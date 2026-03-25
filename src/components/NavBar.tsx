@@ -1,12 +1,12 @@
 import React from 'react';
-import { BookOpen, Compass, Home, Trophy, User } from 'lucide-react';
+import { PenLine, Compass, Home, Trophy, User } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const NAV_ITEMS = [
   { path: '/home', icon: Home, label: '홈' },
   { path: '/course', icon: Compass, label: '코스' },
   { path: '/league', icon: Trophy, label: '리그' },
-  { path: '/review', icon: BookOpen, label: '복습장' },
+  { path: '/review', icon: PenLine, label: '퀴즈' },
   { path: '/my', icon: User, label: 'MY' },
 ];
 

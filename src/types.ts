@@ -1,3 +1,13 @@
+export type CardType = 'intro' | 'content' | 'compare' | 'summary' | 'photo' | 'list';
+
+export type WordSlide = {
+  cardType: CardType;
+  label: string;
+  emoji: string;
+  body?: string;
+  tags?: string[];
+};
+
 export type Word = {
   id: number;
   word: string;
@@ -5,6 +15,16 @@ export type Word = {
   detailedMeaning: string;
   newsExample: string;
   hint: string;
+  relatedWords?: string[];
+};
+
+export type Course = {
+  id: string;
+  level: string;
+  title: string;
+  description: string;
+  category: string;
+  words: Word[];
 };
 
 export type Mission = {

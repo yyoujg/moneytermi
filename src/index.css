@@ -1,5 +1,20 @@
 @import "tailwindcss";
 
+@keyframes bounce-up {
+  0%, 100% { transform: translateY(0); opacity: 0.5; }
+  50% { transform: translateY(-4px); opacity: 1; }
+}
+@keyframes bounce-down {
+  0%, 100% { transform: translateY(0); opacity: 0.5; }
+  50% { transform: translateY(4px); opacity: 1; }
+}
+.animate-bounce-up {
+  animation: bounce-up 1.4s ease-in-out infinite;
+}
+.animate-bounce-down {
+  animation: bounce-down 1.4s ease-in-out infinite;
+}
+
 html,
 body,
 #root {
