@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npm run:*)",
+      "Bash(ls:*)",
+      "Bash(npm install:*)",
+      "Skill(update-config)",
+      "Bash(git init:*)",
+      "Bash(git config:*)",
+      "Bash(git remote:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
