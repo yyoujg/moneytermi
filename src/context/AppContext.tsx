@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState } from 'react';
 import type { Word, Missions } from '../types';
 
 const toDateStr = (d: Date) => d.toISOString().slice(0, 10); // 'YYYY-MM-DD'
-const today = toDateStr(new Date());
 
 type AppContextValue = {
   points: number;
@@ -58,8 +57,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export const useAppContext = () => {
+// eslint-disable-next-line react-refresh/only-export-components
+export function useAppContext() {
   const ctx = useContext(AppContext);
   if (!ctx) throw new Error('useAppContext must be used within AppProvider');
   return ctx;
-};
+}

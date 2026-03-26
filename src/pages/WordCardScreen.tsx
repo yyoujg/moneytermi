@@ -8,22 +8,23 @@ import CardLayout from '../components/CardLayout';
 
 const ACCENT = '#f97316';
 
+// ── SlideHeader (렌더 외부에 선언) ───────────────────────────────
+function SlideHeader({ label }: { label: string }) {
+  return (
+    <div className="shrink-0 mb-3">
+      <p className="text-[14px] font-semibold text-gray-400 break-keep">{label}</p>
+    </div>
+  );
+}
+
 // ── 슬라이드 콘텐츠 ───────────────────────────────────────────────
 function SlideContent({
-  slide, word, accentBg, onTagClick,
+  slide, word, onTagClick,
 }: {
   slide: WordSlide;
   word: Word;
-  accentBg: string;
   onTagClick: (name: string) => void;
 }) {
-  // 공통: 상단 단어명 + 슬라이드 레이블
-  const SlideHeader = () => (
-    <div className="shrink-0 mb-3">
-      <p className="text-[14px] font-semibold text-gray-400 break-keep">{slide.label}</p>
-    </div>
-  );
-
   if (slide.cardType === 'intro') {
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-center px-8 gap-6">
@@ -41,7 +42,7 @@ function SlideContent({
   if (slide.cardType === 'summary') {
     return (
       <div className="flex-1 flex flex-col px-6 pt-4 pb-4">
-        <SlideHeader />
+        <SlideHeader label={slide.label} />
         <p className="text-[17px] font-semibold leading-[1.8] text-gray-700 break-keep">{slide.body}</p>
       </div>
     );
@@ -50,7 +51,7 @@ function SlideContent({
   if (slide.cardType === 'content') {
     return (
       <div className="flex-1 flex flex-col px-6 pt-4 pb-4">
-        <SlideHeader />
+        <SlideHeader label={slide.label} />
         <p className="text-[15px] leading-[1.9] text-gray-600 font-medium break-keep">{slide.body}</p>
       </div>
     );
@@ -59,7 +60,7 @@ function SlideContent({
   if (slide.cardType === 'photo') {
     return (
       <div className="flex-1 flex flex-col px-6 pt-4 pb-4">
-        <SlideHeader />
+        <SlideHeader label={slide.label} />
         <div className="flex flex-col gap-4">
           <div className="text-4xl">🎯</div>
           <p className="text-[15px] leading-[1.9] text-gray-600 font-medium break-keep">{slide.body}</p>
@@ -71,7 +72,7 @@ function SlideContent({
   if (slide.cardType === 'compare') {
     return (
       <div className="flex-1 flex flex-col px-6 pt-4 pb-4">
-        <SlideHeader />
+        <SlideHeader label={slide.label} />
         <div className="border-l-2 pl-4 border-gray-300">
           <p className="text-[15px] leading-[1.9] text-gray-600 font-medium break-keep">&ldquo;{slide.body}&rdquo;</p>
         </div>
@@ -82,7 +83,7 @@ function SlideContent({
   if (slide.cardType === 'list') {
     return (
       <div className="flex-1 flex flex-col px-6 pt-4 pb-4">
-        <SlideHeader />
+        <SlideHeader label={slide.label} />
         <div className="flex flex-col">
           {slide.tags?.map((tag, i) => (
             <button
@@ -125,17 +126,9 @@ const WordCardScreen = () => {
   const slides = getWordSlides(word);
   const totalSlides = slides.length;
   const currentSlide = slides[slideIndex];
-  const accentBg = ACCENT;
 
-  // 슬라이드 이동 (스와이프)
-  const goPrev = () => {
-    if (slideIndex > 0) setSlideIndex(s => s - 1);
-  };
-  const goNext = () => {
-    if (slideIndex < totalSlides - 1) setSlideIndex(s => s + 1);
-  };
-
-  // 단어 이동 (버튼)
+  const goPrev = () => { if (slideIndex > 0) setSlideIndex(s => s - 1); };
+  const goNext = () => { if (slideIndex < totalSlides - 1) setSlideIndex(s => s + 1); };
   const goPrevWord = () => { setWordIndex(i => i - 1); setSlideIndex(0); };
   const goNextWord = () => { setWordIndex(i => i + 1); setSlideIndex(0); };
 
@@ -151,7 +144,7 @@ const WordCardScreen = () => {
 
   return (
     <CardLayout
-      accentBg={accentBg}
+      accentBg={ACCENT}
       headerMeta={currentSlide?.cardType === 'intro' ? '' : word.word}
       slideNum={slideIndex + 1}
       slideTotal={totalSlides}
@@ -174,7 +167,6 @@ const WordCardScreen = () => {
       <SlideContent
         slide={currentSlide}
         word={word}
-        accentBg={accentBg}
         onTagClick={handleRelatedWordClick}
       />
     </CardLayout>

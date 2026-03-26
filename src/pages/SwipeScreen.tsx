@@ -21,7 +21,7 @@ const SwipeScreen = () => {
   React.useEffect(() => {
     setCurrentIndex(stateInitialIndex ?? 0);
     setSlideIndex(0);
-  }, [location.key]);
+  }, [location.key, stateInitialIndex]);
 
   if (!swipeQueue.length || currentIndex >= swipeQueue.length) {
     return (

@@ -11,7 +11,21 @@
       "Bash(git init:*)",
       "Bash(git config:*)",
       "Bash(git remote:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git rm:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(npx vite:*)",
+      "Bash(python3:*)",
+      "Bash(for i:*)",
+      "Bash(do echo:*)",
+      "Bash(__NEW_LINE_c48aaa3f8664c9f2__ mv:*)",
+      "Bash(mv macro_part2.ts macro_fintech_credit.ts)",
+      "Bash(mv macro_part3.ts macro_national_income.ts)",
+      "Bash(mv macro_part4.ts macro_global_finance.ts)",
+      "Bash(mv macro_part5.ts macro_corporate_monetary.ts)",
+      "Bash(node -e \"const m = require\\(''''./node_modules/@toss/tds-mobile/dist/cjs/index.js''''\\); console.log\\(Object.keys\\(m\\).join\\(''''\\\\n''''\\)\\)\")",
+      "Bash(wc:*)"
     ]
   }
 }

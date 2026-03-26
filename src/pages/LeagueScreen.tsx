@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Info, Zap, Trophy, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { TextButton, List, ListRow, Badge, Spacing } from '@toss/tds-mobile';
-import { CURRENT_LEAGUE_ID, CURRENT_LEAGUE_NAME, INITIAL_LEAGUE_USERS, LEAGUE_TIERS } from '../constants';
+import { CURRENT_LEAGUE_ID, INITIAL_LEAGUE_USERS, LEAGUE_TIERS } from '../constants';
 import { useAppContext } from '../context/AppContext';
 
 const RANK_MEDALS = ['🥇', '🥈', '🥉'];

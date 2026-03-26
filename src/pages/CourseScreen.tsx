@@ -1,9 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { CheckCircle, ChevronRight, X, Play } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { SearchField, SegmentedControl, Button, Spacing } from '@toss/tds-mobile';
 import { ALL_WORDS, CATEGORIES, COURSES } from '../constants';
-import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
 
 const CourseScreen = () => {
@@ -35,8 +34,6 @@ const CourseScreen = () => {
 
   const totalWords = ALL_WORDS.length;
   const totalKnown = knownWords.length;
-  const totalPct = Math.round((totalKnown / totalWords) * 100);
-
   const allCategories = ['전체', ...CATEGORIES];
 
   return (

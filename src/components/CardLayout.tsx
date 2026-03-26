@@ -8,7 +8,7 @@ type Props = {
   headerMeta: string;
   slideNum: number;
   slideTotal: number;
-  slideLabel: string;
+  slideLabel?: string;
   wordDots?: WordDot[];
   onBack: () => void;
   // 슬라이드 이동 (스와이프)
@@ -32,7 +32,6 @@ const CardLayout = ({
   headerMeta,
   slideNum,
   slideTotal,
-  slideLabel,
   wordDots,
   onBack,
   onPrev,
