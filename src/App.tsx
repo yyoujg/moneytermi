@@ -38,7 +38,7 @@ export default function App() {
   return (
     <AppProvider>
       <HashRouter>
-        <div className="w-full max-w-md mx-auto bg-white h-screen overflow-hidden relative font-sans text-gray-900 flex flex-col selection:bg-orange-100 selection:text-orange-900">
+        <div className="w-full max-w-md mx-auto bg-[#0B0B0B] h-[100dvh] overflow-hidden relative font-sans text-white flex flex-col">
           <Layout />
         </div>
       </HashRouter>

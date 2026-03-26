@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { Word, WordSlide } from '../types';
-import { COURSES } from '../constants';
+import { useAppContext } from '../context/AppContext';
 import { getWordSlides } from '../utils/wordSlides';
 import CardLayout from '../components/CardLayout';
 
@@ -12,7 +12,7 @@ const ACCENT = '#f97316';
 function SlideHeader({ label }: { label: string }) {
   return (
     <div className="shrink-0 mb-3">
-      <p className="text-[14px] font-semibold text-gray-400 break-keep">{label}</p>
+      <p className="text-[14px] font-semibold text-[#777777] break-keep">{label}</p>
     </div>
   );
 }
@@ -30,10 +30,10 @@ function SlideContent({
       <div className="flex-1 flex flex-col items-center justify-center text-center px-8 gap-6">
         <div className="text-5xl">{slide.emoji}</div>
         <div>
-          <h1 className="text-[30px] font-black text-gray-900 leading-tight tracking-tight break-keep mb-3">
+          <h1 className="text-[30px] font-black text-white leading-tight tracking-tight break-keep mb-3">
             {word.word}
           </h1>
-          <p className="text-[15px] text-gray-400 font-medium break-keep">{word.meaning}</p>
+          <p className="text-[15px] text-[#ABABAB] font-medium break-keep">{word.meaning}</p>
         </div>
       </div>
     );
@@ -43,7 +43,7 @@ function SlideContent({
     return (
       <div className="flex-1 flex flex-col px-6 pt-4 pb-4">
         <SlideHeader label={slide.label} />
-        <p className="text-[17px] font-semibold leading-[1.8] text-gray-700 break-keep">{slide.body}</p>
+        <p className="text-[17px] font-semibold leading-[1.8] text-[#D1D1D6] break-keep">{slide.body}</p>
       </div>
     );
   }
@@ -52,7 +52,7 @@ function SlideContent({
     return (
       <div className="flex-1 flex flex-col px-6 pt-4 pb-4">
         <SlideHeader label={slide.label} />
-        <p className="text-[15px] leading-[1.9] text-gray-600 font-medium break-keep">{slide.body}</p>
+        <p className="text-[15px] leading-[1.9] text-[#ABABAB] font-medium break-keep">{slide.body}</p>
       </div>
     );
   }
@@ -63,7 +63,7 @@ function SlideContent({
         <SlideHeader label={slide.label} />
         <div className="flex flex-col gap-4">
           <div className="text-4xl">🎯</div>
-          <p className="text-[15px] leading-[1.9] text-gray-600 font-medium break-keep">{slide.body}</p>
+          <p className="text-[15px] leading-[1.9] text-[#ABABAB] font-medium break-keep">{slide.body}</p>
         </div>
       </div>
     );
@@ -73,8 +73,8 @@ function SlideContent({
     return (
       <div className="flex-1 flex flex-col px-6 pt-4 pb-4">
         <SlideHeader label={slide.label} />
-        <div className="border-l-2 pl-4 border-gray-300">
-          <p className="text-[15px] leading-[1.9] text-gray-600 font-medium break-keep">&ldquo;{slide.body}&rdquo;</p>
+        <div className="border-l-2 pl-4 border-[#2A2A2A]">
+          <p className="text-[15px] leading-[1.9] text-[#ABABAB] font-medium break-keep">&ldquo;{slide.body}&rdquo;</p>
         </div>
       </div>
     );
@@ -89,11 +89,11 @@ function SlideContent({
             <button
               key={tag}
               onClick={() => onTagClick(tag)}
-              className="flex items-center gap-3 py-3 border-b border-gray-100 last:border-0 active:opacity-60 text-left"
+              className="flex items-center gap-3 py-3 border-b border-[#1E1E1E] last:border-0 active:opacity-60 text-left"
             >
-              <span className="text-[12px] font-black w-4 shrink-0 text-gray-400">{i + 1}</span>
-              <p className="text-[15px] font-semibold text-gray-800 break-keep flex-1">{tag}</p>
-              <ChevronRight size={14} className="text-gray-300 shrink-0" />
+              <span className="text-[12px] font-black w-4 shrink-0 text-[#555555]">{i + 1}</span>
+              <p className="text-[15px] font-semibold text-white break-keep flex-1">{tag}</p>
+              <ChevronRight size={14} className="text-[#555555] shrink-0" />
             </button>
           ))}
         </div>
@@ -108,6 +108,7 @@ function SlideContent({
 const WordCardScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { courses } = useAppContext();
 
   const state = location.state as { words: Word[]; index: number; backPath?: string; backState?: unknown } | null;
   const words = state?.words ?? [];
@@ -135,7 +136,7 @@ const WordCardScreen = () => {
   const handleRelatedWordClick = (wordName: string) => {
     const idx = words.findIndex(w => w.word === wordName);
     if (idx >= 0) { setWordIndex(idx); setSlideIndex(0); return; }
-    const targetCourse = COURSES.find(c => c.words.some(w => w.word === wordName));
+    const targetCourse = courses.find(c => c.words.some(w => w.word === wordName));
     if (targetCourse) {
       const targetIdx = targetCourse.words.findIndex(w => w.word === wordName);
       navigate('/word-card', { state: { words: targetCourse.words, index: targetIdx, backPath } });

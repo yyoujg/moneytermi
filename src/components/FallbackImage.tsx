@@ -10,7 +10,7 @@ type Props = {
 
 const FallbackImage = ({ src, alt, fallbackNode, className, style }: Props) => {
   const [imgError, setImgError] = useState(false);
-  if (imgError) return <div className={`flex items-center justify-center ${className}`} style={style}>{fallbackNode}</div>;
+  if (!src || imgError) return <div className={`flex items-center justify-center ${className}`} style={style}>{fallbackNode}</div>;
   return <img src={src} alt={alt} className={className} style={style} onError={() => setImgError(true)} />;
 };
 

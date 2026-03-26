@@ -9,7 +9,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
       description: '경제가 좋고 나쁨을 판단하는 기준점들',
       words: [
         {
-          id: 1,
+          id: 26,
           word: `경기순응성`,
           meaning: `경제가 좋을 땐 더 과열되고, 나쁠 땐 더 얼어붙는 성질`,
           detailedMeaning: `호황기에는 은행이 돈을 쉽게 빌려줘 경기를 더 띄우고, 불황기에는 대출을 회수해 기업을 더 힘들게 만드는 금융의 특징입니다.`,
@@ -18,7 +18,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['거시건전성 정책']
         },
         {
-          id: 2,
+          id: 27,
           word: `경기종합지수`,
           meaning: `국가 경제의 전체적인 흐름을 파악하기 위해 만든 종합 지표`,
           detailedMeaning: `산업생산, 소매판매 등 여러 경제 지표를 합쳐서 현재 경기가 어떤지(동행), 앞으로 어떨지(선행)를 숫자로 보여주는 지수입니다.`,
@@ -27,7 +27,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['경제성장률', '기준순환일']
         },
         {
-          id: 3,
+          id: 28,
           word: `고용률`,
           meaning: `일할 수 있는 나이의 사람들 중 실제로 일하는 사람의 비율`,
           detailedMeaning: `실업률의 단점을 보완하는 지표로, 15세 이상 생산가능인구 중에서 취업자가 차지하는 비중을 나타내어 실질적인 일자리 상황을 보여줍니다.`,
@@ -36,7 +36,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['경제활동인구', '실업률']
         },
         {
-          id: 4,
+          id: 29,
           word: `고통지수`,
           meaning: `국민들이 피부로 느끼는 경제적 삶의 어려움을 수치화한 지표`,
           detailedMeaning: `소비자물가상승률과 실업률을 더해서 계산합니다. 물가가 오르고 실업자가 많아질수록 지수가 높아져 살기 팍팍하다는 뜻입니다.`,
@@ -45,7 +45,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['소비자물가지수', '실업률']
         },
         {
-          id: 5,
+          id: 30,
           word: `골디락스경제`,
           meaning: `경제가 성장하는데도 물가는 크게 오르지 않는 이상적인 상태`,
           detailedMeaning: `영국 동화 <골디락스와 곰 세 마리>에서 따온 말로, 너무 뜨겁지도(인플레이션) 너무 차갑지도(경기침체) 않은 딱 적당히 좋은 경제 상황을 뜻합니다.`,
@@ -63,7 +63,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
       description: '경제를 진단하고 온도를 맞추는 지표와 정책',
       words: [
         {
-          id: 1,
+          id: 31,
           word: `경기`,
           meaning: `국가 경제 활동 전반의 좋고 나쁜 흐름과 활력`,
           detailedMeaning: `생산, 소비, 투자, 고용 등 경제의 여러 활동이 얼마나 활발하게 돌아가고 있는지를 종합적으로 나타내는 상태입니다. 보통 호황기, 후퇴기, 불황기, 회복기의 사이클을 그립니다.`,
@@ -72,7 +72,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['경기순응성', '경기종합지수']
         },
         {
-          id: 2,
+          id: 32,
           word: `경기조절정책`,
           meaning: `경제가 너무 뜨겁거나 차갑지 않게 정부나 중앙은행이 나서는 일`,
           detailedMeaning: `경기가 침체되면 돈을 풀거나 세금을 깎아 살리고, 너무 과열되어 물가가 치솟으면 금리를 올리거나 세금을 늘려 진정시키는 경제안정화 정책입니다.`,
@@ -81,7 +81,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['거시건전성 정책', '긴축정책']
         },
         {
-          id: 3,
+          id: 33,
           word: `경제 서프라이즈 지수`,
           meaning: `실제 경제 성적표가 전문가 예상보다 얼마나 놀라웠는지 보여주는 지수`,
           detailedMeaning: `발표된 각종 경제 지표들이 시장의 예상치보다 좋으면 플러스(+), 나쁘면 마이너스(-)로 표시하여 현재 경제가 기대보다 잘 굴러가는지 판단하는 데 쓰입니다.`,
@@ -90,7 +90,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['기대인플레이션']
         },
         {
-          id: 4,
+          id: 34,
           word: `경제심리지수`,
           meaning: `기업과 소비자가 현재 경제를 어떻게 체감하는지 합쳐놓은 숫자`,
           detailedMeaning: `기업들이 느끼는 체감경기(BSI)와 소비자들이 느끼는 체감경기(CSI)를 하나로 묶어 경제 전반의 분위기를 파악하기 위해 한국은행이 만드는 지수입니다. 100이 넘으면 긍정적입니다.`,
@@ -99,7 +99,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['기업경기실사지수(BSI)']
         },
         {
-          id: 5,
+          id: 35,
           word: `경제활동인구`,
           meaning: `일할 능력과 의지가 있는 15세 이상의 사람들`,
           detailedMeaning: `현재 직장에 다니고 있는 사람(취업자)과 직장은 없지만 적극적으로 일자리를 구하고 있는 사람(실업자)을 모두 합친 숫자입니다. 취업을 포기한 사람은 포함되지 않습니다.`,
@@ -117,7 +117,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
       description: '물가와 투자, 그리고 국가 자산의 크기 측정하기',
       words: [
         {
-          id: 1,
+          id: 36,
           word: `국내공급물가지수`,
           meaning: `국내 시장에 공급되는 모든 상품과 서비스의 전반적인 가격 변동 지표`,
           detailedMeaning: `국내에서 생산된 물건뿐만 아니라 외국에서 수입한 물건까지 모두 포함하여, 생산자와 소비자 사이에서 거래되는 전반적인 물가 수준이 어떻게 변하는지 보여주는 지수입니다.`,
@@ -126,7 +126,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['소비자물가지수', '생산자물가지수']
         },
         {
-          id: 2,
+          id: 37,
           word: `국내총투자율`,
           meaning: `국가 전체가 처분할 수 있는 소득 중에서 미래를 위해 투자한 비율`,
           detailedMeaning: `공장을 짓거나 기계를 사는 등 국민경제가 새로운 자산을 만드는 데 쓴 돈의 비율입니다. 이 수치가 높으면 미래에 경제가 더 성장할 가능성이 큽니다.`,
@@ -135,7 +135,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['가계순저축률', '국외투자율']
         },
         {
-          id: 3,
+          id: 38,
           word: `국민대차대조표`,
           meaning: `특정 시점에 한 나라가 가진 재산과 빚을 모두 기록한 장부`,
           detailedMeaning: `기업이 재무상태표를 작성하듯, 우리나라 전체가 보유한 부동산, 공장 같은 실물 자산과 예금, 주식 같은 금융 자산, 그리고 부채를 모두 종합해 국가의 뼈대(재산)를 보여주는 표입니다.`,
@@ -144,7 +144,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['국민계정체계(SNA)']
         },
         {
-          id: 4,
+          id: 39,
           word: `국민부담률`,
           meaning: `국민이 낸 세금과 사회보험료가 나라 경제 규모에 차지하는 비중`,
           detailedMeaning: `1년 동안 국민이 납부한 국세, 지방세에 국민연금, 건강보험료 등을 모두 합친 금액을 국내총생산(GDP)으로 나눈 비율로, 국민이 실제로 체감하는 조세 부담을 나타냅니다.`,
@@ -153,7 +153,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['간접세/직접세', '국내총생산(GDP)']
         },
         {
-          id: 5,
+          id: 40,
           word: `국민연금`,
           meaning: `국민이 늙거나 병들어 소득이 끊겼을 때를 대비한 국가의 강제 저축`,
           detailedMeaning: `소득이 있을 때 매월 일정액의 보험료를 내고, 노령, 장애, 사망 등의 사유로 소득 능력을 잃었을 때 본인이나 유족에게 연금을 지급하여 기본 생활을 보장하는 사회보장제도입니다.`,
@@ -171,7 +171,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
       description: '나라 빚과 정부가 경제를 다루는 방법',
       words: [
         {
-          id: 1,
+          id: 41,
           word: `긴축정책`,
           meaning: `경제가 너무 과열되거나 물가가 치솟을 때 돈줄을 조이는 정책`,
           detailedMeaning: `정부가 세금을 더 거두거나 정부 지출을 줄이고, 중앙은행이 금리를 올려 시중에 풀린 돈을 거둬들여서 경제를 진정시키는 브레이크 역할을 합니다.`,
@@ -180,7 +180,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['경기조절정책', '공개시장운영']
         },
         {
-          id: 2,
+          id: 42,
           word: `국가신용등급`,
           meaning: `한 나라가 빌린 돈을 제때 갚을 수 있는 능력을 매긴 성적표`,
           detailedMeaning: `무디스(Moody's), S&P, 피치(Fitch) 등 국제 신용평가사들이 그 나라의 경제력, 정치적 안정성 등을 평가하여 AAA, BBB 등으로 등급을 매깁니다. 등급이 높을수록 돈을 싸게 빌릴 수 있습니다.`,
@@ -189,7 +189,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['국가채무', '국제금융시장']
         },
         {
-          id: 3,
+          id: 43,
           word: `국가채무`,
           meaning: `정부가 나중에 갚아야 할 국가의 공식적인 빚`,
           detailedMeaning: `도로나 항만을 짓거나 복지 예산이 부족할 때 정부가 국채를 발행하거나 돈을 빌려서 생긴 빚입니다. GDP 대비 이 비율이 너무 높으면 국가 파산 위험이 커집니다.`,
@@ -198,7 +198,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['국채', '국민부담률']
         },
         {
-          id: 4,
+          id: 44,
           word: `기준환율`,
           meaning: `우리나라 원화와 기축통화인 미국 달러화 사이의 직거래 환율`,
           detailedMeaning: `외환시장에서 매일매일 거래된 달러 가격의 평균을 내서 다음 날 은행들이 환전할 때 기준으로 삼는 중심 환율(매매기준율)을 말합니다.`,
@@ -207,7 +207,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['고정환율제도', '구매력평가 환율']
         },
         {
-          id: 5,
+          id: 45,
           word: `긴급수입제한조치(세이프가드)`,
           meaning: `외국 물건이 갑자기 너무 많이 들어와 국내 산업이 망할 위기일 때 막는 제도`,
           detailedMeaning: `불공정 무역이 아니더라도, 특정 수입품이 폭증해 국내 기업들이 큰 피해를 입을 우려가 있을 때 일시적으로 관세를 팍 올리거나 수입량을 확 줄이는 긴급 보호 조치입니다.`,
@@ -225,7 +225,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
       description: '물가 거품을 걷어내고 경제의 진짜 모습 확인하기',
       words: [
         {
-          id: 1,
+          id: 46,
           word: `명목국내총생산/실질국내총생산`,
           meaning: `물가 변동을 포함해 계산한 GDP(명목)와 물가 상승분 거품을 뺀 진짜 GDP(실질)`,
           detailedMeaning: `명목 GDP는 단순히 빵 가격이 올라서 경제 규모가 커진 것처럼 보이는 착시를 포함하고, 실질 GDP는 가격을 고정해 두고 빵을 진짜 몇 개 더 만들었는지만 따지는 정확한 지표입니다.`,
@@ -234,7 +234,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['경제성장률', 'GDP디플레이터']
         },
         {
-          id: 2,
+          id: 47,
           word: `명목금리/실질금리`,
           meaning: `은행 통장에 찍히는 겉보기 이자율(명목금리)에서 물가 상승률을 뺀 진짜 내 이익(실질금리)`,
           detailedMeaning: `은행 이자가 3%인데 그사이 물가가 5% 올랐다면, 실질금리는 -2%가 되어 돈을 은행에 가만히 넣어두면 오히려 손해를 보게 된다는 개념입니다.`,
@@ -243,7 +243,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['피셔효과', '인플레이션']
         },
         {
-          id: 3,
+          id: 48,
           word: `마찰적 실업`,
           meaning: `직장을 옮기거나 처음 취업을 준비할 때, 나와 맞는 일자리를 찾는 과정에서 겪는 일시적 실업`,
           detailedMeaning: `경제가 나빠서 일자리가 없는 것이 아니라, 회사와 구직자가 서로 정보를 탐색하고 조건에 맞는 곳을 고르느라 발생하는 자연스럽고 불가피한 실업입니다.`,
@@ -252,7 +252,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['자연실업률', '실업률']
         },
         {
-          id: 4,
+          id: 49,
           word: `부가가치`,
           meaning: `원재료에 기업의 기술이나 노동력을 더해 새롭게 만들어낸 추가적인 가치`,
           detailedMeaning: `밀가루 100원어치를 사서 빵을 만들어 500원에 팔았다면, 제빵사가 땀 흘려 새로 만들어낸 400원의 가치가 바로 부가가치입니다. 이 부가가치를 모두 더한 것이 GDP가 됩니다.`,
@@ -261,7 +261,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['국내총생산(GDP)']
         },
         {
-          id: 5,
+          id: 50,
           word: `부채비율`,
           meaning: `회사가 갚아야 할 남의 돈(부채)이 진짜 내 돈(자본)에 비해 얼마나 많은지 보여주는 건전성 지표`,
           detailedMeaning: `이 비율이 100% 이하면 빚보다 내 돈이 더 많아 안전하고, 200%가 넘으면 빚이 너무 많아 위험 신호로 봅니다. 기업이 얼마나 튼튼한지 판단할 때 필수적으로 확인합니다.`,
@@ -279,7 +279,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
       description: 'GDP부터 환율까지, 큰 단위의 경제 읽기',
       words: [
         {
-          id: 1,
+          id: 51,
           word: `공개시장운영`,
           meaning: `중앙은행이 시장에서 채권을 사고팔아 돈의 양을 조절하는 일`,
           detailedMeaning: `한국은행이 시중에 돈이 너무 많으면 국공채를 팔아 돈을 거둬들이고, 돈이 부족하면 채권을 사들여 돈을 푸는 가장 핵심적인 통화정책입니다.`,
@@ -288,7 +288,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['기준금리', '양적완화']
         },
         {
-          id: 2,
+          id: 52,
           word: `광의통화(M2)`,
           meaning: `시중에 얼마나 돈이 풀려있는지 보여주는 넓은 의미의 돈`,
           detailedMeaning: `현금과 입출금 통장(M1)에 더해서, 약간의 이자만 포기하면 쉽게 현금으로 바꿀 수 있는 예적금, 펀드까지 합친 시중의 돈(유동성) 규모입니다.`,
@@ -297,7 +297,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['협의통화(M1)', '유동성']
         },
         {
-          id: 3,
+          id: 53,
           word: `구매력평가 환율`,
           meaning: `각 나라의 돈으로 물건을 얼마나 살 수 있는지 비교한 환율`,
           detailedMeaning: `빅맥 지수처럼 똑같은 물건을 살 때 각국 통화로 얼마가 드는지 비교하여, 화폐의 실제 가치와 물가 수준을 반영해 계산한 장기적인 환율입니다.`,
@@ -306,7 +306,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['빅맥지수', '기준환율']
         },
         {
-          id: 4,
+          id: 54,
           word: `국내총생산(GDP)`,
           meaning: `한 나라 안에서 1년 동안 생산된 모든 물건과 서비스의 가치`,
           detailedMeaning: `외국인이든 내국인이든 상관없이 우리나라 영토 안에서 일어난 경제 활동의 크기를 뜻하며, 국가 경제 규모를 나타내는 가장 대표적인 지표입니다.`,
@@ -315,7 +315,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['국민총소득(GNI)', '경제성장률']
         },
         {
-          id: 5,
+          id: 55,
           word: `국제수지(BOP)`,
           meaning: `한 나라가 다른 나라들과 돈을 주고받은 모든 거래의 기록`,
           detailedMeaning: `일정 기간 동안 국가 간에 들어오고 나간 외환(달러 등)의 차이를 보여주는 장부로, 경상수지와 자본수지 등으로 나뉩니다.`,
@@ -333,7 +333,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
       description: '우리가 번 돈은 어떻게 측정되고 순환할까?',
       words: [
         {
-          id: 1,
+          id: 56,
           word: `국민소득`,
           meaning: `한 나라의 국민이 일정 기간 동안 새로 만들어낸 가치의 합`,
           detailedMeaning: `가계, 기업, 정부 등 모든 경제 주체가 1년 동안 생산 활동에 참여하여 벌어들인 총소득입니다. 나라 경제가 얼마나 부유해졌는지 파악하는 기본 지표입니다.`,
@@ -342,7 +342,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['국민총소득(GNI)', '국내총생산(GDP)']
         },
         {
-          id: 2,
+          id: 57,
           word: `국민소득 3면 등가의 법칙`,
           meaning: `생산, 분배, 지출로 계산한 국민소득은 결국 모두 같다는 원리`,
           detailedMeaning: `물건을 만들고(생산), 그 대가로 돈을 나누어 갖고(분배), 그 돈으로 물건을 사는(지출) 금액을 각각 따로 계산해도 경제 전체로 보면 결국 하나의 흐름이므로 총액이 같다는 경제학의 기본 법칙입니다.`,
@@ -351,7 +351,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['국민소득', '국민계정체계(SNA)']
         },
         {
-          id: 3,
+          id: 58,
           word: `국민처분가능소득(NDI)`,
           meaning: `한 나라의 국민이 소비나 저축으로 마음대로 쓸 수 있는 소득 총액`,
           detailedMeaning: `국민이 벌어들인 총소득에서, 외국에 무상으로 준 돈은 빼고 외국에서 공짜로 받은 돈은 더하여 실제로 우리나라가 최종적으로 소비하거나 저축할 수 있는 순수한 소득입니다.`,
@@ -360,7 +360,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['가계처분가능소득', '국민총소득(GNI)']
         },
         {
-          id: 4,
+          id: 59,
           word: `국민총소득(GNI)`,
           meaning: `우리나라 국민이 국내외 어디서든 벌어들인 소득의 총합`,
           detailedMeaning: `국내총생산(GDP)이 영토 중심이라면, 국민총소득(GNI)은 국적 중심입니다. 우리나라 사람이 외국에서 번 돈은 포함하고, 외국인이 우리나라에서 번 돈은 빼서 실제 국민의 주머니 사정을 잘 보여줍니다.`,
@@ -369,7 +369,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['국내총생산(GDP)', '국외순수취요소소득']
         },
         {
-          id: 5,
+          id: 60,
           word: `국민계정체계(SNA)`,
           meaning: `한 나라의 경제 활동 전체를 체계적으로 기록하는 국제 회계 기준`,
           detailedMeaning: `UN 등 국제기구가 마련한 일종의 가계부 작성 규칙입니다. 각 나라의 경제 규모(GDP 등)를 똑같은 기준으로 비교할 수 있도록 만들어진 통계 시스템입니다.`,
@@ -387,7 +387,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
       description: '전 세계 돈의 흐름을 관리하는 기구와 역사',
       words: [
         {
-          id: 1,
+          id: 61,
           word: `국제결제은행(BIS)`,
           meaning: `세계 각국 중앙은행들의 중앙은행`,
           detailedMeaning: `각국 중앙은행 간의 협력을 증진하고 국제 금융 안정을 도모하는 국제기구입니다. 일반 은행들이 위기에 대비해 자본을 얼마나 쌓아둬야 하는지 정하는 기준(BIS 자기자본비율)을 만듭니다.`,
@@ -396,7 +396,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['기본자본(Tier 1)', '금융안정위원회(FSB)']
         },
         {
-          id: 2,
+          id: 62,
           word: `국제통화기금(IMF)`,
           meaning: `세계 경제의 안정과 성장을 위해 만들어진 국제기구`,
           detailedMeaning: `국가 간 무역을 촉진하고 환율 안정을 유지하며, 외환보유액이 부족해 국가 부도 위기에 처한 나라에 긴급 자금을 빌려주는 역할을 합니다. 1997년 우리나라가 구제금융을 받았던 곳이기도 합니다.`,
@@ -405,7 +405,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['국제수지(BOP)', '외환보유액']
         },
         {
-          id: 3,
+          id: 63,
           word: `국제회계기준`,
           meaning: `전 세계 기업들이 똑같은 기준으로 장부를 쓰도록 만든 회계 규칙`,
           detailedMeaning: `어느 나라 기업이든 재무제표를 동일한 잣대로 작성하여, 전 세계 투자자들이 기업의 재무 상태를 쉽게 비교하고 믿고 투자할 수 있도록 만든 공통 회계 언어입니다.`,
@@ -414,7 +414,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['기업공개']
         },
         {
-          id: 4,
+          id: 64,
           word: `글로벌 가치사슬(GVC)`,
           meaning: `상품의 설계, 부품 조달, 조립이 여러 나라에 걸쳐 이루어지는 분업망`,
           detailedMeaning: `스마트폰을 만들 때 미국에서 디자인하고, 한국에서 반도체를 만들며, 베트남에서 조립하는 것처럼 전 세계가 생산 네트워크로 촘촘히 연결된 구조를 뜻합니다.`,
@@ -423,7 +423,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['공급병목', '글로벌 공급망 압력 지수']
         },
         {
-          id: 5,
+          id: 65,
           word: `글로벌 금융위기`,
           meaning: `2008년 미국 서브프라임 모기지 사태로 촉발된 전 세계적인 경제 침체`,
           detailedMeaning: `미국의 집값 폭락과 비우량 주택담보대출(서브프라임) 부실이 거대한 투자은행(리먼 브라더스)의 파산으로 이어지며, 전 세계 금융 시장과 실물 경제가 도미노처럼 붕괴했던 대사건입니다.`,
@@ -441,7 +441,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
       description: '인플레이션의 진짜 얼굴과 금리의 속성',
       words: [
         {
-          id: 1,
+          id: 66,
           word: `근원인플레이션율`,
           meaning: `물가 변동이 심한 농산물과 석유를 빼고 계산한 물가의 진짜 흐름`,
           detailedMeaning: `날씨에 따라 값이 널뛰는 파, 양파나 중동 정세에 민감한 기름값 등 일시적인 충격을 제외하고, 나라 경제의 기초 체력에 따른 근본적인 물가 상승 추세를 파악하기 위한 지표입니다.`,
@@ -450,7 +450,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['소비자물가지수', '기대인플레이션']
         },
         {
-          id: 2,
+          id: 67,
           word: `기대인플레이션`,
           meaning: `기업과 소비자가 예상하는 앞으로의 물가 상승률`,
           detailedMeaning: `사람들이 "앞으로 물가가 오르겠지?"라고 생각하면 미리 물건을 사재기하거나 월급을 올려달라고 요구하게 되고, 이것이 실제로 물가를 끌어올리는 원동력이 되기 때문에 중앙은행이 매우 중요하게 관리하는 심리 지표입니다.`,
@@ -459,7 +459,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['근원인플레이션율', '기준금리']
         },
         {
-          id: 3,
+          id: 68,
           word: `금리스왑`,
           meaning: `서로 다른 이자 지급 방식을 맞바꾸는 금융 계약`,
           detailedMeaning: `변동금리로 돈을 빌린 기업이 금리가 오를까 봐 걱정될 때, 고정금리로 돈을 빌린 기업과 이자 내는 방식을 교환하여 서로의 금리 위험을 회피(헤지)하는 거래입니다.`,
@@ -468,7 +468,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['금리선물', '고정금리']
         },
         {
-          id: 4,
+          id: 69,
           word: `금리자유화`,
           meaning: `정부가 금리를 강제로 정하지 않고 시장 원리에 맡기는 것`,
           detailedMeaning: `과거에는 국가가 은행의 예금과 대출 이자를 통제했지만, 이제는 금융 시장에 돈을 빌리려는 사람과 빌려주려는 사람의 수요·공급에 따라 이자율이 자유롭게 결정되도록 푼 제도입니다.`,
@@ -477,7 +477,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['기준금리']
         },
         {
-          id: 5,
+          id: 70,
           word: `금본위제`,
           meaning: `화폐의 가치를 금의 무게에 고정시키고, 원하면 화폐를 금으로 바꿔주던 제도`,
           detailedMeaning: `과거 국가가 보유한 금의 양만큼만 돈을 찍어낼 수 있었던 시스템입니다. 안정적이지만 경제 규모가 커지면서 금이 부족해져 한계에 부딪혔고, 현재는 폐지되어 달러 중심의 관리통화제도를 씁니다.`,
@@ -495,7 +495,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
       description: '경제가 꺾이고 물가가 흔들리는 여러 모습들',
       words: [
         {
-          id: 1,
+          id: 71,
           word: `디플레이션`,
           meaning: `나라 전체의 물가가 지속적으로 뚝뚝 떨어지는 현상`,
           detailedMeaning: `물가가 떨어지면 당장은 좋을 것 같지만, 사람들이 "내일이면 더 싸지겠지?" 하며 지갑을 닫고, 기업은 물건이 안 팔려 망하고 직원을 자르는 악순환에 빠지는 무서운 현상입니다.`,
@@ -504,7 +504,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['인플레이션', '스태그플레이션']
         },
         {
-          id: 2,
+          id: 72,
           word: `디스인플레이션`,
           meaning: `물가가 오르긴 오르는데, 그 오르는 속도가 눈에 띄게 느려지는 현상`,
           detailedMeaning: `인플레이션을 잡기 위해 금리를 올린 결과, 여전히 물가는 플러스 상승률이지만 예전처럼 미친 듯이 오르지는 않고 안정화되어 가는 과정입니다.`,
@@ -513,7 +513,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['인플레이션', '긴축정책']
         },
         {
-          id: 3,
+          id: 73,
           word: `더블딥`,
           meaning: `불황에 빠졌던 경제가 잠깐 회복하는 척하다가 다시 침체로 곤두박질치는 현상`,
           detailedMeaning: `경기 그래프가 W자 모양을 그린다고 해서 W자형 침체라고도 합니다. 성급하게 경기 부양책을 거두었을 때 발생하기 쉽습니다.`,
@@ -522,7 +522,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['경기순응성', '소프트랜딩/하드랜딩']
         },
         {
-          id: 4,
+          id: 74,
           word: `동행종합지수`,
           meaning: `현재 우리나라 경제가 얼마나 좋은지 나쁜지를 실시간으로 보여주는 성적표`,
           detailedMeaning: `광공업생산지수, 소매판매액지수 등 지금 당장의 경제 상태를 잘 반영하는 지표들을 묶어, 현재 경기가 상승장인지 하락장인지 파악할 때 씁니다.`,
@@ -531,7 +531,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['경기종합지수', '선행종합지수']
         },
         {
-          id: 5,
+          id: 75,
           word: `대외의존도`,
           meaning: `한 나라 경제가 스스로 먹고살지 못하고 외국과의 수출입에 얼마나 기대고 있는지 보여주는 비율`,
           detailedMeaning: `국민총소득(GNI) 대비 수출과 수입이 차지하는 비중입니다. 이 숫자가 높을수록 환율이나 외국 경제 상황에 우리나라 경제가 심하게 휘청거립니다.`,
@@ -549,7 +549,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
       description: '경제가 아플 때 나타나는 치명적인 증상들',
       words: [
         {
-          id: 1,
+          id: 76,
           word: `소프트랜딩/하드랜딩`,
           meaning: `경제가 과열되었다가 식을 때, 충격 없이 부드럽게 가라앉으면 연착륙(소프트), 쿵 떨어지며 박살나면 경착륙(하드)`,
           detailedMeaning: `물가를 잡기 위해 금리를 올렸을 때, 경제 성장률이 조금 둔화되면서 무사히 물가가 잡히면 연착륙 성공, 기업이 망하고 대규모 실업이 발생하면 경착륙이라고 부릅니다.`,
@@ -558,7 +558,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['더블딥', '경기조절정책']
         },
         {
-          id: 2,
+          id: 77,
           word: `스태그플레이션`,
           meaning: `경제는 엉망진창으로 안 좋은데 물가는 무섭게 치솟는 최악의 경제 질병`,
           detailedMeaning: `보통 경기가 좋으면 물가가 오르고, 경기가 나쁘면 물가가 떨어지는데, 스태그플레이션은 불황(Stagnation)과 물가 상승(Inflation)이 겹쳐서 약도 없는 끔찍한 상황입니다.`,
@@ -567,7 +567,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['인플레이션', '디플레이션']
         },
         {
-          id: 3,
+          id: 78,
           word: `스트레스 DSR`,
           meaning: `나중에 금리가 더 오를 수도 있다는 위험(스트레스)까지 미리 깐깐하게 계산해서 대출 한도를 줄이는 제도`,
           detailedMeaning: `빚을 갚을 수 있는지(DSR) 따질 때, 지금 금리가 아니라 가상의 '가산 금리'를 더 얹어서 이자를 낼 수 있는지 팍팍하게 심사하여 과도한 빚을 내지 못하게 막습니다.`,
@@ -576,7 +576,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['총부채원리금상환비율(DSR)', '거시건전성 정책']
         },
         {
-          id: 4,
+          id: 79,
           word: `시스템 리스크`,
           meaning: `한 금융회사의 파산이 꼬리에 꼬리를 물고 번져 나라 경제 전체의 금융망을 마비시키는 거대한 위험`,
           detailedMeaning: `큰 은행 하나가 망하면 그 은행과 거래하던 다른 은행, 기업들이 연쇄 부도를 맞으며 2008년 글로벌 금융위기처럼 통제 불능 상태에 빠지는 것을 말합니다.`,
@@ -585,7 +585,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['뱅크런', '글로벌 금융위기']
         },
         {
-          id: 5,
+          id: 80,
           word: `신용경색`,
           meaning: `금융시장에 피(돈)가 돌지 않아 기업들이 흑자를 내고도 돈을 빌리지 못해 쩔쩔매는 꽉 막힌 현상`,
           detailedMeaning: `시장에 돈이 메말랐거나, 은행들이 서로를 못 믿어 아무에게도 돈을 안 빌려주려고 할 때 발생하며, 건강한 기업까지 흑자부도를 맞게 하는 원인이 됩니다.`,
@@ -603,7 +603,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
       description: '큰돈이 도는 구조와 디지털 혁신의 만남',
       words: [
         {
-          id: 1,
+          id: 81,
           word: `오픈뱅킹`,
           meaning: `A은행 앱 하나만 켜면 B, C은행에 흩어진 내 계좌의 돈까지 싹 다 조회하고 이체할 수 있는 편리한 서비스`,
           detailedMeaning: `은행들이 서로의 장벽을 허물고 고객의 금융 데이터를 공유하도록 만든 제도로, 핀테크 앱(토스, 뱅크샐러드 등)이 혁신적으로 성장할 수 있었던 일등 공신입니다.`,
@@ -612,7 +612,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['모바일뱅킹', '핀테크']
         },
         {
-          id: 2,
+          id: 82,
           word: `옵션`,
           meaning: `미래의 특정 시점에 주식이나 물건을 정해진 가격에 '살 수 있는 권리(콜)'나 '팔 수 있는 권리(풋)'를 사고파는 거래`,
           detailedMeaning: `선물거래가 꼭 약속을 지켜야 하는 것이라면, 옵션은 프리미엄(수수료)을 내고 권리만 샀기 때문에 나한테 불리하면 권리를 포기해도 되는 파생상품입니다.`,
@@ -621,7 +621,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['선물거래', '콜옵션']
         },
         {
-          id: 3,
+          id: 83,
           word: `워크아웃`,
           meaning: `부도 위기에 처한 기업을 살리기 위해 채권단(은행)이 빚을 깎아주거나 갚을 시간을 늘려주는 구조조정 작업`,
           detailedMeaning: `기업이 아예 파산해서 돈을 한 푼도 못 건지는 것보다는, 뼈를 깎는 인원 감축과 자산 매각을 전제로 숨통을 틔워주어 살려내는 게 이득이라고 판단될 때 실시합니다.`,
@@ -630,7 +630,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['기업회생절차']
         },
         {
-          id: 4,
+          id: 84,
           word: `외환보유액`,
           meaning: `나라 경제에 비상사태가 터졌을 때 쓰기 위해 정부와 중앙은행이 금고에 든든하게 비축해 둔 외국 돈(달러 등)`,
           detailedMeaning: `우리나라가 외국에 진 빚을 못 갚아 부도가 나거나(1997년 IMF 사태), 환율이 비정상적으로 널뛸 때 방어막으로 쓰는 국가 경제의 최후의 보루이자 비상금입니다.`,
@@ -639,7 +639,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['스무딩오퍼레이션', '국제통화기금(IMF)']
         },
         {
-          id: 5,
+          id: 85,
           word: `양적완화정책`,
           meaning: `중앙은행이 금리를 내리는 것만으로는 경제가 살아나지 않을 때, 아예 돈을 직접 마구 찍어내서 시장에 강제로 푸는 처방전`,
           detailedMeaning: `중앙은행이 발권력을 동원해 시중 은행들이 가진 채권을 대규모로 사들여 시장에 유동성(돈)을 콸콸 쏟아붓는 비상식적이고 강력한 통화 정책입니다.`,
@@ -657,7 +657,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
       description: '위기를 다루는 국가의 돈줄 조절법',
       words: [
         {
-          id: 1,
+          id: 86,
           word: `지급준비제도`,
           meaning: `은행이 예금자에게 돈을 제때 돌려주기 위해, 고객이 맡긴 돈의 일정 비율을 중앙은행에 의무적으로 쌓아두게 하는 규칙`,
           detailedMeaning: `예금자들이 한꺼번에 돈을 찾으러 올 때(뱅크런)를 대비한 최소한의 비상금입니다. 이 지급준비율을 높이거나 낮추는 것으로 시중에 풀리는 돈의 양을 조절할 수 있습니다.`,
@@ -666,7 +666,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['뱅크런', '통화승수']
         },
         {
-          id: 2,
+          id: 87,
           word: `제로금리정책`,
           meaning: `경기가 너무 안 좋을 때, 중앙은행이 기준금리를 0%에 가깝게 내려서 시중에 돈을 억지로 풀게 만드는 극단적 부양책`,
           detailedMeaning: `이자가 거의 없으니 사람들이 저축 대신 돈을 펑펑 쓰거나 투자를 하게 만들고, 기업들도 이자 부담 없이 빚을 내서 공장을 짓게 하여 죽어가는 경제를 살려내는 충격 요법입니다.`,
@@ -675,7 +675,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['양적완화정책', '유동성 함정']
         },
         {
-          id: 3,
+          id: 88,
           word: `테이퍼링(Tapering)`,
           meaning: `양적완화로 시장에 콸콸 쏟아붓던 엄청난 돈의 양을 수도꼭지 잠그듯 서서히 줄여나가는 조치`,
           detailedMeaning: `마라톤 선수가 대회 직전에 훈련량을 점점 줄이는 것에서 유래했습니다. 경제가 어느 정도 회복되었다고 판단될 때, 물가 폭등을 막기 위해 돈 푸는 속도를 점진적으로 늦추는 과정입니다.`,
@@ -684,7 +684,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['양적완화정책', '출구전략']
         },
         {
-          id: 4,
+          id: 89,
           word: `출구전략`,
           meaning: `위기 상황을 극복하기 위해 풀었던 엄청난 돈과 파격적인 정책들을, 경제에 큰 충격이 가지 않게 서서히 정상으로 되돌리는 계획`,
           detailedMeaning: `불이 나서 뿌렸던 엄청난 물을, 불을 다 끈 뒤에 조심스럽게 말려나가는 작업입니다. 금리를 천천히 올리거나 시중에 풀린 채권을 회수하는 방식 등으로 진행됩니다.`,
@@ -693,7 +693,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['테이퍼링(Tapering)', '긴축정책']
         },
         {
-          id: 5,
+          id: 90,
           word: `잠재GDP성장률`,
           meaning: `한 나라가 인플레이션을 일으키지 않으면서, 노동력과 자본을 정상적으로 투입해 달성할 수 있는 최대의 기초 체력 성장률`,
           detailedMeaning: `이 나라 경제가 오버페이스하지 않고 꾸준히 달릴 수 있는 적정 속도입니다. 실제 경제성장률이 이 잠재성장률보다 높으면 경기가 과열된 것으로, 낮으면 침체된 것으로 봅니다.`,
@@ -711,7 +711,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
       description: '세계 경제를 뒤흔드는 투기 자본과 분배 지표',
       words: [
         {
-          id: 1,
+          id: 91,
           word: `환율조작국`,
           meaning: `자기 나라의 수출품 가격을 싸게 만들어서 부당하게 장사를 잘하려고 정부가 억지로 환율을 조작하는 얌체 국가`,
           detailedMeaning: `미국이 무역 적자를 줄이기 위해 교역국들을 감시하다가, 중앙은행이 외환시장에 너무 많이 개입하여 환율을 왜곡하는 나라를 지정해 무역 제재를 가하는 제도입니다.`,
@@ -720,7 +720,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['스무딩오퍼레이션', '관리변동환율제도']
         },
         {
-          id: 2,
+          id: 92,
           word: `캐리트레이드`,
           meaning: `이자가 아주 싼 나라에서 돈을 빌려, 이자를 많이 주는 다른 나라의 자산에 투자해 쏠쏠한 금리 차익을 챙기는 투자 기법`,
           detailedMeaning: `금리가 사실상 0%인 일본에서 엔화를 빌려(엔 캐리트레이드), 금리가 5%인 미국 채권이나 한국 주식을 사면 가만히 앉아서 큰 이득을 볼 수 있는 글로벌 투기 자금의 움직임입니다.`,
@@ -729,7 +729,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['외환시장', '금리평가이론']
         },
         {
-          id: 3,
+          id: 93,
           word: `헤지펀드`,
           meaning: `소수의 거액 자산가들로부터 막대한 돈을 모아, 어떤 시장 상황에서도 무조건 수익을 내기 위해 공격적이고 수단과 방법을 가리지 않는 사모펀드`,
           detailedMeaning: `일반 펀드와 달리 정부의 규제를 덜 받아 공매도, 파생상품 등 온갖 고위험 고수익 투자 기법을 마음대로 사용하여 글로벌 금융시장을 뒤흔드는 거대한 투기 세력이기도 합니다.`,
@@ -738,7 +738,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['공매도', '뮤추얼펀드']
         },
         {
-          id: 4,
+          id: 94,
           word: `지니계수`,
           meaning: `한 나라의 빈부격차가 얼마나 심한지 0부터 1 사이의 숫자로 나타낸 소득 불평등 지표`,
           detailedMeaning: `0에 가까울수록 모든 사람이 돈을 똑같이 나눠 가진 평등한 상태이고, 1에 가까울수록 단 한 사람이 나라의 모든 부를 다 차지한 끔찍한 불평등 상태를 의미합니다.`,
@@ -747,7 +747,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
           relatedWords: ['소득5분위배율', '로렌츠곡선']
         },
         {
-          id: 5,
+          id: 95,
           word: `통화승수`,
           meaning: `중앙은행이 시중에 푼 원금(본원통화)이 은행들의 대출 과정을 거치면서 몇 배로 불어났는지를 보여주는 마법의 배수`,
           detailedMeaning: `한국은행이 100만 원을 찍어냈는데 시중에 돈이 1,000만 원으로 불어났다면 통화승수는 10입니다. 이 수치가 높을수록 신용 창출이 활발해 경제에 돈이 쌩쌩 잘 돌고 있다는 뜻입니다.`,

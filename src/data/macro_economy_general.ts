@@ -63,7 +63,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
       description: '구독경제부터 기펜재까지, 경제의 독특한 현상들',
       words: [
         {
-          id: 1,
+          id: 6,
           word: `구독경제`,
           meaning: `물건을 아예 사는 대신 매달 돈을 내고 정기적으로 빌려 쓰는 경제 모델`,
           detailedMeaning: `과거 신문이나 우유를 배달받던 것을 넘어, 넷플릭스 같은 영상 서비스, 정수기, 심지어 자동차나 영양제까지 월정액을 내고 이용하는 현대의 소비 트렌드입니다.`,
@@ -72,7 +72,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           relatedWords: ['기회비용']
         },
         {
-          id: 2,
+          id: 7,
           word: `기후테크`,
           meaning: `지구 온난화와 기후 변화 문제를 해결하기 위해 개발되는 모든 첨단 기술`,
           detailedMeaning: `탄소를 줄이거나(온실가스 감축), 신재생 에너지를 만들고, 버려지는 쓰레기를 재활용하는 등 환경 보호와 수익 창출을 동시에 노리는 기술 산업입니다.`,
@@ -81,7 +81,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           relatedWords: ['그린본드']
         },
         {
-          id: 3,
+          id: 8,
           word: `기펜재`,
           meaning: `가격이 떨어지는데도 오히려 사람들이 안 사고, 오르면 더 사는 이상한 물건`,
           detailedMeaning: `일반적으로 가격이 내리면 수요가 늘어야 하는데 반대로 움직이는 특수한 재화입니다. (예: 너무 가난해서 감자만 먹다가, 감자값이 싸지면 남은 돈으로 고기를 사느라 오히려 감자 소비를 줄이는 현상)`,
@@ -90,7 +90,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           relatedWords: ['공급탄력성']
         },
         {
-          id: 4,
+          id: 9,
           word: `기준순환일`,
           meaning: `경제가 바닥을 치고 올라가거나, 꼭대기를 찍고 내려오는 꺾임 포인트(날짜)`,
           detailedMeaning: `경기 순환의 파도 속에서, 가장 좋았던 날(정점)과 가장 나빴던 날(저점)을 통계청이 나중에 분석해서 공식적으로 선언하는 기준일입니다.`,
@@ -99,7 +99,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           relatedWords: ['경기종합지수', '경제성장률']
         },
         {
-          id: 5,
+          id: 10,
           word: `공급탄력성`,
           meaning: `물건 가격이 변할 때, 생산자들이 물건을 얼마나 더 빨리 찍어낼 수 있는지 나타낸 수치`,
           detailedMeaning: `가격이 올랐을 때 금방 생산을 늘릴 수 있으면(예: 마스크, 공산품) 탄력적이라고 하고, 농산물이나 아파트처럼 가격이 올라도 당장 생산을 못 늘리면 비탄력적이라고 합니다.`,
@@ -117,7 +117,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
       description: '우리의 선택을 좌우하는 경제학의 심리 법칙',
       words: [
         {
-          id: 1,
+          id: 11,
           word: `낙수효과`,
           meaning: `대기업이나 부유층의 소득이 늘어나면 연쇄적으로 서민층에도 혜택이 돌아간다는 이론`,
           detailedMeaning: `물이 위에서 아래로 떨어지듯, 고소득층의 투자와 소비가 늘어나면 일자리가 생기고 중소기업의 매출도 늘어나 경제 전체가 성장한다는 논리입니다.`,
@@ -126,7 +126,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           relatedWords: ['분수효과']
         },
         {
-          id: 2,
+          id: 12,
           word: `낙인효과`,
           meaning: `한 번 나쁜 사람이나 기업으로 찍히면 계속해서 부정적인 평가를 받는 현상`,
           detailedMeaning: `과거의 실패나 불미스러운 일 때문에 시장에서 신뢰를 잃고, 이후에 아무리 노력해도 재기하기 어려워지는 경제적/사회적 불이익을 뜻합니다.`,
@@ -135,7 +135,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           relatedWords: ['정보의 비대칭성']
         },
         {
-          id: 3,
+          id: 13,
           word: `도덕적 해이`,
           meaning: `자신이 책임지지 않아도 될 때, 얌체처럼 행동하거나 의무를 소홀히 하는 현상`,
           detailedMeaning: `보험에 가입한 사람이 일부러 사고를 내거나 부주의해지는 것, 혹은 대마불사(큰 기업은 망하지 않는다)를 믿고 은행이 위험한 투자를 일삼는 상황을 말합니다.`,
@@ -144,7 +144,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           relatedWords: ['역선택', '정보의 비대칭성']
         },
         {
-          id: 4,
+          id: 14,
           word: `매몰비용`,
           meaning: `이미 엎질러진 물처럼, 지출한 뒤에는 절대 다시 회수할 수 없는 비용`,
           detailedMeaning: `재미없는 영화인 줄 알면서도 이미 낸 영화표 값이 아까워 끝까지 보는 것처럼, 합리적인 의사결정을 방해하는 과거의 비용입니다.`,
@@ -153,7 +153,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           relatedWords: ['기회비용']
         },
         {
-          id: 5,
+          id: 15,
           word: `대체재`,
           meaning: `콜라와 사이다처럼 서로 대신해서 쓸 수 있는 물건`,
           detailedMeaning: `어떤 물건의 가격이 너무 비싸지면, 사람들은 비슷한 만족감을 주는 다른 물건(대체재)을 찾게 됩니다. 돼지고기 값이 오르면 닭고기가 잘 팔리는 식이죠.`,
@@ -171,7 +171,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
       description: '햄버거 가격부터 명품 오픈런까지, 일상 속 경제 법칙',
       words: [
         {
-          id: 1,
+          id: 16,
           word: `뱅크런`,
           meaning: `은행에 돈을 맡긴 사람들이 은행이 망할까 봐 한꺼번에 돈을 찾으러 몰려가는 사태`,
           detailedMeaning: `소문이나 위기감 때문에 예금자들이 몰려들면, 멀쩡한 은행도 순식간에 내어줄 현금이 바닥나 파산하게 만드는 무서운 금융 패닉 현상입니다.`,
@@ -180,7 +180,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           relatedWords: ['금융공황', '예금보험제도']
         },
         {
-          id: 2,
+          id: 17,
           word: `베블런효과`,
           meaning: `물건값이 비싸질수록 오히려 허세를 부리기 위해 더 잘 팔리는 이상한 소비 현상`,
           detailedMeaning: `명품 가방이나 고급 스포츠카처럼 "내가 이렇게 비싸고 희귀한 걸 산다"라고 남들에게 과시하기 위한 소비 심리 때문에 발생합니다.`,
@@ -189,7 +189,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           relatedWords: ['밴드웨건효과', '속물효과(스놉효과)']
         },
         {
-          id: 3,
+          id: 18,
           word: `보복소비`,
           meaning: `외부 요인으로 억눌렸던 소비가 한꺼번에 폭발적으로 늘어나는 현상`,
           detailedMeaning: `코로나19 같은 전염병이나 국가적 재난 때문에 꾹 참고 돈을 안 쓰던 사람들이 제한이 풀리자마자 억울함을 보상받듯 엄청난 돈을 쓰는 현상입니다.`,
@@ -198,7 +198,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           relatedWords: ['소비자동향지수(CSI)']
         },
         {
-          id: 4,
+          id: 19,
           word: `분수효과`,
           meaning: `저소득층의 소득을 늘려주면 소비가 살아나 경제 전체가 좋아진다는 이론`,
           detailedMeaning: `분수가 아래에서 위로 솟구치듯, 서민들의 지갑을 두둑하게 해주면 그 돈이 빵집, 미용실, 기업의 매출로 연쇄적으로 이어져 경기가 좋아진다는 낙수효과의 반대 개념입니다.`,
@@ -207,7 +207,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           relatedWords: ['낙수효과', '한계소비성향']
         },
         {
-          id: 5,
+          id: 20,
           word: `빅맥지수`,
           meaning: `전 세계 맥도날드 빅맥 햄버거 가격으로 각국 돈의 진짜 가치를 비교하는 지수`,
           detailedMeaning: `영국의 경제지 <이코노미스트>가 고안한 것으로, "같은 물건은 어디서든 가치가 같아야 한다"는 원리를 이용해 현재 환율이 적정한지 쉽고 재미있게 평가하는 지표입니다.`,
@@ -225,7 +225,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
       description: '우리의 빚과 편리해진 금융 서비스 이해하기',
       words: [
         {
-          id: 1,
+          id: 21,
           word: `가계순저축률`,
           meaning: `가계가 마음대로 쓸 수 있는 소득 중에서 쓰지 않고 저축한 비율`,
           detailedMeaning: `가계처분가능소득에서 소비 지출을 빼고 남은 돈(저축)이 차지하는 비중입니다. 이 수치가 높으면 미래 대비가 잘 되어 있다는 뜻이지만, 너무 높으면 소비가 위축되어 경제가 안 돌아갈 수 있습니다.`,
@@ -234,7 +234,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           relatedWords: ['가계처분가능소득', '국내총투자율']
         },
         {
-          id: 2,
+          id: 22,
           word: `가계신용통계`,
           meaning: `우리나라 일반 가정이 안고 있는 빚의 총합`,
           detailedMeaning: `가계가 은행 등 금융기관에서 빌린 돈(대출금)과 신용카드로 물건을 사고 아직 갚지 않은 돈(판매신용)을 모두 합친 '국가 전체의 가계 빚' 통계입니다.`,
@@ -243,7 +243,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           relatedWords: ['가계부실위험지수(HDRI)']
         },
         {
-          id: 3,
+          id: 23,
           word: `가교은행`,
           meaning: `파산한 은행을 임시로 맡아 처리해 주는 징검다리 은행`,
           detailedMeaning: `부실해진 은행이 문을 닫으면 예금자들이 피해를 보므로, 다른 주인을 찾거나 안전하게 정리될 때까지 예금과 대출 업무를 임시로 넘겨받아 유지하는 예금보험공사 산하의 은행입니다.`,
@@ -252,7 +252,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           relatedWords: ['경영실태평가']
         },
         {
-          id: 4,
+          id: 24,
           word: `가상자산공개(ICO)`,
           meaning: `새로운 코인을 발행하여 사업 자금을 끌어모으는 방법`,
           detailedMeaning: `주식시장에서 회사가 처음 주식을 팔아 돈을 모으는 기업공개(IPO)처럼, 블록체인 기업이 새로 만든 가상자산(암호화폐)을 투자자들에게 팔아 개발 자금을 조달하는 행위입니다.`,
@@ -261,7 +261,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           relatedWords: ['가상자산', '기업공개']
         },
         {
-          id: 5,
+          id: 25,
           word: `간편 송금`,
           meaning: `복잡한 인증 없이 스마트폰으로 빠르게 돈을 보내는 서비스`,
           detailedMeaning: `보안카드나 공인인증서 없이 미리 충전해 둔 선불금이나 연결된 계좌를 통해 비밀번호, 생체인식만으로 뚝딱 송금할 수 있는 모바일 금융 서비스(예: 토스, 카카오페이 송금)입니다.`,

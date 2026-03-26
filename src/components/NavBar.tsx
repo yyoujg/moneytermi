@@ -14,8 +14,11 @@ const NavBar = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
+  const HIDDEN_PATHS = ['/swipe', '/quiz', '/course/words', '/word-card', '/league/rules'];
+  if (HIDDEN_PATHS.some(p => pathname.startsWith(p))) return null;
+
   return (
-    <div className="absolute bottom-0 w-full bg-white border-t border-gray-100 flex justify-around pt-3 pb-safe-bottom z-50">
+    <div className="absolute bottom-0 w-full bg-[#161616] flex justify-around pt-3 pb-safe-bottom z-50">
       <div className="flex w-full justify-around pb-6 px-2">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
@@ -24,9 +27,9 @@ const NavBar = () => {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className={`flex flex-col items-center transition-colors ${isActive ? 'text-gray-900' : 'text-gray-400 hover:text-gray-600'}`}
+              className={`flex flex-col items-center transition-colors ${isActive ? 'text-white' : 'text-[#777777] hover:text-[#ABABAB]'}`}
             >
-              <Icon size={24} strokeWidth={isActive ? 2.5 : 2} className={isActive ? 'text-gray-900' : 'text-gray-400'} />
+              <Icon size={24} strokeWidth={isActive ? 2.5 : 2} className={isActive ? 'text-white' : 'text-[#777777]'} />
               <span className={`text-[10px] mt-1.5 ${isActive ? 'font-bold' : 'font-medium'}`}>{item.label}</span>
             </button>
           );

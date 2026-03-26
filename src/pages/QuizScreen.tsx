@@ -1,71 +1,322 @@
-import React, { useState } from 'react';
-import { ChevronLeft, Heart, Zap } from 'lucide-react';
-import { Button, TextButton, TextField } from '@toss/tds-mobile';
+import React, { useState, useMemo, useEffect } from 'react';
+import { ChevronLeft, Zap, Check, X } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { Word, Missions } from '../types';
 import { useAppContext } from '../context/AppContext';
+import { useAuth } from '../hooks/useAuth';
+import GuestLinkSheet from '../components/GuestLinkSheet';
+
+const getOptions = (correctWord: Word, allWords: Word[]): string[] => {
+  const others = allWords.filter(w => w.id !== correctWord.id);
+  const shuffled = [...others].sort(() => Math.random() - 0.5);
+  const wrong = shuffled.slice(0, 3).map(w => w.word);
+  return [...wrong, correctWord.word].sort(() => Math.random() - 0.5);
+};
+
+// 콤보 기반 포인트 계산
+const calcEarned = (combo: number): number => {
+  if (combo >= 5) return 20;
+  if (combo >= 3) return 15;
+  return 10;
+};
 
 const QuizScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { points, setPoints, setMissions } = useAppContext();
+  const { points, setPoints, setMissions, otherLeagueUsers, allWords } = useAppContext();
 
   const quizQueue: Word[] = (location.state as { quizQueue?: Word[] } | null)?.quizQueue ?? [];
 
-  const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
-  const [quizInput, setQuizInput] = useState('');
-  const [combo, setCombo] = useState(0);
-  const [showHint, setShowHint] = useState(false);
+  const { isGuest, linkAccount } = useAuth();
+  const [showLinkSheet, setShowLinkSheet] = useState(false);
 
-  if (!quizQueue || quizQueue.length === 0 || currentQuizIndex >= quizQueue.length) {
-    return <div className="flex h-full items-center justify-center">퀴즈 완료!</div>;
-  }
+  const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
+  const [combo, setCombo] = useState(0);
+  const [maxCombo, setMaxCombo] = useState(0);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [status, setStatus] = useState<'idle' | 'correct' | 'wrong'>('idle');
+  const [totalEarned, setTotalEarned] = useState(0);
+  const [lastEarned, setLastEarned] = useState(0);
+  const [showPointPop, setShowPointPop] = useState(false);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [shake, setShake] = useState(false);
 
   const currentWord = quizQueue[currentQuizIndex];
+
+  const options = useMemo(() => {
+    if (!currentWord) return [];
+    return getOptions(currentWord, allWords);
+  }, [currentWord?.id, allWords]);
+
+  // +P 팝업 트리거
+  useEffect(() => {
+    if (showPointPop) {
+      const t = setTimeout(() => setShowPointPop(false), 700);
+      return () => clearTimeout(t);
+    }
+  }, [showPointPop]);
+
+  // 완료 화면
+  if (!quizQueue || quizQueue.length === 0 || currentQuizIndex >= quizQueue.length) {
+    const accuracy = quizQueue.length > 0 ? Math.round((correctCount / quizQueue.length) * 100) : 0;
+    const rankEstimate = Math.max(1, Math.floor(totalEarned / 5));
+    const myRank = (() => {
+      const league = [...otherLeagueUsers, { id: 'me', points }].sort((a, b) => b.points - a.points);
+      return league.findIndex(u => u.id === 'me') + 1;
+    })();
+    const prevRank = (() => {
+      const league = [...otherLeagueUsers, { id: 'me', points: points - totalEarned }].sort((a, b) => b.points - a.points);
+      return league.findIndex(u => u.id === 'me') + 1;
+    })();
+    const rankRose = prevRank > myRank;
+
+    return (
+      <div className="flex h-full flex-col bg-[#0B0B0B]">
+        {showLinkSheet && (
+          <GuestLinkSheet
+            onClose={() => setShowLinkSheet(false)}
+            onLink={(email) => { linkAccount(email); setShowLinkSheet(false); }}
+          />
+        )}
+        <div className="flex-1 flex flex-col items-center justify-center px-8 gap-5">
+          <div className="text-6xl">🎉</div>
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-white mb-1">퀴즈 완료!</h2>
+            <p className="text-sm text-[#555555]">{quizQueue.length}문제 완료</p>
+          </div>
+
+          {/* 결과 카드 */}
+          <div className="w-full bg-[#161616] rounded-2xl p-5 flex flex-col gap-4">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-[#555555]">획득 포인트</span>
+              <div className="flex items-center gap-1.5">
+                <Zap size={14} className="text-orange-500 fill-current" />
+                <span className="text-xl font-bold text-orange-500">+{totalEarned}P</span>
+              </div>
+            </div>
+            <div className="h-px bg-[#1E1E1E]" />
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-[#555555]">정답률</span>
+              <span className="text-xl font-bold text-white">{accuracy}%</span>
+            </div>
+            <div className="h-px bg-[#1E1E1E]" />
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-[#555555]">최고 연속 정답</span>
+              <span className="text-xl font-bold text-white">{maxCombo}연속 🔥</span>
+            </div>
+            {rankRose && (
+              <>
+                <div className="h-px bg-[#1E1E1E]" />
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-[#555555]">순위 변화</span>
+                  <span className="text-sm font-bold text-green-400">🔥 {prevRank}위 → {myRank}위 상승!</span>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="px-5 pb-12 flex flex-col gap-3">
+          {isGuest && totalEarned > 0 && (
+            <div className="rounded-2xl px-4 py-4 flex flex-col gap-3" style={{ backgroundColor: '#110C04' }}>
+              <div>
+                {rankRose
+                  ? <p className="text-sm font-bold text-orange-400">🔥 {prevRank}위 → {myRank}위 상승!</p>
+                  : <p className="text-sm font-bold text-orange-400">+{totalEarned}P 획득!</p>
+                }
+                <p className="text-xs text-[#555555] mt-0.5">지금 저장하면 {points}P + {myRank}위 유지됩니다</p>
+              </div>
+              <button
+                onClick={() => setShowLinkSheet(true)}
+                className="w-full py-3 rounded-xl bg-orange-500 text-sm font-bold text-white active:opacity-90"
+              >
+                🔥 지금 저장하기
+              </button>
+            </div>
+          )}
+          <button
+            onClick={() => navigate('/home')}
+            className="w-full py-4 rounded-2xl text-sm font-bold text-white bg-orange-500 active:opacity-90"
+          >
+            홈으로
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const progressPercent = (currentQuizIndex / quizQueue.length) * 100;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!quizInput.trim()) return;
-    const cleanInput = quizInput.replace(/\s+/g, '').toLowerCase();
-    const cleanAnswer = currentWord.word.replace(/\s+/g, '').toLowerCase();
-    if (cleanInput === cleanAnswer) {
-      const earnedPoints = showHint ? 5 : 10;
-      const comboBonus = combo > 1 ? combo * 2 : 0;
-      setPoints((p) => p + earnedPoints + comboBonus);
-      setCombo((c) => c + 1);
-      setMissions((prev: Missions) => ({ ...prev, m3: { ...prev.m3, current: Math.min(prev.m3.current + 1, prev.m3.target) } }));
+  const handleSelect = (option: string) => {
+    if (status !== 'idle') return;
+    setSelected(option);
+    const isCorrect = option === currentWord.word;
+
+    if (isCorrect) {
+      const newCombo = combo + 1;
+      const earned = calcEarned(newCombo);
+
+      setPoints(p => p + earned);
+      setTotalEarned(t => t + earned);
+      setCombo(newCombo);
+      setMaxCombo(m => Math.max(m, newCombo));
+      setCorrectCount(c => c + 1);
+      setLastEarned(earned);
+      setShowPointPop(true);
+      setStatus('correct');
+      setMissions((prev: Missions) => ({
+        ...prev,
+        m3: { ...prev.m3, current: Math.min(prev.m3.current + 1, prev.m3.target) },
+      }));
+      // 정답: 300ms 후 자동 이동
       setTimeout(() => {
-        setCurrentQuizIndex((prev) => prev + 1);
-        setQuizInput('');
-        setShowHint(false);
-      }, 1000);
+        setCurrentQuizIndex(i => i + 1);
+        setSelected(null);
+        setStatus('idle');
+      }, 300);
     } else {
       setCombo(0);
-      setTimeout(() => setQuizInput(''), 800);
+      setStatus('wrong');
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+      // 오답: 900ms 후 재시도
+      setTimeout(() => {
+        setSelected(null);
+        setStatus('idle');
+      }, 900);
     }
   };
 
+  // 스트릭 메시지
+  const streakMessage = combo >= 5 ? { text: `⚡ ${combo}연속! x2 보너스`, color: 'text-yellow-400' }
+    : combo >= 3 ? { text: `🔥 ${combo}연속! +5P 보너스`, color: 'text-orange-400' }
+    : null;
+
   return (
-    <div className="flex flex-col h-full bg-gray-50 relative overflow-hidden">
-      <div className="pt-12 px-5 pb-3 flex justify-between items-center bg-white z-10 border-b border-gray-100">
-        <button onClick={() => navigate('/home')} className="p-2 -ml-2"><ChevronLeft size={28} className="text-gray-700" /></button>
-        <div className="flex space-x-1">
-          <Heart size={16} className="text-rose-500 fill-current" />
-          <Heart size={16} className="text-rose-500 fill-current" />
-          <Heart size={16} className="text-gray-200 fill-current" />
+    <div className="flex flex-col h-full bg-[#0B0B0B]">
+      {/* 헤더 */}
+      <div className="pt-12 px-5 pb-3 flex justify-between items-center bg-[#161616]">
+        <button onClick={() => navigate('/home')} className="p-2 -ml-2">
+          <ChevronLeft size={24} className="text-[#777777]" />
+        </button>
+        <span className="text-xs font-medium text-[#555555]">{currentQuizIndex + 1} / {quizQueue.length}</span>
+        {/* 포인트 + 팝업 */}
+        <div className="relative flex items-center gap-1">
+          {showPointPop && (
+            <span
+              key={totalEarned}
+              className="absolute -top-5 right-0 text-xs font-bold text-green-400 whitespace-nowrap"
+              style={{ animation: 'fadeUp 0.7s ease forwards' }}
+            >
+              +{lastEarned}P
+            </span>
+          )}
+          <Zap size={13} className="text-[#555555] fill-current" />
+          <span className="text-sm font-bold text-white">{points}</span>
         </div>
-        <div className="font-bold text-gray-900 flex items-center text-sm"><Zap size={16} className="mr-1 text-orange-500 fill-current" /> {points}</div>
       </div>
-      <div className="w-full bg-gray-200 h-1 z-10"><div className="bg-orange-500 h-1 transition-all duration-300" style={{ width: `${progressPercent}%` }} /></div>
-      <div className="flex-1 p-6 flex flex-col mt-4">
-        <form onSubmit={handleSubmit} className="mt-auto mb-10">
-          <div className="mb-4">
-            <TextField variant="box" value={quizInput} onChange={(e) => setQuizInput(e.target.value)} placeholder="정답 입력" />
-            {!showHint && <TextButton size="small" onClick={() => setShowHint(true)} className="mt-2">초성 보기</TextButton>}
+
+      {/* 애니메이션 */}
+      <style>{`
+        @keyframes fadeUp {
+          0% { opacity: 1; transform: translateY(0); }
+          100% { opacity: 0; transform: translateY(-16px); }
+        }
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          20% { transform: translateX(-6px); }
+          40% { transform: translateX(6px); }
+          60% { transform: translateX(-4px); }
+          80% { transform: translateX(4px); }
+        }
+        @keyframes flashGreen {
+          0% { background-color: #161616; }
+          30% { background-color: rgba(34,197,94,0.12); }
+          100% { background-color: #161616; }
+        }
+        .shake { animation: shake 0.5s ease; }
+        .flash-correct { animation: flashGreen 0.4s ease; }
+      `}</style>
+
+      {/* 진행 바 */}
+      <div className="w-full bg-[#1E1E1E] h-1">
+        <div
+          className="bg-orange-500 h-1 transition-all duration-500"
+          style={{ width: `${progressPercent}%` }}
+        />
+      </div>
+
+      {/* 콘텐츠 */}
+      <div className="flex-1 flex flex-col px-5 py-5 gap-4">
+        {/* 스트릭 배너 */}
+        {streakMessage && status === 'idle' && (
+          <div className={`flex items-center justify-center py-2 rounded-xl bg-[#161616] ${streakMessage.color} text-xs font-bold`}>
+            {streakMessage.text}
           </div>
-          <Button display="block" type="submit">제출하기</Button>
-        </form>
+        )}
+
+        {/* 문제 카드 */}
+        <div className={`rounded-2xl p-5 flex-1 flex flex-col justify-center gap-4
+          ${status === 'correct' ? 'flash-correct ring-2 ring-green-500/40' : 'bg-[#161616]'}
+          ${status === 'wrong' ? 'bg-[#161616] ring-2 ring-red-500/30' : ''}
+          ${shake ? 'shake' : ''}
+        `}>
+          <span className="text-[11px] font-medium text-[#555555] tracking-widest uppercase">이 뜻에 맞는 용어는?</span>
+
+          <p className="text-xl font-bold text-white leading-snug">{currentWord.meaning}</p>
+
+          <div className="w-8 h-[2px] bg-[#2A2A2A]" />
+
+          <p className="text-sm text-[#777777] leading-relaxed break-keep">{currentWord.detailedMeaning}</p>
+
+          {status === 'correct' && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-green-400">정답!</span>
+              <span className="text-xs font-bold text-green-400">+{lastEarned}P</span>
+              {combo >= 3 && <span className="text-xs font-bold text-orange-400">🔥 {combo}연속</span>}
+            </div>
+          )}
+          {status === 'wrong' && (
+            <p className="text-sm font-bold text-red-400">
+              정답: <span className="text-white">{currentWord.word}</span>
+            </p>
+          )}
+        </div>
+
+        {/* 객관식 선택지 */}
+        <div className="grid grid-cols-2 gap-2">
+          {options.map((option) => {
+            const isSelected = selected === option;
+            const isCorrectOption = option === currentWord.word;
+            let optionStyle = 'bg-[#161616] text-white active:bg-[#2A2A2A]';
+
+            if (status !== 'idle') {
+              if (isCorrectOption) {
+                optionStyle = 'bg-green-500/15 text-green-400 ring-1 ring-green-500/50';
+              } else if (isSelected && !isCorrectOption) {
+                optionStyle = 'bg-red-500/15 text-red-400 ring-1 ring-red-500/40';
+              } else {
+                optionStyle = 'bg-[#161616] text-[#3A3A3A]';
+              }
+            }
+
+            return (
+              <button
+                key={option}
+                onClick={() => handleSelect(option)}
+                className={`relative py-4 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-150 ${optionStyle}`}
+              >
+                {option}
+                {status !== 'idle' && isCorrectOption && (
+                  <Check size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-green-400" />
+                )}
+                {status !== 'idle' && isSelected && !isCorrectOption && (
+                  <X size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400" />
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

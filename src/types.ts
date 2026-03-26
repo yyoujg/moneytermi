@@ -1,5 +1,20 @@
 export type CardType = 'intro' | 'content' | 'compare' | 'summary' | 'photo' | 'list';
 
+export type AuthUser = {
+  id: string;
+  nickname: string;
+  email?: string;
+  isGuest: boolean;
+  leagueTier: string;
+};
+
+export type AuthState = {
+  user: AuthUser | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  isAuthenticated: boolean;
+};
+
 export type WordSlide = {
   cardType: CardType;
   label: string;

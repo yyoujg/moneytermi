@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronRight, Lightbulb, RotateCcw, Zap } from 'lucide-react';
-import { Button, TextButton, TextField, Spacing } from '@toss/tds-mobile';
+import { Spacing } from '@toss/tds-mobile';
 import { useAppContext } from '../context/AppContext';
-import { ALL_WORDS } from '../constants';
 import type { Missions } from '../types';
 
 type Status = 'idle' | 'correct' | 'wrong';
@@ -17,9 +16,13 @@ const shuffle = <T,>(arr: T[]): T[] => {
 };
 
 const QuizPage = () => {
-  const { points, setPoints, setMissions } = useAppContext();
+  const { points, setPoints, setMissions, allWords } = useAppContext();
 
-  const [queue] = useState(() => shuffle(ALL_WORDS));
+  const [queue, setQueue] = React.useState<typeof allWords>([]);
+  React.useEffect(() => {
+    if (allWords.length > 0 && queue.length === 0) setQueue(shuffle(allWords));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allWords]);
   const [index, setIndex] = useState(0);
   const [input, setInput] = useState('');
   const [status, setStatus] = useState<Status>('idle');
@@ -44,8 +47,8 @@ const QuizPage = () => {
     setShowDetail(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (status !== 'idle' || !input.trim()) return;
 
     const clean = (s: string) => s.replace(/\s+/g, '').toLowerCase();
@@ -71,17 +74,21 @@ const QuizPage = () => {
 
   if (isFinished) {
     return (
-      <div className="flex flex-col h-full bg-gray-50 items-center justify-center p-6 pb-24">
-        <div className="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center text-4xl mb-4">🏆</div>
-        <h2 className="text-xl font-bold text-gray-900 mb-1">퀴즈 완료!</h2>
-        <p className="text-sm text-gray-400 mb-6">{queue.length}문제 중 {totalCorrect}개 정답</p>
-        <div className="flex items-center gap-2 bg-orange-50 border border-orange-100 rounded-2xl px-5 py-3 mb-8">
+      <div className="flex flex-col h-full bg-[#0B0B0B] items-center justify-center p-6 pb-24">
+        <div className="w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center text-4xl mb-4">🏆</div>
+        <h2 className="text-xl font-bold text-white mb-1">퀴즈 완료!</h2>
+        <p className="text-sm text-[#777777] mb-6">{queue.length}문제 중 {totalCorrect}개 정답</p>
+        <div className="flex items-center gap-2 bg-orange-500/10 border border-orange-500/20 rounded-2xl px-5 py-3 mb-8">
           <Zap size={16} className="text-orange-500 fill-current" />
-          <span className="text-sm font-bold text-gray-900">누적 포인트 {points} P</span>
+          <span className="text-sm font-bold text-white">누적 포인트 {points} P</span>
         </div>
-        <Button size="large" onClick={() => window.location.reload()}>
-          <RotateCcw size={16} className="mr-2" />다시 풀기
-        </Button>
+        <button
+          onClick={() => window.location.reload()}
+          className="flex items-center gap-2 px-6 py-4 rounded-2xl text-white text-xs font-bold active:opacity-90"
+          style={{ backgroundColor: '#f97316' }}
+        >
+          <RotateCcw size={14} /> 다시 풀기
+        </button>
       </div>
     );
   }
@@ -90,85 +97,94 @@ const QuizPage = () => {
   const earnedPreview = (showHint ? 5 : 10) + (combo >= 2 ? combo * 2 : 0);
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 pb-24">
+    <div className="flex flex-col h-full bg-[#0B0B0B] pb-24">
       {/* 헤더 */}
-      <div className="bg-white pt-12 px-5 pb-3 border-b border-gray-100">
+      <div className="bg-[#161616] pt-12 px-5 pb-4 border-b border-[#1E1E1E]">
         <div className="flex justify-between items-center mb-3">
-          <h2 className="text-xl font-bold text-gray-900">퀴즈</h2>
+          <h2 className="text-xl font-bold text-white">퀴즈</h2>
           <div className="flex items-center gap-2">
             {combo >= 2 && (
               <div className="bg-orange-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
                 🔥 {combo}연속
               </div>
             )}
-            <div className="flex items-center gap-1 bg-orange-50 border border-orange-100 rounded-full px-3 py-1.5">
+            <div className="flex items-center gap-1 bg-orange-500/10 border border-orange-500/20 rounded-full px-3 py-1.5">
               <Zap size={13} className="text-orange-500 fill-current" />
-              <span className="text-xs font-bold text-gray-800">{points} P</span>
+              <span className="text-xs font-bold text-white">{points} P</span>
             </div>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex-1 bg-gray-100 rounded-full h-1.5 overflow-hidden">
+          <div className="flex-1 bg-[#1E1E1E] rounded-full h-1.5 overflow-hidden">
             <div className="bg-orange-400 h-full rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
           </div>
-          <span className="text-xs font-bold text-gray-400 shrink-0">{index + 1} / {queue.length}</span>
+          <span className="text-xs font-bold text-[#777777] shrink-0">{index + 1} / {queue.length}</span>
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col px-5 py-5">
+      <div className="flex-1 flex flex-col px-5 py-4">
         {/* 문제 카드 */}
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 mb-5 flex-1">
-          <p className="text-[11px] font-bold text-orange-400 mb-4">뜻을 보고 용어를 맞혀보세요</p>
+        <div className="bg-[#161616] rounded-2xl p-6 mb-5 flex-1">
+          <p className="text-[11px] font-medium text-[#555555] mb-4 tracking-wide uppercase">뜻을 보고 용어를 맞혀보세요</p>
 
-          <p className="text-lg font-bold text-gray-900 leading-relaxed mb-5">{word.meaning}</p>
+          <p className="text-lg font-bold text-white leading-relaxed mb-5">{word.meaning}</p>
 
           {showHint && (
-            <div className="bg-orange-50 border border-orange-100 rounded-2xl px-4 py-3 flex items-center gap-2 mb-4">
-              <Lightbulb size={14} className="text-orange-400 shrink-0" />
-              <span className="text-base font-bold text-orange-600 tracking-widest">{word.hint}</span>
+            <div className="bg-[#1E1E1E] rounded-2xl px-4 py-3 flex items-center gap-2 mb-4">
+              <Lightbulb size={14} className="text-[#777777] shrink-0" />
+              <span className="text-base font-bold text-white tracking-widest">{word.hint}</span>
             </div>
           )}
 
           {showDetail ? (
-            <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
-              <p className="text-xs font-bold text-gray-400 mb-1.5">상세 설명</p>
-              <p className="text-sm text-gray-500 leading-relaxed break-keep">{word.detailedMeaning}</p>
+            <div className="bg-[#1E1E1E] rounded-2xl p-4">
+              <p className="text-xs font-bold text-[#777777] mb-1.5">상세 설명</p>
+              <p className="text-sm text-[#ABABAB] leading-relaxed break-keep">{word.detailedMeaning}</p>
             </div>
           ) : (
-            <TextButton size="small" onClick={() => setShowDetail(true)}>
+            <button
+              onClick={() => setShowDetail(true)}
+              className="text-xs font-bold text-[#777777] active:text-[#ABABAB]"
+            >
               상세 설명 보기
-            </TextButton>
+            </button>
           )}
         </div>
 
         {/* 입력 + 제출 */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <div>
-            <TextField
-              variant="box"
+            <input
+              ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="용어를 입력하세요"
               disabled={status !== 'idle'}
-              ref={inputRef}
               autoComplete="off"
+              className={`w-full px-4 py-4 rounded-2xl text-sm font-medium outline-none border transition-colors
+                ${status === 'correct' ? 'bg-green-500/10 border-green-500/40 text-green-400' :
+                  status === 'wrong' ? 'bg-red-500/10 border-red-500/40 text-red-400' :
+                  'bg-[#161616] border-[#1E1E1E] text-white focus:border-orange-500/50'}
+              `}
+              style={{ caretColor: '#f97316' }}
             />
             {status === 'correct' && (
-              <p className="text-xs font-bold text-green-500 mt-1.5 px-1">정답! +{earnedPreview}P</p>
+              <p className="text-xs font-bold text-green-400 mt-1.5 px-1">정답! +{earnedPreview}P</p>
             )}
             {status === 'wrong' && (
               <p className="text-xs font-bold text-red-400 mt-1.5 px-1">틀렸어요. 다시 시도해보세요!</p>
             )}
           </div>
 
-          <Button
-            type="submit"
-            size="large"
+          <button
+            type="button"
+            onClick={() => handleSubmit()}
             disabled={status !== 'idle' || !input.trim()}
-            style={{ width: '100%' }}
+            className="w-full py-4 rounded-2xl text-white text-xs font-bold active:opacity-90 disabled:opacity-30"
+            style={{ backgroundColor: '#f97316' }}
           >
             제출하기
-          </Button>
+          </button>
         </form>
 
         <Spacing size={12} />
@@ -178,14 +194,14 @@ const QuizPage = () => {
           {!showHint && (
             <button
               onClick={() => setShowHint(true)}
-              className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl border border-gray-100 bg-white text-xs font-bold text-gray-500 active:bg-gray-50"
+              className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-[#161616] text-xs font-bold text-[#777777] active:opacity-70"
             >
-              <Lightbulb size={13} className="text-orange-400" /> 초성 힌트
+              <Lightbulb size={13} className="text-[#555555]" /> 초성 힌트
             </button>
           )}
           <button
             onClick={goNext}
-            className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl border border-gray-100 bg-white text-xs font-bold text-gray-400 active:bg-gray-50"
+            className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-[#161616] text-xs font-bold text-[#777777] active:opacity-70"
           >
             <ChevronRight size={13} /> 건너뛰기
           </button>

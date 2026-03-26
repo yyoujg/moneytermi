@@ -82,7 +82,7 @@ const CardLayout = ({
   const showWordNav = onPrevWord || onNextWord;
 
   return (
-    <div className="flex flex-col h-full bg-gray-100 relative overflow-hidden">
+    <div className="flex flex-col h-full bg-[#0B0B0B] relative overflow-hidden">
 
 
       {/* 상단 내비 */}
@@ -90,9 +90,9 @@ const CardLayout = ({
         <div className="flex items-center justify-between">
           <button
             onClick={onBack}
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-white/80 border border-gray-200"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-[#1E1E1E]/80 border border-[#555555]"
           >
-            <ChevronLeft size={20} className="text-gray-600" />
+            <ChevronLeft size={20} className="text-[#ABABAB]" />
           </button>
 
           {wordDots && wordDots.length > 0 && (
@@ -104,7 +104,7 @@ const CardLayout = ({
                   className="h-1.5 rounded-full transition-all duration-300"
                   style={{
                     width: dot.active ? 20 : 6,
-                    backgroundColor: dot.active ? accentBg : '#d1d5db',
+                    backgroundColor: dot.active ? accentBg : '#555555',
                   }}
                 />
               ))}
@@ -116,18 +116,18 @@ const CardLayout = ({
       </div>
 
       {/* 카드 + 단어 버튼 */}
-      <div className="relative z-10 flex-1 mx-4 mb-24 flex flex-col gap-3">
+      <div className="relative z-10 flex-1 mx-4 mb-6 flex flex-col gap-3">
 
         {/* 카드 (스와이프 영역) */}
         <div
           ref={cardRef}
           key={cardKey}
-          className="flex-1 bg-white rounded-[28px] border border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.07)] overflow-hidden flex flex-col select-none"
+          className="flex-1 bg-[#161616] rounded-[28px] border border-[#1E1E1E] shadow-[0_20px_50px_rgba(0,0,0,0.4)] overflow-hidden flex flex-col select-none"
         >
           {/* 카드 헤더 */}
           <div className="flex justify-between items-center px-6 pt-5 pb-2 shrink-0">
-            <p className="text-[16px] font-black text-gray-900 break-keep">{headerMeta}</p>
-            <div className="px-3 py-1 rounded-lg text-[11px] font-black text-gray-400 bg-gray-100 shrink-0 ml-2">
+            <p className="text-[16px] font-black text-white break-keep">{headerMeta}</p>
+            <div className="px-3 py-1 rounded-lg text-[11px] font-black text-[#777777] bg-[#161616] shrink-0 ml-2">
               {String(slideNum).padStart(2, '0')} / {String(slideTotal).padStart(2, '0')}
             </div>
           </div>
@@ -141,7 +141,7 @@ const CardLayout = ({
             {!isLast && (
               <ChevronDown
                 size={22}
-                className="animate-bounce-down text-gray-300"
+                className="animate-bounce-down text-[#555555]"
               />
             )}
           </div>
@@ -153,7 +153,7 @@ const CardLayout = ({
             <button
               onClick={onPrevWord}
               disabled={isFirstWord}
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-400 disabled:opacity-30 active:bg-gray-50"
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#161616] border border-[#1E1E1E] text-[#777777] disabled:opacity-30 active:bg-[#161616]"
             >
               <ChevronLeft size={18} />
             </button>
@@ -161,7 +161,7 @@ const CardLayout = ({
               onClick={onNextWord}
               disabled={isLastWord}
               className="w-10 h-10 flex items-center justify-center rounded-xl text-white active:opacity-80 disabled:opacity-30"
-              style={{ backgroundColor: isLastWord ? '#d1d5db' : accentBg }}
+              style={{ backgroundColor: isLastWord ? '#555555' : accentBg }}
             >
               <ChevronRight size={18} />
             </button>
