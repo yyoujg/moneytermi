@@ -56,7 +56,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [otherLeagueUsers, setOtherLeagueUsers] = useState<LeagueUser[]>([]);
   const [courses, setCourses]             = useState<Course[]>([]);
   const [allWords, setAllWords]           = useState<Word[]>([]);
-  const initialized = useRef(false);
+  const [ready, setReady]                 = useState(false);
   const pendingKnownIds   = useRef<Set<number> | null>(null);
   const pendingUnknownIds = useRef<Set<number> | null>(null);
 
@@ -99,21 +99,32 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     loadContent();
   }, []);
 
-  // ── 초기 로드 ─────────────────────────────────────────────────
+  // ── 초기 로드 (profileId 준비될 때까지 재시도) ────────────────
   useEffect(() => {
+    let cancelled = false;
+    let attempt = 0;
+
     const load = async () => {
+      if (cancelled) return;
+
       const { profileId } = getStoredIds();
-      if (!profileId) return;
+      // profileId가 없으면 useAuth.initAuth()가 아직 실행 중 — 재시도
+      if (!profileId) {
+        if (attempt++ < 12) setTimeout(load, 500);
+        return;
+      }
+
       const db = getDb();
       const today = toDateStr(new Date());
 
-      // 1. points
-      const { data: profile } = await db
+      // 1. points — DB값과 로컬값 중 큰 값 유지 (로딩 중 적립 포인트 보존)
+      const { data: profile, error: profileErr } = await db
         .from('profiles')
         .select('points')
         .eq('id', profileId)
         .single();
-      if (profile) setPoints(profile.points);
+      if (profileErr) console.error('[load] profiles fetch 실패:', profileErr);
+      if (profile) setPoints(prev => Math.max(prev, profile.points));
 
       // 2. word_progress → 실제 Word 객체 복원
       const { data: progress } = await db
@@ -140,19 +151,24 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
           const next = { ...prev };
           dm.forEach(row => {
             const key = row.mission_id as keyof Missions;
-            if (next[key]) next[key] = { ...next[key], current: row.current, isRewarded: row.is_rewarded };
+            if (next[key]) next[key] = {
+              ...next[key],
+              current: Math.max(next[key].current, row.current),
+              isRewarded: next[key].isRewarded || row.is_rewarded,
+            };
           });
           return next;
         });
       }
 
-      // 4. attendance — 기존 출석 기록 로드 (버튼 누를 때 저장, 여기서는 조회만)
-      const { data: att } = await db
+      // 4. attendance
+      const { data: att, error: attLoadErr } = await db
         .from('attendance')
         .select('date')
         .eq('user_id', profileId)
         .order('date', { ascending: false })
         .limit(60);
+      if (attLoadErr) console.error('[load] attendance fetch 실패:', attLoadErr);
 
       const dates = att ? att.map(a => a.date) : [];
       setAttendanceDates(dates);
@@ -182,10 +198,11 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         })));
       }
 
-      initialized.current = true;
+      if (!cancelled) setReady(true);
     };
 
     load();
+    return () => { cancelled = true; };
   }, []);
 
   // ── allWords 로드 후 pending word IDs 해소 ────────────────────
@@ -203,42 +220,45 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   // ── points → Supabase 동기화 (1초 디바운스) ───────────────────
   useEffect(() => {
-    if (!initialized.current) return;
+    if (!ready) return;
     const { profileId } = getStoredIds();
     if (!profileId) return;
     const t = setTimeout(async () => {
-      await getDb().from('profiles').update({ points }).eq('id', profileId);
+      const { error } = await getDb().from('profiles').update({ points }).eq('id', profileId);
+      if (error) console.error('[sync] points 저장 실패:', error);
     }, 1000);
     return () => clearTimeout(t);
-  }, [points]);
+  }, [points, ready]);
 
   // ── knownWords → word_progress upsert (2초 디바운스) ──────────
   useEffect(() => {
-    if (!initialized.current || knownWords.length === 0) return;
+    if (!ready || knownWords.length === 0) return;
     const { profileId } = getStoredIds();
     if (!profileId) return;
     const t = setTimeout(async () => {
       const rows = knownWords.map(w => ({ user_id: profileId, word_id: w.id, status: 'known' as const }));
-      await getDb().from('word_progress').upsert(rows, { onConflict: 'user_id,word_id' });
+      const { error } = await getDb().from('word_progress').upsert(rows, { onConflict: 'user_id,word_id' });
+      if (error) console.error('[sync] word_progress(known) 저장 실패:', error);
     }, 2000);
     return () => clearTimeout(t);
-  }, [knownWords]);
+  }, [knownWords, ready]);
 
   // ── unknownWords → word_progress upsert ───────────────────────
   useEffect(() => {
-    if (!initialized.current || unknownWords.length === 0) return;
+    if (!ready || unknownWords.length === 0) return;
     const { profileId } = getStoredIds();
     if (!profileId) return;
     const t = setTimeout(async () => {
       const rows = unknownWords.map(w => ({ user_id: profileId, word_id: w.id, status: 'unknown' as const }));
-      await getDb().from('word_progress').upsert(rows, { onConflict: 'user_id,word_id' });
+      const { error } = await getDb().from('word_progress').upsert(rows, { onConflict: 'user_id,word_id' });
+      if (error) console.error('[sync] word_progress(unknown) 저장 실패:', error);
     }, 2000);
     return () => clearTimeout(t);
-  }, [unknownWords]);
+  }, [unknownWords, ready]);
 
   // ── missions → daily_missions upsert (1.5초 디바운스) ─────────
   useEffect(() => {
-    if (!initialized.current) return;
+    if (!ready) return;
     const { profileId } = getStoredIds();
     if (!profileId) return;
     const today = toDateStr(new Date());
@@ -247,10 +267,11 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         user_id: profileId, mission_id: m.id, date: today,
         current: m.current, is_rewarded: m.isRewarded,
       }));
-      await getDb().from('daily_missions').upsert(rows, { onConflict: 'user_id,mission_id,date' });
+      const { error } = await getDb().from('daily_missions').upsert(rows, { onConflict: 'user_id,mission_id,date' });
+      if (error) console.error('[sync] daily_missions 저장 실패:', error);
     }, 1500);
     return () => clearTimeout(t);
-  }, [missions]);
+  }, [missions, ready]);
 
   // ── checkIn — 출석 버튼 클릭 시 ────────────────────────────────
   const checkIn = async () => {
