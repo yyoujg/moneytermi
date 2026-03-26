@@ -267,15 +267,18 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     if (!profileId) return;
     const db = getDb();
 
-    await db.from('attendance').upsert(
+    const { error: attErr } = await db.from('attendance').upsert(
       { user_id: profileId, date: today },
       { onConflict: 'user_id,date' }
     );
+    if (attErr) console.error('[checkIn] attendance upsert 실패:', attErr);
+
     // 디바운스 sync가 initialized.current에 막힐 수 있으므로 직접 저장
-    await db.from('daily_missions').upsert(
+    const { error: dmErr } = await db.from('daily_missions').upsert(
       { user_id: profileId, mission_id: 'm1', date: today, current: 1, is_rewarded: false },
       { onConflict: 'user_id,mission_id,date' }
     );
+    if (dmErr) console.error('[checkIn] daily_missions upsert 실패:', dmErr);
   };
 
   // ── claimReward ───────────────────────────────────────────────

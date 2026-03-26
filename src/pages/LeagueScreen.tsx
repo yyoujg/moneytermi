@@ -51,7 +51,7 @@ const LeagueScreen = () => {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-white">주간 리그</h2>
           <TextButton size="small" onClick={() => navigate('/league/rules')}>
-            <Info size={13} className="mr-1" />안내
+            <span className="flex items-center gap-1"><Info size={13} />안내</span>
           </TextButton>
         </div>
 

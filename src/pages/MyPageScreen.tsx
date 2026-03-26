@@ -167,7 +167,7 @@ const MyPageScreen = () => {
       <div className="px-5 pt-5 flex flex-col gap-4">
         {/* 출석 달력 */}
         <div>
-          <p className="text-sm font-bold text-[#ABABAB] mb-3">출석 현황</p>
+          <p className="text-sm font-bold text-[#ABABAB] mb-5">출석 현황</p>
           <AttendanceCalendar attendanceDates={attendanceDates} />
         </div>
 
@@ -203,7 +203,7 @@ const MyPageScreen = () => {
                   }
                   contents={
                     sub
-                      ? <ListRow.Texts type="2RowTypeA" top={<span className={danger ? 'text-red-400' : ''}>{label}</span>} bottom={sub} />
+                      ? <ListRow.Texts type="2RowTypeA" top={<span className={danger ? 'text-red-400' : ''}>{label}</span>} bottom={<span className="text-[11px]">{sub}</span>} />
                       : <ListRow.Texts type="1RowTypeA" top={<span className={danger ? 'text-red-400' : ''}>{label}</span>} />
                   }
                   right={!danger ? <ChevronRight size={16} className="text-[#555555]" /> : undefined}
