@@ -1,6 +1,7 @@
 import React from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { List, ListRow, Spacing } from '@toss/tds-mobile';
 
 const RULES = [
   { icon: '📅', title: '리그 기간', desc: '매주 월요일 00:00에 초기화돼요.' },
@@ -15,28 +16,42 @@ const LeagueRulesScreen = () => {
 
   return (
     <div className="flex flex-col h-full bg-gray-50">
+      {/* 헤더 */}
       <div className="pt-12 px-5 pb-4 bg-white border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/league')}
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-50 border border-gray-100">
+          <button
+            onClick={() => navigate('/league')}
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-50 border border-gray-100"
+          >
             <ChevronLeft size={20} className="text-gray-600" />
           </button>
           <h2 className="text-base font-bold text-gray-900">리그 안내</h2>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 pt-5 pb-24 [&::-webkit-scrollbar]:hidden">
-        <div className="flex flex-col gap-3">
-          {RULES.map(({ icon, title, desc }) => (
-            <div key={title} className="bg-white rounded-2xl border border-gray-100 p-4 flex items-start gap-4 shadow-sm">
-              <span className="text-2xl shrink-0">{icon}</span>
-              <div>
-                <p className="text-sm font-bold text-gray-900 mb-1">{title}</p>
-                <p className="text-sm text-gray-500 leading-relaxed">{desc}</p>
-              </div>
-            </div>
-          ))}
+      <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+        <Spacing size={20} />
+        <div className="px-4">
+          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+            <List>
+              {RULES.map(({ icon, title, desc }) => (
+                <ListRow
+                  key={title}
+                  border="none"
+                  left={<span className="text-2xl w-9 text-center shrink-0">{icon}</span>}
+                  contents={
+                    <ListRow.Texts
+                      type="2RowTypeA"
+                      top={title}
+                      bottom={desc}
+                    />
+                  }
+                />
+              ))}
+            </List>
+          </div>
         </div>
+        <Spacing size={40} />
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronRight, Lightbulb, RotateCcw, Zap } from 'lucide-react';
+import { Button, TextButton, TextField, Spacing } from '@toss/tds-mobile';
 import { useAppContext } from '../context/AppContext';
 import { ALL_WORDS } from '../constants';
 import type { Missions } from '../types';
@@ -26,7 +27,6 @@ const QuizPage = () => {
   const [showDetail, setShowDetail] = useState(false);
   const [combo, setCombo] = useState(0);
   const [totalCorrect, setTotalCorrect] = useState(0);
-  const [shake, setShake] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const word = queue[index];
@@ -65,8 +65,7 @@ const QuizPage = () => {
     } else {
       setCombo(0);
       setStatus('wrong');
-      setShake(true);
-      setTimeout(() => { setShake(false); setStatus('idle'); setInput(''); }, 700);
+      setTimeout(() => { setStatus('idle'); setInput(''); }, 700);
     }
   };
 
@@ -80,12 +79,9 @@ const QuizPage = () => {
           <Zap size={16} className="text-orange-500 fill-current" />
           <span className="text-sm font-bold text-gray-900">누적 포인트 {points} P</span>
         </div>
-        <button
-          onClick={() => window.location.reload()}
-          className="flex items-center gap-2 bg-orange-500 text-white font-bold px-8 py-4 rounded-2xl text-sm active:bg-orange-600"
-        >
-          <RotateCcw size={16} /> 다시 풀기
-        </button>
+        <Button size="large" onClick={() => window.location.reload()}>
+          <RotateCcw size={16} className="mr-2" />다시 풀기
+        </Button>
       </div>
     );
   }
@@ -124,10 +120,8 @@ const QuizPage = () => {
         <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 mb-5 flex-1">
           <p className="text-[11px] font-bold text-orange-400 mb-4">뜻을 보고 용어를 맞혀보세요</p>
 
-          {/* 뜻 */}
           <p className="text-lg font-bold text-gray-900 leading-relaxed mb-5">{word.meaning}</p>
 
-          {/* 초성 힌트 */}
           {showHint && (
             <div className="bg-orange-50 border border-orange-100 rounded-2xl px-4 py-3 flex items-center gap-2 mb-4">
               <Lightbulb size={14} className="text-orange-400 shrink-0" />
@@ -135,38 +129,29 @@ const QuizPage = () => {
             </div>
           )}
 
-          {/* 상세 설명 (토글) */}
           {showDetail ? (
             <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
               <p className="text-xs font-bold text-gray-400 mb-1.5">상세 설명</p>
               <p className="text-sm text-gray-500 leading-relaxed break-keep">{word.detailedMeaning}</p>
             </div>
           ) : (
-            <button
-              onClick={() => setShowDetail(true)}
-              className="text-xs font-semibold text-gray-400 underline underline-offset-2"
-            >
+            <TextButton size="small" onClick={() => setShowDetail(true)}>
               상세 설명 보기
-            </button>
+            </TextButton>
           )}
         </div>
 
         {/* 입력 + 제출 */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <div className={`transition-transform duration-100 ${shake ? 'translate-x-1.5' : ''}`}>
-            <input
-              ref={inputRef}
-              type="text"
+          <div>
+            <TextField
+              variant="box"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="용어를 입력하세요"
               disabled={status !== 'idle'}
+              ref={inputRef}
               autoComplete="off"
-              className={`w-full px-5 py-4 rounded-2xl border text-sm font-semibold outline-none transition-all
-                ${status === 'correct' ? 'border-green-400 bg-green-50 text-green-600' : ''}
-                ${status === 'wrong' ? 'border-red-300 bg-red-50 text-red-500' : ''}
-                ${status === 'idle' ? 'border-gray-200 bg-white text-gray-900 focus:border-orange-400' : ''}
-              `}
             />
             {status === 'correct' && (
               <p className="text-xs font-bold text-green-500 mt-1.5 px-1">정답! +{earnedPreview}P</p>
@@ -176,17 +161,20 @@ const QuizPage = () => {
             )}
           </div>
 
-          <button
+          <Button
             type="submit"
+            size="large"
             disabled={status !== 'idle' || !input.trim()}
-            className="w-full bg-orange-500 text-white font-bold py-4 rounded-2xl text-sm active:bg-orange-600 disabled:opacity-40 transition-colors"
+            style={{ width: '100%' }}
           >
             제출하기
-          </button>
+          </Button>
         </form>
 
-        {/* 하단 보조 */}
-        <div className="flex gap-3 mt-3">
+        <Spacing size={12} />
+
+        {/* 하단 보조 버튼 */}
+        <div className="flex gap-3">
           {!showHint && (
             <button
               onClick={() => setShowHint(true)}

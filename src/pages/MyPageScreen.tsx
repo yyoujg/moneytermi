@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { BookOpen, Bell, Settings, LogOut, ChevronRight, ChevronLeft, Zap, Trophy } from 'lucide-react';
+import { BookOpen, Bell, Settings, LogOut, ChevronLeft, Zap, Trophy } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import FallbackImage from '../components/FallbackImage';
 import { CURRENT_LEAGUE_NAME } from '../constants';
+import { List, ListRow, Spacing } from '@toss/tds-mobile';
 
 const MENU_ITEMS = [
-  { icon: Bell, label: '공지사항', sub: '최신 소식을 확인하세요' },
-  { icon: Settings, label: '앱 설정', sub: '알림, 테마 등' },
+  { icon: Bell, label: '공지사항', sub: '최신 소식을 확인하세요', danger: false },
+  { icon: Settings, label: '앱 설정', sub: '알림, 테마 등', danger: false },
   { icon: LogOut, label: '로그아웃', sub: '', danger: true },
 ];
 
@@ -18,10 +19,8 @@ const AttendanceCalendar = ({ attendanceDates }: { attendanceDates: string[] }) 
 
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
-
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-
   const attendSet = new Set(attendanceDates);
   const todayStr = today.toISOString().slice(0, 10);
 
@@ -39,7 +38,6 @@ const AttendanceCalendar = ({ attendanceDates }: { attendanceDates: string[] }) 
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-      {/* 헤더 */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
         <button
           onClick={() => setViewDate(new Date(year, month - 1, 1))}
@@ -55,11 +53,10 @@ const AttendanceCalendar = ({ attendanceDates }: { attendanceDates: string[] }) 
           onClick={() => setViewDate(new Date(year, month + 1, 1))}
           className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 active:bg-gray-100"
         >
-          <ChevronRight size={16} className="text-gray-500" />
+          <ChevronLeft size={16} className="text-gray-500 rotate-180" />
         </button>
       </div>
 
-      {/* 요일 헤더 */}
       <div className="grid grid-cols-7 px-3 pt-3">
         {DAYS.map((d, i) => (
           <div key={d} className={`text-center text-[11px] font-bold pb-2 ${i === 0 ? 'text-red-400' : i === 6 ? 'text-blue-400' : 'text-gray-400'}`}>
@@ -68,7 +65,6 @@ const AttendanceCalendar = ({ attendanceDates }: { attendanceDates: string[] }) 
         ))}
       </div>
 
-      {/* 날짜 그리드 */}
       <div className="grid grid-cols-7 px-3 pb-4 gap-y-1">
         {cells.map((day, idx) => {
           if (day === null) return <div key={`empty-${idx}`} />;
@@ -76,10 +72,9 @@ const AttendanceCalendar = ({ attendanceDates }: { attendanceDates: string[] }) 
           const isAttended = attendSet.has(dateStr);
           const isToday = dateStr === todayStr;
           const dayOfWeek = (firstDay + day - 1) % 7;
-
           return (
             <div key={day} className="flex items-center justify-center py-0.5">
-              <div className={`w-8 h-8 flex items-center justify-center rounded-full text-xs font-semibold transition-all
+              <div className={`w-8 h-8 flex items-center justify-center rounded-full text-xs font-semibold
                 ${isAttended ? 'bg-orange-500 text-white font-bold' : ''}
                 ${isToday && !isAttended ? 'ring-2 ring-orange-400 text-orange-500 font-bold' : ''}
                 ${!isAttended && !isToday ? (dayOfWeek === 0 ? 'text-red-300' : dayOfWeek === 6 ? 'text-blue-300' : 'text-gray-400') : ''}
@@ -91,7 +86,6 @@ const AttendanceCalendar = ({ attendanceDates }: { attendanceDates: string[] }) 
         })}
       </div>
 
-      {/* 범례 */}
       <div className="flex items-center gap-4 px-5 pb-4 pt-1 border-t border-gray-50">
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-full bg-orange-500" />
@@ -110,8 +104,8 @@ const MyPageScreen = () => {
   const { points, knownWords, attendanceDates } = useAppContext();
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 relative pb-24 overflow-y-auto [&::-webkit-scrollbar]:hidden">
-      {/* Profile Header */}
+    <div className="flex flex-col h-full bg-gray-50 pb-24 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+      {/* 프로필 헤더 */}
       <div className="bg-white pt-12 px-6 pb-6 border-b border-gray-100">
         <h2 className="text-xl font-bold mb-6 text-gray-900">마이페이지</h2>
         <div className="flex items-center gap-4 mb-6">
@@ -127,21 +121,25 @@ const MyPageScreen = () => {
           </div>
         </div>
 
-        {/* Stats */}
+        {/* 통계 */}
         <div className="flex gap-3">
           <div className="flex-1 bg-orange-50 rounded-2xl p-4 border border-orange-100">
             <div className="flex items-center gap-1.5 mb-1.5">
               <Zap size={14} className="text-orange-500 fill-current" />
               <span className="text-[11px] font-bold text-orange-400">누적 포인트</span>
             </div>
-            <p className="text-2xl font-bold text-gray-900">{points.toLocaleString()}<span className="text-sm font-semibold text-gray-400 ml-1">P</span></p>
+            <p className="text-2xl font-bold text-gray-900">
+              {points.toLocaleString()}<span className="text-sm font-semibold text-gray-400 ml-1">P</span>
+            </p>
           </div>
           <div className="flex-1 bg-gray-50 rounded-2xl p-4 border border-gray-100">
             <div className="flex items-center gap-1.5 mb-1.5">
               <BookOpen size={14} className="text-gray-400" />
               <span className="text-[11px] font-bold text-gray-400">학습한 단어</span>
             </div>
-            <p className="text-2xl font-bold text-gray-900">{knownWords.length}<span className="text-sm font-semibold text-gray-400 ml-1">개</span></p>
+            <p className="text-2xl font-bold text-gray-900">
+              {knownWords.length}<span className="text-sm font-semibold text-gray-400 ml-1">개</span>
+            </p>
           </div>
         </div>
       </div>
@@ -153,30 +151,34 @@ const MyPageScreen = () => {
           <AttendanceCalendar attendanceDates={attendanceDates} />
         </div>
 
-        {/* Menu */}
+        {/* 메뉴 */}
         <div>
           <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-            {MENU_ITEMS.map(({ icon: Icon, label, sub, danger }, idx) => (
-              <button
-                key={label}
-                className={`w-full flex items-center justify-between px-5 py-4 active:bg-gray-50 transition-colors ${idx < MENU_ITEMS.length - 1 ? 'border-b border-gray-50' : ''}`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${danger ? 'bg-red-50' : 'bg-gray-100'}`}>
-                    <Icon size={16} className={danger ? 'text-red-400' : 'text-gray-500'} />
-                  </div>
-                  <div className="text-left">
-                    <p className={`text-sm font-semibold ${danger ? 'text-red-400' : 'text-gray-800'}`}>{label}</p>
-                    {sub && <p className="text-[11px] text-gray-400 mt-0.5">{sub}</p>}
-                  </div>
-                </div>
-                {!danger && <ChevronRight size={16} className="text-gray-300" />}
-              </button>
-            ))}
+            <List>
+              {MENU_ITEMS.map(({ icon: Icon, label, sub, danger }) => (
+                <ListRow
+                  key={label}
+                  as="button"
+                  border="none"
+                  left={
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${danger ? 'bg-red-50' : 'bg-gray-100'}`}>
+                      <Icon size={16} className={danger ? 'text-red-400' : 'text-gray-500'} />
+                    </div>
+                  }
+                  contents={
+                    sub
+                      ? <ListRow.Texts type="2RowTypeA" top={<span className={danger ? 'text-red-400' : ''}>{label}</span>} bottom={sub} />
+                      : <ListRow.Texts type="1RowTypeA" top={<span className={danger ? 'text-red-400' : ''}>{label}</span>} />
+                  }
+                  right={!danger ? <ListRow.IconButton name="chevron-right-small" alt="이동" /> : undefined}
+                />
+              ))}
+            </List>
           </div>
         </div>
 
-        <p className="text-center text-[11px] text-gray-300 font-medium mt-1 mb-2">머니터미 v1.0.0</p>
+        <Spacing size={4} />
+        <p className="text-center text-[11px] text-gray-300 font-medium mb-2">머니터미 v1.0.0</p>
       </div>
     </div>
   );

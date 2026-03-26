@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Info, Zap, Trophy, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { TextButton, List, ListRow, Badge, Spacing } from '@toss/tds-mobile';
 import { CURRENT_LEAGUE_ID, CURRENT_LEAGUE_NAME, INITIAL_LEAGUE_USERS, LEAGUE_TIERS } from '../constants';
 import { useAppContext } from '../context/AppContext';
 
@@ -17,33 +18,26 @@ const LeagueScreen = () => {
   );
 
   const top3 = sortedLeague.slice(0, 3);
-  const rest = sortedLeague.slice(3);
   const myRank = sortedLeague.findIndex((u) => u.id === 'me') + 1;
-  const myEntry = sortedLeague.find((u) => u.id === 'me')!;
   const maxPoints = sortedLeague[0].points;
-
-  // 승급/강등 기준 (상위 5명 승급, 하위 5명 강등)
   const total = sortedLeague.length;
   const promoteZone = 5;
   const demoteZone = 5;
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 relative pb-24 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+    <div className="flex flex-col h-full bg-gray-50 pb-24 overflow-y-auto [&::-webkit-scrollbar]:hidden">
 
       {/* 헤더 */}
       <div className="bg-white pt-12 px-6 pb-5 border-b border-gray-100">
         <div className="flex justify-between items-center mb-1">
           <h2 className="text-xl font-bold text-gray-900">주간 리그</h2>
-          <button
-            onClick={() => navigate('/league/rules')}
-            className="flex items-center gap-1 text-xs font-semibold text-gray-400 bg-gray-50 border border-gray-100 rounded-full px-3 py-1.5"
-          >
-            <Info size={13} /> 안내
-          </button>
+          <TextButton size="small" onClick={() => navigate('/league/rules')}>
+            <Info size={13} className="mr-1" />안내
+          </TextButton>
         </div>
 
         {/* 리그 단계 트랙 */}
-        <div className="relative mb-5">
+        <div className="relative mb-5 mt-4">
           <div className="flex justify-between items-start relative">
             <div className="absolute top-4 left-4 right-4 h-[3px] bg-gray-100 z-0 rounded-full">
               <div
@@ -56,7 +50,7 @@ const LeagueScreen = () => {
               const isCurrent = tier.id === CURRENT_LEAGUE_ID;
               return (
                 <div key={tier.id} className="flex flex-col items-center relative z-10 w-14">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all
                     ${isCurrent ? 'bg-orange-500 text-white shadow-lg ring-4 ring-orange-100 scale-110' :
                       isPast ? 'bg-orange-200 text-orange-600' :
                       'bg-white border-2 border-gray-200 text-gray-300'}`}
@@ -97,7 +91,6 @@ const LeagueScreen = () => {
               <span className="text-2xl font-bold">{myRank}<span className="text-sm font-semibold text-orange-100 ml-0.5">위</span></span>
             </div>
           </div>
-          {/* 포인트 진행 바 */}
           <div className="mt-3">
             <div className="flex justify-between text-[10px] text-orange-100 mb-1">
               <span>0</span>
@@ -121,7 +114,6 @@ const LeagueScreen = () => {
           <div className="px-4 pt-4 pb-2">
             <p className="text-[11px] font-bold text-gray-400 mb-4 text-center tracking-wide">TOP 3</p>
             <div className="flex items-end justify-center gap-3 mb-4">
-              {/* 2등 */}
               {top3[1] && (
                 <div className="flex flex-col items-center flex-1">
                   <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-2xl border-2 border-gray-100 mb-1">{top3[1].emoji}</div>
@@ -132,7 +124,6 @@ const LeagueScreen = () => {
                   </div>
                 </div>
               )}
-              {/* 1등 */}
               {top3[0] && (
                 <div className="flex flex-col items-center flex-1">
                   <div className="w-14 h-14 bg-orange-50 rounded-full flex items-center justify-center text-3xl border-2 border-orange-200 mb-1">{top3[0].emoji}</div>
@@ -143,7 +134,6 @@ const LeagueScreen = () => {
                   </div>
                 </div>
               )}
-              {/* 3등 */}
               {top3[2] && (
                 <div className="flex flex-col items-center flex-1">
                   <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-2xl border-2 border-gray-100 mb-1">{top3[2].emoji}</div>
@@ -158,55 +148,56 @@ const LeagueScreen = () => {
           </div>
         </div>
 
-        {/* 전체 순위 리스트 */}
+        {/* 전체 순위 */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-4">
-          {sortedLeague.map((u, i) => {
-            const rank = i + 1;
-            const isMe = u.id === 'me';
-            const isPromote = rank <= promoteZone;
-            const isDemote = rank > total - demoteZone;
+          <List>
+            {sortedLeague.map((u, i) => {
+              const rank = i + 1;
+              const isMe = u.id === 'me';
+              const isPromote = rank <= promoteZone;
+              const isDemote = rank > total - demoteZone;
 
-            return (
-              <div
-                key={u.id}
-                className={`flex items-center px-4 py-3 border-b border-gray-50 last:border-0
-                  ${isMe ? 'bg-orange-50' : ''}
-                `}
-              >
-                {/* 순위 */}
-                <div className="w-8 shrink-0 text-center">
-                  {rank <= 3
-                    ? <span className="text-base">{RANK_MEDALS[rank - 1]}</span>
-                    : <span className={`text-sm font-bold ${isMe ? 'text-orange-500' : 'text-gray-400'}`}>{rank}</span>
+              return (
+                <ListRow
+                  key={u.id}
+                  border="none"
+                  style={isMe ? { backgroundColor: '#fff7ed' } : undefined}
+                  left={
+                    <div className="w-8 text-center shrink-0">
+                      {rank <= 3
+                        ? <span className="text-base">{RANK_MEDALS[rank - 1]}</span>
+                        : <span className={`text-sm font-bold ${isMe ? 'text-orange-500' : 'text-gray-400'}`}>{rank}</span>
+                      }
+                    </div>
                   }
-                </div>
-
-                {/* 아바타 */}
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-lg ml-2 shrink-0 border ${isMe ? 'bg-orange-100 border-orange-200' : 'bg-gray-50 border-gray-100'}`}>
-                  {u.emoji}
-                </div>
-
-                {/* 이름 */}
-                <div className="flex-1 mx-3 min-w-0">
-                  <p className={`text-sm font-semibold truncate ${isMe ? 'text-orange-600' : 'text-gray-800'}`}>
-                    {u.name}
-                    {isMe && <span className="ml-1.5 text-[10px] font-bold bg-orange-500 text-white px-1.5 py-0.5 rounded-full">나</span>}
-                  </p>
-                  {isPromote && <span className="text-[10px] font-bold text-green-500">▲ 승급권</span>}
-                  {isDemote && <span className="text-[10px] font-bold text-red-400">▼ 강등권</span>}
-                </div>
-
-                {/* 포인트 */}
-                <div className="flex items-center gap-1 shrink-0">
-                  <Zap size={12} className={`fill-current ${isMe ? 'text-orange-500' : 'text-gray-300'}`} />
-                  <span className={`text-sm font-bold ${isMe ? 'text-orange-600' : 'text-gray-700'}`}>{u.points}</span>
-                </div>
-              </div>
-            );
-          })}
+                  contents={
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className={`w-9 h-9 rounded-full flex items-center justify-center text-lg shrink-0 border ${isMe ? 'bg-orange-100 border-orange-200' : 'bg-gray-50 border-gray-100'}`}>
+                        {u.emoji}
+                      </div>
+                      <div className="min-w-0">
+                        <p className={`text-sm font-semibold truncate ${isMe ? 'text-orange-600' : 'text-gray-800'}`}>
+                          {u.name}
+                          {isMe && <Badge color="orange" size="small" variant="fill" className="ml-1.5">나</Badge>}
+                        </p>
+                        {isPromote && <span className="text-[10px] font-bold text-green-500">▲ 승급권</span>}
+                        {isDemote && <span className="text-[10px] font-bold text-red-400">▼ 강등권</span>}
+                      </div>
+                    </div>
+                  }
+                  right={
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Zap size={12} className={`fill-current ${isMe ? 'text-orange-500' : 'text-gray-300'}`} />
+                      <span className={`text-sm font-bold ${isMe ? 'text-orange-600' : 'text-gray-700'}`}>{u.points}</span>
+                    </div>
+                  }
+                />
+              );
+            })}
+          </List>
         </div>
+        <Spacing size={8} />
       </div>
-
     </div>
   );
 };
