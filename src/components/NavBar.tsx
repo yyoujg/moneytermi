@@ -29,10 +29,12 @@ const NavBar = () => {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className={`flex flex-col items-center px-4 py-2 rounded-full transition-colors ${isActive ? 'bg-[#EEEEEE] text-[#111111]' : 'text-[#999999]'}`}
+              className="flex flex-col items-center px-3 py-2 transition-all duration-200"
             >
-              <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-              <span className={`text-[10px] mt-1 ${isActive ? 'font-bold' : 'font-medium'}`}>{item.label}</span>
+              <div className={`w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200 ${isActive ? 'bg-orange-500 text-white' : 'text-[#BBBBBB]'}`}>
+                <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />
+              </div>
+              <span className={`text-[10px] mt-1 transition-colors ${isActive ? 'font-bold text-orange-500' : 'font-medium text-[#BBBBBB]'}`}>{item.label}</span>
             </button>
           );
         })}
