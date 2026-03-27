@@ -183,7 +183,9 @@ const CourseScreen = () => {
                   className={`w-full flex items-center justify-center gap-1.5 py-3.5 rounded-2xl text-xs font-bold transition-colors
                     ${isCompleted
                       ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20 active:bg-orange-500/20'
-                      : 'bg-orange-500 text-white active:bg-orange-600'
+                      : hasStarted
+                        ? 'bg-orange-500 text-white active:bg-orange-600'
+                        : 'bg-[#E5E5E5] text-[#555555] active:opacity-80'
                     }`}
                 >
                   <Play size={14} />

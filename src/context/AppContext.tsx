@@ -14,6 +14,7 @@ export type LeagueUser = {
 };
 
 type AppContextValue = {
+  ready: boolean;
   points: number;
   setPoints: React.Dispatch<React.SetStateAction<number>>;
   knownWords: Word[];
@@ -23,6 +24,7 @@ type AppContextValue = {
   missions: Missions;
   setMissions: React.Dispatch<React.SetStateAction<Missions>>;
   claimReward: (missionId: keyof Missions) => void;
+  toggleKnown: (word: Word) => void;
   attendanceDates: string[];
   otherLeagueUsers: LeagueUser[];
   checkIn: () => Promise<void>;
@@ -129,6 +131,17 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         .select('points')
         .eq('id', profileId)
         .single();
+
+      // profileId가 Supabase에 없으면 (오프라인 폴백 UUID 등) localStorage 초기화 후 재시도
+      if (profileErr?.code === 'PGRST116') {
+        const { Storage } = await import('../lib/storage');
+        await Storage.removeItem('moneytermi_auth');
+        profileIdRef.current = null;
+        dbRef.current = supabase;
+        attempt = 0;
+        setTimeout(load, 300);
+        return;
+      }
       if (profileErr) console.error('[load] profiles fetch 실패:', profileErr);
       if (profile) setPoints(prev => Math.max(prev, profile.points));
 
@@ -337,6 +350,18 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     return () => clearTimeout(t);
   }, [ready]);
 
+  // ── toggleKnown ───────────────────────────────────────────────
+  const toggleKnown = (word: Word) => {
+    const isKnown = knownWords.some(w => w.id === word.id);
+    if (isKnown) {
+      setKnownWords(prev => prev.filter(w => w.id !== word.id));
+      setUnknownWords(prev => prev.some(w => w.id === word.id) ? prev : [...prev, word]);
+    } else {
+      setKnownWords(prev => prev.some(w => w.id === word.id) ? prev : [...prev, word]);
+      setUnknownWords(prev => prev.filter(w => w.id !== word.id));
+    }
+  };
+
   // ── claimReward ───────────────────────────────────────────────
   const claimReward = (missionId: keyof Missions) => setMissions(prev => {
     const mission = prev[missionId];
@@ -349,11 +374,13 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AppContext.Provider value={{
+      ready,
       points, setPoints,
       knownWords, setKnownWords,
       unknownWords, setUnknownWords,
       missions, setMissions,
       claimReward,
+      toggleKnown,
       checkIn,
       attendanceDates,
       otherLeagueUsers,

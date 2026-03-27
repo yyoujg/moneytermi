@@ -67,7 +67,7 @@ const HomeScreen = () => {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
-  const { points, knownWords, missions, claimReward, checkIn, attendanceDates, otherLeagueUsers, courses, allWords } = useAppContext();
+  const { points, knownWords, missions, claimReward, attendanceDates, otherLeagueUsers, courses, allWords } = useAppContext();
   const { isGuest, linkAccount } = useAuth();
   const [showLinkSheet, setShowLinkSheet] = useState(false);
   const [linkDismissed, setLinkDismissed] = useState(false);
@@ -256,10 +256,6 @@ const HomeScreen = () => {
         <div className="bg-white rounded-2xl px-5 pt-4 pb-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-bold text-[#111111]">이번 주</p>
-            {missions.m1.current < missions.m1.target
-              ? <button onClick={checkIn} className="px-3 py-1.5 rounded-xl bg-[#EEEEEE] text-orange-400 text-xs font-bold active:opacity-70">출석하기</button>
-              : <span className="text-xs font-bold text-[#AAAAAA]">출석 완료 ✓</span>
-            }
           </div>
           <WeeklyBarChart attendanceDates={attendanceDates} />
         </div>

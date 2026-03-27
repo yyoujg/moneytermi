@@ -9,7 +9,7 @@ import { useAppContext } from '../context/AppContext';
 const CourseWordListScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { knownWords } = useAppContext();
+  const { knownWords, toggleKnown } = useAppContext();
 
   const course = (location.state as { course: Course } | null)?.course ?? null;
 
@@ -74,10 +74,13 @@ const CourseWordListScreen = () => {
                     })}
                     border="none"
                     left={
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0
-                        ${isKnown ? 'bg-orange-500 text-white' : 'bg-[#F0F0F0] text-[#888888]'}`}>
+                      <button
+                        onClick={e => { e.stopPropagation(); toggleKnown(word); }}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 active:opacity-70
+                          ${isKnown ? 'bg-orange-500 text-white' : 'bg-[#F0F0F0] text-[#888888]'}`}
+                      >
                         {isKnown ? <CheckCircle size={14} strokeWidth={2.5} /> : idx + 1}
-                      </div>
+                      </button>
                     }
                     contents={
                       <ListRow.Texts

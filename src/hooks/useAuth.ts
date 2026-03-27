@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { AuthState } from '../types';
 import { supabase } from '../lib/supabase';
-import { Storage } from '@apps-in-toss/web-framework';
+import { Storage } from '../lib/storage';
 
 const STORAGE_KEY = 'moneytermi_auth';
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Storage } from '@apps-in-toss/web-framework';
+import { Storage } from '../lib/storage';
 import { BookOpen, Bell, Settings, LogOut, ChevronLeft, ChevronRight, Zap, Trophy, ShieldCheck, ShieldAlert, X, Volume2, VolumeX } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import FallbackImage from '../components/FallbackImage';
@@ -173,7 +173,7 @@ const SettingsSheet = ({ onClose }: { onClose: () => void }) => {
                 onClick={toggleSound}
                 className={`w-12 h-6 rounded-full transition-colors relative ${soundOn ? 'bg-orange-500' : 'bg-[#D0D0D0]'}`}
               >
-                <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${soundOn ? 'translate-x-[26px]' : 'translate-x-0.5'}`} />
+                <span className={`absolute left-0 top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${soundOn ? 'translate-x-[26px]' : 'translate-x-[2px]'}`} />
               </button>
             </div>
 
@@ -192,7 +192,7 @@ const SettingsSheet = ({ onClose }: { onClose: () => void }) => {
                 onClick={toggleVibration}
                 className={`w-12 h-6 rounded-full transition-colors relative ${vibrationOn ? 'bg-orange-500' : 'bg-[#D0D0D0]'}`}
               >
-                <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${vibrationOn ? 'translate-x-[26px]' : 'translate-x-0.5'}`} />
+                <span className={`absolute left-0 top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${vibrationOn ? 'translate-x-[26px]' : 'translate-x-[2px]'}`} />
               </button>
             </div>
           </div>
@@ -244,7 +244,7 @@ const LogoutDialog = ({ isGuest, onConfirm, onCancel }: { isGuest: boolean; onCo
 
 // ── 메인 ──────────────────────────────────────────────────────
 const MyPageScreen = () => {
-  const { points, knownWords, attendanceDates } = useAppContext();
+  const { points, knownWords, attendanceDates, missions, checkIn } = useAppContext();
   const { user, isGuest, linkAccount, logout } = useAuth();
   const [showLinkSheet, setShowLinkSheet]     = useState(false);
   const [showNotice, setShowNotice]           = useState(false);
@@ -333,23 +333,33 @@ const MyPageScreen = () => {
       <div className="px-5 pt-5 flex flex-col gap-4">
         {/* 출석 달력 */}
         <div>
-          <p className="text-sm font-bold text-[#555555] mb-5">출석 현황</p>
+          <div className="flex items-center justify-between mb-5">
+            <p className="text-sm font-bold text-[#555555]">출석 현황</p>
+            {missions.m1.current < missions.m1.target
+              ? <button onClick={checkIn} className="flex items-center gap-1 px-3.5 py-1.5 rounded-xl bg-orange-500 text-white text-xs font-bold active:opacity-80">✋ 출석하기</button>
+              : <span className="text-xs font-bold text-green-500">✅ 출석 완료</span>
+            }
+          </div>
           <AttendanceCalendar attendanceDates={attendanceDates} />
         </div>
 
         {/* 계정 연결 */}
-        {isGuest && (
-          <div className="bg-white rounded-2xl px-4 py-4 flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-[#111111] mb-0.5">기록 안전하게 보관하기</p>
-              <p className="text-xs text-[#888888]">⚠️ 앱 삭제 시 데이터가 사라질 수 있어요</p>
+        {user !== null && isGuest && (
+          <div className="rounded-2xl overflow-hidden" style={{ background: 'linear-gradient(135deg, #FF8C42 0%, #F97316 100%)' }}>
+            <div className="px-5 py-6">
+              <div className="flex items-center gap-2 mb-3">
+                <ShieldAlert size={14} className="text-white/80" />
+                <span className="text-[11px] font-semibold text-white/80">게스트 계정</span>
+              </div>
+              <p className="text-base font-bold text-white mb-2">학습 기록이 사라질 수 있어요</p>
+              <p className="text-xs text-white/70 leading-relaxed" style={{ marginBottom: '1.5rem' }}>앱 삭제 또는 기기 변경 시 지금까지의<br />포인트와 학습 기록이 모두 초기화돼요.</p>
+              <button
+                onClick={() => setShowLinkSheet(true)}
+                className="w-full py-3 rounded-xl bg-white text-orange-500 text-sm font-bold active:opacity-90"
+              >
+                이메일로 기록 저장하기
+              </button>
             </div>
-            <button
-              onClick={() => setShowLinkSheet(true)}
-              className="px-3.5 py-2 rounded-xl bg-orange-500 text-xs font-bold text-white active:opacity-90 shrink-0 ml-3 whitespace-nowrap"
-            >
-              기록 저장하기
-            </button>
           </div>
         )}
 

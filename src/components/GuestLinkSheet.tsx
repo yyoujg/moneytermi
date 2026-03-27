@@ -85,7 +85,7 @@ const GuestLinkSheet = ({ onClose, onLink }: Props) => {
       <div className="fixed inset-0 z-50 bg-black/70" onClick={onClose} />
 
       <div
-        className="fixed bottom-0 z-50 w-full"
+        className="fixed bottom-0 z-[60] w-full"
         style={{ maxWidth: '28rem', left: '50%', transform: 'translateX(-50%)' }}
       >
         <div className="bg-white rounded-t-3xl px-5 pt-6 pb-10 flex flex-col gap-5">

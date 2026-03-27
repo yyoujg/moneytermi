@@ -1,7 +1,7 @@
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate,  } from 'react-router-dom';
 import { Component, type ReactNode, type ErrorInfo } from 'react';
-import { AppProvider } from './context/AppContext';
+import { AppProvider, useAppContext } from './context/AppContext';
 import NavBar from './components/NavBar';
 import HomeScreen from './pages/HomeScreen';
 import CourseScreen from './pages/CourseScreen';
@@ -45,7 +45,20 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
   }
 }
 
+const LoadingScreen = () => (
+  <div className="flex-1 flex flex-col items-center justify-center gap-4">
+    <div className="w-12 h-12 rounded-2xl bg-orange-500 flex items-center justify-center text-2xl animate-pulse">
+      🍊
+    </div>
+    <p className="text-sm font-semibold text-[#AAAAAA]">불러오는 중...</p>
+  </div>
+);
+
 const Layout = () => {
+  const { ready } = useAppContext();
+
+  if (!ready) return <LoadingScreen />;
+
   return (
     <div className="flex-1 w-full h-full relative">
       <Routes>

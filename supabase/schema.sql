@@ -157,7 +157,15 @@ CREATE POLICY "attendance_own" ON public.attendance
   );
 
 -- ──────────────────────────────────────────
--- 8. 리그 랭킹 뷰
+-- 8. anon 롤 권한 부여 (RLS가 실제 접근을 제한하지만, 테이블 접근 자체는 허용)
+-- ──────────────────────────────────────────
+GRANT SELECT, INSERT, UPDATE        ON public.profiles       TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.word_progress  TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.daily_missions TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.attendance     TO anon;
+
+-- ──────────────────────────────────────────
+-- 9. 리그 랭킹 뷰
 -- ──────────────────────────────────────────
 CREATE OR REPLACE VIEW public.league_rankings AS
 SELECT
@@ -172,7 +180,7 @@ FROM public.profiles
 ORDER BY points DESC;
 
 -- ──────────────────────────────────────────
--- 9. 게스트 → 이메일 계정 승격 헬퍼 함수
+-- 10. 게스트 → 이메일 계정 승격 헬퍼 함수
 --    클라이언트: supabase.rpc('link_guest_to_auth', { guest_token, auth_user_id, email })
 -- ──────────────────────────────────────────
 CREATE OR REPLACE FUNCTION public.link_guest_to_auth(
