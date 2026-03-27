@@ -74,7 +74,7 @@ const LeagueScreen = () => {
           {/* 위 2명 + 아래 */}
           <div className="flex flex-col gap-1.5">
             {aboveUser && (
-              <div className="rounded-xl px-3 py-2.5 flex items-center justify-between" style={{ backgroundColor: '#0A1F0E' }}>
+              <div className="rounded-xl px-3 py-2.5 flex items-center justify-between" style={{ backgroundColor: 'rgba(34,197,94,0.08)' }}>
                 <div className="flex items-center gap-2">
                   <TrendingUp size={13} className="text-green-500 shrink-0" />
                   <span className="text-xs text-[#888888] truncate max-w-[120px]">{aboveUser.name}</span>
@@ -92,7 +92,7 @@ const LeagueScreen = () => {
               </div>
             )}
             {belowUser && myRank > total - 5 && (
-              <div className="rounded-xl px-3 py-2.5 flex items-center justify-between" style={{ backgroundColor: '#1F0A0C' }}>
+              <div className="rounded-xl px-3 py-2.5 flex items-center justify-between" style={{ backgroundColor: 'rgba(239,68,68,0.08)' }}>
                 <div className="flex items-center gap-2">
                   <TrendingDown size={13} className="text-red-400 shrink-0" />
                   <span className="text-xs text-[#888888]">강등 위험</span>
@@ -140,7 +140,7 @@ const LeagueScreen = () => {
 
         {/* 게스트 연결 유도 */}
         {isGuest && !linkDismissed && (
-          <div className="relative rounded-2xl px-4 pt-3 pb-4 mb-3" style={{ backgroundColor: '#110C04' }}>
+          <div className="relative rounded-2xl px-4 pt-3 pb-4 mb-3" style={{ backgroundColor: 'rgba(249,115,22,0.08)' }}>
             <button
               onClick={() => setLinkDismissed(true)}
               className="absolute top-2.5 right-2.5 w-6 h-6 flex items-center justify-center rounded-full bg-[#E5E5E5] active:opacity-70 opacity-40"
@@ -212,7 +212,7 @@ const LeagueScreen = () => {
                   key={u.id}
                   border="none"
                   style={
-                    isMe ? { backgroundColor: '#1A1208' }
+                    isMe ? { backgroundColor: 'rgba(249,115,22,0.08)' }
                     : undefined
                   }
                   left={

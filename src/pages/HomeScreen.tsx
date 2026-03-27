@@ -138,7 +138,7 @@ const HomeScreen = () => {
 
         {/* 게스트 계정 연결 유도 */}
         {showGuestNudge && (
-          <div className="relative rounded-2xl px-4 pt-3 pb-4 mb-3" style={{ backgroundColor: '#110C04' }}>
+          <div className="relative rounded-2xl px-4 pt-3 pb-4 mb-3" style={{ backgroundColor: 'rgba(249,115,22,0.08)' }}>
             <button
               onClick={() => setLinkDismissed(true)}
               className="absolute top-2.5 right-2.5 w-6 h-6 flex items-center justify-center rounded-full bg-[#E5E5E5] active:opacity-70 opacity-40"
@@ -197,7 +197,7 @@ const HomeScreen = () => {
               return league.findIndex(u => u.id === 'me') + 1;
             })();
             return (
-              <div className="rounded-xl px-3 py-3 mb-3 flex flex-col gap-1.5" style={{ backgroundColor: '#1A1208' }}>
+              <div className="rounded-xl px-3 py-3 mb-3 flex flex-col gap-1.5" style={{ backgroundColor: 'rgba(249,115,22,0.08)' }}>
                 <p className="text-xs font-bold text-orange-400">
                   🔥 지금 하면 +{remainP}P (현재 {myRank}위 → {estimatedRank}위)
                 </p>

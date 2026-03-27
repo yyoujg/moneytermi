@@ -127,7 +127,7 @@ const QuizScreen = () => {
 
         <div className="px-5 pb-12 flex flex-col gap-3">
           {isGuest && totalEarned > 0 && (
-            <div className="rounded-2xl px-4 py-4 flex flex-col gap-3" style={{ backgroundColor: '#110C04' }}>
+            <div className="rounded-2xl px-4 py-4 flex flex-col gap-3" style={{ backgroundColor: 'rgba(249,115,22,0.08)' }}>
               <div>
                 {rankRose
                   ? <p className="text-sm font-bold text-orange-400">🔥 {prevRank}위 → {myRank}위 상승!</p>
