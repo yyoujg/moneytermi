@@ -35,6 +35,7 @@ const CardLayout = ({
   headerMeta,
   slideNum,
   slideTotal,
+  slideLabel,
   wordDots,
   onBack,
   onPrev,
