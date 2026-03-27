@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { AuthState } from '../types';
 import { supabase } from '../lib/supabase';
+import { Storage } from '@apps-in-toss/web-framework';
 
 const STORAGE_KEY = 'moneytermi_auth';
 
@@ -13,9 +14,9 @@ type StoredProfile = {
   email?: string;
 };
 
-export const loadStoredProfile = (): StoredProfile | null => {
+export const loadStoredProfile = async (): Promise<StoredProfile | null> => {
   try {
-    const s = localStorage.getItem(STORAGE_KEY);
+    const s = await Storage.getItem(STORAGE_KEY);
     if (!s) return null;
     const p = JSON.parse(s);
     // 구버전 포맷 호환
@@ -59,7 +60,7 @@ export const useAuth = () => {
             user: {
               id: profile.id,
               nickname: profile.nickname,
-              email: profile.email ?? undefined,
+              email: session.user.email ?? undefined,
               isGuest: false,
               leagueTier: profile.league_tier,
             },
@@ -90,7 +91,7 @@ export const useAuth = () => {
           user: {
             id: profile.id,
             nickname: profile.nickname,
-            email: profile.email ?? undefined,
+            email: session.user.email ?? undefined,
             isGuest: false,
             leagueTier: profile.league_tier,
           },
@@ -102,8 +103,8 @@ export const useAuth = () => {
       }
     }
 
-    // 2. localStorage에 기존 프로필 있으면 복원
-    const stored = loadStoredProfile();
+    // 2. 저장된 프로필 있으면 복원
+    const stored = await loadStoredProfile();
     if (stored) {
       setProfileId(stored.profileId);
       setGuestToken(stored.guestToken);
@@ -137,7 +138,7 @@ export const useAuth = () => {
           isGuest: true,
           leagueTier: profile.league_tier,
         };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
+        await Storage.setItem(STORAGE_KEY, JSON.stringify(toStore));
         setProfileId(profile.id);
         setGuestToken(newGuestToken);
         setAuthState({
@@ -157,7 +158,7 @@ export const useAuth = () => {
       profileId: id, guestToken: token,
       nickname: '예비슈퍼개미', isGuest: true, leagueTier: 'bronze',
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
+    await Storage.setItem(STORAGE_KEY, JSON.stringify(toStore));
     setProfileId(id);
     setGuestToken(token);
     setAuthState({
@@ -166,21 +167,26 @@ export const useAuth = () => {
     });
   };
 
-  const linkAccount = (email: string, nickname?: string) => {
+  const linkAccount = async (email: string, nickname?: string) => {
+    const stored = await loadStoredProfile();
+    if (stored) {
+      await Storage.setItem(STORAGE_KEY, JSON.stringify({
+        ...stored, email, isGuest: false, nickname: nickname ?? stored.nickname,
+      }));
+    }
     setAuthState(prev => {
       if (!prev.user) return prev;
-      const next: AuthState = {
+      return {
         user: { ...prev.user, email, nickname: nickname ?? prev.user.nickname, isGuest: false },
         accessToken: prev.accessToken, refreshToken: prev.refreshToken, isAuthenticated: true,
       };
-      const stored = loadStoredProfile();
-      if (stored) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({
-          ...stored, email, isGuest: false, nickname: nickname ?? stored.nickname,
-        }));
-      }
-      return next;
     });
+  };
+
+  const logout = async () => {
+    await Storage.removeItem(STORAGE_KEY);
+    await supabase.auth.signOut();
+    window.location.reload();
   };
 
   return {
@@ -190,5 +196,6 @@ export const useAuth = () => {
     guestToken,
     profileId,
     linkAccount,
+    logout,
   };
 };

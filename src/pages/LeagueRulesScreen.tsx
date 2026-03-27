@@ -15,24 +15,24 @@ const LeagueRulesScreen = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col h-full bg-[#0B0B0B]">
+    <div className="flex flex-col h-full bg-[#F7F7F7]">
       {/* 헤더 */}
-      <div className="pt-12 px-5 pb-4 bg-[#161616]">
+      <div className="pt-12 px-5 pb-4 bg-white">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/league')}
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-[#1E1E1E]"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-[#F0F0F0]"
           >
-            <ChevronLeft size={20} className="text-[#ABABAB]" />
+            <ChevronLeft size={20} className="text-[#555555]" />
           </button>
-          <h2 className="text-base font-bold text-white">리그 안내</h2>
+          <h2 className="text-base font-bold text-[#111111]">리그 안내</h2>
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">
         <Spacing size={20} />
         <div className="px-5">
-          <div className="bg-[#161616] rounded-2xl overflow-hidden">
+          <div className="bg-white rounded-2xl overflow-hidden">
             <List>
               {RULES.map(({ icon, title, desc }) => (
                 <ListRow
@@ -42,8 +42,8 @@ const LeagueRulesScreen = () => {
                   contents={
                     <ListRow.Texts
                       type="2RowTypeA"
-                      top={<span className="text-white">{title}</span>}
-                      bottom={<span className="text-[#777777]">{desc}</span>}
+                      top={<span className="text-[#111111]">{title}</span>}
+                      bottom={<span className="text-[#888888]">{desc}</span>}
                     />
                   }
                 />

@@ -25,18 +25,18 @@ const SwipeScreen = () => {
   if (!swipeQueue.length || currentIndex >= swipeQueue.length) {
     const quizWords = [...swipeQueue].sort(() => Math.random() - 0.5).slice(0, Math.min(5, swipeQueue.length));
     return (
-      <div className="flex h-full flex-col bg-[#0B0B0B]">
+      <div className="flex h-full flex-col bg-[#F7F7F7]">
         <div className="flex-1 flex flex-col items-center justify-center gap-5 p-8">
-          <div className="w-20 h-20 bg-[#161616] rounded-full flex items-center justify-center text-4xl">🎉</div>
+          <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-4xl">🎉</div>
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-white mb-1">학습 완료!</h2>
-            <p className="text-sm text-[#555555]">{swipeQueue.length}개 단어를 학습했어요</p>
+            <h2 className="text-2xl font-bold text-[#111111] mb-1">학습 완료!</h2>
+            <p className="text-sm text-[#AAAAAA]">{swipeQueue.length}개 단어를 학습했어요</p>
           </div>
-          <div className="w-full bg-[#161616] rounded-2xl p-4">
-            <p className="text-xs text-[#555555] mb-3">방금 배운 단어, 바로 확인해볼까요?</p>
+          <div className="w-full bg-white rounded-2xl p-4">
+            <p className="text-xs text-[#AAAAAA] mb-3">방금 배운 단어, 바로 확인해볼까요?</p>
             <div className="flex flex-wrap gap-1.5">
               {swipeQueue.slice(0, 5).map(w => (
-                <span key={w.id} className="text-xs px-2.5 py-1 rounded-full bg-[#1E1E1E] text-[#ABABAB]">{w.word}</span>
+                <span key={w.id} className="text-xs px-2.5 py-1 rounded-full bg-[#F0F0F0] text-[#555555]">{w.word}</span>
               ))}
             </div>
           </div>
@@ -49,7 +49,7 @@ const SwipeScreen = () => {
             바로 퀴즈 풀기 →
           </button>
           <button onClick={() => navigate('/course')}
-            className="w-full py-3 rounded-2xl bg-[#161616] text-xs font-medium text-[#777777] active:opacity-70">
+            className="w-full py-3 rounded-2xl bg-white text-xs font-medium text-[#888888] active:opacity-70">
             코스로 돌아가기
           </button>
         </div>
@@ -97,7 +97,7 @@ const SwipeScreen = () => {
   const isLastSlide = slideIndex === totalSlides - 1;
 
   return (
-    <div className="flex flex-col h-full bg-[#0B0B0B] select-none">
+    <div className="flex flex-col h-full bg-[#F7F7F7] select-none">
 
       {/* 상단 세그먼트 진행바 + X 버튼 */}
       <div className="flex items-center gap-3 px-5 pt-14 pb-3">
@@ -105,15 +105,15 @@ const SwipeScreen = () => {
           {slides.map((_, i) => (
             <div
               key={i}
-              className={`flex-1 h-[3px] rounded-full transition-all duration-300 ${i <= slideIndex ? 'bg-orange-500' : 'bg-[#1E1E1E]'}`}
+              className={`flex-1 h-[3px] rounded-full transition-all duration-300 ${i <= slideIndex ? 'bg-orange-500' : 'bg-[#E5E5E5]'}`}
             />
           ))}
         </div>
         <button
           onClick={() => navigate('/course')}
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-[#161616] shrink-0"
+          className="w-8 h-8 flex items-center justify-center rounded-full bg-white shrink-0"
         >
-          <X size={15} className="text-[#ABABAB]" />
+          <X size={15} className="text-[#555555]" />
         </button>
       </div>
 
@@ -127,17 +127,17 @@ const SwipeScreen = () => {
       >
         {/* 레벨 뱃지 + 단어 */}
         <div className="mb-5">
-          <span className="text-[11px] font-medium text-[#777777] px-2.5 py-1 rounded-full" style={{ backgroundColor: '#1E1E1E' }}>
+          <span className="text-[11px] font-medium text-[#888888] px-2.5 py-1 rounded-full" style={{ backgroundColor: '#F0F0F0' }}>
             {course?.level}
           </span>
-          <h2 className="text-3xl font-bold text-white mt-4 mb-2 leading-tight">{currentWord.word}</h2>
+          <h2 className="text-3xl font-bold text-[#111111] mt-4 mb-2 leading-tight">{currentWord.word}</h2>
           <p className="text-base font-semibold text-orange-500">{currentWord.meaning}</p>
         </div>
 
-        <div className="w-8 h-[2px] bg-[#1E1E1E] mb-5" />
+        <div className="w-8 h-[2px] bg-[#E5E5E5] mb-5" />
 
         {/* 슬라이드 카테고리 라벨 */}
-        <p className="text-xs font-bold text-[#777777] tracking-widest uppercase mb-3">{currentSlide?.label}</p>
+        <p className="text-xs font-bold text-[#888888] tracking-widest uppercase mb-3">{currentSlide?.label}</p>
 
         {/* 슬라이드 이모지 */}
         <div className="text-5xl mb-4">{currentSlide?.emoji}</div>
@@ -156,18 +156,18 @@ const SwipeScreen = () => {
                   const idx = targetCourse.words.findIndex((w) => w.id === targetWord.id);
                   navigate('/swipe', { state: { course: targetCourse, initialIndex: idx } });
                 }}
-                className="text-sm font-medium text-[#ABABAB] bg-[#1E1E1E] px-4 py-2 rounded-full active:bg-[#2A2A2A]"
+                className="text-sm font-medium text-[#555555] bg-[#F0F0F0] px-4 py-2 rounded-full active:bg-[#E5E5E5]"
               >
                 {rw}
               </button>
             ))}
           </div>
         ) : currentSlide?.cardType === 'compare' ? (
-          <div className="bg-[#1E1E1E] rounded-2xl p-4">
-            <p className="text-sm text-[#ABABAB] leading-relaxed break-keep">"{currentSlide.body}"</p>
+          <div className="bg-[#F0F0F0] rounded-2xl p-4">
+            <p className="text-sm text-[#555555] leading-relaxed break-keep">"{currentSlide.body}"</p>
           </div>
         ) : (
-          <p className="text-base text-[#D1D1D6] leading-relaxed break-keep">{currentSlide?.body}</p>
+          <p className="text-base text-[#444444] leading-relaxed break-keep">{currentSlide?.body}</p>
         )}
       </div>
 
@@ -176,7 +176,7 @@ const SwipeScreen = () => {
         <button
           onClick={goPrev}
           disabled={isFirstSlideOfFirstWord}
-          className="w-14 h-14 flex items-center justify-center rounded-2xl bg-[#161616] text-[#777777] disabled:opacity-30 active:opacity-70 transition-colors shrink-0"
+          className="w-14 h-14 flex items-center justify-center rounded-2xl bg-white text-[#888888] disabled:opacity-30 active:opacity-70 transition-colors shrink-0"
         >
           <ChevronLeft size={22} />
         </button>

@@ -12,7 +12,7 @@ const ACCENT = '#f97316';
 function SlideHeader({ label }: { label: string }) {
   return (
     <div className="shrink-0 mb-3">
-      <p className="text-[14px] font-semibold text-[#777777] break-keep">{label}</p>
+      <p className="text-[14px] font-semibold text-[#888888] break-keep">{label}</p>
     </div>
   );
 }
@@ -30,10 +30,10 @@ function SlideContent({
       <div className="flex-1 flex flex-col items-center justify-center text-center px-8 gap-6">
         <div className="text-5xl">{slide.emoji}</div>
         <div>
-          <h1 className="text-[30px] font-black text-white leading-tight tracking-tight break-keep mb-3">
+          <h1 className="text-[30px] font-black text-[#111111] leading-tight tracking-tight break-keep mb-3">
             {word.word}
           </h1>
-          <p className="text-[15px] text-[#ABABAB] font-medium break-keep">{word.meaning}</p>
+          <p className="text-[15px] text-[#555555] font-medium break-keep">{word.meaning}</p>
         </div>
       </div>
     );
@@ -43,7 +43,7 @@ function SlideContent({
     return (
       <div className="flex-1 flex flex-col px-6 pt-4 pb-4">
         <SlideHeader label={slide.label} />
-        <p className="text-[17px] font-semibold leading-[1.8] text-[#D1D1D6] break-keep">{slide.body}</p>
+        <p className="text-[17px] font-semibold leading-[1.8] text-[#333333] break-keep">{slide.body}</p>
       </div>
     );
   }
@@ -52,7 +52,7 @@ function SlideContent({
     return (
       <div className="flex-1 flex flex-col px-6 pt-4 pb-4">
         <SlideHeader label={slide.label} />
-        <p className="text-[15px] leading-[1.9] text-[#ABABAB] font-medium break-keep">{slide.body}</p>
+        <p className="text-[15px] leading-[1.9] text-[#555555] font-medium break-keep">{slide.body}</p>
       </div>
     );
   }
@@ -63,7 +63,7 @@ function SlideContent({
         <SlideHeader label={slide.label} />
         <div className="flex flex-col gap-4">
           <div className="text-4xl">🎯</div>
-          <p className="text-[15px] leading-[1.9] text-[#ABABAB] font-medium break-keep">{slide.body}</p>
+          <p className="text-[15px] leading-[1.9] text-[#555555] font-medium break-keep">{slide.body}</p>
         </div>
       </div>
     );
@@ -73,8 +73,8 @@ function SlideContent({
     return (
       <div className="flex-1 flex flex-col px-6 pt-4 pb-4">
         <SlideHeader label={slide.label} />
-        <div className="border-l-2 pl-4 border-[#2A2A2A]">
-          <p className="text-[15px] leading-[1.9] text-[#ABABAB] font-medium break-keep">&ldquo;{slide.body}&rdquo;</p>
+        <div className="border-l-2 pl-4 border-[#E5E5E5]">
+          <p className="text-[15px] leading-[1.9] text-[#555555] font-medium break-keep">&ldquo;{slide.body}&rdquo;</p>
         </div>
       </div>
     );
@@ -89,11 +89,11 @@ function SlideContent({
             <button
               key={tag}
               onClick={() => onTagClick(tag)}
-              className="flex items-center gap-3 py-3 border-b border-[#1E1E1E] last:border-0 active:opacity-60 text-left"
+              className="flex items-center gap-3 py-3 border-b border-[#E5E5E5] last:border-0 active:opacity-60 text-left"
             >
-              <span className="text-[12px] font-black w-4 shrink-0 text-[#555555]">{i + 1}</span>
-              <p className="text-[15px] font-semibold text-white break-keep flex-1">{tag}</p>
-              <ChevronRight size={14} className="text-[#555555] shrink-0" />
+              <span className="text-[12px] font-black w-4 shrink-0 text-[#AAAAAA]">{i + 1}</span>
+              <p className="text-[15px] font-semibold text-[#111111] break-keep flex-1">{tag}</p>
+              <ChevronRight size={14} className="text-[#AAAAAA] shrink-0" />
             </button>
           ))}
         </div>

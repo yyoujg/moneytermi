@@ -23,33 +23,33 @@ const CourseWordListScreen = () => {
   const isCompleted = progressPct === 100;
 
   return (
-    <div className="flex flex-col h-full bg-[#0B0B0B]">
+    <div className="flex flex-col h-full bg-[#F7F7F7]">
       {/* 헤더 */}
-      <div className="pt-12 px-5 pb-4 bg-[#161616]">
+      <div className="pt-12 px-5 pb-4 bg-white">
         <div className="flex items-center gap-3 mb-4">
           <button
             onClick={() => navigate('/course')}
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-[#1E1E1E] shrink-0"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-[#F0F0F0] shrink-0"
           >
-            <ChevronLeft size={20} className="text-[#ABABAB]" />
+            <ChevronLeft size={20} className="text-[#555555]" />
           </button>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-medium text-[#777777] px-2.5 py-1 rounded-full" style={{ backgroundColor: '#1E1E1E' }}>{course.level}</span>
+              <span className="text-[11px] font-medium text-[#888888] px-2.5 py-1 rounded-full" style={{ backgroundColor: '#F0F0F0' }}>{course.level}</span>
               {isCompleted && <Badge color="green" size="small" variant="fill">완료</Badge>}
             </div>
-            <h2 className="text-base font-bold text-white mt-1 truncate">{course.title}</h2>
+            <h2 className="text-base font-bold text-[#111111] mt-1 truncate">{course.title}</h2>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex-1 bg-[#1E1E1E] rounded-full h-1.5 overflow-hidden">
+          <div className="flex-1 bg-[#F0F0F0] rounded-full h-1.5 overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-500 ${isCompleted ? 'bg-orange-500' : 'bg-orange-300'}`}
               style={{ width: `${progressPct}%` }}
             />
           </div>
-          <span className="text-xs font-bold text-[#777777] shrink-0">{courseKnownCount}/{course.words.length}</span>
+          <span className="text-xs font-bold text-[#888888] shrink-0">{courseKnownCount}/{course.words.length}</span>
         </div>
       </div>
 
@@ -57,11 +57,11 @@ const CourseWordListScreen = () => {
       <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">
         <Spacing size={16} />
         <div className="px-5">
-          <p className="text-xs font-bold text-[#777777] mb-2">수록 단어 {course.words.length}개</p>
+          <p className="text-xs font-bold text-[#888888] mb-2">수록 단어 {course.words.length}개</p>
         </div>
 
         <div className="px-5">
-          <div className="bg-[#161616] rounded-2xl overflow-hidden">
+          <div className="bg-white rounded-2xl overflow-hidden">
             <List>
               {course.words.map((word, idx) => {
                 const isKnown = knownWords.some(kw => kw.id === word.id);
@@ -75,7 +75,7 @@ const CourseWordListScreen = () => {
                     border="none"
                     left={
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0
-                        ${isKnown ? 'bg-orange-500 text-white' : 'bg-[#161616] text-[#777777]'}`}>
+                        ${isKnown ? 'bg-orange-500 text-white' : 'bg-[#F0F0F0] text-[#888888]'}`}>
                         {isKnown ? <CheckCircle size={14} strokeWidth={2.5} /> : idx + 1}
                       </div>
                     }
@@ -86,7 +86,7 @@ const CourseWordListScreen = () => {
                         bottom={word.meaning}
                       />
                     }
-                    right={<ChevronRight size={16} className="text-[#555555]" />}
+                    right={<ChevronRight size={16} className="text-[#AAAAAA]" />}
                   />
                 );
               })}
