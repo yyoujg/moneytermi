@@ -3,8 +3,8 @@ import { defineConfig } from '@apps-in-toss/web-framework/config';
 export default defineConfig({
   appName: 'moneytermi',
   brand: {
-    displayName: 'moneytermi',
-    primaryColor: '#3182F6',
+    displayName: '머니터미',
+    primaryColor: '#F97316',
     icon: '',
   },
   web: {
