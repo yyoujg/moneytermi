@@ -109,6 +109,7 @@ const SwipeScreen = () => {
       headerMeta={currentSlide?.cardType === 'intro' ? '' : currentWord.word}
       slideNum={slideIndex + 1}
       slideTotal={totalSlides}
+      slideLabel={currentSlide?.label}
       wordDots={swipeQueue.map((_, i) => ({
         active: i === currentIndex,
         onClick: () => { setCurrentIndex(i); setSlideIndex(0); },

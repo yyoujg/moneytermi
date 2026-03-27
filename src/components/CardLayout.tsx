@@ -130,15 +130,22 @@ const CardLayout = ({
       {/* 카드 + 단어 버튼 */}
       <div className="relative z-10 flex-1 mx-4 mb-6 flex flex-col gap-3">
 
-        {/* 카드 (스와이프 영역) */}
+        {/* 단어명 카드 */}
+        {headerMeta && (
+          <div className="bg-white rounded-[20px] border border-[#E5E5E5] shadow-[0_4px_16px_rgba(0,0,0,0.06)] px-6 py-4 shrink-0">
+            <p className="text-[22px] font-black text-[#111111] break-keep">{headerMeta}</p>
+          </div>
+        )}
+
+        {/* 콘텐츠 카드 (스와이프 영역) */}
         <div
           ref={cardRef}
           key={cardKey}
           className="flex-1 bg-white rounded-[28px] border border-[#E5E5E5] shadow-[0_20px_50px_rgba(0,0,0,0.08)] overflow-hidden flex flex-col select-none"
         >
-          {/* 카드 헤더 */}
+          {/* 레이블 + 슬라이드 번호 */}
           <div className="flex justify-between items-center px-6 pt-5 pb-2 shrink-0">
-            <p className="text-[16px] font-black text-[#111111] break-keep">{headerMeta}</p>
+            <p className="text-[15px] font-bold text-[#444444] break-keep">{slideLabel ?? ''}</p>
             <div className="px-3 py-1 rounded-lg text-[11px] font-black text-[#888888] bg-[#F0F0F0] shrink-0 ml-2">
               {String(slideNum).padStart(2, '0')} / {String(slideTotal).padStart(2, '0')}
             </div>
@@ -147,12 +154,11 @@ const CardLayout = ({
           {/* 슬라이드 콘텐츠 */}
           {children}
 
-
           {/* 스와이프 힌트 */}
           <div className="pb-3 flex justify-center shrink-0">
             {!isLast && (
               <ChevronDown
-                size={72}
+                size={32}
                 className="animate-bounce-down text-[#AAAAAA]"
               />
             )}
