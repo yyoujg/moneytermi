@@ -8,8 +8,9 @@ import { useAuth } from '../hooks/useAuth';
 import GuestLinkSheet from '../components/GuestLinkSheet';
 import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
 
-const getOptions = (correctWord: Word, allWords: Word[]): string[] => {
-  const others = allWords.filter(w => w.id !== correctWord.id);
+const getOptions = (correctWord: Word, knownWords: Word[], allWords: Word[]): string[] => {
+  const pool = knownWords.length >= 4 ? knownWords : allWords;
+  const others = pool.filter(w => w.id !== correctWord.id);
   const shuffled = [...others].sort(() => Math.random() - 0.5);
   const wrong = shuffled.slice(0, 3).map(w => w.word);
   return [...wrong, correctWord.word].sort(() => Math.random() - 0.5);
@@ -25,9 +26,12 @@ const calcEarned = (combo: number): number => {
 const QuizScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { points, setPoints, setMissions, otherLeagueUsers, allWords } = useAppContext();
+  const { points, setPoints, setMissions, otherLeagueUsers, allWords, knownWords } = useAppContext();
 
-  const quizQueue: Word[] = (location.state as { quizQueue?: Word[] } | null)?.quizQueue ?? [];
+  const passedQueue: Word[] = (location.state as { quizQueue?: Word[] } | null)?.quizQueue ?? [];
+  const quizQueue: Word[] = passedQueue.length > 0
+    ? passedQueue
+    : [...knownWords].sort(() => Math.random() - 0.5).slice(0, 10);
 
   const { isGuest, linkAccount } = useAuth();
   const [showLinkSheet, setShowLinkSheet] = useState(false);
@@ -54,7 +58,7 @@ const QuizScreen = () => {
 
   const options = useMemo(() => {
     if (!currentWord) return [];
-    return getOptions(currentWord, allWords);
+    return getOptions(currentWord, knownWords, allWords);
   }, [currentWord?.id, allWords]);
 
   // +P 팝업 트리거
