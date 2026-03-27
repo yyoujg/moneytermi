@@ -1,73 +1,68 @@
-# React + TypeScript + Vite
+# 머니터미 (moneytermi)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+토스 미니앱으로 제공되는 금융 경제 용어 학습 앱이에요.
+카드 스와이프, 퀴즈, 리그 시스템을 통해 경제 용어를 재미있게 익힐 수 있어요.
 
-Currently, two official plugins are available:
+## 주요 기능
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **홈**: 오늘의 학습 현황 및 추천 코스
+- **코스**: 주제별 경제 용어 학습 (거시경제, 금융, 주식 등)
+- **스와이프**: 카드 넘기기 방식의 단어 학습
+- **퀴즈**: 객관식 퀴즈로 복습
+- **리그**: 티어 기반 경쟁 시스템 (알개미 → 슈퍼개미)
+- **복습**: 틀린 단어 재학습
+- **마이페이지**: 학습 기록 및 설정
 
-## React Compiler
+## 기술 스택
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React 18 + TypeScript
+- Vite
+- Tailwind CSS v4
+- React Router DOM v7
+- Supabase (인증 및 DB)
+- Apps in Toss (앱인토스) Web Framework
 
-## Expanding the ESLint configuration
+## 개발 환경 설정
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 빌드 및 배포
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+# 빌드
+npm run build
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# 배포 (API 키 직접 입력)
+npx ait deploy --api-key {API_KEY}
+
+# 또는 토큰 등록 후 배포
+npx ait token add
+npx ait deploy
 ```
+
+CI/CD는 GitHub Actions로 자동화되어 있어요.
+`main` 브랜치에 push하면 자동으로 빌드 후 배포가 실행돼요.
+
+## 출시 전 테스트
+
+빌드 후 생성된 테스트 스킴(QR 코드)으로 토스앱 내에서 테스트할 수 있어요.
+
+```
+intoss-private://appsintoss?_deploymentId={deploymentId}
+```
+
+## 환경 변수
+
+| 변수명 | 설명 |
+|--------|------|
+| `VITE_SUPABASE_URL` | Supabase 프로젝트 URL |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anon 키 |
+
+## GitHub Secrets
+
+| 시크릿명 | 설명 |
+|----------|------|
+| `AIT_API_KEY` | 앱인토스 콘솔 API 키 |
