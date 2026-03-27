@@ -119,10 +119,14 @@ const WordCardScreen = () => {
       slideNum={slideIndex + 1}
       slideTotal={totalSlides}
       slideLabel={currentSlide?.label}
-      wordDots={words.map((_, i) => ({
-        active: i === wordIndex,
-        onClick: () => { setWordIndex(i); setSlideIndex(0); },
-      }))}
+      wordDots={words.map((_, i) => {
+        const firstLocked = words.findIndex(w => !knownWords.some(kw => kw.id === w.id));
+        const accessible = firstLocked === -1 || i <= firstLocked;
+        return {
+          active: i === wordIndex,
+          onClick: accessible ? () => { setWordIndex(i); setSlideIndex(0); } : () => {},
+        };
+      })}
       onBack={() => navigate(backPath, backState ? { state: backState } : undefined)}
       onPrev={goPrev}
       onNext={goNext}

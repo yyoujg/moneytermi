@@ -1,7 +1,6 @@
 import React from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Lock, CheckCircle } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { CheckCircle } from 'lucide-react';
 import { Badge, Spacing } from '@toss/tds-mobile';
 import type { Course } from '../types';
 import { useAppContext } from '../context/AppContext';
@@ -21,6 +20,10 @@ const CourseWordListScreen = () => {
   const courseKnownCount = course.words.filter(w => knownWords.some(kw => kw.id === w.id)).length;
   const progressPct = Math.round((courseKnownCount / course.words.length) * 100);
   const isCompleted = progressPct === 100;
+
+  // 첫 번째 미완료 단어까지만 접근 가능
+  const firstLockedIdx = course.words.findIndex(w => !knownWords.some(kw => kw.id === w.id));
+  const isAccessible = (idx: number) => firstLockedIdx === -1 || idx <= firstLockedIdx;
 
   return (
     <div className="flex flex-col h-full bg-[#F7F7F7]">
@@ -64,17 +67,19 @@ const CourseWordListScreen = () => {
           <div className="bg-white rounded-2xl overflow-hidden divide-y divide-[#F0F0F0]">
             {course.words.map((word, idx) => {
               const isKnown = knownWords.some(kw => kw.id === word.id);
+              const accessible = isAccessible(idx);
+              const locked = !accessible;
               return (
-                <div key={word.id} className="flex items-start gap-3 px-4 py-3.5">
-                  <button
-                    onClick={() => toggleKnown(word)}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 active:opacity-70 mt-0.5
+                <div key={word.id} className={`flex items-start gap-3 px-4 py-3.5 ${locked ? 'opacity-40' : ''}`}>
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5
                       ${isKnown ? 'bg-orange-500 text-white' : 'bg-[#F0F0F0] text-[#888888]'}`}
                   >
-                    {isKnown ? <CheckCircle size={14} strokeWidth={2.5} /> : idx + 1}
-                  </button>
+                    {isKnown ? <CheckCircle size={14} strokeWidth={2.5} /> : locked ? <Lock size={13} /> : idx + 1}
+                  </div>
                   <button
-                    className="flex-1 flex items-start gap-2 text-left active:opacity-60"
+                    disabled={locked}
+                    className="flex-1 flex items-start gap-2 text-left active:opacity-60 disabled:pointer-events-none"
                     onClick={() => navigate('/word-card', {
                       state: { words: course.words, index: idx, backPath: '/course/words', backState: { course } }
                     })}
@@ -83,7 +88,7 @@ const CourseWordListScreen = () => {
                       <p className="text-[15px] font-semibold text-[#111111] break-keep">{word.word}</p>
                       <p className="text-[13px] text-[#888888] break-keep">{word.meaning}</p>
                     </div>
-                    <ChevronRight size={16} className="text-[#AAAAAA] shrink-0 mt-1" />
+                    {!locked && <ChevronRight size={16} className="text-[#AAAAAA] shrink-0 mt-1" />}
                   </button>
                 </div>
               );
