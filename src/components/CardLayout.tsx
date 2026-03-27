@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, CheckCircle } from 'lucide-react';
 
 type WordDot = { active: boolean; onClick: () => void };
 
@@ -21,6 +21,9 @@ type Props = {
   onNextWord?: () => void;
   isFirstWord?: boolean;
   isLastWord?: boolean;
+  // 완료 토글
+  isKnown?: boolean;
+  onToggleKnown?: () => void;
   cardKey?: string;
   children: React.ReactNode;
 };
@@ -42,11 +45,14 @@ const CardLayout = ({
   onNextWord,
   isFirstWord,
   isLastWord,
+  isKnown,
+  onToggleKnown,
   cardKey,
   children,
 }: Props) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const touchStartY = useRef<number | null>(null);
+  const isSwiping = useRef(false);
 
   useEffect(() => {
     const el = cardRef.current;
@@ -54,10 +60,16 @@ const CardLayout = ({
 
     const onTouchStart = (e: TouchEvent) => {
       touchStartY.current = e.touches[0].clientY;
+      isSwiping.current = false;
     };
 
     const onTouchMove = (e: TouchEvent) => {
-      e.preventDefault(); // 브라우저 스크롤 차단
+      if (touchStartY.current === null) return;
+      const dy = Math.abs(e.touches[0].clientY - touchStartY.current);
+      if (dy > 8) {
+        isSwiping.current = true;
+        e.preventDefault(); // 스와이프 중에만 스크롤 차단
+      }
     };
 
     const onTouchEnd = (e: TouchEvent) => {
@@ -140,32 +152,44 @@ const CardLayout = ({
           <div className="pb-3 flex justify-center shrink-0">
             {!isLast && (
               <ChevronDown
-                size={22}
+                size={72}
                 className="animate-bounce-down text-[#AAAAAA]"
               />
             )}
           </div>
         </div>
 
-        {/* 단어 이동 버튼 */}
+        {/* 완료 버튼 — 마지막 슬라이드에만 표시 */}
+        {onToggleKnown && isLast && (
+          <button
+            onClick={onToggleKnown}
+            className={`flex items-center justify-center gap-1.5 h-10 rounded-xl text-xs font-bold active:opacity-80 transition-colors shrink-0
+              ${isKnown ? 'bg-orange-500 text-white' : 'bg-white border border-[#E5E5E5] text-[#888888]'}`}
+          >
+            <CheckCircle size={14} strokeWidth={2.5} />
+            {isKnown ? '완료' : '완료하기'}
+          </button>
+        )}
+
+        {/* 단어 이동 버튼 — 좌우 고정 */}
         {showWordNav && (
-          <div className="flex gap-2 shrink-0 justify-center">
+          <>
             <button
               onClick={onPrevWord}
               disabled={isFirstWord}
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-[#E5E5E5] text-[#888888] disabled:opacity-30 active:bg-white"
+              className="absolute left-0 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center text-[#AAAAAA] disabled:opacity-20 active:opacity-50 z-20"
             >
-              <ChevronLeft size={18} />
+              <ChevronLeft size={32} />
             </button>
             <button
               onClick={onNextWord}
               disabled={isLastWord}
-              className="w-10 h-10 flex items-center justify-center rounded-xl text-white active:opacity-80 disabled:opacity-30"
-              style={{ backgroundColor: isLastWord ? '#CCCCCC' : accentBg }}
+              className="absolute right-0 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center disabled:opacity-20 active:opacity-50 z-20"
+              style={{ color: isLastWord ? '#CCCCCC' : accentBg }}
             >
-              <ChevronRight size={18} />
+              <ChevronRight size={32} />
             </button>
-          </div>
+          </>
         )}
       </div>
     </div>

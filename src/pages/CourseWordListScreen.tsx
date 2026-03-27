@@ -2,7 +2,7 @@ import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
-import { List, ListRow, Badge, Spacing } from '@toss/tds-mobile';
+import { Badge, Spacing } from '@toss/tds-mobile';
 import type { Course } from '../types';
 import { useAppContext } from '../context/AppContext';
 
@@ -61,39 +61,33 @@ const CourseWordListScreen = () => {
         </div>
 
         <div className="px-5">
-          <div className="bg-white rounded-2xl overflow-hidden">
-            <List>
-              {course.words.map((word, idx) => {
-                const isKnown = knownWords.some(kw => kw.id === word.id);
-                return (
-                  <ListRow
-                    key={word.id}
-                    as="button"
+          <div className="bg-white rounded-2xl overflow-hidden divide-y divide-[#F0F0F0]">
+            {course.words.map((word, idx) => {
+              const isKnown = knownWords.some(kw => kw.id === word.id);
+              return (
+                <div key={word.id} className="flex items-start gap-3 px-4 py-3.5">
+                  <button
+                    onClick={() => toggleKnown(word)}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 active:opacity-70 mt-0.5
+                      ${isKnown ? 'bg-orange-500 text-white' : 'bg-[#F0F0F0] text-[#888888]'}`}
+                  >
+                    {isKnown ? <CheckCircle size={14} strokeWidth={2.5} /> : idx + 1}
+                  </button>
+                  <button
+                    className="flex-1 flex items-start gap-2 text-left active:opacity-60"
                     onClick={() => navigate('/word-card', {
                       state: { words: course.words, index: idx, backPath: '/course/words', backState: { course } }
                     })}
-                    border="none"
-                    left={
-                      <button
-                        onClick={e => { e.stopPropagation(); toggleKnown(word); }}
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 active:opacity-70
-                          ${isKnown ? 'bg-orange-500 text-white' : 'bg-[#F0F0F0] text-[#888888]'}`}
-                      >
-                        {isKnown ? <CheckCircle size={14} strokeWidth={2.5} /> : idx + 1}
-                      </button>
-                    }
-                    contents={
-                      <ListRow.Texts
-                        type="2RowTypeA"
-                        top={word.word}
-                        bottom={word.meaning}
-                      />
-                    }
-                    right={<ChevronRight size={16} className="text-[#AAAAAA]" />}
-                  />
-                );
-              })}
-            </List>
+                  >
+                    <div className="flex-1 flex flex-col gap-0.5">
+                      <p className="text-[15px] font-semibold text-[#111111] break-keep">{word.word}</p>
+                      <p className="text-[13px] text-[#888888] break-keep">{word.meaning}</p>
+                    </div>
+                    <ChevronRight size={16} className="text-[#AAAAAA] shrink-0 mt-1" />
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
 
