@@ -1,10 +1,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { ChevronLeft, Zap, Check, X } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Storage } from '@apps-in-toss/web-framework';
 import type { Word, Missions } from '../types';
 import { useAppContext } from '../context/AppContext';
 import { useAuth } from '../hooks/useAuth';
 import GuestLinkSheet from '../components/GuestLinkSheet';
+import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
 
 const getOptions = (correctWord: Word, allWords: Word[]): string[] => {
   const others = allWords.filter(w => w.id !== correctWord.id);
@@ -40,6 +42,13 @@ const QuizScreen = () => {
   const [showPointPop, setShowPointPop] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
   const [shake, setShake] = useState(false);
+  const [soundOn, setSoundOn] = useState(true);
+  const [vibrationOn, setVibrationOn] = useState(true);
+
+  useEffect(() => {
+    Storage.getItem('setting_sound').then(v => { if (v !== null) setSoundOn(v !== 'off'); }).catch(() => {});
+    Storage.getItem('setting_vibration').then(v => { if (v !== null) setVibrationOn(v !== 'off'); }).catch(() => {});
+  }, []);
 
   const currentWord = quizQueue[currentQuizIndex];
 
@@ -71,7 +80,7 @@ const QuizScreen = () => {
     const rankRose = prevRank > myRank;
 
     return (
-      <div className="flex h-full flex-col bg-[#0B0B0B]">
+      <div className="flex h-full flex-col bg-[#F7F7F7]">
         {showLinkSheet && (
           <GuestLinkSheet
             onClose={() => setShowLinkSheet(false)}
@@ -81,34 +90,34 @@ const QuizScreen = () => {
         <div className="flex-1 flex flex-col items-center justify-center px-8 gap-5">
           <div className="text-6xl">🎉</div>
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-white mb-1">퀴즈 완료!</h2>
-            <p className="text-sm text-[#555555]">{quizQueue.length}문제 완료</p>
+            <h2 className="text-2xl font-bold text-[#111111] mb-1">퀴즈 완료!</h2>
+            <p className="text-sm text-[#AAAAAA]">{quizQueue.length}문제 완료</p>
           </div>
 
           {/* 결과 카드 */}
-          <div className="w-full bg-[#161616] rounded-2xl p-5 flex flex-col gap-4">
+          <div className="w-full bg-white rounded-2xl p-5 flex flex-col gap-4">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-[#555555]">획득 포인트</span>
+              <span className="text-sm text-[#AAAAAA]">획득 포인트</span>
               <div className="flex items-center gap-1.5">
                 <Zap size={14} className="text-orange-500 fill-current" />
                 <span className="text-xl font-bold text-orange-500">+{totalEarned}P</span>
               </div>
             </div>
-            <div className="h-px bg-[#1E1E1E]" />
+            <div className="h-px bg-[#E5E5E5]" />
             <div className="flex justify-between items-center">
-              <span className="text-sm text-[#555555]">정답률</span>
-              <span className="text-xl font-bold text-white">{accuracy}%</span>
+              <span className="text-sm text-[#AAAAAA]">정답률</span>
+              <span className="text-xl font-bold text-[#111111]">{accuracy}%</span>
             </div>
-            <div className="h-px bg-[#1E1E1E]" />
+            <div className="h-px bg-[#E5E5E5]" />
             <div className="flex justify-between items-center">
-              <span className="text-sm text-[#555555]">최고 연속 정답</span>
-              <span className="text-xl font-bold text-white">{maxCombo}연속 🔥</span>
+              <span className="text-sm text-[#AAAAAA]">최고 연속 정답</span>
+              <span className="text-xl font-bold text-[#111111]">{maxCombo}연속 🔥</span>
             </div>
             {rankRose && (
               <>
-                <div className="h-px bg-[#1E1E1E]" />
+                <div className="h-px bg-[#E5E5E5]" />
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-[#555555]">순위 변화</span>
+                  <span className="text-sm text-[#AAAAAA]">순위 변화</span>
                   <span className="text-sm font-bold text-green-400">🔥 {prevRank}위 → {myRank}위 상승!</span>
                 </div>
               </>
@@ -124,7 +133,7 @@ const QuizScreen = () => {
                   ? <p className="text-sm font-bold text-orange-400">🔥 {prevRank}위 → {myRank}위 상승!</p>
                   : <p className="text-sm font-bold text-orange-400">+{totalEarned}P 획득!</p>
                 }
-                <p className="text-xs text-[#555555] mt-0.5">지금 저장하면 {points}P + {myRank}위 유지됩니다</p>
+                <p className="text-xs text-[#AAAAAA] mt-0.5">지금 저장하면 {points}P + {myRank}위 유지됩니다</p>
               </div>
               <button
                 onClick={() => setShowLinkSheet(true)}
@@ -156,6 +165,7 @@ const QuizScreen = () => {
       const newCombo = combo + 1;
       const earned = calcEarned(newCombo);
 
+      feedbackCorrect(soundOn, vibrationOn);
       setPoints(p => p + earned);
       setTotalEarned(t => t + earned);
       setCombo(newCombo);
@@ -175,6 +185,7 @@ const QuizScreen = () => {
         setStatus('idle');
       }, 300);
     } else {
+      feedbackWrong(soundOn, vibrationOn);
       setCombo(0);
       setStatus('wrong');
       setShake(true);
@@ -193,13 +204,13 @@ const QuizScreen = () => {
     : null;
 
   return (
-    <div className="flex flex-col h-full bg-[#0B0B0B]">
+    <div className="flex flex-col h-full bg-[#F7F7F7]">
       {/* 헤더 */}
-      <div className="pt-12 px-5 pb-3 flex justify-between items-center bg-[#161616]">
+      <div className="pt-12 px-5 pb-3 flex justify-between items-center bg-white">
         <button onClick={() => navigate('/home')} className="p-2 -ml-2">
-          <ChevronLeft size={24} className="text-[#777777]" />
+          <ChevronLeft size={24} className="text-[#888888]" />
         </button>
-        <span className="text-xs font-medium text-[#555555]">{currentQuizIndex + 1} / {quizQueue.length}</span>
+        <span className="text-xs font-medium text-[#AAAAAA]">{currentQuizIndex + 1} / {quizQueue.length}</span>
         {/* 포인트 + 팝업 */}
         <div className="relative flex items-center gap-1">
           {showPointPop && (
@@ -211,8 +222,8 @@ const QuizScreen = () => {
               +{lastEarned}P
             </span>
           )}
-          <Zap size={13} className="text-[#555555] fill-current" />
-          <span className="text-sm font-bold text-white">{points}</span>
+          <Zap size={13} className="text-[#AAAAAA] fill-current" />
+          <span className="text-sm font-bold text-[#111111]">{points}</span>
         </div>
       </div>
 
@@ -230,16 +241,16 @@ const QuizScreen = () => {
           80% { transform: translateX(4px); }
         }
         @keyframes flashGreen {
-          0% { background-color: #161616; }
+          0% { background-color: #FFFFFF; }
           30% { background-color: rgba(34,197,94,0.12); }
-          100% { background-color: #161616; }
+          100% { background-color: #FFFFFF; }
         }
         .shake { animation: shake 0.5s ease; }
         .flash-correct { animation: flashGreen 0.4s ease; }
       `}</style>
 
       {/* 진행 바 */}
-      <div className="w-full bg-[#1E1E1E] h-1">
+      <div className="w-full bg-[#E5E5E5] h-1">
         <div
           className="bg-orange-500 h-1 transition-all duration-500"
           style={{ width: `${progressPercent}%` }}
@@ -250,24 +261,24 @@ const QuizScreen = () => {
       <div className="flex-1 flex flex-col px-5 py-5 gap-4">
         {/* 스트릭 배너 */}
         {streakMessage && status === 'idle' && (
-          <div className={`flex items-center justify-center py-2 rounded-xl bg-[#161616] ${streakMessage.color} text-xs font-bold`}>
+          <div className={`flex items-center justify-center py-2 rounded-xl bg-white ${streakMessage.color} text-xs font-bold`}>
             {streakMessage.text}
           </div>
         )}
 
         {/* 문제 카드 */}
         <div className={`rounded-2xl p-5 flex-1 flex flex-col justify-center gap-4
-          ${status === 'correct' ? 'flash-correct ring-2 ring-green-500/40' : 'bg-[#161616]'}
-          ${status === 'wrong' ? 'bg-[#161616] ring-2 ring-red-500/30' : ''}
+          ${status === 'correct' ? 'flash-correct ring-2 ring-green-500/40' : 'bg-white'}
+          ${status === 'wrong' ? 'bg-white ring-2 ring-red-500/30' : ''}
           ${shake ? 'shake' : ''}
         `}>
-          <span className="text-[11px] font-medium text-[#555555] tracking-widest uppercase">이 뜻에 맞는 용어는?</span>
+          <span className="text-[11px] font-medium text-[#AAAAAA] tracking-widest uppercase">이 뜻에 맞는 용어는?</span>
 
-          <p className="text-xl font-bold text-white leading-snug">{currentWord.meaning}</p>
+          <p className="text-xl font-bold text-[#111111] leading-snug">{currentWord.meaning}</p>
 
-          <div className="w-8 h-[2px] bg-[#2A2A2A]" />
+          <div className="w-8 h-[2px] bg-[#E5E5E5]" />
 
-          <p className="text-sm text-[#777777] leading-relaxed break-keep">{currentWord.detailedMeaning}</p>
+          <p className="text-sm text-[#888888] leading-relaxed break-keep">{currentWord.detailedMeaning}</p>
 
           {status === 'correct' && (
             <div className="flex items-center gap-2">
@@ -278,7 +289,7 @@ const QuizScreen = () => {
           )}
           {status === 'wrong' && (
             <p className="text-sm font-bold text-red-400">
-              정답: <span className="text-white">{currentWord.word}</span>
+              정답: <span className="text-[#111111]">{currentWord.word}</span>
             </p>
           )}
         </div>
@@ -288,7 +299,7 @@ const QuizScreen = () => {
           {options.map((option) => {
             const isSelected = selected === option;
             const isCorrectOption = option === currentWord.word;
-            let optionStyle = 'bg-[#161616] text-white active:bg-[#2A2A2A]';
+            let optionStyle = 'bg-white text-[#111111] active:bg-[#E8E8E8]';
 
             if (status !== 'idle') {
               if (isCorrectOption) {
@@ -296,7 +307,7 @@ const QuizScreen = () => {
               } else if (isSelected && !isCorrectOption) {
                 optionStyle = 'bg-red-500/15 text-red-400 ring-1 ring-red-500/40';
               } else {
-                optionStyle = 'bg-[#161616] text-[#3A3A3A]';
+                optionStyle = 'bg-white text-[#CCCCCC]';
               }
             }
 

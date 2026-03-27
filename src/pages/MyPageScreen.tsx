@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { BookOpen, Bell, Settings, LogOut, ChevronLeft, ChevronRight, Zap, Trophy, ShieldCheck, ShieldAlert } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Storage } from '@apps-in-toss/web-framework';
+import { BookOpen, Bell, Settings, LogOut, ChevronLeft, ChevronRight, Zap, Trophy, ShieldCheck, ShieldAlert, X, Volume2, VolumeX } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import FallbackImage from '../components/FallbackImage';
 import { CURRENT_LEAGUE_NAME } from '../constants';
@@ -7,14 +8,10 @@ import { List, ListRow, Spacing } from '@toss/tds-mobile';
 import { useAuth } from '../hooks/useAuth';
 import GuestLinkSheet from '../components/GuestLinkSheet';
 
-const MENU_ITEMS = [
-  { icon: Bell, label: '공지사항', sub: '최신 소식을 확인하세요', danger: false },
-  { icon: Settings, label: '앱 설정', sub: '알림, 테마 등', danger: false },
-  { icon: LogOut, label: '로그아웃', sub: '', danger: true },
-];
-
 const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
+
+// ── 출석 달력 ─────────────────────────────────────────────────
 const AttendanceCalendar = ({ attendanceDates }: { attendanceDates: string[] }) => {
   const today = new Date();
   const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
@@ -39,29 +36,29 @@ const AttendanceCalendar = ({ attendanceDates }: { attendanceDates: string[] }) 
   ).filter(Boolean).length;
 
   return (
-    <div className="bg-[#161616] rounded-2xl overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-4 border-b border-[#1E1E1E]">
+    <div className="bg-white rounded-2xl overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-[#E5E5E5]">
         <button
           onClick={() => setViewDate(new Date(year, month - 1, 1))}
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-[#161616] active:bg-[#1E1E1E]"
+          className="w-8 h-8 flex items-center justify-center rounded-full bg-white active:bg-[#F0F0F0]"
         >
-          <ChevronLeft size={16} className="text-[#777777]" />
+          <ChevronLeft size={16} className="text-[#888888]" />
         </button>
         <div className="text-center">
-          <p className="text-sm font-bold text-white">{year}년 {month + 1}월</p>
+          <p className="text-sm font-bold text-[#111111]">{year}년 {month + 1}월</p>
           <p className="text-[11px] text-orange-400 font-semibold mt-0.5">이번 달 {attendCount}일 출석</p>
         </div>
         <button
           onClick={() => setViewDate(new Date(year, month + 1, 1))}
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-[#161616] active:bg-[#1E1E1E]"
+          className="w-8 h-8 flex items-center justify-center rounded-full bg-white active:bg-[#F0F0F0]"
         >
-          <ChevronLeft size={16} className="text-[#777777] rotate-180" />
+          <ChevronLeft size={16} className="text-[#888888] rotate-180" />
         </button>
       </div>
 
       <div className="grid grid-cols-7 px-3 pt-3">
         {DAYS.map((d, i) => (
-          <div key={d} className={`text-center text-[11px] font-bold pb-2 ${i === 0 ? 'text-red-400' : i === 6 ? 'text-blue-400' : 'text-[#777777]'}`}>
+          <div key={d} className={`text-center text-[11px] font-bold pb-2 ${i === 0 ? 'text-red-400' : i === 6 ? 'text-blue-400' : 'text-[#888888]'}`}>
             {d}
           </div>
         ))}
@@ -79,7 +76,7 @@ const AttendanceCalendar = ({ attendanceDates }: { attendanceDates: string[] }) 
               <div className={`w-8 h-8 flex items-center justify-center rounded-full text-xs font-semibold
                 ${isAttended ? 'bg-orange-500 text-white font-bold' : ''}
                 ${isToday && !isAttended ? 'ring-2 ring-orange-400 text-orange-500 font-bold' : ''}
-                ${!isAttended && !isToday ? (dayOfWeek === 0 ? 'text-red-300' : dayOfWeek === 6 ? 'text-blue-300' : 'text-[#777777]') : ''}
+                ${!isAttended && !isToday ? (dayOfWeek === 0 ? 'text-red-300' : dayOfWeek === 6 ? 'text-blue-300' : 'text-[#888888]') : ''}
               `}>
                 {day}
               </div>
@@ -88,49 +85,218 @@ const AttendanceCalendar = ({ attendanceDates }: { attendanceDates: string[] }) 
         })}
       </div>
 
-      <div className="flex items-center gap-4 px-5 pb-4 pt-1 border-t border-[#1E1E1E]">
+      <div className="flex items-center gap-4 px-5 pb-4 pt-1 border-t border-[#E5E5E5]">
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-full bg-orange-500" />
-          <span className="text-[11px] text-[#777777] font-medium">출석</span>
+          <span className="text-[11px] text-[#888888] font-medium">출석</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-full border-2 border-orange-400" />
-          <span className="text-[11px] text-[#777777] font-medium">오늘</span>
+          <span className="text-[11px] text-[#888888] font-medium">오늘</span>
         </div>
       </div>
     </div>
   );
 };
 
-const MyPageScreen = () => {
-  const { points, knownWords, attendanceDates } = useAppContext();
-  const { user, isGuest, linkAccount } = useAuth();
-  const [showLinkSheet, setShowLinkSheet] = useState(false);
+// ── 공지사항 시트 ──────────────────────────────────────────────
+const NoticeSheet = ({ onClose }: { onClose: () => void }) => (
+  <>
+    <div className="fixed inset-0 z-50 bg-black/70" onClick={onClose} />
+    <div className="fixed bottom-0 z-[60] w-full" style={{ maxWidth: '28rem', left: '50%', transform: 'translateX(-50%)' }}>
+      <div className="bg-white rounded-t-3xl px-5 pt-6 pb-28 flex flex-col gap-4" style={{ maxHeight: '80dvh', overflowY: 'auto' }}>
+        <div className="flex items-center justify-between">
+          <p className="text-base font-bold text-[#111111]">공지사항</p>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-[#F0F0F0]">
+            <X size={15} className="text-[#888888]" />
+          </button>
+        </div>
+        <div className="flex flex-col items-center justify-center py-12 gap-2">
+          <Bell size={32} className="text-[#C0C0C0]" />
+          <p className="text-sm text-[#AAAAAA]">아직 공지사항이 없어요</p>
+        </div>
+      </div>
+    </div>
+  </>
+);
+
+// ── 설정 시트 ─────────────────────────────────────────────────
+const SettingsSheet = ({ onClose }: { onClose: () => void }) => {
+  const [soundOn, setSoundOn]         = useState(true);
+  const [vibrationOn, setVibrationOn] = useState(true);
+
+  useEffect(() => {
+    Storage.getItem('setting_sound').then(v => { if (v !== null) setSoundOn(v !== 'off'); });
+    Storage.getItem('setting_vibration').then(v => { if (v !== null) setVibrationOn(v !== 'off'); });
+  }, []);
+
+  const toggleSound = () => {
+    const next = !soundOn;
+    setSoundOn(next);
+    Storage.setItem('setting_sound', next ? 'on' : 'off');
+  };
+
+  const toggleVibration = () => {
+    const next = !vibrationOn;
+    setVibrationOn(next);
+    Storage.setItem('setting_vibration', next ? 'on' : 'off');
+  };
 
   return (
-    <div className="flex flex-col h-full bg-[#0B0B0B] pb-24 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+    <>
+      <div className="fixed inset-0 z-50 bg-black/70" onClick={onClose} />
+      <div className="fixed bottom-0 z-[60] w-full" style={{ maxWidth: '28rem', left: '50%', transform: 'translateX(-50%)' }}>
+        <div className="bg-white rounded-t-3xl px-5 pt-6 pb-28 flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <p className="text-base font-bold text-[#111111]">앱 설정</p>
+            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-[#F0F0F0]">
+              <X size={15} className="text-[#888888]" />
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            {/* 효과음 */}
+            <div className="flex items-center justify-between bg-[#F0F0F0] rounded-2xl px-4 py-4">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[#E5E5E5] flex items-center justify-center">
+                  {soundOn
+                    ? <Volume2 size={16} className="text-[#555555]" />
+                    : <VolumeX size={16} className="text-[#AAAAAA]" />
+                  }
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-[#111111]">효과음</p>
+                  <p className="text-xs text-[#AAAAAA]">퀴즈 정답/오답 효과음</p>
+                </div>
+              </div>
+              <button
+                onClick={toggleSound}
+                className={`w-12 h-6 rounded-full transition-colors relative ${soundOn ? 'bg-orange-500' : 'bg-[#D0D0D0]'}`}
+              >
+                <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${soundOn ? 'translate-x-[26px]' : 'translate-x-0.5'}`} />
+              </button>
+            </div>
+
+            {/* 진동 */}
+            <div className="flex items-center justify-between bg-[#F0F0F0] rounded-2xl px-4 py-4">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[#E5E5E5] flex items-center justify-center">
+                  <span className={`text-base ${vibrationOn ? 'text-[#555555]' : 'text-[#AAAAAA]'}`}>📳</span>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-[#111111]">진동</p>
+                  <p className="text-xs text-[#AAAAAA]">햅틱 피드백</p>
+                </div>
+              </div>
+              <button
+                onClick={toggleVibration}
+                className={`w-12 h-6 rounded-full transition-colors relative ${vibrationOn ? 'bg-orange-500' : 'bg-[#D0D0D0]'}`}
+              >
+                <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${vibrationOn ? 'translate-x-[26px]' : 'translate-x-0.5'}`} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+// ── 로그아웃 확인 다이얼로그 ──────────────────────────────────
+const LogoutDialog = ({ isGuest, onConfirm, onCancel }: { isGuest: boolean; onConfirm: () => void; onCancel: () => void }) => (
+  <>
+    <div className="fixed inset-0 z-50 bg-black/70" onClick={onCancel} />
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
+      <div className="bg-[#F0F0F0] rounded-3xl px-6 py-6 w-full flex flex-col gap-5" style={{ maxWidth: '22rem' }}>
+        <div className="text-center">
+          <p className="text-base font-bold text-[#111111] mb-2">로그아웃</p>
+          {isGuest ? (
+            <p className="text-sm text-[#555555] leading-relaxed">
+              게스트 계정은 로그아웃 시<br />
+              <span className="text-red-400 font-semibold">모든 학습 기록이 삭제</span>됩니다.<br />
+              계속하시겠습니까?
+            </p>
+          ) : (
+            <p className="text-sm text-[#555555] leading-relaxed">
+              로그아웃하시겠습니까?<br />
+              학습 기록은 서버에 저장되어 있습니다.
+            </p>
+          )}
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={onCancel}
+            className="flex-1 py-3.5 rounded-2xl bg-[#E5E5E5] text-sm font-bold text-[#555555] active:opacity-80"
+          >
+            취소
+          </button>
+          <button
+            onClick={onConfirm}
+            className="flex-1 py-3.5 rounded-2xl bg-red-500/20 text-sm font-bold text-red-400 active:opacity-80"
+          >
+            로그아웃
+          </button>
+        </div>
+      </div>
+    </div>
+  </>
+);
+
+// ── 메인 ──────────────────────────────────────────────────────
+const MyPageScreen = () => {
+  const { points, knownWords, attendanceDates } = useAppContext();
+  const { user, isGuest, linkAccount, logout } = useAuth();
+  const [showLinkSheet, setShowLinkSheet]     = useState(false);
+  const [showNotice, setShowNotice]           = useState(false);
+  const [showSettings, setShowSettings]       = useState(false);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+
+  const handleMenuClick = (label: string) => {
+    if (label === '공지사항') setShowNotice(true);
+    else if (label === '앱 설정') setShowSettings(true);
+    else if (label === '로그아웃') setShowLogoutDialog(true);
+  };
+
+  const MENU_ITEMS = [
+    { icon: Bell,     label: '공지사항', sub: '최신 소식을 확인하세요', danger: false },
+    { icon: Settings, label: '앱 설정',  sub: '알림, 테마 등',         danger: false },
+    ...(!isGuest ? [{ icon: LogOut, label: '로그아웃', sub: '', danger: true }] : []),
+  ];
+
+  return (
+    <div className="flex flex-col h-full bg-[#F7F7F7] pb-24 overflow-y-auto [&::-webkit-scrollbar]:hidden">
       {showLinkSheet && (
         <GuestLinkSheet
           onClose={() => setShowLinkSheet(false)}
           onLink={(email) => { linkAccount(email); setShowLinkSheet(false); }}
         />
       )}
+      {showNotice && <NoticeSheet onClose={() => setShowNotice(false)} />}
+      {showSettings && <SettingsSheet onClose={() => setShowSettings(false)} />}
+      {showLogoutDialog && (
+        <LogoutDialog
+          isGuest={isGuest}
+          onConfirm={logout}
+          onCancel={() => setShowLogoutDialog(false)}
+        />
+      )}
+
       {/* 프로필 헤더 */}
-      <div className="bg-[#161616] pt-12 px-5 pb-5">
-        <h2 className="text-xl font-bold mb-5 text-white">마이페이지</h2>
+      <div className="bg-white pt-12 px-5 pb-5">
+        <h2 className="text-xl font-bold mb-5 text-[#111111]">마이페이지</h2>
         <div className="flex items-center gap-4 mb-5">
           <div className="w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center text-3xl border-2 border-orange-500/20 overflow-hidden shrink-0">
             <FallbackImage src="" alt="프로필" className="w-full h-full object-cover" fallbackNode={<span>🍊</span>} />
           </div>
           <div>
-            <p className="font-bold text-white text-base">{user?.nickname ?? '예비슈퍼개미'}</p>
+            <p className="font-bold text-[#111111] text-base">{user?.nickname ?? '예비슈퍼개미'}</p>
             <div className="flex items-center gap-1.5 mt-1">
               <Trophy size={12} className="text-orange-400" />
-              <span className="text-xs text-[#777777] font-medium">{CURRENT_LEAGUE_NAME} 리그</span>
+              <span className="text-xs text-[#888888] font-medium">{CURRENT_LEAGUE_NAME} 리그</span>
             </div>
             {isGuest && (
-              <span className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-medium text-[#555555] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#1E1E1E' }}>
-                <ShieldAlert size={10} className="text-[#555555]" /> 게스트 계정
+              <span className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-medium text-[#AAAAAA] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#F0F0F0' }}>
+                <ShieldAlert size={10} className="text-[#AAAAAA]" /> 게스트 계정
               </span>
             )}
             {!isGuest && (
@@ -143,22 +309,22 @@ const MyPageScreen = () => {
 
         {/* 통계 */}
         <div className="flex gap-3">
-          <div className="flex-1 bg-[#1E1E1E] rounded-2xl p-4">
+          <div className="flex-1 bg-[#F0F0F0] rounded-2xl p-4">
             <div className="flex items-center gap-1.5 mb-2">
-              <Zap size={13} className="text-[#555555] fill-current" />
-              <span className="text-[11px] font-medium text-[#555555]">누적 포인트</span>
+              <Zap size={13} className="text-[#AAAAAA] fill-current" />
+              <span className="text-[11px] font-medium text-[#AAAAAA]">누적 포인트</span>
             </div>
-            <p className="text-3xl font-bold text-white">
-              {points.toLocaleString()}<span className="text-sm font-medium text-[#555555] ml-1">P</span>
+            <p className="text-3xl font-bold text-[#111111]">
+              {points.toLocaleString()}<span className="text-sm font-medium text-[#AAAAAA] ml-1">P</span>
             </p>
           </div>
-          <div className="flex-1 bg-[#1E1E1E] rounded-2xl p-4">
+          <div className="flex-1 bg-[#F0F0F0] rounded-2xl p-4">
             <div className="flex items-center gap-1.5 mb-2">
-              <BookOpen size={13} className="text-[#555555]" />
-              <span className="text-[11px] font-medium text-[#555555]">학습한 단어</span>
+              <BookOpen size={13} className="text-[#AAAAAA]" />
+              <span className="text-[11px] font-medium text-[#AAAAAA]">학습한 단어</span>
             </div>
-            <p className="text-3xl font-bold text-white">
-              {knownWords.length}<span className="text-sm font-medium text-[#555555] ml-1">개</span>
+            <p className="text-3xl font-bold text-[#111111]">
+              {knownWords.length}<span className="text-sm font-medium text-[#AAAAAA] ml-1">개</span>
             </p>
           </div>
         </div>
@@ -167,16 +333,16 @@ const MyPageScreen = () => {
       <div className="px-5 pt-5 flex flex-col gap-4">
         {/* 출석 달력 */}
         <div>
-          <p className="text-sm font-bold text-[#ABABAB] mb-5">출석 현황</p>
+          <p className="text-sm font-bold text-[#555555] mb-5">출석 현황</p>
           <AttendanceCalendar attendanceDates={attendanceDates} />
         </div>
 
         {/* 계정 연결 */}
         {isGuest && (
-          <div className="bg-[#161616] rounded-2xl px-4 py-4 flex items-center justify-between">
+          <div className="bg-white rounded-2xl px-4 py-4 flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-white mb-0.5">기록 안전하게 보관하기</p>
-              <p className="text-xs text-[#777777]">⚠️ 앱 삭제 시 데이터가 사라질 수 있어요</p>
+              <p className="text-sm font-semibold text-[#111111] mb-0.5">기록 안전하게 보관하기</p>
+              <p className="text-xs text-[#888888]">⚠️ 앱 삭제 시 데이터가 사라질 수 있어요</p>
             </div>
             <button
               onClick={() => setShowLinkSheet(true)}
@@ -189,16 +355,17 @@ const MyPageScreen = () => {
 
         {/* 메뉴 */}
         <div>
-          <div className="bg-[#161616] rounded-2xl overflow-hidden">
+          <div className="bg-white rounded-2xl overflow-hidden">
             <List>
               {MENU_ITEMS.map(({ icon: Icon, label, sub, danger }) => (
                 <ListRow
                   key={label}
                   as="button"
                   border="none"
+                  onClick={() => handleMenuClick(label)}
                   left={
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${danger ? 'bg-red-500/10' : 'bg-[#2A2A2A]'}`}>
-                      <Icon size={16} className={danger ? 'text-red-400' : 'text-[#ABABAB]'} />
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${danger ? 'bg-red-500/10' : 'bg-[#E5E5E5]'}`}>
+                      <Icon size={16} className={danger ? 'text-red-400' : 'text-[#555555]'} />
                     </div>
                   }
                   contents={
@@ -206,7 +373,7 @@ const MyPageScreen = () => {
                       ? <ListRow.Texts type="2RowTypeA" top={<span className={danger ? 'text-red-400' : ''}>{label}</span>} bottom={<span className="text-[11px]">{sub}</span>} />
                       : <ListRow.Texts type="1RowTypeA" top={<span className={danger ? 'text-red-400' : ''}>{label}</span>} />
                   }
-                  right={!danger ? <ChevronRight size={16} className="text-[#555555]" /> : undefined}
+                  right={!danger ? <ChevronRight size={16} className="text-[#AAAAAA]" /> : undefined}
                 />
               ))}
             </List>
@@ -214,7 +381,7 @@ const MyPageScreen = () => {
         </div>
 
         <Spacing size={4} />
-        <p className="text-center text-[11px] text-[#555555] font-medium mb-2">머니터미 v1.0.0</p>
+        <p className="text-center text-[11px] text-[#AAAAAA] font-medium mb-2">머니터미 v1.0.0</p>
       </div>
     </div>
   );
