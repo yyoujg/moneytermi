@@ -14,7 +14,7 @@ const NavBar = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  const HIDDEN_PATHS = ['/swipe', '/quiz', '/course/words', '/word-card', '/league/rules'];
+  const HIDDEN_PATHS = ['/quiz', '/course/words', '/word-card', '/league/rules'];
   if (HIDDEN_PATHS.some(p => pathname.startsWith(p))) return null;
 
   return (

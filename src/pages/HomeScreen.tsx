@@ -210,7 +210,7 @@ const HomeScreen = () => {
 
           {/* 단일 CTA */}
           <button
-            onClick={() => navigate('/swipe', { state: { course: nextCourse } })}
+            onClick={() => navigate('/word-card', { state: { words: nextCourse.words, index: 0, backPath: '/home', autoAdvance: true } })}
             className="w-full py-4 rounded-2xl bg-orange-500 text-white text-sm font-bold active:opacity-90 flex items-center justify-center gap-2"
           >
             오늘 학습 시작하기
@@ -278,7 +278,7 @@ const HomeScreen = () => {
               return (
                 <div
                   key={course.id}
-                  onClick={() => navigate('/swipe', { state: { course } })}
+                  onClick={() => navigate('/word-card', { state: { words: course.words, index: 0, backPath: '/home', autoAdvance: true } })}
                   className="bg-white rounded-2xl px-4 py-3.5 flex items-center gap-4 active:opacity-80 cursor-pointer"
                 >
                   <div className="flex-1 min-w-0">

@@ -8,7 +8,6 @@ import CourseScreen from './pages/CourseScreen';
 import ReviewScreen from './pages/ReviewScreen';
 import LeagueScreen from './pages/LeagueScreen';
 import QuizScreen from './pages/QuizScreen';
-import SwipeScreen from './pages/SwipeScreen';
 import CourseWordListScreen from './pages/CourseWordListScreen';
 import WordCardScreen from './pages/WordCardScreen';
 import LeagueRulesScreen from './pages/LeagueRulesScreen';
@@ -68,8 +67,7 @@ const Layout = () => {
         <Route path="/league" element={<LeagueScreen />} />
         <Route path="/review" element={<ReviewScreen />} />
         <Route path="/my" element={<MyPageScreen />} />
-        <Route path="/swipe" element={<SwipeScreen />} />
-        <Route path="/course/words" element={<CourseWordListScreen />} />
+<Route path="/course/words" element={<CourseWordListScreen />} />
         <Route path="/word-card" element={<WordCardScreen />} />
         <Route path="/league/rules" element={<LeagueRulesScreen />} />
         <Route path="/quiz" element={<QuizScreen />} />
