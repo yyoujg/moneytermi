@@ -9,6 +9,16 @@
   <body>
     <div id="root"></div>
     <script>
+      window.onerror = function(msg, src, line, col, err) {
+        document.body.style.background = '#fff';
+        document.body.innerHTML = '<pre style="padding:20px;font-size:12px;color:red;white-space:pre-wrap">[JS Error]\n' + msg + '\n' + (err && err.stack ? err.stack : '') + '</pre>';
+      };
+      window.addEventListener('unhandledrejection', function(e) {
+        document.body.style.background = '#fff';
+        document.body.innerHTML = '<pre style="padding:20px;font-size:12px;color:red;white-space:pre-wrap">[Unhandled Promise]\n' + (e.reason && e.reason.stack ? e.reason.stack : e.reason) + '</pre>';
+      });
+    </script>
+    <script>
       window.__CONSTANT_HANDLER_MAP = {
         getSafeAreaInsets: { top: 0, bottom: 0 },
         getAppName: 'moneytermi',
