@@ -220,7 +220,7 @@ const HomeScreen = () => {
           {quizWords.length > 0 && (
             <button
               onClick={() => navigate('/quiz', { state: { quizQueue: quizWords } })}
-              className="w-full mt-2 py-3 rounded-xl bg-[#F0F0F0] text-xs font-medium text-[#888888] active:opacity-70"
+              className="w-full mt-4 py-3 rounded-xl bg-[#F0F0F0] text-xs font-medium text-[#888888] active:opacity-70"
             >
               퀴즈 풀기 →
             </button>
