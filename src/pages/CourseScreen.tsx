@@ -179,7 +179,7 @@ const CourseScreen = () => {
                 </div>
 
                 <button
-                  onClick={() => navigate('/word-card', { state: { words: course.words, index: 0, backPath: '/course', autoAdvance: true } })}
+                  onClick={() => navigate('/word-card', { state: { words: [...course.words].sort((a, b) => a.difficulty - b.difficulty), index: 0, backPath: '/course', autoAdvance: true } })}
                   className={`w-full flex items-center justify-center gap-1.5 py-3.5 rounded-2xl text-xs font-bold transition-colors
                     ${isCompleted
                       ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20 active:bg-orange-500/20'

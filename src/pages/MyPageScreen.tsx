@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Storage } from '../lib/storage';
-import { BookOpen, Bell, Settings, LogOut, ChevronLeft, ChevronRight, Zap, Trophy, ShieldCheck, ShieldAlert, X, Volume2, VolumeX } from 'lucide-react';
+import { BookOpen, Bell, Settings, LogOut, ChevronLeft, ChevronRight, Zap, Trophy, ShieldCheck, ShieldAlert, X, Volume2, VolumeX, Pencil } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import FallbackImage from '../components/FallbackImage';
 import { CURRENT_LEAGUE_NAME } from '../constants';
@@ -242,14 +242,92 @@ const LogoutDialog = ({ isGuest, onConfirm, onCancel }: { isGuest: boolean; onCo
   </>
 );
 
+// ── 닉네임 변경 시트 ──────────────────────────────────────────
+const NicknameSheet = ({
+  currentNickname,
+  onClose,
+  onSave,
+}: {
+  currentNickname: string;
+  onClose: () => void;
+  onSave: (nickname: string) => Promise<{ error: string | null }>;
+}) => {
+  const [value, setValue] = useState(currentNickname);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setTimeout(() => inputRef.current?.focus(), 100);
+  }, []);
+
+  const handleSave = async () => {
+    setLoading(true);
+    setError(null);
+    const result = await onSave(value);
+    setLoading(false);
+    if (result.error) {
+      setError(result.error);
+    } else {
+      onClose();
+    }
+  };
+
+  return (
+    <>
+      <div className="fixed inset-0 z-50 bg-black/70" onClick={onClose} />
+      <div className="fixed bottom-0 z-[60] w-full" style={{ maxWidth: '28rem', left: '50%', transform: 'translateX(-50%)' }}>
+        <div className="bg-white rounded-t-3xl px-5 pt-6 pb-10 flex flex-col gap-5">
+          <div className="flex items-center justify-between">
+            <p className="text-base font-bold text-[#111111]">닉네임 변경</p>
+            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-[#F0F0F0]">
+              <X size={15} className="text-[#888888]" />
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <div className={`flex items-center gap-3 bg-[#F0F0F0] rounded-2xl px-4 py-3.5 transition-colors ${error ? 'ring-2 ring-red-400/50' : ''}`}>
+              <input
+                ref={inputRef}
+                value={value}
+                onChange={e => { setValue(e.target.value); setError(null); }}
+                onKeyDown={e => { if (e.key === 'Enter') handleSave(); }}
+                maxLength={10}
+                placeholder="닉네임 입력"
+                className="flex-1 bg-transparent text-sm font-semibold text-[#111111] placeholder:text-[#AAAAAA] outline-none"
+              />
+              <span className="text-xs text-[#AAAAAA] shrink-0">{value.length}/10</span>
+              {value.length > 0 && (
+                <button onClick={() => { setValue(''); setError(null); }} className="w-5 h-5 flex items-center justify-center rounded-full bg-[#D0D0D0]">
+                  <X size={10} className="text-white" />
+                </button>
+              )}
+            </div>
+            {error && <p className="text-xs text-red-400 font-medium px-1">{error}</p>}
+          </div>
+
+          <button
+            onClick={handleSave}
+            disabled={loading || value.trim().length === 0}
+            className="w-full py-4 rounded-2xl bg-orange-500 text-white text-sm font-bold active:bg-orange-600 disabled:opacity-40 transition-colors"
+          >
+            {loading ? '확인 중...' : '저장하기'}
+          </button>
+        </div>
+      </div>
+    </>
+  );
+};
+
 // ── 메인 ──────────────────────────────────────────────────────
 const MyPageScreen = () => {
   const { points, knownWords, attendanceDates, missions, checkIn } = useAppContext();
-  const { user, isGuest, linkAccount, logout } = useAuth();
-  const [showLinkSheet, setShowLinkSheet]     = useState(false);
-  const [showNotice, setShowNotice]           = useState(false);
-  const [showSettings, setShowSettings]       = useState(false);
-  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const { user, isGuest, linkAccount, updateNickname, logout } = useAuth();
+  const [showLinkSheet, setShowLinkSheet]         = useState(false);
+  const [showNotice, setShowNotice]               = useState(false);
+  const [showSettings, setShowSettings]           = useState(false);
+  const [showLogoutDialog, setShowLogoutDialog]   = useState(false);
+  const [showNicknameSheet, setShowNicknameSheet] = useState(false);
 
   const handleMenuClick = (label: string) => {
     if (label === '공지사항') setShowNotice(true);
@@ -273,6 +351,13 @@ const MyPageScreen = () => {
       )}
       {showNotice && <NoticeSheet onClose={() => setShowNotice(false)} />}
       {showSettings && <SettingsSheet onClose={() => setShowSettings(false)} />}
+      {showNicknameSheet && (
+        <NicknameSheet
+          currentNickname={user?.nickname ?? ''}
+          onClose={() => setShowNicknameSheet(false)}
+          onSave={updateNickname}
+        />
+      )}
       {showLogoutDialog && (
         <LogoutDialog
           isGuest={isGuest}
@@ -289,7 +374,13 @@ const MyPageScreen = () => {
             <FallbackImage src="" alt="프로필" className="w-full h-full object-cover" fallbackNode={<span>🍊</span>} />
           </div>
           <div>
-            <p className="font-bold text-[#111111] text-base">{user?.nickname ?? '예비슈퍼개미'}</p>
+            <button
+              onClick={() => setShowNicknameSheet(true)}
+              className="flex items-center gap-1.5 group active:opacity-70"
+            >
+              <p className="font-bold text-[#111111] text-base">{user?.nickname ?? '예비슈퍼개미'}</p>
+              <Pencil size={13} className="text-[#AAAAAA] group-active:text-orange-400" />
+            </button>
             <div className="flex items-center gap-1.5 mt-1">
               <Trophy size={12} className="text-orange-400" />
               <span className="text-xs text-[#888888] font-medium">{CURRENT_LEAGUE_NAME} 리그</span>

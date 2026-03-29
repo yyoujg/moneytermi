@@ -15,6 +15,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `정부가 세금만으로 예산이 부족할 때 국민이나 기관에 발행하는 채권입니다. 국가가 보증하므로 떼일 염려가 거의 없는 가장 안전한 금융 자산으로 꼽힙니다.`,
           newsExample: `안전 자산 선호 심리가 강해지면서 주요국의 국채 금리가 일제히 하락했다.`,
           hint: `ㄱㅊ`,
+          difficulty: 1,
           relatedWords: ['국가채무', '공개시장운영']
         },
         {
@@ -24,6 +25,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `공장을 크게 짓고 대량 생산을 하면 고정 비용(설비 투자비 등)이 분산되어 단가가 싸지기 때문에, 기업들이 시장을 선점하고 덩치를 키우려 하는 경제학적 원리입니다.`,
           newsExample: `배터리 업계는 수익성 확보를 위해 대규모 공장 증설을 통한 규모의 경제 실현에 사활을 걸고 있다.`,
           hint: `ㄱㅁㅇ ㄱㅈ`,
+          difficulty: 1,
           relatedWords: ['기회비용']
         },
         {
@@ -33,6 +35,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `아이들이 안전하게 뛰어노는 모래놀이터(Sandbox)처럼, 핀테크 등 혁신적인 신사업을 시작할 때 기존의 낡은 법에 얽매이지 않고 실험해 볼 수 있도록 정부가 특례를 부여하는 것입니다.`,
           newsExample: `혁신 금융 서비스로 지정되어 규제 샌드박스를 통과한 AI 간편 투자 앱이 정식 출시되었다.`,
           hint: `ㄱㅈ ㅅㄷㅂㅅ`,
+          difficulty: 2,
           relatedWords: ['핀테크']
         },
         {
@@ -42,6 +45,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `신재생에너지, 전기차 인프라 구축, 환경오염 방지 등 환경 친화적인 사업에만 투자할 것을 약속하고 기업이나 기관이 발행하는 '녹색 채권'입니다.`,
           newsExample: `ESG 경영이 화두로 떠오르면서 기업들의 그린본드 발행 규모가 급격히 증가하고 있다.`,
           hint: `ㄱㄹㅂㄷ`,
+          difficulty: 2,
           relatedWords: ['기후테크', '금융채']
         },
         {
@@ -51,6 +55,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `증권사, 자산운용사, 헤지펀드 등이 대출이나 투자를 통해 돈을 불리는 활동을 말합니다. 경제에 돈을 공급하는 순기능도 있지만, 위기가 닥치면 파악하기 어려워 위험을 키울 수 있습니다.`,
           newsExample: `국제기구들은 중국의 막대한 그림자금융 규모가 글로벌 경제의 시한폭탄이 될 수 있다고 경고했다.`,
           hint: `ㄱㄹㅈㄱㅇ`,
+          difficulty: 2,
           relatedWords: ['비은행금융중개(NBFI)', '금융불안지수(FSI)']
         }
       ],
@@ -69,6 +74,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `단리는 정직하게 원금에 대해서만 이자를 주지만, 복리는 이자가 이자를 낳기 때문에 시간이 지날수록 돈이 눈덩이처럼 불어나는 마법 같은 효과를 냅니다.`,
           newsExample: `장기 투자를 할 때는 단리 상품보다 이자에 이자가 붙는 복리 상품이 자산 증식에 훨씬 유리하다.`,
           hint: `ㄷㄹ/ㅂㄹ`,
+          difficulty: 1,
           relatedWords: ['명목금리/실질금리']
         },
         {
@@ -78,6 +84,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `만약 5억 원짜리 아파트를 살 때 LTV가 60%라면, 은행에서 최대 3억 원까지만 빌릴 수 있다는 뜻입니다. 정부가 가계 빚을 조절할 때 쓰는 대표적인 규제입니다.`,
           newsExample: `부동산 시장 연착륙을 위해 무주택자에 대한 담보인정비율(LTV) 규제가 대폭 완화되었다.`,
           hint: `ㄷㅂㅇㅈㅂㅇ`,
+          difficulty: 2,
           relatedWords: ['총부채상환비율(DTI)', '총부채원리금상환비율(DSR)']
         },
         {
@@ -87,6 +94,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `대출을 받아 투자했을 때, 대출 이자보다 투자 수익률이 더 높다면 내 돈만으로 투자했을 때보다 훨씬 큰 이익을 얻을 수 있지만, 반대로 실패하면 손실도 폭발적으로 커집니다.`,
           newsExample: `저금리 기조 속에 빚을 내어 주식에 투자하는 레버리지 효과를 노린 2030 세대가 급증했다.`,
           hint: `ㄹㅂㄹㅈ ㅎㄱ`,
+          difficulty: 2,
           relatedWords: ['디레버리징']
         },
         {
@@ -96,6 +104,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `경기가 나빠지거나 금리가 올라 빚을 감당하기 힘들어지면, 기업이나 가계가 자산을 팔고 씀씀이를 줄여 빚부터 갚는 현상입니다. 이때 경제 전체가 얼어붙게 됩니다.`,
           newsExample: `글로벌 금융위기 이후 전 세계는 빚을 줄이는 가혹한 디레버리징 시대를 경험했다.`,
           hint: `ㄷㄹㅂㄹㅈ`,
+          difficulty: 3,
           relatedWords: ['레버리지 효과', '긴축정책']
         },
         {
@@ -105,6 +114,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `빚을 내서 투자(파생상품 등)를 했는데 자산 가치가 뚝 떨어져 정해진 유지율을 밑돌게 되면, 부족한 돈(증거금)을 즉시 입금하라고 요구하는 끔찍한 전화입니다.`,
           newsExample: `주가 폭락으로 반대매매 위기에 처한 개인 투자자들에게 증권사의 마진콜이 빗발치고 있다.`,
           hint: `ㅁㅈㅋ`,
+          difficulty: 2,
           relatedWords: ['반대매매', '증거금']
         }
       ],
@@ -123,6 +133,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `언제 어디서나 잔액 조회, 송금, 대출, 상품 가입 등을 폰으로 뚝딱 처리하게 만들어준 현대 디지털 금융과 핀테크의 가장 기본이 되는 바탕입니다.`,
           newsExample: `모바일뱅킹의 대중화로 오프라인 점포 방문객이 급감하자 시중 은행들이 줄줄이 영업점을 통폐합하고 있다.`,
           hint: `ㅁㅂㅇㅂㅋ`,
+          difficulty: 1,
           relatedWords: ['인터넷뱅킹', '오픈뱅킹']
         },
         {
@@ -132,6 +143,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `은행 같은 관리자가 없어도 모두가 똑같은 장부를 나눠 가지기 때문에 위조나 변조가 사실상 불가능하며, 가상자산(암호화폐)을 돌아가게 만드는 핵심 원리입니다.`,
           newsExample: `금융권뿐만 아니라 물류, 의료, 공공 서비스 등 데이터 보안이 중요한 다양한 분야로 블록체인 기술이 도입되고 있다.`,
           hint: `ㅂㄹㅊㅇ`,
+          difficulty: 2,
           relatedWords: ['분산원장기술', '비트코인', '가상자산']
         },
         {
@@ -141,6 +153,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `이 엄청난 정보들을 분석하면 사람들의 숨겨진 취향이나 앞으로 유행할 트렌드를 찾아낼 수 있어, 기업들에게는 돈을 벌게 해주는 21세기의 원유(기름)로 불립니다.`,
           newsExample: `카드사들은 고객들의 결제 패턴을 분석한 빅데이터를 활용하여 개인의 취향에 딱 맞춘 초개인화 마케팅을 선보이고 있다.`,
           hint: `ㅂㄷㅇㅌ`,
+          difficulty: 1,
           relatedWords: ['4차 산업혁명', '로보어드바이저']
         },
         {
@@ -150,6 +163,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `막강한 가입자 수를 바탕으로 간편결제, 송금, 심지어 대출 중개까지 뛰어들어 전통적인 은행들의 가장 무서운 경쟁자로 떠오른 혁신 기업들입니다.`,
           newsExample: `빅테크 기업들의 금융 시장 장악력이 너무 커지자, 금융당국은 기존 은행들과의 기울어진 운동장을 바로잡기 위한 규제 마련에 착수했다.`,
           hint: `ㅂㅌㅋ`,
+          difficulty: 1,
           relatedWords: ['핀테크', '플랫폼 노동자']
         },
         {
@@ -159,6 +173,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `사토시 나카모토가 만든 블록체인 기술의 첫 결과물로, 발행량이 2,100만 개로 딱 정해져 있어 가상세계의 금(디지털 골드)으로 불리며 투자 자산으로 각광받고 있습니다.`,
           newsExample: `미국 증권거래위원회의 현물 ETF 승인으로 기관 자금이 유입되면서 비트코인 가격이 사상 최고치를 경신했다.`,
           hint: `ㅂㅌㅋㅇ`,
+          difficulty: 1,
           relatedWords: ['가상자산', '블록체인', '작업증명']
         }
       ],
@@ -177,6 +192,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `목돈을 굴릴 때 많이 쓰며, 이 증서를 산 사람은 만기 때 은행에 가져가면 누구나 이자와 원금을 받을 수 있습니다. 대출 금리를 정하는 기준으로도 많이 쓰입니다.`,
           newsExample: `은행들이 연말 자금 확보를 위해 양도성예금증서(CD) 발행을 늘리면서 CD 금리가 가파르게 상승했다.`,
           hint: `ㅇㄷㅅㅇㄱㅈㅅ`,
+          difficulty: 3,
           relatedWords: ['자금조달비용지수(COFIX)']
         },
         {
@@ -186,6 +202,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `증권사가 고객 돈을 모아 아주 안전한 국공채 등에 투자해서 번 돈을 매일매일 이자로 쪼개서 통장에 넣어줍니다. 직장인들의 월급 통장이나 비상금 통장으로 인기가 많습니다.`,
           newsExample: `증시 대기 자금이 늘어나면서 증권사 어음관리계좌(CMA) 잔고가 역대 최대치를 경신했다.`,
           hint: `ㅇㅇㄱㄹㄱㅈ`,
+          difficulty: 2,
           relatedWords: ['머니마켓펀드(MMF)']
         },
         {
@@ -195,6 +212,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `집은 있지만 수입이 없는 고령자들이 집을 팔지 않고도 평생 안정적으로 생활비를 받을 수 있게 해주는 주택연금 제도가 대표적입니다.`,
           newsExample: `빠르게 고령화 사회로 진입하면서 노후 대비책으로 주택연금(역모기지론) 가입자가 매년 급증하고 있다.`,
           hint: `ㅇㅁㄱㅈㄹ`,
+          difficulty: 2,
           relatedWords: ['모기지대출', '국민연금']
         },
         {
@@ -204,6 +222,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `집값이 미친 듯이 오를 때 "지금 안 사면 평생 못 산다(FOMO)"는 불안감에 무리하게 빚을 내어 부동산이나 주식, 코인 등에 뛰어드는 2030 세대의 투자 행태를 뜻합니다.`,
           newsExample: `과거 고점일 때 영끌해서 아파트를 매수한 청년층이 최근 고금리로 인해 막대한 이자 부담에 시달리고 있다.`,
           hint: `ㅇㄲ`,
+          difficulty: 1,
           relatedWords: ['레버리지 효과', 'FOMO현상']
         },
         {
@@ -213,6 +232,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `은행은 고객에게 싼 이자로 돈을 빌려(예금), 다른 사람에게 비싼 이자로 빌려주어(대출) 그 중간 이윤을 챙깁니다. 금리가 오를 때 은행들이 이 마진을 훌쩍 키워 돈을 쓸어 담곤 합니다.`,
           newsExample: `금융당국은 시중 은행들이 이자 장사에만 몰두한다는 비판이 거세지자 예대금리차를 매달 투명하게 공시하도록 지시했다.`,
           hint: `ㅇㄷㄱㄹㅊ`,
+          difficulty: 2,
           relatedWords: ['순이자마진(NIM)']
         }
       ],
@@ -231,6 +251,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `비트코인 같은 민간 가상자산과 달리 국가가 직접 가치를 100% 보장하기 때문에 가격이 널뛰지 않고 안전하며, 미래의 현금을 대체할 국가 주도 디지털 돈입니다.`,
           newsExample: `한국은행은 다가오는 디지털 경제 시대에 대비하여 범용 중앙은행 디지털화폐(CBDC) 모의실험을 성공적으로 마쳤다.`,
           hint: `ㅈㅇㅇㅎ ㄷㅈㅌㅎㅍ`,
+          difficulty: 3,
           relatedWords: ['비트코인', '법정화폐']
         },
         {
@@ -240,6 +261,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `은행 대출을 받기 힘든 스타트업이 신제품을 만들기 전 미리 대중의 투자를 받아 제작비를 마련하고, 나중에 제품으로 보상하거나 주식을 나눠주는 혁신적인 금융 기법입니다.`,
           newsExample: `기발한 디자인의 친환경 텀블러가 크라우드펀딩 플랫폼에서 목표 금액의 1000%를 초과 달성하며 큰 화제를 모았다.`,
           hint: `ㅋㄹㅇㄷㅍㄷ`,
+          difficulty: 2,
           relatedWords: ['핀테크', '스타트업']
         },
         {
@@ -249,6 +271,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `착하고 깨끗하게 경영하는 기업이 결국 장기적으로 튼튼하게 살아남는다는 믿음 때문에, 최근 전 세계 거대 투자사들이 기업에 투자할 때 가장 중요하게 따지는 성적표입니다.`,
           newsExample: `대기업들은 글로벌 투자 유치를 위해 탄소 배출을 줄이고 협력사와의 상생을 강화하는 등 ESG경영에 사활을 걸고 있다.`,
           hint: `ESGㄱㅇ`,
+          difficulty: 2,
           relatedWords: ['그린본드', '탄소배출권']
         },
         {
@@ -258,6 +281,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `남들이 부동산이나 주식, 코인으로 돈을 벌었다는 소문을 들을 때 "나만 벼락거지가 된 것 같다"는 심리적 압박감 때문에 앞뒤 재지 않고 무리하게 추격 매수를 하는 심리입니다.`,
           newsExample: `주식 시장이 연일 최고점을 찍자, 투자 소외감을 견디지 못한 2030 세대의 FOMO현상이 빚투로 이어지고 있다.`,
           hint: `FOMOㅎㅅ`,
+          difficulty: 1,
           relatedWords: ['영끌', '레버리지 효과']
         },
         {
@@ -267,6 +291,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `주가가 폭락할 것 같고 시장이 혼란스러울 때 투자자들이 패닉에 빠지면 이 VIX 지수가 급등하기 때문에 흔히 '월가의 공포지수'라고 부릅니다.`,
           newsExample: `중동 지역의 지정학적 리스크가 고조되면서 간밤에 뉴욕 증시의 VIX 공포지수가 20% 넘게 폭등했다.`,
           hint: `VIX ㅈㅅ`,
+          difficulty: 3,
           relatedWords: ['금융불안지수(FSI)', '꼬리위험']
         }
       ],
@@ -285,6 +310,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `시중 금리가 어떻게 변하든 처음 계약할 때 정한 이자만 내면 되는 방식입니다. 앞으로 금리가 크게 오를 것 같을 때 선택하면 유리합니다.`,
           newsExample: `향후 기준금리 인상이 예상됨에 따라 변동금리보다 고정금리 대출을 찾는 금융소비자가 늘고 있다.`,
           hint: `ㄱㅈㄱㄹ`,
+          difficulty: 1,
           relatedWords: ['가산금리', '고정금리부채권(SB)']
         },
         {
@@ -294,6 +320,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `환율이 시장 상황에 따라 매일 변하게 두지 않고, 정부가 1달러=1,000원 처럼 못을 박아두고 그 선을 유지하도록 직접 개입하는 환율 제도입니다.`,
           newsExample: `과거 많은 신흥국들이 수출 가격 경쟁력을 확보하기 위해 달러에 연동하는 고정환율제도를 채택했었다.`,
           hint: `ㄱㅈㅎㅇㅈㄷ`,
+          difficulty: 2,
           relatedWords: ['관리변동환율제도', '기준환율']
         },
         {
@@ -303,6 +330,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `개인들이 쓰는 소액결제망과 달리, 한 번에 수십억에서 수백억 원의 자금이 은행들끼리 또는 한국은행과 거래될 때 사용하는 국가 핵심 결제 인프라(한국은행 한은금융망)입니다.`,
           newsExample: `한국은행은 거액지급시스템의 안전성을 높이기 위해 차세대 전산망 구축을 완료했다.`,
           hint: `ㄱㅇㅈㄱㅅㅅㅌ`,
+          difficulty: 3,
           relatedWords: ['결제리스크', '결제완결성']
         },
         {
@@ -312,6 +340,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `돈을 지급하고 받는 결제 시스템에서, 어떤 거래가 완료되면 그 이후에 금융회사가 파산하더라도 그 결제 자체는 물를 수 없게 보장하여 연쇄 부도를 막는 안전장치입니다.`,
           newsExample: `지급결제제도의 안정을 위해 법적으로 결제완결성을 보장하는 것은 매우 중요하다.`,
           hint: `ㄱㅈㅇㄱㅅ`,
+          difficulty: 3,
           relatedWords: ['거액지급시스템', '결제리스크']
         },
         {
@@ -321,6 +350,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `은행이 예금 대출뿐만 아니라 증권이나 보험까지 다 같이 팔 수 있게 허용하는 것이 겸업주의이고, 각자의 고유 업무만 엄격하게 분리해서 하도록 막는 것이 전업주의입니다.`,
           newsExample: `세계 금융의 흐름이 전업주의에서 금융회사들의 경쟁력을 높이기 위한 겸업주의로 옮겨가는 추세다.`,
           hint: `ㄱㅇㅈㅇ/ㅈㅇㅈㅇ`,
+          difficulty: 2,
           relatedWords: ['금산분리', '금융지주회사']
         }
       ],
@@ -339,6 +369,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `BIS 자기자본비율을 계산할 때 가장 핵심이 되는 자본으로, 주주들이 낸 자본금이나 회사가 벌어서 쌓아둔 이익잉여금처럼 상환 의무가 없는 튼튼한 자본입니다.`,
           newsExample: `금융감독원은 경기 불확실성에 대비해 은행들에게 기본자본(Tier 1) 비율을 높게 유지할 것을 권고했다.`,
           hint: `ㄱㅂㅈㅂ`,
+          difficulty: 3,
           relatedWords: ['국제결제은행(BIS)', '기타기본자본(Additional Tier 1)']
         },
         {
@@ -348,6 +379,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `과거처럼 금보유량에 얽매이지 않고(금본위제 폐지), 국가의 신용을 바탕으로 지폐를 발행하며 통화량을 인위적으로 융통성 있게 관리하는 현대의 시스템입니다.`,
           newsExample: `현대 자본주의 국가들은 모두 중앙은행이 발권력을 독점하는 관리통화제도를 채택하고 있다.`,
           hint: `ㄱㄹㅌㅎㅈㄷ`,
+          difficulty: 3,
           relatedWords: ['금본위제', '기준금리']
         },
         {
@@ -357,6 +389,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `돈을 빌려주는 투자자에게 "나중에 이자랑 원금 대신에, 우리 회사가 투자해둔 A사 주식으로 바꿔갈 수 있는 권리"를 덤으로 주는 특수한 채권입니다.`,
           newsExample: `자사주를 활용해 자금을 조달하려는 상장사들의 교환사채(EB) 발행이 늘고 있다.`,
           hint: `ㄱㅎㅅㅊ`,
+          difficulty: 3,
           relatedWords: ['국채', '기업어음(CP)']
         },
         {
@@ -366,6 +399,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `미국 달러화, 유로화, 일본 엔화, 영국 파운드화 등 국제 외환시장에서 쉽게 다른 통화로 바꿀 수 있고 널리 인정받는 강력한 통화들을 말합니다.`,
           newsExample: `수출입 결제 대금을 원활하게 지급하기 위해서는 충분한 규모의 교환성 통화를 확보해야 한다.`,
           hint: `ㄱㅎㅅ ㅌㅎ`,
+          difficulty: 2,
           relatedWords: ['기축통화', '외환보유액']
         },
         {
@@ -375,6 +409,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `고객이 돈을 맡기면 신탁회사가 주식, 채권 등에 알아서 투자하여 수익을 낸 뒤, 수수료를 떼고 원금과 이익을 돌려주는 금융 상품입니다.`,
           newsExample: `주식 시장 변동성이 커지자 전문가가 대신 운용해주는 특정 금전신탁으로 시중 자금이 몰리고 있다.`,
           hint: `ㄱㅈㅅㅌ`,
+          difficulty: 2,
           relatedWords: ['그림자금융']
         }
       ],
@@ -393,6 +428,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `주로 은행이나 대기업들이 당장 내일이나 몇 달 뒤에 쓸 급전이 필요할 때 콜, 기업어음(CP), 양도성예금증서(CD) 등을 사고팔며 자금을 조달하는 곳입니다. 자금 시장의 혈관 역할을 합니다.`,
           newsExample: `레고랜드 사태로 불안감이 커지며 단기금융시장의 자금줄이 급격히 말라붙었다.`,
           hint: `ㄷㄱㄱㅇㅅㅈ`,
+          difficulty: 2,
           relatedWords: ['장기금융시장', '콜시장']
         },
         {
@@ -402,6 +438,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `경쟁자가 없기 때문에 기업이 마음대로 비싼 가격을 부르거나 품질을 떨어뜨릴 수 있어, 소비자에게 피해가 가기 쉬운 구조입니다. 통신사, 정유사 등이 대표적인 과점입니다.`,
           newsExample: `공정거래위원회는 거대 플랫폼 기업들의 독점적 지위 남용 행위를 엄격히 제재하기로 했다.`,
           hint: `ㄷㅈ/ㄱㅈ`,
+          difficulty: 1,
           relatedWords: ['카르텔', '불완전경쟁시장']
         },
         {
@@ -411,6 +448,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `보통 미국 주식이 오르면 한국 주식도 오르는 동조화(커플링) 현상이 나타나지만, 미국은 경제가 좋은데 한국만 침체되어 주가가 따로 노는 것을 탈동조화(디커플링)라고 합니다.`,
           newsExample: `최근 미 증시는 연일 최고치를 경신하는 반면, 국내 증시는 박스권에 갇힌 디커플링 현상이 심화되고 있다.`,
           hint: `ㄷㅋㅍㄹ/ㅋㅍㄹ`,
+          difficulty: 2,
           relatedWords: ['동행종합지수']
         },
         {
@@ -420,6 +458,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `빅데이터와 알고리즘을 활용해 사람(PB) 대신 싼 수수료로 고객의 투자 성향에 맞춘 자산 배분 포트폴리오를 짜주는 핀테크 서비스입니다.`,
           newsExample: `젊은 세대를 중심으로 자산관리의 문턱을 낮춘 로보어드바이저 가입자가 크게 늘고 있다.`,
           hint: `ㄹㅂㅇㄷㅂㅇㅈ`,
+          difficulty: 2,
           relatedWords: ['핀테크', '빅데이터']
         },
         {
@@ -429,6 +468,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `세금을 너무 많이 떼가면 사람들이 "차라리 일 안 하고 말지"라며 경제 활동을 포기하거나 세금을 회피하기 때문에, 적정 수준을 넘어가면 오히려 걷히는 세금(세수)이 줄어든다는 이론입니다.`,
           newsExample: `감세를 주장하는 진영에서는 조세 수입을 늘리기 위해 래퍼곡선의 원리를 자주 인용한다.`,
           hint: `ㄹㅍㄱㅅ`,
+          difficulty: 3,
           relatedWords: ['조세부담률']
         }
       ],
@@ -447,6 +487,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `언제든 자유롭게 돈을 넣고 뺄 수 있으면서 수시입출금 통장보다 이자가 조금 더 높아, 주식에 투자하기 전 마땅한 곳을 찾지 못한 큰돈이 잠시 머무르는 주차장 역할을 합니다.`,
           newsExample: `증시 불확실성이 커지자 오갈 데 없는 투자 대기 자금이 안전 자산인 머니마켓펀드(MMF)로 대거 몰려들었다.`,
           hint: `ㅁㄴㅁㅋㅍㄷ`,
+          difficulty: 2,
           relatedWords: ['단기금융시장', '어음관리계좌(CMA)']
         },
         {
@@ -456,6 +497,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `일반적인 펀드 가입과 달리, 투자자가 펀드라는 이름의 주식회사 주식을 직접 사서 주주가 된 뒤 배당 형태로 수익을 돌려받는 간접투자 상품입니다.`,
           newsExample: `개인 투자자들이 직접 투자의 어려움을 느끼고 전문가가 대신 운용해주는 뮤추얼펀드로 눈길을 돌리고 있다.`,
           hint: `ㅁㅊㅇㅍㄷ`,
+          difficulty: 2,
           relatedWords: ['펀드', '헤지펀드']
         },
         {
@@ -465,6 +507,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `투자자의 빚 상환 능력이 떨어졌을 때 증권사가 자신의 돈을 떼이지 않기 위해 시장가(하한가)로 무조건 주식을 던져버려, 시장 전체의 주가 폭락을 부추기는 요인이 됩니다.`,
           newsExample: `연일 주가 급락장이 이어지면서 빚내서 투자한 개미들의 반대매매 물량이 쏟아져 나와 지수 하락을 부채질했다.`,
           hint: `ㅂㄷㅁㅁ`,
+          difficulty: 2,
           relatedWords: ['마진콜', '증거금']
         },
         {
@@ -474,6 +517,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `고객이 은행에 적금을 들러 갔다가 생명보험이나 연금보험까지 한곳에서 편하게 가입할 수 있도록 하여, 금융회사들끼리 서로의 영역을 넘어 판매하게 해준 제도입니다.`,
           newsExample: `시중은행들은 예대마진 외에 비이자 이익을 늘리기 위해 창구에서 방카슈랑스 상품 판매를 적극 독려하고 있다.`,
           hint: `ㅂㅋㅅㄹㅅ`,
+          difficulty: 2,
           relatedWords: ['겸업주의/전업주의']
         },
         {
@@ -483,6 +527,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `인가를 받은 대형 투자은행(IB)만 발행할 수 있으며, 은행 예금처럼 원금이 떼일 위험은 거의 없으면서 금리는 은행보다 조금 더 쳐주는 매력적인 단기 금융 상품입니다.`,
           newsExample: `대형 증권사들이 수신 자금 확보 경쟁에 뛰어들면서 1년 만기 발행어음 금리를 연 4% 중반대까지 인상했다.`,
           hint: `ㅂㅎㅇㅇ`,
+          difficulty: 3,
           relatedWords: ['종합금융투자사업자', '기업어음(CP)']
         }
       ],
@@ -501,6 +546,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `대기업이 은행을 소유하면 은행을 자신의 사금고처럼 써서 일반 예금자들에게 피해를 줄 수 있기 때문에 이를 엄격히 법으로 분리하는 것입니다.`,
           newsExample: `빅테크 기업의 인터넷 은행 진출을 두고 금산분리 규제 완화 논란이 뜨겁다.`,
           hint: `ㄱㅅㅂㄹ`,
+          difficulty: 3,
           relatedWords: ['금융지주회사', '은산분리']
         },
         {
@@ -510,6 +556,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `중앙은행(한국은행 금융통화위원회)이 경제 상황을 보고 매달 결정하는 금리로, 이 금리가 변하면 시중 은행의 예금, 대출 금리가 줄줄이 따라 변합니다.`,
           newsExample: `한국은행이 치솟는 물가를 잡기 위해 기준금리를 0.5%p 인상하는 빅스텝을 밟았다.`,
           hint: `ㄱㅈㄱㄹ`,
+          difficulty: 1,
           relatedWords: ['공개시장운영', '가산금리']
         },
         {
@@ -519,6 +566,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `국제 무역이나 금융 거래에서 가장 기본이 되는 화폐로, 현재는 미국의 달러(Dollar)가 세계 유일의 확고한 기축통화 역할을 하고 있습니다.`,
           newsExample: `미국이 강력한 경제 제재를 가할 수 있는 이유는 달러가 기축통화이기 때문이다.`,
           hint: `ㄱㅊㅌㅎ`,
+          difficulty: 2,
           relatedWords: ['교환성 통화', '국제금융시장']
         },
         {
@@ -528,6 +576,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `내가 A를 선택함으로써 가질 수 없게 된 B, C 중 가장 아까운 것의 가치입니다. 경제학에서는 항상 이 기회비용을 따져서 합리적인 선택을 해야 합니다.`,
           newsExample: `대학 진학 대신 바로 취업을 선택했을 때의 기회비용은 4년간의 대학 생활과 졸업장이 될 것이다.`,
           hint: `ㄱㅎㅂㅇ`,
+          difficulty: 1,
           relatedWords: ['매몰비용']
         },
         {
@@ -537,6 +586,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `정규분포 그래프의 양 끝 꼬리 부분에 해당하는 극단적인 사건(예: 2008년 글로벌 금융위기, 코로나19 팬데믹 등)을 의미합니다.`,
           newsExample: `증시 변동성이 극심해지면서 헤지펀드들은 꼬리위험에 대비한 자산 배분에 나섰다.`,
           hint: `ㄲㄹㅇㅎ`,
+          difficulty: 3,
           relatedWords: ['블랙스완', '글로벌 금융위기']
         }
       ],
@@ -555,6 +605,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `정부가 외환보유액이나 원유 수출 대금 등 남아도는 막대한 여유 자금을 바탕으로, 해외의 주식, 채권, 부동산 등에 투자하여 수익을 창출하는 국영 투자 기관입니다.`,
           newsExample: `중동의 국부펀드들이 막강한 오일머니를 바탕으로 전 세계 유망 IT 기업 사냥에 나섰다.`,
           hint: `ㄱㅂㅍㄷ`,
+          difficulty: 2,
           relatedWords: ['외환보유액']
         },
         {
@@ -564,6 +615,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `국내 총투자가 국내 총저축보다 많아서 자금이 부족할 때, 외국에서 자본을 들여와 부족분을 채우는 것을 뜻합니다. 경상수지가 적자일 때 발생합니다.`,
           newsExample: `대규모 개발 사업으로 자금 수요가 늘자 국외저축 의존도가 일시적으로 높아졌다.`,
           hint: `ㄱㅇㅈㅊ`,
+          difficulty: 2,
           relatedWords: ['국내총투자율', '경상수지']
         },
         {
@@ -573,6 +625,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `우리나라 근로자나 기업이 해외에서 노동력과 자본을 제공하고 받은 소득에서, 국내에 있는 외국인과 외국 기업이 가져간 소득을 뺀 금액입니다.`,
           newsExample: `해외 배당금 수입이 크게 늘면서 국외순수취요소소득이 흑자 폭을 키웠다.`,
           hint: `ㄱㅇㅅㅅㅊㅇㅅㅅㄷ`,
+          difficulty: 3,
           relatedWords: ['국민총소득(GNI)', '국내총생산(GDP)']
         },
         {
@@ -582,6 +635,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `우리나라가 외국에 공장을 짓거나 돈을 빌려준 등 해외로 나간 순자산이 국민처분가능소득에서 차지하는 비중입니다. 경상수지 흑자가 클수록 높아집니다.`,
           newsExample: `국내 저축이 투자를 초과하며 남는 자본이 해외로 빠져나가 국외투자율이 지속적으로 상승하고 있다.`,
           hint: `ㄱㅇㅌㅈㅇ`,
+          difficulty: 2,
           relatedWords: ['국내총투자율', '경상수지']
         },
         {
@@ -591,6 +645,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `물건 수출입(경상수지)뿐만 아니라 주식 투자, 대출(금융계정) 등 국가 간에 발생한 모든 경제적 거래를 체계적으로 꼼꼼하게 기록한 표입니다.`,
           newsExample: `한국은행이 발표한 국제수지표에 따르면 지난달 외국인 주식 투자 자금이 대거 순유출된 것으로 나타났다.`,
           hint: `ㄱㅈㅅㅈㅍ`,
+          difficulty: 2,
           relatedWords: ['국제수지(BOP)', '경상수지']
         }
       ],
@@ -609,6 +664,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `경제 위기나 헛소문 등으로 금융기관의 건전성에 대한 신뢰가 무너져, 대규모 뱅크런(예금 인출 사태)이 발생하고 멀쩡한 은행까지 연쇄 도산하는 극심한 혼란 상태입니다.`,
           newsExample: `1930년대 대공황 당시 미국에서는 수많은 은행이 파산하며 극심한 금융공황을 겪었다.`,
           hint: `ㄱㅇㄱㅎ`,
+          difficulty: 2,
           relatedWords: ['글로벌 금융위기', '결제리스크']
         },
         {
@@ -618,6 +674,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `한국은행이 금융 시스템이 위기 상황으로 가고 있는지 파악하기 위해 여러 시장 지표를 하나의 숫자로 만든 것입니다. 이 수치가 높을수록 위기 경보가 켜졌다는 뜻입니다.`,
           newsExample: `부동산 PF 부실 우려로 단기 자금 시장이 경색되면서 금융불안지수(FSI)가 '주의' 단계를 넘어섰다.`,
           hint: `ㄱㅇㅂㅇㅈㅅ`,
+          difficulty: 3,
           relatedWords: ['금융취약성지수(FVI)', '거시건전성 정책']
         },
         {
@@ -627,6 +684,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `금융 시스템이 물가처럼 흔들림 없이 정상적으로 기능하여, 기업과 가계에 돈이 원활하게 돌고 대내외적인 경제 위기가 닥쳐도 스스로 충격을 흡수할 수 있는 상태를 뜻합니다.`,
           newsExample: `한국은행은 물가 안정과 함께 금융안정을 도모하는 것을 중앙은행의 핵심 목표로 삼고 있다.`,
           hint: `ㄱㅇㅇㅈ`,
+          difficulty: 1,
           relatedWords: ['거시건전성 정책', '금융상황지수(FCI)']
         },
         {
@@ -636,6 +694,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `자신은 직접 금융업을 하지 않지만, 자회사들의 주식을 소유하여 묶어 관리(예: KB금융지주, 신한지주)함으로써 시너지를 내고 대형화하기 위해 설립된 회사입니다.`,
           newsExample: `주요 금융지주회사들이 이자 이익 증가에 힘입어 역대 최대 규모의 당기순이익을 달성했다.`,
           hint: `ㄱㅇㅈㅈㅎㅅ`,
+          difficulty: 2,
           relatedWords: ['겸업주의/전업주의', '금산분리']
         },
         {
@@ -645,6 +704,7 @@ export const MACRO_FINANCE: Course[] = [
           detailedMeaning: `한국은행 총재를 포함한 7명의 위원들이 모여 국내외 경제 상황을 종합적으로 판단한 뒤, 시중에 돈을 풀지 조일지 통화정책 방향을 투표로 결정하는 막강한 회의체입니다.`,
           newsExample: `내일 열리는 금융통화위원회에서 기준금리를 연속 동결할지, 아니면 전격 인상할지 시장의 이목이 집중되고 있다.`,
           hint: `ㄱㅇㅌㅎㅇㅇㅎ`,
+          difficulty: 3,
           relatedWords: ['기준금리', '공개시장운영']
         }
       ],

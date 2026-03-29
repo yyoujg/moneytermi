@@ -15,6 +15,7 @@ export const MACRO_STOCK: Course[] = [
           detailedMeaning: `소수의 주주들만 있던 비상장 기업이, 사업을 크게 확장할 자금을 모으기 위해 재무상태를 투명하게 공개하고 주식시장에 이름을 올리는 과정입니다.`,
           newsExample: `올해 하반기 최대어로 꼽히는 IT 기업의 기업공개(IPO)에 수십조 원의 청약 증거금이 몰렸다.`,
           hint: `ㄱㅇㄱㄱ`,
+          difficulty: 2,
           relatedWords: ['가상자산공개(ICO)']
         },
         {
@@ -24,6 +25,7 @@ export const MACRO_STOCK: Course[] = [
           detailedMeaning: `담보 없이 오직 기업의 신용만으로 발행하여, 주로 1년 미만의 짧은 기간 동안 쓸 운영 자금을 금융시장(증권사 등)에서 조달하는 방법입니다.`,
           newsExample: `자금줄이 마른 건설사들이 높은 금리에도 불구하고 기업어음(CP) 발행을 늘리고 있다.`,
           hint: `ㄱㅇㅇㅇ`,
+          difficulty: 2,
           relatedWords: ['금융채', '국채']
         },
         {
@@ -33,6 +35,7 @@ export const MACRO_STOCK: Course[] = [
           detailedMeaning: `사업의 전문성을 높이거나 경영권을 강화하기 위해 실시합니다. 기존 주주들이 새 회사의 주식을 나눠 갖는 '인적분할'과, 기존 회사가 새 회사의 지분 100%를 소유하는 '물적분할'이 있습니다.`,
           newsExample: `해당 대기업은 핵심 사업부의 경쟁력 강화를 위해 물적분할 후 재상장을 추진 중이다.`,
           hint: `ㄱㅇㅂㅎ`,
+          difficulty: 2,
           relatedWords: ['기업공개(IPO)']
         },
         {
@@ -42,6 +45,7 @@ export const MACRO_STOCK: Course[] = [
           detailedMeaning: `파산시켜서 아예 문을 닫는 것보다, 빚을 좀 깎아주고 살려두는 것이 채권자나 국가 경제에 더 유리하다고 판단될 때 법원의 관리(법정관리) 하에 재기를 돕는 절차입니다.`,
           newsExample: `유동성 위기를 극복하지 못한 중견 해운사가 결국 법원에 기업회생절차를 신청했다.`,
           hint: `ㄱㅇㅎㅅㅈㅊ`,
+          difficulty: 2,
           relatedWords: ['가교은행']
         },
         {
@@ -51,6 +55,7 @@ export const MACRO_STOCK: Course[] = [
           detailedMeaning: `현장에 있는 기업인들에게 "요즘 장사 잘 됩니까?"라고 물어보고 수치화한 것입니다. 100을 넘으면 긍정적으로 보는 기업이 더 많다는 뜻이고, 100 미만이면 그 반대입니다.`,
           newsExample: `수출 둔화 우려 속에 제조업 기업경기실사지수(BSI)가 3개월 연속 기준선인 100을 밑돌았다.`,
           hint: `ㄱㅇㄱㄱㅅㅅㅈㅅ`,
+          difficulty: 3,
           relatedWords: ['경제심리지수', '기업심리지수(CBSI)']
         }
       ],
@@ -69,6 +74,7 @@ export const MACRO_STOCK: Course[] = [
           detailedMeaning: `코스피200이나 반도체 산업 등 전체 시장이나 특정 섹터에 골고루 분산 투자하는 효과를 내면서도, 일반 주식처럼 스마트폰으로 실시간 거래가 가능해 아주 인기가 높습니다.`,
           newsExample: `개인 투자자들의 자금이 2차전지 관련 상장지수펀드(ETF)로 대거 몰리며 거래 대금이 폭발적으로 증가했다.`,
           hint: `ㅅㅈㅈㅅㅍㄷ`,
+          difficulty: 2,
           relatedWords: ['뮤추얼펀드', '주가지수']
         },
         {
@@ -78,6 +84,7 @@ export const MACRO_STOCK: Course[] = [
           detailedMeaning: `전기가 합선되었을 때 두꺼비집이 내려가 화재를 막는 것처럼, 주가가 일정 수준 이상 폭락하면 시장 전체의 매매를 잠시 중단시켜 공포에 질린 투매를 막는 안전장치입니다.`,
           newsExample: `미국 증시 개장 직후 주가가 폭락하자 시스템 안정을 위해 1단계 서킷브레이커가 발동되었다.`,
           hint: `ㅅㅋㅂㄹㅇㅋ`,
+          difficulty: 2,
           relatedWords: ['사이드카', '금융공황']
         },
         {
@@ -87,6 +94,7 @@ export const MACRO_STOCK: Course[] = [
           detailedMeaning: `과거 국내 주식에만 투자하던 '동학개미'들이 애플, 테슬라 등 글로벌 빅테크 기업의 성장에 주목하여 해외로 눈을 돌리면서 생겨난 신조어입니다.`,
           newsExample: `서학개미들이 가장 많이 보유한 미국 인공지능 관련 주식이 간밤에 사상 최고치를 경신했다.`,
           hint: `ㅅㅎㄱㅁ`,
+          difficulty: 1,
           relatedWords: ['환리스크']
         },
         {
@@ -96,6 +104,7 @@ export const MACRO_STOCK: Course[] = [
           detailedMeaning: `가을에 수확할 배추를 여름에 미리 고정된 가격으로 밭떼기 계약을 맺는 것과 같습니다. 가격이 오를지 내릴지 모르는 불확실성(위험)을 피하거나 큰 수익을 낼 때 씁니다.`,
           newsExample: `국제 유가 상승에 베팅하는 투기 자금이 원유 선물거래 시장으로 급격히 유입되고 있다.`,
           hint: `ㅅㅁㄱㄹ`,
+          difficulty: 2,
           relatedWords: ['옵션', '차액결제선물환(NDF) 거래']
         },
         {
@@ -105,6 +114,7 @@ export const MACRO_STOCK: Course[] = [
           detailedMeaning: `쌀, 라면, 버스 요금, 집세 등 소비자들이 장바구니에 담는 품목들의 가격 변동을 측정합니다. 중앙은행이 금리를 결정할 때 가장 중요하게 쳐다보는 성적표입니다.`,
           newsExample: `지난달 미국 소비자물가지수(CPI)가 시장의 예상치를 뛰어넘으며 인플레이션 공포를 다시 자극했다.`,
           hint: `ㅅㅂㅈㅁㄱㅈㅅ`,
+          difficulty: 2,
           relatedWords: ['근원인플레이션율', '기대인플레이션']
         }
       ],
@@ -123,6 +133,7 @@ export const MACRO_STOCK: Course[] = [
           detailedMeaning: `회사가 1년에 1만 원을 버는데 주가가 10만 원이라면 PER은 10배입니다. 이 숫자가 낮을수록 회사가 버는 돈에 비해 주가가 싸게 거래(저평가)되고 있다는 뜻입니다.`,
           newsExample: `주가가 급락하면서 코스피 시장의 평균 주가수익비율(PER)이 역사적 저점 수준까지 떨어졌다.`,
           hint: `ㅈㄱㅅㅇㅂㅇ`,
+          difficulty: 2,
           relatedWords: ['주가순자산비율(PBR)', '주당순이익(EPS)']
         },
         {
@@ -132,6 +143,7 @@ export const MACRO_STOCK: Course[] = [
           detailedMeaning: `PBR이 1 미만이라는 것은 회사가 가진 땅, 공장 등 순수한 재산을 다 합친 것보다 현재 주식 시장에서 평가받는 시가총액이 더 낮다는 의미입니다.`,
           newsExample: `정부의 기업 밸류업 프로그램 발표 이후, PBR이 1 미만인 만년 저평가 가치주들로 매수세가 쏠리고 있다.`,
           hint: `ㅈㄱㅅㅈㅅㅂㅇ`,
+          difficulty: 3,
           relatedWords: ['주가수익비율(PER)', '주주환원정책']
         },
         {
@@ -141,6 +153,7 @@ export const MACRO_STOCK: Course[] = [
           detailedMeaning: `주가가 오르면 주식으로 바꿔서 큰 시세 차익을 얻을 수 있고, 주가가 떨어지면 주식으로 바꾸지 않고 그냥 원금과 이자만 받으면 되는 일석이조의 투자 상품입니다.`,
           newsExample: `자금 조달이 시급한 바이오 벤처기업들이 잇따라 대규모 전환사채(CB) 발행에 성공했다.`,
           hint: `ㅈㅎㅅㅊ`,
+          difficulty: 3,
           relatedWords: ['교환사채(EB)', '신주인수권부사채(BW)']
         },
         {
@@ -150,6 +163,7 @@ export const MACRO_STOCK: Course[] = [
           detailedMeaning: `쓰레기(Junk)라는 이름처럼 회사가 망할 위험이 높습니다. 하지만 위험을 무릅쓰고 고수익을 노리는 투자자들이나 공격적인 헤지펀드들이 주로 투자합니다.`,
           newsExample: `글로벌 금리 인하 기대감이 퍼지면서 고수익을 좇는 자금들이 위험 자산인 정크본드 시장으로 유입되고 있다.`,
           hint: `ㅈㅋㅂㄷ`,
+          difficulty: 2,
           relatedWords: ['신용평가제도', '회사채']
         },
         {
@@ -159,6 +173,7 @@ export const MACRO_STOCK: Course[] = [
           detailedMeaning: `미래의 위험을 피하기 위한 목적으로 만들어졌지만, 지렛대(레버리지) 효과가 매우 커서 적은 돈으로 막대한 이익을 볼 수도, 반대로 엄청난 빚을 질 수도 있습니다.`,
           newsExample: `금리 변동성이 극심해지자 위험을 회피하려는 기업들의 파생금융상품 거래 규모가 급증했다.`,
           hint: `ㅍㅅㄱㅇㅅㅍ`,
+          difficulty: 3,
           relatedWords: ['선물거래', '옵션', '스왑']
         }
       ],

@@ -30,6 +30,7 @@ export type Word = {
   detailedMeaning: string;
   newsExample: string;
   hint: string;
+  difficulty: 1 | 2 | 3;
   relatedWords?: string[];
 };
 

@@ -15,6 +15,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `가구의 소득과 자산을 모두 고려하여, 대출 원리금을 갚기 어려운 가구를 평가하는 지수입니다. 100을 넘으면 위험 가구로 분류합니다.`,
           newsExample: `금리 인상 여파로 가계부실위험지수가 1년 새 최고치를 경신했다.`,
           hint: `ㄱㄱㅂㅅㅇㅎㅈㅅ`,
+          difficulty: 3,
           relatedWords: ['가계처분가능소득', '고정이하여신비율']
         },
         {
@@ -24,6 +25,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `개인이 번 총소득에서 세금, 국민연금, 건강보험료 등 반드시 내야 하는 돈을 빼고 남은 순수한 소득입니다.`,
           newsExample: `물가는 오르는데 가계처분가능소득은 제자리걸음을 하며 서민 경제가 얼어붙고 있다.`,
           hint: `ㄱㄱㅊㅂㄱㄴㅅㄷ`,
+          difficulty: 2,
           relatedWords: ['가계순저축률', '국민처분가능소득(NDI)']
         },
         {
@@ -33,6 +35,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `직접세는 소득세처럼 내 소득에 직접 매겨 내가 내는 세금이고, 간접세는 부가가치세처럼 물건값에 포함되어 있어 소비자가 부담하지만 납부는 가게 주인이 하는 세금입니다.`,
           newsExample: `정부는 서민 부담 완화를 위해 유류세 등 주요 간접세 인하를 검토 중이다.`,
           hint: `ㄱㅈㅅ/ㅈㅈㅅ`,
+          difficulty: 1,
           relatedWords: ['국민부담률']
         },
         {
@@ -42,6 +45,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `개별 은행의 건전성을 넘어, 경제 시스템 전체에 과도한 빚이나 거품이 쌓여 위기가 발생하는 것을 막기 위한 정책입니다. LTV, DSR 규제가 대표적입니다.`,
           newsExample: `금융당국은 가계부채 관리를 위해 한층 강화된 거시건전성 정책을 발표했다.`,
           hint: `ㄱㅅㄱㅈㅅㅈㅊ`,
+          difficulty: 3,
           relatedWords: ['경기순응성', '금융안정']
         },
         {
@@ -51,6 +55,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `거래 상대방이 파산하거나 시스템에 문제가 생겨, 약속한 시간에 대금을 받지 못해 발생하는 연쇄적인 위험을 말합니다.`,
           newsExample: `중앙은행은 대규모 이체 시스템의 결제리스크를 줄이기 위한 공동망 개편에 나섰다.`,
           hint: `ㄱㅈㄹㅅㅋ`,
+          difficulty: 2,
           relatedWords: ['결제완결성', '거액지급시스템']
         }
       ],
@@ -69,6 +74,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `과거 신문이나 우유를 배달받던 것을 넘어, 넷플릭스 같은 영상 서비스, 정수기, 심지어 자동차나 영양제까지 월정액을 내고 이용하는 현대의 소비 트렌드입니다.`,
           newsExample: `소유보다 경험을 중시하는 MZ세대의 소비 성향에 맞춰 다양한 산업으로 구독경제 모델이 확산되고 있다.`,
           hint: `ㄱㄷㄱㅈ`,
+          difficulty: 1,
           relatedWords: ['기회비용']
         },
         {
@@ -78,6 +84,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `탄소를 줄이거나(온실가스 감축), 신재생 에너지를 만들고, 버려지는 쓰레기를 재활용하는 등 환경 보호와 수익 창출을 동시에 노리는 기술 산업입니다.`,
           newsExample: `글로벌 투자금이 탄소 중립을 실현할 혁신적인 기후테크 스타트업들로 빠르게 유입되고 있다.`,
           hint: `ㄱㅎㅌㅋ`,
+          difficulty: 1,
           relatedWords: ['그린본드']
         },
         {
@@ -87,6 +94,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `일반적으로 가격이 내리면 수요가 늘어야 하는데 반대로 움직이는 특수한 재화입니다. (예: 너무 가난해서 감자만 먹다가, 감자값이 싸지면 남은 돈으로 고기를 사느라 오히려 감자 소비를 줄이는 현상)`,
           newsExample: `전통적인 경제학의 수요 법칙을 거스르는 대표적인 예외 사례로 기펜재가 자주 언급된다.`,
           hint: `ㄱㅍㅈ`,
+          difficulty: 3,
           relatedWords: ['공급탄력성']
         },
         {
@@ -96,6 +104,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `경기 순환의 파도 속에서, 가장 좋았던 날(정점)과 가장 나빴던 날(저점)을 통계청이 나중에 분석해서 공식적으로 선언하는 기준일입니다.`,
           newsExample: `통계청은 각종 지표를 종합한 결과, 이번 경기 침체의 저점(기준순환일)을 지난 1월로 공식 판정했다.`,
           hint: `ㄱㅈㅅㅎㅇ`,
+          difficulty: 2,
           relatedWords: ['경기종합지수', '경제성장률']
         },
         {
@@ -105,6 +114,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `가격이 올랐을 때 금방 생산을 늘릴 수 있으면(예: 마스크, 공산품) 탄력적이라고 하고, 농산물이나 아파트처럼 가격이 올라도 당장 생산을 못 늘리면 비탄력적이라고 합니다.`,
           newsExample: `주택 시장은 공급탄력성이 매우 낮아 수요가 조금만 늘어도 가격이 단기간에 폭등하는 구조적 특징이 있다.`,
           hint: `ㄱㄱㅌㄹㅅ`,
+          difficulty: 2,
           relatedWords: ['공급병목']
         }
       ],
@@ -123,6 +133,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `물이 위에서 아래로 떨어지듯, 고소득층의 투자와 소비가 늘어나면 일자리가 생기고 중소기업의 매출도 늘어나 경제 전체가 성장한다는 논리입니다.`,
           newsExample: `정부는 대기업 규제 완화를 통한 낙수효과를 기대하며 새로운 경제 정책을 발표했다.`,
           hint: `ㄴㅅㅎㄱ`,
+          difficulty: 1,
           relatedWords: ['분수효과']
         },
         {
@@ -132,6 +143,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `과거의 실패나 불미스러운 일 때문에 시장에서 신뢰를 잃고, 이후에 아무리 노력해도 재기하기 어려워지는 경제적/사회적 불이익을 뜻합니다.`,
           newsExample: `부도 위기를 겪었던 기업은 낙인효과 때문에 새로운 자금을 조달하는 데 큰 어려움을 겪고 있다.`,
           hint: `ㄴㅇㅎㄱ`,
+          difficulty: 1,
           relatedWords: ['정보의 비대칭성']
         },
         {
@@ -141,6 +153,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `보험에 가입한 사람이 일부러 사고를 내거나 부주의해지는 것, 혹은 대마불사(큰 기업은 망하지 않는다)를 믿고 은행이 위험한 투자를 일삼는 상황을 말합니다.`,
           newsExample: `정부의 무조건적인 구제금융은 금융회사들의 도덕적 해이를 부추길 수 있다는 비판이 제기된다.`,
           hint: `ㄷㄷㅈ ㅎㅇ`,
+          difficulty: 2,
           relatedWords: ['역선택', '정보의 비대칭성']
         },
         {
@@ -150,6 +163,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `재미없는 영화인 줄 알면서도 이미 낸 영화표 값이 아까워 끝까지 보는 것처럼, 합리적인 의사결정을 방해하는 과거의 비용입니다.`,
           newsExample: `기업은 신사업을 철수할 때 기존에 투자된 매몰비용에 얽매이지 않고 미래의 가치를 냉정하게 판단해야 한다.`,
           hint: `ㅁㅁㅂㅇ`,
+          difficulty: 2,
           relatedWords: ['기회비용']
         },
         {
@@ -159,6 +173,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `어떤 물건의 가격이 너무 비싸지면, 사람들은 비슷한 만족감을 주는 다른 물건(대체재)을 찾게 됩니다. 돼지고기 값이 오르면 닭고기가 잘 팔리는 식이죠.`,
           newsExample: `국제 유가가 급등하면서 석유의 대체재인 천연가스와 신재생에너지에 대한 수요가 크게 늘고 있다.`,
           hint: `ㄷㅊㅈ`,
+          difficulty: 1,
           relatedWords: ['보완재']
         }
       ],
@@ -177,6 +192,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `소문이나 위기감 때문에 예금자들이 몰려들면, 멀쩡한 은행도 순식간에 내어줄 현금이 바닥나 파산하게 만드는 무서운 금융 패닉 현상입니다.`,
           newsExample: `과거 저축은행 부실 사태 때 뱅크런 조짐이 보이자 금융당국은 즉각 예금자 보호 조치를 발표하며 시장 불안 달래기에 나섰다.`,
           hint: `ㅂㅋㄹ`,
+          difficulty: 1,
           relatedWords: ['금융공황', '예금보험제도']
         },
         {
@@ -186,6 +202,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `명품 가방이나 고급 스포츠카처럼 "내가 이렇게 비싸고 희귀한 걸 산다"라고 남들에게 과시하기 위한 소비 심리 때문에 발생합니다.`,
           newsExample: `계속되는 명품 브랜드의 가격 인상에도 불구하고 베블런효과로 인해 백화점 앞 오픈런 행렬이 매일 이어지고 있다.`,
           hint: `ㅂㅂㄹㅎㄱ`,
+          difficulty: 2,
           relatedWords: ['밴드웨건효과', '속물효과(스놉효과)']
         },
         {
@@ -195,6 +212,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `코로나19 같은 전염병이나 국가적 재난 때문에 꾹 참고 돈을 안 쓰던 사람들이 제한이 풀리자마자 억울함을 보상받듯 엄청난 돈을 쓰는 현상입니다.`,
           newsExample: `팬데믹 이후 해외여행 수요가 급증하면서 항공 및 관광 업계가 보복소비의 특수를 톡톡히 누리고 있다.`,
           hint: `ㅂㅂㅅㅂ`,
+          difficulty: 1,
           relatedWords: ['소비자동향지수(CSI)']
         },
         {
@@ -204,6 +222,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `분수가 아래에서 위로 솟구치듯, 서민들의 지갑을 두둑하게 해주면 그 돈이 빵집, 미용실, 기업의 매출로 연쇄적으로 이어져 경기가 좋아진다는 낙수효과의 반대 개념입니다.`,
           newsExample: `근로장려금 확대와 소상공인 지원금 지급은 서민 계층의 소비 진작을 통한 분수효과를 노린 정책이다.`,
           hint: `ㅂㅅㅎㄱ`,
+          difficulty: 1,
           relatedWords: ['낙수효과', '한계소비성향']
         },
         {
@@ -213,6 +232,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `영국의 경제지 <이코노미스트>가 고안한 것으로, "같은 물건은 어디서든 가치가 같아야 한다"는 원리를 이용해 현재 환율이 적정한지 쉽고 재미있게 평가하는 지표입니다.`,
           newsExample: `최신 빅맥지수 조사 결과, 우리나라 원화 가치가 실제 구매력에 비해 달러 대비 다소 저평가되어 있는 것으로 나타났다.`,
           hint: `ㅂㅁㅈㅅ`,
+          difficulty: 1,
           relatedWords: ['구매력평가 환율', '일물일가의 법칙']
         }
       ],
@@ -231,6 +251,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `가계처분가능소득에서 소비 지출을 빼고 남은 돈(저축)이 차지하는 비중입니다. 이 수치가 높으면 미래 대비가 잘 되어 있다는 뜻이지만, 너무 높으면 소비가 위축되어 경제가 안 돌아갈 수 있습니다.`,
           newsExample: `경기 침체 우려에 지갑을 닫은 소비자들이 늘어나며 가계순저축률이 상승세를 보이고 있다.`,
           hint: `ㄱㄱㅅㅈㅊㄹ`,
+          difficulty: 2,
           relatedWords: ['가계처분가능소득', '국내총투자율']
         },
         {
@@ -240,6 +261,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `가계가 은행 등 금융기관에서 빌린 돈(대출금)과 신용카드로 물건을 사고 아직 갚지 않은 돈(판매신용)을 모두 합친 '국가 전체의 가계 빚' 통계입니다.`,
           newsExample: `고금리 장기화에도 불구하고 주택담보대출이 늘며 전체 가계신용 규모가 역대 최대치를 경신했다.`,
           hint: `ㄱㄱㅅㅇㅌㄱ`,
+          difficulty: 2,
           relatedWords: ['가계부실위험지수(HDRI)']
         },
         {
@@ -249,6 +271,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `부실해진 은행이 문을 닫으면 예금자들이 피해를 보므로, 다른 주인을 찾거나 안전하게 정리될 때까지 예금과 대출 업무를 임시로 넘겨받아 유지하는 예금보험공사 산하의 은행입니다.`,
           newsExample: `부실 우려가 커진 저축은행을 신속히 정리하기 위해 가교은행으로의 계약 이전을 결정했다.`,
           hint: `ㄱㄱㅇㅎ`,
+          difficulty: 2,
           relatedWords: ['경영실태평가']
         },
         {
@@ -258,6 +281,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `주식시장에서 회사가 처음 주식을 팔아 돈을 모으는 기업공개(IPO)처럼, 블록체인 기업이 새로 만든 가상자산(암호화폐)을 투자자들에게 팔아 개발 자금을 조달하는 행위입니다.`,
           newsExample: `금융위는 투자자 보호 장치가 마련되기 전까지 국내에서의 가상자산공개(ICO) 금지 기조를 유지하기로 했다.`,
           hint: `ㄱㅅㅈㅅㄱㄱ`,
+          difficulty: 3,
           relatedWords: ['가상자산', '기업공개']
         },
         {
@@ -267,6 +291,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
           detailedMeaning: `보안카드나 공인인증서 없이 미리 충전해 둔 선불금이나 연결된 계좌를 통해 비밀번호, 생체인식만으로 뚝딱 송금할 수 있는 모바일 금융 서비스(예: 토스, 카카오페이 송금)입니다.`,
           newsExample: `모바일 뱅킹이 대중화되면서 전체 이체 건수 중 간편 송금이 차지하는 비중이 50%를 넘어섰다.`,
           hint: `ㄱㅍㅅㄱ`,
+          difficulty: 1,
           relatedWords: ['기업·개인간(B2C) 지급결제시스템']
         }
       ],

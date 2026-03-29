@@ -183,6 +183,46 @@ export const useAuth = () => {
     });
   };
 
+  const updateNickname = async (newNickname: string): Promise<{ error: string | null }> => {
+    const trimmed = newNickname.trim();
+    if (!trimmed) return { error: '닉네임을 입력해주세요' };
+    if (trimmed.length > 10) return { error: '닉네임은 10자 이내로 입력해주세요' };
+    if (trimmed === authState.user?.nickname) return { error: '현재 닉네임과 동일해요' };
+
+    if (profileId) {
+      // 중복 확인
+      const { data: existing } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('nickname', trimmed)
+        .neq('id', profileId)
+        .maybeSingle();
+
+      if (existing) return { error: '이미 사용 중인 닉네임이에요' };
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ nickname: trimmed })
+        .eq('id', profileId);
+
+      if (updateError) return { error: '닉네임 변경에 실패했어요' };
+    }
+
+    // localStorage 업데이트
+    const stored = await loadStoredProfile();
+    if (stored) {
+      await Storage.setItem(STORAGE_KEY, JSON.stringify({ ...stored, nickname: trimmed }));
+    }
+
+    // 상태 업데이트
+    setAuthState(prev => {
+      if (!prev.user) return prev;
+      return { ...prev, user: { ...prev.user, nickname: trimmed } };
+    });
+
+    return { error: null };
+  };
+
   const logout = async () => {
     await Storage.removeItem(STORAGE_KEY);
     await supabase.auth.signOut();
@@ -196,6 +236,7 @@ export const useAuth = () => {
     guestToken,
     profileId,
     linkAccount,
+    updateNickname,
     logout,
   };
 };

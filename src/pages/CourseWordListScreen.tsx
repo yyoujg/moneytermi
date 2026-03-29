@@ -21,8 +21,11 @@ const CourseWordListScreen = () => {
   const progressPct = Math.round((courseKnownCount / course.words.length) * 100);
   const isCompleted = progressPct === 100;
 
+  // 난이도 순 정렬
+  const sortedWords = [...course.words].sort((a, b) => a.difficulty - b.difficulty);
+
   // 첫 번째 미완료 단어까지만 접근 가능
-  const firstLockedIdx = course.words.findIndex(w => !knownWords.some(kw => kw.id === w.id));
+  const firstLockedIdx = sortedWords.findIndex(w => !knownWords.some(kw => kw.id === w.id));
   const isAccessible = (idx: number) => firstLockedIdx === -1 || idx <= firstLockedIdx;
 
   return (
@@ -65,7 +68,7 @@ const CourseWordListScreen = () => {
 
         <div className="px-5">
           <div className="bg-white rounded-2xl overflow-hidden divide-y divide-[#F0F0F0]">
-            {course.words.map((word, idx) => {
+            {sortedWords.map((word, idx) => {
               const isKnown = knownWords.some(kw => kw.id === word.id);
               const accessible = isAccessible(idx);
               const locked = !accessible;
@@ -81,7 +84,7 @@ const CourseWordListScreen = () => {
                     disabled={locked}
                     className="flex-1 flex items-start gap-2 text-left active:opacity-60 disabled:pointer-events-none"
                     onClick={() => navigate('/word-card', {
-                      state: { words: course.words, index: idx, backPath: '/course/words', backState: { course } }
+                      state: { words: sortedWords, index: idx, backPath: '/course/words', backState: { course } }
                     })}
                   >
                     <div className="flex-1 flex flex-col gap-0.5">
