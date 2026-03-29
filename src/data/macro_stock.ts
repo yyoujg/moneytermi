@@ -3,7 +3,7 @@ import type { Course } from '../types';
 export const MACRO_STOCK: Course[] = [
   {
       id: 'bok_32',
-      category: '금융',
+      category: '주식/기업',
       level: 'Lv.2',
       title: '기업의 자금과 경영',
       description: '기업은 어떻게 돈을 구하고 살아남을까?',
@@ -62,7 +62,7 @@ export const MACRO_STOCK: Course[] = [
     },
   {
       id: 'bok_33',
-      category: '금융',
+      category: '주식/기업',
       level: 'Lv.2',
       title: '주식 시장과 투자의 세계',
       description: '서학개미부터 ETF까지, 주식 시장의 주요 키워드',
@@ -121,7 +121,7 @@ export const MACRO_STOCK: Course[] = [
     },
   {
       id: 'bok_34',
-      category: '금융',
+      category: '주식/기업',
       level: 'Lv.3',
       title: '주가 평가와 파생 상품',
       description: '이 주식이 비싼지 싼지 가려내는 마법의 지표들',

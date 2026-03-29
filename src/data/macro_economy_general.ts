@@ -3,7 +3,7 @@ import type { Course } from '../types';
 export const MACRO_ECONOMY_GENERAL: Course[] = [
   {
       id: 'bok_1',
-      category: '경제',
+      category: '경제일반',
       level: 'Lv.1',
       title: '가계와 기본 금융',
       description: '가계 경제와 금융 제도의 기초 이해하기',
@@ -62,7 +62,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
     },
   {
       id: 'bok_2',
-      category: '경제',
+      category: '경제일반',
       level: 'Lv.1',
       title: '새로운 경제 트렌드와 원리',
       description: '구독경제부터 기펜재까지, 경제의 독특한 현상들',
@@ -121,7 +121,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
     },
   {
       id: 'bok_3',
-      category: '경제',
+      category: '경제일반',
       level: 'Lv.1',
       title: '생활 속 경제 심리',
       description: '우리의 선택을 좌우하는 경제학의 심리 법칙',
@@ -180,7 +180,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
     },
   {
       id: 'bok_4',
-      category: '경제',
+      category: '경제일반',
       level: 'Lv.1',
       title: '생활 밀착형 경제와 심리',
       description: '햄버거 가격부터 명품 오픈런까지, 일상 속 경제 법칙',
@@ -239,7 +239,7 @@ export const MACRO_ECONOMY_GENERAL: Course[] = [
     },
   {
       id: 'bok_5',
-      category: '경제',
+      category: '경제일반',
       level: 'Lv.2',
       title: '가계 신용과 핀테크',
       description: '우리의 빚과 편리해진 금융 서비스 이해하기',
