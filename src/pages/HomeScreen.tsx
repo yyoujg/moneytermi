@@ -209,22 +209,24 @@ const HomeScreen = () => {
           })()}
 
           {/* 단일 CTA */}
-          <button
-            onClick={() => navigate('/word-card', { state: { words: nextCourse.words, index: 0, backPath: '/home', autoAdvance: true } })}
-            className="w-full py-4 rounded-2xl bg-orange-500 text-white text-sm font-bold active:opacity-90 flex items-center justify-center gap-2"
-          >
-            오늘 학습 시작하기
-            <ChevronRight size={16} />
-          </button>
-
-          {quizWords.length > 0 && (
+          <div className="flex flex-col" style={{ gap: 12 }}>
             <button
-              onClick={() => navigate('/quiz', { state: { quizQueue: quizWords } })}
-              className="w-full mt-4 py-3 rounded-xl bg-[#F0F0F0] text-xs font-medium text-[#888888] active:opacity-70"
+              onClick={() => navigate('/word-card', { state: { words: nextCourse.words, index: 0, backPath: '/home', autoAdvance: true } })}
+              className="w-full py-4 rounded-2xl bg-orange-500 text-white text-sm font-bold active:opacity-90 flex items-center justify-center gap-2"
             >
-              퀴즈 풀기 →
+              오늘 학습 시작하기
+              <ChevronRight size={16} />
             </button>
-          )}
+
+            {quizWords.length > 0 && (
+              <button
+                onClick={() => navigate('/quiz', { state: { quizQueue: quizWords } })}
+                className="w-full py-3 rounded-xl bg-[#F0F0F0] text-xs font-medium text-[#888888] active:opacity-70"
+              >
+                퀴즈 풀기 →
+              </button>
+            )}
+          </div>
         </div>
 
         {/* 빠른 통계 */}
