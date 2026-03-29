@@ -68,7 +68,7 @@ const HomeScreen = () => {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
   const { points, knownWords, missions, claimReward, attendanceDates, otherLeagueUsers, courses, allWords } = useAppContext();
-  const { isGuest, linkAccount } = useAuth();
+  const { isGuest, linkAccount, user } = useAuth();
   const [showLinkSheet, setShowLinkSheet] = useState(false);
   const [linkDismissed, setLinkDismissed] = useState(false);
   const totalWords = allWords.length;
@@ -129,7 +129,7 @@ const HomeScreen = () => {
             <div className="inline-flex items-center px-2 py-1 rounded mb-2" style={{ backgroundColor: '#F0F0F0' }}>
               <span className="text-[11px] font-medium text-[#AAAAAA]">{CURRENT_LEAGUE_NAME} 리그</span>
             </div>
-            <h1 className="text-xl font-bold text-[#111111]">안녕하세요, 예비슈퍼개미님</h1>
+            <h1 className="text-xl font-bold text-[#111111]">안녕하세요, {user?.nickname ?? '예비슈퍼개미'}님</h1>
           </div>
           <div className="w-10 h-10 bg-[#F0F0F0] rounded-full flex items-center justify-center overflow-hidden shrink-0">
             <FallbackImage src="" alt="프로필" className="w-full h-full object-cover" fallbackNode={<span className="text-lg">🍊</span>} />
