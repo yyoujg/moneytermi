@@ -3,7 +3,7 @@ import type { Course } from '../types';
 export const MACRO_MACROECONOMICS: Course[] = [
   {
       id: 'bok_6',
-      category: '거시경제',
+      category: '경제',
       level: 'Lv.2',
       title: '경기 지표와 경제 정책',
       description: '경제가 좋고 나쁨을 판단하는 기준점들',
@@ -62,7 +62,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
     },
   {
       id: 'bok_7',
-      category: '거시경제',
+      category: '경제',
       level: 'Lv.2',
       title: '경기 흐름과 통제',
       description: '경제를 진단하고 온도를 맞추는 지표와 정책',
@@ -121,7 +121,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
     },
   {
       id: 'bok_8',
-      category: '거시경제',
+      category: '경제',
       level: 'Lv.2',
       title: '국가 경제의 성적표',
       description: '물가와 투자, 그리고 국가 자산의 크기 측정하기',
@@ -180,7 +180,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
     },
   {
       id: 'bok_9',
-      category: '거시경제',
+      category: '경제',
       level: 'Lv.2',
       title: '국가 정책과 신용',
       description: '나라 빚과 정부가 경제를 다루는 방법',
@@ -239,7 +239,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
     },
   {
       id: 'bok_10',
-      category: '거시경제',
+      category: '경제',
       level: 'Lv.2',
       title: '명목과 실질의 경제학',
       description: '물가 거품을 걷어내고 경제의 진짜 모습 확인하기',
@@ -298,7 +298,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
     },
   {
       id: 'bok_11',
-      category: '거시경제',
+      category: '경제',
       level: 'Lv.3',
       title: '국가 경제와 글로벌 지표',
       description: 'GDP부터 환율까지, 큰 단위의 경제 읽기',
@@ -357,7 +357,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
     },
   {
       id: 'bok_12',
-      category: '거시경제',
+      category: '경제',
       level: 'Lv.3',
       title: '국민소득의 심층 이해',
       description: '우리가 번 돈은 어떻게 측정되고 순환할까?',
@@ -416,7 +416,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
     },
   {
       id: 'bok_13',
-      category: '거시경제',
+      category: '경제',
       level: 'Lv.3',
       title: '글로벌 금융과 위기',
       description: '전 세계 돈의 흐름을 관리하는 기구와 역사',
@@ -475,7 +475,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
     },
   {
       id: 'bok_14',
-      category: '거시경제',
+      category: '경제',
       level: 'Lv.3',
       title: '물가와 금리의 심화',
       description: '인플레이션의 진짜 얼굴과 금리의 속성',
@@ -534,7 +534,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
     },
   {
       id: 'bok_15',
-      category: '거시경제',
+      category: '경제',
       level: 'Lv.3',
       title: '경기 변동과 물가의 흐름',
       description: '경제가 꺾이고 물가가 흔들리는 여러 모습들',
@@ -593,7 +593,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
     },
   {
       id: 'bok_16',
-      category: '거시경제',
+      category: '경제',
       level: 'Lv.3',
       title: '경제의 위기와 리스크',
       description: '경제가 아플 때 나타나는 치명적인 증상들',
@@ -652,7 +652,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
     },
   {
       id: 'bok_17',
-      category: '거시경제',
+      category: '경제',
       level: 'Lv.4',
       title: '국가 경제와 혁신',
       description: '큰돈이 도는 구조와 디지털 혁신의 만남',
@@ -711,7 +711,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
     },
   {
       id: 'bok_18',
-      category: '거시경제',
+      category: '경제',
       level: 'Lv.4',
       title: '중앙은행의 통화 정책',
       description: '위기를 다루는 국가의 돈줄 조절법',
@@ -770,7 +770,7 @@ export const MACRO_MACROECONOMICS: Course[] = [
     },
   {
       id: 'bok_19',
-      category: '거시경제',
+      category: '경제',
       level: 'Lv.4',
       title: '글로벌 심리와 불평등',
       description: '세계 경제를 뒤흔드는 투기 자본과 분배 지표',
