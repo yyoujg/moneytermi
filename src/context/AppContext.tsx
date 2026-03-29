@@ -88,7 +88,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
           .filter((cw: any) => cw.course_id === c.id)
           .sort((a: any, b: any) => a.position - b.position)
           .map((cw: any) => wordMap.get(cw.word_id))
-          .filter(Boolean) as Word[],
+          .filter(Boolean)
+          .sort((a: any, b: any) => (a.difficulty ?? 0) - (b.difficulty ?? 0)) as Word[],
       }));
 
       setCourses(builtCourses);
