@@ -233,21 +233,21 @@ const HomeScreen = () => {
             <Zap size={14} className="text-[#AAAAAA] fill-current shrink-0" />
             <div>
               <p className="text-[10px] text-[#AAAAAA]">포인트</p>
-              <p className="text-base font-bold text-[#111111]">{points.toLocaleString()}<span className="text-xs text-[#AAAAAA] ml-0.5">P</span></p>
+              <p className="text-base font-bold text-[#111111] whitespace-nowrap">{points.toLocaleString()}<span className="text-xs text-[#AAAAAA] ml-0.5">P</span></p>
             </div>
           </div>
           <div className="flex-1 bg-white rounded-2xl px-4 py-3 flex items-center gap-3">
             <Flame size={14} className="text-[#AAAAAA] shrink-0" />
             <div>
               <p className="text-[10px] text-[#AAAAAA]">연속 출석</p>
-              <p className="text-base font-bold text-[#111111]">{streak}<span className="text-xs text-[#AAAAAA] ml-0.5">일</span></p>
+              <p className="text-base font-bold text-[#111111] whitespace-nowrap">{streak}<span className="text-xs text-[#AAAAAA] ml-0.5">일</span></p>
             </div>
           </div>
           <div className="flex-1 bg-white rounded-2xl px-4 py-3 flex items-center gap-3">
             <BookOpen size={14} className="text-[#AAAAAA] shrink-0" />
             <div>
               <p className="text-[10px] text-[#AAAAAA]">학습 단어</p>
-              <p className="text-base font-bold text-[#111111]">{knownWords.length}<span className="text-xs text-[#AAAAAA] ml-0.5">/{totalWords}</span></p>
+              <p className="text-base font-bold text-[#111111] whitespace-nowrap">{knownWords.length}<span className="text-xs text-[#AAAAAA] ml-0.5">/{totalWords}</span></p>
             </div>
           </div>
         </div>
@@ -290,7 +290,7 @@ const HomeScreen = () => {
                       <div className="flex-1 bg-[#F0F0F0] rounded-full h-1 overflow-hidden">
                         <div className="bg-orange-500 h-full rounded-full" style={{ width: `${progressPct}%` }} />
                       </div>
-                      <span className="text-[11px] font-bold text-orange-500 w-7 text-right shrink-0">{progressPct}%</span>
+                      <span className="text-[11px] font-bold text-orange-500 shrink-0 whitespace-nowrap">{progressPct}%</span>
                     </div>
                   </div>
                 </div>
