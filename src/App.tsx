@@ -2,6 +2,7 @@ import React from 'react';
 import { HashRouter, Routes, Route, Navigate,  } from 'react-router-dom';
 import { Component, type ReactNode, type ErrorInfo } from 'react';
 import { AppProvider, useAppContext } from './context/AppContext';
+import { AuthProvider } from './hooks/useAuth';
 import NavBar from './components/NavBar';
 import HomeScreen from './pages/HomeScreen';
 import CourseScreen from './pages/CourseScreen';
@@ -80,6 +81,7 @@ const Layout = () => {
 export default function App() {
   return (
     <ErrorBoundary>
+      <AuthProvider>
       <AppProvider>
         <HashRouter>
           <div className="w-full max-w-md mx-auto bg-[#F7F7F7] h-[100dvh] overflow-hidden relative font-sans text-[#111111] flex flex-col">
@@ -89,6 +91,7 @@ export default function App() {
           </div>
         </HashRouter>
       </AppProvider>
+      </AuthProvider>
     </ErrorBoundary>
   );
 }

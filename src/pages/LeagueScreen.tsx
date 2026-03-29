@@ -12,14 +12,16 @@ const RANK_MEDALS = ['🥇', '🥈', '🥉'];
 const LeagueScreen = () => {
   const navigate = useNavigate();
   const { points, otherLeagueUsers } = useAppContext();
-  const { isGuest, linkAccount } = useAuth();
+  const { isGuest, linkAccount, user } = useAuth();
   const [showLinkSheet, setShowLinkSheet] = useState(false);
   const [linkDismissed, setLinkDismissed] = useState(false);
 
+  const myName = `나 (${user?.nickname ?? '예비슈퍼개미'})`;
+
   const sortedLeague = useMemo(
-    () => [...otherLeagueUsers, { id: 'me', name: '나 (예비슈퍼개미)', points, emoji: '🍊' }]
+    () => [...otherLeagueUsers, { id: 'me', name: myName, points, emoji: '🍊' }]
       .sort((a, b) => b.points - a.points),
-    [otherLeagueUsers, points]
+    [otherLeagueUsers, points, myName]
   );
 
   const top3 = sortedLeague.slice(0, 3);

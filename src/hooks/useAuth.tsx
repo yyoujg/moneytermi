@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import type { AuthState } from '../types';
+import { useState, useEffect, useContext, createContext } from 'react';
+import type { AuthState, User } from '../types';
 import { supabase } from '../lib/supabase';
 import { Storage } from '../lib/storage';
 
@@ -36,7 +36,20 @@ export const loadStoredProfile = async (): Promise<StoredProfile | null> => {
   }
 };
 
-export const useAuth = () => {
+type AuthContextValue = {
+  user: User | null;
+  isGuest: boolean;
+  isAuthenticated: boolean;
+  guestToken: string | null;
+  profileId: string | null;
+  linkAccount: (email: string, nickname?: string) => Promise<void>;
+  updateNickname: (newNickname: string) => Promise<{ error: string | null }>;
+  logout: () => Promise<void>;
+};
+
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [authState, setAuthState] = useState<AuthState>({
     user: null, accessToken: null, refreshToken: null, isAuthenticated: false,
   });
@@ -190,7 +203,6 @@ export const useAuth = () => {
     if (trimmed === authState.user?.nickname) return { error: '현재 닉네임과 동일해요' };
 
     if (profileId) {
-      // 중복 확인
       const { data: existing } = await supabase
         .from('profiles')
         .select('id')
@@ -208,13 +220,11 @@ export const useAuth = () => {
       if (updateError) return { error: '닉네임 변경에 실패했어요' };
     }
 
-    // localStorage 업데이트
     const stored = await loadStoredProfile();
     if (stored) {
       await Storage.setItem(STORAGE_KEY, JSON.stringify({ ...stored, nickname: trimmed }));
     }
 
-    // 상태 업데이트
     setAuthState(prev => {
       if (!prev.user) return prev;
       return { ...prev, user: { ...prev.user, nickname: trimmed } };
@@ -229,14 +239,24 @@ export const useAuth = () => {
     window.location.reload();
   };
 
-  return {
-    user: authState.user,
-    isGuest: authState.user?.isGuest ?? true,
-    isAuthenticated: authState.isAuthenticated,
-    guestToken,
-    profileId,
-    linkAccount,
-    updateNickname,
-    logout,
-  };
+  return (
+    <AuthContext.Provider value={{
+      user: authState.user,
+      isGuest: authState.user?.isGuest ?? true,
+      isAuthenticated: authState.isAuthenticated,
+      guestToken,
+      profileId,
+      linkAccount,
+      updateNickname,
+      logout,
+    }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = (): AuthContextValue => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  return ctx;
 };
