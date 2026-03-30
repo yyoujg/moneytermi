@@ -167,10 +167,11 @@ const WordCardScreen = () => {
     setNewsItems([]);
     setNewsLoading(true);
     supabase.functions.invoke('naver-news', { body: { query: currentWord.word } })
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) { console.error('[뉴스 fetch 실패]', error); return; }
         if (!cancelled) setNewsItems(Array.isArray(data) ? data : []);
       })
-      .catch((err) => { console.error('[뉴스 fetch 실패]', err); })
+      .catch((err) => { console.error('[뉴스 fetch 네트워크 오류]', err); })
       .finally(() => { if (!cancelled) setNewsLoading(false); });
     return () => { cancelled = true; };
   }, [wordIndex, words]);
