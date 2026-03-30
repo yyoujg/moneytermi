@@ -2,6 +2,7 @@ import React from 'react';
 import { HashRouter, Routes, Route, Navigate,  } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { Component, type ReactNode, type ErrorInfo } from 'react';
+import * as Sentry from '@sentry/react';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { AuthProvider } from './hooks/useAuth';
 import NavBar from './components/NavBar';
@@ -24,6 +25,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('[ErrorBoundary]', error, info.componentStack);
+    Sentry.captureException(error, { extra: { componentStack: info.componentStack } });
   }
 
   render() {
