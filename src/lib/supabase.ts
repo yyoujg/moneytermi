@@ -8,17 +8,17 @@ if (!url || !key) {
   throw new Error('환경변수 누락: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY 를 확인하세요.');
 }
 
+// iOS WKWebView(Toss 앱)에서 Web Locks API가 "Lock was stolen" AbortError를 발생시키므로 no-op으로 우회
+const noOpLock = (_name: string, _acquireTimeout: number, fn: () => Promise<unknown>) => fn();
+
 // 기본 클라이언트 (Supabase Auth 세션용)
-// auth.lock을 no-op으로 설정: iOS WKWebView(Toss 앱)에서 Web Locks API가
-// "Lock was stolen by another request" AbortError를 발생시키는 문제 우회
 export const supabase = createClient<Database>(url, key, {
-  auth: {
-    lock: (_name: string, _acquireTimeout: number, fn: () => Promise<unknown>) => fn(),
-  },
+  auth: { lock: noOpLock },
 });
 
 // 게스트용 클라이언트 — RLS 통과를 위해 x-guest-token 헤더 포함
 export const getGuestClient = (guestToken: string) =>
   createClient<Database>(url, key, {
     global: { headers: { 'x-guest-token': guestToken } },
+    auth: { lock: noOpLock },
   });
