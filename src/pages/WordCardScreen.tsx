@@ -9,7 +9,11 @@ const ACCENT = '#f97316';
 
 type NaverNewsItem = { title: string; link: string; description: string; pubDate: string };
 
-const stripHtml = (s: string) => s.replace(/<[^>]*>/g, '');
+const stripHtml = (s: string) => {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = s.replace(/<[^>]*>/g, '');
+  return tmp.textContent ?? '';
+};
 
 const Highlight = ({ text, keyword }: { text: string; keyword: string }) => {
   if (!keyword) return <>{text}</>;
@@ -67,13 +71,13 @@ const WordCard = ({
     </div>
 
     {/* 자세히 알아보기 */}
-    <div className="bg-white rounded-2xl px-5 py-4">
+    <div className="bg-white rounded-2xl px-5 py-4" style={{ marginBottom: '12px' }}>
       <p className="text-[11px] font-bold text-[#AAAAAA] mb-3">📖 자세히 알아보기</p>
-      <p className="text-[14px] leading-relaxed text-[#555555] break-keep">{word.detailedMeaning}</p>
+      <p className="text-[14px] leading-relaxed text-[#888888] font-medium break-keep">{word.detailedMeaning}</p>
     </div>
 
     {/* 실시간 뉴스 */}
-    <div className="bg-white rounded-2xl px-5 py-4">
+    <div className="bg-white rounded-2xl px-5 py-4" style={{ marginBottom: '12px' }}>
       <p className="text-[11px] font-bold text-[#AAAAAA] mb-3">🗞 실시간 뉴스</p>
       {newsLoading ? (
         <div className="flex justify-center py-4">
@@ -182,6 +186,13 @@ const WordCardScreen = () => {
       .finally(() => { if (!cancelled) setNewsLoading(false); });
     return () => { cancelled = true; };
   }, [wordIndex, words]);
+
+  // autoAdvance 완료 토스트
+  useEffect(() => {
+    if (autoAdvance && words.length > 0 && wordIndex >= words.length) {
+      toast.success('학습 완료!');
+    }
+  }, [wordIndex, words.length, autoAdvance]);
 
   // autoAdvance 완료 화면
   if (autoAdvance && words.length > 0 && wordIndex >= words.length) {

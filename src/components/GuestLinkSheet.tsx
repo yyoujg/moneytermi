@@ -89,7 +89,7 @@ const GuestLinkSheet = ({ onClose, onLink }: Props) => {
       onDimmerClick={onClose}
       hasTextField
       header={
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" style={{ paddingLeft: '20px' }}>
           {step === 'otp' && (
             <button
               onClick={() => { setStep('email'); setOtp(''); setOtpError(false); }}
