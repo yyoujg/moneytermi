@@ -51,7 +51,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
 const LoadingScreen = () => (
   <div className="flex-1 flex flex-col items-center justify-center gap-4">
     <div className="w-12 h-12 rounded-2xl bg-orange-500 flex items-center justify-center text-2xl animate-pulse">
-      🍊
+      💰
     </div>
     <p className="text-sm font-semibold text-[#AAAAAA]">불러오는 중...</p>
   </div>
