@@ -31,7 +31,8 @@ const GuestLinkSheet = ({ onClose, onLink }: Props) => {
 
     setLoading(false);
     if (error) {
-      setSendError('이메일 발송에 실패했습니다. 다시 시도해주세요.');
+      console.error('[OTP 발송 실패]', error.message, error);
+      setSendError(`이메일 발송에 실패했습니다. (${error.message})`);
       return;
     }
     setStep('otp');
