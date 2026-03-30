@@ -12,6 +12,20 @@ type NaverNewsItem = { title: string; link: string; description: string; pubDate
 
 const stripHtml = (s: string) => s.replace(/<[^>]*>/g, '');
 
+const Highlight = ({ text, keyword }: { text: string; keyword: string }) => {
+  if (!keyword) return <>{text}</>;
+  const parts = text.split(new RegExp(`(${keyword})`, 'gi'));
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.toLowerCase() === keyword.toLowerCase()
+          ? <mark key={i} style={{ background: '#fff3e0', color: '#f97316', fontWeight: 700, borderRadius: 3, padding: '0 2px' }}>{part}</mark>
+          : <span key={i}>{part}</span>
+      )}
+    </>
+  );
+};
+
 // ── 단어 카드 본문 ────────────────────────────────────────────────
 const WordCard = ({
   word,
@@ -27,6 +41,7 @@ const WordCard = ({
   onRelatedClick: (name: string) => void;
   newsItems: NaverNewsItem[];
   newsLoading: boolean;
+  keyword: string;
 }) => (
   <div className="flex flex-col gap-3 px-5 pb-6">
 
@@ -57,14 +72,6 @@ const WordCard = ({
       <p className="text-[14px] leading-[1.9] text-[#555555] break-keep">{word.detailedMeaning}</p>
     </div>
 
-    {/* 뉴스에서는 */}
-    <div className="bg-white rounded-2xl px-5 py-4">
-      <p className="text-[11px] font-bold text-[#AAAAAA] mb-2">📰 뉴스에서는</p>
-      <div className="border-l-2 border-orange-200 pl-3">
-        <p className="text-[14px] leading-[1.9] text-[#555555] break-keep">&ldquo;{word.newsExample}&rdquo;</p>
-      </div>
-    </div>
-
     {/* 실시간 뉴스 */}
     <div className="bg-white rounded-2xl px-5 py-4">
       <p className="text-[11px] font-bold text-[#AAAAAA] mb-3">🗞 실시간 뉴스</p>
@@ -73,20 +80,21 @@ const WordCard = ({
           <div className="w-5 h-5 border-2 border-orange-300 border-t-orange-500 rounded-full animate-spin" />
         </div>
       ) : newsItems.length > 0 ? (
-        <div className="flex flex-col gap-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {newsItems.map((item, i) => (
             <a
               key={i}
               href={item.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-start gap-2 active:opacity-60"
+              style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}
+              className="active:opacity-60"
             >
               <div className="flex-1">
                 <p className="text-[13px] font-semibold text-[#333333] break-keep leading-snug line-clamp-2">
-                  {stripHtml(item.title)}
+                  <Highlight text={stripHtml(item.title)} keyword={keyword} />
                 </p>
-                <p className="text-[11px] text-[#AAAAAA] mt-0.5">
+                <p style={{ marginTop: '4px' }} className="text-[11px] text-[#AAAAAA]">
                   {new Date(item.pubDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
                 </p>
               </div>
@@ -306,6 +314,7 @@ const WordCardScreen = () => {
           onRelatedClick={handleRelatedWordClick}
           newsItems={newsItems}
           newsLoading={newsLoading}
+          keyword={word.word}
         />
       </div>
 
