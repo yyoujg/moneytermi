@@ -8,7 +8,7 @@ import { useAuth } from '../hooks/useAuth';
 import GuestLinkSheet from '../components/GuestLinkSheet';
 import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
 
-const getOptions = (correctWord: Word, knownWords: Word[], allWords: Word[]): string[] => {
+export const getOptions = (correctWord: Word, knownWords: Word[], allWords: Word[]): string[] => {
   const pool = knownWords.length >= 4 ? knownWords : allWords;
   const others = pool.filter(w => w.id !== correctWord.id);
   const shuffled = [...others].sort(() => Math.random() - 0.5);
@@ -17,7 +17,7 @@ const getOptions = (correctWord: Word, knownWords: Word[], allWords: Word[]): st
 };
 
 // 콤보 기반 포인트 계산
-const calcEarned = (combo: number): number => {
+export const calcEarned = (combo: number): number => {
   if (combo >= 5) return 20;
   if (combo >= 3) return 15;
   return 10;

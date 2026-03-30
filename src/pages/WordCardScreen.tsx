@@ -162,7 +162,7 @@ const WordCardScreen = () => {
       .then(({ data }) => {
         if (!cancelled) setNewsItems(Array.isArray(data) ? data : []);
       })
-      .catch(() => {})
+      .catch((err) => { console.error('[뉴스 fetch 실패]', err); })
       .finally(() => { if (!cancelled) setNewsLoading(false); });
     return () => { cancelled = true; };
   }, [wordIndex, words]);

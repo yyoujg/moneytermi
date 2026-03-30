@@ -66,6 +66,7 @@ const GuestLinkSheet = ({ onClose, onLink }: Props) => {
       if (rpcError) {
         console.warn('link_guest_to_auth 실패:', rpcError);
         setLoading(false);
+        setOtpError(false);
         setLinkError('계정 연결 중 오류가 발생했습니다. 다시 시도해주세요.');
         return;
       }

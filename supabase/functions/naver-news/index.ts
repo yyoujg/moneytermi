@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
 
   try {
     const { query } = await req.json();
-    if (!query) {
+    if (!query || typeof query !== 'string') {
       return new Response(JSON.stringify([]), { headers: { ...CORS, 'Content-Type': 'application/json' } });
     }
 
