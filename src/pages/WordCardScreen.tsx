@@ -68,8 +68,8 @@ const WordCard = ({
 
     {/* 자세히 알아보기 */}
     <div className="bg-white rounded-2xl px-5 py-4">
-      <p className="text-[11px] font-bold text-[#AAAAAA] mb-2">📖 자세히 알아보기</p>
-      <p className="text-[14px] leading-[1.9] text-[#555555] break-keep">{word.detailedMeaning}</p>
+      <p className="text-[11px] font-bold text-[#AAAAAA] mb-3">📖 자세히 알아보기</p>
+      <p className="text-[14px] leading-relaxed text-[#555555] break-keep">{word.detailedMeaning}</p>
     </div>
 
     {/* 실시간 뉴스 */}
