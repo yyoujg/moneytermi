@@ -245,7 +245,8 @@ const WordCardScreen = () => {
     if (wordIndex > 0) setWordIndex(i => i - 1);
   };
 
-  const handleRelatedWordClick = (wordName: string) => {
+  const handleRelatedWordClick = (rawName: string) => {
+    const wordName = rawName.replace(/["""'']/g, '').trim();
     // 현재 코스 내에 있으면 바로 이동
     const idx = words.findIndex(w => w.word === wordName);
     if (idx >= 0) { setWordIndex(idx); return; }
