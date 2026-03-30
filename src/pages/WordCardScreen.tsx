@@ -4,7 +4,6 @@ import { ChevronLeft, ChevronRight, Check, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Word, Missions } from '../types';
 import { useAppContext } from '../context/AppContext';
-import { supabase } from '../lib/supabase';
 
 const ACCENT = '#f97316';
 
@@ -167,12 +166,19 @@ const WordCardScreen = () => {
     let cancelled = false;
     setNewsItems([]);
     setNewsLoading(true);
-    supabase.functions.invoke('naver-news', { body: { query: currentWord.word } })
-      .then(({ data, error }) => {
-        if (error) { console.error('[뉴스 fetch 실패]', error); return; }
-        if (!cancelled) setNewsItems(Array.isArray(data) ? data : []);
-      })
-      .catch((err) => { console.error('[뉴스 fetch 네트워크 오류]', err); })
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+    fetch(`${supabaseUrl}/functions/v1/naver-news`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${anonKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query: currentWord.word }),
+    })
+      .then(res => res.json())
+      .then(data => { if (!cancelled) setNewsItems(Array.isArray(data) ? data : []); })
+      .catch((err) => { console.error('[뉴스 fetch 실패]', err); })
       .finally(() => { if (!cancelled) setNewsLoading(false); });
     return () => { cancelled = true; };
   }, [wordIndex, words]);
