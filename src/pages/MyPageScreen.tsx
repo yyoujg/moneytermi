@@ -4,7 +4,7 @@ import { BookOpen, Settings, LogOut, ChevronLeft, ChevronRight, Zap, Trophy, Shi
 import { useAppContext } from '../context/AppContext';
 import { toast } from 'sonner';
 import { CURRENT_LEAGUE_NAME } from '../constants';
-import { List, ListRow, Spacing } from '@toss/tds-mobile';
+import { List, ListRow, Spacing, Switch, BottomSheet, ConfirmDialog } from '@toss/tds-mobile';
 import { useAuth } from '../hooks/useAuth';
 import GuestLinkSheet from '../components/GuestLinkSheet';
 
@@ -102,70 +102,50 @@ const AttendanceCalendar = ({ attendanceDates }: { attendanceDates: string[] }) 
 // ── 앱 사용법 / FAQ 시트 ───────────────────────────────────────
 const FAQ_ITEMS = [
   { q: '포인트는 어떻게 얻나요?', a: '퀴즈에서 정답을 맞히면 10~20P를 획득해요. 연속 정답 시 보너스 포인트가 붙어요!' },
-  { q: '단어를 "알고 있어요" 표시하면?', a: '학습 완료로 기록되고 복습 리스트에 추가됩니다. 체크 해제도 언제든지 가능해요.' },
-  { q: '리그 순위는 어떻게 결정되나요?', a: '보유 포인트 순으로 순위가 매겨집니다. 매주 초기화되니 꾸준히 퀴즈를 풀어보세요.' },
-  { q: '코스는 어떻게 구성되어 있나요?', a: '경제 카테고리별(거시경제, 금융, 주식/기업 등)로 묶인 단어 묶음이에요. 난이도순으로 학습해요.' },
-  { q: '게스트 계정은 안전한가요?', a: '게스트 계정의 학습 기록은 이 기기에만 저장돼요. 이메일로 연결하면 어디서든 이어할 수 있어요.' },
+  { q: '단어를 "알고 있어요" 표시하면?', a: '학습 완료로 기록되고 복습 리스트에 추가돼요. 체크 해제도 언제든지 가능해요.' },
+  { q: '리그 순위는 어떻게 결정되나요?', a: '보유 포인트 순으로 순위가 정해져요. 매주 초기화되니 꾸준히 퀴즈를 풀어보세요.' },
+  { q: '코스는 어떻게 구성돼 있나요?', a: '경제 카테고리별(거시경제, 금융, 주식/기업 등)로 묶인 단어 묶음이에요. 난이도순으로 학습해요.' },
+  { q: '게스트 계정은 안전한가요?', a: '게스트 계정의 학습 기록은 이 기기에만 저장돼요. 이메일로 연결하면 어디서든 이어서 학습할 수 있어요.' },
   { q: '앱 사용법이 궁금해요', a: '홈 → 오늘 학습 시작 → 단어 카드 → 퀴즈 순서로 사용해보세요. 매일 출석하면 포인트도 받아요!' },
 ];
 
-const GuideSheet = ({ onClose }: { onClose: () => void }) => (
-  <>
-    <div className="fixed inset-0 z-50 bg-black/70" onClick={onClose} />
-    <div className="fixed bottom-0 z-[60] w-full" style={{ maxWidth: '28rem', left: '50%', transform: 'translateX(-50%)' }}>
-      <div className="bg-white rounded-t-3xl px-5 pt-6 pb-28 flex flex-col gap-4" style={{ maxHeight: '80dvh', overflowY: 'auto' }}>
-        <div className="flex items-center justify-between">
-          <p className="text-base font-bold text-[#111111]">앱 사용법 & FAQ</p>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-[#F0F0F0]">
-            <X size={15} className="text-[#888888]" />
-          </button>
+const GuideSheet = ({ open, onClose }: { open: boolean; onClose: () => void }) => (
+  <BottomSheet open={open} onDimmerClick={onClose} header="앱 사용법 & FAQ">
+    <div className="px-5 pb-6 flex flex-col gap-3">
+      {FAQ_ITEMS.map((item, i) => (
+        <div key={i} className="bg-[#F7F7F7] rounded-2xl px-4 py-4">
+          <p className="text-sm font-bold text-[#111111] mb-1.5">Q. {item.q}</p>
+          <p className="text-xs text-[#666666] leading-relaxed">{item.a}</p>
         </div>
-        <div className="flex flex-col gap-3">
-          {FAQ_ITEMS.map((item, i) => (
-            <div key={i} className="bg-[#F7F7F7] rounded-2xl px-4 py-4">
-              <p className="text-sm font-bold text-[#111111] mb-1.5">Q. {item.q}</p>
-              <p className="text-xs text-[#666666] leading-relaxed">{item.a}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+      ))}
     </div>
-  </>
+  </BottomSheet>
 );
 
 // ── 이모지 피커 시트 ───────────────────────────────────────────
 const EMOJI_OPTIONS = ['😊','🥰','😎','🤓','🧠','🦁','🐼','🐻','🦊','🐯','🌟','🎯','🎮','🚀','💎','🔥','🍀','🎸','🏆','⚡'];
 
-const EmojiPickerSheet = ({ current, onSelect, onClose }: { current: string; onSelect: (e: string) => void; onClose: () => void }) => (
-  <>
-    <div className="fixed inset-0 z-50 bg-black/70" onClick={onClose} />
-    <div className="fixed bottom-0 z-[60] w-full" style={{ maxWidth: '28rem', left: '50%', transform: 'translateX(-50%)' }}>
-      <div className="bg-white rounded-t-3xl px-5 pt-6 pb-28">
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-base font-bold text-[#111111]">프로필 이모지 선택</p>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-[#F0F0F0]">
-            <X size={15} className="text-[#888888]" />
+const EmojiPickerSheet = ({ open, current, onSelect, onClose }: { open: boolean; current: string; onSelect: (e: string) => void; onClose: () => void }) => (
+  <BottomSheet open={open} onDimmerClick={onClose} header="프로필 이모지 선택">
+    <div className="px-5 pb-6">
+      <div className="grid grid-cols-5 gap-3">
+        {EMOJI_OPTIONS.map(emoji => (
+          <button
+            key={emoji}
+            onClick={() => { onSelect(emoji); onClose(); }}
+            className={`w-full aspect-square rounded-2xl flex items-center justify-center text-3xl transition-all
+              ${current === emoji ? 'bg-orange-500/15 ring-2 ring-orange-500' : 'bg-[#F0F0F0] active:bg-[#E5E5E5]'}`}
+          >
+            {emoji}
           </button>
-        </div>
-        <div className="grid grid-cols-5 gap-3">
-          {EMOJI_OPTIONS.map(emoji => (
-            <button
-              key={emoji}
-              onClick={() => { onSelect(emoji); onClose(); }}
-              className={`w-full aspect-square rounded-2xl flex items-center justify-center text-3xl transition-all
-                ${current === emoji ? 'bg-orange-500/15 ring-2 ring-orange-500' : 'bg-[#F0F0F0] active:bg-[#E5E5E5]'}`}
-            >
-              {emoji}
-            </button>
-          ))}
-        </div>
+        ))}
       </div>
     </div>
-  </>
+  </BottomSheet>
 );
 
 // ── 설정 시트 ─────────────────────────────────────────────────
-const SettingsSheet = ({ onClose }: { onClose: () => void }) => {
+const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   const [soundOn, setSoundOn]         = useState(true);
   const [vibrationOn, setVibrationOn] = useState(true);
 
@@ -187,111 +167,52 @@ const SettingsSheet = ({ onClose }: { onClose: () => void }) => {
   };
 
   return (
-    <>
-      <div className="fixed inset-0 z-50 bg-black/70" onClick={onClose} />
-      <div className="fixed bottom-0 z-[60] w-full" style={{ maxWidth: '28rem', left: '50%', transform: 'translateX(-50%)' }}>
-        <div className="bg-white rounded-t-3xl px-5 pt-6 pb-28 flex flex-col gap-4">
-          <div className="flex items-center justify-between">
-            <p className="text-base font-bold text-[#111111]">앱 설정</p>
-            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-[#F0F0F0]">
-              <X size={15} className="text-[#888888]" />
-            </button>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            {/* 효과음 */}
-            <div className="flex items-center justify-between bg-[#F0F0F0] rounded-2xl px-4 py-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-[#E5E5E5] flex items-center justify-center">
-                  {soundOn
-                    ? <Volume2 size={16} className="text-[#555555]" />
-                    : <VolumeX size={16} className="text-[#AAAAAA]" />
-                  }
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-[#111111]">효과음</p>
-                  <p className="text-xs text-[#AAAAAA]">퀴즈 정답/오답 효과음</p>
-                </div>
-              </div>
-              <button
-                onClick={toggleSound}
-                className={`w-12 h-6 rounded-full transition-colors relative ${soundOn ? 'bg-orange-500' : 'bg-[#D0D0D0]'}`}
-              >
-                <span className={`absolute left-0 top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${soundOn ? 'translate-x-[26px]' : 'translate-x-[2px]'}`} />
-              </button>
+    <BottomSheet open={open} onDimmerClick={onClose} header="앱 설정">
+      <div className="px-5 pb-6 flex flex-col gap-2">
+        {/* 효과음 */}
+        <div className="flex items-center justify-between bg-[#F0F0F0] rounded-2xl px-4 py-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-[#E5E5E5] flex items-center justify-center">
+              {soundOn
+                ? <Volume2 size={16} className="text-[#555555]" />
+                : <VolumeX size={16} className="text-[#AAAAAA]" />
+              }
             </div>
-
-            {/* 진동 */}
-            <div className="flex items-center justify-between bg-[#F0F0F0] rounded-2xl px-4 py-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-[#E5E5E5] flex items-center justify-center">
-                  <span className={`text-base ${vibrationOn ? 'text-[#555555]' : 'text-[#AAAAAA]'}`}>📳</span>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-[#111111]">진동</p>
-                  <p className="text-xs text-[#AAAAAA]">햅틱 피드백</p>
-                </div>
-              </div>
-              <button
-                onClick={toggleVibration}
-                className={`w-12 h-6 rounded-full transition-colors relative ${vibrationOn ? 'bg-orange-500' : 'bg-[#D0D0D0]'}`}
-              >
-                <span className={`absolute left-0 top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${vibrationOn ? 'translate-x-[26px]' : 'translate-x-[2px]'}`} />
-              </button>
+            <div>
+              <p className="text-sm font-semibold text-[#111111]">효과음</p>
+              <p className="text-xs text-[#AAAAAA]">퀴즈 정답/오답 효과음</p>
             </div>
           </div>
+          <Switch checked={soundOn} onChange={toggleSound} />
+        </div>
+
+        {/* 진동 */}
+        <div className="flex items-center justify-between bg-[#F0F0F0] rounded-2xl px-4 py-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-[#E5E5E5] flex items-center justify-center">
+              <span className={`text-base ${vibrationOn ? 'text-[#555555]' : 'text-[#AAAAAA]'}`}>📳</span>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-[#111111]">진동</p>
+              <p className="text-xs text-[#AAAAAA]">햅틱 피드백</p>
+            </div>
+          </div>
+          <Switch checked={vibrationOn} onChange={toggleVibration} />
         </div>
       </div>
-    </>
+    </BottomSheet>
   );
 };
 
-// ── 로그아웃 확인 다이얼로그 ──────────────────────────────────
-const LogoutDialog = ({ isGuest, onConfirm, onCancel }: { isGuest: boolean; onConfirm: () => void; onCancel: () => void }) => (
-  <>
-    <div className="fixed inset-0 z-50 bg-black/70" onClick={onCancel} />
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
-      <div className="bg-[#F0F0F0] rounded-3xl px-6 py-6 w-full flex flex-col gap-5" style={{ maxWidth: '22rem' }}>
-        <div className="text-center">
-          <p className="text-base font-bold text-[#111111] mb-2">로그아웃</p>
-          {isGuest ? (
-            <p className="text-sm text-[#555555] leading-relaxed">
-              게스트 계정은 로그아웃 시<br />
-              <span className="text-red-400 font-semibold">모든 학습 기록이 삭제</span>됩니다.<br />
-              계속하시겠습니까?
-            </p>
-          ) : (
-            <p className="text-sm text-[#555555] leading-relaxed">
-              로그아웃하시겠습니까?<br />
-              학습 기록은 서버에 저장되어 있습니다.
-            </p>
-          )}
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={onCancel}
-            className="flex-1 py-3.5 rounded-2xl bg-[#E5E5E5] text-sm font-bold text-[#555555] active:opacity-80"
-          >
-            취소
-          </button>
-          <button
-            onClick={onConfirm}
-            className="flex-1 py-3.5 rounded-2xl bg-red-500/20 text-sm font-bold text-red-400 active:opacity-80"
-          >
-            로그아웃
-          </button>
-        </div>
-      </div>
-    </div>
-  </>
-);
 
 // ── 닉네임 변경 시트 ──────────────────────────────────────────
 const NicknameSheet = ({
+  open,
   currentNickname,
   onClose,
   onSave,
 }: {
+  open: boolean;
   currentNickname: string;
   onClose: () => void;
   onSave: (nickname: string) => Promise<{ error: string | null }>;
@@ -318,48 +239,38 @@ const NicknameSheet = ({
   };
 
   return (
-    <>
-      <div className="fixed inset-0 z-50 bg-black/70" onClick={onClose} />
-      <div className="fixed bottom-0 z-[60] w-full" style={{ maxWidth: '28rem', left: '50%', transform: 'translateX(-50%)' }}>
-        <div className="bg-white rounded-t-3xl px-5 pt-6 pb-10 flex flex-col gap-5">
-          <div className="flex items-center justify-between">
-            <p className="text-base font-bold text-[#111111]">닉네임 변경</p>
-            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-[#F0F0F0]">
-              <X size={15} className="text-[#888888]" />
-            </button>
+    <BottomSheet open={open} onDimmerClick={onClose} header="닉네임 변경" hasTextField>
+      <div className="px-5 pb-6 flex flex-col gap-5">
+        <div className="flex flex-col gap-2">
+          <div className={`flex items-center gap-3 bg-[#F0F0F0] rounded-2xl px-4 py-3.5 transition-colors ${error ? 'ring-2 ring-red-400/50' : ''}`}>
+            <input
+              ref={inputRef}
+              value={value}
+              onChange={e => { setValue(e.target.value); setError(null); }}
+              onKeyDown={e => { if (e.key === 'Enter') handleSave(); }}
+              maxLength={10}
+              placeholder="닉네임 입력"
+              className="flex-1 bg-transparent text-sm font-semibold text-[#111111] placeholder:text-[#AAAAAA] outline-none"
+            />
+            <span className="text-xs text-[#AAAAAA] shrink-0">{value.length}/10</span>
+            {value.length > 0 && (
+              <button onClick={() => { setValue(''); setError(null); }} className="w-5 h-5 flex items-center justify-center rounded-full bg-[#D0D0D0]">
+                <X size={10} className="text-white" />
+              </button>
+            )}
           </div>
-
-          <div className="flex flex-col gap-2">
-            <div className={`flex items-center gap-3 bg-[#F0F0F0] rounded-2xl px-4 py-3.5 transition-colors ${error ? 'ring-2 ring-red-400/50' : ''}`}>
-              <input
-                ref={inputRef}
-                value={value}
-                onChange={e => { setValue(e.target.value); setError(null); }}
-                onKeyDown={e => { if (e.key === 'Enter') handleSave(); }}
-                maxLength={10}
-                placeholder="닉네임 입력"
-                className="flex-1 bg-transparent text-sm font-semibold text-[#111111] placeholder:text-[#AAAAAA] outline-none"
-              />
-              <span className="text-xs text-[#AAAAAA] shrink-0">{value.length}/10</span>
-              {value.length > 0 && (
-                <button onClick={() => { setValue(''); setError(null); }} className="w-5 h-5 flex items-center justify-center rounded-full bg-[#D0D0D0]">
-                  <X size={10} className="text-white" />
-                </button>
-              )}
-            </div>
-            {error && <p className="text-xs text-red-400 font-medium px-1">{error}</p>}
-          </div>
-
-          <button
-            onClick={handleSave}
-            disabled={loading || value.trim().length === 0}
-            className="w-full py-4 rounded-2xl bg-orange-500 text-white text-sm font-bold active:bg-orange-600 disabled:opacity-40 transition-colors"
-          >
-            {loading ? '확인 중...' : '저장하기'}
-          </button>
+          {error && <p className="text-xs text-red-400 font-medium px-1">{error}</p>}
         </div>
+
+        <button
+          onClick={handleSave}
+          disabled={loading || value.trim().length === 0}
+          className="w-full py-4 rounded-2xl bg-orange-500 text-white text-sm font-bold active:bg-orange-600 disabled:opacity-40 transition-colors"
+        >
+          {loading ? '확인 중...' : '저장하기'}
+        </button>
       </div>
-    </>
+    </BottomSheet>
   );
 };
 
@@ -399,29 +310,36 @@ const MyPageScreen = () => {
           onLink={(email) => { linkAccount(email); setShowLinkSheet(false); }}
         />
       )}
-      {showGuide && <GuideSheet onClose={() => setShowGuide(false)} />}
-      {showEmojiPicker && (
-        <EmojiPickerSheet
-          current={myEmoji}
-          onSelect={updateMyEmoji}
-          onClose={() => setShowEmojiPicker(false)}
-        />
-      )}
-      {showSettings && <SettingsSheet onClose={() => setShowSettings(false)} />}
-      {showNicknameSheet && (
-        <NicknameSheet
-          currentNickname={user?.nickname ?? ''}
-          onClose={() => setShowNicknameSheet(false)}
-          onSave={updateNickname}
-        />
-      )}
-      {showLogoutDialog && (
-        <LogoutDialog
-          isGuest={isGuest}
-          onConfirm={logout}
-          onCancel={() => setShowLogoutDialog(false)}
-        />
-      )}
+      <GuideSheet open={showGuide} onClose={() => setShowGuide(false)} />
+      <EmojiPickerSheet
+        open={showEmojiPicker}
+        current={myEmoji}
+        onSelect={updateMyEmoji}
+        onClose={() => setShowEmojiPicker(false)}
+      />
+      <SettingsSheet open={showSettings} onClose={() => setShowSettings(false)} />
+      <NicknameSheet
+        open={showNicknameSheet}
+        currentNickname={user?.nickname ?? ''}
+        onClose={() => setShowNicknameSheet(false)}
+        onSave={updateNickname}
+      />
+      <ConfirmDialog open={showLogoutDialog}>
+        <ConfirmDialog.Title>로그아웃</ConfirmDialog.Title>
+        <ConfirmDialog.Description>
+          {isGuest ? (
+            <>
+              게스트 계정은 로그아웃하면<br />
+              <span className="text-red-400 font-semibold">모든 학습 기록이 삭제</span>돼요.<br />
+              계속할까요?
+            </>
+          ) : (
+            <>로그아웃할까요?<br />학습 기록은 서버에 저장돼 있어요.</>
+          )}
+        </ConfirmDialog.Description>
+        <ConfirmDialog.CancelButton onClick={() => setShowLogoutDialog(false)}>취소</ConfirmDialog.CancelButton>
+        <ConfirmDialog.ConfirmButton onClick={() => { logout(); setShowLogoutDialog(false); }} color="danger">로그아웃</ConfirmDialog.ConfirmButton>
+      </ConfirmDialog>
 
       {/* 프로필 헤더 */}
       <div className="bg-white pt-12 px-5 pb-5">

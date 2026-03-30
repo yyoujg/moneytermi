@@ -137,7 +137,7 @@ const QuizScreen = () => {
                   ? <p className="text-sm font-bold text-orange-400">🔥 {prevRank}위 → {myRank}위 상승!</p>
                   : <p className="text-sm font-bold text-orange-400">+{totalEarned}P 획득!</p>
                 }
-                <p className="text-xs text-[#AAAAAA] mt-0.5">지금 저장하면 {points}P + {myRank}위 유지됩니다</p>
+                <p className="text-xs text-[#AAAAAA] mt-0.5">지금 저장하면 {points}P + {myRank}위 유지돼요</p>
               </div>
               <button
                 onClick={() => setShowLinkSheet(true)}

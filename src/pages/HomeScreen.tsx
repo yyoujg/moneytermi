@@ -145,7 +145,7 @@ const HomeScreen = () => {
               <X size={12} className="text-[#AAAAAA]" />
             </button>
             <p className="text-base font-bold text-orange-400 pr-8 mb-0.5">🔥 {points}P + {myRank}위 유지</p>
-            <p className="text-xs text-[#AAAAAA]">⚠️ 삭제 시 전부 사라짐</p>
+            <p className="text-xs text-[#AAAAAA]">⚠️ 삭제하면 전부 사라져요</p>
             <div className="h-5" />
             <button
               onClick={() => setShowLinkSheet(true)}
