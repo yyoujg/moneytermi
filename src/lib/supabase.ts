@@ -9,7 +9,13 @@ if (!url || !key) {
 }
 
 // 기본 클라이언트 (Supabase Auth 세션용)
-export const supabase = createClient<Database>(url, key);
+// auth.lock을 no-op으로 설정: iOS WKWebView(Toss 앱)에서 Web Locks API가
+// "Lock was stolen by another request" AbortError를 발생시키는 문제 우회
+export const supabase = createClient<Database>(url, key, {
+  auth: {
+    lock: (_name: string, _acquireTimeout: number, fn: () => Promise<unknown>) => fn(),
+  },
+});
 
 // 게스트용 클라이언트 — RLS 통과를 위해 x-guest-token 헤더 포함
 export const getGuestClient = (guestToken: string) =>
