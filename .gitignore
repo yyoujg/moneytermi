@@ -33,3 +33,4 @@ dist-ssr
 .granite
 .claude/settings.local.json
 .vercel
+supabase/.temp/
