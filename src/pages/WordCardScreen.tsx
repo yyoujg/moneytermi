@@ -34,6 +34,7 @@ const WordCard = ({
   onRelatedClick,
   newsItems,
   newsLoading,
+  keyword,
 }: {
   word: Word;
   isKnown: boolean;
