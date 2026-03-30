@@ -1,5 +1,6 @@
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate,  } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import { Component, type ReactNode, type ErrorInfo } from 'react';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { AuthProvider } from './hooks/useAuth';
@@ -84,6 +85,7 @@ export default function App() {
       <AuthProvider>
       <AppProvider>
         <HashRouter>
+          <Toaster position="top-center" duration={1800} richColors />
           <div className="w-full max-w-md mx-auto bg-[#F7F7F7] h-[100dvh] overflow-hidden relative font-sans text-[#111111] flex flex-col">
             <ErrorBoundary>
               <Layout />

@@ -30,6 +30,8 @@ type AppContextValue = {
   checkIn: () => Promise<void>;
   courses: Course[];
   allWords: Word[];
+  myEmoji: string;
+  updateMyEmoji: (emoji: string) => Promise<void>;
 };
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -49,6 +51,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [otherLeagueUsers, setOtherLeagueUsers] = useState<LeagueUser[]>([]);
   const [courses, setCourses]             = useState<Course[]>([]);
   const [allWords, setAllWords]           = useState<Word[]>([]);
+  const [myEmoji, setMyEmoji]             = useState<string>('😊');
   const [ready, setReady]                 = useState(false);
   const pendingKnownIds   = useRef<Set<number> | null>(null);
   const pendingUnknownIds = useRef<Set<number> | null>(null);
@@ -201,7 +204,15 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         }));
       }
 
-      // 5. 리그 유저 — 본인 제외한 전체 프로필 (공개 SELECT)
+      // 5. 내 프로필 이모지 로드
+      const { data: myProfile } = await db
+        .from('profiles')
+        .select('emoji')
+        .eq('id', profileId)
+        .single();
+      if (myProfile?.emoji) setMyEmoji(myProfile.emoji);
+
+      // 6. 리그 유저 — 본인 제외한 전체 프로필 (공개 SELECT)
       const { data: league } = await supabase
         .from('profiles')
         .select('id, nickname, points, emoji')
@@ -363,6 +374,14 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // ── updateMyEmoji ─────────────────────────────────────────────
+  const updateMyEmoji = async (emoji: string) => {
+    setMyEmoji(emoji);
+    const profileId = profileIdRef.current;
+    if (!profileId) return;
+    await dbRef.current.from('profiles').update({ emoji }).eq('id', profileId);
+  };
+
   // ── claimReward ───────────────────────────────────────────────
   const claimReward = (missionId: keyof Missions) => setMissions(prev => {
     const mission = prev[missionId];
@@ -387,6 +406,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       otherLeagueUsers,
       courses,
       allWords,
+      myEmoji,
+      updateMyEmoji,
     }}>
       {children}
     </AppContext.Provider>

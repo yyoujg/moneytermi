@@ -1,3 +1,5 @@
+
+
 import React, { useMemo, useState } from 'react';
 import { Info, Zap, Trophy, TrendingUp, TrendingDown, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -11,7 +13,7 @@ const RANK_MEDALS = ['🥇', '🥈', '🥉'];
 
 const LeagueScreen = () => {
   const navigate = useNavigate();
-  const { points, otherLeagueUsers } = useAppContext();
+  const { points, otherLeagueUsers, myEmoji } = useAppContext();
   const { isGuest, linkAccount, user } = useAuth();
   const [showLinkSheet, setShowLinkSheet] = useState(false);
   const [linkDismissed, setLinkDismissed] = useState(false);
@@ -19,9 +21,9 @@ const LeagueScreen = () => {
   const myName = `나 (${user?.nickname ?? '예비슈퍼개미'})`;
 
   const sortedLeague = useMemo(
-    () => [...otherLeagueUsers, { id: 'me', name: myName, points, emoji: '🍊' }]
+    () => [...otherLeagueUsers, { id: 'me', name: myName, points, emoji: myEmoji }]
       .sort((a, b) => b.points - a.points),
-    [otherLeagueUsers, points, myName]
+    [otherLeagueUsers, points, myName, myEmoji]
   );
 
   const top3 = sortedLeague.slice(0, 3);
@@ -61,7 +63,7 @@ const LeagueScreen = () => {
         <div className="bg-[#F7F7F7] rounded-2xl p-4 mb-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-orange-500/10 rounded-full flex items-center justify-center text-xl">🍊</div>
+              <div className="w-10 h-10 bg-orange-500/10 rounded-full flex items-center justify-center text-xl">{myEmoji}</div>
               <div>
                 <p className="text-sm font-bold text-[#111111]">예비슈퍼개미</p>
                 <p className="text-xs text-[#AAAAAA]">{LEAGUE_TIERS.find(t => t.id === CURRENT_LEAGUE_ID)?.name} 리그</p>

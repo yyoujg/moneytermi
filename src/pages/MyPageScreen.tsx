@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Storage } from '../lib/storage';
-import { BookOpen, Bell, Settings, LogOut, ChevronLeft, ChevronRight, Zap, Trophy, ShieldCheck, ShieldAlert, X, Volume2, VolumeX, Pencil } from 'lucide-react';
+import { BookOpen, Settings, LogOut, ChevronLeft, ChevronRight, Zap, Trophy, ShieldCheck, ShieldAlert, X, Volume2, VolumeX, Pencil } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
-import FallbackImage from '../components/FallbackImage';
+import { toast } from 'sonner';
 import { CURRENT_LEAGUE_NAME } from '../constants';
 import { List, ListRow, Spacing } from '@toss/tds-mobile';
 import { useAuth } from '../hooks/useAuth';
@@ -99,21 +99,65 @@ const AttendanceCalendar = ({ attendanceDates }: { attendanceDates: string[] }) 
   );
 };
 
-// ── 공지사항 시트 ──────────────────────────────────────────────
-const NoticeSheet = ({ onClose }: { onClose: () => void }) => (
+// ── 앱 사용법 / FAQ 시트 ───────────────────────────────────────
+const FAQ_ITEMS = [
+  { q: '포인트는 어떻게 얻나요?', a: '퀴즈에서 정답을 맞히면 10~20P를 획득해요. 연속 정답 시 보너스 포인트가 붙어요!' },
+  { q: '단어를 "알고 있어요" 표시하면?', a: '학습 완료로 기록되고 복습 리스트에 추가됩니다. 체크 해제도 언제든지 가능해요.' },
+  { q: '리그 순위는 어떻게 결정되나요?', a: '보유 포인트 순으로 순위가 매겨집니다. 매주 초기화되니 꾸준히 퀴즈를 풀어보세요.' },
+  { q: '코스는 어떻게 구성되어 있나요?', a: '경제 카테고리별(거시경제, 금융, 주식/기업 등)로 묶인 단어 묶음이에요. 난이도순으로 학습해요.' },
+  { q: '게스트 계정은 안전한가요?', a: '게스트 계정의 학습 기록은 이 기기에만 저장돼요. 이메일로 연결하면 어디서든 이어할 수 있어요.' },
+  { q: '앱 사용법이 궁금해요', a: '홈 → 오늘 학습 시작 → 단어 카드 → 퀴즈 순서로 사용해보세요. 매일 출석하면 포인트도 받아요!' },
+];
+
+const GuideSheet = ({ onClose }: { onClose: () => void }) => (
   <>
     <div className="fixed inset-0 z-50 bg-black/70" onClick={onClose} />
     <div className="fixed bottom-0 z-[60] w-full" style={{ maxWidth: '28rem', left: '50%', transform: 'translateX(-50%)' }}>
       <div className="bg-white rounded-t-3xl px-5 pt-6 pb-28 flex flex-col gap-4" style={{ maxHeight: '80dvh', overflowY: 'auto' }}>
         <div className="flex items-center justify-between">
-          <p className="text-base font-bold text-[#111111]">공지사항</p>
+          <p className="text-base font-bold text-[#111111]">앱 사용법 & FAQ</p>
           <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-[#F0F0F0]">
             <X size={15} className="text-[#888888]" />
           </button>
         </div>
-        <div className="flex flex-col items-center justify-center py-12 gap-2">
-          <Bell size={32} className="text-[#C0C0C0]" />
-          <p className="text-sm text-[#AAAAAA]">아직 공지사항이 없어요</p>
+        <div className="flex flex-col gap-3">
+          {FAQ_ITEMS.map((item, i) => (
+            <div key={i} className="bg-[#F7F7F7] rounded-2xl px-4 py-4">
+              <p className="text-sm font-bold text-[#111111] mb-1.5">Q. {item.q}</p>
+              <p className="text-xs text-[#666666] leading-relaxed">{item.a}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </>
+);
+
+// ── 이모지 피커 시트 ───────────────────────────────────────────
+const EMOJI_OPTIONS = ['😊','🥰','😎','🤓','🧠','🦁','🐼','🐻','🦊','🐯','🌟','🎯','🎮','🚀','💎','🔥','🍀','🎸','🏆','⚡'];
+
+const EmojiPickerSheet = ({ current, onSelect, onClose }: { current: string; onSelect: (e: string) => void; onClose: () => void }) => (
+  <>
+    <div className="fixed inset-0 z-50 bg-black/70" onClick={onClose} />
+    <div className="fixed bottom-0 z-[60] w-full" style={{ maxWidth: '28rem', left: '50%', transform: 'translateX(-50%)' }}>
+      <div className="bg-white rounded-t-3xl px-5 pt-6 pb-28">
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-base font-bold text-[#111111]">프로필 이모지 선택</p>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full bg-[#F0F0F0]">
+            <X size={15} className="text-[#888888]" />
+          </button>
+        </div>
+        <div className="grid grid-cols-5 gap-3">
+          {EMOJI_OPTIONS.map(emoji => (
+            <button
+              key={emoji}
+              onClick={() => { onSelect(emoji); onClose(); }}
+              className={`w-full aspect-square rounded-2xl flex items-center justify-center text-3xl transition-all
+                ${current === emoji ? 'bg-orange-500/15 ring-2 ring-orange-500' : 'bg-[#F0F0F0] active:bg-[#E5E5E5]'}`}
+            >
+              {emoji}
+            </button>
+          ))}
         </div>
       </div>
     </div>
@@ -321,23 +365,29 @@ const NicknameSheet = ({
 
 // ── 메인 ──────────────────────────────────────────────────────
 const MyPageScreen = () => {
-  const { points, knownWords, attendanceDates, missions, checkIn } = useAppContext();
+  const { points, knownWords, attendanceDates, missions, checkIn, myEmoji, updateMyEmoji } = useAppContext();
   const { user, isGuest, linkAccount, updateNickname, logout } = useAuth();
   const [showLinkSheet, setShowLinkSheet]         = useState(false);
-  const [showNotice, setShowNotice]               = useState(false);
+  const [showGuide, setShowGuide]                 = useState(false);
   const [showSettings, setShowSettings]           = useState(false);
   const [showLogoutDialog, setShowLogoutDialog]   = useState(false);
   const [showNicknameSheet, setShowNicknameSheet] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker]     = useState(false);
 
   const handleMenuClick = (label: string) => {
-    if (label === '공지사항') setShowNotice(true);
+    if (label === '앱 사용법') setShowGuide(true);
     else if (label === '앱 설정') setShowSettings(true);
     else if (label === '로그아웃') setShowLogoutDialog(true);
   };
 
+  const handleCheckIn = async () => {
+    await checkIn();
+    toast.success('📅 오늘 출석 완료! +10P');
+  };
+
   const MENU_ITEMS = [
-    { icon: Bell,     label: '공지사항', sub: '최신 소식을 확인하세요', danger: false },
-    { icon: Settings, label: '앱 설정',  sub: '알림, 테마 등',         danger: false },
+    { icon: BookOpen, label: '앱 사용법', sub: '사용법 및 자주 묻는 질문', danger: false },
+    { icon: Settings, label: '앱 설정',  sub: '알림, 테마 등',            danger: false },
     ...(!isGuest ? [{ icon: LogOut, label: '로그아웃', sub: '', danger: true }] : []),
   ];
 
@@ -349,7 +399,14 @@ const MyPageScreen = () => {
           onLink={(email) => { linkAccount(email); setShowLinkSheet(false); }}
         />
       )}
-      {showNotice && <NoticeSheet onClose={() => setShowNotice(false)} />}
+      {showGuide && <GuideSheet onClose={() => setShowGuide(false)} />}
+      {showEmojiPicker && (
+        <EmojiPickerSheet
+          current={myEmoji}
+          onSelect={updateMyEmoji}
+          onClose={() => setShowEmojiPicker(false)}
+        />
+      )}
       {showSettings && <SettingsSheet onClose={() => setShowSettings(false)} />}
       {showNicknameSheet && (
         <NicknameSheet
@@ -370,9 +427,15 @@ const MyPageScreen = () => {
       <div className="bg-white pt-12 px-5 pb-5">
         <h2 className="text-xl font-bold mb-5 text-[#111111]">마이페이지</h2>
         <div className="flex items-center gap-4 mb-5">
-          <div className="w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center text-3xl border-2 border-orange-500/20 overflow-hidden shrink-0">
-            <FallbackImage src="" alt="프로필" className="w-full h-full object-cover" fallbackNode={<span>🍊</span>} />
-          </div>
+          <button
+            onClick={() => setShowEmojiPicker(true)}
+            className="relative w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center text-3xl border-2 border-orange-500/20 shrink-0 active:opacity-70"
+          >
+            <span>{myEmoji}</span>
+            <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
+              <Pencil size={9} className="text-white" />
+            </div>
+          </button>
           <div>
             <button
               onClick={() => setShowNicknameSheet(true)}
@@ -427,7 +490,7 @@ const MyPageScreen = () => {
           <div className="flex items-center justify-between mb-5">
             <p className="text-sm font-bold text-[#555555]">출석 현황</p>
             {missions.m1.current < missions.m1.target
-              ? <button onClick={checkIn} className="flex items-center gap-1 px-3.5 py-1.5 rounded-xl bg-orange-500 text-white text-xs font-bold active:opacity-80">✋ 출석하기</button>
+              ? <button onClick={handleCheckIn} className="flex items-center gap-1 px-3.5 py-1.5 rounded-xl bg-orange-500 text-white text-xs font-bold active:opacity-80">✋ 출석하기</button>
               : <span className="text-xs font-bold text-green-500">✅ 출석 완료</span>
             }
           </div>

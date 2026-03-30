@@ -74,7 +74,7 @@ const QuizPage = () => {
 
   if (isFinished) {
     return (
-      <div className="flex flex-col h-full bg-[#F7F7F7] items-center justify-center p-6 pb-24">
+      <div className="flex flex-col h-full bg-[#F7F7F7] items-center justify-center p-6 pb-32">
         <div className="w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center text-4xl mb-4">🏆</div>
         <h2 className="text-xl font-bold text-[#111111] mb-1">퀴즈 완료!</h2>
         <p className="text-sm text-[#888888] mb-6">{queue.length}문제 중 {totalCorrect}개 정답</p>
@@ -97,7 +97,7 @@ const QuizPage = () => {
   const earnedPreview = (showHint ? 5 : 10) + (combo >= 2 ? combo * 2 : 0);
 
   return (
-    <div className="flex flex-col h-full bg-[#F7F7F7] pb-24">
+    <div className="flex flex-col h-full bg-[#F7F7F7] pb-32">
       {/* 헤더 */}
       <div className="bg-white pt-12 px-5 pb-4 border-b border-[#E5E5E5]">
         <div className="flex justify-between items-center mb-3">

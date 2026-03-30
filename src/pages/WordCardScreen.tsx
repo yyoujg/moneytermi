@@ -1,10 +1,16 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, ExternalLink } from 'lucide-react';
+import { toast } from 'sonner';
 import type { Word, Missions } from '../types';
 import { useAppContext } from '../context/AppContext';
+import { supabase } from '../lib/supabase';
 
 const ACCENT = '#f97316';
+
+type NaverNewsItem = { title: string; link: string; description: string; pubDate: string };
+
+const stripHtml = (s: string) => s.replace(/<[^>]*>/g, '');
 
 // ── 단어 카드 본문 ────────────────────────────────────────────────
 const WordCard = ({
@@ -12,11 +18,15 @@ const WordCard = ({
   isKnown,
   onToggleKnown,
   onRelatedClick,
+  newsItems,
+  newsLoading,
 }: {
   word: Word;
   isKnown: boolean;
   onToggleKnown?: () => void;
   onRelatedClick: (name: string) => void;
+  newsItems: NaverNewsItem[];
+  newsLoading: boolean;
 }) => (
   <div className="flex flex-col gap-3 px-5 pb-6">
 
@@ -55,13 +65,39 @@ const WordCard = ({
       </div>
     </div>
 
-    {/* 힌트 */}
-    {word.hint && (
-      <div className="bg-orange-50 rounded-2xl px-5 py-4">
-        <p className="text-[11px] font-bold text-orange-300 mb-2">🎯 초성 힌트</p>
-        <p className="text-[18px] font-bold tracking-widest text-orange-400">{word.hint}</p>
-      </div>
-    )}
+    {/* 실시간 뉴스 */}
+    <div className="bg-white rounded-2xl px-5 py-4">
+      <p className="text-[11px] font-bold text-[#AAAAAA] mb-3">🗞 실시간 뉴스</p>
+      {newsLoading ? (
+        <div className="flex justify-center py-4">
+          <div className="w-5 h-5 border-2 border-orange-300 border-t-orange-500 rounded-full animate-spin" />
+        </div>
+      ) : newsItems.length > 0 ? (
+        <div className="flex flex-col gap-3">
+          {newsItems.map((item, i) => (
+            <a
+              key={i}
+              href={item.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-start gap-2 active:opacity-60"
+            >
+              <div className="flex-1">
+                <p className="text-[13px] font-semibold text-[#333333] break-keep leading-snug line-clamp-2">
+                  {stripHtml(item.title)}
+                </p>
+                <p className="text-[11px] text-[#AAAAAA] mt-0.5">
+                  {new Date(item.pubDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
+                </p>
+              </div>
+              <ExternalLink size={13} className="text-[#CCCCCC] shrink-0 mt-0.5" />
+            </a>
+          ))}
+        </div>
+      ) : (
+        <p className="text-[13px] text-[#AAAAAA]">관련 뉴스를 찾을 수 없어요</p>
+      )}
+    </div>
 
     {/* 관련 용어 */}
     {word.relatedWords && word.relatedWords.length > 0 && (
@@ -89,7 +125,7 @@ const WordCard = ({
 const WordCardScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { courses, knownWords, toggleKnown, setKnownWords, setMissions } = useAppContext();
+  const { courses, allWords, knownWords, toggleKnown, setKnownWords, setMissions } = useAppContext();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const state = location.state as {
@@ -111,6 +147,25 @@ const WordCardScreen = () => {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   }, [wordIndex]);
+
+  // 뉴스 fetch
+  const [newsItems, setNewsItems] = useState<NaverNewsItem[]>([]);
+  const [newsLoading, setNewsLoading] = useState(false);
+  useEffect(() => {
+    if (!words.length) return;
+    const currentWord = words[wordIndex];
+    if (!currentWord) return;
+    let cancelled = false;
+    setNewsItems([]);
+    setNewsLoading(true);
+    supabase.functions.invoke('naver-news', { body: { query: currentWord.word } })
+      .then(({ data }) => {
+        if (!cancelled) setNewsItems(Array.isArray(data) ? data : []);
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setNewsLoading(false); });
+    return () => { cancelled = true; };
+  }, [wordIndex, words]);
 
   // autoAdvance 완료 화면
   if (autoAdvance && words.length > 0 && wordIndex >= words.length) {
@@ -175,12 +230,23 @@ const WordCardScreen = () => {
   };
 
   const handleRelatedWordClick = (wordName: string) => {
+    // 현재 코스 내에 있으면 바로 이동
     const idx = words.findIndex(w => w.word === wordName);
     if (idx >= 0) { setWordIndex(idx); return; }
-    const targetCourse = courses.find(c => c.words.some(w => w.word === wordName));
+
+    // 다른 코스에서 검색 (word id 기반으로 매칭)
+    const targetWord = allWords.find(w => w.word === wordName);
+    if (!targetWord) {
+      toast.error('아직 등록되지 않은 용어예요');
+      return;
+    }
+
+    const targetCourse = courses.find(c => c.words.some(w => w.id === targetWord.id));
     if (targetCourse) {
-      const targetIdx = targetCourse.words.findIndex(w => w.word === wordName);
+      const targetIdx = targetCourse.words.findIndex(w => w.id === targetWord.id);
       navigate('/word-card', { state: { words: targetCourse.words, index: targetIdx, backPath, autoAdvance } });
+    } else {
+      navigate('/word-card', { state: { words: [targetWord], index: 0, backPath, autoAdvance } });
     }
   };
 
@@ -232,9 +298,14 @@ const WordCardScreen = () => {
           isKnown={isKnown}
           onToggleKnown={autoAdvance ? undefined : () => {
             toggleKnown(word);
-            if (!isKnown && wordIndex < words.length - 1) setWordIndex(i => i + 1);
+            if (!isKnown) {
+              toast.success('알고 있어요!');
+              if (wordIndex < words.length - 1) setWordIndex(i => i + 1);
+            }
           }}
           onRelatedClick={handleRelatedWordClick}
+          newsItems={newsItems}
+          newsLoading={newsLoading}
         />
       </div>
 

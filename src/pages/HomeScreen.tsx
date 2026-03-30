@@ -5,7 +5,6 @@ import { Badge, TextButton } from '@toss/tds-mobile';
 import { useNavigate } from 'react-router-dom';
 import type { Mission, Missions } from '../types';
 import { CURRENT_LEAGUE_NAME } from '../constants';
-import FallbackImage from '../components/FallbackImage';
 import { useAppContext } from '../context/AppContext';
 import { useAuth } from '../hooks/useAuth';
 import GuestLinkSheet from '../components/GuestLinkSheet';
@@ -67,7 +66,7 @@ const HomeScreen = () => {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
-  const { points, knownWords, missions, claimReward, attendanceDates, otherLeagueUsers, courses, allWords } = useAppContext();
+  const { points, knownWords, missions, claimReward, attendanceDates, otherLeagueUsers, courses, allWords, myEmoji } = useAppContext();
   const { isGuest, linkAccount, user } = useAuth();
   const [showLinkSheet, setShowLinkSheet] = useState(false);
   const [linkDismissed, setLinkDismissed] = useState(false);
@@ -132,7 +131,7 @@ const HomeScreen = () => {
             <h1 className="text-xl font-bold text-[#111111]">안녕하세요, {user?.nickname ?? '예비슈퍼개미'}님</h1>
           </div>
           <div className="w-10 h-10 bg-[#F0F0F0] rounded-full flex items-center justify-center overflow-hidden shrink-0">
-            <FallbackImage src="" alt="프로필" className="w-full h-full object-cover" fallbackNode={<span className="text-lg">🍊</span>} />
+            <span className="text-lg">{myEmoji}</span>
           </div>
         </div>
 
