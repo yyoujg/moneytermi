@@ -123,7 +123,7 @@ const HomeScreen = () => {
 
       {/* 헤더 */}
       <div className="pt-4 px-5 pb-4">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-4">
           <div>
             <div className="inline-flex items-center px-2 py-1 rounded mb-2" style={{ backgroundColor: '#F0F0F0' }}>
               <span className="text-[11px] font-medium text-[#AAAAAA]">{CURRENT_LEAGUE_NAME} 리그</span>
@@ -157,13 +157,13 @@ const HomeScreen = () => {
         )}
 
         {/* 오늘 목표 카드 (핵심 CTA) */}
-        <div className="bg-white rounded-2xl p-5 mb-3">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white rounded-2xl p-5 mb-4">
+          <div className="flex items-center justify-between mb-3">
             <p className="text-xs font-medium text-[#AAAAAA]">오늘 목표</p>
             <span className="text-xs font-bold text-orange-500">{todayDone}/{todayTotal} 완료</span>
           </div>
 
-          <div className="flex gap-3 mb-5">
+          <div className="flex gap-3 mb-4">
             {/* 학습 목표 */}
             <div className={`flex-1 rounded-xl p-3 ${m2.current >= m2.target ? 'bg-orange-500/10' : 'bg-[#F0F0F0]'}`}>
               <div className="flex items-center gap-2 mb-1.5">
@@ -229,7 +229,7 @@ const HomeScreen = () => {
         </div>
 
         {/* 빠른 통계 */}
-        <div className="flex gap-3 mb-3">
+        <div className="flex gap-3 mb-4">
           <div className="flex-1 bg-white rounded-2xl px-4 py-3 flex items-center gap-3">
             <Zap size={14} className="text-[#AAAAAA] fill-current shrink-0" />
             <div>
@@ -263,7 +263,7 @@ const HomeScreen = () => {
       </div>
 
       {/* 코스 + 미션 */}
-      <div className="px-5 flex flex-col gap-5">
+      <div className="px-5 flex flex-col gap-4">
         {/* 코스 */}
         <div>
           <div className="flex justify-between items-center mb-3">
@@ -301,8 +301,8 @@ const HomeScreen = () => {
         </div>
 
         {/* 미션 */}
-        <div className="bg-white rounded-2xl p-5 mb-2">
-          <div className="flex justify-between items-center mb-4">
+        <div className="bg-white rounded-2xl p-5 mb-4">
+          <div className="flex justify-between items-center mb-3">
             <h2 className="text-sm font-bold text-[#555555]">오늘의 미션</h2>
             <span className="text-[11px] font-medium text-[#AAAAAA]">자정 초기화</span>
           </div>
