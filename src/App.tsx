@@ -49,11 +49,13 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
 }
 
 const LoadingScreen = () => (
-  <div className="flex-1 flex flex-col items-center justify-center gap-4">
-    <div className="w-12 h-12 rounded-2xl bg-orange-500 flex items-center justify-center text-2xl animate-pulse">
-      💰
-    </div>
-    <p className="text-sm font-semibold text-[#AAAAAA]">불러오는 중...</p>
+  <div className="flex-1 flex flex-col items-center justify-center" style={{ backgroundColor: '#FA4809' }}>
+    <img
+      src="/logo_width.png"
+      alt="머니터미"
+      style={{ width: '180px', marginBottom: '48px' }}
+    />
+    <div className="w-5 h-5 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }} />
   </div>
 );
 
