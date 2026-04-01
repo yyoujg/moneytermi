@@ -165,7 +165,23 @@ const WordCardScreen = () => {
     scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   }, [wordIndex]);
 
-  // 뉴스 fetch
+  // 뉴스 캐시 (세션 내 Map)
+  const newsCache = useRef<Map<string, NaverNewsItem[]>>(new Map());
+
+  const fetchNews = (word: string): Promise<NaverNewsItem[]> => {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+    return fetch(`${supabaseUrl}/functions/v1/naver-news`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${anonKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: word }),
+    })
+      .then(res => res.json())
+      .then(data => Array.isArray(data) ? data : [])
+      .catch(() => []);
+  };
+
+  // 뉴스 fetch (캐시 우선)
   const [newsItems, setNewsItems] = useState<NaverNewsItem[]>([]);
   const [newsLoading, setNewsLoading] = useState(false);
   useEffect(() => {
@@ -173,22 +189,31 @@ const WordCardScreen = () => {
     const currentWord = words[wordIndex];
     if (!currentWord) return;
     let cancelled = false;
-    setNewsItems([]);
-    setNewsLoading(true);
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-    fetch(`${supabaseUrl}/functions/v1/naver-news`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${anonKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ query: currentWord.word }),
-    })
-      .then(res => res.json())
-      .then(data => { if (!cancelled) setNewsItems(Array.isArray(data) ? data : []); })
-      .catch((err) => { console.error('[뉴스 fetch 실패]', err); })
-      .finally(() => { if (!cancelled) setNewsLoading(false); });
+
+    const cached = newsCache.current.get(currentWord.word);
+    if (cached) {
+      setNewsItems(cached);
+      setNewsLoading(false);
+    } else {
+      setNewsItems([]);
+      setNewsLoading(true);
+      fetchNews(currentWord.word).then(data => {
+        if (!cancelled) {
+          newsCache.current.set(currentWord.word, data);
+          setNewsItems(data);
+          setNewsLoading(false);
+        }
+      });
+    }
+
+    // 다음 단어 prefetch
+    const nextWord = words[wordIndex + 1];
+    if (nextWord && !newsCache.current.has(nextWord.word)) {
+      fetchNews(nextWord.word).then(data => {
+        newsCache.current.set(nextWord.word, data);
+      });
+    }
+
     return () => { cancelled = true; };
   }, [wordIndex, words]);
 

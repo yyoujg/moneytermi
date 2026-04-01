@@ -110,7 +110,7 @@ const FAQ_ITEMS = [
 ];
 
 const GuideSheet = ({ open, onClose }: { open: boolean; onClose: () => void }) => (
-  <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px' }}>앱 사용법 & FAQ</span>}>
+  <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px', fontWeight: 700 }}>앱 사용법 & FAQ</span>}>
     <div className="px-5 pb-6 flex flex-col gap-3">
       {FAQ_ITEMS.map((item, i) => (
         <div key={i} className="bg-[#F7F7F7] rounded-2xl px-4 py-4">
@@ -126,7 +126,7 @@ const GuideSheet = ({ open, onClose }: { open: boolean; onClose: () => void }) =
 const EMOJI_OPTIONS = ['😊','🥰','😎','🤓','🧠','🦁','🐼','🐻','🦊','🐯','🌟','🎯','🎮','🚀','💎','🔥','🍀','🎸','🏆','⚡'];
 
 const EmojiPickerSheet = ({ open, current, onSelect, onClose }: { open: boolean; current: string; onSelect: (e: string) => void; onClose: () => void }) => (
-  <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px' }}>프로필 이모지 선택</span>}>
+  <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px', fontWeight: 700 }}>프로필 이모지 선택</span>}>
     <div className="px-5 pb-6">
       <div className="grid grid-cols-5 gap-3">
         {EMOJI_OPTIONS.map(emoji => (
@@ -167,7 +167,7 @@ const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () => void }
   };
 
   return (
-    <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px' }}>앱 설정</span>}>
+    <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px', fontWeight: 700 }}>앱 설정</span>}>
       <div className="px-5 pb-6 flex flex-col gap-2">
         {/* 효과음 */}
         <div className="flex items-center justify-between bg-[#F0F0F0] rounded-2xl px-4 py-4">
@@ -239,7 +239,7 @@ const NicknameSheet = ({
   };
 
   return (
-    <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px' }}>닉네임 변경</span>} hasTextField>
+    <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px', fontWeight: 700 }}>닉네임 변경</span>} hasTextField>
       <div className="px-5 pb-6 flex flex-col gap-5">
         <div className="flex flex-col gap-2">
           <div className={`flex items-center gap-3 bg-[#F0F0F0] rounded-2xl px-4 py-3.5 transition-colors ${error ? 'ring-2 ring-red-400/50' : ''}`}>
