@@ -51,7 +51,7 @@ const LeagueScreen = () => {
       )}
 
       {/* 헤더 */}
-      <div className="bg-white pt-12 px-5 pb-5">
+      <div className="bg-white pt-4 px-5 pb-5">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-[#111111]">주간 리그</h2>
           <TextButton size="small" onClick={() => navigate('/league/rules')}>

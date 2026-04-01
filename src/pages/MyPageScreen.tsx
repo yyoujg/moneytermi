@@ -342,7 +342,7 @@ const MyPageScreen = () => {
       </ConfirmDialog>
 
       {/* 프로필 헤더 */}
-      <div className="bg-white pt-12 px-5 pb-5">
+      <div className="bg-white pt-4 px-5 pb-5">
         <h2 className="text-xl font-bold mb-5 text-[#111111]">마이페이지</h2>
         <div className="flex items-center gap-4 mb-5">
           <button

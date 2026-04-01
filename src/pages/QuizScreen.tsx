@@ -210,7 +210,7 @@ const QuizScreen = () => {
   return (
     <div className="flex flex-col h-full bg-[#F7F7F7]">
       {/* 헤더 */}
-      <div className="pt-12 px-5 pb-3 flex justify-between items-center bg-white">
+      <div className="pt-4 px-5 pb-3 flex justify-between items-center bg-white">
         <button onClick={() => navigate('/home')} className="p-2 -ml-2">
           <ChevronLeft size={24} className="text-[#888888]" />
         </button>

@@ -31,7 +31,7 @@ const CourseWordListScreen = () => {
   return (
     <div className="flex flex-col h-full bg-[#F7F7F7]">
       {/* 헤더 */}
-      <div className="pt-12 px-5 pb-4 bg-white">
+      <div className="pt-4 px-5 pb-4 bg-white">
         <div className="flex items-center gap-3 mb-4">
           <button
             onClick={() => navigate('/course')}

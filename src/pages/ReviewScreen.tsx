@@ -99,7 +99,7 @@ const QuizPage = () => {
   return (
     <div className="flex flex-col h-full bg-[#F7F7F7] pb-32">
       {/* 헤더 */}
-      <div className="bg-white pt-12 px-5 pb-4 border-b border-[#E5E5E5]">
+      <div className="bg-white pt-4 px-5 pb-4 border-b border-[#E5E5E5]">
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-xl font-bold text-[#111111]">퀴즈</h2>
           <div className="flex items-center gap-2">

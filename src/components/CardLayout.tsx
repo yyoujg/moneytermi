@@ -99,7 +99,7 @@ const CardLayout = ({
 
 
       {/* 상단 내비 */}
-      <div className="relative z-10 pt-12 px-5 pb-3">
+      <div className="relative z-10 pt-4 px-5 pb-3">
         <div className="flex items-center justify-between">
           <button
             onClick={onBack}

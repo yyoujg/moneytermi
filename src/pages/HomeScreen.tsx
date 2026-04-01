@@ -122,7 +122,7 @@ const HomeScreen = () => {
       )}
 
       {/* 헤더 */}
-      <div className="pt-12 px-5 pb-4">
+      <div className="pt-4 px-5 pb-4">
         <div className="flex justify-between items-center mb-6">
           <div>
             <div className="inline-flex items-center px-2 py-1 rounded mb-2" style={{ backgroundColor: '#F0F0F0' }}>

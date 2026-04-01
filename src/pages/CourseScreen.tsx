@@ -41,7 +41,7 @@ const CourseScreen = () => {
 
       {/* 헤더 */}
       <div className="sticky top-0 z-20 bg-white">
-        <div className="pt-12 px-5 pb-4">
+        <div className="pt-4 px-5 pb-4">
           <div className="flex items-center justify-between mb-1">
             <div>
               <h2 className="text-xl font-bold text-[#111111]">학습 코스</h2>

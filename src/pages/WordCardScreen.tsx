@@ -71,14 +71,14 @@ const WordCard = ({
     </div>
 
     {/* 자세히 알아보기 */}
-    <div className="bg-white rounded-2xl px-5 py-4" style={{ marginBottom: '12px' }}>
-      <p className="text-[12px] font-bold text-[#BBBBBB] mb-3 tracking-[0.02em]">📖 자세히 알아보기</p>
+    <div className="bg-white rounded-2xl px-5 pt-4 pb-5" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <p className="text-[12px] font-bold text-[#BBBBBB] tracking-[0.02em]">📖 자세히 알아보기</p>
       <p className="text-[14px] leading-[1.8] text-[#444444] font-medium break-keep tracking-[-0.01em]">{word.detailedMeaning}</p>
     </div>
 
     {/* 실시간 뉴스 */}
-    <div className="bg-white rounded-2xl px-5 py-4" style={{ marginBottom: '12px' }}>
-      <p className="text-[12px] font-bold text-[#BBBBBB] mb-3 tracking-[0.02em]">🗞 실시간 뉴스</p>
+    <div className="bg-white rounded-2xl px-5 pt-4 pb-5" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <p className="text-[12px] font-bold text-[#BBBBBB] tracking-[0.02em]">🗞 실시간 뉴스</p>
       {newsLoading ? (
         <div className="flex justify-center py-4">
           <div className="w-5 h-5 border-2 border-orange-300 border-t-orange-500 rounded-full animate-spin" />
@@ -118,8 +118,8 @@ const WordCard = ({
 
     {/* 관련 용어 */}
     {word.relatedWords && word.relatedWords.length > 0 && (
-      <div className="bg-white rounded-2xl px-5 py-4">
-        <p className="text-[12px] font-bold text-[#BBBBBB] mb-3 tracking-[0.02em]">🔗 관련 용어</p>
+      <div className="bg-white rounded-2xl px-5 py-4" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <p className="text-[12px] font-bold text-[#BBBBBB] tracking-[0.02em]">🔗 관련 용어</p>
         <div className="flex flex-col">
           {word.relatedWords.map((tag, i) => (
             <button
@@ -289,7 +289,7 @@ const WordCardScreen = () => {
     <div className="flex flex-col h-full bg-[#F7F7F7]">
 
       {/* 상단 바 */}
-      <div className="pt-12 px-4 pb-3 bg-white flex items-center gap-3">
+      <div className="pt-4 px-4 pb-2 bg-white flex items-center gap-3">
         <button
           onClick={() => navigate(backPath, backState ? { state: backState } : undefined)}
           className="w-9 h-9 flex items-center justify-center rounded-full bg-[#F0F0F0] shrink-0"
@@ -325,7 +325,7 @@ const WordCardScreen = () => {
       </div>
 
       {/* 스크롤 영역 */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden pt-4">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden pt-2">
         <WordCard
           word={word}
           isKnown={isKnown}
