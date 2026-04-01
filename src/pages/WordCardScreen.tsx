@@ -53,10 +53,10 @@ const WordCard = ({
     <div className="bg-white rounded-2xl px-5 py-5">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1">
-          <h1 className="text-[26px] font-black text-[#111111] leading-tight tracking-tight break-keep mb-2">
+          <h1 className="text-[28px] font-black text-[#111111] leading-[1.2] tracking-[-0.03em] break-keep mb-2">
             {word.word}
           </h1>
-          <p className="text-[14px] text-[#888888] font-medium break-keep leading-relaxed">{word.meaning}</p>
+          <p className="text-[14px] text-[#444444] font-medium break-keep leading-[1.7] tracking-[-0.01em]">{word.meaning}</p>
         </div>
         {onToggleKnown && (
           <button
@@ -72,13 +72,13 @@ const WordCard = ({
 
     {/* 자세히 알아보기 */}
     <div className="bg-white rounded-2xl px-5 py-4" style={{ marginBottom: '12px' }}>
-      <p className="text-[11px] font-bold text-[#AAAAAA] mb-3">📖 자세히 알아보기</p>
-      <p className="text-[14px] leading-relaxed text-[#888888] font-medium break-keep">{word.detailedMeaning}</p>
+      <p className="text-[12px] font-bold text-[#BBBBBB] mb-3 tracking-[0.02em]">📖 자세히 알아보기</p>
+      <p className="text-[14px] leading-[1.8] text-[#444444] font-medium break-keep tracking-[-0.01em]">{word.detailedMeaning}</p>
     </div>
 
     {/* 실시간 뉴스 */}
     <div className="bg-white rounded-2xl px-5 py-4" style={{ marginBottom: '12px' }}>
-      <p className="text-[11px] font-bold text-[#AAAAAA] mb-3">🗞 실시간 뉴스</p>
+      <p className="text-[12px] font-bold text-[#BBBBBB] mb-3 tracking-[0.02em]">🗞 실시간 뉴스</p>
       {newsLoading ? (
         <div className="flex justify-center py-4">
           <div className="w-5 h-5 border-2 border-orange-300 border-t-orange-500 rounded-full animate-spin" />
@@ -95,9 +95,14 @@ const WordCard = ({
               className="active:opacity-60"
             >
               <div className="flex-1">
-                <p className="text-[13px] font-semibold text-[#333333] break-keep leading-snug line-clamp-2">
+                <p className="text-[13px] font-semibold text-[#222222] break-keep leading-[1.55] tracking-[-0.01em] line-clamp-2">
                   <Highlight text={stripHtml(item.title)} keyword={keyword} />
                 </p>
+                {item.description && (
+                  <p className="text-[12px] text-[#888888] break-keep leading-[1.6] tracking-[-0.01em] line-clamp-2 mt-1">
+                    <Highlight text={stripHtml(item.description)} keyword={keyword} />
+                  </p>
+                )}
                 <p style={{ marginTop: '4px' }} className="text-[11px] text-[#AAAAAA]">
                   {new Date(item.pubDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
                 </p>
@@ -114,7 +119,7 @@ const WordCard = ({
     {/* 관련 용어 */}
     {word.relatedWords && word.relatedWords.length > 0 && (
       <div className="bg-white rounded-2xl px-5 py-4">
-        <p className="text-[11px] font-bold text-[#AAAAAA] mb-3">🔗 관련 용어</p>
+        <p className="text-[12px] font-bold text-[#BBBBBB] mb-3 tracking-[0.02em]">🔗 관련 용어</p>
         <div className="flex flex-col">
           {word.relatedWords.map((tag, i) => (
             <button
@@ -123,7 +128,7 @@ const WordCard = ({
               className="flex items-center gap-3 py-3 border-b border-[#F0F0F0] last:border-0 active:opacity-60 text-left"
             >
               <span className="text-[11px] font-black w-4 shrink-0 text-[#AAAAAA]">{i + 1}</span>
-              <p className="text-[14px] font-semibold text-[#555555] break-keep flex-1">{tag}</p>
+              <p className="text-[14px] font-semibold text-[#333333] break-keep flex-1 tracking-[-0.01em]">{tag}</p>
               <ChevronRight size={14} className="text-[#AAAAAA] shrink-0" />
             </button>
           ))}
