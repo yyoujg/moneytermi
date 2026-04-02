@@ -53,7 +53,7 @@ const LoadingScreen = () => (
     <img
       src="/logo.png"
       alt="머니터미"
-      style={{ width: '100px', marginBottom: '64px' }}
+      style={{ width: '150px', marginBottom: '64px' }}
     />
     <div style={{ width: '140px', height: '3px', borderRadius: '999px', backgroundColor: 'rgba(255,255,255,0.3)', overflow: 'hidden' }}>
       <div style={{
