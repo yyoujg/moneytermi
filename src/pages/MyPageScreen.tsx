@@ -344,37 +344,39 @@ const MyPageScreen = () => {
       {/* 프로필 헤더 */}
       <div className="bg-white pt-4 px-5 pb-5">
         <h2 className="text-xl font-bold mb-5 text-[#111111]">마이페이지</h2>
-        <div className="flex flex-col items-center mb-5">
+        <div className="flex items-center gap-4 mb-5">
           <button
             onClick={() => setShowEmojiPicker(true)}
-            className="relative w-20 h-20 bg-[#F0F0F0] rounded-full flex items-center justify-center text-4xl shrink-0 active:opacity-70 mb-3"
+            className="relative w-16 h-16 bg-[#F0F0F0] rounded-full flex items-center justify-center text-3xl shrink-0 active:opacity-70"
           >
             <span>{myEmoji}</span>
-            <div className="absolute -bottom-0.5 -right-0.5 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
-              <Pencil size={10} className="text-white" />
+            <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
+              <Pencil size={9} className="text-white" />
             </div>
           </button>
-          <button
-            onClick={() => setShowNicknameSheet(true)}
-            className="flex items-center gap-1.5 group active:opacity-70 mb-1"
-          >
-            <p className="font-bold text-[#111111] text-base">{user?.nickname ?? '예비슈퍼개미'}</p>
-            <Pencil size={13} className="text-[#AAAAAA] group-active:text-orange-400" />
-          </button>
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <Trophy size={12} className="text-orange-400" />
-            <span className="text-xs text-[#888888] font-medium">{CURRENT_LEAGUE_NAME} 리그</span>
+          <div>
+            <button
+              onClick={() => setShowNicknameSheet(true)}
+              className="flex items-center gap-1.5 group active:opacity-70"
+            >
+              <p className="font-bold text-[#111111] text-base">{user?.nickname ?? '예비슈퍼개미'}</p>
+              <Pencil size={13} className="text-[#AAAAAA] group-active:text-orange-400" />
+            </button>
+            <div className="flex items-center gap-1.5 mt-1">
+              <Trophy size={12} className="text-orange-400" />
+              <span className="text-xs text-[#888888] font-medium">{CURRENT_LEAGUE_NAME} 리그</span>
+            </div>
+            {isGuest && (
+              <span className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-medium text-[#AAAAAA] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#F0F0F0' }}>
+                <ShieldAlert size={10} className="text-[#AAAAAA]" /> 게스트 계정
+              </span>
+            )}
+            {!isGuest && (
+              <span className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-medium text-green-500 px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(34,197,94,0.08)' }}>
+                <ShieldCheck size={10} /> {user?.email ?? '계정 연결됨'}
+              </span>
+            )}
           </div>
-          {isGuest && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[#AAAAAA] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#F0F0F0' }}>
-              <ShieldAlert size={10} className="text-[#AAAAAA]" /> 게스트 계정
-            </span>
-          )}
-          {!isGuest && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-medium text-green-500 px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(34,197,94,0.08)' }}>
-              <ShieldCheck size={10} /> {user?.email ?? '계정 연결됨'}
-            </span>
-          )}
         </div>
 
         {/* 통계 */}
