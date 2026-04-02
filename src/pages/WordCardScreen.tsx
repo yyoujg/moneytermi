@@ -80,8 +80,14 @@ const WordCard = ({
     <div className="bg-white rounded-2xl px-5 pt-4 pb-5" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
       <p className="text-[12px] font-bold text-[#BBBBBB] tracking-[0.02em]">🗞 실시간 뉴스</p>
       {newsLoading ? (
-        <div className="flex justify-center py-4">
-          <div className="w-5 h-5 border-2 border-orange-300 border-t-orange-500 rounded-full animate-spin" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {[1, 2, 3].map(i => (
+            <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div className="h-3.5 bg-[#F0F0F0] rounded animate-pulse" style={{ width: '90%' }} />
+              <div className="h-3.5 bg-[#F0F0F0] rounded animate-pulse" style={{ width: '70%' }} />
+              <div className="h-2.5 bg-[#F0F0F0] rounded animate-pulse" style={{ width: '30%' }} />
+            </div>
+          ))}
         </div>
       ) : newsItems.length > 0 ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
