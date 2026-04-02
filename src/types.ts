@@ -54,6 +54,5 @@ export type Mission = {
 
 export type Missions = {
   m1: Mission;
-  m2: Mission;
   m3: Mission;
 };

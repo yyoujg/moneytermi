@@ -38,7 +38,6 @@ const AppContext = createContext<AppContextValue | null>(null);
 
 const DEFAULT_MISSIONS: Missions = {
   m1: { id: 'm1', title: '앱 출석하기',         reward: 10, current: 0, target: 1, isRewarded: false },
-  m2: { id: 'm2', title: '용어 학습 1회 완료',   reward: 20, current: 0, target: 1, isRewarded: false },
   m3: { id: 'm3', title: '퀴즈 정답 3회 맞히기', reward: 30, current: 0, target: 3, isRewarded: false },
 };
 

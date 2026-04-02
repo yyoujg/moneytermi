@@ -9,7 +9,7 @@ import GuestLinkSheet from '../components/GuestLinkSheet';
 import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
 
 export const getOptions = (correctWord: Word, knownWords: Word[], allWords: Word[]): string[] => {
-  const pool = knownWords.length >= 4 ? knownWords : allWords;
+  const pool = knownWords.length >= 2 ? knownWords : allWords;
   const others = pool.filter(w => w.id !== correctWord.id);
   const shuffled = [...others].sort(() => Math.random() - 0.5);
   const wrong = shuffled.slice(0, 3).map(w => w.word);
@@ -18,9 +18,9 @@ export const getOptions = (correctWord: Word, knownWords: Word[], allWords: Word
 
 // 콤보 기반 포인트 계산
 export const calcEarned = (combo: number): number => {
-  if (combo >= 5) return 20;
-  if (combo >= 3) return 15;
-  return 10;
+  if (combo >= 5) return 40;
+  if (combo >= 3) return 30;
+  return 20;
 };
 
 const QuizScreen = () => {

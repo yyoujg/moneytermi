@@ -86,11 +86,10 @@ const HomeScreen = () => {
     return count;
   })();
 
-  // 오늘 목표 (m2: 학습, m3: 퀴즈)
-  const m2 = missions.m2;
+  // 오늘 목표 (m3: 퀴즈)
   const m3 = missions.m3;
-  const todayDone = (m2.current >= m2.target ? 1 : 0) + (m3.current >= m3.target ? 1 : 0);
-  const todayTotal = 2;
+  const todayDone = m3.current >= m3.target ? 1 : 0;
+  const todayTotal = 1;
 
   // 리그 순위 계산
   const myRank = (() => {
@@ -164,17 +163,6 @@ const HomeScreen = () => {
           </div>
 
           <div className="flex gap-3 mb-4">
-            {/* 학습 목표 */}
-            <div className={`flex-1 rounded-xl p-3 ${m2.current >= m2.target ? 'bg-orange-500/10' : 'bg-[#F0F0F0]'}`}>
-              <div className="flex items-center gap-2 mb-1.5">
-                <BookOpen size={13} className={m2.current >= m2.target ? 'text-orange-500' : 'text-[#AAAAAA]'} />
-                <span className="text-[11px] font-medium text-[#AAAAAA]">단어 학습</span>
-              </div>
-              <p className="text-lg font-bold text-[#111111]">
-                {m2.current >= m2.target ? '완료' : '0'}
-                <span className="text-xs text-[#AAAAAA] ml-1">/{m2.target}회</span>
-              </p>
-            </div>
             {/* 퀴즈 목표 */}
             <div className={`flex-1 rounded-xl p-3 ${m3.current >= m3.target ? 'bg-orange-500/10' : 'bg-[#F0F0F0]'}`}>
               <div className="flex items-center gap-2 mb-1.5">
@@ -333,10 +321,10 @@ const HomeScreen = () => {
 
           {/* 보조 미션 */}
           <div className="flex flex-col gap-0">
-            {([missions.m1, missions.m2] as Mission[]).map((mission, idx) => {
+            {([missions.m1] as Mission[]).map((mission, idx) => {
               const isCompleted = mission.current >= mission.target;
               return (
-                <div key={mission.id} className={`flex justify-between items-center py-3 ${idx === 0 ? 'border-b border-[#E5E5E5]' : ''}`}>
+                <div key={mission.id} className={`flex justify-between items-center py-3 ${idx === 0 ? '' : ''}`}>
                   <div className="flex items-center gap-2.5">
                     <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 text-[9px] font-bold ${
                       mission.isRewarded ? 'bg-orange-500 text-white' : isCompleted ? 'bg-orange-500/20 text-orange-500' : 'bg-[#F0F0F0] text-[#AAAAAA]'

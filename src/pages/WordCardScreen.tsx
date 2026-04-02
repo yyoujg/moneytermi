@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Check, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
-import type { Word, Missions } from '../types';
+import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
 
 const ACCENT = '#f97316';
@@ -148,7 +148,7 @@ const WordCard = ({
 const WordCardScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { courses, allWords, knownWords, toggleKnown, setKnownWords, setMissions } = useAppContext();
+  const { courses, allWords, knownWords, toggleKnown, setKnownWords } = useAppContext();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const state = location.state as {
@@ -232,7 +232,10 @@ const WordCardScreen = () => {
 
   // autoAdvance 완료 화면
   if (autoAdvance && words.length > 0 && wordIndex >= words.length) {
-    const quizWords = [...words].sort(() => Math.random() - 0.5).slice(0, Math.min(5, words.length));
+    const quizWords = knownWords
+      .filter(kw => words.some(w => w.id === kw.id))
+      .sort(() => Math.random() - 0.5)
+      .slice(0, Math.min(5, knownWords.length));
     return (
       <div className="flex h-full flex-col bg-[#F7F7F7]">
         <div className="flex-1 flex flex-col items-center justify-center gap-5 p-8">
@@ -279,9 +282,6 @@ const WordCardScreen = () => {
   const goNext = () => {
     if (autoAdvance) {
       setKnownWords(prev => prev.some(w => w.id === word.id) ? prev : [...prev, word]);
-      if (wordIndex === words.length - 1) {
-        setMissions((prev: Missions) => ({ ...prev, m2: { ...prev.m2, current: 1 } }));
-      }
       setWordIndex(i => i + 1);
     } else if (wordIndex < words.length - 1) {
       setWordIndex(i => i + 1);
