@@ -27,7 +27,6 @@ const QuizPage = () => {
   const [input, setInput] = useState('');
   const [status, setStatus] = useState<Status>('idle');
   const [showHint, setShowHint] = useState(false);
-  const [showDetail, setShowDetail] = useState(false);
   const [combo, setCombo] = useState(0);
   const [totalCorrect, setTotalCorrect] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -44,7 +43,6 @@ const QuizPage = () => {
     setInput('');
     setStatus('idle');
     setShowHint(false);
-    setShowDetail(false);
   };
 
   const handleSubmit = (e?: React.FormEvent) => {
@@ -136,19 +134,10 @@ const QuizPage = () => {
             </div>
           )}
 
-          {showDetail ? (
-            <div className="bg-[#F0F0F0] rounded-2xl p-4">
-              <p className="text-xs font-bold text-[#888888] mb-1.5">상세 설명</p>
-              <p className="text-sm text-[#555555] leading-relaxed break-keep">{word.detailedMeaning}</p>
-            </div>
-          ) : (
-            <button
-              onClick={() => setShowDetail(true)}
-              className="text-xs font-bold text-[#888888] active:text-[#555555]"
-            >
-              상세 설명 보기
-            </button>
-          )}
+          <div className="bg-[#F0F0F0] rounded-2xl p-4">
+            <p className="text-xs font-bold text-[#888888] mb-1.5">상세 설명</p>
+            <p className="text-sm text-[#555555] leading-relaxed break-keep">{word.detailedMeaning}</p>
+          </div>
         </div>
 
         {/* 입력 + 제출 */}

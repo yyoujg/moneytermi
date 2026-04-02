@@ -280,9 +280,9 @@ const QuizScreen = () => {
 
           <p className="text-xl font-bold text-[#111111] leading-snug">{currentWord.meaning}</p>
 
-          <div className="w-8 h-[2px] bg-[#E5E5E5]" />
-
-          <p className="text-sm text-[#888888] leading-relaxed break-keep">{currentWord.detailedMeaning}</p>
+          <div className="bg-[#F7F7F7] rounded-xl px-4 py-3">
+            <p className="text-sm text-[#888888] leading-relaxed break-keep">{currentWord.detailedMeaning}</p>
+          </div>
 
           {status === 'correct' && (
             <div className="flex items-center gap-2">
