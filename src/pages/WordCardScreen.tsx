@@ -97,6 +97,7 @@ const WordCard = ({
               href={item.link}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={e => { e.preventDefault(); window.open(item.link, '_system'); }}
               style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}
               className="active:opacity-60"
             >
