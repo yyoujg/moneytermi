@@ -3,6 +3,7 @@ import { HashRouter, Routes, Route, Navigate,  } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { Component, type ReactNode, type ErrorInfo } from 'react';
 import * as Sentry from '@sentry/react';
+import { closeView } from '@apps-in-toss/web-framework';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { AuthProvider } from './hooks/useAuth';
 import NavBar from './components/NavBar';
@@ -36,7 +37,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
           <p className="text-sm font-semibold text-[#111111]">앗, 문제가 발생했어요</p>
           <p className="text-xs text-[#888888]">앱을 다시 시작해 주세요.</p>
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => closeView()}
             className="mt-2 px-5 py-2.5 rounded-xl bg-orange-500 text-sm font-bold text-white active:opacity-80"
           >
             다시 시작

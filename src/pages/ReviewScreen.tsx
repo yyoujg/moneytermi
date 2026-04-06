@@ -29,6 +29,16 @@ const QuizPage = () => {
   const [showHint, setShowHint] = useState(false);
   const [combo, setCombo] = useState(0);
   const [totalCorrect, setTotalCorrect] = useState(0);
+
+  const restart = () => {
+    setQueue(shuffle(allWords));
+    setIndex(0);
+    setInput('');
+    setStatus('idle');
+    setShowHint(false);
+    setCombo(0);
+    setTotalCorrect(0);
+  };
   const inputRef = useRef<HTMLInputElement>(null);
 
   const word = queue[index];
@@ -81,7 +91,7 @@ const QuizPage = () => {
           <span className="text-sm font-bold text-[#111111]">누적 포인트 {points} P</span>
         </div>
         <button
-          onClick={() => window.location.reload()}
+          onClick={restart}
           className="flex items-center gap-2 px-6 py-4 rounded-2xl text-white text-xs font-bold active:opacity-90"
           style={{ backgroundColor: '#f97316' }}
         >

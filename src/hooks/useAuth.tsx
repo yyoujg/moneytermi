@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext, createContext } from 'react';
+import { closeView } from '@apps-in-toss/web-framework';
 import type { AuthState, User } from '../types';
 import { supabase } from '../lib/supabase';
 import { Storage } from '../lib/storage';
@@ -236,7 +237,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = async () => {
     await Storage.removeItem(STORAGE_KEY);
     await supabase.auth.signOut();
-    window.location.reload();
+    closeView();
   };
 
   return (
