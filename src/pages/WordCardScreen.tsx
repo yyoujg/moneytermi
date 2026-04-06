@@ -97,7 +97,6 @@ const WordCard = ({
               href={item.link}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={e => { e.preventDefault(); location.href = `toss://web?url=${encodeURIComponent(item.link)}`; }}
               style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}
               className="active:opacity-60"
             >
