@@ -65,7 +65,7 @@ const LeagueScreen = () => {
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-orange-500/10 rounded-full flex items-center justify-center text-xl">{myEmoji}</div>
               <div>
-                <p className="text-sm font-bold text-[#111111]">예비슈퍼개미</p>
+                <p className="text-sm font-bold text-[#111111]">{user?.nickname ?? '예비슈퍼개미'}</p>
                 <p className="text-xs text-[#AAAAAA]">{LEAGUE_TIERS.find(t => t.id === CURRENT_LEAGUE_ID)?.name} 리그</p>
               </div>
             </div>

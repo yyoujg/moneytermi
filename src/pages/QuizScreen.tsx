@@ -59,7 +59,7 @@ const QuizScreen = () => {
   const options = useMemo(() => {
     if (!currentWord) return [];
     return getOptions(currentWord, knownWords, allWords);
-  }, [currentWord?.id, allWords]);
+  }, [currentWord?.id, allWords, knownWords]);
 
   // +P 팝업 트리거
   useEffect(() => {
