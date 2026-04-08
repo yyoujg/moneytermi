@@ -246,7 +246,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       setUnknownWords(allWords.filter(w => pendingUnknownIds.current!.has(w.id)));
       pendingUnknownIds.current = null;
     }
-  }, [allWords]);
+  }, [allWords, ready]);
 
   // ── points → Supabase 동기화 (1초 디바운스) ───────────────────
   useEffect(() => {
