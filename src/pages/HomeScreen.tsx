@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { closeView } from '@apps-in-toss/web-framework';
+import React, { useState } from 'react';
 import { ChevronRight, Zap, Flame, BookOpen, PenLine, X } from 'lucide-react';
 import { Badge, TextButton } from '@toss/tds-mobile';
 import { useNavigate } from 'react-router-dom';
@@ -7,7 +6,6 @@ import type { Mission, Missions } from '../types';
 import { CURRENT_LEAGUE_NAME } from '../constants';
 import { useAppContext } from '../context/AppContext';
 import { useAuth } from '../hooks/useAuth';
-import GuestLinkSheet from '../components/GuestLinkSheet';
 
 // 주간 학습 바 차트
 const WeeklyBarChart = ({ attendanceDates }: { attendanceDates: string[] }) => {
@@ -59,26 +57,8 @@ const WeeklyBarChart = ({ attendanceDates }: { attendanceDates: string[] }) => {
 
 const HomeScreen = () => {
   const navigate = useNavigate();
-
-  // 홈 화면에서 뒤로가기 → 미니앱 종료
-  useEffect(() => {
-    // #region agent log
-    fetch('http://127.0.0.1:7590/ingest/ef3a8cbf-b212-49a0-ae61-c5cbc95ccee0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5dbe8c'},body:JSON.stringify({sessionId:'5dbe8c',runId:'pre-fix',hypothesisId:'D',location:'src/pages/HomeScreen.tsx:HomeScreen',message:'HomeScreen mount',data:{href:globalThis.location?.href,hash:globalThis.location?.hash,search:globalThis.location?.search},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-
-    const handlePopState = () => {
-      // #region agent log
-      fetch('http://127.0.0.1:7590/ingest/ef3a8cbf-b212-49a0-ae61-c5cbc95ccee0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5dbe8c'},body:JSON.stringify({sessionId:'5dbe8c',runId:'pre-fix',hypothesisId:'D',location:'src/pages/HomeScreen.tsx:HomeScreen',message:'HomeScreen popstate -> closeView',data:{href:globalThis.location?.href,hash:globalThis.location?.hash},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
-      closeView();
-    };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
   const { points, knownWords, missions, claimReward, attendanceDates, otherLeagueUsers, courses, allWords, myEmoji } = useAppContext();
-  const { isGuest, linkAccount, user } = useAuth();
-  const [showLinkSheet, setShowLinkSheet] = useState(false);
-  const [linkDismissed, setLinkDismissed] = useState(false);
+  const { user } = useAuth();
   const totalWords = allWords.length;
 
   // 연속 출석일
@@ -117,17 +97,8 @@ const HomeScreen = () => {
     ? [...knownWords].sort(() => Math.random() - 0.5).slice(0, 5)
     : [];
 
-  // 게스트 유도 트리거: 3일 연속 출석 OR 포인트 100P 달성
-  const showGuestNudge = isGuest && !linkDismissed && (streak >= 3 || points >= 100);
-
   return (
     <div className="flex flex-col h-full pb-24 overflow-y-auto [&::-webkit-scrollbar]:hidden" style={{ backgroundColor: '#F7F7F7' }}>
-      {showLinkSheet && (
-        <GuestLinkSheet
-          onClose={() => { setShowLinkSheet(false); setLinkDismissed(true); }}
-          onLink={(email) => { linkAccount(email); setLinkDismissed(true); }}
-        />
-      )}
 
       {/* 헤더 */}
       <div className="pt-4 px-5 pb-4">
@@ -142,27 +113,6 @@ const HomeScreen = () => {
             <span className="text-lg">{myEmoji}</span>
           </div>
         </div>
-
-        {/* 게스트 계정 연결 유도 */}
-        {showGuestNudge && (
-          <div className="relative rounded-2xl px-4 pt-3 pb-4 mb-3" style={{ backgroundColor: 'rgba(249,115,22,0.08)' }}>
-            <button
-              onClick={() => setLinkDismissed(true)}
-              className="absolute top-2.5 right-2.5 w-6 h-6 flex items-center justify-center rounded-full bg-[#E5E5E5] active:opacity-70 opacity-40"
-            >
-              <X size={12} className="text-[#AAAAAA]" />
-            </button>
-            <p className="text-base font-bold text-orange-400 pr-8 mb-0.5">🔥 {points}P + {myRank}위 유지</p>
-            <p className="text-xs text-[#AAAAAA]">⚠️ 삭제하면 전부 사라져요</p>
-            <div className="h-5" />
-            <button
-              onClick={() => setShowLinkSheet(true)}
-              className="w-full py-2.5 rounded-xl bg-orange-500 text-xs font-bold text-white active:opacity-90"
-            >
-              🔥 지금 저장하기
-            </button>
-          </div>
-        )}
 
         {/* 오늘 목표 카드 (핵심 CTA) */}
         <div className="bg-white rounded-2xl p-5 mb-4">

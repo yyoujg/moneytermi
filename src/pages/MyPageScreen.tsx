@@ -6,7 +6,6 @@ import { toast } from 'sonner';
 import { CURRENT_LEAGUE_NAME } from '../constants';
 import { List, ListRow, Spacing, Switch, BottomSheet, ConfirmDialog } from '@toss/tds-mobile';
 import { useAuth } from '../hooks/useAuth';
-import GuestLinkSheet from '../components/GuestLinkSheet';
 
 const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -277,8 +276,7 @@ const NicknameSheet = ({
 // ── 메인 ──────────────────────────────────────────────────────
 const MyPageScreen = () => {
   const { points, knownWords, attendanceDates, missions, checkIn, myEmoji, updateMyEmoji } = useAppContext();
-  const { user, isGuest, linkAccount, updateNickname, logout } = useAuth();
-  const [showLinkSheet, setShowLinkSheet]         = useState(false);
+  const { user, isGuest, updateNickname, logout } = useAuth();
   const [showGuide, setShowGuide]                 = useState(false);
   const [showSettings, setShowSettings]           = useState(false);
   const [showLogoutDialog, setShowLogoutDialog]   = useState(false);
@@ -304,12 +302,6 @@ const MyPageScreen = () => {
 
   return (
     <div className="flex flex-col h-full bg-[#F7F7F7] pb-24 overflow-y-auto [&::-webkit-scrollbar]:hidden">
-      {showLinkSheet && (
-        <GuestLinkSheet
-          onClose={() => setShowLinkSheet(false)}
-          onLink={(email) => { linkAccount(email); setShowLinkSheet(false); }}
-        />
-      )}
       <GuideSheet open={showGuide} onClose={() => setShowGuide(false)} />
       <EmojiPickerSheet
         open={showEmojiPicker}
@@ -371,11 +363,6 @@ const MyPageScreen = () => {
                 <ShieldAlert size={10} className="text-[#AAAAAA]" /> 게스트 계정
               </span>
             )}
-            {!isGuest && (
-              <span className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-medium text-green-500 px-2 py-0.5 rounded-full" style={{ backgroundColor: 'rgba(34,197,94,0.08)' }}>
-                <ShieldCheck size={10} /> {user?.email ?? '계정 연결됨'}
-              </span>
-            )}
           </div>
         </div>
 
@@ -414,26 +401,6 @@ const MyPageScreen = () => {
           </div>
           <AttendanceCalendar attendanceDates={attendanceDates} />
         </div>
-
-        {/* 계정 연결 */}
-        {user !== null && isGuest && (
-          <div className="rounded-2xl overflow-hidden" style={{ background: 'linear-gradient(135deg, #FF8C42 0%, #F97316 100%)' }}>
-            <div className="px-5 py-6">
-              <div className="flex items-center gap-2 mb-3">
-                <ShieldAlert size={14} className="text-white/80" />
-                <span className="text-[11px] font-semibold text-white/80">게스트 계정</span>
-              </div>
-              <p className="text-base font-bold text-white mb-2">학습 기록이 사라질 수 있어요</p>
-              <p className="text-xs text-white/70 leading-relaxed" style={{ marginBottom: '1.5rem' }}>앱 삭제 또는 기기 변경 시 지금까지의<br />포인트와 학습 기록이 모두 초기화돼요.</p>
-              <button
-                onClick={() => setShowLinkSheet(true)}
-                className="w-full py-3 rounded-xl bg-white text-orange-500 text-sm font-bold active:opacity-90"
-              >
-                이메일로 기록 저장하기
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* 메뉴 */}
         <div>

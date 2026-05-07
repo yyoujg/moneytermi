@@ -1,9 +1,9 @@
 import React from 'react';
-import { HashRouter, Routes, Route, Navigate,  } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { Component, type ReactNode, type ErrorInfo } from 'react';
 import * as Sentry from '@sentry/react';
-import { closeView } from '@apps-in-toss/web-framework';
+import { closeView, graniteEvent, getSchemeUri } from '@apps-in-toss/web-framework';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { AuthProvider } from './hooks/useAuth';
 import NavBar from './components/NavBar';
@@ -74,33 +74,113 @@ const LoadingScreen = () => (
   </div>
 );
 
+const ALLOWED_PATHS = new Set([
+  '/home',
+  '/course',
+  '/league',
+  '/review',
+  '/my',
+  '/course/words',
+  '/word-card',
+  '/league/rules',
+  '/quiz',
+]);
+
+function parseLandingPath(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  const s = raw.trim();
+  if (!s) return null;
+
+  const pick = (v: string | null): string | null => {
+    if (!v) return null;
+    const decoded = (() => {
+      try { return decodeURIComponent(v); } catch { return v; }
+    })();
+    const value = decoded.trim();
+
+    const fromHash = value.includes('#/') ? value.slice(value.indexOf('#') + 1) : value;
+    const candidate = fromHash.startsWith('/') ? fromHash : (fromHash.startsWith('#') ? fromHash.slice(1) : null);
+    if (!candidate) return null;
+
+    const pathOnly = candidate.split('?')[0] ?? candidate;
+    return ALLOWED_PATHS.has(pathOnly) ? pathOnly : null;
+  };
+
+  const direct = pick(s);
+  if (direct) return direct;
+
+  try {
+    const u = new URL(s);
+    const hashPath = pick(u.hash);
+    if (hashPath) return hashPath;
+
+    const params = u.searchParams;
+    for (const key of ['path', 'landing', 'url', 'redirect', 'target']) {
+      const v = params.get(key);
+      const chosen = pick(v);
+      if (chosen) return chosen;
+    }
+  } catch {
+    // ignore
+  }
+
+  return null;
+}
+
+const LandingRouter = () => {
+  const { ready } = useAppContext();
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    if (!ready) return;
+
+    let schemeUri = '';
+    try {
+      schemeUri = getSchemeUri();
+    } catch {
+      schemeUri = '';
+    }
+
+    const target = parseLandingPath(schemeUri) ?? parseLandingPath(globalThis.location?.href ?? '');
+    if (target && globalThis.location?.hash !== `#${target}`) {
+      navigate(target, { replace: true });
+    }
+  }, [ready, navigate]);
+
+  return null;
+};
+
+const BackEventHandler = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  React.useEffect(() => {
+    const unsubscription = graniteEvent.addEventListener('backEvent', {
+      onEvent: () => {
+        const idx = typeof window !== 'undefined' ? (window.history.state?.idx ?? 0) : 0;
+
+        if (idx > 0) {
+          navigate(-1);
+          return;
+        }
+
+        if (location.pathname !== '/home') {
+          navigate('/home', { replace: true });
+          return;
+        }
+
+        closeView();
+      },
+    });
+
+    return unsubscription;
+  }, [navigate, location.pathname]);
+
+  return null;
+};
+
 const Layout = () => {
   const { ready } = useAppContext();
-
-  React.useEffect(() => {
-    // #region agent log
-    fetch('http://127.0.0.1:7590/ingest/ef3a8cbf-b212-49a0-ae61-c5cbc95ccee0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5dbe8c'},body:JSON.stringify({sessionId:'5dbe8c',runId:'pre-fix',hypothesisId:'A',location:'src/App.tsx:Layout',message:'Layout mount: initial location',data:{href:globalThis.location?.href,pathname:globalThis.location?.pathname,hash:globalThis.location?.hash,search:globalThis.location?.search,ready},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
-  }, []);
-
-  React.useEffect(() => {
-    const onPopState = () => {
-      // #region agent log
-      fetch('http://127.0.0.1:7590/ingest/ef3a8cbf-b212-49a0-ae61-c5cbc95ccee0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5dbe8c'},body:JSON.stringify({sessionId:'5dbe8c',runId:'pre-fix',hypothesisId:'D',location:'src/App.tsx:Layout',message:'window popstate',data:{href:globalThis.location?.href,hash:globalThis.location?.hash,search:globalThis.location?.search},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
-    };
-    const onHashChange = () => {
-      // #region agent log
-      fetch('http://127.0.0.1:7590/ingest/ef3a8cbf-b212-49a0-ae61-c5cbc95ccee0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5dbe8c'},body:JSON.stringify({sessionId:'5dbe8c',runId:'pre-fix',hypothesisId:'A',location:'src/App.tsx:Layout',message:'window hashchange',data:{href:globalThis.location?.href,hash:globalThis.location?.hash},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
-    };
-    window.addEventListener('popstate', onPopState);
-    window.addEventListener('hashchange', onHashChange);
-    return () => {
-      window.removeEventListener('popstate', onPopState);
-      window.removeEventListener('hashchange', onHashChange);
-    };
-  }, []);
 
   if (!ready) return <LoadingScreen />;
 
@@ -129,6 +209,8 @@ export default function App() {
       <AuthProvider>
       <AppProvider>
         <HashRouter>
+          <LandingRouter />
+          <BackEventHandler />
           <Toaster position="top-center" duration={1800} richColors />
           <div className="w-full max-w-md mx-auto bg-[#F7F7F7] h-[100dvh] overflow-hidden relative font-sans text-[#111111] flex flex-col">
             <ErrorBoundary>

@@ -1,22 +1,19 @@
 
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Info, Zap, Trophy, TrendingUp, TrendingDown, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { TextButton, List, ListRow, Badge, Spacing } from '@toss/tds-mobile';
 import { CURRENT_LEAGUE_ID, LEAGUE_TIERS } from '../constants';
 import { useAppContext } from '../context/AppContext';
 import { useAuth } from '../hooks/useAuth';
-import GuestLinkSheet from '../components/GuestLinkSheet';
 
 const RANK_MEDALS = ['🥇', '🥈', '🥉'];
 
 const LeagueScreen = () => {
   const navigate = useNavigate();
   const { points, otherLeagueUsers, myEmoji } = useAppContext();
-  const { isGuest, linkAccount, user } = useAuth();
-  const [showLinkSheet, setShowLinkSheet] = useState(false);
-  const [linkDismissed, setLinkDismissed] = useState(false);
+  const { user } = useAuth();
 
   const myName = `나 (${user?.nickname ?? '예비슈퍼개미'})`;
 
@@ -43,13 +40,6 @@ const LeagueScreen = () => {
 
   return (
     <div className="flex flex-col h-full bg-[#F7F7F7]">
-      {showLinkSheet && (
-        <GuestLinkSheet
-          onClose={() => { setShowLinkSheet(false); setLinkDismissed(true); }}
-          onLink={(email) => { linkAccount(email); setLinkDismissed(true); }}
-        />
-      )}
-
       {/* 헤더 */}
       <div className="bg-white pt-4 px-5 pb-5">
         <div className="flex justify-between items-center mb-4">
@@ -141,27 +131,6 @@ const LeagueScreen = () => {
 
       {/* 랭킹 — 스크롤 영역 */}
       <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden px-5 pt-4 pb-24">
-
-        {/* 게스트 연결 유도 */}
-        {isGuest && !linkDismissed && (
-          <div className="relative rounded-2xl px-4 pt-3 pb-4 mb-3" style={{ backgroundColor: 'rgba(249,115,22,0.08)' }}>
-            <button
-              onClick={() => setLinkDismissed(true)}
-              className="absolute top-2.5 right-2.5 w-6 h-6 flex items-center justify-center rounded-full bg-[#E5E5E5] active:opacity-70 opacity-40"
-            >
-              <X size={12} className="text-[#AAAAAA]" />
-            </button>
-            <p className="text-base font-bold text-orange-400 pr-8 mb-0.5">🔥 {points}P + {myRank}위 유지</p>
-            <p className="text-xs text-[#AAAAAA]">⚠️ 삭제하면 전부 사라져요</p>
-            <div className="h-5" />
-            <button
-              onClick={() => setShowLinkSheet(true)}
-              className="w-full py-2.5 rounded-xl bg-orange-500 text-xs font-bold text-white active:opacity-90"
-            >
-              🔥 지금 저장하기
-            </button>
-          </div>
-        )}
 
         {/* TOP 3 podium */}
         <div className="bg-white rounded-2xl overflow-hidden mb-3">

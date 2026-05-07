@@ -5,22 +5,35 @@ import { Storage } from '@apps-in-toss/web-framework';
 import type { Word, Missions } from '../types';
 import { useAppContext } from '../context/AppContext';
 import { useAuth } from '../hooks/useAuth';
-import GuestLinkSheet from '../components/GuestLinkSheet';
 import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
 
 export const getOptions = (correctWord: Word, knownWords: Word[], allWords: Word[]): string[] => {
-  const pool = knownWords.length >= 2 ? knownWords : allWords;
+  const pool = knownWords.length >= 4 ? knownWords : allWords;
   const others = pool.filter(w => w.id !== correctWord.id);
   const shuffled = [...others].sort(() => Math.random() - 0.5);
-  const wrong = shuffled.slice(0, 3).map(w => w.word);
-  return [...wrong, correctWord.word].sort(() => Math.random() - 0.5);
+
+  const wrong: string[] = [];
+  for (const w of shuffled) {
+    if (wrong.length >= 3) break;
+    wrong.push(w.word);
+  }
+
+  if (wrong.length < 3) {
+    const fallback = allWords.filter(w => w.id !== correctWord.id).sort(() => Math.random() - 0.5);
+    for (const w of fallback) {
+      if (wrong.length >= 3) break;
+      if (!wrong.includes(w.word)) wrong.push(w.word);
+    }
+  }
+
+  return [...wrong.slice(0, 3), correctWord.word].sort(() => Math.random() - 0.5);
 };
 
 // 콤보 기반 포인트 계산
 export const calcEarned = (combo: number): number => {
-  if (combo >= 5) return 40;
-  if (combo >= 3) return 30;
-  return 20;
+  if (combo >= 5) return 20;
+  if (combo >= 3) return 15;
+  return 10;
 };
 
 const QuizScreen = () => {
@@ -33,8 +46,7 @@ const QuizScreen = () => {
     ? passedQueue
     : [...knownWords].sort(() => Math.random() - 0.5).slice(0, 10);
 
-  const { isGuest, linkAccount } = useAuth();
-  const [showLinkSheet, setShowLinkSheet] = useState(false);
+  const { isGuest } = useAuth();
 
   const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
   const [combo, setCombo] = useState(0);
@@ -85,12 +97,6 @@ const QuizScreen = () => {
 
     return (
       <div className="flex h-full flex-col bg-[#F7F7F7]">
-        {showLinkSheet && (
-          <GuestLinkSheet
-            onClose={() => setShowLinkSheet(false)}
-            onLink={(email) => { linkAccount(email); setShowLinkSheet(false); }}
-          />
-        )}
         <div className="flex-1 flex flex-col items-center justify-center px-8 gap-5">
           <div className="text-6xl">🎉</div>
           <div className="text-center">
@@ -130,23 +136,6 @@ const QuizScreen = () => {
         </div>
 
         <div className="px-5 pb-12 flex flex-col gap-3">
-          {isGuest && totalEarned > 0 && (
-            <div className="rounded-2xl px-4 py-4 flex flex-col gap-3" style={{ backgroundColor: 'rgba(249,115,22,0.08)' }}>
-              <div>
-                {rankRose
-                  ? <p className="text-sm font-bold text-orange-400">🔥 {prevRank}위 → {myRank}위 상승!</p>
-                  : <p className="text-sm font-bold text-orange-400">+{totalEarned}P 획득!</p>
-                }
-                <p className="text-xs text-[#AAAAAA] mt-0.5">지금 저장하면 {points}P + {myRank}위 유지돼요</p>
-              </div>
-              <button
-                onClick={() => setShowLinkSheet(true)}
-                className="w-full py-3 rounded-xl bg-orange-500 text-sm font-bold text-white active:opacity-90"
-              >
-                🔥 지금 저장하기
-              </button>
-            </div>
-          )}
           <button
             onClick={() => navigate('/home')}
             className="w-full py-4 rounded-2xl text-sm font-bold text-white bg-orange-500 active:opacity-90"

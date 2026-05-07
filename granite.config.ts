@@ -15,5 +15,8 @@ export default defineConfig({
       build: 'vite build',
     },
   },
+  navigationBar: {
+    withBackButton: true,
+  },
   permissions: [],
 });
