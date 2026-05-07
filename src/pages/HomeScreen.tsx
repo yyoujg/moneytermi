@@ -62,7 +62,16 @@ const HomeScreen = () => {
 
   // 홈 화면에서 뒤로가기 → 미니앱 종료
   useEffect(() => {
-    const handlePopState = () => { closeView(); };
+    // #region agent log
+    fetch('http://127.0.0.1:7590/ingest/ef3a8cbf-b212-49a0-ae61-c5cbc95ccee0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5dbe8c'},body:JSON.stringify({sessionId:'5dbe8c',runId:'pre-fix',hypothesisId:'D',location:'src/pages/HomeScreen.tsx:HomeScreen',message:'HomeScreen mount',data:{href:globalThis.location?.href,hash:globalThis.location?.hash,search:globalThis.location?.search},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+
+    const handlePopState = () => {
+      // #region agent log
+      fetch('http://127.0.0.1:7590/ingest/ef3a8cbf-b212-49a0-ae61-c5cbc95ccee0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5dbe8c'},body:JSON.stringify({sessionId:'5dbe8c',runId:'pre-fix',hypothesisId:'D',location:'src/pages/HomeScreen.tsx:HomeScreen',message:'HomeScreen popstate -> closeView',data:{href:globalThis.location?.href,hash:globalThis.location?.hash},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
+      closeView();
+    };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);

@@ -77,6 +77,31 @@ const LoadingScreen = () => (
 const Layout = () => {
   const { ready } = useAppContext();
 
+  React.useEffect(() => {
+    // #region agent log
+    fetch('http://127.0.0.1:7590/ingest/ef3a8cbf-b212-49a0-ae61-c5cbc95ccee0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5dbe8c'},body:JSON.stringify({sessionId:'5dbe8c',runId:'pre-fix',hypothesisId:'A',location:'src/App.tsx:Layout',message:'Layout mount: initial location',data:{href:globalThis.location?.href,pathname:globalThis.location?.pathname,hash:globalThis.location?.hash,search:globalThis.location?.search,ready},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+  }, []);
+
+  React.useEffect(() => {
+    const onPopState = () => {
+      // #region agent log
+      fetch('http://127.0.0.1:7590/ingest/ef3a8cbf-b212-49a0-ae61-c5cbc95ccee0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5dbe8c'},body:JSON.stringify({sessionId:'5dbe8c',runId:'pre-fix',hypothesisId:'D',location:'src/App.tsx:Layout',message:'window popstate',data:{href:globalThis.location?.href,hash:globalThis.location?.hash,search:globalThis.location?.search},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
+    };
+    const onHashChange = () => {
+      // #region agent log
+      fetch('http://127.0.0.1:7590/ingest/ef3a8cbf-b212-49a0-ae61-c5cbc95ccee0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5dbe8c'},body:JSON.stringify({sessionId:'5dbe8c',runId:'pre-fix',hypothesisId:'A',location:'src/App.tsx:Layout',message:'window hashchange',data:{href:globalThis.location?.href,hash:globalThis.location?.hash},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
+    };
+    window.addEventListener('popstate', onPopState);
+    window.addEventListener('hashchange', onHashChange);
+    return () => {
+      window.removeEventListener('popstate', onPopState);
+      window.removeEventListener('hashchange', onHashChange);
+    };
+  }, []);
+
   if (!ready) return <LoadingScreen />;
 
   return (

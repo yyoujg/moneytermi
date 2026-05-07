@@ -22,6 +22,9 @@ const GuestLinkSheet = ({ onClose, onLink }: Props) => {
 
   const handleSendCode = async () => {
     if (!isEmailValid || loading) return;
+    // #region agent log
+    fetch('http://127.0.0.1:7590/ingest/ef3a8cbf-b212-49a0-ae61-c5cbc95ccee0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5dbe8c'},body:JSON.stringify({sessionId:'5dbe8c',runId:'pre-fix',hypothesisId:'E',location:'src/components/GuestLinkSheet.tsx:GuestLinkSheet',message:'OTP send attempt',data:{step,emailLen:email.length,isEmailValid},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     setLoading(true);
     setSendError('');
 
@@ -36,11 +39,17 @@ const GuestLinkSheet = ({ onClose, onLink }: Props) => {
       setSendError(`이메일 발송에 실패했어요. (${error.message})`);
       return;
     }
+    // #region agent log
+    fetch('http://127.0.0.1:7590/ingest/ef3a8cbf-b212-49a0-ae61-c5cbc95ccee0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5dbe8c'},body:JSON.stringify({sessionId:'5dbe8c',runId:'pre-fix',hypothesisId:'E',location:'src/components/GuestLinkSheet.tsx:GuestLinkSheet',message:'OTP send success -> step otp',data:{},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     setStep('otp');
   };
 
   const handleVerify = async () => {
     if (otp.length !== 6 || loading) return;
+    // #region agent log
+    fetch('http://127.0.0.1:7590/ingest/ef3a8cbf-b212-49a0-ae61-c5cbc95ccee0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5dbe8c'},body:JSON.stringify({sessionId:'5dbe8c',runId:'pre-fix',hypothesisId:'E',location:'src/components/GuestLinkSheet.tsx:GuestLinkSheet',message:'OTP verify attempt',data:{otpLen:otp.length},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     setLoading(true);
     setOtpError(false);
 
@@ -92,7 +101,12 @@ const GuestLinkSheet = ({ onClose, onLink }: Props) => {
         <div className="flex items-center gap-2" style={{ paddingLeft: '20px' }}>
           {step === 'otp' && (
             <button
-              onClick={() => { setStep('email'); setOtp(''); setOtpError(false); }}
+              onClick={() => {
+                // #region agent log
+                fetch('http://127.0.0.1:7590/ingest/ef3a8cbf-b212-49a0-ae61-c5cbc95ccee0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5dbe8c'},body:JSON.stringify({sessionId:'5dbe8c',runId:'pre-fix',hypothesisId:'E',location:'src/components/GuestLinkSheet.tsx:GuestLinkSheet',message:'OTP step back to email',data:{},timestamp:Date.now()})}).catch(()=>{});
+                // #endregion
+                setStep('email'); setOtp(''); setOtpError(false);
+              }}
               className="w-7 h-7 flex items-center justify-center rounded-full bg-[#F0F0F0] mr-1"
             >
               <ArrowLeft size={14} className="text-[#888888]" />

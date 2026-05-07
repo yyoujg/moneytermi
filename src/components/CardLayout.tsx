@@ -102,7 +102,12 @@ const CardLayout = ({
       <div className="relative z-10 pt-4 px-5 pb-3">
         <div className="flex items-center justify-between">
           <button
-            onClick={onBack}
+            onClick={() => {
+              // #region agent log
+              fetch('http://127.0.0.1:7590/ingest/ef3a8cbf-b212-49a0-ae61-c5cbc95ccee0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5dbe8c'},body:JSON.stringify({sessionId:'5dbe8c',runId:'pre-fix',hypothesisId:'C',location:'src/components/CardLayout.tsx:CardLayout',message:'CardLayout back button click',data:{href:globalThis.location?.href,hash:globalThis.location?.hash},timestamp:Date.now()})}).catch(()=>{});
+              // #endregion
+              onBack();
+            }}
             className="w-9 h-9 flex items-center justify-center rounded-full bg-[#F0F0F0]/80 border border-[#AAAAAA]"
           >
             <ChevronLeft size={20} className="text-[#555555]" />

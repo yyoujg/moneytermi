@@ -90,9 +90,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const initAuth = async () => {
+    // #region agent log
+    fetch('http://127.0.0.1:7590/ingest/ef3a8cbf-b212-49a0-ae61-c5cbc95ccee0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5dbe8c'},body:JSON.stringify({sessionId:'5dbe8c',runId:'pre-fix',hypothesisId:'E',location:'src/hooks/useAuth.tsx:initAuth',message:'initAuth start',data:{},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     // 1. Supabase 세션 확인 (이메일 OTP 로그인 상태)
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
+      // #region agent log
+      fetch('http://127.0.0.1:7590/ingest/ef3a8cbf-b212-49a0-ae61-c5cbc95ccee0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5dbe8c'},body:JSON.stringify({sessionId:'5dbe8c',runId:'pre-fix',hypothesisId:'E',location:'src/hooks/useAuth.tsx:initAuth',message:'supabase session exists',data:{hasEmail:!!session.user.email},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
       const { data: profile } = await supabase
         .from('profiles')
         .select('*')
@@ -120,6 +126,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // 2. 저장된 프로필 있으면 복원
     const stored = await loadStoredProfile();
     if (stored) {
+      // #region agent log
+      fetch('http://127.0.0.1:7590/ingest/ef3a8cbf-b212-49a0-ae61-c5cbc95ccee0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5dbe8c'},body:JSON.stringify({sessionId:'5dbe8c',runId:'pre-fix',hypothesisId:'E',location:'src/hooks/useAuth.tsx:initAuth',message:'stored profile restored',data:{isGuest:stored.isGuest,hasEmail:!!stored.email},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
       setProfileId(stored.profileId);
       setGuestToken(stored.guestToken);
       setAuthState({
@@ -145,6 +154,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .single();
 
       if (!error && profile) {
+        // #region agent log
+        fetch('http://127.0.0.1:7590/ingest/ef3a8cbf-b212-49a0-ae61-c5cbc95ccee0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5dbe8c'},body:JSON.stringify({sessionId:'5dbe8c',runId:'pre-fix',hypothesisId:'E',location:'src/hooks/useAuth.tsx:initAuth',message:'guest profile created',data:{},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
         const toStore: StoredProfile = {
           profileId: profile.id,
           guestToken: newGuestToken,
@@ -166,6 +178,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     // 4. 오프라인 폴백
+    // #region agent log
+    fetch('http://127.0.0.1:7590/ingest/ef3a8cbf-b212-49a0-ae61-c5cbc95ccee0',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'5dbe8c'},body:JSON.stringify({sessionId:'5dbe8c',runId:'pre-fix',hypothesisId:'E',location:'src/hooks/useAuth.tsx:initAuth',message:'offline fallback profile',data:{},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     const id = crypto.randomUUID();
     const token = crypto.randomUUID();
     const toStore: StoredProfile = {
