@@ -80,13 +80,20 @@ const ALLOWED_PATHS = new Set([
   '/league',
   '/review',
   '/my',
-  '/course/words',
-  '/word-card',
   '/league/rules',
   '/quiz',
 ]);
 
-function parseLandingPath(raw: string | null | undefined): string | null {
+const matchAllowed = (p: string | null | undefined): string | null => {
+  if (!p) return null;
+  const decoded = (() => {
+    try { return decodeURIComponent(p); } catch { return p; }
+  })();
+  const pathOnly = decoded.split('?')[0] ?? decoded;
+  return ALLOWED_PATHS.has(pathOnly) ? pathOnly : null;
+};
+
+export function parseLandingPath(raw: string | null | undefined): string | null {
   if (!raw) return null;
   const s = raw.trim();
   if (!s) return null;
@@ -102,26 +109,40 @@ function parseLandingPath(raw: string | null | undefined): string | null {
     const candidate = fromHash.startsWith('/') ? fromHash : (fromHash.startsWith('#') ? fromHash.slice(1) : null);
     if (!candidate) return null;
 
-    const pathOnly = candidate.split('?')[0] ?? candidate;
-    return ALLOWED_PATHS.has(pathOnly) ? pathOnly : null;
+    return matchAllowed(candidate);
   };
 
   const direct = pick(s);
   if (direct) return direct;
 
+  let u: URL;
   try {
-    const u = new URL(s);
-    const hashPath = pick(u.hash);
-    if (hashPath) return hashPath;
-
-    const params = u.searchParams;
-    for (const key of ['path', 'landing', 'url', 'redirect', 'target']) {
-      const v = params.get(key);
-      const chosen = pick(v);
-      if (chosen) return chosen;
-    }
+    u = new URL(s);
   } catch {
-    // ignore
+    return null;
+  }
+
+  if (u.pathname && u.pathname !== '/') {
+    const hit = matchAllowed(u.pathname);
+    if (hit) return hit;
+  }
+
+  if (u.host) {
+    if (u.pathname && u.pathname !== '/') {
+      const combinedHit = matchAllowed('/' + u.host + u.pathname);
+      if (combinedHit) return combinedHit;
+    }
+
+    const hostHit = matchAllowed('/' + u.host);
+    if (hostHit) return hostHit;
+  }
+
+  const hashPath = pick(u.hash);
+  if (hashPath) return hashPath;
+
+  for (const key of ['path', 'landing', 'url', 'redirect', 'target']) {
+    const chosen = pick(u.searchParams.get(key));
+    if (chosen) return chosen;
   }
 
   return null;
@@ -141,7 +162,13 @@ const LandingRouter = () => {
       schemeUri = '';
     }
 
-    const target = parseLandingPath(schemeUri) ?? parseLandingPath(globalThis.location?.href ?? '');
+    const target = parseLandingPath(schemeUri);
+    Sentry.addBreadcrumb({
+      category: 'deep-link',
+      level: 'info',
+      message: 'LandingRouter',
+      data: { schemeUri, target },
+    });
     if (target && globalThis.location?.hash !== `#${target}`) {
       navigate(target, { replace: true });
     }
