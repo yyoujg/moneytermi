@@ -7,15 +7,16 @@ import { closeView, graniteEvent, getSchemeUri } from '@apps-in-toss/web-framewo
 import { AppProvider, useAppContext } from './context/AppContext';
 import { AuthProvider } from './hooks/useAuth';
 import NavBar from './components/NavBar';
-import HomeScreen from './pages/HomeScreen';
-import CourseScreen from './pages/CourseScreen';
-import ReviewScreen from './pages/ReviewScreen';
-import LeagueScreen from './pages/LeagueScreen';
-import QuizScreen from './pages/QuizScreen';
-import CourseWordListScreen from './pages/CourseWordListScreen';
-import WordCardScreen from './pages/WordCardScreen';
-import LeagueRulesScreen from './pages/LeagueRulesScreen';
-import MyPageScreen from './pages/MyPageScreen';
+
+const HomeScreen = React.lazy(() => import('./pages/HomeScreen'));
+const CourseScreen = React.lazy(() => import('./pages/CourseScreen'));
+const ReviewScreen = React.lazy(() => import('./pages/ReviewScreen'));
+const LeagueScreen = React.lazy(() => import('./pages/LeagueScreen'));
+const QuizScreen = React.lazy(() => import('./pages/QuizScreen'));
+const CourseWordListScreen = React.lazy(() => import('./pages/CourseWordListScreen'));
+const WordCardScreen = React.lazy(() => import('./pages/WordCardScreen'));
+const LeagueRulesScreen = React.lazy(() => import('./pages/LeagueRulesScreen'));
+const MyPageScreen = React.lazy(() => import('./pages/MyPageScreen'));
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -205,6 +206,7 @@ const Layout = () => {
 
   return (
     <div className="flex-1 w-full h-full relative">
+      <React.Suspense fallback={<LoadingScreen />}>
       <Routes>
         <Route path="/" element={<Navigate to={resolveLandingTarget()} replace />} />
         <Route path="/home" element={<HomeScreen />} />
@@ -217,6 +219,7 @@ const Layout = () => {
         <Route path="/league/rules" element={<LeagueRulesScreen />} />
         <Route path="/quiz" element={<QuizScreen />} />
       </Routes>
+      </React.Suspense>
       <NavBar />
     </div>
   );

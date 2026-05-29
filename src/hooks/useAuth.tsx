@@ -126,7 +126,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       profileId: id, guestToken: token,
       nickname: '예비슈퍼개미', isGuest: true, leagueTier: 'bronze',
     };
-    await Storage.setItem(STORAGE_KEY, JSON.stringify(toStore));
+    try {
+      await Storage.setItem(STORAGE_KEY, JSON.stringify(toStore));
+    } catch (err) {
+      console.warn('오프라인 프로필 저장 실패:', err);
+    }
     setProfileId(id);
     setGuestToken(token);
     setAuthState({

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import type { Word, Course, Missions } from '../types';
 import { supabase, getGuestClient } from '../lib/supabase';
 import { loadStoredProfile } from '../hooks/useAuth';
+import { Storage } from '../lib/storage';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 const toDateStr = (d: Date) => d.toISOString().slice(0, 10);
@@ -63,6 +64,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   // ── 콘텐츠 로드 (courses + words) ─────────────────────────────
   useEffect(() => {
     const loadContent = async () => {
+      try {
       const [{ data: wordsData }, { data: cwData }, { data: coursesData }] = await Promise.all([
         supabase.from('words').select('*').order('id'),
         supabase.from('course_words').select('course_id, word_id, position').order('position'),
@@ -96,6 +98,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
       setCourses(builtCourses);
       setAllWords(Array.from(wordMap.values()));
+      } catch (e) {
+        console.error('[AppContext] 콘텐츠 로드 실패:', e);
+      }
     };
     loadContent();
   }, []);
@@ -128,6 +133,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       const db = dbRef.current;
       const today = toDateStr(new Date());
 
+      try {
       // 1. points — DB값과 로컬값 중 큰 값 유지 (로딩 중 적립 포인트 보존)
       const { data: profile, error: profileErr } = await db
         .from('profiles')
@@ -137,7 +143,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
       // profileId가 Supabase에 없으면 (오프라인 폴백 UUID 등) localStorage 초기화 후 재시도
       if (profileErr?.code === 'PGRST116') {
-        const { Storage } = await import('../lib/storage');
         await Storage.removeItem('moneytermi_auth');
         profileIdRef.current = null;
         dbRef.current = supabase;
@@ -228,7 +233,11 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         })));
       }
 
-      if (!cancelled) setReady(true);
+      } catch (e) {
+        console.error('[AppContext] 초기 로드 실패:', e);
+      } finally {
+        if (!cancelled && profileIdRef.current !== null) setReady(true);
+      }
     };
 
     load();
