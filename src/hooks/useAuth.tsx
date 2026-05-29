@@ -6,6 +6,19 @@ import { Storage } from '../lib/storage';
 
 const STORAGE_KEY = 'moneytermi_auth';
 
+// crypto.randomUUID는 secure context(HTTPS/localhost)에서만 동작.
+// iOS 샌드박스는 http LAN IP로 로드되어 비보안 컨텍스트라 undefined → 폴백 필요.
+const uuid = (): string => {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
+
 type StoredProfile = {
   profileId: string;
   guestToken: string;
@@ -23,7 +36,7 @@ export const loadStoredProfile = async (): Promise<StoredProfile | null> => {
     if (p.user) {
       return {
         profileId: p.user.id,
-        guestToken: p._guestToken ?? crypto.randomUUID(),
+        guestToken: p._guestToken ?? uuid(),
         nickname: p.user.nickname,
         isGuest: p.user.isGuest,
         leagueTier: p.user.leagueTier ?? 'bronze',
@@ -78,7 +91,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // 2. 첫 방문: Supabase에 게스트 프로필 생성
     try {
-      const newGuestToken = crypto.randomUUID();
+      const newGuestToken = uuid();
       const { data: profile, error } = await supabase
         .from('profiles')
         .insert({ guest_token: newGuestToken })
@@ -107,8 +120,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     // 3. 오프라인 폴백
-    const id = crypto.randomUUID();
-    const token = crypto.randomUUID();
+    const id = uuid();
+    const token = uuid();
     const toStore: StoredProfile = {
       profileId: id, guestToken: token,
       nickname: '예비슈퍼개미', isGuest: true, leagueTier: 'bronze',
