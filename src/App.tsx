@@ -169,25 +169,30 @@ const BackEventHandler = () => {
   const location = useLocation();
 
   React.useEffect(() => {
-    const unsubscription = graniteEvent.addEventListener('backEvent', {
-      onEvent: () => {
-        const idx = typeof window !== 'undefined' ? (window.history.state?.idx ?? 0) : 0;
+    let unsubscription: (() => void) | undefined;
+    try {
+      unsubscription = graniteEvent.addEventListener('backEvent', {
+        onEvent: () => {
+          const idx = typeof window !== 'undefined' ? (window.history.state?.idx ?? 0) : 0;
 
-        if (idx > 0) {
-          navigate(-1);
-          return;
-        }
+          if (idx > 0) {
+            navigate(-1);
+            return;
+          }
 
-        if (location.pathname !== '/home') {
-          navigate('/home', { replace: true });
-          return;
-        }
+          if (location.pathname !== '/home') {
+            navigate('/home', { replace: true });
+            return;
+          }
 
-        closeView();
-      },
-    });
+          try { closeView(); } catch { /* AIT 브리지 없는 브라우저 환경 */ }
+        },
+      });
+    } catch {
+      // AIT 브리지가 없는 브라우저 dev 환경: 백 이벤트 등록 생략
+    }
 
-    return unsubscription;
+    return () => unsubscription?.();
   }, [navigate, location.pathname]);
 
   return null;

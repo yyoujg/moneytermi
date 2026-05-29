@@ -53,4 +53,18 @@ describe('parseLandingPath', () => {
     expect(parseLandingPath('apps-in-toss://moneytermi/word-card')).toBeNull();
     expect(parseLandingPath('apps-in-toss://moneytermi/course/words')).toBeNull();
   });
+
+  it('출시 전 테스트 스킴 intoss-private (host=appsintoss) pathname 매칭', () => {
+    expect(parseLandingPath('intoss-private://appsintoss/quiz?_deploymentId=0198c000-68c3-7d2b-0000-2c00000005ec')).toBe('/quiz');
+    expect(parseLandingPath('intoss-private://appsintoss/league/rules?_deploymentId=0198c000-68c3-7d2b-0000-2c00000005ec')).toBe('/league/rules');
+  });
+
+  it('출시 후 운영 스킴 intoss (host=appName) pathname 매칭', () => {
+    expect(parseLandingPath('intoss://moneytermi/quiz')).toBe('/quiz');
+    expect(parseLandingPath('intoss://moneytermi/league/rules')).toBe('/league/rules');
+  });
+
+  it('테스트 스킴 path 없이 home만 (appsintoss 단독) → null (home 폴백)', () => {
+    expect(parseLandingPath('intoss-private://appsintoss?_deploymentId=0198c000-68c3-7d2b-0000-2c00000005ec')).toBeNull();
+  });
 });
