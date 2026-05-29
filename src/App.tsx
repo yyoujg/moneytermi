@@ -148,34 +148,21 @@ export function parseLandingPath(raw: string | null | undefined): string | null 
   return null;
 }
 
-const LandingRouter = () => {
-  const { ready } = useAppContext();
-  const navigate = useNavigate();
-
-  React.useEffect(() => {
-    if (!ready) return;
-
-    let schemeUri = '';
-    try {
-      schemeUri = getSchemeUri();
-    } catch {
-      schemeUri = '';
-    }
-
-    const target = parseLandingPath(schemeUri);
-    Sentry.addBreadcrumb({
-      category: 'deep-link',
-      level: 'info',
-      message: 'LandingRouter',
-      data: { schemeUri, target },
-    });
-    if (target && globalThis.location?.hash !== `#${target}`) {
-      navigate(target, { replace: true });
-    }
-  }, [ready, navigate]);
-
-  return null;
-};
+let resolvedLanding: string | null = null;
+function resolveLandingTarget(): string {
+  if (resolvedLanding) return resolvedLanding;
+  let schemeUri = '';
+  try {
+    schemeUri = getSchemeUri();
+  } catch {
+    schemeUri = '';
+  }
+  const target = parseLandingPath(schemeUri);
+  // 진단(한시): 실기기에서 getSchemeUri 반환값을 Sentry Issues로 확인하기 위함. PROD 빌드에서만 전송됨.
+  Sentry.captureMessage('deep-link', { level: 'info', extra: { schemeUri, target } });
+  resolvedLanding = target ?? '/home';
+  return resolvedLanding;
+}
 
 const BackEventHandler = () => {
   const navigate = useNavigate();
@@ -214,7 +201,7 @@ const Layout = () => {
   return (
     <div className="flex-1 w-full h-full relative">
       <Routes>
-        <Route path="/" element={<Navigate to="/home" replace />} />
+        <Route path="/" element={<Navigate to={resolveLandingTarget()} replace />} />
         <Route path="/home" element={<HomeScreen />} />
         <Route path="/course" element={<CourseScreen />} />
         <Route path="/league" element={<LeagueScreen />} />
@@ -236,7 +223,6 @@ export default function App() {
       <AuthProvider>
       <AppProvider>
         <HashRouter>
-          <LandingRouter />
           <BackEventHandler />
           <Toaster position="top-center" duration={1800} richColors />
           <div className="w-full max-w-md mx-auto bg-[#F7F7F7] h-[100dvh] overflow-hidden relative font-sans text-[#111111] flex flex-col">
