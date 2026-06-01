@@ -163,10 +163,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         .eq('user_id', profileId);
 
       if (progress && progress.length > 0) {
-        const knownIds   = new Set(progress.filter(p => p.status === 'known').map(p => p.word_id));
-        const unknownIds = new Set(progress.filter(p => p.status === 'unknown').map(p => p.word_id));
-        pendingKnownIds.current   = knownIds;
-        pendingUnknownIds.current = unknownIds;
+        const knownIdSet   = new Set(progress.filter(p => p.status === 'known').map(p => p.word_id));
+        const unknownIdSet = new Set(progress.filter(p => p.status === 'unknown').map(p => p.word_id));
+        pendingKnownIds.current   = knownIdSet;
+        pendingUnknownIds.current = unknownIdSet;
       }
 
       // 3. daily_missions
