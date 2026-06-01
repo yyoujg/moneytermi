@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseLandingPath } from './App';
+import { parseLandingPath } from './lib/landing';
 
 describe('parseLandingPath', () => {
   it('null/undefined/빈 문자열 → null', () => {
