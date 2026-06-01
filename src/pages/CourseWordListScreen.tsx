@@ -1,4 +1,3 @@
-import React from 'react';
 import { ChevronLeft, ChevronRight, Lock, CheckCircle } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Badge, Spacing } from '@toss/tds-mobile';
@@ -8,7 +7,7 @@ import { useAppContext } from '../context/AppContext';
 const CourseWordListScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { knownWords, toggleKnown } = useAppContext();
+  const { knownWords } = useAppContext();
 
   const course = (location.state as { course: Course } | null)?.course ?? null;
 

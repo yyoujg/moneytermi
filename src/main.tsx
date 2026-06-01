@@ -1,4 +1,4 @@
-import React, { StrictMode } from 'react'
+import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { TDSMobileAITProvider } from '@toss/tds-mobile-ait'
 import * as Sentry from '@sentry/react'

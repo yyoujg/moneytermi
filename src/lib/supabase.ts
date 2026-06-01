@@ -9,7 +9,7 @@ if (!url || !key) {
 }
 
 // iOS WKWebView(Toss 앱)에서 Web Locks API가 "Lock was stolen" AbortError를 발생시키므로 no-op으로 우회
-const noOpLock = (_name: string, _acquireTimeout: number, fn: () => Promise<unknown>) => fn();
+const noOpLock = <R>(_name: string, _acquireTimeout: number, fn: () => Promise<R>): Promise<R> => fn();
 
 // 기본 클라이언트 (Supabase Auth 세션용)
 export const supabase = createClient<Database>(url, key, {

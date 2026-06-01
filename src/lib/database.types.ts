@@ -1,11 +1,16 @@
 export type Json = string | number | boolean | null | { [key: string]: Json } | Json[];
 
-export interface Database {
+export type Database = {
+  __InternalSupabase: {
+    PostgrestVersion: '12';
+  };
   public: {
     Tables: {
       profiles: {
         Row: {
           id: string;
+          guest_token: string;
+          auth_id: string | null;
           nickname: string;
           email: string | null;
           is_guest: boolean;
@@ -17,6 +22,8 @@ export interface Database {
         };
         Insert: {
           id?: string;
+          guest_token?: string;
+          auth_id?: string | null;
           nickname?: string;
           email?: string | null;
           is_guest?: boolean;
@@ -28,6 +35,8 @@ export interface Database {
         };
         Update: {
           id?: string;
+          guest_token?: string;
+          auth_id?: string | null;
           nickname?: string;
           email?: string | null;
           is_guest?: boolean;
@@ -36,6 +45,7 @@ export interface Database {
           emoji?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       word_progress: {
         Row: {
@@ -56,12 +66,13 @@ export interface Database {
           status?: 'known' | 'unknown';
           updated_at?: string;
         };
+        Relationships: [];
       };
       daily_missions: {
         Row: {
           id: string;
           user_id: string;
-          mission_id: 'm1' | 'm2' | 'm3';
+          mission_id: 'm1' | 'm3';
           date: string;
           current: number;
           is_rewarded: boolean;
@@ -69,7 +80,7 @@ export interface Database {
         Insert: {
           id?: string;
           user_id: string;
-          mission_id: 'm1' | 'm2' | 'm3';
+          mission_id: 'm1' | 'm3';
           date?: string;
           current?: number;
           is_rewarded?: boolean;
@@ -78,6 +89,7 @@ export interface Database {
           current?: number;
           is_rewarded?: boolean;
         };
+        Relationships: [];
       };
       attendance: {
         Row: {
@@ -92,7 +104,100 @@ export interface Database {
           date?: string;
           created_at?: string;
         };
-        Update: never;
+        Update: {
+          id?: string;
+          user_id?: string;
+          date?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      words: {
+        Row: {
+          id: number;
+          word: string;
+          meaning: string;
+          detailed_meaning: string;
+          news_example: string;
+          hint: string;
+          related_words: string[] | null;
+        };
+        Insert: {
+          id: number;
+          word: string;
+          meaning: string;
+          detailed_meaning: string;
+          news_example: string;
+          hint: string;
+          related_words?: string[] | null;
+        };
+        Update: {
+          id?: number;
+          word?: string;
+          meaning?: string;
+          detailed_meaning?: string;
+          news_example?: string;
+          hint?: string;
+          related_words?: string[] | null;
+        };
+        Relationships: [];
+      };
+      courses: {
+        Row: {
+          id: string;
+          level: string;
+          title: string;
+          description: string;
+          category: string;
+        };
+        Insert: {
+          id: string;
+          level: string;
+          title: string;
+          description: string;
+          category: string;
+        };
+        Update: {
+          id?: string;
+          level?: string;
+          title?: string;
+          description?: string;
+          category?: string;
+        };
+        Relationships: [];
+      };
+      course_words: {
+        Row: {
+          course_id: string;
+          word_id: number;
+          position: number;
+        };
+        Insert: {
+          course_id: string;
+          word_id: number;
+          position: number;
+        };
+        Update: {
+          course_id?: string;
+          word_id?: number;
+          position?: number;
+        };
+        Relationships: [];
+      };
+      league_tiers: {
+        Row: {
+          id: number;
+          name: string;
+        };
+        Insert: {
+          id: number;
+          name: string;
+        };
+        Update: {
+          id?: number;
+          name?: string;
+        };
+        Relationships: [];
       };
     };
     Views: {
@@ -105,7 +210,24 @@ export interface Database {
           league_tier: string;
           rank: number;
         };
+        Relationships: [];
       };
     };
+    Functions: {
+      link_guest_to_auth: {
+        Args: {
+          p_guest_token: string;
+          p_auth_user_id: string;
+          p_email: string;
+        };
+        Returns: undefined;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
   };
-}
+};

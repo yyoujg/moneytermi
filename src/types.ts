@@ -1,5 +1,3 @@
-export type CardType = 'intro' | 'content' | 'compare' | 'summary' | 'photo' | 'list';
-
 export type AuthUser = {
   id: string;
   nickname: string;
@@ -15,13 +13,6 @@ export type AuthState = {
   isAuthenticated: boolean;
 };
 
-export type WordSlide = {
-  cardType: CardType;
-  label: string;
-  emoji: string;
-  body?: string;
-  tags?: string[];
-};
 
 export type Word = {
   id: number;

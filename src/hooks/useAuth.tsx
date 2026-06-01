@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, createContext } from 'react';
 import { closeView } from '@apps-in-toss/web-framework';
-import type { AuthState, User } from '../types';
+import type { AuthState, AuthUser } from '../types';
 import { supabase } from '../lib/supabase';
 import { Storage } from '../lib/storage';
 
@@ -49,7 +49,7 @@ export const loadStoredProfile = async (): Promise<StoredProfile | null> => {
 };
 
 type AuthContextValue = {
-  user: User | null;
+  user: AuthUser | null;
   isGuest: boolean;
   isAuthenticated: boolean;
   guestToken: string | null;

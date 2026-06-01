@@ -1,63 +1,16 @@
-import React, { useState } from 'react';
-import { ChevronRight, Zap, Flame, BookOpen, PenLine, X } from 'lucide-react';
+import { ChevronRight, Zap, Flame, BookOpen, PenLine } from 'lucide-react';
 import { Badge, TextButton } from '@toss/tds-mobile';
 import { useNavigate } from 'react-router-dom';
 import type { Mission, Missions } from '../types';
 import { CURRENT_LEAGUE_NAME } from '../constants';
 import { useAppContext } from '../context/AppContext';
 import { useAuth } from '../hooks/useAuth';
-
-// 주간 학습 바 차트
-const WeeklyBarChart = ({ attendanceDates }: { attendanceDates: string[] }) => {
-  const days = ['월', '화', '수', '목', '금', '토', '일'];
-  const today = new Date();
-  const todayDay = today.getDay();
-  const mondayOffset = (todayDay === 0 ? -6 : 1 - todayDay);
-  const attendSet = new Set(attendanceDates);
-
-  const week = days.map((label, i) => {
-    const d = new Date(today);
-    d.setDate(today.getDate() + mondayOffset + i);
-    const dateStr = d.toISOString().slice(0, 10);
-    const isAttended = attendSet.has(dateStr);
-    const isFuture = d > today;
-    const isToday = i === (todayDay === 0 ? 6 : todayDay - 1);
-    const count = isAttended ? [4, 6, 3, 7, 5, 8, 2][i] : 0;
-    return { label, count, isToday, isFuture, isAttended };
-  });
-
-  const maxVal = Math.max(...week.map(d => d.count), 1);
-
-  return (
-    <div>
-      <div className="flex items-end justify-between gap-1.5 mb-2" style={{ height: 56 }}>
-        {week.map(({ label, count, isToday, isFuture }) => (
-          <div key={label} className="flex-1 flex flex-col items-center">
-            <div className="w-full flex items-end justify-center" style={{ height: 48 }}>
-              <div
-                className={`w-full rounded-t transition-all duration-700 ${
-                  isToday ? 'bg-orange-500' : count > 0 ? 'bg-[#E5E5E5]' : 'bg-[#F0F0F0]'
-                } ${isFuture ? 'opacity-30' : ''}`}
-                style={{ height: count > 0 ? `${(count / maxVal) * 48}px` : '4px' }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="flex justify-between gap-1.5">
-        {week.map(({ label, isToday }) => (
-          <div key={label} className={`flex-1 text-center text-[10px] font-medium ${isToday ? 'text-orange-500' : 'text-[#AAAAAA]'}`}>
-            {label}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
+import { calculateRank } from '../utils/league';
+import { WeeklyBarChart } from '../components/home/WeeklyBarChart';
 
 const HomeScreen = () => {
   const navigate = useNavigate();
-  const { points, knownWords, missions, claimReward, attendanceDates, otherLeagueUsers, courses, allWords, myEmoji } = useAppContext();
+  const { points, knownWords, knownIds, missions, claimReward, attendanceDates, otherLeagueUsers, courses, allWords, myEmoji } = useAppContext();
   const { user } = useAuth();
   const totalWords = allWords.length;
 
@@ -81,14 +34,11 @@ const HomeScreen = () => {
   const todayTotal = 1;
 
   // 리그 순위 계산
-  const myRank = (() => {
-    const league = [...otherLeagueUsers, { id: 'me', points }].sort((a, b) => b.points - a.points);
-    return league.findIndex(u => u.id === 'me') + 1;
-  })();
+  const myRank = calculateRank(otherLeagueUsers, points);
 
   // 이어서 시작할 코스 (가장 진행중인 것)
   const nextCourse = courses.find(c => {
-    const known = c.words.filter(w => knownWords.some(kw => kw.id === w.id)).length;
+    const known = c.words.filter(w => knownIds.has(w.id)).length;
     return known < c.words.length;
   }) ?? courses[0];
 
@@ -138,10 +88,7 @@ const HomeScreen = () => {
           {/* 압박 텍스트 */}
           {todayDone < todayTotal && (() => {
             const remainP = Object.values(missions).filter(m => !m.isRewarded && m.current < m.target).reduce((s, m) => s + m.reward, 0);
-            const estimatedRank = (() => {
-              const league = [...otherLeagueUsers, { id: 'me', points: points + remainP }].sort((a, b) => b.points - a.points);
-              return league.findIndex(u => u.id === 'me') + 1;
-            })();
+            const estimatedRank = calculateRank(otherLeagueUsers, points + remainP);
             return (
               <div className="rounded-xl px-3 py-3 mb-3 flex flex-col gap-1.5" style={{ backgroundColor: 'rgba(249,115,22,0.08)' }}>
                 <p className="text-xs font-bold text-orange-400">
@@ -221,7 +168,7 @@ const HomeScreen = () => {
           </div>
           <div className="flex flex-col gap-2.5">
             {courses.slice(0, 2).map((course) => {
-              const courseKnownCount = course.words.filter((w) => knownWords.some((kw) => kw.id === w.id)).length;
+              const courseKnownCount = course.words.filter((w) => knownIds.has(w.id)).length;
               const progressPct = Math.round((courseKnownCount / course.words.length) * 100);
               return (
                 <div
