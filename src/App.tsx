@@ -1,5 +1,5 @@
 import React from 'react';
-import { HashRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { Component, type ReactNode, type ErrorInfo } from 'react';
 import * as Sentry from '@sentry/react';
@@ -159,8 +159,12 @@ function resolveLandingTarget(): string {
     schemeUri = '';
   }
   const target = parseLandingPath(schemeUri);
-  // 진단(한시): 실기기에서 getSchemeUri 반환값을 Sentry Issues로 확인하기 위함. PROD 빌드에서만 전송됨.
-  Sentry.captureMessage('deep-link', { level: 'info', extra: { schemeUri, target } });
+  // 진단(한시): 기기가 스킴을 pathname으로 주는지 getSchemeUri로 주는지 Sentry로 확정. PROD 빌드에서만 전송됨.
+  const loc = globalThis.location;
+  Sentry.captureMessage('deep-link', {
+    level: 'info',
+    extra: { schemeUri, target, href: loc?.href, pathname: loc?.pathname, hash: loc?.hash },
+  });
   resolvedLanding = target ?? '/home';
   return resolvedLanding;
 }
@@ -230,7 +234,7 @@ export default function App() {
     <ErrorBoundary>
       <AuthProvider>
       <AppProvider>
-        <HashRouter>
+        <BrowserRouter>
           <BackEventHandler />
           <Toaster position="top-center" duration={1800} richColors />
           <div className="w-full max-w-md mx-auto bg-[#F7F7F7] h-[100dvh] overflow-hidden relative font-sans text-[#111111] flex flex-col">
@@ -238,7 +242,7 @@ export default function App() {
               <Layout />
             </ErrorBoundary>
           </div>
-        </HashRouter>
+        </BrowserRouter>
       </AppProvider>
       </AuthProvider>
     </ErrorBoundary>
