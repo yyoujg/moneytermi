@@ -1,10 +1,10 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { ChevronLeft, Zap, Check, X } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Storage } from '@apps-in-toss/web-framework';
 import type { Word, Missions } from '../types';
 import { useAppContext } from '../context/AppContext';
-import { useAuth } from '../hooks/useAuth';
+import { useSettings } from '../hooks/useSettings';
+import { calculateRank } from '../utils/league';
 import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
 
 export const getOptions = (correctWord: Word, knownWords: Word[], allWords: Word[]): string[] => {
@@ -46,8 +46,6 @@ const QuizScreen = () => {
     ? passedQueue
     : [...knownWords].sort(() => Math.random() - 0.5).slice(0, 10);
 
-  const { isGuest } = useAuth();
-
   const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
   const [combo, setCombo] = useState(0);
   const [maxCombo, setMaxCombo] = useState(0);
@@ -58,13 +56,7 @@ const QuizScreen = () => {
   const [showPointPop, setShowPointPop] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
   const [shake, setShake] = useState(false);
-  const [soundOn, setSoundOn] = useState(true);
-  const [vibrationOn, setVibrationOn] = useState(true);
-
-  useEffect(() => {
-    Storage.getItem('setting_sound').then(v => { if (v !== null) setSoundOn(v !== 'off'); }).catch(() => {});
-    Storage.getItem('setting_vibration').then(v => { if (v !== null) setVibrationOn(v !== 'off'); }).catch(() => {});
-  }, []);
+  const { soundOn, vibrationOn } = useSettings();
 
   const currentWord = quizQueue[currentQuizIndex];
 
@@ -84,15 +76,8 @@ const QuizScreen = () => {
   // 완료 화면
   if (!quizQueue || quizQueue.length === 0 || currentQuizIndex >= quizQueue.length) {
     const accuracy = quizQueue.length > 0 ? Math.round((correctCount / quizQueue.length) * 100) : 0;
-    const rankEstimate = Math.max(1, Math.floor(totalEarned / 5));
-    const myRank = (() => {
-      const league = [...otherLeagueUsers, { id: 'me', points }].sort((a, b) => b.points - a.points);
-      return league.findIndex(u => u.id === 'me') + 1;
-    })();
-    const prevRank = (() => {
-      const league = [...otherLeagueUsers, { id: 'me', points: points - totalEarned }].sort((a, b) => b.points - a.points);
-      return league.findIndex(u => u.id === 'me') + 1;
-    })();
+    const myRank = calculateRank(otherLeagueUsers, points);
+    const prevRank = calculateRank(otherLeagueUsers, points - totalEarned);
     const rankRose = prevRank > myRank;
 
     return (

@@ -1,4 +1,3 @@
-import React from 'react';
 import { PenLine, Compass, Home, Trophy, User } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 

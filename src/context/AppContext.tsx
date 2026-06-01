@@ -1,9 +1,9 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useMemo } from 'react';
 import type { Word, Course, Missions } from '../types';
 import { supabase, getGuestClient } from '../lib/supabase';
 import { loadStoredProfile } from '../hooks/useAuth';
+import { useDebouncedEffect } from '../hooks/useDebouncedEffect';
 import { Storage } from '../lib/storage';
-import type { SupabaseClient } from '@supabase/supabase-js';
 
 const toDateStr = (d: Date) => d.toISOString().slice(0, 10);
 
@@ -19,6 +19,7 @@ type AppContextValue = {
   points: number;
   setPoints: React.Dispatch<React.SetStateAction<number>>;
   knownWords: Word[];
+  knownIds: Set<number>;
   setKnownWords: React.Dispatch<React.SetStateAction<Word[]>>;
   unknownWords: Word[];
   setUnknownWords: React.Dispatch<React.SetStateAction<Word[]>>;
@@ -56,9 +57,11 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const pendingKnownIds   = useRef<Set<number> | null>(null);
   const pendingUnknownIds = useRef<Set<number> | null>(null);
 
+  const knownIds = useMemo(() => new Set(knownWords.map(w => w.id)), [knownWords]);
+
   // ── Storage는 초기 로드 시 한 번만 읽고 ref에 캐싱 ────────────
   const profileIdRef    = useRef<string | null>(null);
-  const dbRef           = useRef<SupabaseClient>(supabase);
+  const dbRef           = useRef<typeof supabase>(supabase);
   const lastMissionDate = useRef<string>(toDateStr(new Date()));
 
   // ── 콘텐츠 로드 (courses + words) ─────────────────────────────
@@ -258,64 +261,52 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   }, [allWords, ready]);
 
   // ── points → Supabase 동기화 (1초 디바운스) ───────────────────
-  useEffect(() => {
+  useDebouncedEffect(async () => {
     if (!ready) return;
-    const t = setTimeout(async () => {
-      const profileId = profileIdRef.current;
-      if (!profileId) return;
-      // DB 현재값과 비교해 더 큰 값을 저장 (race condition 완화)
-      const { data: current } = await dbRef.current
-        .from('profiles').select('points').eq('id', profileId).single();
-      const safePoints = current ? Math.max(points, current.points) : points;
-      const { error } = await dbRef.current
-        .from('profiles').update({ points: safePoints }).eq('id', profileId);
-      if (error) console.error('[sync] points 저장 실패:', error);
-    }, 1000);
-    return () => clearTimeout(t);
-  }, [points, ready]);
+    const profileId = profileIdRef.current;
+    if (!profileId) return;
+    // DB 현재값과 비교해 더 큰 값을 저장 (race condition 완화)
+    const { data: current } = await dbRef.current
+      .from('profiles').select('points').eq('id', profileId).single();
+    const safePoints = current ? Math.max(points, current.points) : points;
+    const { error } = await dbRef.current
+      .from('profiles').update({ points: safePoints }).eq('id', profileId);
+    if (error) console.error('[sync] points 저장 실패:', error);
+  }, [points, ready], 1000);
 
   // ── knownWords → word_progress upsert (2초 디바운스) ──────────
-  useEffect(() => {
+  useDebouncedEffect(async () => {
     if (!ready || knownWords.length === 0) return;
-    const t = setTimeout(async () => {
-      const profileId = profileIdRef.current;
-      if (!profileId) return;
-      const rows = knownWords.map(w => ({ user_id: profileId, word_id: w.id, status: 'known' as const }));
-      const { error } = await dbRef.current.from('word_progress').upsert(rows, { onConflict: 'user_id,word_id' });
-      if (error) console.error('[sync] word_progress(known) 저장 실패:', error);
-    }, 2000);
-    return () => clearTimeout(t);
-  }, [knownWords, ready]);
+    const profileId = profileIdRef.current;
+    if (!profileId) return;
+    const rows = knownWords.map(w => ({ user_id: profileId, word_id: w.id, status: 'known' as const }));
+    const { error } = await dbRef.current.from('word_progress').upsert(rows, { onConflict: 'user_id,word_id' });
+    if (error) console.error('[sync] word_progress(known) 저장 실패:', error);
+  }, [knownWords, ready], 2000);
 
   // ── unknownWords → word_progress upsert ───────────────────────
-  useEffect(() => {
+  useDebouncedEffect(async () => {
     if (!ready || unknownWords.length === 0) return;
-    const t = setTimeout(async () => {
-      const profileId = profileIdRef.current;
-      if (!profileId) return;
-      const rows = unknownWords.map(w => ({ user_id: profileId, word_id: w.id, status: 'unknown' as const }));
-      const { error } = await dbRef.current.from('word_progress').upsert(rows, { onConflict: 'user_id,word_id' });
-      if (error) console.error('[sync] word_progress(unknown) 저장 실패:', error);
-    }, 2000);
-    return () => clearTimeout(t);
-  }, [unknownWords, ready]);
+    const profileId = profileIdRef.current;
+    if (!profileId) return;
+    const rows = unknownWords.map(w => ({ user_id: profileId, word_id: w.id, status: 'unknown' as const }));
+    const { error } = await dbRef.current.from('word_progress').upsert(rows, { onConflict: 'user_id,word_id' });
+    if (error) console.error('[sync] word_progress(unknown) 저장 실패:', error);
+  }, [unknownWords, ready], 2000);
 
   // ── missions → daily_missions upsert (1.5초 디바운스) ─────────
-  useEffect(() => {
+  useDebouncedEffect(async () => {
     if (!ready) return;
+    const profileId = profileIdRef.current;
+    if (!profileId) return;
     const today = toDateStr(new Date());
-    const t = setTimeout(async () => {
-      const profileId = profileIdRef.current;
-      if (!profileId) return;
-      const rows = (Object.values(missions) as Missions[keyof Missions][]).map(m => ({
-        user_id: profileId, mission_id: m.id, date: today,
-        current: m.current, is_rewarded: m.isRewarded,
-      }));
-      const { error } = await dbRef.current.from('daily_missions').upsert(rows, { onConflict: 'user_id,mission_id,date' });
-      if (error) console.error('[sync] daily_missions 저장 실패:', error);
-    }, 1500);
-    return () => clearTimeout(t);
-  }, [missions, ready]);
+    const rows = (Object.values(missions) as Missions[keyof Missions][]).map(m => ({
+      user_id: profileId, mission_id: m.id as 'm1' | 'm3', date: today,
+      current: m.current, is_rewarded: m.isRewarded,
+    }));
+    const { error } = await dbRef.current.from('daily_missions').upsert(rows, { onConflict: 'user_id,mission_id,date' });
+    if (error) console.error('[sync] daily_missions 저장 실패:', error);
+  }, [missions, ready], 1500);
 
   // ── checkIn — 출석 버튼 클릭 시 ────────────────────────────────
   const checkIn = async () => {
@@ -404,7 +395,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     <AppContext.Provider value={{
       ready,
       points, setPoints,
-      knownWords, setKnownWords,
+      knownWords, knownIds, setKnownWords,
       unknownWords, setUnknownWords,
       missions, setMissions,
       claimReward,

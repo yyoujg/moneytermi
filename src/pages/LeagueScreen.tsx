@@ -1,7 +1,7 @@
 
 
-import React, { useMemo } from 'react';
-import { Info, Zap, Trophy, TrendingUp, TrendingDown, X } from 'lucide-react';
+import { useMemo } from 'react';
+import { Info, Zap, Trophy, TrendingUp, TrendingDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { TextButton, List, ListRow, Badge, Spacing } from '@toss/tds-mobile';
 import { CURRENT_LEAGUE_ID, LEAGUE_TIERS } from '../constants';

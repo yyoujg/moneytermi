@@ -1,13 +1,12 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Check, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
+import { useNews, type NaverNewsItem } from '../hooks/useNews';
 
 const ACCENT = '#f97316';
-
-type NaverNewsItem = { title: string; link: string; description: string; pubDate: string };
 
 const stripHtml = (s: string) => {
   const tmp = document.createElement('div');
@@ -71,18 +70,18 @@ const WordCard = ({
     </div>
 
     {/* 자세히 알아보기 */}
-    <div className="bg-white rounded-2xl px-5 pt-4 pb-5" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+    <div className="bg-white rounded-2xl px-5 pt-4 pb-5 flex flex-col gap-2.5">
       <p className="text-[12px] font-bold text-[#BBBBBB] tracking-[0.02em]">📖 자세히 알아보기</p>
       <p className="text-[14px] leading-[1.8] text-[#444444] font-medium break-keep tracking-[-0.01em]">{word.detailedMeaning}</p>
     </div>
 
     {/* 실시간 뉴스 */}
-    <div className="bg-white rounded-2xl px-5 pt-4 pb-5" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+    <div className="bg-white rounded-2xl px-5 pt-4 pb-5 flex flex-col gap-2.5">
       <p className="text-[12px] font-bold text-[#BBBBBB] tracking-[0.02em]">🗞 실시간 뉴스</p>
       {newsLoading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div className="flex flex-col gap-3.5">
           {[1, 2, 3].map(i => (
-            <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <div key={i} className="flex flex-col gap-1.5">
               <div className="h-3.5 bg-[#F0F0F0] rounded animate-pulse" style={{ width: '90%' }} />
               <div className="h-3.5 bg-[#F0F0F0] rounded animate-pulse" style={{ width: '70%' }} />
               <div className="h-2.5 bg-[#F0F0F0] rounded animate-pulse" style={{ width: '30%' }} />
@@ -90,15 +89,14 @@ const WordCard = ({
           ))}
         </div>
       ) : newsItems.length > 0 ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div className="flex flex-col gap-3.5">
           {newsItems.map((item, i) => (
             <a
               key={i}
               href={item.link}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}
-              className="active:opacity-60"
+              className="flex items-start gap-2 active:opacity-60"
             >
               <div className="flex-1">
                 <p className="text-[13px] font-semibold text-[#222222] break-keep leading-[1.55] tracking-[-0.01em] line-clamp-2">
@@ -109,7 +107,7 @@ const WordCard = ({
                     <Highlight text={stripHtml(item.description)} keyword={keyword} />
                   </p>
                 )}
-                <p style={{ marginTop: '4px' }} className="text-[11px] text-[#AAAAAA]">
+                <p className="text-[11px] text-[#AAAAAA] mt-1">
                   {new Date(item.pubDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
                 </p>
               </div>
@@ -124,7 +122,7 @@ const WordCard = ({
 
     {/* 관련 용어 */}
     {word.relatedWords && word.relatedWords.length > 0 && (
-      <div className="bg-white rounded-2xl px-5 py-4" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div className="bg-white rounded-2xl px-5 py-4 flex flex-col gap-2.5">
         <p className="text-[12px] font-bold text-[#BBBBBB] tracking-[0.02em]">🔗 관련 용어</p>
         <div className="flex flex-col">
           {word.relatedWords.map((tag, i) => (
@@ -171,57 +169,8 @@ const WordCardScreen = () => {
     scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   }, [wordIndex]);
 
-  // 뉴스 캐시 (세션 내 Map)
-  const newsCache = useRef<Map<string, NaverNewsItem[]>>(new Map());
-
-  const fetchNews = (word: string): Promise<NaverNewsItem[]> => {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-    return fetch(`${supabaseUrl}/functions/v1/naver-news`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${anonKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: word }),
-    })
-      .then(res => res.json())
-      .then(data => Array.isArray(data) ? data : [])
-      .catch(() => []);
-  };
-
-  // 뉴스 fetch (캐시 우선)
-  const [newsItems, setNewsItems] = useState<NaverNewsItem[]>([]);
-  const [newsLoading, setNewsLoading] = useState(false);
-  useEffect(() => {
-    if (!words.length) return;
-    const currentWord = words[wordIndex];
-    if (!currentWord) return;
-    let cancelled = false;
-
-    const cached = newsCache.current.get(currentWord.word);
-    if (cached) {
-      setNewsItems(cached);
-      setNewsLoading(false);
-    } else {
-      setNewsItems([]);
-      setNewsLoading(true);
-      fetchNews(currentWord.word).then(data => {
-        if (!cancelled) {
-          newsCache.current.set(currentWord.word, data);
-          setNewsItems(data);
-          setNewsLoading(false);
-        }
-      });
-    }
-
-    // 다음 단어 prefetch
-    const nextWord = words[wordIndex + 1];
-    if (nextWord && !newsCache.current.has(nextWord.word)) {
-      fetchNews(nextWord.word).then(data => {
-        newsCache.current.set(nextWord.word, data);
-      });
-    }
-
-    return () => { cancelled = true; };
-  }, [wordIndex, words]);
+  // 뉴스 (현재 단어 로드 + 다음 단어 prefetch)
+  const { newsItems, newsLoading } = useNews(words, wordIndex);
 
   // autoAdvance 완료 토스트
   useEffect(() => {
