@@ -6,6 +6,7 @@ import { useAppContext } from '../context/AppContext';
 import { useSettings } from '../hooks/useSettings';
 import { calculateRank } from '../utils/league';
 import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
+import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
 
 export const getOptions = (correctWord: Word, knownWords: Word[], allWords: Word[]): string[] => {
   const pool = knownWords.length >= 4 ? knownWords : allWords;
@@ -118,6 +119,8 @@ const QuizScreen = () => {
               </>
             )}
           </div>
+
+          <DailyAlarmPromptCard />
         </div>
 
         <div className="px-5 pb-12 flex flex-col gap-3">

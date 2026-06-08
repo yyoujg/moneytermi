@@ -1,9 +1,11 @@
-import { Volume2, VolumeX } from 'lucide-react';
+import { Volume2, VolumeX, Bell } from 'lucide-react';
 import { Switch, BottomSheet } from '@toss/tds-mobile';
 import { useSettings } from '../../hooks/useSettings';
+import { useNotificationAgreement } from '../../hooks/useNotificationAgreement';
 
 export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   const { soundOn, vibrationOn, toggleSound, toggleVibration } = useSettings();
+  const { agreed, requestAgreement } = useNotificationAgreement();
 
   return (
     <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px', fontWeight: 700 }}>앱 설정</span>}>
@@ -38,6 +40,27 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
           </div>
           <Switch checked={vibrationOn} onChange={toggleVibration} />
         </div>
+
+        {/* 학습 알림 */}
+        <button
+          type="button"
+          onClick={requestAgreement}
+          disabled={agreed}
+          className="flex items-center justify-between bg-[#F0F0F0] rounded-2xl px-4 py-4 text-left disabled:opacity-100"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-[#E5E5E5] flex items-center justify-center">
+              <Bell size={16} className={agreed ? 'text-[#555555]' : 'text-[#AAAAAA]'} />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-[#111111]">학습 알림</p>
+              <p className="text-xs text-[#AAAAAA]">복습/학습 리마인더 받기</p>
+            </div>
+          </div>
+          <span className={`text-sm font-semibold ${agreed ? 'text-[#AAAAAA]' : 'text-[#F97316]'}`}>
+            {agreed ? '동의됨' : '받기'}
+          </span>
+        </button>
       </div>
     </BottomSheet>
   );

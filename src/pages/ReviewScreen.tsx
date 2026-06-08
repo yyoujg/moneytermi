@@ -3,6 +3,7 @@ import { ChevronRight, Lightbulb, RotateCcw, Zap } from 'lucide-react';
 import { Spacing } from '@toss/tds-mobile';
 import { useAppContext } from '../context/AppContext';
 import type { Missions } from '../types';
+import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
 
 type Status = 'idle' | 'correct' | 'wrong';
 
@@ -89,6 +90,9 @@ const QuizPage = () => {
         <div className="flex items-center gap-2 bg-orange-500/10 border border-orange-500/20 rounded-2xl px-5 py-3 mb-8">
           <Zap size={16} className="text-orange-500 fill-current" />
           <span className="text-sm font-bold text-[#111111]">누적 포인트 {points} P</span>
+        </div>
+        <div className="w-full max-w-sm mb-8">
+          <DailyAlarmPromptCard />
         </div>
         <button
           onClick={restart}
