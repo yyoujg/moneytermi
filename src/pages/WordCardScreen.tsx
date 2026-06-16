@@ -146,7 +146,7 @@ const WordCard = ({
 const WordCardScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { courses, allWords, knownWords, toggleKnown, setKnownWords } = useAppContext();
+  const { courses, allWords, knownWords, knownIds, toggleKnown, setKnownWords } = useAppContext();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const state = location.state as {
@@ -157,8 +157,14 @@ const WordCardScreen = () => {
     autoAdvance?: boolean;
   } | null;
 
-  const words = state?.words ?? [];
-  const backPath = state?.backPath ?? '/course';
+  // 콜드 딥링크(state 없음) 진입 시: 미완료 코스 우선으로 기본 단어 로드
+  const isDeepLink = !state?.words?.length;
+  const words = React.useMemo<Word[]>(() => {
+    if (state?.words?.length) return state.words;
+    const course = courses.find(c => c.words.some(w => !knownIds.has(w.id))) ?? courses[0];
+    return course?.words ?? [];
+  }, [state, courses, knownIds]);
+  const backPath = state?.backPath ?? (isDeepLink ? '/home' : '/course');
   const backState = state?.backState;
   const autoAdvance = state?.autoAdvance ?? false;
 
@@ -221,6 +227,8 @@ const WordCardScreen = () => {
   }
 
   if (!words.length) {
+    // 딥링크 진입 직후 콘텐츠 로딩 대기 — 로딩 끝났는데도 비면 폴백
+    if (isDeepLink && courses.length === 0) return null;
     navigate(backPath, { replace: true });
     return null;
   }

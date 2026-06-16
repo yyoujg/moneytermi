@@ -1,5 +1,6 @@
 import { PenLine, Compass, Home, Trophy, User } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useSafeAreaInsets } from '../hooks/useSafeAreaInsets';
 
 const NAV_ITEMS = [
   { path: '/home', icon: Home, label: '홈' },
@@ -12,12 +13,16 @@ const NAV_ITEMS = [
 const NavBar = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const insets = useSafeAreaInsets();
 
   const HIDDEN_PATHS = ['/quiz', '/course/words', '/word-card', '/league/rules'];
   if (HIDDEN_PATHS.some(p => pathname.startsWith(p))) return null;
 
   return (
-    <div className="absolute bottom-0 w-full flex justify-center pb-6 z-50 pointer-events-none">
+    <div
+      className="absolute bottom-0 w-full flex justify-center z-50 pointer-events-none"
+      style={{ paddingBottom: 24 + insets.bottom }}
+    >
       <div className="flex items-center gap-1 bg-white/95 backdrop-blur-md rounded-full px-4 py-2 shadow-lg pointer-events-auto"
         style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.12)' }}
       >

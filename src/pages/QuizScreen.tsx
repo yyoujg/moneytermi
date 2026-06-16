@@ -1,11 +1,12 @@
 import { useState, useMemo, useEffect } from 'react';
 import { ChevronLeft, Zap, Check, X } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import type { Word, Missions } from '../types';
+import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
 import { useSettings } from '../hooks/useSettings';
 import { calculateRank } from '../utils/league';
 import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
+import { requestAppReview } from '../lib/review';
 import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
 
 export const getOptions = (correctWord: Word, knownWords: Word[], allWords: Word[]): string[] => {
@@ -40,7 +41,7 @@ export const calcEarned = (combo: number): number => {
 const QuizScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { points, setPoints, setMissions, otherLeagueUsers, allWords, knownWords } = useAppContext();
+  const { points, otherLeagueUsers, allWords, knownWords, submitQuizAnswer } = useAppContext();
 
   const passedQueue: Word[] = (location.state as { quizQueue?: Word[] } | null)?.quizQueue ?? [];
   const quizQueue: Word[] = passedQueue.length > 0
@@ -73,6 +74,12 @@ const QuizScreen = () => {
       return () => clearTimeout(t);
     }
   }, [showPointPop]);
+
+  // 퀴즈 완료 시 앱 리뷰 요청 (플랫폼이 노출 제어)
+  const finished = quizQueue.length > 0 && currentQuizIndex >= quizQueue.length;
+  useEffect(() => {
+    if (finished) requestAppReview();
+  }, [finished]);
 
   // 완료 화면
   if (!quizQueue || quizQueue.length === 0 || currentQuizIndex >= quizQueue.length) {
@@ -137,28 +144,25 @@ const QuizScreen = () => {
 
   const progressPercent = (currentQuizIndex / quizQueue.length) * 100;
 
-  const handleSelect = (option: string) => {
+  const handleSelect = async (option: string) => {
     if (status !== 'idle') return;
     setSelected(option);
+    // 즉시 피드백은 낙관적 (정답 단어는 클라가 이미 앎). 포인트·콤보는 서버가 채점.
     const isCorrect = option === currentWord.word;
 
     if (isCorrect) {
-      const newCombo = combo + 1;
-      const earned = calcEarned(newCombo);
-
       feedbackCorrect(soundOn, vibrationOn);
-      setPoints(p => p + earned);
-      setTotalEarned(t => t + earned);
-      setCombo(newCombo);
-      setMaxCombo(m => Math.max(m, newCombo));
-      setCorrectCount(c => c + 1);
-      setLastEarned(earned);
-      setShowPointPop(true);
       setStatus('correct');
-      setMissions((prev: Missions) => ({
-        ...prev,
-        m3: { ...prev.m3, current: Math.min(prev.m3.current + 1, prev.m3.target) },
-      }));
+      setCorrectCount(c => c + 1);
+
+      const res = await submitQuizAnswer(currentWord.id, option, 'mc', false, currentQuizIndex === 0);
+      if (res) {
+        setCombo(res.combo);
+        setMaxCombo(m => Math.max(m, res.combo));
+        setTotalEarned(t => t + res.earned);
+        setLastEarned(res.earned);
+        setShowPointPop(true);
+      }
       // 정답: 300ms 후 자동 이동
       setTimeout(() => {
         setCurrentQuizIndex(i => i + 1);
@@ -171,6 +175,8 @@ const QuizScreen = () => {
       setStatus('wrong');
       setShake(true);
       setTimeout(() => setShake(false), 500);
+      // 서버 콤보도 초기화 (오답 기록)
+      void submitQuizAnswer(currentWord.id, option, 'mc', false, currentQuizIndex === 0);
       // 오답: 900ms 후 재시도
       setTimeout(() => {
         setSelected(null);

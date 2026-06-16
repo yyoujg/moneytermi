@@ -16,6 +16,7 @@ export type Database = {
           is_guest: boolean;
           league_tier: string;
           points: number;
+          quiz_combo: number;
           emoji: string;
           created_at: string;
           updated_at: string;
@@ -29,6 +30,7 @@ export type Database = {
           is_guest?: boolean;
           league_tier?: string;
           points?: number;
+          quiz_combo?: number;
           emoji?: string;
           created_at?: string;
           updated_at?: string;
@@ -42,6 +44,7 @@ export type Database = {
           is_guest?: boolean;
           league_tier?: string;
           points?: number;
+          quiz_combo?: number;
           emoji?: string;
           updated_at?: string;
         };
@@ -221,6 +224,39 @@ export type Database = {
           p_email: string;
         };
         Returns: undefined;
+      };
+      submit_quiz_answer: {
+        Args: {
+          p_word_id: number;
+          p_answer: string;
+          p_mode: 'mc' | 'typed';
+          p_used_hint?: boolean;
+          p_session_start?: boolean;
+        };
+        Returns: {
+          correct: boolean;
+          earned: number;
+          combo: number;
+          points: number;
+          m3_current: number;
+        };
+      };
+      claim_mission_reward: {
+        Args: {
+          p_mission_id: string;
+          p_date?: string;
+        };
+        Returns: {
+          points: number;
+        };
+      };
+      checkin: {
+        Args: {
+          p_date?: string;
+        };
+        Returns: {
+          ok: boolean;
+        };
       };
     };
     Enums: {
