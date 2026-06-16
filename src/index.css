@@ -23,6 +23,10 @@ body,
   height: 100%;
 }
 
+:root {
+  color-scheme: light;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Pretendard', 'Segoe UI', Roboto, sans-serif;
   background: #0B0B0B;
