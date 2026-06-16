@@ -7,6 +7,7 @@ import { closeView, graniteEvent, getSchemeUri } from '@apps-in-toss/web-framewo
 import { AppProvider, useAppContext } from './context/AppContext';
 import { AuthProvider } from './hooks/useAuth';
 import { parseLandingPath } from './lib/landing';
+import { logScreen } from './lib/analytics';
 import { useSafeAreaInsets } from './hooks/useSafeAreaInsets';
 import NavBar from './components/NavBar';
 
@@ -131,6 +132,14 @@ const BackEventHandler = () => {
   return null;
 };
 
+const ScreenLogger = () => {
+  const location = useLocation();
+  React.useEffect(() => {
+    logScreen('screen_view', { path: location.pathname });
+  }, [location.pathname]);
+  return null;
+};
+
 const Layout = () => {
   const { ready } = useAppContext();
 
@@ -165,6 +174,7 @@ export default function App() {
       <AppProvider>
         <BrowserRouter>
           <BackEventHandler />
+          <ScreenLogger />
           <Toaster position="top-center" duration={1800} richColors />
           <div
             className="w-full max-w-md mx-auto bg-[#F7F7F7] h-[100dvh] overflow-hidden relative font-sans text-[#111111] flex flex-col"

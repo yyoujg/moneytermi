@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import type { Mission, Missions } from '../types';
 import { CURRENT_LEAGUE_NAME } from '../constants';
 import { useAppContext } from '../context/AppContext';
+import { logClick } from '../lib/analytics';
 import { useAuth } from '../hooks/useAuth';
 import { calculateRank } from '../utils/league';
 import { WeeklyBarChart } from '../components/home/WeeklyBarChart';
@@ -104,7 +105,7 @@ const HomeScreen = () => {
           {/* 단일 CTA */}
           <div className="flex flex-col" style={{ gap: 12 }}>
             <button
-              onClick={() => navigate('/word-card', { state: { words: nextCourse.words, index: 0, backPath: '/home', autoAdvance: true } })}
+              onClick={() => { logClick('course_start', { course_id: nextCourse.id, title: nextCourse.title }); navigate('/word-card', { state: { words: nextCourse.words, index: 0, backPath: '/home', autoAdvance: true } }); }}
               className="w-full py-4 rounded-2xl bg-orange-500 text-white text-sm font-bold active:opacity-90 flex items-center justify-center gap-2"
             >
               오늘 학습 시작하기
