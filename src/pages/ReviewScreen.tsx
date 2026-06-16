@@ -3,6 +3,7 @@ import { ChevronRight, Lightbulb, RotateCcw, Zap } from 'lucide-react';
 import { Spacing } from '@toss/tds-mobile';
 import { useAppContext } from '../context/AppContext';
 import { requestAppReview } from '../lib/review';
+import { logClick } from '../lib/analytics';
 import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
 
 type Status = 'idle' | 'correct' | 'wrong';
@@ -52,7 +53,10 @@ const QuizPage = () => {
   // 퀴즈 완료 시 앱 리뷰 요청 (플랫폼이 노출 제어)
   const completed = queue.length > 0 && index >= queue.length;
   useEffect(() => {
-    if (completed) requestAppReview();
+    if (completed) {
+      logClick('quiz_complete', { mode: 'review', total: queue.length, correct: totalCorrect });
+      requestAppReview();
+    }
   }, [completed]);
 
   const goNext = () => {

@@ -5,6 +5,7 @@ import { loadStoredProfile } from '../hooks/useAuth';
 import { useDebouncedEffect } from '../hooks/useDebouncedEffect';
 import { Storage } from '../lib/storage';
 import { requestAppReview } from '../lib/review';
+import { logClick } from '../lib/analytics';
 
 const toDateStr = (d: Date) => d.toISOString().slice(0, 10);
 
@@ -359,6 +360,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     if (error || !data) { console.error('[claimReward] 실패:', error); return; }
     setPoints(data.points);
     setMissions(prev => ({ ...prev, [missionId]: { ...prev[missionId], isRewarded: true } }));
+    logClick('mission_reward_claim', { mission_id: missionId, reward: mission.reward });
     requestAppReview();
   };
 

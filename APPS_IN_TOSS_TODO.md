@@ -43,58 +43,25 @@
 - **근거**: [서비스 오픈 정책](https://developers-apps-in-toss.toss.im/intro/guide.md),
   [서비스별 주의사항](https://developers-apps-in-toss.toss.im/intro/caution.md)
 
-### A-4. RLS 적용 유지 확인
-- **현재 상태**: 적용됨. profiles/word_progress/daily_missions/attendance RLS 활성
-  (`supabase/schema.sql`), 콘텐츠 테이블은 public read.
-- **권장 조치**: 배포 전 모든 테이블 RLS 활성 상태 재확인(필수 정책).
-- **근거**: [Supabase 연동](https://developers-apps-in-toss.toss.im/supabase/intro.md)
-
 ---
 
 ## B. 권장 (안정성 / UX)
 
-### B-1. 푸시 딥링크 경로 버그 수정 — ✅ 완료
-- **조치 내역**:
-  - `src/lib/landing.ts` `ALLOWED_PATHS`에 `/word-card` 추가.
-  - `src/App.test.ts` 테스트 분리(word-card 허용 / course-words null).
-  - `src/pages/WordCardScreen.tsx` — state 없는 콜드 딥링크 진입 시 미완료 코스 우선으로
-    기본 단어 로드(HomeScreen `nextCourse` 패턴 재사용), 콘텐츠 로딩 중에는 리다이렉트 보류.
-- **남은 확인(실기기)**: word-card 딥링크 진입 시 단어 정상 표시.
-- **근거**: [인앱 기능/딥링크 테스트](https://developers-apps-in-toss.toss.im/development/test/function.md)
-
-### B-2. SafeAreaInsets 적용 — ✅ 완료
-- **조치 내역**:
-  - 신규 `src/hooks/useSafeAreaInsets.ts` — `SafeAreaInsets.get()` 초기값 +
-    `SafeAreaInsets.subscribe()` 구독, 웹/미지원 환경은 0 폴백(try/catch).
-  - `src/App.tsx` 루트 컨테이너에 `paddingTop: insets.top`(상태바/노치 회피).
-  - `src/components/NavBar.tsx` 하단 패딩 `pb-6` → `paddingBottom: 24 + insets.bottom`(홈 인디케이터 회피).
-- **남은 확인(실기기)**: 노치/홈 인디케이터 영역 침범 없음.
-- **근거**: [Safe Area](https://developers-apps-in-toss.toss.im/bedrock/reference/framework/화면%20제어/safe-area.md)
-
-### B-3. requestReview(앱 리뷰 요청) 도입 — ✅ 완료
-- **조치 내역**:
-  - 신규 `src/lib/review.ts` `requestAppReview()` — `requestReview.isSupported()` 가드 + try/catch.
-  - 호출 지점: `claimReward` 성공 직후(`AppContext.tsx`), 퀴즈 완료 시(`QuizScreen.tsx`,
-    `ReviewScreen.tsx`, 빈 큐 가드). 노출은 플랫폼이 제어하므로 게이팅 없음.
-- **남은 확인(실기기)**: 노출 조건 충족 시 리뷰 프롬프트 표시.
-- **근거**: [requestReview](https://developers-apps-in-toss.toss.im/bedrock/reference/framework/인터렉션/requestReview.md)
-
-### B-4. UX / 디자인 가이드 점검
-- **현재 상태**: 탭 5개(홈/코스/리그/퀴즈/MY, `src/components/NavBar.tsx`)로 2~5개 기준 충족,
-  해요체 사용, `navigationBar.withBackButton: true` 설정됨. 다크모드 대응·로고 규격은 확인 필요.
-- **권장 조치(확인 필요)**:
-  - 로고 600x600 직각(둥근 모서리 X), 라이트/다크 배경 모두 식별 가능 여부
-  - 앱 진입 즉시 모달/바텀시트 노출 금지(현재 동의는 결과 화면 카드로 보여 OK로 판단)
-  - 다이얼로그 항상 닫기 가능, 뒤로가기 차단 금지
-  - 다크모드 대응 여부(현재 라이트 톤 위주로 보임)
+### B-1. UX / 디자인 가이드 점검 — 부분 완료
+- **점검 결과(코드 확인 완료)**:
+  - 탭 5개(홈/코스/리그/퀴즈/MY, `src/components/NavBar.tsx`) -> 2~5개 기준 충족 ✅
+  - 해요체 사용, `navigationBar.withBackButton: true` 설정 ✅
+  - 진입 즉시 모달/바텀시트 없음 ✅ — App/main/HomeScreen 마운트 시 자동 오픈 없음.
+    `DailyAlarmPromptCard`는 결과 화면 인라인 카드(QuizScreen:130, ReviewScreen:98)
+  - 로고: `public/logo.png` 600x600 확인 ✅ (둥근모서리/라이트·다크 배경 가독성은 육안 잔여)
+- **다크모드 — light-only 명시 선언으로 처리**: `index.html`에 `color-scheme: light` /
+  `theme-color: #F97316` 메타, `src/index.css` `:root { color-scheme: light }` 추가 →
+  OS/웹뷰 강제 다크 반전·UA 폼 컨트롤 다크 렌더 방지. 전면 다크 테마(하드코딩 색 298개
+  토큰화)는 별도 작업/디자인 결정 필요(미대응).
+- **남은 확인(콘솔/육안)**: 콘솔 등록 아이콘(brand.icon 원격 URL) 규격, 로고 배경 대비.
 - **근거**: [UI/UX 가이드](https://developers-apps-in-toss.toss.im/design/consumer-ux-guide.md),
   [UX 라이팅](https://developers-apps-in-toss.toss.im/design/ux-writing.md),
   [해상도 가이드](https://developers-apps-in-toss.toss.im/design/resolution.md)
-
-### B-5. 번들 크기 / 리소스 확인
-- **현재 상태**: 확인 필요.
-- **권장 조치**: 빌드 번들 100MB(비압축) 이하 유지, 큰 리소스는 CDN/지연 로딩으로 분리.
-- **근거**: [미니앱 출시](https://developers-apps-in-toss.toss.im/development/deploy.md)
 
 ---
 
@@ -127,21 +94,64 @@
 - **근거**: [공유 리워드](https://developers-apps-in-toss.toss.im/reward/intro.md),
   [프로모션](https://developers-apps-in-toss.toss.im/promotion/intro.md)
 
-### C-4. Analytics 이벤트 로깅
-- **현재 상태**: Sentry(에러 모니터링)만 사용. 행동 분석 없음.
-- **권장 조치(확인 필요)**: 핵심 퍼널(코스 시작/단어 학습/퀴즈 완료/보상 수령) 이벤트 로깅.
-  단, AIT Analytics 컴포넌트 예제는 React Native 기준이므로 웹 프레임워크 적용 방식
-  (콘솔 이벤트 로깅 포함)을 먼저 확인.
-- **근거**: [이벤트 로깅](https://developers-apps-in-toss.toss.im/analytics/logging.md),
-  [Analytics](https://developers-apps-in-toss.toss.im/bedrock/reference/framework/분석/Analytics.md)
-
-### C-5. 수익화(광고 / IAP / 토스페이)
+### C-4. 수익화(광고 / IAP / 토스페이)
 - **현재 상태**: 미사용.
 - **권장 조치**: 무료 학습 앱 특성상 현재 불필요. 향후 도입 시 광고는 AIT 네이티브 포맷,
   디지털 재화는 IAP, 실물/결제는 토스페이만 사용해야 함(정책).
 - **근거**: [인앱 광고](https://developers-apps-in-toss.toss.im/ads/intro.md),
   [인앱 결제](https://developers-apps-in-toss.toss.im/iap/intro.md),
   [토스페이](https://developers-apps-in-toss.toss.im/tosspay/intro.md)
+
+---
+
+## E. 앱인토스 콘솔 설정 (배포 전 필요 — 구체)
+
+콘솔: https://apps-in-toss.toss.im/ (토스 비즈니스 계정 필요, 워크스페이스는 사업자당 1개)
+아래는 콘솔에서 직접 입력/설정해야 하는 항목. 코드만으로는 처리 불가.
+
+### E-1. 앱 기본 정보 / 에셋 등록
+- **앱 이름**(토스 내 노출명): `머니터미`
+- **appName(ID)**: `moneytermi` — intoss:// 스킴에 사용, **등록 후 변경 불가**. `granite.config.ts`의 appName과 일치시킬 것
+- **앱 유형**: 비게임
+- **한 줄 소개(subtitle) / 상세 설명**: 서비스 흐름·핵심 경험 기술 (APP_INTRO.md 내용 활용)
+- **연령 등급**: 19세 (현 플랫폼 기준)
+- **고객지원**: 이메일 / 전화 / 상담 URL 중 입력
+- **앱 로고**: 600x600 PNG, **배경 있음(투명 X)**, 다크모드에서도 식별 가능 — `public/logo.png`(600x600 확인됨) 또는 `brand.icon` URL과 동일 이미지
+- **썸네일**: 1932x828 PNG (핵심 기능 노출)
+- **스크린샷(선택)**: 세로 636x1048 3장+ 또는 가로 1504x741 1장+
+- **카테고리**: 실제 서비스에 맞게(교육/경제 등)
+- **브랜드 색상**: `#F97316` (`granite.config.ts` brand.primaryColor와 일치)
+
+### E-2. 토스 로그인 설정 (A-1 연동 시 필수)
+- **약관 동의 화면** 구성(최초 로그인 시 노출)
+- **요청 사용자 정보 scope** 선택 — 최소 필요만. 가능 항목: `user_email`, `user_name`,
+  `user_phone`, `user_birthday`, `user_gender`, `user_nationality`, `user_ci`.
+  (학습앱은 식별 위주이므로 최소 scope 권장; 콘솔에서 선택+사용자 동의분만 반환됨)
+- **이용약관 / 개인정보처리방침 URL** 등록
+- **복호화 키 + AAD**: 콘솔이 이메일로 발급 → 서버에 안전 보관(사용자 정보 복호화용, 클라 노출 금지)
+- **연결 해제(unlink) 콜백**: 콜백 URL + Basic Auth 자격증명 등록(GET/POST 지원)
+- 참고: 기능성 푸시(`DAILY_TERM_PUSH`) 사용 중 → 정책상 토스 로그인 연동 필요(A-1)
+
+### E-3. 스마트 메시지(기능성 푸시) 템플릿 — DAILY_TERM_PUSH (C-2 관련)
+콘솔 > 스마트 메시지에서 발송 템플릿 등록:
+- **발송 코드(templateCode)**: `DAILY_TERM_PUSH` (`src/hooks/useNotificationAgreement.ts`의 TEMPLATE_CODE와 일치)
+- **제목**: 최대 7자(공백 포함), 명사형, "~하기" 회피 → 예: `오늘의 용어`
+- **내용**: 최대 25자(공백 포함), "~요." 종결(변수는 2자 계산) → 예: `오늘의 경제 용어가 도착했어요.`
+- **이동 URL**: `intoss://moneytermi/word-card` (제출 전 동작 확인 — 코드 ALLOWED_PATHS에 `/word-card` 반영 완료)
+- **알림 동의문**: 스마트 메시지 > 알림 동의 탭에서 등록, 발송 조건/주기(매일 09:00 KST) 설정
+- 템플릿 텍스트 심사 2~3영업일 소요
+
+### E-4. 도메인 allowlist (A-2, Supabase 측 — 콘솔 아님)
+- Supabase Authentication > URL Configuration에 origin 등록:
+  - 운영: `https://moneytermi.apps.tossmini.com`
+  - QA: `https://moneytermi.private-apps.tossmini.com`
+- 출시 전 필수(콘솔이 아닌 Supabase 대시보드 설정이지만 함께 처리).
+
+### E-5. 출시(검토 요청)
+- 모든 필드/에셋 입력 후 콘솔 **"검토 요청하기"** 클릭 → 승인 1~2영업일
+  (스마트 메시지 텍스트 심사는 2~3영업일 별도)
+- 출시 정책 금지항목(가상자산/투자자문/금융상품 중개/외부결제·앱설치 유도) 미해당 재확인(A-3)
+- 배포 Supabase에 마이그레이션 전체 적용 확인(schema/content/league_rls/points_integrity)
 
 ---
 
