@@ -25,7 +25,11 @@ type AppContextValue = {
   setUnknownWords: React.Dispatch<React.SetStateAction<Word[]>>;
   missions: Missions;
   setMissions: React.Dispatch<React.SetStateAction<Missions>>;
-  claimReward: (missionId: keyof Missions) => void;
+  claimReward: (missionId: keyof Missions) => Promise<void>;
+  submitQuizAnswer: (
+    wordId: number, answer: string, mode: 'mc' | 'typed',
+    usedHint: boolean, sessionStart: boolean,
+  ) => Promise<{ correct: boolean; earned: number; combo: number; points: number; m3Current: number } | null>;
   toggleKnown: (word: Word) => void;
   attendanceDates: string[];
   otherLeagueUsers: LeagueUser[];
@@ -154,7 +158,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
       if (profileErr) console.error('[load] profiles fetch 실패:', profileErr);
-      if (profile) setPoints(prev => Math.max(prev, profile.points));
+      if (profile) setPoints(profile.points);  // 서버 단일 진실원
 
       // 2. word_progress → 실제 Word 객체 복원
       const { data: progress } = await db
@@ -260,20 +264,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [allWords, ready]);
 
-  // ── points → Supabase 동기화 (1초 디바운스) ───────────────────
-  useDebouncedEffect(async () => {
-    if (!ready) return;
-    const profileId = profileIdRef.current;
-    if (!profileId) return;
-    // DB 현재값과 비교해 더 큰 값을 저장 (race condition 완화)
-    const { data: current } = await dbRef.current
-      .from('profiles').select('points').eq('id', profileId).single();
-    const safePoints = current ? Math.max(points, current.points) : points;
-    const { error } = await dbRef.current
-      .from('profiles').update({ points: safePoints }).eq('id', profileId);
-    if (error) console.error('[sync] points 저장 실패:', error);
-  }, [points, ready], 1000);
-
   // ── knownWords → word_progress upsert (2초 디바운스) ──────────
   useDebouncedEffect(async () => {
     if (!ready || knownWords.length === 0) return;
@@ -294,20 +284,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     if (error) console.error('[sync] word_progress(unknown) 저장 실패:', error);
   }, [unknownWords, ready], 2000);
 
-  // ── missions → daily_missions upsert (1.5초 디바운스) ─────────
-  useDebouncedEffect(async () => {
-    if (!ready) return;
-    const profileId = profileIdRef.current;
-    if (!profileId) return;
-    const today = toDateStr(new Date());
-    const rows = (Object.values(missions) as Missions[keyof Missions][]).map(m => ({
-      user_id: profileId, mission_id: m.id as 'm1' | 'm3', date: today,
-      current: m.current, is_rewarded: m.isRewarded,
-    }));
-    const { error } = await dbRef.current.from('daily_missions').upsert(rows, { onConflict: 'user_id,mission_id,date' });
-    if (error) console.error('[sync] daily_missions 저장 실패:', error);
-  }, [missions, ready], 1500);
-
   // ── checkIn — 출석 버튼 클릭 시 ────────────────────────────────
   const checkIn = async () => {
     const today = toDateStr(new Date());
@@ -322,18 +298,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     const profileId = profileIdRef.current;
     if (!profileId) return;
 
-    const { error: attErr } = await dbRef.current.from('attendance').upsert(
-      { user_id: profileId, date: today },
-      { onConflict: 'user_id,date' }
-    );
-    if (attErr) console.error('[checkIn] attendance upsert 실패:', attErr);
-
-    // 디바운스 sync가 initialized.current에 막힐 수 있으므로 직접 저장
-    const { error: dmErr } = await dbRef.current.from('daily_missions').upsert(
-      { user_id: profileId, mission_id: 'm1', date: today, current: 1, is_rewarded: false },
-      { onConflict: 'user_id,mission_id,date' }
-    );
-    if (dmErr) console.error('[checkIn] daily_missions upsert 실패:', dmErr);
+    const { error } = await dbRef.current.rpc('checkin', { p_date: today });
+    if (error) console.error('[checkIn] checkin RPC 실패:', error);
   };
 
   // ── 자정 미션 초기화 ──────────────────────────────────────────
@@ -381,15 +347,36 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     await dbRef.current.from('profiles').update({ emoji }).eq('id', profileId);
   };
 
-  // ── claimReward ───────────────────────────────────────────────
-  const claimReward = (missionId: keyof Missions) => setMissions(prev => {
-    const mission = prev[missionId];
-    if (mission.current >= mission.target && !mission.isRewarded) {
-      setPoints(p => p + mission.reward);
-      return { ...prev, [missionId]: { ...mission, isRewarded: true } };
-    }
-    return prev;
-  });
+  // ── claimReward — 서버가 자격 검증 후 적립 ─────────────────────
+  const claimReward = async (missionId: keyof Missions) => {
+    const mission = missions[missionId];
+    if (mission.current < mission.target || mission.isRewarded) return;
+    const today = toDateStr(new Date());
+    const { data, error } = await dbRef.current.rpc('claim_mission_reward', {
+      p_mission_id: missionId, p_date: today,
+    });
+    if (error || !data) { console.error('[claimReward] 실패:', error); return; }
+    setPoints(data.points);
+    setMissions(prev => ({ ...prev, [missionId]: { ...prev[missionId], isRewarded: true } }));
+  };
+
+  // ── submitQuizAnswer — 서버 채점 (포인트·콤보·m3 서버 소유) ────
+  const submitQuizAnswer = async (
+    wordId: number, answer: string, mode: 'mc' | 'typed',
+    usedHint: boolean, sessionStart: boolean,
+  ) => {
+    const { data, error } = await dbRef.current.rpc('submit_quiz_answer', {
+      p_word_id: wordId, p_answer: answer, p_mode: mode,
+      p_used_hint: usedHint, p_session_start: sessionStart,
+    });
+    if (error || !data) { console.error('[submitQuizAnswer] 실패:', error); return null; }
+    setPoints(data.points);
+    setMissions(prev => ({ ...prev, m3: { ...prev.m3, current: data.m3_current } }));
+    return {
+      correct: data.correct, earned: data.earned, combo: data.combo,
+      points: data.points, m3Current: data.m3_current,
+    };
+  };
 
   return (
     <AppContext.Provider value={{
@@ -399,6 +386,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       unknownWords, setUnknownWords,
       missions, setMissions,
       claimReward,
+      submitQuizAnswer,
       toggleKnown,
       checkIn,
       attendanceDates,

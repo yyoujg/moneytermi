@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChevronRight, Lightbulb, RotateCcw, Zap } from 'lucide-react';
 import { Spacing } from '@toss/tds-mobile';
 import { useAppContext } from '../context/AppContext';
-import type { Missions } from '../types';
 import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
 
 type Status = 'idle' | 'correct' | 'wrong';
@@ -17,7 +16,7 @@ const shuffle = <T,>(arr: T[]): T[] => {
 };
 
 const QuizPage = () => {
-  const { points, setPoints, setMissions, allWords } = useAppContext();
+  const { points, allWords, submitQuizAnswer } = useAppContext();
 
   const [queue, setQueue] = React.useState<typeof allWords>([]);
   React.useEffect(() => {
@@ -56,27 +55,24 @@ const QuizPage = () => {
     setShowHint(false);
   };
 
-  const handleSubmit = (e?: React.FormEvent) => {
+  const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (status !== 'idle' || !input.trim()) return;
 
+    // 즉시 피드백은 낙관적, 포인트·콤보·m3는 서버가 채점
     const clean = (s: string) => s.replace(/\s+/g, '').toLowerCase();
     const isCorrect = clean(input) === clean(word.word);
 
     if (isCorrect) {
-      const earned = (showHint ? 5 : 10) + (combo >= 2 ? combo * 2 : 0);
-      setPoints((p) => p + earned);
-      setCombo((c) => c + 1);
       setTotalCorrect((c) => c + 1);
       setStatus('correct');
-      setMissions((prev: Missions) => ({
-        ...prev,
-        m3: { ...prev.m3, current: Math.min(prev.m3.current + 1, prev.m3.target) },
-      }));
+      const res = await submitQuizAnswer(word.id, input, 'typed', showHint, index === 0);
+      if (res) setCombo(res.combo);
       setTimeout(goNext, 900);
     } else {
       setCombo(0);
       setStatus('wrong');
+      void submitQuizAnswer(word.id, input, 'typed', showHint, index === 0);
       setTimeout(() => { setStatus('idle'); setInput(''); }, 700);
     }
   };
