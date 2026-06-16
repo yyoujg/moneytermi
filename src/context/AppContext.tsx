@@ -4,6 +4,7 @@ import { supabase, getGuestClient } from '../lib/supabase';
 import { loadStoredProfile } from '../hooks/useAuth';
 import { useDebouncedEffect } from '../hooks/useDebouncedEffect';
 import { Storage } from '../lib/storage';
+import { requestAppReview } from '../lib/review';
 
 const toDateStr = (d: Date) => d.toISOString().slice(0, 10);
 
@@ -358,6 +359,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     if (error || !data) { console.error('[claimReward] 실패:', error); return; }
     setPoints(data.points);
     setMissions(prev => ({ ...prev, [missionId]: { ...prev[missionId], isRewarded: true } }));
+    requestAppReview();
   };
 
   // ── submitQuizAnswer — 서버 채점 (포인트·콤보·m3 서버 소유) ────

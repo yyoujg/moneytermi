@@ -7,6 +7,7 @@ import { closeView, graniteEvent, getSchemeUri } from '@apps-in-toss/web-framewo
 import { AppProvider, useAppContext } from './context/AppContext';
 import { AuthProvider } from './hooks/useAuth';
 import { parseLandingPath } from './lib/landing';
+import { useSafeAreaInsets } from './hooks/useSafeAreaInsets';
 import NavBar from './components/NavBar';
 
 const HomeScreen = React.lazy(() => import('./pages/HomeScreen'));
@@ -157,6 +158,7 @@ const Layout = () => {
 };
 
 export default function App() {
+  const insets = useSafeAreaInsets();
   return (
     <ErrorBoundary>
       <AuthProvider>
@@ -164,7 +166,10 @@ export default function App() {
         <BrowserRouter>
           <BackEventHandler />
           <Toaster position="top-center" duration={1800} richColors />
-          <div className="w-full max-w-md mx-auto bg-[#F7F7F7] h-[100dvh] overflow-hidden relative font-sans text-[#111111] flex flex-col">
+          <div
+            className="w-full max-w-md mx-auto bg-[#F7F7F7] h-[100dvh] overflow-hidden relative font-sans text-[#111111] flex flex-col"
+            style={{ paddingTop: insets.top }}
+          >
             <ErrorBoundary>
               <Layout />
             </ErrorBoundary>

@@ -49,8 +49,12 @@ describe('parseLandingPath', () => {
     expect(parseLandingPath('apps-in-toss://moneytermi/')).toBeNull();
   });
 
-  it('제거된 ALLOWED 경로는 null', () => {
-    expect(parseLandingPath('apps-in-toss://moneytermi/word-card')).toBeNull();
+  it('word-card는 허용 경로 (푸시 딥링크)', () => {
+    expect(parseLandingPath('apps-in-toss://moneytermi/word-card')).toBe('/word-card');
+    expect(parseLandingPath('intoss://moneytermi/word-card')).toBe('/word-card');
+  });
+
+  it('미허용 중첩 경로는 null', () => {
     expect(parseLandingPath('apps-in-toss://moneytermi/course/words')).toBeNull();
   });
 

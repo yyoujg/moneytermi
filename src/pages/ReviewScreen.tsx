@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChevronRight, Lightbulb, RotateCcw, Zap } from 'lucide-react';
 import { Spacing } from '@toss/tds-mobile';
 import { useAppContext } from '../context/AppContext';
+import { requestAppReview } from '../lib/review';
 import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
 
 type Status = 'idle' | 'correct' | 'wrong';
@@ -47,6 +48,12 @@ const QuizPage = () => {
   useEffect(() => {
     if (status === 'idle') inputRef.current?.focus();
   }, [index, status]);
+
+  // 퀴즈 완료 시 앱 리뷰 요청 (플랫폼이 노출 제어)
+  const completed = queue.length > 0 && index >= queue.length;
+  useEffect(() => {
+    if (completed) requestAppReview();
+  }, [completed]);
 
   const goNext = () => {
     setIndex((i) => i + 1);

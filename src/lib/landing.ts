@@ -6,6 +6,7 @@ const ALLOWED_PATHS = new Set([
   '/my',
   '/league/rules',
   '/quiz',
+  '/word-card',
 ]);
 
 const matchAllowed = (p: string | null | undefined): string | null => {

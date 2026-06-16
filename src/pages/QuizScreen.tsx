@@ -6,6 +6,7 @@ import { useAppContext } from '../context/AppContext';
 import { useSettings } from '../hooks/useSettings';
 import { calculateRank } from '../utils/league';
 import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
+import { requestAppReview } from '../lib/review';
 import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
 
 export const getOptions = (correctWord: Word, knownWords: Word[], allWords: Word[]): string[] => {
@@ -73,6 +74,12 @@ const QuizScreen = () => {
       return () => clearTimeout(t);
     }
   }, [showPointPop]);
+
+  // 퀴즈 완료 시 앱 리뷰 요청 (플랫폼이 노출 제어)
+  const finished = quizQueue.length > 0 && currentQuizIndex >= quizQueue.length;
+  useEffect(() => {
+    if (finished) requestAppReview();
+  }, [finished]);
 
   // 완료 화면
   if (!quizQueue || quizQueue.length === 0 || currentQuizIndex >= quizQueue.length) {
