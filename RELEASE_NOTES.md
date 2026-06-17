@@ -5,6 +5,35 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
 
 ---
 
+## 2026-06-16 — 분석 / 다크모드 후속 빌드
+
+### 주요 기능
+
+- **Analytics 이벤트 로깅 (C-4)** (`d145aa4`)
+  - `@apps-in-toss/web-analytics`의 `Analytics.screen/click`를 감싼 가드 래퍼
+    `src/lib/analytics.ts` 신설(init 불필요, 미지원/웹/개발 환경 조용히 무시).
+  - 도입 이벤트: `screen_view`(라우트 변경, `App.tsx` ScreenLogger),
+    `course_start`(`CourseScreen`/`HomeScreen`, course_id·title),
+    `quiz_complete`(`QuizScreen` mode:quiz / `ReviewScreen` mode:review, total·correct),
+    `mission_reward_claim`(`AppContext.claimReward`, mission_id·reward).
+  - 기존 `requestAppReview` 지점에 병치. 프로덕션에서만 집계(대시보드 +1일).
+
+### UX
+
+- **다크모드 light-only 명시** (`16e0d25`)
+  - `index.html`에 `color-scheme: light` / `theme-color: #F97316` 메타,
+    `src/index.css`에 `:root { color-scheme: light }` 추가.
+  - OS/웹뷰 강제 다크 반전과 UA 폼 컨트롤 다크 렌더로 인한 가독성 깨짐 방지.
+    전면 다크 테마(하드코딩 색 298개 토큰화)는 별도 작업으로 미대응.
+
+### 문서
+
+- **문서 추가/갱신** (`8188b3c`)
+  - `RELEASE_NOTES.md`, `DATA_STRUCTURE.md` 추가, `APPS_IN_TOSS_TODO.md` 갱신
+    (완료 항목 정리 + 앱인토스 콘솔 설정 E 섹션 구체화), `README.md` 문서 링크.
+
+---
+
 ## 2026-06-16 — Apps in Toss 출시 준비 빌드
 
 ### 주요 기능
@@ -72,6 +101,7 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
 - [ ] (실기기 확인) `intoss://moneytermi/word-card` 딥링크 진입 시 단어 정상 표시.
 - [ ] (실기기 확인) 노치/홈 인디케이터 영역 침범 없음(SafeAreaInsets).
 - [ ] (실기기 확인) 리뷰 프롬프트 노출 조건 동작.
+- [ ] (출시 후) 콘솔 분석 대시보드에서 이벤트 수집 확인(+1일, 프로덕션만 집계).
 - [ ] 남은 출시 항목은 `APPS_IN_TOSS_TODO.md` 참고(특히 A-1 토스 로그인 연동).
 
 > 참고: `package.json` 버전은 현재 `0.0.0`. 출시 시 버전 정책 확정 필요.

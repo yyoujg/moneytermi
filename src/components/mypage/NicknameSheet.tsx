@@ -38,7 +38,7 @@ export const NicknameSheet = ({
     <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px', fontWeight: 700 }}>닉네임 변경</span>} hasTextField>
       <div className="px-5 pb-6 flex flex-col gap-5">
         <div className="flex flex-col gap-2">
-          <div className={`flex items-center gap-3 bg-[#F0F0F0] rounded-2xl px-4 py-3.5 transition-colors ${error ? 'ring-2 ring-red-400/50' : ''}`}>
+          <div className={`flex items-center gap-3 bg-[var(--color-surface)] rounded-2xl px-4 py-3.5 transition-colors ${error ? 'ring-2 ring-red-400/50' : ''}`}>
             <input
               ref={inputRef}
               value={value}
@@ -46,11 +46,11 @@ export const NicknameSheet = ({
               onKeyDown={e => { if (e.key === 'Enter') handleSave(); }}
               maxLength={10}
               placeholder="닉네임 입력"
-              className="flex-1 bg-transparent text-sm font-semibold text-[#111111] placeholder:text-[#AAAAAA] outline-none"
+              className="flex-1 bg-transparent text-sm font-semibold text-[var(--color-ink)] placeholder:text-[var(--color-ink-4)] outline-none"
             />
-            <span className="text-xs text-[#AAAAAA] shrink-0">{value.length}/10</span>
+            <span className="text-xs text-[var(--color-ink-4)] shrink-0">{value.length}/10</span>
             {value.length > 0 && (
-              <button onClick={() => { setValue(''); setError(null); }} className="w-5 h-5 flex items-center justify-center rounded-full bg-[#D0D0D0]">
+              <button onClick={() => { setValue(''); setError(null); }} className="w-5 h-5 flex items-center justify-center rounded-full bg-[var(--color-line)]">
                 <X size={10} className="text-white" />
               </button>
             )}

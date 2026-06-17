@@ -21,7 +21,7 @@ const Highlight = ({ text, keyword }: { text: string; keyword: string }) => {
     <>
       {parts.map((part, i) =>
         part.toLowerCase() === keyword.toLowerCase()
-          ? <mark key={i} style={{ background: '#fff3e0', color: '#f97316', fontWeight: 700, borderRadius: 3, padding: '0 2px' }}>{part}</mark>
+          ? <mark key={i} style={{ background: 'var(--color-brand-cream)', color: '#f97316', fontWeight: 700, borderRadius: 3, padding: '0 2px' }}>{part}</mark>
           : <span key={i}>{part}</span>
       )}
     </>
@@ -49,19 +49,19 @@ const WordCard = ({
   <div className="flex flex-col gap-3 px-5 pb-6">
 
     {/* 단어 헤더 */}
-    <div className="bg-white rounded-2xl px-5 py-5">
+    <div className="bg-[var(--color-card)] rounded-2xl px-5 py-5">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1">
-          <h1 className="text-[28px] font-black text-[#111111] leading-[1.2] tracking-[-0.03em] break-keep mb-2">
+          <h1 className="text-[28px] font-black text-[var(--color-ink)] leading-[1.2] tracking-[-0.03em] break-keep mb-2">
             {word.word}
           </h1>
-          <p className="text-[14px] text-[#444444] font-medium break-keep leading-[1.7] tracking-[-0.01em]">{word.meaning}</p>
+          <p className="text-[14px] text-[var(--color-ink-2)] font-medium break-keep leading-[1.7] tracking-[-0.01em]">{word.meaning}</p>
         </div>
         {onToggleKnown && (
           <button
             onClick={onToggleKnown}
             className={`shrink-0 mt-1 w-8 h-8 rounded-full flex items-center justify-center transition-colors
-              ${isKnown ? 'bg-orange-500 text-white' : 'bg-[#F0F0F0] text-[#AAAAAA]'}`}
+              ${isKnown ? 'bg-orange-500 text-white' : 'bg-[var(--color-surface)] text-[var(--color-ink-4)]'}`}
           >
             <Check size={16} strokeWidth={2.5} />
           </button>
@@ -70,21 +70,21 @@ const WordCard = ({
     </div>
 
     {/* 자세히 알아보기 */}
-    <div className="bg-white rounded-2xl px-5 pt-4 pb-5 flex flex-col gap-2.5">
-      <p className="text-[12px] font-bold text-[#BBBBBB] tracking-[0.02em]">📖 자세히 알아보기</p>
-      <p className="text-[14px] leading-[1.8] text-[#444444] font-medium break-keep tracking-[-0.01em]">{word.detailedMeaning}</p>
+    <div className="bg-[var(--color-card)] rounded-2xl px-5 pt-4 pb-5 flex flex-col gap-2.5">
+      <p className="text-[12px] font-bold text-[var(--color-ink-4)] tracking-[0.02em]">📖 자세히 알아보기</p>
+      <p className="text-[14px] leading-[1.8] text-[var(--color-ink-2)] font-medium break-keep tracking-[-0.01em]">{word.detailedMeaning}</p>
     </div>
 
     {/* 실시간 뉴스 */}
-    <div className="bg-white rounded-2xl px-5 pt-4 pb-5 flex flex-col gap-2.5">
-      <p className="text-[12px] font-bold text-[#BBBBBB] tracking-[0.02em]">🗞 실시간 뉴스</p>
+    <div className="bg-[var(--color-card)] rounded-2xl px-5 pt-4 pb-5 flex flex-col gap-2.5">
+      <p className="text-[12px] font-bold text-[var(--color-ink-4)] tracking-[0.02em]">🗞 실시간 뉴스</p>
       {newsLoading ? (
         <div className="flex flex-col gap-3.5">
           {[1, 2, 3].map(i => (
             <div key={i} className="flex flex-col gap-1.5">
-              <div className="h-3.5 bg-[#F0F0F0] rounded animate-pulse" style={{ width: '90%' }} />
-              <div className="h-3.5 bg-[#F0F0F0] rounded animate-pulse" style={{ width: '70%' }} />
-              <div className="h-2.5 bg-[#F0F0F0] rounded animate-pulse" style={{ width: '30%' }} />
+              <div className="h-3.5 bg-[var(--color-surface)] rounded animate-pulse" style={{ width: '90%' }} />
+              <div className="h-3.5 bg-[var(--color-surface)] rounded animate-pulse" style={{ width: '70%' }} />
+              <div className="h-2.5 bg-[var(--color-surface)] rounded animate-pulse" style={{ width: '30%' }} />
             </div>
           ))}
         </div>
@@ -99,41 +99,41 @@ const WordCard = ({
               className="flex items-start gap-2 active:opacity-60"
             >
               <div className="flex-1">
-                <p className="text-[13px] font-semibold text-[#222222] break-keep leading-[1.55] tracking-[-0.01em] line-clamp-2">
+                <p className="text-[13px] font-semibold text-[var(--color-ink)] break-keep leading-[1.55] tracking-[-0.01em] line-clamp-2">
                   <Highlight text={stripHtml(item.title)} keyword={keyword} />
                 </p>
                 {item.description && (
-                  <p className="text-[12px] text-[#888888] break-keep leading-[1.6] tracking-[-0.01em] line-clamp-2 mt-1">
+                  <p className="text-[12px] text-[var(--color-ink-3)] break-keep leading-[1.6] tracking-[-0.01em] line-clamp-2 mt-1">
                     <Highlight text={stripHtml(item.description)} keyword={keyword} />
                   </p>
                 )}
-                <p className="text-[11px] text-[#AAAAAA] mt-1">
+                <p className="text-[11px] text-[var(--color-ink-4)] mt-1">
                   {new Date(item.pubDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
                 </p>
               </div>
-              <ExternalLink size={13} className="text-[#CCCCCC] shrink-0 mt-0.5" />
+              <ExternalLink size={13} className="text-[var(--color-line)] shrink-0 mt-0.5" />
             </a>
           ))}
         </div>
       ) : (
-        <p className="text-[13px] text-[#AAAAAA]">관련 뉴스를 찾을 수 없어요</p>
+        <p className="text-[13px] text-[var(--color-ink-4)]">관련 뉴스를 찾을 수 없어요</p>
       )}
     </div>
 
     {/* 관련 용어 */}
     {word.relatedWords && word.relatedWords.length > 0 && (
-      <div className="bg-white rounded-2xl px-5 py-4 flex flex-col gap-2.5">
-        <p className="text-[12px] font-bold text-[#BBBBBB] tracking-[0.02em]">🔗 관련 용어</p>
+      <div className="bg-[var(--color-card)] rounded-2xl px-5 py-4 flex flex-col gap-2.5">
+        <p className="text-[12px] font-bold text-[var(--color-ink-4)] tracking-[0.02em]">🔗 관련 용어</p>
         <div className="flex flex-col">
           {word.relatedWords.map((tag, i) => (
             <button
               key={tag}
               onClick={() => onRelatedClick(tag)}
-              className="flex items-center gap-3 py-3 border-b border-[#F0F0F0] last:border-0 active:opacity-60 text-left"
+              className="flex items-center gap-3 py-3 border-b border-[var(--color-surface)] last:border-0 active:opacity-60 text-left"
             >
-              <span className="text-[11px] font-black w-4 shrink-0 text-[#AAAAAA]">{i + 1}</span>
-              <p className="text-[14px] font-semibold text-[#333333] break-keep flex-1 tracking-[-0.01em]">{tag}</p>
-              <ChevronRight size={14} className="text-[#AAAAAA] shrink-0" />
+              <span className="text-[11px] font-black w-4 shrink-0 text-[var(--color-ink-4)]">{i + 1}</span>
+              <p className="text-[14px] font-semibold text-[var(--color-ink)] break-keep flex-1 tracking-[-0.01em]">{tag}</p>
+              <ChevronRight size={14} className="text-[var(--color-ink-4)] shrink-0" />
             </button>
           ))}
         </div>
@@ -192,18 +192,18 @@ const WordCardScreen = () => {
       .sort(() => Math.random() - 0.5)
       .slice(0, Math.min(5, knownWords.length));
     return (
-      <div className="flex h-full flex-col bg-[#F7F7F7]">
+      <div className="flex h-full flex-col bg-[var(--color-canvas)]">
         <div className="flex-1 flex flex-col items-center justify-center gap-5 p-8">
-          <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-4xl">🎉</div>
+          <div className="w-20 h-20 bg-[var(--color-card)] rounded-full flex items-center justify-center text-4xl">🎉</div>
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-[#111111] mb-1">학습 완료!</h2>
-            <p className="text-sm text-[#AAAAAA]">{words.length}개 단어를 학습했어요</p>
+            <h2 className="text-2xl font-bold text-[var(--color-ink)] mb-1">학습 완료!</h2>
+            <p className="text-sm text-[var(--color-ink-4)]">{words.length}개 단어를 학습했어요</p>
           </div>
-          <div className="w-full bg-white rounded-2xl p-4">
-            <p className="text-xs text-[#AAAAAA] mb-3">방금 배운 단어, 바로 확인해볼까요?</p>
+          <div className="w-full bg-[var(--color-card)] rounded-2xl p-4">
+            <p className="text-xs text-[var(--color-ink-4)] mb-3">방금 배운 단어, 바로 확인해볼까요?</p>
             <div className="flex flex-wrap gap-1.5">
               {words.slice(0, 5).map(w => (
-                <span key={w.id} className="text-xs px-2.5 py-1 rounded-full bg-[#F0F0F0] text-[#555555]">{w.word}</span>
+                <span key={w.id} className="text-xs px-2.5 py-1 rounded-full bg-[var(--color-surface)] text-[var(--color-ink-2)]">{w.word}</span>
               ))}
             </div>
           </div>
@@ -217,7 +217,7 @@ const WordCardScreen = () => {
           </button>
           <button
             onClick={() => navigate(backPath, backState ? { state: backState } : undefined)}
-            className="w-full py-3 rounded-2xl bg-white text-xs font-medium text-[#888888] active:opacity-70"
+            className="w-full py-3 rounded-2xl bg-[var(--color-card)] text-xs font-medium text-[var(--color-ink-3)] active:opacity-70"
           >
             코스로 돌아가기
           </button>
@@ -274,15 +274,15 @@ const WordCardScreen = () => {
   const firstLocked = words.findIndex(w => !knownWords.some(kw => kw.id === w.id));
 
   return (
-    <div className="flex flex-col h-full bg-[#F7F7F7]">
+    <div className="flex flex-col h-full bg-[var(--color-canvas)]">
 
       {/* 상단 바 */}
-      <div className="pt-4 px-4 pb-2 bg-white flex items-center gap-3">
+      <div className="pt-4 px-4 pb-2 bg-[var(--color-card)] flex items-center gap-3">
         <button
           onClick={() => navigate(backPath, backState ? { state: backState } : undefined)}
-          className="w-9 h-9 flex items-center justify-center rounded-full bg-[#F0F0F0] shrink-0"
+          className="w-9 h-9 flex items-center justify-center rounded-full bg-[var(--color-surface)] shrink-0"
         >
-          <ChevronLeft size={20} className="text-[#555555]" />
+          <ChevronLeft size={20} className="text-[var(--color-ink-2)]" />
         </button>
 
         {/* 단어 dots */}
@@ -301,15 +301,15 @@ const WordCardScreen = () => {
                     : known
                       ? 'w-2 h-2 bg-orange-300'
                       : accessible
-                        ? 'w-2 h-2 bg-[#D0D0D0]'
-                        : 'w-2 h-2 bg-[#E5E5E5]'
+                        ? 'w-2 h-2 bg-[var(--color-line)]'
+                        : 'w-2 h-2 bg-[var(--color-line)]'
                   }`}
               />
             );
           })}
         </div>
 
-        <span className="text-xs font-bold text-[#AAAAAA] shrink-0">{wordIndex + 1}/{words.length}</span>
+        <span className="text-xs font-bold text-[var(--color-ink-4)] shrink-0">{wordIndex + 1}/{words.length}</span>
       </div>
 
       {/* 스크롤 영역 */}
@@ -332,11 +332,11 @@ const WordCardScreen = () => {
       </div>
 
       {/* 하단 네비게이션 */}
-      <div className="px-5 pb-8 pt-3 bg-white flex gap-3">
+      <div className="px-5 pb-8 pt-3 bg-[var(--color-card)] flex gap-3">
         <button
           onClick={goPrev}
           disabled={wordIndex === 0}
-          className="flex-1 py-3.5 rounded-2xl bg-[#F0F0F0] text-sm font-bold text-[#555555] disabled:opacity-30 active:opacity-70 flex items-center justify-center gap-1"
+          className="flex-1 py-3.5 rounded-2xl bg-[var(--color-surface)] text-sm font-bold text-[var(--color-ink-2)] disabled:opacity-30 active:opacity-70 flex items-center justify-center gap-1"
         >
           <ChevronLeft size={16} /> 이전
         </button>

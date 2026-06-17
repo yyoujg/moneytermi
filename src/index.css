@@ -23,11 +23,40 @@ body,
   height: 100%;
 }
 
+/* 색 토큰 — 라이트 기본값. .dark에서 값만 교체 */
 :root {
   color-scheme: light;
+  --color-canvas: #F7F7F7;
+  --color-surface: #F0F0F0;
+  --color-card: #FFFFFF;
+  --color-ink: #111111;
+  --color-ink-2: #555555;
+  --color-ink-3: #888888;
+  --color-ink-4: #AAAAAA;
+  --color-line: #E5E5E5;
+  --color-brand-cream: #fff3e0;
+  --color-brand-soft: rgba(249, 115, 22, 0.08);
+  --color-success-soft: rgba(34, 197, 94, 0.08);
+  --color-danger-soft: rgba(239, 68, 68, 0.08);
+}
+
+.dark {
+  color-scheme: dark;
+  --color-canvas: #121212;
+  --color-surface: #1E1E1E;
+  --color-card: #242424;
+  --color-ink: #F2F2F2;
+  --color-ink-2: #C9C9C9;
+  --color-ink-3: #9C9C9C;
+  --color-ink-4: #6F6F6F;
+  --color-line: #333333;
+  --color-brand-cream: rgba(249, 115, 22, 0.18);
+  --color-brand-soft: rgba(249, 115, 22, 0.16);
+  --color-success-soft: rgba(34, 197, 94, 0.16);
+  --color-danger-soft: rgba(239, 68, 68, 0.16);
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Pretendard', 'Segoe UI', Roboto, sans-serif;
-  background: #0B0B0B;
+  background: var(--color-canvas);
 }
