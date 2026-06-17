@@ -1,12 +1,14 @@
 
 
 import { useMemo } from 'react';
-import { Info, Zap, Trophy, TrendingUp, TrendingDown } from 'lucide-react';
+import { Info, Zap, Trophy, TrendingUp, TrendingDown, Share2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { TextButton, List, ListRow, Badge, Spacing } from '@toss/tds-mobile';
 import { CURRENT_LEAGUE_ID, LEAGUE_TIERS } from '../constants';
 import { useAppContext } from '../context/AppContext';
 import { useAuth } from '../hooks/useAuth';
+import { shareTossLink } from '../lib/share';
+import { logClick } from '../lib/analytics';
 
 const RANK_MEDALS = ['🥇', '🥈', '🥉'];
 
@@ -44,9 +46,20 @@ const LeagueScreen = () => {
       <div className="bg-white pt-4 px-5 pb-5">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-[#111111]">주간 리그</h2>
-          <TextButton size="small" onClick={() => navigate('/league/rules')}>
-            <span className="flex items-center gap-1"><Info size={13} />안내</span>
-          </TextButton>
+          <div className="flex items-center gap-1">
+            <TextButton
+              size="small"
+              onClick={() => {
+                logClick('league_share');
+                shareTossLink('intoss://moneytermi/league', '머니터미에서 경제 용어 배우고 리그에서 겨뤄봐요!');
+              }}
+            >
+              <span className="flex items-center gap-1"><Share2 size={13} />공유</span>
+            </TextButton>
+            <TextButton size="small" onClick={() => navigate('/league/rules')}>
+              <span className="flex items-center gap-1"><Info size={13} />안내</span>
+            </TextButton>
+          </div>
         </div>
 
         {/* 내 현황 강조 */}
