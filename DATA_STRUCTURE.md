@@ -233,6 +233,7 @@ type LeagueUser = { id: string; name: string; points: number; emoji: string };
 | setting_notification_agreement | 'agreed' \| 'rejected' | `useNotificationAgreement.ts` (KEY) |
 | setting_sound | 'on' \| 'off' | `useSettings.ts` (효과음 설정) |
 | setting_vibration | 'on' \| 'off' | `useSettings.ts` (진동 설정) |
+| setting_theme | 'system' \| 'light' \| 'dark' | `useTheme.tsx` (다크 모드, 기본 system) |
 
 ```ts
 // useAuth.tsx

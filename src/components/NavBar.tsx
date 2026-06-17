@@ -23,7 +23,7 @@ const NavBar = () => {
       className="absolute bottom-0 w-full flex justify-center z-50 pointer-events-none"
       style={{ paddingBottom: 24 + insets.bottom }}
     >
-      <div className="flex items-center gap-1 bg-white/95 backdrop-blur-md rounded-full px-4 py-2 shadow-lg pointer-events-auto"
+      <div className="flex items-center gap-1 bg-[var(--color-card)] backdrop-blur-md rounded-full px-4 py-2 shadow-lg pointer-events-auto"
         style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.12)' }}
       >
         {NAV_ITEMS.map((item) => {
@@ -35,10 +35,10 @@ const NavBar = () => {
               onClick={() => navigate(item.path)}
               className="flex flex-col items-center px-3 py-2 transition-all duration-200"
             >
-              <div className={`w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200 ${isActive ? 'bg-orange-500 text-white' : 'text-[#BBBBBB]'}`}>
+              <div className={`w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200 ${isActive ? 'bg-orange-500 text-white' : 'text-[var(--color-ink-4)]'}`}>
                 <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />
               </div>
-              <span className={`text-[10px] mt-1 transition-colors ${isActive ? 'font-bold text-orange-500' : 'font-medium text-[#BBBBBB]'}`}>{item.label}</span>
+              <span className={`text-[10px] mt-1 transition-colors ${isActive ? 'font-bold text-orange-500' : 'font-medium text-[var(--color-ink-4)]'}`}>{item.label}</span>
             </button>
           );
         })}

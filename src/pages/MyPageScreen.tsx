@@ -38,7 +38,7 @@ const MyPageScreen = () => {
   ];
 
   return (
-    <div className="flex flex-col h-full bg-[#F7F7F7] pb-24 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+    <div className="flex flex-col h-full bg-[var(--color-canvas)] pb-24 overflow-y-auto [&::-webkit-scrollbar]:hidden">
       <GuideSheet open={showGuide} onClose={() => setShowGuide(false)} />
       <EmojiPickerSheet
         open={showEmojiPicker}
@@ -75,12 +75,12 @@ const MyPageScreen = () => {
       />
 
       {/* 프로필 헤더 */}
-      <div className="bg-white pt-4 px-5 pb-5">
-        <h2 className="text-xl font-bold mb-5 text-[#111111]">마이페이지</h2>
+      <div className="bg-[var(--color-card)] pt-4 px-5 pb-5">
+        <h2 className="text-xl font-bold mb-5 text-[var(--color-ink)]">마이페이지</h2>
         <div className="flex items-center gap-4 mb-5">
           <button
             onClick={() => setShowEmojiPicker(true)}
-            className="relative w-16 h-16 bg-[#F0F0F0] rounded-full flex items-center justify-center text-3xl shrink-0 active:opacity-70"
+            className="relative w-16 h-16 bg-[var(--color-surface)] rounded-full flex items-center justify-center text-3xl shrink-0 active:opacity-70"
           >
             <span>{myEmoji}</span>
             <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
@@ -92,16 +92,16 @@ const MyPageScreen = () => {
               onClick={() => setShowNicknameSheet(true)}
               className="flex items-center gap-1.5 group active:opacity-70"
             >
-              <p className="font-bold text-[#111111] text-base">{user?.nickname ?? '예비슈퍼개미'}</p>
-              <Pencil size={13} className="text-[#AAAAAA] group-active:text-orange-400" />
+              <p className="font-bold text-[var(--color-ink)] text-base">{user?.nickname ?? '예비슈퍼개미'}</p>
+              <Pencil size={13} className="text-[var(--color-ink-4)] group-active:text-orange-400" />
             </button>
             <div className="flex items-center gap-1.5 mt-1">
               <Trophy size={12} className="text-orange-400" />
-              <span className="text-xs text-[#888888] font-medium">{CURRENT_LEAGUE_NAME} 리그</span>
+              <span className="text-xs text-[var(--color-ink-3)] font-medium">{CURRENT_LEAGUE_NAME} 리그</span>
             </div>
             {isGuest && (
-              <span className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-medium text-[#AAAAAA] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#F0F0F0' }}>
-                <ShieldAlert size={10} className="text-[#AAAAAA]" /> 게스트 계정
+              <span className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-medium text-[var(--color-ink-4)] px-2 py-0.5 rounded-full" style={{ backgroundColor: 'var(--color-surface)' }}>
+                <ShieldAlert size={10} className="text-[var(--color-ink-4)]" /> 게스트 계정
               </span>
             )}
           </div>
@@ -109,22 +109,22 @@ const MyPageScreen = () => {
 
         {/* 통계 */}
         <div className="flex gap-3">
-          <div className="flex-1 bg-[#F0F0F0] rounded-2xl p-4">
+          <div className="flex-1 bg-[var(--color-surface)] rounded-2xl p-4">
             <div className="flex items-center gap-1.5 mb-2">
-              <Zap size={13} className="text-[#AAAAAA] fill-current" />
-              <span className="text-[11px] font-medium text-[#AAAAAA]">누적 포인트</span>
+              <Zap size={13} className="text-[var(--color-ink-4)] fill-current" />
+              <span className="text-[11px] font-medium text-[var(--color-ink-4)]">누적 포인트</span>
             </div>
-            <p className="text-3xl font-bold text-[#111111]">
-              {points.toLocaleString()}<span className="text-sm font-medium text-[#AAAAAA] ml-1">P</span>
+            <p className="text-3xl font-bold text-[var(--color-ink)]">
+              {points.toLocaleString()}<span className="text-sm font-medium text-[var(--color-ink-4)] ml-1">P</span>
             </p>
           </div>
-          <div className="flex-1 bg-[#F0F0F0] rounded-2xl p-4">
+          <div className="flex-1 bg-[var(--color-surface)] rounded-2xl p-4">
             <div className="flex items-center gap-1.5 mb-2">
-              <BookOpen size={13} className="text-[#AAAAAA]" />
-              <span className="text-[11px] font-medium text-[#AAAAAA]">학습한 단어</span>
+              <BookOpen size={13} className="text-[var(--color-ink-4)]" />
+              <span className="text-[11px] font-medium text-[var(--color-ink-4)]">학습한 단어</span>
             </div>
-            <p className="text-3xl font-bold text-[#111111]">
-              {knownWords.length}<span className="text-sm font-medium text-[#AAAAAA] ml-1">개</span>
+            <p className="text-3xl font-bold text-[var(--color-ink)]">
+              {knownWords.length}<span className="text-sm font-medium text-[var(--color-ink-4)] ml-1">개</span>
             </p>
           </div>
         </div>
@@ -134,7 +134,7 @@ const MyPageScreen = () => {
         {/* 출석 달력 */}
         <div>
           <div className="flex items-center justify-between mb-5">
-            <p className="text-sm font-bold text-[#555555]">출석 현황</p>
+            <p className="text-sm font-bold text-[var(--color-ink-2)]">출석 현황</p>
             {missions.m1.current < missions.m1.target
               ? <button onClick={handleCheckIn} className="flex items-center gap-1 px-3.5 py-1.5 rounded-xl bg-orange-500 text-white text-xs font-bold active:opacity-80">✋ 출석하기</button>
               : <span className="text-xs font-bold text-green-500">✅ 출석 완료</span>
@@ -145,7 +145,7 @@ const MyPageScreen = () => {
 
         {/* 메뉴 */}
         <div>
-          <div className="bg-white rounded-2xl overflow-hidden">
+          <div className="bg-[var(--color-card)] rounded-2xl overflow-hidden">
             <List>
               {MENU_ITEMS.map(({ icon: Icon, label, sub, danger }) => (
                 <ListRow
@@ -154,8 +154,8 @@ const MyPageScreen = () => {
                   border="none"
                   onClick={() => handleMenuClick(label)}
                   left={
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${danger ? 'bg-red-500/10' : 'bg-[#E5E5E5]'}`}>
-                      <Icon size={16} className={danger ? 'text-red-400' : 'text-[#555555]'} />
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${danger ? 'bg-red-500/10' : 'bg-[var(--color-line)]'}`}>
+                      <Icon size={16} className={danger ? 'text-red-400' : 'text-[var(--color-ink-2)]'} />
                     </div>
                   }
                   contents={
@@ -163,7 +163,7 @@ const MyPageScreen = () => {
                       ? <ListRow.Texts type="2RowTypeA" top={<span className={danger ? 'text-red-400' : ''}>{label}</span>} bottom={<span className="text-[11px]">{sub}</span>} />
                       : <ListRow.Texts type="1RowTypeA" top={<span className={danger ? 'text-red-400' : ''}>{label}</span>} />
                   }
-                  right={!danger ? <ChevronRight size={16} className="text-[#AAAAAA]" /> : undefined}
+                  right={!danger ? <ChevronRight size={16} className="text-[var(--color-ink-4)]" /> : undefined}
                 />
               ))}
             </List>
@@ -171,7 +171,7 @@ const MyPageScreen = () => {
         </div>
 
         <Spacing size={4} />
-        <p className="text-center text-[11px] text-[#AAAAAA] font-medium mb-2">머니터미 v1.0.0</p>
+        <p className="text-center text-[11px] text-[var(--color-ink-4)] font-medium mb-2">머니터미 v1.0.0</p>
       </div>
     </div>
   );

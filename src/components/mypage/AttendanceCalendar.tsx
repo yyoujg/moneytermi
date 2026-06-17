@@ -27,29 +27,29 @@ export const AttendanceCalendar = ({ attendanceDates }: { attendanceDates: strin
   ).filter(Boolean).length;
 
   return (
-    <div className="bg-white rounded-2xl overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-4 border-b border-[#E5E5E5]">
+    <div className="bg-[var(--color-card)] rounded-2xl overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-line)]">
         <button
           onClick={() => setViewDate(new Date(year, month - 1, 1))}
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-white active:bg-[#F0F0F0]"
+          className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--color-card)] active:bg-[var(--color-surface)]"
         >
-          <ChevronLeft size={16} className="text-[#888888]" />
+          <ChevronLeft size={16} className="text-[var(--color-ink-3)]" />
         </button>
         <div className="text-center">
-          <p className="text-sm font-bold text-[#111111]">{year}년 {month + 1}월</p>
+          <p className="text-sm font-bold text-[var(--color-ink)]">{year}년 {month + 1}월</p>
           <p className="text-[11px] text-orange-400 font-semibold mt-0.5">이번 달 {attendCount}일 출석</p>
         </div>
         <button
           onClick={() => setViewDate(new Date(year, month + 1, 1))}
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-white active:bg-[#F0F0F0]"
+          className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--color-card)] active:bg-[var(--color-surface)]"
         >
-          <ChevronLeft size={16} className="text-[#888888] rotate-180" />
+          <ChevronLeft size={16} className="text-[var(--color-ink-3)] rotate-180" />
         </button>
       </div>
 
       <div className="grid grid-cols-7 px-3 pt-3">
         {DAYS.map((d, i) => (
-          <div key={d} className={`text-center text-[11px] font-bold pb-2 ${i === 0 ? 'text-red-400' : i === 6 ? 'text-blue-400' : 'text-[#888888]'}`}>
+          <div key={d} className={`text-center text-[11px] font-bold pb-2 ${i === 0 ? 'text-red-400' : i === 6 ? 'text-blue-400' : 'text-[var(--color-ink-3)]'}`}>
             {d}
           </div>
         ))}
@@ -67,7 +67,7 @@ export const AttendanceCalendar = ({ attendanceDates }: { attendanceDates: strin
               <div className={`w-8 h-8 flex items-center justify-center rounded-full text-xs font-semibold
                 ${isAttended ? 'bg-orange-500 text-white font-bold' : ''}
                 ${isToday && !isAttended ? 'ring-2 ring-orange-400 text-orange-500 font-bold' : ''}
-                ${!isAttended && !isToday ? (dayOfWeek === 0 ? 'text-red-300' : dayOfWeek === 6 ? 'text-blue-300' : 'text-[#888888]') : ''}
+                ${!isAttended && !isToday ? (dayOfWeek === 0 ? 'text-red-300' : dayOfWeek === 6 ? 'text-blue-300' : 'text-[var(--color-ink-3)]') : ''}
               `}>
                 {day}
               </div>
@@ -76,14 +76,14 @@ export const AttendanceCalendar = ({ attendanceDates }: { attendanceDates: strin
         })}
       </div>
 
-      <div className="flex items-center gap-4 px-5 pb-4 pt-1 border-t border-[#E5E5E5]">
+      <div className="flex items-center gap-4 px-5 pb-4 pt-1 border-t border-[var(--color-line)]">
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-full bg-orange-500" />
-          <span className="text-[11px] text-[#888888] font-medium">출석</span>
+          <span className="text-[11px] text-[var(--color-ink-3)] font-medium">출석</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-full border-2 border-orange-400" />
-          <span className="text-[11px] text-[#888888] font-medium">오늘</span>
+          <span className="text-[11px] text-[var(--color-ink-3)] font-medium">오늘</span>
         </div>
       </div>
     </div>

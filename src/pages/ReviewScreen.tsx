@@ -90,13 +90,13 @@ const QuizPage = () => {
 
   if (isFinished) {
     return (
-      <div className="flex flex-col h-full bg-[#F7F7F7] items-center justify-center p-6 pb-32">
+      <div className="flex flex-col h-full bg-[var(--color-canvas)] items-center justify-center p-6 pb-32">
         <div className="w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center text-4xl mb-4">🏆</div>
-        <h2 className="text-xl font-bold text-[#111111] mb-1">퀴즈 완료!</h2>
-        <p className="text-sm text-[#888888] mb-6">{queue.length}문제 중 {totalCorrect}개 정답</p>
+        <h2 className="text-xl font-bold text-[var(--color-ink)] mb-1">퀴즈 완료!</h2>
+        <p className="text-sm text-[var(--color-ink-3)] mb-6">{queue.length}문제 중 {totalCorrect}개 정답</p>
         <div className="flex items-center gap-2 bg-orange-500/10 border border-orange-500/20 rounded-2xl px-5 py-3 mb-8">
           <Zap size={16} className="text-orange-500 fill-current" />
-          <span className="text-sm font-bold text-[#111111]">누적 포인트 {points} P</span>
+          <span className="text-sm font-bold text-[var(--color-ink)]">누적 포인트 {points} P</span>
         </div>
         <div className="w-full max-w-sm mb-8">
           <DailyAlarmPromptCard />
@@ -116,11 +116,11 @@ const QuizPage = () => {
   const earnedPreview = (showHint ? 5 : 10) + (combo >= 2 ? combo * 2 : 0);
 
   return (
-    <div className="flex flex-col h-full bg-[#F7F7F7] pb-32">
+    <div className="flex flex-col h-full bg-[var(--color-canvas)] pb-32">
       {/* 헤더 */}
-      <div className="bg-white pt-4 px-5 pb-4 border-b border-[#E5E5E5]">
+      <div className="bg-[var(--color-card)] pt-4 px-5 pb-4 border-b border-[var(--color-line)]">
         <div className="flex justify-between items-center mb-3">
-          <h2 className="text-xl font-bold text-[#111111]">퀴즈</h2>
+          <h2 className="text-xl font-bold text-[var(--color-ink)]">퀴즈</h2>
           <div className="flex items-center gap-2">
             {combo >= 2 && (
               <div className="bg-orange-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
@@ -129,35 +129,35 @@ const QuizPage = () => {
             )}
             <div className="flex items-center gap-1 bg-orange-500/10 border border-orange-500/20 rounded-full px-3 py-1.5">
               <Zap size={13} className="text-orange-500 fill-current" />
-              <span className="text-xs font-bold text-[#111111]">{points} P</span>
+              <span className="text-xs font-bold text-[var(--color-ink)]">{points} P</span>
             </div>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex-1 bg-[#E5E5E5] rounded-full h-1.5 overflow-hidden">
+          <div className="flex-1 bg-[var(--color-line)] rounded-full h-1.5 overflow-hidden">
             <div className="bg-orange-400 h-full rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
           </div>
-          <span className="text-xs font-bold text-[#888888] shrink-0">{index + 1} / {queue.length}</span>
+          <span className="text-xs font-bold text-[var(--color-ink-3)] shrink-0">{index + 1} / {queue.length}</span>
         </div>
       </div>
 
       <div className="flex-1 flex flex-col px-5 py-4">
         {/* 문제 카드 */}
-        <div className="bg-white rounded-2xl p-6 mb-5 flex-1">
-          <p className="text-[11px] font-medium text-[#AAAAAA] mb-4 tracking-wide uppercase">뜻을 보고 용어를 맞혀보세요</p>
+        <div className="bg-[var(--color-card)] rounded-2xl p-6 mb-5 flex-1">
+          <p className="text-[11px] font-medium text-[var(--color-ink-4)] mb-4 tracking-wide uppercase">뜻을 보고 용어를 맞혀보세요</p>
 
-          <p className="text-lg font-bold text-[#111111] leading-relaxed mb-5">{word.meaning}</p>
+          <p className="text-lg font-bold text-[var(--color-ink)] leading-relaxed mb-5">{word.meaning}</p>
 
           {showHint && (
-            <div className="bg-[#F0F0F0] rounded-2xl px-4 py-3 flex items-center gap-2 mb-4">
-              <Lightbulb size={14} className="text-[#888888] shrink-0" />
-              <span className="text-base font-bold text-[#111111] tracking-widest">{word.hint}</span>
+            <div className="bg-[var(--color-surface)] rounded-2xl px-4 py-3 flex items-center gap-2 mb-4">
+              <Lightbulb size={14} className="text-[var(--color-ink-3)] shrink-0" />
+              <span className="text-base font-bold text-[var(--color-ink)] tracking-widest">{word.hint}</span>
             </div>
           )}
 
-          <div className="bg-[#F0F0F0] rounded-2xl p-4">
-            <p className="text-xs font-bold text-[#888888] mb-1.5">상세 설명</p>
-            <p className="text-sm text-[#555555] leading-relaxed break-keep">{word.detailedMeaning}</p>
+          <div className="bg-[var(--color-surface)] rounded-2xl p-4">
+            <p className="text-xs font-bold text-[var(--color-ink-3)] mb-1.5">상세 설명</p>
+            <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep">{word.detailedMeaning}</p>
           </div>
         </div>
 
@@ -174,7 +174,7 @@ const QuizPage = () => {
               className={`w-full px-4 py-4 rounded-2xl text-sm font-medium outline-none border transition-colors
                 ${status === 'correct' ? 'bg-green-500/10 border-green-500/40 text-green-400' :
                   status === 'wrong' ? 'bg-red-500/10 border-red-500/40 text-red-400' :
-                  'bg-white border-[#E5E5E5] text-[#111111] focus:border-orange-500/50'}
+                  'bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink)] focus:border-orange-500/50'}
               `}
               style={{ caretColor: '#f97316' }}
             />
@@ -204,14 +204,14 @@ const QuizPage = () => {
           {!showHint && (
             <button
               onClick={() => setShowHint(true)}
-              className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-white text-xs font-bold text-[#888888] active:opacity-70"
+              className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-[var(--color-card)] text-xs font-bold text-[var(--color-ink-3)] active:opacity-70"
             >
-              <Lightbulb size={13} className="text-[#AAAAAA]" /> 초성 힌트
+              <Lightbulb size={13} className="text-[var(--color-ink-4)]" /> 초성 힌트
             </button>
           )}
           <button
             onClick={goNext}
-            className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-white text-xs font-bold text-[#888888] active:opacity-70"
+            className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-[var(--color-card)] text-xs font-bold text-[var(--color-ink-3)] active:opacity-70"
           >
             <ChevronRight size={13} /> 건너뛰기
           </button>

@@ -9,6 +9,7 @@ import { AuthProvider } from './hooks/useAuth';
 import { parseLandingPath } from './lib/landing';
 import { logScreen } from './lib/analytics';
 import { useSafeAreaInsets } from './hooks/useSafeAreaInsets';
+import { ThemeProvider } from './hooks/useTheme';
 import NavBar from './components/NavBar';
 
 const HomeScreen = React.lazy(() => import('./pages/HomeScreen'));
@@ -38,8 +39,8 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
       return (
         <div className="flex flex-col items-center justify-center h-full gap-4 px-6 text-center">
           <p className="text-2xl">⚠️</p>
-          <p className="text-sm font-semibold text-[#111111]">앗, 문제가 발생했어요</p>
-          <p className="text-xs text-[#888888]">앱을 다시 시작해 주세요.</p>
+          <p className="text-sm font-semibold text-[var(--color-ink)]">앗, 문제가 발생했어요</p>
+          <p className="text-xs text-[var(--color-ink-3)]">앱을 다시 시작해 주세요.</p>
           <button
             onClick={() => closeView()}
             className="mt-2 px-5 py-2.5 rounded-xl bg-orange-500 text-sm font-bold text-white active:opacity-80"
@@ -170,6 +171,7 @@ export default function App() {
   const insets = useSafeAreaInsets();
   return (
     <ErrorBoundary>
+      <ThemeProvider>
       <AuthProvider>
       <AppProvider>
         <BrowserRouter>
@@ -177,7 +179,7 @@ export default function App() {
           <ScreenLogger />
           <Toaster position="top-center" duration={1800} richColors />
           <div
-            className="w-full max-w-md mx-auto bg-[#F7F7F7] h-[100dvh] overflow-hidden relative font-sans text-[#111111] flex flex-col"
+            className="w-full max-w-md mx-auto bg-[var(--color-canvas)] h-[100dvh] overflow-hidden relative font-sans text-[var(--color-ink)] flex flex-col"
             style={{ paddingTop: insets.top }}
           >
             <ErrorBoundary>
@@ -187,6 +189,7 @@ export default function App() {
         </BrowserRouter>
       </AppProvider>
       </AuthProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }

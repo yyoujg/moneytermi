@@ -38,20 +38,20 @@ const CourseScreen = () => {
   const allCategories = ['전체', ...categories];
 
   return (
-    <div className="flex flex-col h-full bg-[#F7F7F7] pb-24 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+    <div className="flex flex-col h-full bg-[var(--color-canvas)] pb-24 overflow-y-auto [&::-webkit-scrollbar]:hidden">
 
       {/* 헤더 */}
-      <div className="sticky top-0 z-20 bg-white">
+      <div className="sticky top-0 z-20 bg-[var(--color-card)]">
         <div className="pt-4 px-5 pb-4">
           <div className="flex items-center justify-between mb-1">
             <div>
-              <h2 className="text-xl font-bold text-[#111111]">학습 코스</h2>
-              <p className="text-xs text-[#888888] mt-0.5">{totalKnown}개 완료 · {totalWords - totalKnown}개 남음</p>
+              <h2 className="text-xl font-bold text-[var(--color-ink)]">학습 코스</h2>
+              <p className="text-xs text-[var(--color-ink-3)] mt-0.5">{totalKnown}개 완료 · {totalWords - totalKnown}개 남음</p>
             </div>
             <button
               onClick={() => { setShowSearch(s => !s); }}
               className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors
-                ${showSearch ? 'bg-orange-500 text-white' : 'bg-[#F0F0F0] text-[#888888]'}`}
+                ${showSearch ? 'bg-orange-500 text-white' : 'bg-[var(--color-surface)] text-[var(--color-ink-3)]'}`}
             >
               {showSearch ? <X size={15} /> : <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>}
             </button>
@@ -69,18 +69,18 @@ const CourseScreen = () => {
                 placeholder="용어 검색"
               />
               {showResults && (
-                <div className="absolute top-[52px] left-0 right-0 bg-white rounded-2xl z-50 overflow-hidden">
+                <div className="absolute top-[52px] left-0 right-0 bg-[var(--color-card)] rounded-2xl z-50 overflow-hidden">
                   {searchResults.length === 0
-                    ? <div className="px-5 py-5 text-center text-sm text-[#888888]">검색 결과가 없어요</div>
+                    ? <div className="px-5 py-5 text-center text-sm text-[var(--color-ink-3)]">검색 결과가 없어요</div>
                     : <div className="max-h-56 overflow-y-auto [&::-webkit-scrollbar]:hidden">
                       {searchResults.map((word, idx) => (
                         <button key={word.id} onMouseDown={() => handleResultClick(word.id)}
-                          className={`w-full text-left px-5 py-3.5 flex items-center justify-between active:bg-white ${idx < searchResults.length - 1 ? 'border-b border-[#E5E5E5]' : ''}`}>
+                          className={`w-full text-left px-5 py-3.5 flex items-center justify-between active:bg-[var(--color-card)] ${idx < searchResults.length - 1 ? 'border-b border-[var(--color-line)]' : ''}`}>
                           <div>
-                            <p className="text-sm font-bold text-[#111111]">{word.word}</p>
-                            <p className="text-xs text-[#888888] mt-0.5 truncate max-w-[240px]">{word.meaning}</p>
+                            <p className="text-sm font-bold text-[var(--color-ink)]">{word.word}</p>
+                            <p className="text-xs text-[var(--color-ink-3)] mt-0.5 truncate max-w-[240px]">{word.meaning}</p>
                           </div>
-                          <ChevronRight size={14} className="text-[#AAAAAA] shrink-0 ml-2" />
+                          <ChevronRight size={14} className="text-[var(--color-ink-4)] shrink-0 ml-2" />
                         </button>
                       ))}
                     </div>
@@ -95,7 +95,7 @@ const CourseScreen = () => {
         <div className="px-5 pb-2 flex gap-[2px]">
           {allWords.map(word => {
             const isKnown = knownWords.some(kw => kw.id === word.id);
-            return <div key={word.id} className={`flex-1 h-1.5 rounded-full transition-all duration-500 ${isKnown ? 'bg-orange-400' : 'bg-[#F0F0F0]'}`} />;
+            return <div key={word.id} className={`flex-1 h-1.5 rounded-full transition-all duration-500 ${isKnown ? 'bg-orange-400' : 'bg-[var(--color-surface)]'}`} />;
           })}
         </div>
 
@@ -116,7 +116,7 @@ const CourseScreen = () => {
               </Menu.Dropdown>
             }
           >
-            <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F0F0F0] text-xs font-medium text-[#888888]">
+            <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--color-surface)] text-xs font-medium text-[var(--color-ink-3)]">
               {activeCategory}
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
             </button>
@@ -133,7 +133,7 @@ const CourseScreen = () => {
           const hasStarted = courseKnownCount > 0;
 
           return (
-            <div key={course.id} className="bg-white rounded-2xl overflow-hidden">
+            <div key={course.id} className="bg-[var(--color-card)] rounded-2xl overflow-hidden">
 
               {/* 카드 헤더 */}
               <div
@@ -142,8 +142,8 @@ const CourseScreen = () => {
               >
                 <div className="flex items-start justify-between mb-3">
                   <span
-                    className="text-[11px] font-medium px-2.5 py-1 rounded-full text-[#888888]"
-                    style={{ backgroundColor: '#F0F0F0' }}
+                    className="text-[11px] font-medium px-2.5 py-1 rounded-full text-[var(--color-ink-3)]"
+                    style={{ backgroundColor: 'var(--color-surface)' }}
                   >
                     {course.level}
                   </span>
@@ -157,10 +157,10 @@ const CourseScreen = () => {
                   )}
                 </div>
 
-                <h3 className="text-[15px] font-bold leading-tight mb-1 text-[#111111]">
+                <h3 className="text-[15px] font-bold leading-tight mb-1 text-[var(--color-ink)]">
                   {course.title}
                 </h3>
-                <p className="text-xs text-[#AAAAAA]">
+                <p className="text-xs text-[var(--color-ink-4)]">
                   {course.description}
                 </p>
               </div>
@@ -168,13 +168,13 @@ const CourseScreen = () => {
               {/* 진행 바 + 버튼 */}
               <div className="px-5 pt-4 pb-5">
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="flex-1 bg-[#F0F0F0] rounded-full h-1.5 overflow-hidden">
+                  <div className="flex-1 bg-[var(--color-surface)] rounded-full h-1.5 overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-700 ${isCompleted ? 'bg-orange-500' : 'bg-orange-300'}`}
                       style={{ width: `${progressPct}%` }}
                     />
                   </div>
-                  <span className="text-[11px] font-bold text-[#888888] shrink-0 w-8 text-right">
+                  <span className="text-[11px] font-bold text-[var(--color-ink-3)] shrink-0 w-8 text-right">
                     {courseKnownCount}/{course.words.length}
                   </span>
                 </div>
@@ -186,7 +186,7 @@ const CourseScreen = () => {
                       ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20 active:bg-orange-500/20'
                       : hasStarted
                         ? 'bg-orange-500 text-white active:bg-orange-600'
-                        : 'bg-[#E5E5E5] text-[#555555] active:opacity-80'
+                        : 'bg-[var(--color-line)] text-[var(--color-ink-2)] active:opacity-80'
                     }`}
                 >
                   <Play size={14} />

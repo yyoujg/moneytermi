@@ -27,20 +27,20 @@ export const DailyAlarmPromptCard = () => {
   if (!show || agreed) return null;
 
   return (
-    <div className="w-full bg-white rounded-2xl p-5 flex flex-col gap-3">
+    <div className="w-full bg-[var(--color-card)] rounded-2xl p-5 flex flex-col gap-3">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
           <Bell size={16} className="text-orange-500" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-[#111111]">매일 오늘의 용어 받기</p>
-          <p className="text-xs text-[#AAAAAA]">매일 09:00, 오늘의 경제 용어를 알림으로 보내드려요</p>
+          <p className="text-sm font-semibold text-[var(--color-ink)]">매일 오늘의 용어 받기</p>
+          <p className="text-xs text-[var(--color-ink-4)]">매일 09:00, 오늘의 경제 용어를 알림으로 보내드려요</p>
         </div>
       </div>
       <div className="flex gap-2">
         <button
           onClick={() => setShow(false)}
-          className="flex-1 py-3 rounded-xl text-sm font-bold text-[#555555] bg-[#F0F0F0] active:opacity-90"
+          className="flex-1 py-3 rounded-xl text-sm font-bold text-[var(--color-ink-2)] bg-[var(--color-surface)] active:opacity-90"
         >
           나중에
         </button>

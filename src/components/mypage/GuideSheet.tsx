@@ -13,9 +13,9 @@ export const GuideSheet = ({ open, onClose }: { open: boolean; onClose: () => vo
   <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px', fontWeight: 700 }}>앱 사용법 & FAQ</span>}>
     <div className="px-5 pb-6 flex flex-col gap-3">
       {FAQ_ITEMS.map((item, i) => (
-        <div key={i} className="bg-[#F7F7F7] rounded-2xl px-4 py-4">
-          <p className="text-sm font-bold text-[#111111] mb-1.5">Q. {item.q}</p>
-          <p className="text-xs text-[#666666] leading-relaxed">{item.a}</p>
+        <div key={i} className="bg-[var(--color-canvas)] rounded-2xl px-4 py-4">
+          <p className="text-sm font-bold text-[var(--color-ink)] mb-1.5">Q. {item.q}</p>
+          <p className="text-xs text-[var(--color-ink-3)] leading-relaxed">{item.a}</p>
         </div>
       ))}
     </div>

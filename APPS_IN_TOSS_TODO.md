@@ -35,9 +35,10 @@
   - 해요체 사용, `navigationBar.withBackButton: true` 설정 ✅
   - 진입 즉시 모달/바텀시트 없음 ✅ — `DailyAlarmPromptCard`는 결과 화면 인라인 카드
   - 로고 600x600 등록 완료 ✅
-- **다크모드 — light-only 명시 선언으로 처리**: `index.html` `color-scheme: light` /
-  `theme-color: #F97316` 메타, `src/index.css` `:root { color-scheme: light }` 추가.
-  전면 다크 테마(하드코딩 색 298개 토큰화)는 별도 작업(미대응).
+- **다크모드 — ✅ 전면 대응 완료**: CSS 변수 토큰(`src/index.css` `:root`/`.dark` 12종),
+  하드코딩 색 전량 `var(--color-*)` 치환(`bg-white`→card 포함). 활성화는 기본 시스템 따름 +
+  설정 수동 토글(시스템/라이트/다크, `src/hooks/useTheme.tsx`, Storage `setting_theme`).
+  설정 UI는 `SettingsSheet.tsx`. 브랜드 오렌지/의미색은 유지.
 - **근거**: [UI/UX 가이드](https://developers-apps-in-toss.toss.im/design/consumer-ux-guide.md),
   [UX 라이팅](https://developers-apps-in-toss.toss.im/design/ux-writing.md),
   [해상도 가이드](https://developers-apps-in-toss.toss.im/design/resolution.md)
