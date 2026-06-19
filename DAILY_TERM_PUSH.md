@@ -2,18 +2,20 @@
 
 매일 09:00 알림 동의 사용자에게 "오늘의 경제 용어" 푸시를 보낸다.
 
-## 발송 방식: 토스 콘솔 스마트 발송 (현재 채택)
+## 발송 방식: "토스에게 발송 요청" (서버리스 정기발송, 현재 채택)
 
-발송은 **토스 콘솔의 스마트 발송 캠페인**이 담당한다. 앱은 **알림 동의만** 받으면 되고,
-발송 대상 관리(동의자 타게팅)는 토스가 한다. 따라서 토스 로그인/`userKey`/직접 API가 필요 없다.
+발송은 **토스 콘솔의 스마트 발송 캠페인**이 담당한다("토스에게 발송 요청" 방식). 앱은 **알림 동의문 동의만**
+받으면 되고, 발송 대상(동의자) 타게팅과 스케줄은 토스가 한다. 따라서 토스 로그인/`userKey`/mTLS/직접 API/사업자등록이 필요 없다.
+**단, "토스에게 발송 요청"은 알림 동의문 연결이 필수다.**
 
-> 직접 API 발송은 사용자별 정수 `userKey`가 필요하고, `userKey`는 토스 로그인(`appLogin`)으로만
-> 얻는다. 게스트 기반 앱에 로그인 마찰을 더하지 않으려고 콘솔 발송을 택했다.
+> 직접 API 발송(대안)은 사용자별 정수 `userKey`(토스 로그인 `appLogin`으로만 획득) + 서버 간 mTLS
+> 클라이언트 인증서 + 사업자등록이 모두 필요하다. 게스트 기반 앱에 그 마찰을 더하지 않으려고
+> 서버리스 "토스에게 발송 요청"을 택했다.
 
 ### 콘솔 캠페인 설정 (STEP 1)
 
 - 발송 방법: 토스에게 발송 요청하기
-- 발송 코드: `DAILY_TERM_PUSH`
+- 발송 코드(기능성 캠페인 templateSetCode): `moneytermi-DAILY_TERM_PUSH` (`moneytermi-` 접두사는 콘솔이 자동 부여)
 - 제목: 오늘의 용어 / 내용: 오늘의 경제 용어가 도착했어요.
 - 이동 URL: `intoss://moneytermi/word-card`
 - 발송 계획: 정기발송 / 매일 / 09:00 / 종료일 없음
@@ -23,7 +25,10 @@
 ## 앱 코드 (STEP 2)
 
 - `src/hooks/useNotificationAgreement.ts`
-  - `requestNotificationAgreement({ options: { templateCode: 'DAILY_TERM_PUSH' } })` 만 호출
+  - `requestNotificationAgreement({ options: { templateCode: 'moneytermi-DAILY_TERM_PUSH' } })` 만 호출
+  - `templateCode`는 콘솔에 등록된 코드와 정확히 일치해야 동의 UI가 뜬다. 토스 문서가
+    "동의문 코드"와 "캠페인 발송 코드"를 혼용하지만, 현재 콘솔엔 캠페인 발송 코드
+    `moneytermi-DAILY_TERM_PUSH` 하나만 존재하므로 그 값을 쓴다.
   - `appLogin`/userKey 등록 없음
   - 동의 여부는 Supabase가 아닌 로컬 Storage에 저장 (UI 토글 표시용일 뿐, 발송 모수는 토스가 관리)
 - `src/components/mypage/SettingsSheet.tsx`
