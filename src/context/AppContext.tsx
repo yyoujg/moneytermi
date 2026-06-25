@@ -77,7 +77,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       const [{ data: wordsData }, { data: cwData }, { data: coursesData }] = await Promise.all([
         supabase.from('words').select('*').order('id'),
         supabase.from('course_words').select('course_id, word_id, position').order('position'),
-        supabase.from('courses').select('*'),
+        supabase.from('courses').select('*').order('sort_order', { ascending: true }),
       ]);
       if (!wordsData || !coursesData || !cwData) return;
 
