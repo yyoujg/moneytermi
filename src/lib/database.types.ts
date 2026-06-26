@@ -57,6 +57,11 @@ export type Database = {
           word_id: number;
           status: 'known' | 'unknown';
           updated_at: string;
+          ease: number;
+          interval_d: number;
+          reps: number;
+          due_date: string;
+          last_grade: number | null;
         };
         Insert: {
           id?: string;
@@ -64,10 +69,20 @@ export type Database = {
           word_id: number;
           status: 'known' | 'unknown';
           updated_at?: string;
+          ease?: number;
+          interval_d?: number;
+          reps?: number;
+          due_date?: string;
+          last_grade?: number | null;
         };
         Update: {
           status?: 'known' | 'unknown';
           updated_at?: string;
+          ease?: number;
+          interval_d?: number;
+          reps?: number;
+          due_date?: string;
+          last_grade?: number | null;
         };
         Relationships: [];
       };

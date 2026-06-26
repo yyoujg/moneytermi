@@ -1,4 +1,4 @@
-import { ChevronRight, Zap, Flame, BookOpen, PenLine } from 'lucide-react';
+import { ChevronRight, Zap, Flame, BookOpen, PenLine, RotateCcw } from 'lucide-react';
 import { Badge, TextButton } from '@toss/tds-mobile';
 import { useNavigate } from 'react-router-dom';
 import type { Mission, Missions } from '../types';
@@ -11,7 +11,7 @@ import { WeeklyBarChart } from '../components/home/WeeklyBarChart';
 
 const HomeScreen = () => {
   const navigate = useNavigate();
-  const { points, knownWords, knownIds, missions, claimReward, attendanceDates, otherLeagueUsers, courses, allWords, myEmoji } = useAppContext();
+  const { points, knownWords, knownIds, missions, claimReward, attendanceDates, otherLeagueUsers, courses, allWords, dueQueue, myEmoji } = useAppContext();
   const { user } = useAuth();
   const totalWords = allWords.length;
 
@@ -122,6 +122,25 @@ const HomeScreen = () => {
             )}
           </div>
         </div>
+
+        {/* 오늘 복습 카드 */}
+        {dueQueue.length > 0 && (
+          <button
+            onClick={() => { logClick('review_start', { count: dueQueue.length }); navigate('/review'); }}
+            className="w-full bg-[var(--color-card)] rounded-2xl p-4 mb-4 flex items-center justify-between active:opacity-80"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-orange-500/10 flex items-center justify-center shrink-0">
+                <RotateCcw size={16} className="text-orange-500" />
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-bold text-[var(--color-ink)]">오늘 복습할 단어 {dueQueue.length}개</p>
+                <p className="text-[11px] text-[var(--color-ink-4)]">기억이 흐려지기 전에 복습해요</p>
+              </div>
+            </div>
+            <ChevronRight size={16} className="text-[var(--color-ink-4)]" />
+          </button>
+        )}
 
         {/* 빠른 통계 */}
         <div className="flex gap-3 mb-4">

@@ -6,6 +6,9 @@ import { useDebouncedEffect } from '../hooks/useDebouncedEffect';
 import { Storage } from '../lib/storage';
 import { requestAppReview } from '../lib/review';
 import { logClick } from '../lib/analytics';
+import { nextSrs, gradeFromResult, addDays } from '../lib/srs';
+
+type WpRow = { word_id: number; ease: number; interval_d: number; reps: number; due_date: string };
 
 const toDateStr = (d: Date) => d.toISOString().slice(0, 10);
 
@@ -38,6 +41,8 @@ type AppContextValue = {
   checkIn: () => Promise<void>;
   courses: Course[];
   allWords: Word[];
+  dueQueue: Word[];
+  recordReview: (wordId: number, correct: boolean, usedHint: boolean) => Promise<void>;
   myEmoji: string;
   updateMyEmoji: (emoji: string) => Promise<void>;
 };
@@ -58,6 +63,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [otherLeagueUsers, setOtherLeagueUsers] = useState<LeagueUser[]>([]);
   const [courses, setCourses]             = useState<Course[]>([]);
   const [allWords, setAllWords]           = useState<Word[]>([]);
+  const [wpRows, setWpRows]               = useState<WpRow[]>([]);
   const [myEmoji, setMyEmoji]             = useState<string>('😊');
   const [ready, setReady]                 = useState(false);
   const pendingKnownIds   = useRef<Set<number> | null>(null);
@@ -165,7 +171,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       // 2. word_progress → 실제 Word 객체 복원
       const { data: progress } = await db
         .from('word_progress')
-        .select('word_id, status')
+        .select('word_id, status, ease, interval_d, reps, due_date')
         .eq('user_id', profileId);
 
       if (progress && progress.length > 0) {
@@ -173,6 +179,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         const unknownIdSet = new Set(progress.filter(p => p.status === 'unknown').map(p => p.word_id));
         pendingKnownIds.current   = knownIdSet;
         pendingUnknownIds.current = unknownIdSet;
+        setWpRows(progress.map(p => ({
+          word_id: p.word_id, ease: p.ease, interval_d: p.interval_d,
+          reps: p.reps, due_date: p.due_date,
+        })));
       }
 
       // 3. daily_missions
@@ -382,6 +392,41 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     };
   };
 
+  // ── 오늘 복습 큐 (due_date <= 오늘) ────────────────────────────
+  const dueQueue = useMemo(() => {
+    const todayStr = toDateStr(new Date());
+    const byId = new Map(allWords.map(w => [w.id, w]));
+    return wpRows
+      .filter(r => r.due_date <= todayStr)
+      .sort((a, b) => a.due_date.localeCompare(b.due_date))
+      .map(r => byId.get(r.word_id))
+      .filter(Boolean) as Word[];
+  }, [wpRows, allWords]);
+
+  // ── recordReview — SRS 일정만 갱신 (포인트는 submitQuizAnswer가 담당) ─
+  const recordReview = async (wordId: number, correct: boolean, usedHint: boolean) => {
+    const existing = wpRows.find(r => r.word_id === wordId);
+    const base = existing ?? { ease: 2.5, interval_d: 0, reps: 0 };
+    const grade = gradeFromResult(correct, usedHint);
+    const ns = nextSrs(base, grade);
+    const due = addDays(new Date(), ns.interval_d);
+
+    setWpRows(prev => [
+      ...prev.filter(r => r.word_id !== wordId),
+      { word_id: wordId, ease: ns.ease, interval_d: ns.interval_d, reps: ns.reps, due_date: due },
+    ]);
+
+    const profileId = profileIdRef.current;
+    if (!profileId) return;
+    const { error } = await dbRef.current.from('word_progress').upsert({
+      user_id: profileId, word_id: wordId,
+      status: correct ? 'known' : 'unknown',
+      ease: ns.ease, interval_d: ns.interval_d, reps: ns.reps,
+      due_date: due, last_grade: grade,
+    }, { onConflict: 'user_id,word_id' });
+    if (error) console.error('[recordReview] word_progress 저장 실패:', error);
+  };
+
   return (
     <AppContext.Provider value={{
       ready,
@@ -397,6 +442,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       otherLeagueUsers,
       courses,
       allWords,
+      dueQueue,
+      recordReview,
       myEmoji,
       updateMyEmoji,
     }}>

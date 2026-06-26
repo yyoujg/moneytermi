@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronRight, Lightbulb, RotateCcw, Zap } from 'lucide-react';
+import { ChevronRight, Lightbulb, Zap } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Spacing } from '@toss/tds-mobile';
+import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
 import { requestAppReview } from '../lib/review';
 import { logClick } from '../lib/analytics';
@@ -18,40 +20,37 @@ const shuffle = <T,>(arr: T[]): T[] => {
 };
 
 const QuizPage = () => {
-  const { points, allWords, submitQuizAnswer } = useAppContext();
+  const navigate = useNavigate();
+  const { points, dueQueue, submitQuizAnswer, recordReview } = useAppContext();
 
-  const [queue, setQueue] = React.useState<typeof allWords>([]);
-  React.useEffect(() => {
-    if (allWords.length > 0 && queue.length === 0) setQueue(shuffle(allWords));
+  const [queue, setQueue] = useState<Word[]>([]);
+  const [started, setStarted] = useState(false);
+  useEffect(() => {
+    if (!started && dueQueue.length > 0) {
+      setQueue(shuffle(dueQueue));
+      setStarted(true);
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allWords]);
+  }, [dueQueue, started]);
   const [index, setIndex] = useState(0);
   const [input, setInput] = useState('');
   const [status, setStatus] = useState<Status>('idle');
   const [showHint, setShowHint] = useState(false);
   const [combo, setCombo] = useState(0);
   const [totalCorrect, setTotalCorrect] = useState(0);
-
-  const restart = () => {
-    setQueue(shuffle(allWords));
-    setIndex(0);
-    setInput('');
-    setStatus('idle');
-    setShowHint(false);
-    setCombo(0);
-    setTotalCorrect(0);
-  };
+  const graded = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const word = queue[index];
-  const isFinished = index >= queue.length;
+  const isEmpty = !started && dueQueue.length === 0;
+  const isFinished = started && index >= queue.length;
 
   useEffect(() => {
     if (status === 'idle') inputRef.current?.focus();
   }, [index, status]);
 
   // 퀴즈 완료 시 앱 리뷰 요청 (플랫폼이 노출 제어)
-  const completed = queue.length > 0 && index >= queue.length;
+  const completed = started && index >= queue.length;
   useEffect(() => {
     if (completed) {
       logClick('quiz_complete', { mode: 'review', total: queue.length, correct: totalCorrect });
@@ -64,6 +63,7 @@ const QuizPage = () => {
     setInput('');
     setStatus('idle');
     setShowHint(false);
+    graded.current = false;
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -73,6 +73,12 @@ const QuizPage = () => {
     // 즉시 피드백은 낙관적, 포인트·콤보·m3는 서버가 채점
     const clean = (s: string) => s.replace(/\s+/g, '').toLowerCase();
     const isCorrect = clean(input) === clean(word.word);
+
+    // SRS 일정은 단어별 첫 제출 결과로 한 번만 기록
+    if (!graded.current) {
+      graded.current = true;
+      void recordReview(word.id, isCorrect, showHint);
+    }
 
     if (isCorrect) {
       setTotalCorrect((c) => c + 1);
@@ -88,11 +94,28 @@ const QuizPage = () => {
     }
   };
 
+  if (isEmpty) {
+    return (
+      <div className="flex flex-col h-full bg-[var(--color-canvas)] items-center justify-center p-6 pb-32">
+        <div className="w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center text-4xl mb-4">✅</div>
+        <h2 className="text-xl font-bold text-[var(--color-ink)] mb-1">오늘 복습 완료</h2>
+        <p className="text-sm text-[var(--color-ink-3)] mb-8">지금 복습할 단어가 없어요</p>
+        <button
+          onClick={() => navigate('/home')}
+          className="px-6 py-4 rounded-2xl text-white text-xs font-bold active:opacity-90"
+          style={{ backgroundColor: '#f97316' }}
+        >
+          홈으로
+        </button>
+      </div>
+    );
+  }
+
   if (isFinished) {
     return (
       <div className="flex flex-col h-full bg-[var(--color-canvas)] items-center justify-center p-6 pb-32">
         <div className="w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center text-4xl mb-4">🏆</div>
-        <h2 className="text-xl font-bold text-[var(--color-ink)] mb-1">퀴즈 완료!</h2>
+        <h2 className="text-xl font-bold text-[var(--color-ink)] mb-1">오늘 복습 완료!</h2>
         <p className="text-sm text-[var(--color-ink-3)] mb-6">{queue.length}문제 중 {totalCorrect}개 정답</p>
         <div className="flex items-center gap-2 bg-orange-500/10 border border-orange-500/20 rounded-2xl px-5 py-3 mb-8">
           <Zap size={16} className="text-orange-500 fill-current" />
@@ -102,15 +125,17 @@ const QuizPage = () => {
           <DailyAlarmPromptCard />
         </div>
         <button
-          onClick={restart}
-          className="flex items-center gap-2 px-6 py-4 rounded-2xl text-white text-xs font-bold active:opacity-90"
+          onClick={() => navigate('/home')}
+          className="px-6 py-4 rounded-2xl text-white text-xs font-bold active:opacity-90"
           style={{ backgroundColor: '#f97316' }}
         >
-          <RotateCcw size={14} /> 다시 풀기
+          홈으로
         </button>
       </div>
     );
   }
+
+  if (!word) return null; // dueQueue 로드~큐 스냅샷 사이 한 프레임 가드
 
   const progress = (index / queue.length) * 100;
   const earnedPreview = (showHint ? 5 : 10) + (combo >= 2 ? combo * 2 : 0);
