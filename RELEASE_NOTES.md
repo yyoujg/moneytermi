@@ -7,6 +7,24 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
 
 ## 2026-06-26 — 디자인 토큰화 / 다크테마 보정 / UX 폴리시
 
+### 토스 콘솔 출시노트 (사용자 노출용 — 아래 평문 그대로 등록)
+
+```
+이번 업데이트 주요 내용
+
+[복습이 똑똑해졌어요]
+오늘 복습할 단어만 골라서 보여드려요. 자주 틀린 단어는 자주, 익숙한 단어는 뜸하게 나오는 간격 반복 방식이라 더 효율적으로 외울 수 있어요.
+
+[새로워진 '실천' 탭]
+배운 경제 개념을 행동으로 옮겨보세요. 단어 카드에서 실천 항목을 담고, 나만의 체크리스트로 관리할 수 있어요.
+
+[다크 모드 개선]
+설정과 도움말 같은 팝업 화면까지 어두운 테마가 자연스럽게 적용돼요. 어두운 화면에서 하단 메뉴도 더 또렷해졌어요.
+
+[그 외]
+화면 곳곳의 간격과 정렬을 다듬고, 앱 사용법 안내를 최신 기능에 맞춰 업데이트했어요.
+```
+
 ### 리팩터
 
 - **브랜드·시맨틱 색 + 폰트 크기 @theme 토큰화** (`3630de4`)
@@ -20,10 +38,12 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
 - **다크 모드 보정**
   - 하단 NavBar 알약에 `border-[var(--color-line)]` 추가 — 다크 캔버스에서 그림자만으로 안 보이던
     가장자리를 토큰 보더로 구분. (`NavBar.tsx`)
-  - **TDS 바텀시트 다크 미적용 해결**: TDS 컴포넌트는 OS `prefers-color-scheme`만 따라 수동 다크 시
-    시트가 라이트로 남던 문제. `useTheme`가 해석된 `isDark`를 노출, `main.tsx`에서 `ThemeProvider`를
-    `TDSMobileAITProvider` 위로 올려 `colorScheme={isDark?'dark':'light'}` 전달. 모든 시트·TDS 컴포넌트가
-    앱 테마를 따름. (`useTheme.tsx`, `main.tsx`, `App.tsx`)
+  - **TDS 바텀시트 다크 미적용 해결**: TDS 색 스킴은 React 컨텍스트(`ee().colorScheme`)로 관리되며 값이
+    없으면 OS `prefers-color-scheme`로 폴백 → 수동 다크 시 시트가 라이트로 남던 문제. `useTheme`가 해석된
+    `isDark`를 노출하고, `main.tsx`에서 `ThemeProvider`를 TDS provider 위로 올린 뒤 TDS의
+    `ColorSchemeArea theme={isDark?'dark':'light'}`로 감쌈(처음 시도한 provider `colorScheme` prop은 컨텍스트를
+    못 세워 실패). 바텀시트는 body로 포털돼도 React 컨텍스트를 상속하므로 모든 시트·TDS 컴포넌트가 앱 테마를
+    따름. (`useTheme.tsx`, `main.tsx`, `App.tsx`)
 - **화면 폴리시** (`17baa25`, `d237bd3`)
   - 홈 복습 카드 `<button>`(블록 중첩 오버플로)→`<div role="button">` 코스카드 패턴으로 겹침 수정.
   - 홈/실천 하단 여백(`pb-32`), 실천 섹션 헤더 간격, 퀴즈/복습 뜻↔설명 간격 보강.
