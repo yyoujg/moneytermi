@@ -90,7 +90,7 @@ const QuizPage = () => {
       setCombo(0);
       setStatus('wrong');
       void submitQuizAnswer(word.id, input, 'typed', showHint, index === 0);
-      setTimeout(() => { setStatus('idle'); setInput(''); }, 700);
+      setTimeout(() => { setStatus('idle'); setInput(''); }, 1000);
     }
   };
 
@@ -135,7 +135,8 @@ const QuizPage = () => {
     );
   }
 
-  if (!word) return null; // dueQueue 로드~큐 스냅샷 사이 한 프레임 가드
+  // dueQueue 로드~큐 스냅샷 사이 한 프레임 가드 (흰 깜빡임 방지)
+  if (!word) return <div className="flex h-full items-center justify-center" style={{ backgroundColor: 'var(--color-canvas)' }} />;
 
   const progress = (index / queue.length) * 100;
   const earnedPreview = (showHint ? 5 : 10) + (combo >= 2 ? combo * 2 : 0);
