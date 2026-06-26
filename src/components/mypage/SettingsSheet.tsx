@@ -3,6 +3,7 @@ import { Switch, BottomSheet } from '@toss/tds-mobile';
 import { useSettings } from '../../hooks/useSettings';
 import { useNotificationAgreement } from '../../hooks/useNotificationAgreement';
 import { useTheme, type Theme } from '../../hooks/useTheme';
+import { Card } from '../ui/Card';
 
 const THEME_OPTIONS: [Theme, string][] = [['system', '시스템'], ['light', '라이트'], ['dark', '다크']];
 
@@ -15,7 +16,7 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
     <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>앱 설정</span>}>
       <div className="px-5 pb-6 flex flex-col gap-2">
         {/* 테마 */}
-        <div className="bg-[var(--color-surface)] rounded-card px-4 py-4">
+        <Card tone="surface" pad="md">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-9 h-9 rounded-chip bg-[var(--color-line)] flex items-center justify-center">
               <Moon size={16} className="text-[var(--color-ink-2)]" />
@@ -38,10 +39,10 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
               </button>
             ))}
           </div>
-        </div>
+        </Card>
 
         {/* 효과음 */}
-        <div className="flex items-center justify-between bg-[var(--color-surface)] rounded-card px-4 py-4">
+        <Card tone="surface" pad="md" className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-chip bg-[var(--color-line)] flex items-center justify-center">
               {soundOn
@@ -55,10 +56,10 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
             </div>
           </div>
           <Switch checked={soundOn} onChange={toggleSound} />
-        </div>
+        </Card>
 
         {/* 진동 */}
-        <div className="flex items-center justify-between bg-[var(--color-surface)] rounded-card px-4 py-4">
+        <Card tone="surface" pad="md" className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-chip bg-[var(--color-line)] flex items-center justify-center">
               <span className={`text-base ${vibrationOn ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-4)]'}`}>📳</span>
@@ -69,7 +70,7 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
             </div>
           </div>
           <Switch checked={vibrationOn} onChange={toggleVibration} />
-        </div>
+        </Card>
 
         {/* 학습 알림 */}
         <button

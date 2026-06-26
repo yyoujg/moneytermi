@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
+import { Card } from '../ui/Card';
 
 const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -27,7 +28,7 @@ export const AttendanceCalendar = ({ attendanceDates }: { attendanceDates: strin
   ).filter(Boolean).length;
 
   return (
-    <div className="bg-[var(--color-card)] rounded-card overflow-hidden">
+    <Card pad="none" className="overflow-hidden">
       <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-line)]">
         <button
           onClick={() => setViewDate(new Date(year, month - 1, 1))}
@@ -86,6 +87,6 @@ export const AttendanceCalendar = ({ attendanceDates }: { attendanceDates: strin
           <span className="text-2xs text-[var(--color-ink-3)] font-medium">오늘</span>
         </div>
       </div>
-    </div>
+    </Card>
   );
 };

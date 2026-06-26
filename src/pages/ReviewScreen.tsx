@@ -6,6 +6,7 @@ import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
 import { requestAppReview } from '../lib/review';
 import { logClick } from '../lib/analytics';
+import { Card } from '../components/ui/Card';
 import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
 
 type Status = 'idle' | 'correct' | 'wrong';
@@ -169,23 +170,23 @@ const QuizPage = () => {
 
       <div className="flex-1 flex flex-col px-5 py-4">
         {/* 문제 카드 */}
-        <div className="bg-[var(--color-card)] rounded-card p-5 mb-4 flex-1">
+        <Card pad="lg" className="mb-4 flex-1">
           <p className="text-2xs font-medium text-[var(--color-ink-4)] mb-3 tracking-wide uppercase">뜻을 보고 용어를 맞혀보세요</p>
 
           <p className="text-lg font-bold text-[var(--color-ink)] leading-relaxed mb-6">{word.meaning}</p>
 
           {showHint && (
-            <div className="bg-[var(--color-surface)] rounded-card px-4 py-3 flex items-center gap-2 mb-4">
+            <Card tone="surface" pad="none" className="px-4 py-3 flex items-center gap-2 mb-4">
               <Lightbulb size={14} className="text-[var(--color-ink-3)] shrink-0" />
               <span className="text-base font-bold text-[var(--color-ink)] tracking-widest">{word.hint}</span>
-            </div>
+            </Card>
           )}
 
-          <div className="bg-[var(--color-surface)] rounded-card p-4">
+          <Card tone="surface" pad="md">
             <p className="text-xs font-bold text-[var(--color-ink-3)] mb-1.5">상세 설명</p>
             <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep">{word.detailedMeaning}</p>
-          </div>
-        </div>
+          </Card>
+        </Card>
 
         {/* 입력 + 제출 */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { BottomSheet } from '@toss/tds-mobile';
+import { Card } from '../ui/Card';
 
 export const NicknameSheet = ({
   open,
@@ -38,7 +39,7 @@ export const NicknameSheet = ({
     <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>닉네임 변경</span>} hasTextField>
       <div className="px-5 pb-6 flex flex-col gap-5">
         <div className="flex flex-col gap-2">
-          <div className={`flex items-center gap-3 bg-[var(--color-surface)] rounded-card px-4 py-3.5 transition-colors ${error ? 'ring-2 ring-danger-400/50' : ''}`}>
+          <Card tone="surface" pad="none" className={`flex items-center gap-3 px-4 py-3.5 transition-colors ${error ? 'ring-2 ring-danger-400/50' : ''}`}>
             <input
               ref={inputRef}
               value={value}
@@ -54,7 +55,7 @@ export const NicknameSheet = ({
                 <X size={10} className="text-white" />
               </button>
             )}
-          </div>
+          </Card>
           {error && <p className="text-xs text-danger-400 font-medium px-1">{error}</p>}
         </div>
 

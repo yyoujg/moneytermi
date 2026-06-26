@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { SearchField, Menu, Spacing } from '@toss/tds-mobile';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
+import { Card } from '../components/ui/Card';
 
 const CourseScreen = () => {
   const navigate = useNavigate();
@@ -69,7 +70,7 @@ const CourseScreen = () => {
                 placeholder="용어 검색"
               />
               {showResults && (
-                <div className="absolute top-[52px] left-0 right-0 bg-[var(--color-card)] rounded-card z-50 overflow-hidden">
+                <Card pad="none" className="absolute top-[52px] left-0 right-0 z-50 overflow-hidden">
                   {searchResults.length === 0
                     ? <div className="px-5 py-5 text-center text-sm text-[var(--color-ink-3)]">검색 결과가 없어요</div>
                     : <div className="max-h-56 overflow-y-auto [&::-webkit-scrollbar]:hidden">
@@ -85,7 +86,7 @@ const CourseScreen = () => {
                       ))}
                     </div>
                   }
-                </div>
+                </Card>
               )}
             </div>
           )}
@@ -133,7 +134,7 @@ const CourseScreen = () => {
           const hasStarted = courseKnownCount > 0;
 
           return (
-            <div key={course.id} className="bg-[var(--color-card)] rounded-card overflow-hidden">
+            <Card key={course.id} pad="none" className="overflow-hidden">
 
               {/* 카드 헤더 */}
               <div
@@ -193,7 +194,7 @@ const CourseScreen = () => {
                   {isCompleted ? '다시 복습하기' : hasStarted ? '이어서 학습하기' : '코스 시작하기'}
                 </button>
               </div>
-            </div>
+            </Card>
           );
         })}
         <Spacing size={8} />

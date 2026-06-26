@@ -38,10 +38,14 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
     `rounded-xl`→`rounded-chip` 전면 치환. BUTTON/INPUT 25곳을 `rounded-button`(pill)으로 — 둥근 nav와 톤 일치.
     `rounded-full`(원형·진행바·점)·`rounded-t*`는 유지.
 
-- **카드 등 컴포넌트화 + 세로 간격 통일** (진행 중 — Home·MyPage 적용)
-  - 신규 `src/components/ui/`의 `Card`(tone card/surface · pad sm/md/lg)·`IconBox`·`StatCard`로 반복 마크업 단일화.
+- **카드 등 컴포넌트화 + 세로 간격 통일**
+  - 신규 `src/components/ui/`의 `Card`(tone card/surface · pad none/sm/md/lg)·`IconBox`·`StatCard`로 반복 마크업 단일화.
+  - **전 화면 적용**: 모든 card/surface 카드 표면을 `<Card>`로 교체(Home·MyPage·Course·League·Review·Quiz·WordCard·
+    CourseWordList·LeagueRules·Actions·SettingsSheet·NicknameSheet·DailyAlarm·AttendanceCalendar). 홈 통계 3종 `<StatCard>`,
+    아이콘 홀더 `<IconBox>`. 읽기 카드는 `pad="none"`으로 기존 `px-5` 보존, 대칭 패딩은 md/lg 변형으로 통일.
+    버튼형 카드(학습 알림·실천하기)는 `<button>` 의미 유지 위해 제외.
   - 세로 리듬 규칙: 최상위 블록·카드 16px(mb-4/gap-4), 섹션 헤더→내용 12px(mb-3). Home·MyPage·Review·Actions의
-    이탈값(`mb-5`=20px, `p-6`=24px 등) 정리. 나머지 화면은 동일 패턴으로 후속 적용 예정.
+    이탈값(`mb-5`=20px, `p-6`=24px 등) 정리.
 
 ### UX
 

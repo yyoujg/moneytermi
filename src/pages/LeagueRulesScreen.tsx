@@ -1,6 +1,7 @@
 import { ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { List, ListRow, Spacing } from '@toss/tds-mobile';
+import { Card } from '../components/ui/Card';
 
 const RULES = [
   { icon: '📅', title: '리그 기간', desc: '매주 월요일 00:00에 초기화돼요.' },
@@ -31,7 +32,7 @@ const LeagueRulesScreen = () => {
       <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">
         <Spacing size={20} />
         <div className="px-5">
-          <div className="bg-[var(--color-card)] rounded-card overflow-hidden">
+          <Card pad="none" className="overflow-hidden">
             <List>
               {RULES.map(({ icon, title, desc }) => (
                 <ListRow
@@ -48,7 +49,7 @@ const LeagueRulesScreen = () => {
                 />
               ))}
             </List>
-          </div>
+          </Card>
         </div>
         <Spacing size={40} />
       </div>

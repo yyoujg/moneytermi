@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Check, Plus, X } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import type { UserAction } from '../types';
+import { Card } from '../components/ui/Card';
 
 const Row = ({ title, concept, isDone, onToggle, onRemove }: {
   title: string;
@@ -10,7 +11,7 @@ const Row = ({ title, concept, isDone, onToggle, onRemove }: {
   onToggle: () => void;
   onRemove: () => void;
 }) => (
-  <div className="bg-[var(--color-card)] rounded-card px-4 py-3.5 flex items-center gap-3">
+  <Card pad="none" className="px-4 py-3.5 flex items-center gap-3">
     <button
       onClick={onToggle}
       aria-label={isDone ? '완료 취소' : '완료'}
@@ -34,7 +35,7 @@ const Row = ({ title, concept, isDone, onToggle, onRemove }: {
     <button onClick={onRemove} aria-label="삭제" className="shrink-0 w-9 h-9 flex items-center justify-center text-[var(--color-ink-4)] active:opacity-60">
       <X size={15} />
     </button>
-  </div>
+  </Card>
 );
 
 const ActionsScreen = () => {

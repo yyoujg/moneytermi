@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Badge, Spacing } from '@toss/tds-mobile';
 import type { Course } from '../types';
 import { useAppContext } from '../context/AppContext';
+import { Card } from '../components/ui/Card';
 
 const CourseWordListScreen = () => {
   const navigate = useNavigate();
@@ -66,7 +67,7 @@ const CourseWordListScreen = () => {
         </div>
 
         <div className="px-5">
-          <div className="bg-[var(--color-card)] rounded-card overflow-hidden divide-y divide-[var(--color-surface)]">
+          <Card pad="none" className="overflow-hidden divide-y divide-[var(--color-surface)]">
             {sortedWords.map((word, idx) => {
               const isKnown = knownWords.some(kw => kw.id === word.id);
               const accessible = isAccessible(idx);
@@ -95,7 +96,7 @@ const CourseWordListScreen = () => {
                 </div>
               );
             })}
-          </div>
+          </Card>
         </div>
 
         <Spacing size={112} />

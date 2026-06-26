@@ -9,6 +9,7 @@ import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
 import { requestAppReview } from '../lib/review';
 import { logClick } from '../lib/analytics';
 import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
+import { Card } from '../components/ui/Card';
 
 export const getOptions = (correctWord: Word, knownWords: Word[], allWords: Word[]): string[] => {
   const pool = knownWords.length >= 4 ? knownWords : allWords;
@@ -102,7 +103,7 @@ const QuizScreen = () => {
           </div>
 
           {/* 결과 카드 */}
-          <div className="w-full bg-[var(--color-card)] rounded-card p-5 flex flex-col gap-4">
+          <Card pad="lg" className="w-full flex flex-col gap-4">
             <div className="flex justify-between items-center">
               <span className="text-sm text-[var(--color-ink-4)]">획득 포인트</span>
               <div className="flex items-center gap-1.5">
@@ -129,7 +130,7 @@ const QuizScreen = () => {
                 </div>
               </>
             )}
-          </div>
+          </Card>
 
           <DailyAlarmPromptCard />
         </div>
