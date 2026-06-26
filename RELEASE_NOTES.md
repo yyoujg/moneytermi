@@ -5,6 +5,54 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
 
 ---
 
+## 2026-06-20 — 데일리 푸시 발송 코드 정정
+
+### 버그 수정
+
+- **데일리 푸시 `templateCode` 불일치** (`7e7d0e3`)
+  - `useNotificationAgreement`의 `TEMPLATE_CODE`를 `DAILY_TERM_PUSH` -> `moneytermi-DAILY_TERM_PUSH`로
+    수정. 콘솔엔 후자(기능성 캠페인 발송 코드)만 존재해 기존 값으론 동의 UI가 뜨지 않았음
+    (`moneytermi-` 접두사는 콘솔 자동 부여).
+
+### 문서
+
+- 발송 방식을 **"토스에게 발송 요청"(서버리스 정기발송)** 으로 명확화. 직접 API 발송 대안의
+  전제(userKey=토스 로그인 / 서버 간 mTLS / 사업자등록) 정리.
+- 토스 문서의 "동의문 코드" vs "캠페인 발송 코드" 혼용 정정(이전 06-17 노트의
+  "`DAILY_TERM_PUSH`=동의문 코드" 서술 대체). A-1의 "기능성 푸시=토스 로그인 필수" 과한 서술 완화.
+- 주요 파일: `DAILY_TERM_PUSH.md`, `APPS_IN_TOSS_TODO.md`.
+- 남은 콘솔 작업: 알림 동의문 등록 -> 캠페인 발송 방법을 "토스에게 발송 요청"으로 재설정 -> 검수/활성화.
+
+---
+
+## 2026-06-17 — 공유 / 전면 다크 테마 빌드
+
+### 주요 기능
+
+- **리그 공유 (C-1)** (`119bb0a`)
+  - `share` / `getTossShareLink`가 `@apps-in-toss/web-bridge`(web-framework 재노출)로
+    사용 가능함을 확인(이전 "패키지 미지원" 판단 정정).
+  - 신규 `src/lib/share.ts` `shareTossLink(path, message)` — 링크 생성 후 네이티브 공유 시트,
+    가드 try/catch(미지원/취소 무시), OG 이미지=브랜드 아이콘.
+  - `LeagueScreen` 헤더에 공유 버튼 추가(`intoss://moneytermi/league`, `league_share` 로깅).
+
+### UX
+
+- **전면 다크 테마** (`a4868ea`)
+  - CSS 변수 토큰 도입(`src/index.css` `:root`/`.dark` 12종). 하드코딩 색 전량
+    `var(--color-*)` 치환(hex 298곳 + `bg-white` 72곳 + 인라인 rgba). 브랜드/의미색은 유지.
+  - 활성화: 기본 시스템 따름 + 설정 수동 토글(시스템/라이트/다크).
+    `src/hooks/useTheme.tsx`(ThemeProvider, Storage `setting_theme`), `SettingsSheet` 테마 UI.
+  - 이전 light-only 강제(`color-scheme: light` 메타/`:root`)는 해제.
+
+### 문서
+
+- `APPS_IN_TOSS_TODO.md` 갱신: 출시 완료 항목 정리, 사업자등록 필요 항목 🔒 표기,
+  E-2(스마트 메시지) 상세 절차 + `DAILY_TERM_PUSH`=동의문 코드 정정, F 콘솔 작업 순서.
+- `DATA_STRUCTURE.md`에 `setting_theme` 키 추가.
+
+---
+
 ## 2026-06-16 — 분석 / 다크모드 후속 빌드
 
 ### 주요 기능
