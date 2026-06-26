@@ -105,15 +105,15 @@ const ActionsScreen = () => {
         )}
 
         {todo.length > 0 && (
-          <div className="mb-5">
-            <p className="text-xs font-bold text-[var(--color-ink-4)] mb-5 px-1">미완료 {todo.length}</p>
+          <div className="mb-5 flex flex-col gap-3">
+            <p className="text-xs font-bold text-[var(--color-ink-4)] px-1">미완료 {todo.length}</p>
             <div className="flex flex-col gap-2">{todo.map(renderRow)}</div>
           </div>
         )}
 
         {done.length > 0 && (
-          <div>
-            <p className="text-xs font-bold text-[var(--color-ink-4)] mb-5 px-1">완료 {done.length}</p>
+          <div className="flex flex-col gap-3">
+            <p className="text-xs font-bold text-[var(--color-ink-4)] px-1">완료 {done.length}</p>
             <div className="flex flex-col gap-2">{done.map(renderRow)}</div>
           </div>
         )}
