@@ -4,6 +4,7 @@ import { TDSMobileAITProvider } from '@toss/tds-mobile-ait'
 import * as Sentry from '@sentry/react'
 import './index.css'
 import App from './App.tsx'
+import { ThemeProvider, useTheme } from './hooks/useTheme'
 
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN,
@@ -13,10 +14,18 @@ Sentry.init({
   enabled: import.meta.env.PROD,
 })
 
+// 앱 테마(시스템/라이트/다크)를 TDS 컴포넌트(바텀시트 등)에 전달
+const TdsThemeBridge = ({ children }: { children: React.ReactNode }) => {
+  const { isDark } = useTheme()
+  return <TDSMobileAITProvider colorScheme={isDark ? 'dark' : 'light'}>{children}</TDSMobileAITProvider>
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <TDSMobileAITProvider>
-      <App />
-    </TDSMobileAITProvider>
+    <ThemeProvider>
+      <TdsThemeBridge>
+        <App />
+      </TdsThemeBridge>
+    </ThemeProvider>
   </StrictMode>,
 )

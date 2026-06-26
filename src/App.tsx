@@ -9,7 +9,6 @@ import { AuthProvider } from './hooks/useAuth';
 import { parseLandingPath } from './lib/landing';
 import { logScreen } from './lib/analytics';
 import { useSafeAreaInsets } from './hooks/useSafeAreaInsets';
-import { ThemeProvider } from './hooks/useTheme';
 import NavBar from './components/NavBar';
 
 const HomeScreen = React.lazy(() => import('./pages/HomeScreen'));
@@ -173,7 +172,6 @@ export default function App() {
   const insets = useSafeAreaInsets();
   return (
     <ErrorBoundary>
-      <ThemeProvider>
       <AuthProvider>
       <AppProvider>
         <BrowserRouter>
@@ -191,7 +189,6 @@ export default function App() {
         </BrowserRouter>
       </AppProvider>
       </AuthProvider>
-      </ThemeProvider>
     </ErrorBoundary>
   );
 }

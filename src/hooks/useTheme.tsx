@@ -7,16 +7,21 @@ const KEY = 'setting_theme';
 const prefersDark = () =>
   typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-color-scheme: dark)').matches;
 
-const applyDark = (theme: Theme) => {
-  const isDark = theme === 'dark' || (theme === 'system' && prefersDark());
-  document.documentElement.classList.toggle('dark', isDark);
-};
+const resolveDark = (theme: Theme) =>
+  theme === 'dark' || (theme === 'system' && prefersDark());
 
-type ThemeContextValue = { theme: Theme; setTheme: (t: Theme) => void };
+type ThemeContextValue = { theme: Theme; setTheme: (t: Theme) => void; isDark: boolean };
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const [theme, setThemeState] = useState<Theme>('system');
+  const [isDark, setIsDark] = useState(false);
+
+  const applyDark = useCallback((t: Theme) => {
+    const dark = resolveDark(t);
+    document.documentElement.classList.toggle('dark', dark);
+    setIsDark(dark);
+  }, []);
 
   // 최초: 저장값 로드 후 적용 (없으면 system)
   useEffect(() => {
@@ -30,7 +35,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
       })
       .catch(() => applyDark('system'));
     return () => { cancelled = true; };
-  }, []);
+  }, [applyDark]);
 
   // system 모드일 때 OS 테마 변경 반영
   useEffect(() => {
@@ -39,15 +44,15 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     const handler = () => applyDark('system');
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
-  }, [theme]);
+  }, [theme, applyDark]);
 
   const setTheme = useCallback((t: Theme) => {
     setThemeState(t);
     applyDark(t);
     Storage.setItem(KEY, t).catch(() => {});
-  }, []);
+  }, [applyDark]);
 
-  return <ThemeContext.Provider value={{ theme, setTheme }}>{children}</ThemeContext.Provider>;
+  return <ThemeContext.Provider value={{ theme, setTheme, isDark }}>{children}</ThemeContext.Provider>;
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
