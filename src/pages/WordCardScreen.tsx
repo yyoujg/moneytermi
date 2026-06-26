@@ -37,6 +37,7 @@ const WordCard = ({
   newsItems,
   newsLoading,
   keyword,
+  allWords,
 }: {
   word: Word;
   isKnown: boolean;
@@ -45,7 +46,12 @@ const WordCard = ({
   newsItems: NaverNewsItem[];
   newsLoading: boolean;
   keyword: string;
-}) => (
+  allWords: Word[];
+}) => {
+  const validRelated = (word.relatedWords ?? []).filter(
+    rw => allWords.some(w => w.word === rw)
+  );
+  return (
   <div className="flex flex-col gap-3 px-5 pb-6">
 
     {/* 단어 헤더 */}
@@ -121,11 +127,11 @@ const WordCard = ({
     </div>
 
     {/* 관련 용어 */}
-    {word.relatedWords && word.relatedWords.length > 0 && (
+    {validRelated.length > 0 && (
       <div className="bg-[var(--color-card)] rounded-2xl px-5 py-4 flex flex-col gap-2.5">
         <p className="text-[12px] font-bold text-[var(--color-ink-4)] tracking-[0.02em]">🔗 관련 용어</p>
         <div className="flex flex-col">
-          {word.relatedWords.map((tag, i) => (
+          {validRelated.map((tag, i) => (
             <button
               key={tag}
               onClick={() => onRelatedClick(tag)}
@@ -140,7 +146,8 @@ const WordCard = ({
       </div>
     )}
   </div>
-);
+  );
+};
 
 // ── 메인 ─────────────────────────────────────────────────────────
 const WordCardScreen = () => {
@@ -328,6 +335,7 @@ const WordCardScreen = () => {
           newsItems={newsItems}
           newsLoading={newsLoading}
           keyword={word.word}
+          allWords={allWords}
         />
       </div>
 

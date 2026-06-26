@@ -152,6 +152,7 @@ export type Database = {
           title: string;
           description: string;
           category: string;
+          sort_order: number;
         };
         Insert: {
           id: string;
@@ -159,6 +160,7 @@ export type Database = {
           title: string;
           description: string;
           category: string;
+          sort_order?: number;
         };
         Update: {
           id?: string;
@@ -166,6 +168,7 @@ export type Database = {
           title?: string;
           description?: string;
           category?: string;
+          sort_order?: number;
         };
         Relationships: [];
       };
