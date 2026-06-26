@@ -35,7 +35,7 @@ export const NicknameSheet = ({
   };
 
   return (
-    <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px', fontWeight: 700 }}>닉네임 변경</span>} hasTextField>
+    <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>닉네임 변경</span>} hasTextField>
       <div className="px-5 pb-6 flex flex-col gap-5">
         <div className="flex flex-col gap-2">
           <div className={`flex items-center gap-3 bg-[var(--color-surface)] rounded-2xl px-4 py-3.5 transition-colors ${error ? 'ring-2 ring-danger-400/50' : ''}`}>

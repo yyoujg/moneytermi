@@ -12,7 +12,7 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
   const { theme, setTheme } = useTheme();
 
   return (
-    <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px', fontWeight: 700 }}>앱 설정</span>}>
+    <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>앱 설정</span>}>
       <div className="px-5 pb-6 flex flex-col gap-2">
         {/* 테마 */}
         <div className="bg-[var(--color-surface)] rounded-2xl px-4 py-4">
