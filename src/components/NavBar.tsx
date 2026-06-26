@@ -24,7 +24,7 @@ const NavBar = () => {
       className="absolute bottom-0 w-full flex justify-center z-50 pointer-events-none"
       style={{ paddingBottom: 24 + insets.bottom }}
     >
-      <div className="flex items-center gap-1 bg-[var(--color-card)] backdrop-blur-md rounded-full px-4 py-2 shadow-lg pointer-events-auto"
+      <div className="flex items-center gap-1 bg-[var(--color-card)] backdrop-blur-md rounded-full px-4 py-2 shadow-lg border border-[var(--color-line)] pointer-events-auto"
         style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.12)' }}
       >
         {NAV_ITEMS.map((item) => {

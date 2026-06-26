@@ -5,6 +5,36 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
 
 ---
 
+## 2026-06-26 — 디자인 토큰화 / 다크테마 보정 / UX 폴리시
+
+### 리팩터
+
+- **브랜드·시맨틱 색 + 폰트 크기 @theme 토큰화** (`3630de4`)
+  - `index.css @theme`에 `--color-brand-*`(200~600·deep)·`--color-success/danger/warning-*`,
+    `--text-2xs/3xs/4xs`(11/10/9px) 정의. 하드코딩 `orange/green/red/yellow` 클래스 ~145곳을
+    `brand/success/danger/warning`로, 임의 `text-[Npx]` 60곳을 토큰/기존 스케일로 1:1 치환. 시각 변화 없음.
+  - 간격(p/m/gap)·라운드는 Tailwind 스케일이 이미 토큰이라 미변경(over-engineering 회피).
+
+### UX
+
+- **다크 모드 보정**
+  - 하단 NavBar 알약에 `border-[var(--color-line)]` 추가 — 다크 캔버스에서 그림자만으로 안 보이던
+    가장자리를 토큰 보더로 구분. (`NavBar.tsx`)
+  - **TDS 바텀시트 다크 미적용 해결**: TDS 컴포넌트는 OS `prefers-color-scheme`만 따라 수동 다크 시
+    시트가 라이트로 남던 문제. `useTheme`가 해석된 `isDark`를 노출, `main.tsx`에서 `ThemeProvider`를
+    `TDSMobileAITProvider` 위로 올려 `colorScheme={isDark?'dark':'light'}` 전달. 모든 시트·TDS 컴포넌트가
+    앱 테마를 따름. (`useTheme.tsx`, `main.tsx`, `App.tsx`)
+- **화면 폴리시** (`17baa25`, `d237bd3`)
+  - 홈 복습 카드 `<button>`(블록 중첩 오버플로)→`<div role="button">` 코스카드 패턴으로 겹침 수정.
+  - 홈/실천 하단 여백(`pb-32`), 실천 섹션 헤더 간격, 퀴즈/복습 뜻↔설명 간격 보강.
+  - NavBar 6탭 간격, 실천 화면 접근성(aria-label·탭 타깃), 복습 진입 흰 깜빡임 제거.
+
+### 문서
+
+- `GuideSheet`(앱 사용법 FAQ) 갱신: 복습 간격반복·실천 탭·다크 모드 항목 추가, stale 문구 정리.
+
+---
+
 ## 2026-06-26 — SRS 복습 / 실천 레이어 / 코스 정렬
 
 ### 주요 기능
