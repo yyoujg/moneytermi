@@ -11,7 +11,7 @@ export const EmojiPickerSheet = ({ open, current, onSelect, onClose }: { open: b
             key={emoji}
             onClick={() => { onSelect(emoji); onClose(); }}
             className={`w-full aspect-square rounded-2xl flex items-center justify-center text-3xl transition-all
-              ${current === emoji ? 'bg-orange-500/15 ring-2 ring-orange-500' : 'bg-[var(--color-surface)] active:bg-[var(--color-line)]'}`}
+              ${current === emoji ? 'bg-brand-500/15 ring-2 ring-brand-500' : 'bg-[var(--color-surface)] active:bg-[var(--color-line)]'}`}
           >
             {emoji}
           </button>

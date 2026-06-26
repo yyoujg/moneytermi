@@ -66,7 +66,7 @@ const LeagueScreen = () => {
         <div className="bg-[var(--color-canvas)] rounded-2xl p-4 mb-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-orange-500/10 rounded-full flex items-center justify-center text-xl">{myEmoji}</div>
+              <div className="w-10 h-10 bg-brand-500/10 rounded-full flex items-center justify-center text-xl">{myEmoji}</div>
               <div>
                 <p className="text-sm font-bold text-[var(--color-ink)]">{user?.nickname ?? '예비슈퍼개미'}</p>
                 <p className="text-xs text-[var(--color-ink-4)]">{LEAGUE_TIERS.find(t => t.id === CURRENT_LEAGUE_ID)?.name} 리그</p>
@@ -74,7 +74,7 @@ const LeagueScreen = () => {
             </div>
             <div className="text-right">
               <p className="text-xs text-[var(--color-ink-4)] mb-0.5">현재 순위</p>
-              <p className="text-2xl font-bold text-orange-500">{myRank}위</p>
+              <p className="text-2xl font-bold text-brand-500">{myRank}위</p>
             </div>
           </div>
 
@@ -83,10 +83,10 @@ const LeagueScreen = () => {
             {aboveUser && (
               <div className="rounded-xl px-3 py-2.5 flex items-center justify-between" style={{ backgroundColor: 'var(--color-success-soft)' }}>
                 <div className="flex items-center gap-2">
-                  <TrendingUp size={13} className="text-green-500 shrink-0" />
+                  <TrendingUp size={13} className="text-success-500 shrink-0" />
                   <span className="text-xs text-[var(--color-ink-3)] truncate max-w-[120px]">{aboveUser.name}</span>
                 </div>
-                <span className="text-sm font-bold text-green-400">+{pointsToAbove}P → {myRank - 1}위</span>
+                <span className="text-sm font-bold text-success-400">+{pointsToAbove}P → {myRank - 1}위</span>
               </div>
             )}
             {above2User && (
@@ -101,10 +101,10 @@ const LeagueScreen = () => {
             {belowUser && myRank > total - 5 && (
               <div className="rounded-xl px-3 py-2.5 flex items-center justify-between" style={{ backgroundColor: 'var(--color-danger-soft)' }}>
                 <div className="flex items-center gap-2">
-                  <TrendingDown size={13} className="text-red-400 shrink-0" />
+                  <TrendingDown size={13} className="text-danger-400 shrink-0" />
                   <span className="text-xs text-[var(--color-ink-3)]">강등 위험</span>
                 </div>
-                <span className="text-sm font-bold text-red-400">-{pointsAboveBelow}P면 강등</span>
+                <span className="text-sm font-bold text-danger-400">-{pointsAboveBelow}P면 강등</span>
               </div>
             )}
           </div>
@@ -115,7 +115,7 @@ const LeagueScreen = () => {
           <div className="flex justify-between items-start relative">
             <div className="absolute top-4 left-4 right-4 h-[2px] bg-[var(--color-line)] z-0 rounded-full">
               <div
-                className="h-full bg-orange-500 rounded-full transition-all duration-1000"
+                className="h-full bg-brand-500 rounded-full transition-all duration-1000"
                 style={{ width: `${((CURRENT_LEAGUE_ID - 1) / (LEAGUE_TIERS.length - 1)) * 100}%` }}
               />
             </div>
@@ -125,14 +125,14 @@ const LeagueScreen = () => {
               return (
                 <div key={tier.id} className="flex flex-col items-center relative z-10 w-14">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all
-                    ${isCurrent ? 'bg-orange-500 text-white scale-110' :
+                    ${isCurrent ? 'bg-brand-500 text-white scale-110' :
                       isPast ? 'bg-[var(--color-line)] text-[var(--color-ink-3)]' :
                       'bg-[var(--color-surface)] text-[var(--color-ink-4)]'}`}
                   >
                     {isCurrent ? <Trophy size={13} /> : isPast ? '✓' : tier.id}
                   </div>
-                  <span className={`text-[10px] font-medium text-center mt-1.5 leading-tight
-                    ${isCurrent ? 'text-orange-500' : isPast ? 'text-[var(--color-ink-4)]' : 'text-[var(--color-ink-4)]'}`}>
+                  <span className={`text-3xs font-medium text-center mt-1.5 leading-tight
+                    ${isCurrent ? 'text-brand-500' : isPast ? 'text-[var(--color-ink-4)]' : 'text-[var(--color-ink-4)]'}`}>
                     {tier.name}
                   </span>
                 </div>
@@ -148,25 +148,25 @@ const LeagueScreen = () => {
         {/* TOP 3 podium */}
         <div className="bg-[var(--color-card)] rounded-2xl overflow-hidden mb-3">
           <div className="px-4 pt-4 pb-3">
-            <p className="text-[11px] font-medium text-[var(--color-ink-4)] mb-4 text-center tracking-widest uppercase">Top 3</p>
+            <p className="text-2xs font-medium text-[var(--color-ink-4)] mb-4 text-center tracking-widest uppercase">Top 3</p>
             <div className="flex items-end justify-center gap-3 mb-2">
               {top3[1] && (
                 <div className="flex flex-col items-center flex-1">
                   <div className="w-11 h-11 bg-[var(--color-surface)] rounded-full flex items-center justify-center text-xl mb-1">{top3[1].emoji}</div>
                   <div className="w-full bg-[var(--color-surface)] rounded-t-xl flex flex-col items-center py-3" style={{ height: 68 }}>
                     <span className="text-base mb-0.5">🥈</span>
-                    <p className="text-[10px] font-bold text-[var(--color-ink-2)] truncate w-full text-center px-1">{top3[1].name}</p>
-                    <p className="text-[10px] font-medium text-[var(--color-ink-4)]">{top3[1].points}P</p>
+                    <p className="text-3xs font-bold text-[var(--color-ink-2)] truncate w-full text-center px-1">{top3[1].name}</p>
+                    <p className="text-3xs font-medium text-[var(--color-ink-4)]">{top3[1].points}P</p>
                   </div>
                 </div>
               )}
               {top3[0] && (
                 <div className="flex flex-col items-center flex-1">
-                  <div className="w-13 h-13 bg-orange-500/10 rounded-full flex items-center justify-center text-2xl mb-1 p-2.5">{top3[0].emoji}</div>
-                  <div className="w-full bg-orange-500 rounded-t-xl flex flex-col items-center py-3" style={{ height: 84 }}>
+                  <div className="w-13 h-13 bg-brand-500/10 rounded-full flex items-center justify-center text-2xl mb-1 p-2.5">{top3[0].emoji}</div>
+                  <div className="w-full bg-brand-500 rounded-t-xl flex flex-col items-center py-3" style={{ height: 84 }}>
                     <span className="text-lg mb-0.5">🥇</span>
-                    <p className="text-[10px] font-bold text-white truncate w-full text-center px-1">{top3[0].name}</p>
-                    <p className="text-[10px] font-medium text-orange-200">{top3[0].points}P</p>
+                    <p className="text-3xs font-bold text-white truncate w-full text-center px-1">{top3[0].name}</p>
+                    <p className="text-3xs font-medium text-brand-200">{top3[0].points}P</p>
                   </div>
                 </div>
               )}
@@ -175,8 +175,8 @@ const LeagueScreen = () => {
                   <div className="w-11 h-11 bg-[var(--color-surface)] rounded-full flex items-center justify-center text-xl mb-1">{top3[2].emoji}</div>
                   <div className="w-full bg-[var(--color-surface)] rounded-t-xl flex flex-col items-center py-3" style={{ height: 56 }}>
                     <span className="text-base mb-0.5">🥉</span>
-                    <p className="text-[10px] font-bold text-[var(--color-ink-2)] truncate w-full text-center px-1">{top3[2].name}</p>
-                    <p className="text-[10px] font-medium text-[var(--color-ink-4)]">{top3[2].points}P</p>
+                    <p className="text-3xs font-bold text-[var(--color-ink-2)] truncate w-full text-center px-1">{top3[2].name}</p>
+                    <p className="text-3xs font-medium text-[var(--color-ink-4)]">{top3[2].points}P</p>
                   </div>
                 </div>
               )}
@@ -205,28 +205,28 @@ const LeagueScreen = () => {
                     <div className="w-8 text-center shrink-0">
                       {rank <= 3
                         ? <span className="text-base">{RANK_MEDALS[rank - 1]}</span>
-                        : <span className={`text-sm font-bold ${isMe ? 'text-orange-500' : 'text-[var(--color-ink-4)]'}`}>{rank}</span>
+                        : <span className={`text-sm font-bold ${isMe ? 'text-brand-500' : 'text-[var(--color-ink-4)]'}`}>{rank}</span>
                       }
                     </div>
                   }
                   contents={
                     <div className="flex items-center gap-2 min-w-0">
-                      <div className={`w-9 h-9 rounded-full flex items-center justify-center text-lg shrink-0 ${isMe ? 'bg-orange-500/15' : 'bg-[var(--color-surface)]'}`}>
+                      <div className={`w-9 h-9 rounded-full flex items-center justify-center text-lg shrink-0 ${isMe ? 'bg-brand-500/15' : 'bg-[var(--color-surface)]'}`}>
                         {u.emoji}
                       </div>
                       <div className="min-w-0">
-                        <p className={`text-sm font-semibold truncate ${isMe ? 'text-orange-500' : 'text-[var(--color-ink)]'}`}>
+                        <p className={`text-sm font-semibold truncate ${isMe ? 'text-brand-500' : 'text-[var(--color-ink)]'}`}>
                           {u.name}
                           {isMe && <Badge color="yellow" size="small" variant="fill" className="ml-1.5">나</Badge>}
                         </p>
                         <div className="flex items-center gap-1.5">
-                          {isPromote && !isMe && <span className="text-[10px] font-bold text-green-500">▲ 승급권</span>}
-                          {isDemote && !isPromote && !isMe && <span className="text-[10px] font-bold text-red-400">▼ 강등권</span>}
+                          {isPromote && !isMe && <span className="text-3xs font-bold text-success-500">▲ 승급권</span>}
+                          {isDemote && !isPromote && !isMe && <span className="text-3xs font-bold text-danger-400">▼ 강등권</span>}
                           {isMe && aboveUser && (
-                            <span className="text-[10px] font-bold text-green-400">+{pointsToAbove}P → {myRank - 1}위</span>
+                            <span className="text-3xs font-bold text-success-400">+{pointsToAbove}P → {myRank - 1}위</span>
                           )}
                           {isMe && isDemote && !aboveUser && (
-                            <span className="text-[10px] font-bold text-red-400">강등 위험</span>
+                            <span className="text-3xs font-bold text-danger-400">강등 위험</span>
                           )}
                         </div>
                       </div>
@@ -234,8 +234,8 @@ const LeagueScreen = () => {
                   }
                   right={
                     <div className="flex items-center gap-1 shrink-0">
-                      <Zap size={12} className={`fill-current ${isMe ? 'text-orange-500' : 'text-[var(--color-ink-4)]'}`} />
-                      <span className={`text-sm font-bold ${isMe ? 'text-orange-500' : 'text-[var(--color-ink-2)]'}`}>{u.points}</span>
+                      <Zap size={12} className={`fill-current ${isMe ? 'text-brand-500' : 'text-[var(--color-ink-4)]'}`} />
+                      <span className={`text-sm font-bold ${isMe ? 'text-brand-500' : 'text-[var(--color-ink-2)]'}`}>{u.points}</span>
                     </div>
                   }
                 />
@@ -247,12 +247,12 @@ const LeagueScreen = () => {
         {/* 승급/강등 안내 */}
         <div className="flex gap-2 mb-4">
           <div className="flex-1 flex items-center gap-2 bg-[var(--color-card)] rounded-xl px-3 py-2.5">
-            <div className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
-            <span className="text-[11px] text-[var(--color-ink-4)]">상위 {promoteZone}명 승급</span>
+            <div className="w-2 h-2 rounded-full bg-success-500 shrink-0" />
+            <span className="text-2xs text-[var(--color-ink-4)]">상위 {promoteZone}명 승급</span>
           </div>
           <div className="flex-1 flex items-center gap-2 bg-[var(--color-card)] rounded-xl px-3 py-2.5">
-            <div className="w-2 h-2 rounded-full bg-red-400 shrink-0" />
-            <span className="text-[11px] text-[var(--color-ink-4)]">하위 {demoteZone}명 강등</span>
+            <div className="w-2 h-2 rounded-full bg-danger-400 shrink-0" />
+            <span className="text-2xs text-[var(--color-ink-4)]">하위 {demoteZone}명 강등</span>
           </div>
         </div>
 

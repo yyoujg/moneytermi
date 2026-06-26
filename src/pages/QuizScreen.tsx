@@ -106,8 +106,8 @@ const QuizScreen = () => {
             <div className="flex justify-between items-center">
               <span className="text-sm text-[var(--color-ink-4)]">획득 포인트</span>
               <div className="flex items-center gap-1.5">
-                <Zap size={14} className="text-orange-500 fill-current" />
-                <span className="text-xl font-bold text-orange-500">+{totalEarned}P</span>
+                <Zap size={14} className="text-brand-500 fill-current" />
+                <span className="text-xl font-bold text-brand-500">+{totalEarned}P</span>
               </div>
             </div>
             <div className="h-px bg-[var(--color-line)]" />
@@ -125,7 +125,7 @@ const QuizScreen = () => {
                 <div className="h-px bg-[var(--color-line)]" />
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-[var(--color-ink-4)]">순위 변화</span>
-                  <span className="text-sm font-bold text-green-400">🔥 {prevRank}위 → {myRank}위 상승!</span>
+                  <span className="text-sm font-bold text-success-400">🔥 {prevRank}위 → {myRank}위 상승!</span>
                 </div>
               </>
             )}
@@ -137,7 +137,7 @@ const QuizScreen = () => {
         <div className="px-5 pb-12 flex flex-col gap-3">
           <button
             onClick={() => navigate('/home')}
-            className="w-full py-4 rounded-2xl text-sm font-bold text-white bg-orange-500 active:opacity-90"
+            className="w-full py-4 rounded-2xl text-sm font-bold text-white bg-brand-500 active:opacity-90"
           >
             홈으로
           </button>
@@ -190,8 +190,8 @@ const QuizScreen = () => {
   };
 
   // 스트릭 메시지
-  const streakMessage = combo >= 5 ? { text: `⚡ ${combo}연속! x2 보너스`, color: 'text-yellow-400' }
-    : combo >= 3 ? { text: `🔥 ${combo}연속! +5P 보너스`, color: 'text-orange-400' }
+  const streakMessage = combo >= 5 ? { text: `⚡ ${combo}연속! x2 보너스`, color: 'text-warning-400' }
+    : combo >= 3 ? { text: `🔥 ${combo}연속! +5P 보너스`, color: 'text-brand-400' }
     : null;
 
   return (
@@ -207,7 +207,7 @@ const QuizScreen = () => {
           {showPointPop && (
             <span
               key={totalEarned}
-              className="absolute -top-5 right-0 text-xs font-bold text-green-400 whitespace-nowrap"
+              className="absolute -top-5 right-0 text-xs font-bold text-success-400 whitespace-nowrap"
               style={{ animation: 'fadeUp 0.7s ease forwards' }}
             >
               +{lastEarned}P
@@ -243,7 +243,7 @@ const QuizScreen = () => {
       {/* 진행 바 */}
       <div className="w-full bg-[var(--color-line)] h-1">
         <div
-          className="bg-orange-500 h-1 transition-all duration-500"
+          className="bg-brand-500 h-1 transition-all duration-500"
           style={{ width: `${progressPercent}%` }}
         />
       </div>
@@ -259,13 +259,13 @@ const QuizScreen = () => {
 
         {/* 문제 카드 */}
         <div className={`rounded-2xl p-5 flex-1 flex flex-col justify-center gap-4
-          ${status === 'correct' ? 'flash-correct ring-2 ring-green-500/40' : 'bg-[var(--color-card)]'}
-          ${status === 'wrong' ? 'bg-[var(--color-card)] ring-2 ring-red-500/30' : ''}
+          ${status === 'correct' ? 'flash-correct ring-2 ring-success-500/40' : 'bg-[var(--color-card)]'}
+          ${status === 'wrong' ? 'bg-[var(--color-card)] ring-2 ring-danger-500/30' : ''}
           ${shake ? 'shake' : ''}
         `}>
-          <span className="text-[11px] font-medium text-[var(--color-ink-4)] tracking-widest uppercase">이 뜻에 맞는 용어는?</span>
+          <span className="text-2xs font-medium text-[var(--color-ink-4)] tracking-widest uppercase">이 뜻에 맞는 용어는?</span>
 
-          <p className="text-xl font-bold text-[var(--color-ink)] leading-snug">{currentWord.meaning}</p>
+          <p className="text-xl font-bold text-[var(--color-ink)] leading-snug mb-2">{currentWord.meaning}</p>
 
           <div className="bg-[var(--color-canvas)] rounded-xl px-4 py-3">
             <p className="text-sm text-[var(--color-ink-3)] leading-relaxed break-keep">{currentWord.detailedMeaning}</p>
@@ -273,13 +273,13 @@ const QuizScreen = () => {
 
           {status === 'correct' && (
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-green-400">정답!</span>
-              <span className="text-xs font-bold text-green-400">+{lastEarned}P</span>
-              {combo >= 3 && <span className="text-xs font-bold text-orange-400">🔥 {combo}연속</span>}
+              <span className="text-sm font-bold text-success-400">정답!</span>
+              <span className="text-xs font-bold text-success-400">+{lastEarned}P</span>
+              {combo >= 3 && <span className="text-xs font-bold text-brand-400">🔥 {combo}연속</span>}
             </div>
           )}
           {status === 'wrong' && (
-            <p className="text-sm font-bold text-red-400">
+            <p className="text-sm font-bold text-danger-400">
               정답: <span className="text-[var(--color-ink)]">{currentWord.word}</span>
             </p>
           )}
@@ -294,9 +294,9 @@ const QuizScreen = () => {
 
             if (status !== 'idle') {
               if (isCorrectOption) {
-                optionStyle = 'bg-green-500/15 text-green-400 ring-1 ring-green-500/50';
+                optionStyle = 'bg-success-500/15 text-success-400 ring-1 ring-success-500/50';
               } else if (isSelected && !isCorrectOption) {
-                optionStyle = 'bg-red-500/15 text-red-400 ring-1 ring-red-500/40';
+                optionStyle = 'bg-danger-500/15 text-danger-400 ring-1 ring-danger-500/40';
               } else {
                 optionStyle = 'bg-[var(--color-card)] text-[var(--color-line)]';
               }
@@ -310,10 +310,10 @@ const QuizScreen = () => {
               >
                 {option}
                 {status !== 'idle' && isCorrectOption && (
-                  <Check size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-green-400" />
+                  <Check size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-success-400" />
                 )}
                 {status !== 'idle' && isSelected && !isCorrectOption && (
-                  <X size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-red-400" />
+                  <X size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-danger-400" />
                 )}
               </button>
             );

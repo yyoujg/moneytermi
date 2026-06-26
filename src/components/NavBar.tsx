@@ -36,10 +36,10 @@ const NavBar = () => {
               onClick={() => navigate(item.path)}
               className="flex flex-col items-center px-2 py-2 transition-all duration-200"
             >
-              <div className={`w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200 ${isActive ? 'bg-orange-500 text-white' : 'text-[var(--color-ink-4)]'}`}>
+              <div className={`w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200 ${isActive ? 'bg-brand-500 text-white' : 'text-[var(--color-ink-4)]'}`}>
                 <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />
               </div>
-              <span className={`text-[10px] mt-1 transition-colors ${isActive ? 'font-bold text-orange-500' : 'font-medium text-[var(--color-ink-4)]'}`}>{item.label}</span>
+              <span className={`text-3xs mt-1 transition-colors ${isActive ? 'font-bold text-brand-500' : 'font-medium text-[var(--color-ink-4)]'}`}>{item.label}</span>
             </button>
           );
         })}

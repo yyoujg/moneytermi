@@ -49,14 +49,14 @@ const HomeScreen = () => {
     : [];
 
   return (
-    <div className="flex flex-col h-full pb-24 overflow-y-auto [&::-webkit-scrollbar]:hidden" style={{ backgroundColor: 'var(--color-canvas)' }}>
+    <div className="flex flex-col h-full pb-32 overflow-y-auto [&::-webkit-scrollbar]:hidden" style={{ backgroundColor: 'var(--color-canvas)' }}>
 
       {/* 헤더 */}
       <div className="pt-4 px-5 pb-4">
         <div className="flex justify-between items-center mb-4">
           <div>
             <div className="inline-flex items-center px-2 py-1 rounded mb-2" style={{ backgroundColor: 'var(--color-surface)' }}>
-              <span className="text-[11px] font-medium text-[var(--color-ink-4)]">{CURRENT_LEAGUE_NAME} 리그</span>
+              <span className="text-2xs font-medium text-[var(--color-ink-4)]">{CURRENT_LEAGUE_NAME} 리그</span>
             </div>
             <h1 className="text-xl font-bold text-[var(--color-ink)]">안녕하세요, {user?.nickname ?? '예비슈퍼개미'}님</h1>
           </div>
@@ -69,15 +69,15 @@ const HomeScreen = () => {
         <div className="bg-[var(--color-card)] rounded-2xl p-5 mb-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs font-medium text-[var(--color-ink-4)]">오늘 목표</p>
-            <span className="text-xs font-bold text-orange-500">{todayDone}/{todayTotal} 완료</span>
+            <span className="text-xs font-bold text-brand-500">{todayDone}/{todayTotal} 완료</span>
           </div>
 
           <div className="flex gap-3 mb-4">
             {/* 퀴즈 목표 */}
-            <div className={`flex-1 rounded-xl p-3 ${m3.current >= m3.target ? 'bg-orange-500/10' : 'bg-[var(--color-surface)]'}`}>
+            <div className={`flex-1 rounded-xl p-3 ${m3.current >= m3.target ? 'bg-brand-500/10' : 'bg-[var(--color-surface)]'}`}>
               <div className="flex items-center gap-2 mb-1.5">
-                <PenLine size={13} className={m3.current >= m3.target ? 'text-orange-500' : 'text-[var(--color-ink-4)]'} />
-                <span className="text-[11px] font-medium text-[var(--color-ink-4)]">퀴즈 정답</span>
+                <PenLine size={13} className={m3.current >= m3.target ? 'text-brand-500' : 'text-[var(--color-ink-4)]'} />
+                <span className="text-2xs font-medium text-[var(--color-ink-4)]">퀴즈 정답</span>
               </div>
               <p className="text-lg font-bold text-[var(--color-ink)]">
                 {m3.current}
@@ -92,10 +92,10 @@ const HomeScreen = () => {
             const estimatedRank = calculateRank(otherLeagueUsers, points + remainP);
             return (
               <div className="rounded-xl px-3 py-3 mb-3 flex flex-col gap-1.5" style={{ backgroundColor: 'var(--color-brand-soft)' }}>
-                <p className="text-xs font-bold text-orange-400">
+                <p className="text-xs font-bold text-brand-400">
                   🔥 지금 하면 +{remainP}P (현재 {myRank}위 → {estimatedRank}위)
                 </p>
-                <p className="text-[11px] text-[var(--color-ink-3)]">
+                <p className="text-2xs text-[var(--color-ink-3)]">
                   ⏰ 자정에 초기화 — 오늘 안 하면 기회 사라짐
                 </p>
               </div>
@@ -106,7 +106,7 @@ const HomeScreen = () => {
           <div className="flex flex-col" style={{ gap: 12 }}>
             <button
               onClick={() => { logClick('course_start', { course_id: nextCourse.id, title: nextCourse.title }); navigate('/word-card', { state: { words: nextCourse.words, index: 0, backPath: '/home', autoAdvance: true } }); }}
-              className="w-full py-4 rounded-2xl bg-orange-500 text-white text-sm font-bold active:opacity-90 flex items-center justify-center gap-2"
+              className="w-full py-4 rounded-2xl bg-brand-500 text-white text-sm font-bold active:opacity-90 flex items-center justify-center gap-2"
             >
               오늘 학습 시작하기
               <ChevronRight size={16} />
@@ -125,21 +125,22 @@ const HomeScreen = () => {
 
         {/* 오늘 복습 카드 */}
         {dueQueue.length > 0 && (
-          <button
+          <div
+            role="button"
             onClick={() => { logClick('review_start', { count: dueQueue.length }); navigate('/review'); }}
-            className="w-full bg-[var(--color-card)] rounded-2xl p-4 mb-4 flex items-center justify-between active:opacity-80"
+            className="bg-[var(--color-card)] rounded-2xl p-4 mb-4 flex items-center justify-between active:opacity-80 cursor-pointer"
           >
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-orange-500/10 flex items-center justify-center shrink-0">
-                <RotateCcw size={16} className="text-orange-500" />
+              <div className="w-9 h-9 rounded-full bg-brand-500/10 flex items-center justify-center shrink-0">
+                <RotateCcw size={16} className="text-brand-500" />
               </div>
               <div className="text-left">
                 <p className="text-sm font-bold text-[var(--color-ink)]">오늘 복습할 단어 {dueQueue.length}개</p>
-                <p className="text-[11px] text-[var(--color-ink-4)]">기억이 흐려지기 전에 복습해요</p>
+                <p className="text-2xs text-[var(--color-ink-4)]">기억이 흐려지기 전에 복습해요</p>
               </div>
             </div>
             <ChevronRight size={16} className="text-[var(--color-ink-4)]" />
-          </button>
+          </div>
         )}
 
         {/* 빠른 통계 */}
@@ -147,21 +148,21 @@ const HomeScreen = () => {
           <div className="flex-1 bg-[var(--color-card)] rounded-2xl px-4 py-3 flex items-center gap-3">
             <Zap size={14} className="text-[var(--color-ink-4)] fill-current shrink-0" />
             <div>
-              <p className="text-[10px] text-[var(--color-ink-4)]">포인트</p>
+              <p className="text-3xs text-[var(--color-ink-4)]">포인트</p>
               <p className="text-base font-bold text-[var(--color-ink)] whitespace-nowrap">{points.toLocaleString()}<span className="text-xs text-[var(--color-ink-4)] ml-0.5">P</span></p>
             </div>
           </div>
           <div className="flex-1 bg-[var(--color-card)] rounded-2xl px-4 py-3 flex items-center gap-3">
             <Flame size={14} className="text-[var(--color-ink-4)] shrink-0" />
             <div>
-              <p className="text-[10px] text-[var(--color-ink-4)]">연속 출석</p>
+              <p className="text-3xs text-[var(--color-ink-4)]">연속 출석</p>
               <p className="text-base font-bold text-[var(--color-ink)] whitespace-nowrap">{streak}<span className="text-xs text-[var(--color-ink-4)] ml-0.5">일</span></p>
             </div>
           </div>
           <div className="flex-1 bg-[var(--color-card)] rounded-2xl px-4 py-3 flex items-center gap-3">
             <BookOpen size={14} className="text-[var(--color-ink-4)] shrink-0" />
             <div>
-              <p className="text-[10px] text-[var(--color-ink-4)]">학습 단어</p>
+              <p className="text-3xs text-[var(--color-ink-4)]">학습 단어</p>
               <p className="text-base font-bold text-[var(--color-ink)] whitespace-nowrap">{knownWords.length}<span className="text-xs text-[var(--color-ink-4)] ml-0.5">/{totalWords}</span></p>
             </div>
           </div>
@@ -198,14 +199,14 @@ const HomeScreen = () => {
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-[10px] font-medium px-2 py-0.5 rounded text-[var(--color-ink-4)]" style={{ backgroundColor: 'var(--color-surface)' }}>{course.level}</span>
+                      <span className="text-3xs font-medium px-2 py-0.5 rounded text-[var(--color-ink-4)]" style={{ backgroundColor: 'var(--color-surface)' }}>{course.level}</span>
                       <h3 className="text-sm font-bold text-[var(--color-ink)] truncate">{course.title}</h3>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="flex-1 bg-[var(--color-surface)] rounded-full h-1 overflow-hidden">
-                        <div className="bg-orange-500 h-full rounded-full" style={{ width: `${progressPct}%` }} />
+                        <div className="bg-brand-500 h-full rounded-full" style={{ width: `${progressPct}%` }} />
                       </div>
-                      <span className="text-[11px] font-bold text-orange-500 shrink-0 whitespace-nowrap">{progressPct}%</span>
+                      <span className="text-2xs font-bold text-brand-500 shrink-0 whitespace-nowrap">{progressPct}%</span>
                     </div>
                   </div>
                 </div>
@@ -218,11 +219,11 @@ const HomeScreen = () => {
         <div className="bg-[var(--color-card)] rounded-2xl p-5 mb-4">
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-sm font-bold text-[var(--color-ink-2)]">오늘의 미션</h2>
-            <span className="text-[11px] font-medium text-[var(--color-ink-4)]">자정 초기화</span>
+            <span className="text-2xs font-medium text-[var(--color-ink-4)]">자정 초기화</span>
           </div>
 
           {/* 핵심 미션: 퀴즈 3문제 */}
-          <div className={`rounded-2xl p-4 mb-3 ${m3.isRewarded ? 'bg-[var(--color-surface)]' : m3.current >= m3.target ? 'bg-orange-500/10' : 'bg-[var(--color-surface)]'}`}>
+          <div className={`rounded-2xl p-4 mb-3 ${m3.isRewarded ? 'bg-[var(--color-surface)]' : m3.current >= m3.target ? 'bg-brand-500/10' : 'bg-[var(--color-surface)]'}`}>
             <div className="flex items-center justify-between mb-3">
               <div>
                 <p className={`text-sm font-bold ${m3.isRewarded ? 'text-[var(--color-ink-4)] line-through' : 'text-[var(--color-ink)]'}`}>
@@ -233,14 +234,14 @@ const HomeScreen = () => {
               {m3.isRewarded
                 ? <Badge color="elephant" size="small" variant="fill">완료</Badge>
                 : m3.current >= m3.target
-                ? <button onClick={() => claimReward('m3')} className="px-3 py-1.5 rounded-xl bg-orange-500 text-white text-xs font-bold active:bg-orange-600">받기</button>
+                ? <button onClick={() => claimReward('m3')} className="px-3 py-1.5 rounded-xl bg-brand-500 text-white text-xs font-bold active:bg-brand-600">받기</button>
                 : <span className="text-lg font-bold text-[var(--color-ink)]">{m3.current}<span className="text-sm text-[var(--color-ink-4)]">/{m3.target}</span></span>
               }
             </div>
             {/* 진행 바 */}
             <div className="flex gap-1">
               {Array.from({ length: m3.target }).map((_, i) => (
-                <div key={i} className={`flex-1 h-1.5 rounded-full transition-all duration-300 ${i < m3.current ? 'bg-orange-500' : 'bg-[var(--color-line)]'}`} />
+                <div key={i} className={`flex-1 h-1.5 rounded-full transition-all duration-300 ${i < m3.current ? 'bg-brand-500' : 'bg-[var(--color-line)]'}`} />
               ))}
             </div>
           </div>
@@ -252,8 +253,8 @@ const HomeScreen = () => {
               return (
                 <div key={mission.id} className={`flex justify-between items-center py-3 ${idx === 0 ? '' : ''}`}>
                   <div className="flex items-center gap-2.5">
-                    <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 text-[9px] font-bold ${
-                      mission.isRewarded ? 'bg-orange-500 text-white' : isCompleted ? 'bg-orange-500/20 text-orange-500' : 'bg-[var(--color-surface)] text-[var(--color-ink-4)]'
+                    <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 text-4xs font-bold ${
+                      mission.isRewarded ? 'bg-brand-500 text-white' : isCompleted ? 'bg-brand-500/20 text-brand-500' : 'bg-[var(--color-surface)] text-[var(--color-ink-4)]'
                     }`}>
                       {(mission.isRewarded || isCompleted) ? '✓' : ''}
                     </div>
@@ -262,10 +263,10 @@ const HomeScreen = () => {
                     </span>
                   </div>
                   {mission.isRewarded
-                    ? <span className="text-[11px] text-[var(--color-ink-4)]">+{mission.reward}P</span>
+                    ? <span className="text-2xs text-[var(--color-ink-4)]">+{mission.reward}P</span>
                     : isCompleted
-                    ? <button onClick={() => claimReward(mission.id as keyof Missions)} className="px-2.5 py-1 rounded-lg bg-orange-500 text-white text-[11px] font-bold active:bg-orange-600">받기</button>
-                    : <span className="text-[11px] text-[var(--color-ink-4)]">+{mission.reward}P</span>
+                    ? <button onClick={() => claimReward(mission.id as keyof Missions)} className="px-2.5 py-1 rounded-lg bg-brand-500 text-white text-2xs font-bold active:bg-brand-600">받기</button>
+                    : <span className="text-2xs text-[var(--color-ink-4)]">+{mission.reward}P</span>
                   }
                 </div>
               );

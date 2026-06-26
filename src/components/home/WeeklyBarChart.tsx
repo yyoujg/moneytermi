@@ -27,7 +27,7 @@ export const WeeklyBarChart = ({ attendanceDates }: { attendanceDates: string[] 
             <div className="w-full flex items-end justify-center" style={{ height: 48 }}>
               <div
                 className={`w-full rounded-t transition-all duration-700 ${
-                  isToday ? 'bg-orange-500' : count > 0 ? 'bg-[var(--color-line)]' : 'bg-[var(--color-surface)]'
+                  isToday ? 'bg-brand-500' : count > 0 ? 'bg-[var(--color-line)]' : 'bg-[var(--color-surface)]'
                 } ${isFuture ? 'opacity-30' : ''}`}
                 style={{ height: count > 0 ? `${(count / maxVal) * 48}px` : '4px' }}
               />
@@ -37,7 +37,7 @@ export const WeeklyBarChart = ({ attendanceDates }: { attendanceDates: string[] 
       </div>
       <div className="flex justify-between gap-1.5">
         {week.map(({ label, isToday }) => (
-          <div key={label} className={`flex-1 text-center text-[10px] font-medium ${isToday ? 'text-orange-500' : 'text-[var(--color-ink-4)]'}`}>
+          <div key={label} className={`flex-1 text-center text-3xs font-medium ${isToday ? 'text-brand-500' : 'text-[var(--color-ink-4)]'}`}>
             {label}
           </div>
         ))}

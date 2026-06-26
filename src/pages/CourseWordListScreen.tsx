@@ -40,7 +40,7 @@ const CourseWordListScreen = () => {
           </button>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-medium text-[var(--color-ink-3)] px-2.5 py-1 rounded-full" style={{ backgroundColor: 'var(--color-surface)' }}>{course.level}</span>
+              <span className="text-2xs font-medium text-[var(--color-ink-3)] px-2.5 py-1 rounded-full" style={{ backgroundColor: 'var(--color-surface)' }}>{course.level}</span>
               {isCompleted && <Badge color="green" size="small" variant="fill">완료</Badge>}
             </div>
             <h2 className="text-base font-bold text-[var(--color-ink)] mt-1 truncate">{course.title}</h2>
@@ -50,7 +50,7 @@ const CourseWordListScreen = () => {
         <div className="flex items-center gap-2">
           <div className="flex-1 bg-[var(--color-surface)] rounded-full h-1.5 overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all duration-500 ${isCompleted ? 'bg-orange-500' : 'bg-orange-300'}`}
+              className={`h-full rounded-full transition-all duration-500 ${isCompleted ? 'bg-brand-500' : 'bg-brand-300'}`}
               style={{ width: `${progressPct}%` }}
             />
           </div>
@@ -75,7 +75,7 @@ const CourseWordListScreen = () => {
                 <div key={word.id} className={`flex items-start gap-3 px-4 py-3.5 ${locked ? 'opacity-40' : ''}`}>
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5
-                      ${isKnown ? 'bg-orange-500 text-white' : 'bg-[var(--color-surface)] text-[var(--color-ink-3)]'}`}
+                      ${isKnown ? 'bg-brand-500 text-white' : 'bg-[var(--color-surface)] text-[var(--color-ink-3)]'}`}
                   >
                     {isKnown ? <CheckCircle size={14} strokeWidth={2.5} /> : locked ? <Lock size={13} /> : idx + 1}
                   </div>

@@ -1,5 +1,24 @@
 @import "tailwindcss";
 
+/* 브랜드/시맨틱 색 토큰 — 라이트/다크 공통(브랜드 색은 양 테마 유지) */
+@theme {
+  --color-brand-200: #fed7aa;
+  --color-brand-300: #fdba74;
+  --color-brand-400: #fb923c;
+  --color-brand-500: #f97316;
+  --color-brand-600: #ea580c;
+  --color-brand-deep: #fa4809;
+  --color-success-400: #4ade80;
+  --color-success-500: #22c55e;
+  --color-danger-300: #fca5a5;
+  --color-danger-400: #f87171;
+  --color-danger-500: #ef4444;
+  --color-warning-400: #facc15;
+  --text-2xs: 11px;
+  --text-3xs: 10px;
+  --text-4xs: 9px;
+}
+
 @keyframes bounce-up {
   0%, 100% { transform: translateY(0); opacity: 0.5; }
   50% { transform: translateY(-4px); opacity: 1; }
