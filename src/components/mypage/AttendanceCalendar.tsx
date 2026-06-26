@@ -37,7 +37,7 @@ export const AttendanceCalendar = ({ attendanceDates }: { attendanceDates: strin
         </button>
         <div className="text-center">
           <p className="text-sm font-bold text-[var(--color-ink)]">{year}년 {month + 1}월</p>
-          <p className="text-[11px] text-orange-400 font-semibold mt-0.5">이번 달 {attendCount}일 출석</p>
+          <p className="text-2xs text-brand-400 font-semibold mt-0.5">이번 달 {attendCount}일 출석</p>
         </div>
         <button
           onClick={() => setViewDate(new Date(year, month + 1, 1))}
@@ -49,7 +49,7 @@ export const AttendanceCalendar = ({ attendanceDates }: { attendanceDates: strin
 
       <div className="grid grid-cols-7 px-3 pt-3">
         {DAYS.map((d, i) => (
-          <div key={d} className={`text-center text-[11px] font-bold pb-2 ${i === 0 ? 'text-red-400' : i === 6 ? 'text-blue-400' : 'text-[var(--color-ink-3)]'}`}>
+          <div key={d} className={`text-center text-2xs font-bold pb-2 ${i === 0 ? 'text-danger-400' : i === 6 ? 'text-blue-400' : 'text-[var(--color-ink-3)]'}`}>
             {d}
           </div>
         ))}
@@ -65,9 +65,9 @@ export const AttendanceCalendar = ({ attendanceDates }: { attendanceDates: strin
           return (
             <div key={day} className="flex items-center justify-center py-0.5">
               <div className={`w-8 h-8 flex items-center justify-center rounded-full text-xs font-semibold
-                ${isAttended ? 'bg-orange-500 text-white font-bold' : ''}
-                ${isToday && !isAttended ? 'ring-2 ring-orange-400 text-orange-500 font-bold' : ''}
-                ${!isAttended && !isToday ? (dayOfWeek === 0 ? 'text-red-300' : dayOfWeek === 6 ? 'text-blue-300' : 'text-[var(--color-ink-3)]') : ''}
+                ${isAttended ? 'bg-brand-500 text-white font-bold' : ''}
+                ${isToday && !isAttended ? 'ring-2 ring-brand-400 text-brand-500 font-bold' : ''}
+                ${!isAttended && !isToday ? (dayOfWeek === 0 ? 'text-danger-300' : dayOfWeek === 6 ? 'text-blue-300' : 'text-[var(--color-ink-3)]') : ''}
               `}>
                 {day}
               </div>
@@ -78,12 +78,12 @@ export const AttendanceCalendar = ({ attendanceDates }: { attendanceDates: strin
 
       <div className="flex items-center gap-4 px-5 pb-4 pt-1 border-t border-[var(--color-line)]">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-orange-500" />
-          <span className="text-[11px] text-[var(--color-ink-3)] font-medium">출석</span>
+          <div className="w-3 h-3 rounded-full bg-brand-500" />
+          <span className="text-2xs text-[var(--color-ink-3)] font-medium">출석</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full border-2 border-orange-400" />
-          <span className="text-[11px] text-[var(--color-ink-3)] font-medium">오늘</span>
+          <div className="w-3 h-3 rounded-full border-2 border-brand-400" />
+          <span className="text-2xs text-[var(--color-ink-3)] font-medium">오늘</span>
         </div>
       </div>
     </div>

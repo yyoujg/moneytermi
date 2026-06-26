@@ -29,8 +29,8 @@ export const DailyAlarmPromptCard = () => {
   return (
     <div className="w-full bg-[var(--color-card)] rounded-2xl p-5 flex flex-col gap-3">
       <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
-          <Bell size={16} className="text-orange-500" />
+        <div className="w-9 h-9 rounded-xl bg-brand-500/10 flex items-center justify-center shrink-0">
+          <Bell size={16} className="text-brand-500" />
         </div>
         <div>
           <p className="text-sm font-semibold text-[var(--color-ink)]">매일 오늘의 용어 받기</p>
@@ -46,7 +46,7 @@ export const DailyAlarmPromptCard = () => {
         </button>
         <button
           onClick={requestAgreement}
-          className="flex-1 py-3 rounded-xl text-sm font-bold text-white bg-orange-500 active:opacity-90"
+          className="flex-1 py-3 rounded-xl text-sm font-bold text-white bg-brand-500 active:opacity-90"
         >
           알림 받기
         </button>

@@ -51,7 +51,7 @@ const CourseScreen = () => {
             <button
               onClick={() => { setShowSearch(s => !s); }}
               className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors
-                ${showSearch ? 'bg-orange-500 text-white' : 'bg-[var(--color-surface)] text-[var(--color-ink-3)]'}`}
+                ${showSearch ? 'bg-brand-500 text-white' : 'bg-[var(--color-surface)] text-[var(--color-ink-3)]'}`}
             >
               {showSearch ? <X size={15} /> : <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>}
             </button>
@@ -95,7 +95,7 @@ const CourseScreen = () => {
         <div className="px-5 pb-2 flex gap-[2px]">
           {allWords.map(word => {
             const isKnown = knownWords.some(kw => kw.id === word.id);
-            return <div key={word.id} className={`flex-1 h-1.5 rounded-full transition-all duration-500 ${isKnown ? 'bg-orange-400' : 'bg-[var(--color-surface)]'}`} />;
+            return <div key={word.id} className={`flex-1 h-1.5 rounded-full transition-all duration-500 ${isKnown ? 'bg-brand-400' : 'bg-[var(--color-surface)]'}`} />;
           })}
         </div>
 
@@ -108,7 +108,7 @@ const CourseScreen = () => {
                   <Menu.DropdownItem
                     key={cat}
                     onClick={() => setActiveCategory(cat)}
-                    right={activeCategory === cat ? <span className="text-orange-500 text-xs font-bold">✓</span> : undefined}
+                    right={activeCategory === cat ? <span className="text-brand-500 text-xs font-bold">✓</span> : undefined}
                   >
                     {cat}
                   </Menu.DropdownItem>
@@ -142,18 +142,18 @@ const CourseScreen = () => {
               >
                 <div className="flex items-start justify-between mb-3">
                   <span
-                    className="text-[11px] font-medium px-2.5 py-1 rounded-full text-[var(--color-ink-3)]"
+                    className="text-2xs font-medium px-2.5 py-1 rounded-full text-[var(--color-ink-3)]"
                     style={{ backgroundColor: 'var(--color-surface)' }}
                   >
                     {course.level}
                   </span>
                   {isCompleted && (
-                    <span className="flex items-center gap-1 text-[11px] font-bold text-orange-500">
+                    <span className="flex items-center gap-1 text-2xs font-bold text-brand-500">
                       <CheckCircle size={12} /> 완료
                     </span>
                   )}
                   {!isCompleted && hasStarted && (
-                    <span className="text-[11px] font-bold text-orange-500">{progressPct}%</span>
+                    <span className="text-2xs font-bold text-brand-500">{progressPct}%</span>
                   )}
                 </div>
 
@@ -170,11 +170,11 @@ const CourseScreen = () => {
                 <div className="flex items-center gap-2 mb-3">
                   <div className="flex-1 bg-[var(--color-surface)] rounded-full h-1.5 overflow-hidden">
                     <div
-                      className={`h-full rounded-full transition-all duration-700 ${isCompleted ? 'bg-orange-500' : 'bg-orange-300'}`}
+                      className={`h-full rounded-full transition-all duration-700 ${isCompleted ? 'bg-brand-500' : 'bg-brand-300'}`}
                       style={{ width: `${progressPct}%` }}
                     />
                   </div>
-                  <span className="text-[11px] font-bold text-[var(--color-ink-3)] shrink-0 w-8 text-right">
+                  <span className="text-2xs font-bold text-[var(--color-ink-3)] shrink-0 w-8 text-right">
                     {courseKnownCount}/{course.words.length}
                   </span>
                 </div>
@@ -183,9 +183,9 @@ const CourseScreen = () => {
                   onClick={() => { logClick('course_start', { course_id: course.id, title: course.title }); navigate('/word-card', { state: { words: [...course.words].sort((a, b) => a.difficulty - b.difficulty), index: 0, backPath: '/course', autoAdvance: true } }); }}
                   className={`w-full flex items-center justify-center gap-1.5 py-3.5 rounded-2xl text-xs font-bold transition-colors
                     ${isCompleted
-                      ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20 active:bg-orange-500/20'
+                      ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20 active:bg-brand-500/20'
                       : hasStarted
-                        ? 'bg-orange-500 text-white active:bg-orange-600'
+                        ? 'bg-brand-500 text-white active:bg-brand-600'
                         : 'bg-[var(--color-line)] text-[var(--color-ink-2)] active:opacity-80'
                     }`}
                 >

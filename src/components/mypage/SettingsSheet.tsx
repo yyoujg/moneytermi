@@ -32,7 +32,7 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
                 type="button"
                 onClick={() => setTheme(val)}
                 className={`flex-1 py-2 rounded-xl text-xs font-bold transition-colors
-                  ${theme === val ? 'bg-orange-500 text-white' : 'bg-[var(--color-card)] text-[var(--color-ink-3)]'}`}
+                  ${theme === val ? 'bg-brand-500 text-white' : 'bg-[var(--color-card)] text-[var(--color-ink-3)]'}`}
               >
                 {label}
               </button>
@@ -87,7 +87,7 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
               <p className="text-xs text-[var(--color-ink-4)]">복습/학습 리마인더 받기</p>
             </div>
           </div>
-          <span className={`text-sm font-semibold ${agreed ? 'text-[var(--color-ink-4)]' : 'text-[#F97316]'}`}>
+          <span className={`text-sm font-semibold ${agreed ? 'text-[var(--color-ink-4)]' : 'text-brand-500'}`}>
             {agreed ? '동의됨' : '받기'}
           </span>
         </button>
