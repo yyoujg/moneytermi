@@ -86,6 +86,66 @@ export type Database = {
         };
         Relationships: [];
       };
+      actions: {
+        Row: {
+          id: string;
+          title: string;
+          description: string;
+          word_id: number | null;
+          course_id: string | null;
+          position: number;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          description: string;
+          word_id?: number | null;
+          course_id?: string | null;
+          position?: number;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          description?: string;
+          word_id?: number | null;
+          course_id?: string | null;
+          position?: number;
+        };
+        Relationships: [];
+      };
+      user_actions: {
+        Row: {
+          id: string;
+          user_id: string;
+          action_id: string | null;
+          custom_title: string | null;
+          status: 'todo' | 'doing' | 'done';
+          due_date: string | null;
+          completed_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          action_id?: string | null;
+          custom_title?: string | null;
+          status?: 'todo' | 'doing' | 'done';
+          due_date?: string | null;
+          completed_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          action_id?: string | null;
+          custom_title?: string | null;
+          status?: 'todo' | 'doing' | 'done';
+          due_date?: string | null;
+          completed_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       daily_missions: {
         Row: {
           id: string;
