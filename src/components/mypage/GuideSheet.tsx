@@ -11,7 +11,7 @@ const FAQ_ITEMS = [
 ];
 
 export const GuideSheet = ({ open, onClose }: { open: boolean; onClose: () => void }) => (
-  <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px', fontWeight: 700 }}>앱 사용법 & FAQ</span>}>
+  <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>앱 사용법 & FAQ</span>}>
     <div className="px-5 pb-6 flex flex-col gap-3">
       {FAQ_ITEMS.map((item, i) => (
         <div key={i} className="bg-[var(--color-canvas)] rounded-2xl px-4 py-4">

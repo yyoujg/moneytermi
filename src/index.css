@@ -73,6 +73,17 @@ body,
   --color-brand-soft: rgba(249, 115, 22, 0.16);
   --color-success-soft: rgba(34, 197, 94, 0.16);
   --color-danger-soft: rgba(239, 68, 68, 0.16);
+
+  /* TDS(adaptive) 표면 색을 앱 다크에 맞춤 — 바텀시트/카드 패널 */
+  --adaptiveBackground: var(--color-card) !important;
+  --adaptiveFloatBackground: var(--color-card) !important;
+  --adaptiveLayeredBackground: var(--color-card) !important;
+  --adaptiveBackgroundLevel01: var(--color-surface) !important;
+  --adaptiveBackgroundLevel02: var(--color-card) !important;
+  --adaptiveBackgroundLevelB01: var(--color-surface) !important;
+  --adaptiveGreyBackground: var(--color-surface) !important;
+  --adaptiveCardBgWhite: var(--color-card) !important;
+  --adaptiveCardBgGrey: var(--color-surface) !important;
 }
 
 body {

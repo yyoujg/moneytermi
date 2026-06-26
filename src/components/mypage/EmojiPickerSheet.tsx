@@ -3,7 +3,7 @@ import { BottomSheet } from '@toss/tds-mobile';
 const EMOJI_OPTIONS = ['😊','🥰','😎','🤓','🧠','🦁','🐼','🐻','🦊','🐯','🌟','🎯','🎮','🚀','💎','🔥','🍀','🎸','🏆','⚡'];
 
 export const EmojiPickerSheet = ({ open, current, onSelect, onClose }: { open: boolean; current: string; onSelect: (e: string) => void; onClose: () => void }) => (
-  <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px', fontWeight: 700 }}>프로필 이모지 선택</span>}>
+  <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>프로필 이모지 선택</span>}>
     <div className="px-5 pb-6">
       <div className="grid grid-cols-5 gap-3">
         {EMOJI_OPTIONS.map(emoji => (
