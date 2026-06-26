@@ -25,7 +25,7 @@ export const ActionPickerSheet = ({
         {actions.map((a) => {
           const added = addedIds.has(a.id);
           return (
-            <div key={a.id} className="bg-[var(--color-canvas)] rounded-2xl px-4 py-4 flex items-center gap-3">
+            <div key={a.id} className="bg-[var(--color-canvas)] rounded-card px-4 py-4 flex items-center gap-3">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-[var(--color-ink)] break-keep">{a.title}</p>
                 {a.description && (
@@ -35,7 +35,7 @@ export const ActionPickerSheet = ({
               <button
                 onClick={() => onAdd(a.id)}
                 disabled={added}
-                className={`shrink-0 px-3 py-2 rounded-xl text-xs font-bold active:opacity-80 disabled:opacity-100 flex items-center gap-1
+                className={`shrink-0 px-3 py-2 rounded-button text-xs font-bold active:opacity-80 disabled:opacity-100 flex items-center gap-1
                   ${added ? 'bg-[var(--color-surface)] text-[var(--color-ink-4)]' : 'bg-brand-500 text-white'}`}
               >
                 {added ? <><Check size={13} /> 담김</> : '담기'}

@@ -62,7 +62,7 @@ const WordCard = ({
   <div className="flex flex-col gap-3 px-5 pb-6">
 
     {/* 단어 헤더 */}
-    <div className="bg-[var(--color-card)] rounded-2xl px-5 py-5">
+    <div className="bg-[var(--color-card)] rounded-card px-5 py-5">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1">
           <h1 className="text-[28px] font-black text-[var(--color-ink)] leading-[1.2] tracking-[-0.03em] break-keep mb-2">
@@ -83,13 +83,13 @@ const WordCard = ({
     </div>
 
     {/* 자세히 알아보기 */}
-    <div className="bg-[var(--color-card)] rounded-2xl px-5 pt-4 pb-5 flex flex-col gap-2.5">
+    <div className="bg-[var(--color-card)] rounded-card px-5 pt-4 pb-5 flex flex-col gap-2.5">
       <p className="text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]">📖 자세히 알아보기</p>
       <p className="text-sm leading-[1.8] text-[var(--color-ink-2)] font-medium break-keep tracking-[-0.01em]">{word.detailedMeaning}</p>
     </div>
 
     {/* 실시간 뉴스 */}
-    <div className="bg-[var(--color-card)] rounded-2xl px-5 pt-4 pb-5 flex flex-col gap-2.5">
+    <div className="bg-[var(--color-card)] rounded-card px-5 pt-4 pb-5 flex flex-col gap-2.5">
       <p className="text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]">🗞 실시간 뉴스</p>
       {newsLoading ? (
         <div className="flex flex-col gap-3.5">
@@ -135,7 +135,7 @@ const WordCard = ({
 
     {/* 관련 용어 */}
     {validRelated.length > 0 && (
-      <div className="bg-[var(--color-card)] rounded-2xl px-5 py-4 flex flex-col gap-2.5">
+      <div className="bg-[var(--color-card)] rounded-card px-5 py-4 flex flex-col gap-2.5">
         <p className="text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]">🔗 관련 용어</p>
         <div className="flex flex-col">
           {validRelated.map((tag, i) => (
@@ -157,7 +157,7 @@ const WordCard = ({
     {relatedActions.length > 0 && (
       <button
         onClick={onOpenActions}
-        className="bg-[var(--color-card)] rounded-2xl px-5 py-4 flex items-center justify-between active:opacity-80"
+        className="bg-[var(--color-card)] rounded-card px-5 py-4 flex items-center justify-between active:opacity-80"
       >
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-brand-500/10 flex items-center justify-center shrink-0">
@@ -237,7 +237,7 @@ const WordCardScreen = () => {
             <h2 className="text-2xl font-bold text-[var(--color-ink)] mb-1">학습 완료!</h2>
             <p className="text-sm text-[var(--color-ink-4)]">{words.length}개 단어를 학습했어요</p>
           </div>
-          <div className="w-full bg-[var(--color-card)] rounded-2xl p-4">
+          <div className="w-full bg-[var(--color-card)] rounded-card p-4">
             <p className="text-xs text-[var(--color-ink-4)] mb-3">방금 배운 단어, 바로 확인해볼까요?</p>
             <div className="flex flex-wrap gap-1.5">
               {words.slice(0, 5).map(w => (
@@ -249,13 +249,13 @@ const WordCardScreen = () => {
         <div className="px-5 pb-12 flex flex-col gap-2.5">
           <button
             onClick={() => navigate('/quiz', { state: { quizQueue: quizWords } })}
-            className="w-full py-4 rounded-2xl bg-brand-500 text-sm font-bold text-white active:opacity-90"
+            className="w-full py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90"
           >
             바로 퀴즈 풀기 →
           </button>
           <button
             onClick={() => navigate(backPath, backState ? { state: backState } : undefined)}
-            className="w-full py-3 rounded-2xl bg-[var(--color-card)] text-xs font-medium text-[var(--color-ink-3)] active:opacity-70"
+            className="w-full py-3 rounded-button bg-[var(--color-card)] text-xs font-medium text-[var(--color-ink-3)] active:opacity-70"
           >
             코스로 돌아가기
           </button>
@@ -388,14 +388,14 @@ const WordCardScreen = () => {
         <button
           onClick={goPrev}
           disabled={wordIndex === 0}
-          className="flex-1 py-3.5 rounded-2xl bg-[var(--color-surface)] text-sm font-bold text-[var(--color-ink-2)] disabled:opacity-30 active:opacity-70 flex items-center justify-center gap-1"
+          className="flex-1 py-3.5 rounded-button bg-[var(--color-surface)] text-sm font-bold text-[var(--color-ink-2)] disabled:opacity-30 active:opacity-70 flex items-center justify-center gap-1"
         >
           <ChevronLeft size={16} /> 이전
         </button>
         <button
           onClick={goNext}
           disabled={!autoAdvance && wordIndex === words.length - 1}
-          className="flex-[2] py-3.5 rounded-2xl text-sm font-bold text-white active:opacity-80 flex items-center justify-center gap-1 disabled:opacity-30"
+          className="flex-[2] py-3.5 rounded-button text-sm font-bold text-white active:opacity-80 flex items-center justify-center gap-1 disabled:opacity-30"
           style={{ backgroundColor: ACCENT }}
         >
           {autoAdvance

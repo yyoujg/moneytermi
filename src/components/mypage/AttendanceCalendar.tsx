@@ -27,7 +27,7 @@ export const AttendanceCalendar = ({ attendanceDates }: { attendanceDates: strin
   ).filter(Boolean).length;
 
   return (
-    <div className="bg-[var(--color-card)] rounded-2xl overflow-hidden">
+    <div className="bg-[var(--color-card)] rounded-card overflow-hidden">
       <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-line)]">
         <button
           onClick={() => setViewDate(new Date(year, month - 1, 1))}

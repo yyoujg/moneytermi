@@ -102,7 +102,7 @@ const QuizPage = () => {
         <p className="text-sm text-[var(--color-ink-3)] mb-8">지금 복습할 단어가 없어요</p>
         <button
           onClick={() => navigate('/home')}
-          className="px-6 py-4 rounded-2xl text-white text-xs font-bold active:opacity-90"
+          className="px-6 py-4 rounded-button text-white text-xs font-bold active:opacity-90"
           style={{ backgroundColor: 'var(--color-brand-500)' }}
         >
           홈으로
@@ -117,7 +117,7 @@ const QuizPage = () => {
         <div className="w-20 h-20 bg-brand-500/10 rounded-full flex items-center justify-center text-4xl mb-4">🏆</div>
         <h2 className="text-xl font-bold text-[var(--color-ink)] mb-1">오늘 복습 완료!</h2>
         <p className="text-sm text-[var(--color-ink-3)] mb-6">{queue.length}문제 중 {totalCorrect}개 정답</p>
-        <div className="flex items-center gap-2 bg-brand-500/10 border border-brand-500/20 rounded-2xl px-5 py-3 mb-8">
+        <div className="flex items-center gap-2 bg-brand-500/10 border border-brand-500/20 rounded-card px-5 py-3 mb-8">
           <Zap size={16} className="text-brand-500 fill-current" />
           <span className="text-sm font-bold text-[var(--color-ink)]">누적 포인트 {points} P</span>
         </div>
@@ -126,7 +126,7 @@ const QuizPage = () => {
         </div>
         <button
           onClick={() => navigate('/home')}
-          className="px-6 py-4 rounded-2xl text-white text-xs font-bold active:opacity-90"
+          className="px-6 py-4 rounded-button text-white text-xs font-bold active:opacity-90"
           style={{ backgroundColor: 'var(--color-brand-500)' }}
         >
           홈으로
@@ -169,19 +169,19 @@ const QuizPage = () => {
 
       <div className="flex-1 flex flex-col px-5 py-4">
         {/* 문제 카드 */}
-        <div className="bg-[var(--color-card)] rounded-2xl p-6 mb-5 flex-1">
-          <p className="text-2xs font-medium text-[var(--color-ink-4)] mb-4 tracking-wide uppercase">뜻을 보고 용어를 맞혀보세요</p>
+        <div className="bg-[var(--color-card)] rounded-card p-5 mb-4 flex-1">
+          <p className="text-2xs font-medium text-[var(--color-ink-4)] mb-3 tracking-wide uppercase">뜻을 보고 용어를 맞혀보세요</p>
 
           <p className="text-lg font-bold text-[var(--color-ink)] leading-relaxed mb-6">{word.meaning}</p>
 
           {showHint && (
-            <div className="bg-[var(--color-surface)] rounded-2xl px-4 py-3 flex items-center gap-2 mb-4">
+            <div className="bg-[var(--color-surface)] rounded-card px-4 py-3 flex items-center gap-2 mb-4">
               <Lightbulb size={14} className="text-[var(--color-ink-3)] shrink-0" />
               <span className="text-base font-bold text-[var(--color-ink)] tracking-widest">{word.hint}</span>
             </div>
           )}
 
-          <div className="bg-[var(--color-surface)] rounded-2xl p-4">
+          <div className="bg-[var(--color-surface)] rounded-card p-4">
             <p className="text-xs font-bold text-[var(--color-ink-3)] mb-1.5">상세 설명</p>
             <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep">{word.detailedMeaning}</p>
           </div>
@@ -197,7 +197,7 @@ const QuizPage = () => {
               placeholder="용어를 입력하세요"
               disabled={status !== 'idle'}
               autoComplete="off"
-              className={`w-full px-4 py-4 rounded-2xl text-sm font-medium outline-none border transition-colors
+              className={`w-full px-4 py-4 rounded-button text-sm font-medium outline-none border transition-colors
                 ${status === 'correct' ? 'bg-success-500/10 border-success-500/40 text-success-400' :
                   status === 'wrong' ? 'bg-danger-500/10 border-danger-500/40 text-danger-400' :
                   'bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink)] focus:border-brand-500/50'}
@@ -216,7 +216,7 @@ const QuizPage = () => {
             type="button"
             onClick={() => handleSubmit()}
             disabled={status !== 'idle' || !input.trim()}
-            className="w-full py-4 rounded-2xl text-white text-xs font-bold active:opacity-90 disabled:opacity-30"
+            className="w-full py-4 rounded-button text-white text-xs font-bold active:opacity-90 disabled:opacity-30"
             style={{ backgroundColor: 'var(--color-brand-500)' }}
           >
             제출하기
@@ -230,14 +230,14 @@ const QuizPage = () => {
           {!showHint && (
             <button
               onClick={() => setShowHint(true)}
-              className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-[var(--color-card)] text-xs font-bold text-[var(--color-ink-3)] active:opacity-70"
+              className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-button bg-[var(--color-card)] text-xs font-bold text-[var(--color-ink-3)] active:opacity-70"
             >
               <Lightbulb size={13} className="text-[var(--color-ink-4)]" /> 초성 힌트
             </button>
           )}
           <button
             onClick={goNext}
-            className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl bg-[var(--color-card)] text-xs font-bold text-[var(--color-ink-3)] active:opacity-70"
+            className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-button bg-[var(--color-card)] text-xs font-bold text-[var(--color-ink-3)] active:opacity-70"
           >
             <ChevronRight size={13} /> 건너뛰기
           </button>

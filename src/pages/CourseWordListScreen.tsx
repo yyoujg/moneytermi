@@ -66,7 +66,7 @@ const CourseWordListScreen = () => {
         </div>
 
         <div className="px-5">
-          <div className="bg-[var(--color-card)] rounded-2xl overflow-hidden divide-y divide-[var(--color-surface)]">
+          <div className="bg-[var(--color-card)] rounded-card overflow-hidden divide-y divide-[var(--color-surface)]">
             {sortedWords.map((word, idx) => {
               const isKnown = knownWords.some(kw => kw.id === word.id);
               const accessible = isAccessible(idx);

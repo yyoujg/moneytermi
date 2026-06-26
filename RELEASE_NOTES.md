@@ -31,7 +31,17 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
   - `index.css @theme`에 `--color-brand-*`(200~600·deep)·`--color-success/danger/warning-*`,
     `--text-2xs/3xs/4xs`(11/10/9px) 정의. 하드코딩 `orange/green/red/yellow` 클래스 ~145곳을
     `brand/success/danger/warning`로, 임의 `text-[Npx]` 60곳을 토큰/기존 스케일로 1:1 치환. 시각 변화 없음.
-  - 간격(p/m/gap)·라운드는 Tailwind 스케일이 이미 토큰이라 미변경(over-engineering 회피).
+  - 간격(p/m/gap)은 Tailwind 스케일이 이미 토큰이라 미변경(over-engineering 회피).
+
+- **radius 토큰화 + 버튼/입력 pill**
+  - `@theme`에 `--radius-card`(16)·`--radius-button`(pill)·`--radius-chip`(12) 정의. `rounded-2xl`→`rounded-card`,
+    `rounded-xl`→`rounded-chip` 전면 치환. BUTTON/INPUT 25곳을 `rounded-button`(pill)으로 — 둥근 nav와 톤 일치.
+    `rounded-full`(원형·진행바·점)·`rounded-t*`는 유지.
+
+- **카드 등 컴포넌트화 + 세로 간격 통일** (진행 중 — Home·MyPage 적용)
+  - 신규 `src/components/ui/`의 `Card`(tone card/surface · pad sm/md/lg)·`IconBox`·`StatCard`로 반복 마크업 단일화.
+  - 세로 리듬 규칙: 최상위 블록·카드 16px(mb-4/gap-4), 섹션 헤더→내용 12px(mb-3). Home·MyPage·Review·Actions의
+    이탈값(`mb-5`=20px, `p-6`=24px 등) 정리. 나머지 화면은 동일 패턴으로 후속 적용 예정.
 
 ### UX
 

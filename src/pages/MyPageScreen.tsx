@@ -10,6 +10,8 @@ import { GuideSheet } from '../components/mypage/GuideSheet';
 import { EmojiPickerSheet } from '../components/mypage/EmojiPickerSheet';
 import { SettingsSheet } from '../components/mypage/SettingsSheet';
 import { NicknameSheet } from '../components/mypage/NicknameSheet';
+import { Card } from '../components/ui/Card';
+import { IconBox } from '../components/ui/IconBox';
 
 const MyPageScreen = () => {
   const { points, knownWords, attendanceDates, missions, checkIn, myEmoji, updateMyEmoji } = useAppContext();
@@ -76,8 +78,8 @@ const MyPageScreen = () => {
 
       {/* 프로필 헤더 */}
       <div className="bg-[var(--color-card)] pt-4 px-5 pb-5">
-        <h2 className="text-xl font-bold mb-5 text-[var(--color-ink)]">마이페이지</h2>
-        <div className="flex items-center gap-4 mb-5">
+        <h2 className="text-xl font-bold mb-4 text-[var(--color-ink)]">마이페이지</h2>
+        <div className="flex items-center gap-4 mb-4">
           <button
             onClick={() => setShowEmojiPicker(true)}
             className="relative w-16 h-16 bg-[var(--color-surface)] rounded-full flex items-center justify-center text-3xl shrink-0 active:opacity-70"
@@ -109,7 +111,7 @@ const MyPageScreen = () => {
 
         {/* 통계 */}
         <div className="flex gap-3">
-          <div className="flex-1 bg-[var(--color-surface)] rounded-2xl p-4">
+          <Card tone="surface" pad="md" className="flex-1">
             <div className="flex items-center gap-1.5 mb-2">
               <Zap size={13} className="text-[var(--color-ink-4)] fill-current" />
               <span className="text-2xs font-medium text-[var(--color-ink-4)]">누적 포인트</span>
@@ -117,8 +119,8 @@ const MyPageScreen = () => {
             <p className="text-3xl font-bold text-[var(--color-ink)]">
               {points.toLocaleString()}<span className="text-sm font-medium text-[var(--color-ink-4)] ml-1">P</span>
             </p>
-          </div>
-          <div className="flex-1 bg-[var(--color-surface)] rounded-2xl p-4">
+          </Card>
+          <Card tone="surface" pad="md" className="flex-1">
             <div className="flex items-center gap-1.5 mb-2">
               <BookOpen size={13} className="text-[var(--color-ink-4)]" />
               <span className="text-2xs font-medium text-[var(--color-ink-4)]">학습한 단어</span>
@@ -126,17 +128,17 @@ const MyPageScreen = () => {
             <p className="text-3xl font-bold text-[var(--color-ink)]">
               {knownWords.length}<span className="text-sm font-medium text-[var(--color-ink-4)] ml-1">개</span>
             </p>
-          </div>
+          </Card>
         </div>
       </div>
 
       <div className="px-5 pt-5 flex flex-col gap-4">
         {/* 출석 달력 */}
         <div>
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-bold text-[var(--color-ink-2)]">출석 현황</p>
             {missions.m1.current < missions.m1.target
-              ? <button onClick={handleCheckIn} className="flex items-center gap-1 px-3.5 py-1.5 rounded-xl bg-brand-500 text-white text-xs font-bold active:opacity-80">✋ 출석하기</button>
+              ? <button onClick={handleCheckIn} className="flex items-center gap-1 px-3.5 py-1.5 rounded-button bg-brand-500 text-white text-xs font-bold active:opacity-80">✋ 출석하기</button>
               : <span className="text-xs font-bold text-success-500">✅ 출석 완료</span>
             }
           </div>
@@ -145,7 +147,7 @@ const MyPageScreen = () => {
 
         {/* 메뉴 */}
         <div>
-          <div className="bg-[var(--color-card)] rounded-2xl overflow-hidden">
+          <Card pad="none" className="overflow-hidden">
             <List>
               {MENU_ITEMS.map(({ icon: Icon, label, sub, danger }) => (
                 <ListRow
@@ -154,9 +156,9 @@ const MyPageScreen = () => {
                   border="none"
                   onClick={() => handleMenuClick(label)}
                   left={
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${danger ? 'bg-danger-500/10' : 'bg-[var(--color-line)]'}`}>
+                    <IconBox className={`rounded-chip ${danger ? 'bg-danger-500/10' : 'bg-[var(--color-line)]'}`}>
                       <Icon size={16} className={danger ? 'text-danger-400' : 'text-[var(--color-ink-2)]'} />
-                    </div>
+                    </IconBox>
                   }
                   contents={
                     sub
@@ -167,7 +169,7 @@ const MyPageScreen = () => {
                 />
               ))}
             </List>
-          </div>
+          </Card>
         </div>
 
         <Spacing size={4} />

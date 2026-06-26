@@ -69,7 +69,7 @@ const CourseScreen = () => {
                 placeholder="용어 검색"
               />
               {showResults && (
-                <div className="absolute top-[52px] left-0 right-0 bg-[var(--color-card)] rounded-2xl z-50 overflow-hidden">
+                <div className="absolute top-[52px] left-0 right-0 bg-[var(--color-card)] rounded-card z-50 overflow-hidden">
                   {searchResults.length === 0
                     ? <div className="px-5 py-5 text-center text-sm text-[var(--color-ink-3)]">검색 결과가 없어요</div>
                     : <div className="max-h-56 overflow-y-auto [&::-webkit-scrollbar]:hidden">
@@ -133,7 +133,7 @@ const CourseScreen = () => {
           const hasStarted = courseKnownCount > 0;
 
           return (
-            <div key={course.id} className="bg-[var(--color-card)] rounded-2xl overflow-hidden">
+            <div key={course.id} className="bg-[var(--color-card)] rounded-card overflow-hidden">
 
               {/* 카드 헤더 */}
               <div
@@ -181,7 +181,7 @@ const CourseScreen = () => {
 
                 <button
                   onClick={() => { logClick('course_start', { course_id: course.id, title: course.title }); navigate('/word-card', { state: { words: [...course.words].sort((a, b) => a.difficulty - b.difficulty), index: 0, backPath: '/course', autoAdvance: true } }); }}
-                  className={`w-full flex items-center justify-center gap-1.5 py-3.5 rounded-2xl text-xs font-bold transition-colors
+                  className={`w-full flex items-center justify-center gap-1.5 py-3.5 rounded-button text-xs font-bold transition-colors
                     ${isCompleted
                       ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20 active:bg-brand-500/20'
                       : hasStarted
