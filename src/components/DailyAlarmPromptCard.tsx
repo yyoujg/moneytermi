@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Bell } from 'lucide-react';
 import { Storage } from '../lib/storage';
 import { useNotificationAgreement } from '../hooks/useNotificationAgreement';
+import { Card } from './ui/Card';
+import { IconBox } from './ui/IconBox';
 
 // 학습 완료 결과 화면에서 미동의 사용자에게 1회만 노출하는 알림 동의 카드.
 // 노출/나중에 클릭 시 다시 자동으로 뜨지 않고, 재동의는 마이페이지에서만 가능하다.
@@ -27,11 +29,11 @@ export const DailyAlarmPromptCard = () => {
   if (!show || agreed) return null;
 
   return (
-    <div className="w-full bg-[var(--color-card)] rounded-card p-5 flex flex-col gap-3">
+    <Card pad="lg" className="w-full flex flex-col gap-3">
       <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-chip bg-brand-500/10 flex items-center justify-center shrink-0">
+        <IconBox className="rounded-chip bg-brand-500/10">
           <Bell size={16} className="text-brand-500" />
-        </div>
+        </IconBox>
         <div>
           <p className="text-sm font-semibold text-[var(--color-ink)]">매일 오늘의 용어 받기</p>
           <p className="text-xs text-[var(--color-ink-4)]">매일 09:00, 오늘의 경제 용어를 알림으로 보내드려요</p>
@@ -51,6 +53,6 @@ export const DailyAlarmPromptCard = () => {
           알림 받기
         </button>
       </div>
-    </div>
+    </Card>
   );
 };

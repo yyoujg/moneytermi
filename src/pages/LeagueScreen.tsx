@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { TextButton, List, ListRow, Badge, Spacing } from '@toss/tds-mobile';
 import { CURRENT_LEAGUE_ID, LEAGUE_TIERS } from '../constants';
 import { useAppContext } from '../context/AppContext';
+import { Card } from '../components/ui/Card';
 import { useAuth } from '../hooks/useAuth';
 import { shareTossLink } from '../lib/share';
 import { logClick } from '../lib/analytics';
@@ -146,7 +147,7 @@ const LeagueScreen = () => {
       <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden px-5 pt-4 pb-24">
 
         {/* TOP 3 podium */}
-        <div className="bg-[var(--color-card)] rounded-card overflow-hidden mb-3">
+        <Card pad="none" className="overflow-hidden mb-3">
           <div className="px-4 pt-4 pb-3">
             <p className="text-2xs font-medium text-[var(--color-ink-4)] mb-4 text-center tracking-widest uppercase">Top 3</p>
             <div className="flex items-end justify-center gap-3 mb-2">
@@ -182,10 +183,10 @@ const LeagueScreen = () => {
               )}
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* 전체 순위 */}
-        <div className="bg-[var(--color-card)] rounded-card overflow-hidden mb-3">
+        <Card pad="none" className="overflow-hidden mb-3">
           <List>
             {sortedLeague.map((u, i) => {
               const rank = i + 1;
@@ -242,7 +243,7 @@ const LeagueScreen = () => {
               );
             })}
           </List>
-        </div>
+        </Card>
 
         {/* 승급/강등 안내 */}
         <div className="flex gap-2 mb-4">
