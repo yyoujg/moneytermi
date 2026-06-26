@@ -102,7 +102,7 @@ const QuizScreen = () => {
           </div>
 
           {/* 결과 카드 */}
-          <div className="w-full bg-[var(--color-card)] rounded-2xl p-5 flex flex-col gap-4">
+          <div className="w-full bg-[var(--color-card)] rounded-card p-5 flex flex-col gap-4">
             <div className="flex justify-between items-center">
               <span className="text-sm text-[var(--color-ink-4)]">획득 포인트</span>
               <div className="flex items-center gap-1.5">
@@ -137,7 +137,7 @@ const QuizScreen = () => {
         <div className="px-5 pb-12 flex flex-col gap-3">
           <button
             onClick={() => navigate('/home')}
-            className="w-full py-4 rounded-2xl text-sm font-bold text-white bg-brand-500 active:opacity-90"
+            className="w-full py-4 rounded-button text-sm font-bold text-white bg-brand-500 active:opacity-90"
           >
             홈으로
           </button>
@@ -252,13 +252,13 @@ const QuizScreen = () => {
       <div className="flex-1 flex flex-col px-5 py-5 gap-4">
         {/* 스트릭 배너 */}
         {streakMessage && status === 'idle' && (
-          <div className={`flex items-center justify-center py-2 rounded-xl bg-[var(--color-card)] ${streakMessage.color} text-xs font-bold`}>
+          <div className={`flex items-center justify-center py-2 rounded-chip bg-[var(--color-card)] ${streakMessage.color} text-xs font-bold`}>
             {streakMessage.text}
           </div>
         )}
 
         {/* 문제 카드 */}
-        <div className={`rounded-2xl p-5 flex-1 flex flex-col justify-center gap-4
+        <div className={`rounded-card p-5 flex-1 flex flex-col justify-center gap-4
           ${status === 'correct' ? 'flash-correct ring-2 ring-success-500/40' : 'bg-[var(--color-card)]'}
           ${status === 'wrong' ? 'bg-[var(--color-card)] ring-2 ring-danger-500/30' : ''}
           ${shake ? 'shake' : ''}
@@ -267,7 +267,7 @@ const QuizScreen = () => {
 
           <p className="text-xl font-bold text-[var(--color-ink)] leading-snug mb-2">{currentWord.meaning}</p>
 
-          <div className="bg-[var(--color-canvas)] rounded-xl px-4 py-3">
+          <div className="bg-[var(--color-canvas)] rounded-chip px-4 py-3">
             <p className="text-sm text-[var(--color-ink-3)] leading-relaxed break-keep">{currentWord.detailedMeaning}</p>
           </div>
 
@@ -306,7 +306,7 @@ const QuizScreen = () => {
               <button
                 key={option}
                 onClick={() => handleSelect(option)}
-                className={`relative py-4 px-4 rounded-2xl text-sm font-bold text-left transition-all duration-150 ${optionStyle}`}
+                className={`relative py-4 px-4 rounded-card text-sm font-bold text-left transition-all duration-150 ${optionStyle}`}
               >
                 {option}
                 {status !== 'idle' && isCorrectOption && (

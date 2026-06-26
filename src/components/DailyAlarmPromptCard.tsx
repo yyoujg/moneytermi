@@ -27,9 +27,9 @@ export const DailyAlarmPromptCard = () => {
   if (!show || agreed) return null;
 
   return (
-    <div className="w-full bg-[var(--color-card)] rounded-2xl p-5 flex flex-col gap-3">
+    <div className="w-full bg-[var(--color-card)] rounded-card p-5 flex flex-col gap-3">
       <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-brand-500/10 flex items-center justify-center shrink-0">
+        <div className="w-9 h-9 rounded-chip bg-brand-500/10 flex items-center justify-center shrink-0">
           <Bell size={16} className="text-brand-500" />
         </div>
         <div>
@@ -40,13 +40,13 @@ export const DailyAlarmPromptCard = () => {
       <div className="flex gap-2">
         <button
           onClick={() => setShow(false)}
-          className="flex-1 py-3 rounded-xl text-sm font-bold text-[var(--color-ink-2)] bg-[var(--color-surface)] active:opacity-90"
+          className="flex-1 py-3 rounded-button text-sm font-bold text-[var(--color-ink-2)] bg-[var(--color-surface)] active:opacity-90"
         >
           나중에
         </button>
         <button
           onClick={requestAgreement}
-          className="flex-1 py-3 rounded-xl text-sm font-bold text-white bg-brand-500 active:opacity-90"
+          className="flex-1 py-3 rounded-button text-sm font-bold text-white bg-brand-500 active:opacity-90"
         >
           알림 받기
         </button>

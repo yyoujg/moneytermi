@@ -17,6 +17,9 @@
   --text-2xs: 11px;
   --text-3xs: 10px;
   --text-4xs: 9px;
+  --radius-card: 16px;
+  --radius-button: 9999px;
+  --radius-chip: 12px;
 }
 
 @keyframes bounce-up {

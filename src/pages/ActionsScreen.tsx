@@ -10,7 +10,7 @@ const Row = ({ title, concept, isDone, onToggle, onRemove }: {
   onToggle: () => void;
   onRemove: () => void;
 }) => (
-  <div className="bg-[var(--color-card)] rounded-2xl px-4 py-3.5 flex items-center gap-3">
+  <div className="bg-[var(--color-card)] rounded-card px-4 py-3.5 flex items-center gap-3">
     <button
       onClick={onToggle}
       aria-label={isDone ? '완료 취소' : '완료'}
@@ -78,19 +78,19 @@ const ActionsScreen = () => {
         <h1 className="text-xl font-bold text-[var(--color-ink)] mb-4">실천</h1>
 
         {/* 직접 추가 */}
-        <div className="flex gap-2 mb-5">
+        <div className="flex gap-2 mb-4">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') handleAdd(); }}
             placeholder="실천할 일을 직접 추가"
-            className="flex-1 px-4 py-3 rounded-2xl text-sm font-medium outline-none border bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink)] focus:border-brand-500/50"
+            className="flex-1 px-4 py-3 rounded-button text-sm font-medium outline-none border bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink)] focus:border-brand-500/50"
             style={{ caretColor: 'var(--color-brand-500)' }}
           />
           <button
             onClick={handleAdd}
             disabled={!input.trim()}
-            className="shrink-0 w-12 rounded-2xl bg-brand-500 text-white flex items-center justify-center active:opacity-90 disabled:opacity-30"
+            className="shrink-0 w-12 rounded-button bg-brand-500 text-white flex items-center justify-center active:opacity-90 disabled:opacity-30"
           >
             <Plus size={18} />
           </button>
@@ -105,7 +105,7 @@ const ActionsScreen = () => {
         )}
 
         {todo.length > 0 && (
-          <div className="mb-5 flex flex-col gap-3">
+          <div className="mb-4 flex flex-col gap-3">
             <p className="text-xs font-bold text-[var(--color-ink-4)] px-1">미완료 {todo.length}</p>
             <div className="flex flex-col gap-2">{todo.map(renderRow)}</div>
           </div>

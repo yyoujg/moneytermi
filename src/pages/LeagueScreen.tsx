@@ -63,7 +63,7 @@ const LeagueScreen = () => {
         </div>
 
         {/* 내 현황 강조 */}
-        <div className="bg-[var(--color-canvas)] rounded-2xl p-4 mb-4">
+        <div className="bg-[var(--color-canvas)] rounded-card p-4 mb-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-brand-500/10 rounded-full flex items-center justify-center text-xl">{myEmoji}</div>
@@ -81,7 +81,7 @@ const LeagueScreen = () => {
           {/* 위 2명 + 아래 */}
           <div className="flex flex-col gap-1.5">
             {aboveUser && (
-              <div className="rounded-xl px-3 py-2.5 flex items-center justify-between" style={{ backgroundColor: 'var(--color-success-soft)' }}>
+              <div className="rounded-chip px-3 py-2.5 flex items-center justify-between" style={{ backgroundColor: 'var(--color-success-soft)' }}>
                 <div className="flex items-center gap-2">
                   <TrendingUp size={13} className="text-success-500 shrink-0" />
                   <span className="text-xs text-[var(--color-ink-3)] truncate max-w-[120px]">{aboveUser.name}</span>
@@ -90,7 +90,7 @@ const LeagueScreen = () => {
               </div>
             )}
             {above2User && (
-              <div className="rounded-xl px-3 py-2.5 flex items-center justify-between bg-[var(--color-surface)]">
+              <div className="rounded-chip px-3 py-2.5 flex items-center justify-between bg-[var(--color-surface)]">
                 <div className="flex items-center gap-2">
                   <TrendingUp size={13} className="text-[var(--color-ink-4)] shrink-0" />
                   <span className="text-xs text-[var(--color-ink-4)] truncate max-w-[120px]">{above2User.name}</span>
@@ -99,7 +99,7 @@ const LeagueScreen = () => {
               </div>
             )}
             {belowUser && myRank > total - 5 && (
-              <div className="rounded-xl px-3 py-2.5 flex items-center justify-between" style={{ backgroundColor: 'var(--color-danger-soft)' }}>
+              <div className="rounded-chip px-3 py-2.5 flex items-center justify-between" style={{ backgroundColor: 'var(--color-danger-soft)' }}>
                 <div className="flex items-center gap-2">
                   <TrendingDown size={13} className="text-danger-400 shrink-0" />
                   <span className="text-xs text-[var(--color-ink-3)]">강등 위험</span>
@@ -146,7 +146,7 @@ const LeagueScreen = () => {
       <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden px-5 pt-4 pb-24">
 
         {/* TOP 3 podium */}
-        <div className="bg-[var(--color-card)] rounded-2xl overflow-hidden mb-3">
+        <div className="bg-[var(--color-card)] rounded-card overflow-hidden mb-3">
           <div className="px-4 pt-4 pb-3">
             <p className="text-2xs font-medium text-[var(--color-ink-4)] mb-4 text-center tracking-widest uppercase">Top 3</p>
             <div className="flex items-end justify-center gap-3 mb-2">
@@ -185,7 +185,7 @@ const LeagueScreen = () => {
         </div>
 
         {/* 전체 순위 */}
-        <div className="bg-[var(--color-card)] rounded-2xl overflow-hidden mb-3">
+        <div className="bg-[var(--color-card)] rounded-card overflow-hidden mb-3">
           <List>
             {sortedLeague.map((u, i) => {
               const rank = i + 1;
@@ -246,11 +246,11 @@ const LeagueScreen = () => {
 
         {/* 승급/강등 안내 */}
         <div className="flex gap-2 mb-4">
-          <div className="flex-1 flex items-center gap-2 bg-[var(--color-card)] rounded-xl px-3 py-2.5">
+          <div className="flex-1 flex items-center gap-2 bg-[var(--color-card)] rounded-chip px-3 py-2.5">
             <div className="w-2 h-2 rounded-full bg-success-500 shrink-0" />
             <span className="text-2xs text-[var(--color-ink-4)]">상위 {promoteZone}명 승급</span>
           </div>
-          <div className="flex-1 flex items-center gap-2 bg-[var(--color-card)] rounded-xl px-3 py-2.5">
+          <div className="flex-1 flex items-center gap-2 bg-[var(--color-card)] rounded-chip px-3 py-2.5">
             <div className="w-2 h-2 rounded-full bg-danger-400 shrink-0" />
             <span className="text-2xs text-[var(--color-ink-4)]">하위 {demoteZone}명 강등</span>
           </div>

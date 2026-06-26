@@ -15,9 +15,9 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
     <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>앱 설정</span>}>
       <div className="px-5 pb-6 flex flex-col gap-2">
         {/* 테마 */}
-        <div className="bg-[var(--color-surface)] rounded-2xl px-4 py-4">
+        <div className="bg-[var(--color-surface)] rounded-card px-4 py-4">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-9 h-9 rounded-xl bg-[var(--color-line)] flex items-center justify-center">
+            <div className="w-9 h-9 rounded-chip bg-[var(--color-line)] flex items-center justify-center">
               <Moon size={16} className="text-[var(--color-ink-2)]" />
             </div>
             <div>
@@ -31,7 +31,7 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
                 key={val}
                 type="button"
                 onClick={() => setTheme(val)}
-                className={`flex-1 py-2 rounded-xl text-xs font-bold transition-colors
+                className={`flex-1 py-2 rounded-button text-xs font-bold transition-colors
                   ${theme === val ? 'bg-brand-500 text-white' : 'bg-[var(--color-card)] text-[var(--color-ink-3)]'}`}
               >
                 {label}
@@ -41,9 +41,9 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
         </div>
 
         {/* 효과음 */}
-        <div className="flex items-center justify-between bg-[var(--color-surface)] rounded-2xl px-4 py-4">
+        <div className="flex items-center justify-between bg-[var(--color-surface)] rounded-card px-4 py-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[var(--color-line)] flex items-center justify-center">
+            <div className="w-9 h-9 rounded-chip bg-[var(--color-line)] flex items-center justify-center">
               {soundOn
                 ? <Volume2 size={16} className="text-[var(--color-ink-2)]" />
                 : <VolumeX size={16} className="text-[var(--color-ink-4)]" />
@@ -58,9 +58,9 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
         </div>
 
         {/* 진동 */}
-        <div className="flex items-center justify-between bg-[var(--color-surface)] rounded-2xl px-4 py-4">
+        <div className="flex items-center justify-between bg-[var(--color-surface)] rounded-card px-4 py-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[var(--color-line)] flex items-center justify-center">
+            <div className="w-9 h-9 rounded-chip bg-[var(--color-line)] flex items-center justify-center">
               <span className={`text-base ${vibrationOn ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-4)]'}`}>📳</span>
             </div>
             <div>
@@ -76,10 +76,10 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
           type="button"
           onClick={requestAgreement}
           disabled={agreed}
-          className="flex items-center justify-between bg-[var(--color-surface)] rounded-2xl px-4 py-4 text-left disabled:opacity-100"
+          className="flex items-center justify-between bg-[var(--color-surface)] rounded-card px-4 py-4 text-left disabled:opacity-100"
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[var(--color-line)] flex items-center justify-center">
+            <div className="w-9 h-9 rounded-chip bg-[var(--color-line)] flex items-center justify-center">
               <Bell size={16} className={agreed ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-4)]'} />
             </div>
             <div>

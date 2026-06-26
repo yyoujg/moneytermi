@@ -38,7 +38,7 @@ export const NicknameSheet = ({
     <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>닉네임 변경</span>} hasTextField>
       <div className="px-5 pb-6 flex flex-col gap-5">
         <div className="flex flex-col gap-2">
-          <div className={`flex items-center gap-3 bg-[var(--color-surface)] rounded-2xl px-4 py-3.5 transition-colors ${error ? 'ring-2 ring-danger-400/50' : ''}`}>
+          <div className={`flex items-center gap-3 bg-[var(--color-surface)] rounded-card px-4 py-3.5 transition-colors ${error ? 'ring-2 ring-danger-400/50' : ''}`}>
             <input
               ref={inputRef}
               value={value}
@@ -61,7 +61,7 @@ export const NicknameSheet = ({
         <button
           onClick={handleSave}
           disabled={loading || value.trim().length === 0}
-          className="w-full py-4 rounded-2xl bg-brand-500 text-white text-sm font-bold active:bg-brand-600 disabled:opacity-40 transition-colors"
+          className="w-full py-4 rounded-button bg-brand-500 text-white text-sm font-bold active:bg-brand-600 disabled:opacity-40 transition-colors"
         >
           {loading ? '확인 중...' : '저장하기'}
         </button>

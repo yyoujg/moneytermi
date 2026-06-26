@@ -31,7 +31,7 @@ const LeagueRulesScreen = () => {
       <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">
         <Spacing size={20} />
         <div className="px-5">
-          <div className="bg-[var(--color-card)] rounded-2xl overflow-hidden">
+          <div className="bg-[var(--color-card)] rounded-card overflow-hidden">
             <List>
               {RULES.map(({ icon, title, desc }) => (
                 <ListRow

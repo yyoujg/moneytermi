@@ -43,7 +43,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
           <p className="text-xs text-[var(--color-ink-3)]">앱을 다시 시작해 주세요.</p>
           <button
             onClick={() => closeView()}
-            className="mt-2 px-5 py-2.5 rounded-xl bg-brand-500 text-sm font-bold text-white active:opacity-80"
+            className="mt-2 px-5 py-2.5 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-80"
           >
             다시 시작
           </button>

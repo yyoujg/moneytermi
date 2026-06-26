@@ -8,6 +8,8 @@ import { logClick } from '../lib/analytics';
 import { useAuth } from '../hooks/useAuth';
 import { calculateRank } from '../utils/league';
 import { WeeklyBarChart } from '../components/home/WeeklyBarChart';
+import { Card } from '../components/ui/Card';
+import { StatCard } from '../components/ui/StatCard';
 
 const HomeScreen = () => {
   const navigate = useNavigate();
@@ -66,15 +68,15 @@ const HomeScreen = () => {
         </div>
 
         {/* 오늘 목표 카드 (핵심 CTA) */}
-        <div className="bg-[var(--color-card)] rounded-2xl p-5 mb-4">
+        <Card pad="lg" className="mb-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs font-medium text-[var(--color-ink-4)]">오늘 목표</p>
             <span className="text-xs font-bold text-brand-500">{todayDone}/{todayTotal} 완료</span>
           </div>
 
-          <div className="flex gap-3 mb-4">
+          <div className="flex gap-3 mb-3">
             {/* 퀴즈 목표 */}
-            <div className={`flex-1 rounded-xl p-3 ${m3.current >= m3.target ? 'bg-brand-500/10' : 'bg-[var(--color-surface)]'}`}>
+            <div className={`flex-1 rounded-chip p-3 ${m3.current >= m3.target ? 'bg-brand-500/10' : 'bg-[var(--color-surface)]'}`}>
               <div className="flex items-center gap-2 mb-1.5">
                 <PenLine size={13} className={m3.current >= m3.target ? 'text-brand-500' : 'text-[var(--color-ink-4)]'} />
                 <span className="text-2xs font-medium text-[var(--color-ink-4)]">퀴즈 정답</span>
@@ -91,7 +93,7 @@ const HomeScreen = () => {
             const remainP = Object.values(missions).filter(m => !m.isRewarded && m.current < m.target).reduce((s, m) => s + m.reward, 0);
             const estimatedRank = calculateRank(otherLeagueUsers, points + remainP);
             return (
-              <div className="rounded-xl px-3 py-3 mb-3 flex flex-col gap-1.5" style={{ backgroundColor: 'var(--color-brand-soft)' }}>
+              <div className="rounded-chip px-3 py-3 mb-3 flex flex-col gap-1.5" style={{ backgroundColor: 'var(--color-brand-soft)' }}>
                 <p className="text-xs font-bold text-brand-400">
                   🔥 지금 하면 +{remainP}P (현재 {myRank}위 → {estimatedRank}위)
                 </p>
@@ -106,7 +108,7 @@ const HomeScreen = () => {
           <div className="flex flex-col" style={{ gap: 12 }}>
             <button
               onClick={() => { logClick('course_start', { course_id: nextCourse.id, title: nextCourse.title }); navigate('/word-card', { state: { words: nextCourse.words, index: 0, backPath: '/home', autoAdvance: true } }); }}
-              className="w-full py-4 rounded-2xl bg-brand-500 text-white text-sm font-bold active:opacity-90 flex items-center justify-center gap-2"
+              className="w-full py-4 rounded-button bg-brand-500 text-white text-sm font-bold active:opacity-90 flex items-center justify-center gap-2"
             >
               오늘 학습 시작하기
               <ChevronRight size={16} />
@@ -115,20 +117,21 @@ const HomeScreen = () => {
             {quizWords.length > 0 && (
               <button
                 onClick={() => navigate('/quiz', { state: { quizQueue: quizWords } })}
-                className="w-full py-3 rounded-xl bg-[var(--color-surface)] text-xs font-medium text-[var(--color-ink-3)] active:opacity-70"
+                className="w-full py-3 rounded-button bg-[var(--color-surface)] text-xs font-medium text-[var(--color-ink-3)] active:opacity-70"
               >
                 퀴즈 풀기 →
               </button>
             )}
           </div>
-        </div>
+        </Card>
 
         {/* 오늘 복습 카드 */}
         {dueQueue.length > 0 && (
-          <div
+          <Card
+            pad="md"
             role="button"
             onClick={() => { logClick('review_start', { count: dueQueue.length }); navigate('/review'); }}
-            className="bg-[var(--color-card)] rounded-2xl p-4 mb-4 flex items-center justify-between active:opacity-80 cursor-pointer"
+            className="mb-4 flex items-center justify-between active:opacity-80 cursor-pointer"
           >
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-full bg-brand-500/10 flex items-center justify-center shrink-0">
@@ -140,41 +143,35 @@ const HomeScreen = () => {
               </div>
             </div>
             <ChevronRight size={16} className="text-[var(--color-ink-4)]" />
-          </div>
+          </Card>
         )}
 
         {/* 빠른 통계 */}
         <div className="flex gap-3 mb-4">
-          <div className="flex-1 bg-[var(--color-card)] rounded-2xl px-4 py-3 flex items-center gap-3">
-            <Zap size={14} className="text-[var(--color-ink-4)] fill-current shrink-0" />
-            <div>
-              <p className="text-3xs text-[var(--color-ink-4)]">포인트</p>
-              <p className="text-base font-bold text-[var(--color-ink)] whitespace-nowrap">{points.toLocaleString()}<span className="text-xs text-[var(--color-ink-4)] ml-0.5">P</span></p>
-            </div>
-          </div>
-          <div className="flex-1 bg-[var(--color-card)] rounded-2xl px-4 py-3 flex items-center gap-3">
-            <Flame size={14} className="text-[var(--color-ink-4)] shrink-0" />
-            <div>
-              <p className="text-3xs text-[var(--color-ink-4)]">연속 출석</p>
-              <p className="text-base font-bold text-[var(--color-ink)] whitespace-nowrap">{streak}<span className="text-xs text-[var(--color-ink-4)] ml-0.5">일</span></p>
-            </div>
-          </div>
-          <div className="flex-1 bg-[var(--color-card)] rounded-2xl px-4 py-3 flex items-center gap-3">
-            <BookOpen size={14} className="text-[var(--color-ink-4)] shrink-0" />
-            <div>
-              <p className="text-3xs text-[var(--color-ink-4)]">학습 단어</p>
-              <p className="text-base font-bold text-[var(--color-ink)] whitespace-nowrap">{knownWords.length}<span className="text-xs text-[var(--color-ink-4)] ml-0.5">/{totalWords}</span></p>
-            </div>
-          </div>
+          <StatCard
+            icon={<Zap size={14} className="text-[var(--color-ink-4)] fill-current shrink-0" />}
+            label="포인트"
+            value={<>{points.toLocaleString()}<span className="text-xs text-[var(--color-ink-4)] ml-0.5">P</span></>}
+          />
+          <StatCard
+            icon={<Flame size={14} className="text-[var(--color-ink-4)] shrink-0" />}
+            label="연속 출석"
+            value={<>{streak}<span className="text-xs text-[var(--color-ink-4)] ml-0.5">일</span></>}
+          />
+          <StatCard
+            icon={<BookOpen size={14} className="text-[var(--color-ink-4)] shrink-0" />}
+            label="학습 단어"
+            value={<>{knownWords.length}<span className="text-xs text-[var(--color-ink-4)] ml-0.5">/{totalWords}</span></>}
+          />
         </div>
 
         {/* 주간 바 차트 */}
-        <div className="bg-[var(--color-card)] rounded-2xl px-5 pt-4 pb-4">
+        <Card pad="none" className="px-5 pt-4 pb-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-bold text-[var(--color-ink)]">이번 주</p>
           </div>
           <WeeklyBarChart attendanceDates={attendanceDates} />
-        </div>
+        </Card>
       </div>
 
       {/* 코스 + 미션 */}
@@ -192,10 +189,11 @@ const HomeScreen = () => {
               const courseKnownCount = course.words.filter((w) => knownIds.has(w.id)).length;
               const progressPct = Math.round((courseKnownCount / course.words.length) * 100);
               return (
-                <div
+                <Card
                   key={course.id}
+                  pad="md"
                   onClick={() => navigate('/word-card', { state: { words: course.words, index: 0, backPath: '/home', autoAdvance: true } })}
-                  className="bg-[var(--color-card)] rounded-2xl px-4 py-3.5 flex items-center gap-4 active:opacity-80 cursor-pointer"
+                  className="flex items-center gap-4 active:opacity-80 cursor-pointer"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
@@ -209,21 +207,21 @@ const HomeScreen = () => {
                       <span className="text-2xs font-bold text-brand-500 shrink-0 whitespace-nowrap">{progressPct}%</span>
                     </div>
                   </div>
-                </div>
+                </Card>
               );
             })}
           </div>
         </div>
 
         {/* 미션 */}
-        <div className="bg-[var(--color-card)] rounded-2xl p-5 mb-4">
+        <Card pad="lg" className="mb-4">
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-sm font-bold text-[var(--color-ink-2)]">오늘의 미션</h2>
             <span className="text-2xs font-medium text-[var(--color-ink-4)]">자정 초기화</span>
           </div>
 
           {/* 핵심 미션: 퀴즈 3문제 */}
-          <div className={`rounded-2xl p-4 mb-3 ${m3.isRewarded ? 'bg-[var(--color-surface)]' : m3.current >= m3.target ? 'bg-brand-500/10' : 'bg-[var(--color-surface)]'}`}>
+          <div className={`rounded-card p-4 mb-3 ${m3.isRewarded ? 'bg-[var(--color-surface)]' : m3.current >= m3.target ? 'bg-brand-500/10' : 'bg-[var(--color-surface)]'}`}>
             <div className="flex items-center justify-between mb-3">
               <div>
                 <p className={`text-sm font-bold ${m3.isRewarded ? 'text-[var(--color-ink-4)] line-through' : 'text-[var(--color-ink)]'}`}>
@@ -234,7 +232,7 @@ const HomeScreen = () => {
               {m3.isRewarded
                 ? <Badge color="elephant" size="small" variant="fill">완료</Badge>
                 : m3.current >= m3.target
-                ? <button onClick={() => claimReward('m3')} className="px-3 py-1.5 rounded-xl bg-brand-500 text-white text-xs font-bold active:bg-brand-600">받기</button>
+                ? <button onClick={() => claimReward('m3')} className="px-3 py-1.5 rounded-button bg-brand-500 text-white text-xs font-bold active:bg-brand-600">받기</button>
                 : <span className="text-lg font-bold text-[var(--color-ink)]">{m3.current}<span className="text-sm text-[var(--color-ink-4)]">/{m3.target}</span></span>
               }
             </div>
@@ -265,14 +263,14 @@ const HomeScreen = () => {
                   {mission.isRewarded
                     ? <span className="text-2xs text-[var(--color-ink-4)]">+{mission.reward}P</span>
                     : isCompleted
-                    ? <button onClick={() => claimReward(mission.id as keyof Missions)} className="px-2.5 py-1 rounded-lg bg-brand-500 text-white text-2xs font-bold active:bg-brand-600">받기</button>
+                    ? <button onClick={() => claimReward(mission.id as keyof Missions)} className="px-2.5 py-1 rounded-button bg-brand-500 text-white text-2xs font-bold active:bg-brand-600">받기</button>
                     : <span className="text-2xs text-[var(--color-ink-4)]">+{mission.reward}P</span>
                   }
                 </div>
               );
             })}
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );
