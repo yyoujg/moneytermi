@@ -1,10 +1,11 @@
 import React, { useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Check, ExternalLink } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, ExternalLink, Target } from 'lucide-react';
 import { toast } from 'sonner';
-import type { Word } from '../types';
+import type { Word, ActionTemplate } from '../types';
 import { useAppContext } from '../context/AppContext';
 import { useNews, type NaverNewsItem } from '../hooks/useNews';
+import { ActionPickerSheet } from '../components/ActionPickerSheet';
 
 const ACCENT = '#f97316';
 
@@ -38,6 +39,9 @@ const WordCard = ({
   newsLoading,
   keyword,
   allWords,
+  relatedActions,
+  addedActionCount,
+  onOpenActions,
 }: {
   word: Word;
   isKnown: boolean;
@@ -47,6 +51,9 @@ const WordCard = ({
   newsLoading: boolean;
   keyword: string;
   allWords: Word[];
+  relatedActions: ActionTemplate[];
+  addedActionCount: number;
+  onOpenActions: () => void;
 }) => {
   const validRelated = (word.relatedWords ?? []).filter(
     rw => allWords.some(w => w.word === rw)
@@ -145,6 +152,29 @@ const WordCard = ({
         </div>
       </div>
     )}
+
+    {/* 실천하기 */}
+    {relatedActions.length > 0 && (
+      <button
+        onClick={onOpenActions}
+        className="bg-[var(--color-card)] rounded-2xl px-5 py-4 flex items-center justify-between active:opacity-80"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-orange-500/10 flex items-center justify-center shrink-0">
+            <Target size={16} className="text-orange-500" />
+          </div>
+          <div className="text-left">
+            <p className="text-[14px] font-bold text-[var(--color-ink)]">🎯 실천하기</p>
+            <p className="text-[11px] text-[var(--color-ink-4)]">이 개념을 행동으로 옮겨봐요</p>
+          </div>
+        </div>
+        {addedActionCount > 0 && (
+          <span className="shrink-0 text-[11px] font-bold text-orange-500 bg-orange-500/10 rounded-full px-2.5 py-1">
+            {addedActionCount}개 담음
+          </span>
+        )}
+      </button>
+    )}
   </div>
   );
 };
@@ -153,8 +183,9 @@ const WordCard = ({
 const WordCardScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { courses, allWords, knownWords, knownIds, toggleKnown, setKnownWords } = useAppContext();
+  const { courses, allWords, knownWords, knownIds, toggleKnown, setKnownWords, myActions, actionsByWord, addAction } = useAppContext();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [actionSheetOpen, setActionSheetOpen] = React.useState(false);
 
   const state = location.state as {
     words: Word[];
@@ -242,6 +273,8 @@ const WordCardScreen = () => {
 
   const word = words[wordIndex];
   const isKnown = knownWords.some(w => w.id === word.id);
+  const wordActions = actionsByWord(word.id);
+  const addedActionCount = myActions.filter(a => a.actionId && wordActions.some(ra => ra.id === a.actionId)).length;
 
   const goNext = () => {
     if (autoAdvance) {
@@ -336,8 +369,19 @@ const WordCardScreen = () => {
           newsLoading={newsLoading}
           keyword={word.word}
           allWords={allWords}
+          relatedActions={wordActions}
+          addedActionCount={addedActionCount}
+          onOpenActions={() => setActionSheetOpen(true)}
         />
       </div>
+
+      <ActionPickerSheet
+        open={actionSheetOpen}
+        onClose={() => setActionSheetOpen(false)}
+        actions={wordActions}
+        myActions={myActions}
+        onAdd={addAction}
+      />
 
       {/* 하단 네비게이션 */}
       <div className="px-5 pb-8 pt-3 bg-[var(--color-card)] flex gap-3">
