@@ -17,7 +17,7 @@ const Row = ({ title, concept, isDone, onToggle, onRemove }: {
       className="shrink-0 w-10 h-10 flex items-center justify-center"
     >
       <span className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors
-        ${isDone ? 'bg-orange-500 text-white' : 'bg-[var(--color-surface)] text-[var(--color-ink-4)]'}`}>
+        ${isDone ? 'bg-brand-500 text-white' : 'bg-[var(--color-surface)] text-[var(--color-ink-4)]'}`}>
         <Check size={14} strokeWidth={2.5} />
       </span>
     </button>
@@ -26,7 +26,7 @@ const Row = ({ title, concept, isDone, onToggle, onRemove }: {
         {title}
       </p>
       {concept && (
-        <span className="inline-block text-[10px] font-medium px-2 py-0.5 rounded mt-1 text-[var(--color-ink-4)]" style={{ backgroundColor: 'var(--color-surface)' }}>
+        <span className="inline-block text-3xs font-medium px-2 py-0.5 rounded mt-1 text-[var(--color-ink-4)]" style={{ backgroundColor: 'var(--color-surface)' }}>
           {concept}
         </span>
       )}
@@ -73,7 +73,7 @@ const ActionsScreen = () => {
   );
 
   return (
-    <div className="flex flex-col h-full pb-24 overflow-y-auto [&::-webkit-scrollbar]:hidden" style={{ backgroundColor: 'var(--color-canvas)' }}>
+    <div className="flex flex-col h-full pb-32 overflow-y-auto [&::-webkit-scrollbar]:hidden" style={{ backgroundColor: 'var(--color-canvas)' }}>
       <div className="pt-4 px-5 pb-2">
         <h1 className="text-xl font-bold text-[var(--color-ink)] mb-4">실천</h1>
 
@@ -84,13 +84,13 @@ const ActionsScreen = () => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') handleAdd(); }}
             placeholder="실천할 일을 직접 추가"
-            className="flex-1 px-4 py-3 rounded-2xl text-sm font-medium outline-none border bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink)] focus:border-orange-500/50"
-            style={{ caretColor: '#f97316' }}
+            className="flex-1 px-4 py-3 rounded-2xl text-sm font-medium outline-none border bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink)] focus:border-brand-500/50"
+            style={{ caretColor: 'var(--color-brand-500)' }}
           />
           <button
             onClick={handleAdd}
             disabled={!input.trim()}
-            className="shrink-0 w-12 rounded-2xl bg-orange-500 text-white flex items-center justify-center active:opacity-90 disabled:opacity-30"
+            className="shrink-0 w-12 rounded-2xl bg-brand-500 text-white flex items-center justify-center active:opacity-90 disabled:opacity-30"
           >
             <Plus size={18} />
           </button>
@@ -98,7 +98,7 @@ const ActionsScreen = () => {
 
         {myActions.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center text-3xl mb-3">🎯</div>
+            <div className="w-16 h-16 bg-brand-500/10 rounded-full flex items-center justify-center text-3xl mb-3">🎯</div>
             <p className="text-sm font-bold text-[var(--color-ink)] mb-1">아직 실천 항목이 없어요</p>
             <p className="text-xs text-[var(--color-ink-4)]">단어 카드에서 "실천하기"로 담거나 직접 추가해보세요</p>
           </div>
@@ -106,14 +106,14 @@ const ActionsScreen = () => {
 
         {todo.length > 0 && (
           <div className="mb-5">
-            <p className="text-xs font-bold text-[var(--color-ink-4)] mb-2 px-1">미완료 {todo.length}</p>
+            <p className="text-xs font-bold text-[var(--color-ink-4)] mb-3 px-1">미완료 {todo.length}</p>
             <div className="flex flex-col gap-2">{todo.map(renderRow)}</div>
           </div>
         )}
 
         {done.length > 0 && (
           <div>
-            <p className="text-xs font-bold text-[var(--color-ink-4)] mb-2 px-1">완료 {done.length}</p>
+            <p className="text-xs font-bold text-[var(--color-ink-4)] mb-3 px-1">완료 {done.length}</p>
             <div className="flex flex-col gap-2">{done.map(renderRow)}</div>
           </div>
         )}

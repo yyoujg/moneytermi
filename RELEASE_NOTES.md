@@ -5,6 +5,39 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
 
 ---
 
+## 2026-06-26 — SRS 복습 / 실천 레이어 / 코스 정렬
+
+### 주요 기능
+
+- **SRS(SM-2 lite) 간격반복 복습** (`3965b72`)
+  - 신규 `src/lib/srs.ts` — `nextSrs`(오답=리셋, 정답+힌트=hard, 정답=good) / `gradeFromResult` / `addDays`.
+  - `word_progress` 확장(ease·interval_d·reps·due_date·last_grade, DB 마이그레이션 별도 실행)에 맞춰
+    `database.types.ts` 동기화.
+  - `AppContext`에 `dueQueue`(due_date<=오늘 파생)·`recordReview`(SRS 일정만 갱신, 포인트 RPC 무관) 추가.
+  - `ReviewScreen`을 전체 셔플 -> `dueQueue` 스냅샷 소비로 전환, 단어별 첫 제출에만 1회 채점,
+    빈 큐/완료 상태 정리. 홈에 "오늘 복습할 단어 N개" 카드(`review_start` 로깅) 추가.
+
+- **실천(actions) 레이어** (`664cf2d`, `dce635e`, `e17a279`)
+  - 신규 테이블 `actions`(공개 템플릿) / `user_actions`(본인 체크리스트) — DB는 별도 실행, 앱에 타입·로직 추가.
+  - `database.types.ts` + `src/types.ts`(`ActionTemplate`/`UserAction`) 동기화.
+  - `AppContext`: `allActions`·`myActions` 상태, `actionsByWord`·`addAction`·`addCustomAction`·
+    `toggleAction`·`removeAction`(낙관적, status 직접 쓰기, 포인트 경로 불가침).
+  - 신규 `ActionsScreen`(미완료/완료 분리 체크리스트 + 직접 추가), `ActionPickerSheet`(TDS BottomSheet),
+    단어 카드 "실천하기" 섹션(담은 개수 뱃지). `/actions` 라우트 + NavBar 6번째 "실천" 탭.
+
+### 개선
+
+- **코스 정렬 / 관련 용어 데드링크 필터** (`6c32c95`, `72de603`)
+  - `courses` 조회에 `.order('sort_order')` 적용(학습 권장 순서), `database.types.ts`에 `sort_order` 동기화.
+  - 단어 카드 "관련 용어"를 `allWords`에 존재하는 항목만 렌더(클릭 시 막히던 데드링크 제거).
+
+### 문서
+
+- `DATA_STRUCTURE.md` 갱신: `sort_order`·콘텐츠 시드 확장(words 233)·related_words 정합성 (`c11da35`).
+- `APP_INTRO.md` 갱신: SRS 복습/실천 레이어/코스 수치(22코스·233단어)/다크테마 반영 (`d668233`).
+
+---
+
 ## 2026-06-20 — 데일리 푸시 발송 코드 정정
 
 ### 버그 수정

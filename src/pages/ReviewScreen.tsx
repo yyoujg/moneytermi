@@ -97,13 +97,13 @@ const QuizPage = () => {
   if (isEmpty) {
     return (
       <div className="flex flex-col h-full bg-[var(--color-canvas)] items-center justify-center p-6 pb-32">
-        <div className="w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center text-4xl mb-4">✅</div>
+        <div className="w-20 h-20 bg-brand-500/10 rounded-full flex items-center justify-center text-4xl mb-4">✅</div>
         <h2 className="text-xl font-bold text-[var(--color-ink)] mb-1">오늘 복습 완료</h2>
         <p className="text-sm text-[var(--color-ink-3)] mb-8">지금 복습할 단어가 없어요</p>
         <button
           onClick={() => navigate('/home')}
           className="px-6 py-4 rounded-2xl text-white text-xs font-bold active:opacity-90"
-          style={{ backgroundColor: '#f97316' }}
+          style={{ backgroundColor: 'var(--color-brand-500)' }}
         >
           홈으로
         </button>
@@ -114,11 +114,11 @@ const QuizPage = () => {
   if (isFinished) {
     return (
       <div className="flex flex-col h-full bg-[var(--color-canvas)] items-center justify-center p-6 pb-32">
-        <div className="w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center text-4xl mb-4">🏆</div>
+        <div className="w-20 h-20 bg-brand-500/10 rounded-full flex items-center justify-center text-4xl mb-4">🏆</div>
         <h2 className="text-xl font-bold text-[var(--color-ink)] mb-1">오늘 복습 완료!</h2>
         <p className="text-sm text-[var(--color-ink-3)] mb-6">{queue.length}문제 중 {totalCorrect}개 정답</p>
-        <div className="flex items-center gap-2 bg-orange-500/10 border border-orange-500/20 rounded-2xl px-5 py-3 mb-8">
-          <Zap size={16} className="text-orange-500 fill-current" />
+        <div className="flex items-center gap-2 bg-brand-500/10 border border-brand-500/20 rounded-2xl px-5 py-3 mb-8">
+          <Zap size={16} className="text-brand-500 fill-current" />
           <span className="text-sm font-bold text-[var(--color-ink)]">누적 포인트 {points} P</span>
         </div>
         <div className="w-full max-w-sm mb-8">
@@ -127,7 +127,7 @@ const QuizPage = () => {
         <button
           onClick={() => navigate('/home')}
           className="px-6 py-4 rounded-2xl text-white text-xs font-bold active:opacity-90"
-          style={{ backgroundColor: '#f97316' }}
+          style={{ backgroundColor: 'var(--color-brand-500)' }}
         >
           홈으로
         </button>
@@ -149,19 +149,19 @@ const QuizPage = () => {
           <h2 className="text-xl font-bold text-[var(--color-ink)]">퀴즈</h2>
           <div className="flex items-center gap-2">
             {combo >= 2 && (
-              <div className="bg-orange-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
+              <div className="bg-brand-500 text-white text-2xs font-bold px-2.5 py-1 rounded-full">
                 🔥 {combo}연속
               </div>
             )}
-            <div className="flex items-center gap-1 bg-orange-500/10 border border-orange-500/20 rounded-full px-3 py-1.5">
-              <Zap size={13} className="text-orange-500 fill-current" />
+            <div className="flex items-center gap-1 bg-brand-500/10 border border-brand-500/20 rounded-full px-3 py-1.5">
+              <Zap size={13} className="text-brand-500 fill-current" />
               <span className="text-xs font-bold text-[var(--color-ink)]">{points} P</span>
             </div>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex-1 bg-[var(--color-line)] rounded-full h-1.5 overflow-hidden">
-            <div className="bg-orange-400 h-full rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+            <div className="bg-brand-400 h-full rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
           </div>
           <span className="text-xs font-bold text-[var(--color-ink-3)] shrink-0">{index + 1} / {queue.length}</span>
         </div>
@@ -170,9 +170,9 @@ const QuizPage = () => {
       <div className="flex-1 flex flex-col px-5 py-4">
         {/* 문제 카드 */}
         <div className="bg-[var(--color-card)] rounded-2xl p-6 mb-5 flex-1">
-          <p className="text-[11px] font-medium text-[var(--color-ink-4)] mb-4 tracking-wide uppercase">뜻을 보고 용어를 맞혀보세요</p>
+          <p className="text-2xs font-medium text-[var(--color-ink-4)] mb-4 tracking-wide uppercase">뜻을 보고 용어를 맞혀보세요</p>
 
-          <p className="text-lg font-bold text-[var(--color-ink)] leading-relaxed mb-5">{word.meaning}</p>
+          <p className="text-lg font-bold text-[var(--color-ink)] leading-relaxed mb-6">{word.meaning}</p>
 
           {showHint && (
             <div className="bg-[var(--color-surface)] rounded-2xl px-4 py-3 flex items-center gap-2 mb-4">
@@ -198,17 +198,17 @@ const QuizPage = () => {
               disabled={status !== 'idle'}
               autoComplete="off"
               className={`w-full px-4 py-4 rounded-2xl text-sm font-medium outline-none border transition-colors
-                ${status === 'correct' ? 'bg-green-500/10 border-green-500/40 text-green-400' :
-                  status === 'wrong' ? 'bg-red-500/10 border-red-500/40 text-red-400' :
-                  'bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink)] focus:border-orange-500/50'}
+                ${status === 'correct' ? 'bg-success-500/10 border-success-500/40 text-success-400' :
+                  status === 'wrong' ? 'bg-danger-500/10 border-danger-500/40 text-danger-400' :
+                  'bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink)] focus:border-brand-500/50'}
               `}
-              style={{ caretColor: '#f97316' }}
+              style={{ caretColor: 'var(--color-brand-500)' }}
             />
             {status === 'correct' && (
-              <p className="text-xs font-bold text-green-400 mt-1.5 px-1">정답! +{earnedPreview}P</p>
+              <p className="text-xs font-bold text-success-400 mt-1.5 px-1">정답! +{earnedPreview}P</p>
             )}
             {status === 'wrong' && (
-              <p className="text-xs font-bold text-red-400 mt-1.5 px-1">틀렸어요. 다시 시도해보세요!</p>
+              <p className="text-xs font-bold text-danger-400 mt-1.5 px-1">틀렸어요. 다시 시도해보세요!</p>
             )}
           </div>
 
@@ -217,7 +217,7 @@ const QuizPage = () => {
             onClick={() => handleSubmit()}
             disabled={status !== 'idle' || !input.trim()}
             className="w-full py-4 rounded-2xl text-white text-xs font-bold active:opacity-90 disabled:opacity-30"
-            style={{ backgroundColor: '#f97316' }}
+            style={{ backgroundColor: 'var(--color-brand-500)' }}
           >
             제출하기
           </button>
