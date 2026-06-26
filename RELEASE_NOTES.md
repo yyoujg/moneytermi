@@ -38,10 +38,12 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
 - **다크 모드 보정**
   - 하단 NavBar 알약에 `border-[var(--color-line)]` 추가 — 다크 캔버스에서 그림자만으로 안 보이던
     가장자리를 토큰 보더로 구분. (`NavBar.tsx`)
-  - **TDS 바텀시트 다크 미적용 해결**: TDS 컴포넌트는 OS `prefers-color-scheme`만 따라 수동 다크 시
-    시트가 라이트로 남던 문제. `useTheme`가 해석된 `isDark`를 노출, `main.tsx`에서 `ThemeProvider`를
-    `TDSMobileAITProvider` 위로 올려 `colorScheme={isDark?'dark':'light'}` 전달. 모든 시트·TDS 컴포넌트가
-    앱 테마를 따름. (`useTheme.tsx`, `main.tsx`, `App.tsx`)
+  - **TDS 바텀시트 다크 미적용 해결**: TDS 색 스킴은 React 컨텍스트(`ee().colorScheme`)로 관리되며 값이
+    없으면 OS `prefers-color-scheme`로 폴백 → 수동 다크 시 시트가 라이트로 남던 문제. `useTheme`가 해석된
+    `isDark`를 노출하고, `main.tsx`에서 `ThemeProvider`를 TDS provider 위로 올린 뒤 TDS의
+    `ColorSchemeArea theme={isDark?'dark':'light'}`로 감쌈(처음 시도한 provider `colorScheme` prop은 컨텍스트를
+    못 세워 실패). 바텀시트는 body로 포털돼도 React 컨텍스트를 상속하므로 모든 시트·TDS 컴포넌트가 앱 테마를
+    따름. (`useTheme.tsx`, `main.tsx`, `App.tsx`)
 - **화면 폴리시** (`17baa25`, `d237bd3`)
   - 홈 복습 카드 `<button>`(블록 중첩 오버플로)→`<div role="button">` 코스카드 패턴으로 겹침 수정.
   - 홈/실천 하단 여백(`pb-32`), 실천 섹션 헤더 간격, 퀴즈/복습 뜻↔설명 간격 보강.
