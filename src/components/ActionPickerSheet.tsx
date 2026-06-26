@@ -19,6 +19,9 @@ export const ActionPickerSheet = ({
   return (
     <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px', fontWeight: 700 }}>실천하기</span>}>
       <div className="px-5 pb-6 flex flex-col gap-2.5">
+        {actions.length === 0 && (
+          <p className="text-center text-xs text-[var(--color-ink-4)] py-8">담을 실천 항목이 없어요</p>
+        )}
         {actions.map((a) => {
           const added = addedIds.has(a.id);
           return (

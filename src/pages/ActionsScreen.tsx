@@ -3,6 +3,40 @@ import { Check, Plus, X } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import type { UserAction } from '../types';
 
+const Row = ({ title, concept, isDone, onToggle, onRemove }: {
+  title: string;
+  concept?: string;
+  isDone: boolean;
+  onToggle: () => void;
+  onRemove: () => void;
+}) => (
+  <div className="bg-[var(--color-card)] rounded-2xl px-4 py-3.5 flex items-center gap-3">
+    <button
+      onClick={onToggle}
+      aria-label={isDone ? '완료 취소' : '완료'}
+      className="shrink-0 w-10 h-10 flex items-center justify-center"
+    >
+      <span className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors
+        ${isDone ? 'bg-orange-500 text-white' : 'bg-[var(--color-surface)] text-[var(--color-ink-4)]'}`}>
+        <Check size={14} strokeWidth={2.5} />
+      </span>
+    </button>
+    <div className="flex-1 min-w-0">
+      <p className={`text-sm font-semibold break-keep ${isDone ? 'text-[var(--color-ink-4)] line-through' : 'text-[var(--color-ink)]'}`}>
+        {title}
+      </p>
+      {concept && (
+        <span className="inline-block text-[10px] font-medium px-2 py-0.5 rounded mt-1 text-[var(--color-ink-4)]" style={{ backgroundColor: 'var(--color-surface)' }}>
+          {concept}
+        </span>
+      )}
+    </div>
+    <button onClick={onRemove} aria-label="삭제" className="shrink-0 w-9 h-9 flex items-center justify-center text-[var(--color-ink-4)] active:opacity-60">
+      <X size={15} />
+    </button>
+  </div>
+);
+
 const ActionsScreen = () => {
   const { myActions, allActions, allWords, toggleAction, removeAction, addCustomAction } = useAppContext();
   const [input, setInput] = useState('');
@@ -27,34 +61,16 @@ const ActionsScreen = () => {
     setInput('');
   };
 
-  const Row = ({ a }: { a: UserAction }) => {
-    const isDone = a.status === 'done';
-    const concept = conceptOf(a);
-    return (
-      <div className="bg-[var(--color-card)] rounded-2xl px-4 py-3.5 flex items-center gap-3">
-        <button
-          onClick={() => toggleAction(a.id)}
-          className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-colors
-            ${isDone ? 'bg-orange-500 text-white' : 'bg-[var(--color-surface)] text-[var(--color-ink-4)]'}`}
-        >
-          <Check size={14} strokeWidth={2.5} />
-        </button>
-        <div className="flex-1 min-w-0">
-          <p className={`text-sm font-semibold break-keep ${isDone ? 'text-[var(--color-ink-4)] line-through' : 'text-[var(--color-ink)]'}`}>
-            {titleOf(a)}
-          </p>
-          {concept && (
-            <span className="inline-block text-[10px] font-medium px-2 py-0.5 rounded mt-1 text-[var(--color-ink-4)]" style={{ backgroundColor: 'var(--color-surface)' }}>
-              {concept}
-            </span>
-          )}
-        </div>
-        <button onClick={() => removeAction(a.id)} className="shrink-0 w-7 h-7 flex items-center justify-center text-[var(--color-ink-4)] active:opacity-60">
-          <X size={15} />
-        </button>
-      </div>
-    );
-  };
+  const renderRow = (a: UserAction) => (
+    <Row
+      key={a.id}
+      title={titleOf(a)}
+      concept={conceptOf(a)}
+      isDone={a.status === 'done'}
+      onToggle={() => toggleAction(a.id)}
+      onRemove={() => removeAction(a.id)}
+    />
+  );
 
   return (
     <div className="flex flex-col h-full pb-24 overflow-y-auto [&::-webkit-scrollbar]:hidden" style={{ backgroundColor: 'var(--color-canvas)' }}>
@@ -91,14 +107,14 @@ const ActionsScreen = () => {
         {todo.length > 0 && (
           <div className="mb-5">
             <p className="text-xs font-bold text-[var(--color-ink-4)] mb-2 px-1">미완료 {todo.length}</p>
-            <div className="flex flex-col gap-2">{todo.map(a => <Row key={a.id} a={a} />)}</div>
+            <div className="flex flex-col gap-2">{todo.map(renderRow)}</div>
           </div>
         )}
 
         {done.length > 0 && (
           <div>
             <p className="text-xs font-bold text-[var(--color-ink-4)] mb-2 px-1">완료 {done.length}</p>
-            <div className="flex flex-col gap-2">{done.map(a => <Row key={a.id} a={a} />)}</div>
+            <div className="flex flex-col gap-2">{done.map(renderRow)}</div>
           </div>
         )}
       </div>
