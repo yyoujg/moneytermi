@@ -16,11 +16,11 @@
 
 ## 문서
 
-- [앱 소개 (APP_INTRO.md)](./APP_INTRO.md)
-- [데이터 구조 (DATA_STRUCTURE.md)](./DATA_STRUCTURE.md)
-- [데일리 용어 푸시 (DAILY_TERM_PUSH.md)](./DAILY_TERM_PUSH.md)
-- [Apps in Toss 적용 항목 (APPS_IN_TOSS_TODO.md)](./APPS_IN_TOSS_TODO.md)
-- [출시 노트 (RELEASE_NOTES.md)](./RELEASE_NOTES.md)
+- [앱 소개 (APP_INTRO.md)](./docs/APP_INTRO.md)
+- [데이터 구조 (DATA_STRUCTURE.md)](./docs/DATA_STRUCTURE.md)
+- [데일리 용어 푸시 (DAILY_TERM_PUSH.md)](./docs/DAILY_TERM_PUSH.md)
+- [Apps in Toss 적용 항목 (APPS_IN_TOSS_TODO.md)](./docs/APPS_IN_TOSS_TODO.md)
+- [출시 노트 (RELEASE_NOTES.md)](./docs/RELEASE_NOTES.md)
 
 ## 기술 스택
 
