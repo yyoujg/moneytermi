@@ -295,9 +295,10 @@ type StoredProfile = {
 
 | 상태 | 대상 | 지연 | 방식 |
 |------|------|------|------|
-| knownWords | word_progress | 2000ms | upsert (onConflict user_id,word_id), status='known' |
-| unknownWords | word_progress | 2000ms | upsert (onConflict user_id,word_id), status='unknown' |
+| knownWords | word_progress | 2000ms | upsert (onConflict user_id,word_id), status='known' + 첫 학습 단어 SRS 시드 |
+| unknownWords | word_progress | 2000ms | upsert (onConflict user_id,word_id), status='unknown' + 첫 학습 단어 SRS 시드 |
 
+- **첫 학습 SRS 시드**(`seedInitialSrs`): 위 status upsert 후, `wpRows`에 아직 없는 단어만 `{ ease:2.5, interval_d:1, reps:0, due_date: 내일(KST) }`로 별도 upsert하고 `wpRows`에 추가. status-only upsert는 `due_date`를 안 건드리므로 복습 완료 단어의 due는 보존. 미시드 시 DB 기본값 `due_date=오늘`이 적용돼 학습 즉시 복습 큐에 쏟아지는 문제를 방지.
 - 포인트·콤보·미션 진행도는 디바운스 동기화하지 않는다(서버 소유). 퀴즈 응답 즉시 `submitQuizAnswer`가 `submit_quiz_answer` RPC를 호출하고, 응답의 `points`/`m3_current`로 클라 상태를 갱신한다.
 - `claimReward`: `claim_mission_reward` RPC 호출 후 응답 `points`로 갱신하고 해당 미션 `isRewarded=true` 반영.
 - `checkIn`: UI 즉시 반영 후 `checkin` RPC 호출(이전의 attendance/daily_missions 직접 upsert 대체).

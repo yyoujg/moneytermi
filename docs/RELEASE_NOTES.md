@@ -76,6 +76,30 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
   - `vercel.json`·`.vercel/`·`.gitignore` `.vercel` 항목 삭제. 코드 import·의존성·lockfile·CI
     참조 없는 죽은 설정. 라이브 배포는 Apps in Toss(`ait`)+Supabase로 무관.
 
+### 활성화 퍼널 2차 (C-1~C-5)
+
+- **SRS 첫 due_date 시딩** (`769d860`)
+  - 기존엔 학습 시 `status`만 upsert라 `due_date`가 DB 기본값(오늘)으로 채워져, 모든 학습
+    단어가 복습 전인데 즉시·영구히 복습 큐에 쏟아지던 문제. `wpRows`에 없는 첫 학습 단어만
+    `{ ease:2.5, interval_d:1, reps:0, due_date:내일 }`로 시드(`seedInitialSrs`). known/unknown
+    둘 다 +1일. 신규 유저가 D1에 "오늘 복습할 단어" 카드를 보게 됨. (`src/context/AppContext.tsx`)
+
+- **신규 CTA 단어 1개 로드 → 동의 카드 앞당김** (`769d860`)
+  - 신규 CTA가 코스 전체 대신 `nextCourse.words[0]`(sort_order 1 코스 position 1 단어) 1개만
+    autoAdvance 로드. 1카드 학습 직후 기존 완료 화면의 `DailyAlarmPromptCard`에 즉시 도달 →
+    코스 완주(27%)를 기다리지 않고 동의 노출. 첫 단어도 결정적으로 고정(쉬운 단어).
+    (`src/pages/HomeScreen.tsx`)
+
+- **자동 출석 세션 래치** (`769d860`)
+  - `autoCheckedRef`로 StrictMode 이중 실행 시 `checkin_auto` 이벤트 중복 로깅 방지(RPC는
+    idempotent라 데이터는 원래 안전). (`src/context/AppContext.tsx`)
+
+- **문서 코드 정합성 정정** (`12d7c1f`)
+  - `APP_INTRO` HashRouter→BrowserRouter, `DATA_STRUCTURE` SRS·실천 예정→배포됨 및 발송코드
+    `moneytermi-DAILY_TERM_PUSH2`, `DAILY_TERM_PUSH` 동의 노출 위치 구현 반영,
+    `APPS_IN_TOSS_TODO` E-1 '푸시→토스로그인 필요' 모순 정정, `README` 실천/다크모드/SRS,
+    `schema.sql` word_progress SRS 컬럼 반영.
+
 ---
 
 ## 2026-06-26 — 디자인 토큰화 / 다크테마 보정 / UX 폴리시
