@@ -16,6 +16,7 @@ const HomeScreen = () => {
   const { points, knownWords, knownIds, missions, claimReward, attendanceDates, otherLeagueUsers, courses, allWords, dueQueue, myEmoji } = useAppContext();
   const { user } = useAuth();
   const totalWords = allWords.length;
+  const isNewUser = knownWords.length === 0;
 
   // 연속 출석일
   const streak = (() => {
@@ -110,7 +111,7 @@ const HomeScreen = () => {
               onClick={() => { logClick('course_start', { course_id: nextCourse.id, title: nextCourse.title }); navigate('/word-card', { state: { words: nextCourse.words, index: 0, backPath: '/home', autoAdvance: true } }); }}
               className="w-full py-4 rounded-button bg-brand-500 text-white text-sm font-bold active:opacity-90 flex items-center justify-center gap-2"
             >
-              오늘 학습 시작하기
+              {isNewUser ? '단어 1개만 배워볼까요?' : '오늘 학습 시작하기'}
               <ChevronRight size={16} />
             </button>
 
@@ -147,6 +148,7 @@ const HomeScreen = () => {
         )}
 
         {/* 빠른 통계 */}
+        {!isNewUser && (
         <div className="flex gap-3 mb-4">
           <StatCard
             icon={<Zap size={14} className="text-[var(--color-ink-4)] fill-current shrink-0" />}
@@ -164,14 +166,17 @@ const HomeScreen = () => {
             value={<>{knownWords.length}<span className="text-xs text-[var(--color-ink-4)] ml-0.5">/{totalWords}</span></>}
           />
         </div>
+        )}
 
         {/* 주간 바 차트 */}
+        {!isNewUser && (
         <Card pad="none" className="px-5 pt-4 pb-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-bold text-[var(--color-ink)]">이번 주</p>
           </div>
           <WeeklyBarChart attendanceDates={attendanceDates} />
         </Card>
+        )}
       </div>
 
       {/* 코스 + 미션 */}
