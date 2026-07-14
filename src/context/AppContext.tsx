@@ -6,11 +6,10 @@ import { useDebouncedEffect } from '../hooks/useDebouncedEffect';
 import { Storage } from '../lib/storage';
 import { requestAppReview } from '../lib/review';
 import { logClick } from '../lib/analytics';
+import { toDateStr } from '../lib/date';
 import { nextSrs, gradeFromResult, addDays } from '../lib/srs';
 
 type WpRow = { word_id: number; ease: number; interval_d: number; reps: number; due_date: string };
-
-const toDateStr = (d: Date) => d.toISOString().slice(0, 10);
 
 const mapUserAction = (r: any): UserAction => ({
   id: r.id,
@@ -31,6 +30,7 @@ export type LeagueUser = {
 
 type AppContextValue = {
   ready: boolean;
+  hydrated: boolean;
   points: number;
   setPoints: React.Dispatch<React.SetStateAction<number>>;
   knownWords: Word[];
@@ -85,6 +85,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [myActions, setMyActions]         = useState<UserAction[]>([]);
   const [myEmoji, setMyEmoji]             = useState<string>('😊');
   const [ready, setReady]                 = useState(false);
+  const [hydrated, setHydrated]           = useState(false);
   const pendingKnownIds   = useRef<Set<number> | null>(null);
   const pendingUnknownIds = useRef<Set<number> | null>(null);
 
@@ -309,6 +310,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       setUnknownWords(allWords.filter(w => pendingUnknownIds.current!.has(w.id)));
       pendingUnknownIds.current = null;
     }
+    setHydrated(true);
   }, [allWords, ready]);
 
   // ── knownWords → word_progress upsert (2초 디바운스) ──────────
@@ -353,7 +355,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (!ready || !profileIdRef.current) return;
     const today = toDateStr(new Date());
-    if (!attendanceDates.includes(today)) checkIn();
+    if (!attendanceDates.includes(today)) {
+      logClick('checkin_auto');
+      checkIn();
+    }
   }, [ready]);
 
   // ── 자정 미션 초기화 ──────────────────────────────────────────
@@ -522,6 +527,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <AppContext.Provider value={{
       ready,
+      hydrated,
       points, setPoints,
       knownWords, knownIds, setKnownWords,
       unknownWords, setUnknownWords,

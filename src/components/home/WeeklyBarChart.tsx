@@ -1,3 +1,5 @@
+import { toDateStr } from '../../lib/date';
+
 // 주간 학습 바 차트
 export const WeeklyBarChart = ({ attendanceDates }: { attendanceDates: string[] }) => {
   const days = ['월', '화', '수', '목', '금', '토', '일'];
@@ -9,7 +11,7 @@ export const WeeklyBarChart = ({ attendanceDates }: { attendanceDates: string[] 
   const week = days.map((label, i) => {
     const d = new Date(today);
     d.setDate(today.getDate() + mondayOffset + i);
-    const dateStr = d.toISOString().slice(0, 10);
+    const dateStr = toDateStr(d);
     const isAttended = attendSet.has(dateStr);
     const isFuture = d > today;
     const isToday = i === (todayDay === 0 ? 6 : todayDay - 1);

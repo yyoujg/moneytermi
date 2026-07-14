@@ -5,6 +5,7 @@ import type { Mission, Missions } from '../types';
 import { CURRENT_LEAGUE_NAME } from '../constants';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
+import { toDateStr } from '../lib/date';
 import { useAuth } from '../hooks/useAuth';
 import { calculateRank } from '../utils/league';
 import { WeeklyBarChart } from '../components/home/WeeklyBarChart';
@@ -13,10 +14,10 @@ import { StatCard } from '../components/ui/StatCard';
 
 const HomeScreen = () => {
   const navigate = useNavigate();
-  const { points, knownWords, knownIds, missions, claimReward, attendanceDates, otherLeagueUsers, courses, allWords, dueQueue, myEmoji } = useAppContext();
+  const { hydrated, points, knownWords, unknownWords, knownIds, missions, claimReward, attendanceDates, otherLeagueUsers, courses, allWords, dueQueue, myEmoji } = useAppContext();
   const { user } = useAuth();
   const totalWords = allWords.length;
-  const isNewUser = knownWords.length === 0;
+  const isNewUser = hydrated && knownWords.length + unknownWords.length === 0;
 
   // 연속 출석일
   const streak = (() => {
@@ -26,7 +27,7 @@ const HomeScreen = () => {
     for (let i = 0; i < 365; i++) {
       const d = new Date(today);
       d.setDate(today.getDate() - i);
-      if (s.has(d.toISOString().slice(0, 10))) count++;
+      if (s.has(toDateStr(d))) count++;
       else break;
     }
     return count;
@@ -108,7 +109,7 @@ const HomeScreen = () => {
           {/* 단일 CTA */}
           <div className="flex flex-col" style={{ gap: 12 }}>
             <button
-              onClick={() => { logClick('course_start', { course_id: nextCourse.id, title: nextCourse.title }); navigate('/word-card', { state: { words: nextCourse.words, index: 0, backPath: '/home', autoAdvance: true } }); }}
+              onClick={() => { if (isNewUser) logClick('home_cta_click'); logClick('course_start', { course_id: nextCourse.id, title: nextCourse.title }); navigate('/word-card', { state: { words: nextCourse.words, index: 0, backPath: '/home', autoAdvance: true } }); }}
               className="w-full py-4 rounded-button bg-brand-500 text-white text-sm font-bold active:opacity-90 flex items-center justify-center gap-2"
             >
               {isNewUser ? '단어 1개만 배워볼까요?' : '오늘 학습 시작하기'}

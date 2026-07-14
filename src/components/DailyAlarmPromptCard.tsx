@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Bell } from 'lucide-react';
 import { Storage } from '../lib/storage';
+import { logClick } from '../lib/analytics';
 import { useNotificationAgreement } from '../hooks/useNotificationAgreement';
 import { Card } from './ui/Card';
 import { IconBox } from './ui/IconBox';
@@ -21,6 +22,7 @@ export const DailyAlarmPromptCard = () => {
     ]).then(([seen, agree]) => {
       if (seen !== '1' && agree !== 'agreed') {
         setShow(true);
+        logClick('notification_prompt_view');
         Storage.setItem(SEEN_KEY, '1').catch(() => {}); // 1회 노출 처리
       }
     });
@@ -47,7 +49,7 @@ export const DailyAlarmPromptCard = () => {
           나중에
         </button>
         <button
-          onClick={requestAgreement}
+          onClick={() => { logClick('notification_agree'); requestAgreement(); }}
           className="flex-1 py-3 rounded-button text-sm font-bold text-white bg-brand-500 active:opacity-90"
         >
           알림 받기
