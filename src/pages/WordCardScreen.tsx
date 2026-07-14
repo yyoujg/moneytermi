@@ -7,6 +7,7 @@ import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
 import { useNews, type NaverNewsItem } from '../hooks/useNews';
 import { ActionPickerSheet } from '../components/ActionPickerSheet';
+import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
 import { Card } from '../components/ui/Card';
 
 const ACCENT = 'var(--color-brand-500)';
@@ -247,6 +248,7 @@ const WordCardScreen = () => {
               ))}
             </div>
           </Card>
+          <DailyAlarmPromptCard />
         </div>
         <div className="px-5 pb-12 flex flex-col gap-2.5">
           <button
