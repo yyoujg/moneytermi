@@ -50,6 +50,26 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
     컴포넌트 전역 `SEEN_KEY` 게이팅으로 기존 위치와 이중 노출 없음(먼저 뜨는 화면이 이김).
     (`src/pages/WordCardScreen.tsx`)
 
+### 수정 (배포 전 검증)
+
+- **날짜 KST 통일** (`aa11580`)
+  - `toDateStr`가 `toISOString()`(UTC) 기반이라 00:00~09:00 KST 구간에서 하루 밀림
+    (예: 07-14 08:00 KST = 07-13 23:00 UTC). 아침 자동 출석이 전날로 기록돼 P0-1이 훼손되던
+    문제. 공유 `src/lib/date.ts`(+9h) 신설, 흩어져 있던 `toISOString().slice(0,10)` 5곳
+    (`AppContext`·`HomeScreen` streak·`WeeklyBarChart`·`AttendanceCalendar`·`srs.addDays`)을
+    일괄 교체해 출석 write/read·streak·SRS due 비교가 같은 규칙을 쓰도록 함.
+
+- **신규 판정 hydration 게이트** (`aa11580`)
+  - `ready` 직후 `knownWords` 하이드레이션(effect [allWords, ready]) 전 프레임에서 재방문
+    유저에게 신규 CTA가 한 번 번쩍이던 문제. `hydrated` 플래그를 추가해
+    `isNewUser = hydrated && knownWords.length + unknownWords.length === 0`로 판정.
+    (`src/context/AppContext.tsx`, `src/pages/HomeScreen.tsx`)
+
+- **활성화 퍼널 계측 추가** (`aa11580`)
+  - 개선 여부 판정용 이벤트 4종: `checkin_auto`(자동 출석), `home_cta_click`(신규 CTA),
+    `notification_prompt_view`/`notification_agree`(동의 카드 노출·수락).
+    `activation_first_card`는 기존.
+
 ### 정리
 
 - **Vercel 설정 제거** (`7108cc5`)
