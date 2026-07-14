@@ -196,6 +196,7 @@ const WordCardScreen = () => {
     backPath?: string;
     backState?: unknown;
     autoAdvance?: boolean;
+    continueWords?: Word[];
   } | null;
 
   // 콜드 딥링크(state 없음) 진입 시: 미완료 코스 우선으로 기본 단어 로드
@@ -251,12 +252,31 @@ const WordCardScreen = () => {
           <DailyAlarmPromptCard />
         </div>
         <div className="px-5 pb-12 flex flex-col gap-2.5">
-          <button
-            onClick={() => navigate('/quiz', { state: { quizQueue: quizWords } })}
-            className="w-full py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90"
-          >
-            바로 퀴즈 풀기 →
-          </button>
+          {(() => {
+            const remaining = state?.continueWords?.filter(w => !knownIds.has(w.id)) ?? [];
+            if (remaining.length > 0) {
+              return (
+                <button
+                  onClick={() => {
+                    logClick('continue_after_first');
+                    const idx = state!.continueWords!.findIndex(w => !knownIds.has(w.id));
+                    navigate('/word-card', { state: { words: state!.continueWords, index: idx, backPath, autoAdvance: true } });
+                  }}
+                  className="w-full py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90"
+                >
+                  다음 단어 계속 배우기 →
+                </button>
+              );
+            }
+            return (
+              <button
+                onClick={() => navigate('/quiz', { state: { quizQueue: quizWords } })}
+                className="w-full py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90"
+              >
+                바로 퀴즈 풀기 →
+              </button>
+            );
+          })()}
           <button
             onClick={() => navigate(backPath, backState ? { state: backState } : undefined)}
             className="w-full py-3 rounded-button bg-[var(--color-card)] text-xs font-medium text-[var(--color-ink-3)] active:opacity-70"

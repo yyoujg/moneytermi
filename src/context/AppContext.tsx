@@ -8,6 +8,7 @@ import { requestAppReview } from '../lib/review';
 import { logClick } from '../lib/analytics';
 import { toDateStr } from '../lib/date';
 import { nextSrs, gradeFromResult, addDays } from '../lib/srs';
+import { DAILY_REVIEW_CAP } from '../constants';
 
 type WpRow = { word_id: number; ease: number; interval_d: number; reps: number; due_date: string };
 
@@ -462,6 +463,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     return wpRows
       .filter(r => r.due_date <= todayStr)
       .sort((a, b) => a.due_date.localeCompare(b.due_date))
+      .slice(0, DAILY_REVIEW_CAP)
       .map(r => byId.get(r.word_id))
       .filter(Boolean) as Word[];
   }, [wpRows, allWords]);
