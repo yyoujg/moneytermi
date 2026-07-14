@@ -186,7 +186,7 @@ const WordCard = ({
 const WordCardScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { courses, allWords, knownWords, knownIds, toggleKnown, setKnownWords, myActions, actionsByWord, addAction } = useAppContext();
+  const { hydrated, courses, allWords, knownWords, unknownWords, knownIds, toggleKnown, setKnownWords, myActions, actionsByWord, addAction } = useAppContext();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [actionSheetOpen, setActionSheetOpen] = React.useState(false);
 
@@ -302,7 +302,7 @@ const WordCardScreen = () => {
 
   const goNext = () => {
     if (autoAdvance) {
-      if (knownWords.length === 0) logClick('activation_first_card');
+      if (hydrated && knownWords.length + unknownWords.length === 0) logClick('activation_first_card');
       setKnownWords(prev => prev.some(w => w.id === word.id) ? prev : [...prev, word]);
       setWordIndex(i => i + 1);
     } else if (wordIndex < words.length - 1) {

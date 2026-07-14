@@ -303,7 +303,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   // ── allWords 로드 후 pending word IDs 해소 ────────────────────
   useEffect(() => {
-    if (allWords.length === 0) return;
+    if (allWords.length === 0 || !ready) return;
     if (pendingKnownIds.current) {
       setKnownWords(allWords.filter(w => pendingKnownIds.current!.has(w.id)));
       pendingKnownIds.current = null;
@@ -383,8 +383,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
     const scheduleReset = () => {
       const now = new Date();
-      const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-      const msUntilMidnight = next.getTime() - now.getTime();
+      const nowKst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+      const nextKstMidnightMs = Date.UTC(nowKst.getUTCFullYear(), nowKst.getUTCMonth(), nowKst.getUTCDate() + 1) - 9 * 60 * 60 * 1000;
+      const msUntilMidnight = nextKstMidnightMs - now.getTime();
 
       const t = setTimeout(() => {
         const today = toDateStr(new Date());
@@ -409,7 +410,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       setKnownWords(prev => prev.filter(w => w.id !== word.id));
       setUnknownWords(prev => prev.some(w => w.id === word.id) ? prev : [...prev, word]);
     } else {
-      if (knownWords.length === 0) logClick('activation_first_card');
+      if (hydrated && knownWords.length + unknownWords.length === 0) logClick('activation_first_card');
       setKnownWords(prev => prev.some(w => w.id === word.id) ? prev : [...prev, word]);
       setUnknownWords(prev => prev.filter(w => w.id !== word.id));
     }
@@ -471,7 +472,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   // ── recordReview — SRS 일정만 갱신 (포인트는 submitQuizAnswer가 담당) ─
   const recordReview = async (wordId: number, correct: boolean, usedHint: boolean) => {
     const existing = wpRows.find(r => r.word_id === wordId);
-    const base = existing ?? { ease: 2.5, interval_d: 0, reps: 0 };
+    const base = existing ?? { ease: 2.5, interval_d: 1, reps: 0 };
     const grade = gradeFromResult(correct, usedHint);
     const ns = nextSrs(base, grade);
     const due = addDays(new Date(), ns.interval_d);
