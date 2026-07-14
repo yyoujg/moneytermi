@@ -231,6 +231,7 @@ type Missions = { m1: Mission; m3: Mission };
 | 필드 | 타입 | 의미 |
 |------|------|------|
 | ready | boolean | 초기 로드 완료 여부 |
+| hydrated | boolean | word_progress(known/unknown) 하이드레이션 완료 여부. `ready` 직후 아직 knownWords가 안 채워진 프레임에서 신규 유저로 오판하지 않도록 홈 신규 판정에 사용 |
 | points / setPoints | number | 포인트 |
 | knownWords / setKnownWords | Word[] | 아는 단어 |
 | knownIds | Set<number> | knownWords의 ID 집합 (useMemo 파생) |
@@ -239,8 +240,8 @@ type Missions = { m1: Mission; m3: Mission };
 | claimReward | (id) => Promise<void> | 미션 보상 수령 (claim_mission_reward RPC, 서버 검증 후 적립) |
 | submitQuizAnswer | (wordId, answer, mode, usedHint, sessionStart) => Promise<{correct,earned,combo,points,m3Current} \| null> | 퀴즈 답안 서버 채점(submit_quiz_answer RPC). 응답으로 points·m3 갱신 |
 | toggleKnown | (word) => void | known/unknown 토글 |
-| checkIn | () => Promise<void> | 출석 체크 |
-| attendanceDates | string[] | 출석 날짜 (YYYY-MM-DD) |
+| checkIn | () => Promise<void> | 출석 체크 (앱 진입 시 오늘 미출석이면 자동 1회 호출) |
+| attendanceDates | string[] | 출석 날짜 (KST YYYY-MM-DD) |
 | otherLeagueUsers | LeagueUser[] | 본인 제외 다른 사용자(최대 49명) |
 | courses | Course[] | 코스 목록 (sort_order 오름차순 정렬) |
 | allWords | Word[] | 전체 용어 |
@@ -300,8 +301,10 @@ type StoredProfile = {
 - 포인트·콤보·미션 진행도는 디바운스 동기화하지 않는다(서버 소유). 퀴즈 응답 즉시 `submitQuizAnswer`가 `submit_quiz_answer` RPC를 호출하고, 응답의 `points`/`m3_current`로 클라 상태를 갱신한다.
 - `claimReward`: `claim_mission_reward` RPC 호출 후 응답 `points`로 갱신하고 해당 미션 `isRewarded=true` 반영.
 - `checkIn`: UI 즉시 반영 후 `checkin` RPC 호출(이전의 attendance/daily_missions 직접 upsert 대체).
+- **자동 출석**: `ready && profileId` 확보 후 오늘(KST) 미출석이면 `checkIn()`을 자동 1회 호출하는 effect(`[ready]`). `checkin` RPC가 idempotent(attendance UNIQUE·m1 upsert)라 중복 안전, 포인트 미지급.
 - `updateMyEmoji`: 상태 반영 후 profiles.emoji 즉시 update(컬럼 GRANT 유지).
 - 자정 미션 리셋: 자정까지 setTimeout 후 날짜가 바뀌면 `missions`를 DEFAULT_MISSIONS로 초기화하고 재예약.
+- **날짜 문자열은 KST 기준**: 출석/streak/SRS due 등 모든 `YYYY-MM-DD`는 `src/lib/date.ts`의 `toDateStr`(UTC+9)로 생성한다. `toISOString()`(UTC)을 직접 쓰면 00:00~09:00 KST 구간에서 하루 밀리므로 금지.
 
 ## 6. 알림 (DAILY_TERM_PUSH)
 
