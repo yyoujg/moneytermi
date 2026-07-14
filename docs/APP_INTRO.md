@@ -118,7 +118,7 @@
 | 미니앱 플랫폼 | Apps in Toss (@apps-in-toss/web-framework) v2.6.1 |
 | 디자인 시스템 | Toss Design System (TDS) |
 | 에러 트래킹 | Sentry |
-| 라우팅 | React Router DOM v7 (HashRouter) |
+| 라우팅 | React Router DOM v7 (BrowserRouter) |
 
 ---
 

@@ -43,9 +43,16 @@ CREATE TABLE public.word_progress (
   user_id    UUID        NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   word_id    INTEGER     NOT NULL,
   status     TEXT        NOT NULL CHECK (status IN ('known', 'unknown')),
+  -- SRS 간격반복 (SM-2 lite). 첫 학습 시 due_date는 앱에서 +1일로 시드.
+  ease       NUMERIC     NOT NULL DEFAULT 2.5,
+  interval_d INTEGER     NOT NULL DEFAULT 0,
+  reps       INTEGER     NOT NULL DEFAULT 0,
+  due_date   DATE        NOT NULL DEFAULT CURRENT_DATE,
+  last_grade SMALLINT,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE (user_id, word_id)
 );
+CREATE INDEX IF NOT EXISTS idx_wp_due ON public.word_progress(user_id, due_date);
 
 -- ──────────────────────────────────────────
 -- 3. daily_missions
