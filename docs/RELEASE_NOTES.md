@@ -5,6 +5,59 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
 
 ---
 
+## 2026-07-14 — 신규 유저 활성화 / 재방문 트리거
+
+판정 근거: 신규 유입은 홈에서 46%가 아무것도 안 하고 이탈(빈 성적표), 출석 발견율 2.6%,
+푸시 동의 모수 상한 27%(완주 시점에만 노출). 기술 버그·콘텐츠 문제는 아님 → 입구(홈)와
+재방문 트리거를 손봄.
+
+### 토스 콘솔 출시노트 (사용자 노출용 — 아래 평문 그대로 등록)
+
+```
+이번 업데이트 주요 내용
+
+[처음 오면 바로 학습부터]
+앱을 처음 켜면 복잡한 숫자 대신 "단어 1개만 배워볼까요?" 한 번만 눌러 바로 첫 단어 학습을 시작할 수 있어요.
+
+[출석은 자동으로]
+앱을 열기만 하면 오늘 출석이 자동으로 체크돼요. 매일 들어오는 것만으로 출석이 쌓여요.
+
+[매일 알림 받기 안내]
+학습을 마치면 매일 09:00 오늘의 경제 용어를 알림으로 받아볼지 물어봐요. 켜두면 잊지 않고 이어갈 수 있어요.
+```
+
+### 기능
+
+- **앱 진입 시 자동 출석 체크** (`ddd8c33`)
+  - `ready && profileId` 확보 후 오늘 미출석이면 기존 `checkIn()` 1회 자동 호출.
+    `checkin` RPC는 idempotent(attendance UNIQUE·m1 upsert)이고 포인트 미지급이라 무결성 리스크 0.
+    출석 발견율 2.6% → m1 미션 루프 진입 회복. (`src/context/AppContext.tsx`)
+
+- **신규 유저 홈 = 강제 첫 학습 CTA** (`ddd8c33`)
+  - `knownWords.length === 0`이면 빈 통계 행(포인트0/출석0/단어0)·주간 바 차트를 숨기고
+    상단 CTA 문구를 "단어 1개만 배워볼까요?"로 전환 → `/word-card` autoAdvance 직행.
+    46% 홈 이탈(단일 최대 누수) 대응. (`src/pages/HomeScreen.tsx`)
+
+- **첫 카드 완료 = 활성화 마일스톤 이벤트** (`ddd8c33`)
+  - `knownWords` 0→1 유저 액션 시점에 `logClick('activation_first_card')`. 완료 경로가 둘이라
+    autoAdvance `goNext`와 `toggleKnown` else 분기 양쪽에 `length===0` 가드. hydration 오발화를
+    피하려 effect 대신 액션 시점 계측. 위 홈 개선 효과 측정 지표.
+    (`src/pages/WordCardScreen.tsx`, `src/context/AppContext.tsx`)
+
+- **푸시 동의 노출을 퍼널 앞단으로** (`68cf44c`)
+  - `DailyAlarmPromptCard`가 퀴즈/복습 완료(완주율 27%)에만 있어 동의 모수 상한이 27%로
+    막혀 있었음. autoAdvance 코스 완료 화면에도 노출해 학습 완주자 전원으로 확장.
+    컴포넌트 전역 `SEEN_KEY` 게이팅으로 기존 위치와 이중 노출 없음(먼저 뜨는 화면이 이김).
+    (`src/pages/WordCardScreen.tsx`)
+
+### 정리
+
+- **Vercel 설정 제거** (`7108cc5`)
+  - `vercel.json`·`.vercel/`·`.gitignore` `.vercel` 항목 삭제. 코드 import·의존성·lockfile·CI
+    참조 없는 죽은 설정. 라이브 배포는 Apps in Toss(`ait`)+Supabase로 무관.
+
+---
+
 ## 2026-06-26 — 디자인 토큰화 / 다크테마 보정 / UX 폴리시
 
 ### 토스 콘솔 출시노트 (사용자 노출용 — 아래 평문 그대로 등록)
