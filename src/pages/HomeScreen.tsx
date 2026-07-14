@@ -109,7 +109,7 @@ const HomeScreen = () => {
           {/* 단일 CTA */}
           <div className="flex flex-col" style={{ gap: 12 }}>
             <button
-              onClick={() => { if (isNewUser) logClick('home_cta_click'); logClick('course_start', { course_id: nextCourse.id, title: nextCourse.title }); navigate('/word-card', { state: { words: nextCourse.words, index: 0, backPath: '/home', autoAdvance: true } }); }}
+              onClick={() => { if (isNewUser) logClick('home_cta_click'); logClick('course_start', { course_id: nextCourse.id, title: nextCourse.title }); const words = isNewUser && nextCourse.words.length > 0 ? [nextCourse.words[0]] : nextCourse.words; navigate('/word-card', { state: { words, index: 0, backPath: '/home', autoAdvance: true, continueWords: isNewUser ? nextCourse.words : undefined } }); }}
               className="w-full py-4 rounded-button bg-brand-500 text-white text-sm font-bold active:opacity-90 flex items-center justify-center gap-2"
             >
               {isNewUser ? '단어 1개만 배워볼까요?' : '오늘 학습 시작하기'}

@@ -2,9 +2,9 @@
 
 머니터미(moneytermi)의 데이터 모델과 저장/동기화 흐름을 한곳에 정리한 문서.
 
-> **최종 갱신 2026-06-26**
-> - 실행 완료: `courses.sort_order` 추가(학습 순서 제어), 콘텐츠 시드 확장(`words` 총 233개·id 최대 2025), `related_words` 데이터 정합성 정리.
-> - 예정(미실행): SRS 간격반복(`word_progress` 확장), 실천 레이어(`actions`/`user_actions`), 시장지표(`market_indicators`). → §8 로드맵 참고.
+> **최종 갱신 2026-07-14**
+> - 실행 완료: `courses.sort_order` 추가(학습 순서 제어), 콘텐츠 시드 확장(`words` 총 233개·id 최대 2025), `related_words` 데이터 정합성 정리, **SRS 간격반복(`word_progress` 확장)·실천 레이어(`actions`/`user_actions`) 배포**, 자동 출석·신규 홈 첫 학습 CTA·날짜 KST 통일.
+> - 예정(미실행): 시장지표(`market_indicators`). → §8 로드맵 참고.
 
 ## 1. 개요
 
@@ -61,7 +61,7 @@ localStorage / 토스앱 Storage   React AppContext           Supabase (PostgreS
 | updated_at | TIMESTAMPTZ | NOT NULL, default now() | 수정 시각 (트리거 자동 갱신) |
 | | | UNIQUE (user_id, word_id) | |
 
-> **예정** SRS(간격반복) 필드 추가 검토 중 — `ease`·`interval_d`·`reps`·`due_date`·`last_grade`. 미실행. §8.1 참고.
+> **배포됨** SRS(간격반복) 필드 — `ease`·`interval_d`·`reps`·`due_date`·`last_grade`. 라이브 DB에 존재(`src/lib/database.types.ts` 기준). 첫 학습 시 `due_date`는 +1일로 시드하고, 복습 채점(`recordReview`)이 SM-2 lite로 갱신. §8.1 참고.
 
 #### daily_missions
 일별 미션 진행도. `(user_id, mission_id, date)` 단위로 유일.
@@ -231,6 +231,7 @@ type Missions = { m1: Mission; m3: Mission };
 | 필드 | 타입 | 의미 |
 |------|------|------|
 | ready | boolean | 초기 로드 완료 여부 |
+| hydrated | boolean | word_progress(known/unknown) 하이드레이션 완료 여부. `ready` 직후 아직 knownWords가 안 채워진 프레임에서 신규 유저로 오판하지 않도록 홈 신규 판정에 사용 |
 | points / setPoints | number | 포인트 |
 | knownWords / setKnownWords | Word[] | 아는 단어 |
 | knownIds | Set<number> | knownWords의 ID 집합 (useMemo 파생) |
@@ -239,8 +240,8 @@ type Missions = { m1: Mission; m3: Mission };
 | claimReward | (id) => Promise<void> | 미션 보상 수령 (claim_mission_reward RPC, 서버 검증 후 적립) |
 | submitQuizAnswer | (wordId, answer, mode, usedHint, sessionStart) => Promise<{correct,earned,combo,points,m3Current} \| null> | 퀴즈 답안 서버 채점(submit_quiz_answer RPC). 응답으로 points·m3 갱신 |
 | toggleKnown | (word) => void | known/unknown 토글 |
-| checkIn | () => Promise<void> | 출석 체크 |
-| attendanceDates | string[] | 출석 날짜 (YYYY-MM-DD) |
+| checkIn | () => Promise<void> | 출석 체크 (앱 진입 시 오늘 미출석이면 자동 1회 호출) |
+| attendanceDates | string[] | 출석 날짜 (KST YYYY-MM-DD) |
 | otherLeagueUsers | LeagueUser[] | 본인 제외 다른 사용자(최대 49명) |
 | courses | Course[] | 코스 목록 (sort_order 오름차순 정렬) |
 | allWords | Word[] | 전체 용어 |
@@ -294,20 +295,23 @@ type StoredProfile = {
 
 | 상태 | 대상 | 지연 | 방식 |
 |------|------|------|------|
-| knownWords | word_progress | 2000ms | upsert (onConflict user_id,word_id), status='known' |
-| unknownWords | word_progress | 2000ms | upsert (onConflict user_id,word_id), status='unknown' |
+| knownWords | word_progress | 2000ms | upsert (onConflict user_id,word_id), status='known' + 첫 학습 단어 SRS 시드 |
+| unknownWords | word_progress | 2000ms | upsert (onConflict user_id,word_id), status='unknown' + 첫 학습 단어 SRS 시드 |
 
+- **첫 학습 SRS 시드**(`seedInitialSrs`): 위 status upsert 후, `wpRows`에 아직 없는 단어만 `{ ease:2.5, interval_d:1, reps:0, due_date: 내일(KST) }`로 별도 upsert하고 `wpRows`에 추가. status-only upsert는 `due_date`를 안 건드리므로 복습 완료 단어의 due는 보존. 미시드 시 DB 기본값 `due_date=오늘`이 적용돼 학습 즉시 복습 큐에 쏟아지는 문제를 방지.
 - 포인트·콤보·미션 진행도는 디바운스 동기화하지 않는다(서버 소유). 퀴즈 응답 즉시 `submitQuizAnswer`가 `submit_quiz_answer` RPC를 호출하고, 응답의 `points`/`m3_current`로 클라 상태를 갱신한다.
 - `claimReward`: `claim_mission_reward` RPC 호출 후 응답 `points`로 갱신하고 해당 미션 `isRewarded=true` 반영.
 - `checkIn`: UI 즉시 반영 후 `checkin` RPC 호출(이전의 attendance/daily_missions 직접 upsert 대체).
+- **자동 출석**: `ready && profileId` 확보 후 오늘(KST) 미출석이면 `checkIn()`을 자동 1회 호출하는 effect(`[ready]`). `checkin` RPC가 idempotent(attendance UNIQUE·m1 upsert)라 중복 안전, 포인트 미지급.
 - `updateMyEmoji`: 상태 반영 후 profiles.emoji 즉시 update(컬럼 GRANT 유지).
 - 자정 미션 리셋: 자정까지 setTimeout 후 날짜가 바뀌면 `missions`를 DEFAULT_MISSIONS로 초기화하고 재예약.
+- **날짜 문자열은 KST 기준**: 출석/streak/SRS due 등 모든 `YYYY-MM-DD`는 `src/lib/date.ts`의 `toDateStr`(UTC+9)로 생성한다. `toISOString()`(UTC)을 직접 쓰면 00:00~09:00 KST 구간에서 하루 밀리므로 금지.
 
 ## 6. 알림 (DAILY_TERM_PUSH)
 
 출처: `DAILY_TERM_PUSH.md`, `src/hooks/useNotificationAgreement.ts`
 
-- 발송 방식: 토스 콘솔 스마트 발송(직접 API 아님). 발송 코드 `DAILY_TERM_PUSH`, 매일 09:00(KST), 이동 URL `intoss://moneytermi/word-card`.
+- 발송 방식: 토스 콘솔 스마트 발송(직접 API 아님). 발송 코드(templateCode) `moneytermi-DAILY_TERM_PUSH2`, 매일 09:00(KST), 이동 URL `intoss://moneytermi/word-card`.
 - `useNotificationAgreement`: 토스 동의 플로우 호출 후 결과를 `setting_notification_agreement`에 'agreed'/'rejected'로 저장(UI 토글 표시용). 실제 발송 대상 관리는 토스 측에서 수행.
 - 발송 대상을 직접 관리하는 Edge Function(`toss-register-push`, `daily-term-push`)과 푸시 컬럼은 현재 미배포(2.5 참고).
 
@@ -332,11 +336,11 @@ type StoredProfile = {
 
 ---
 
-## 8. 로드맵 (예정 · 미실행)
+## 8. 로드맵
 
-> 아래는 "단어 암기 → 학습+실천" 전환을 위한 계획 스키마다. **DB 미반영**. 실행 시 본 문서 본문으로 승격한다.
+> 8.1 SRS·8.2 실천은 **배포 완료**(라이브 DB 반영). 8.3 시장지표만 미실행.
 
-### 8.1 SRS 간격반복 (예정) — `word_progress` 확장
+### 8.1 SRS 간격반복 (배포됨) — `word_progress` 확장
 
 틀린 단어는 자주, 아는 단어는 뜸하게 출제. 포인트 경로(§2.4)는 건드리지 않고 일정 필드만 추가.
 
@@ -355,7 +359,7 @@ CREATE INDEX IF NOT EXISTS idx_wp_due ON word_progress(user_id, due_date);
 - "오늘 복습 큐": `WHERE due_date <= CURRENT_DATE ORDER BY due_date`.
 - RLS: 기존 `word_progress`(본인 행) 정책 그대로 적용. 포인트는 기존 `submit_quiz_answer` RPC 유지.
 
-### 8.2 실천 레이어 (예정) — `actions` / `user_actions`
+### 8.2 실천 레이어 (배포됨) — `actions` / `user_actions`
 
 개념을 내 할 일로 전환. 콘텐츠(공개)와 사용자 실천(본인 소유)을 분리.
 

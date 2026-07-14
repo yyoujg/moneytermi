@@ -9,3 +9,6 @@ export const LEAGUE_TIERS = [
 export const CURRENT_LEAGUE_ID = 1;
 export const CURRENT_LEAGUE_NAME = '알개미';
 
+// 하루 복습 큐 상한 (홈 "오늘 복습할 단어 N개")
+export const DAILY_REVIEW_CAP = 10;
+

@@ -8,6 +8,7 @@ import { requestAppReview } from '../lib/review';
 import { logClick } from '../lib/analytics';
 import { toDateStr } from '../lib/date';
 import { nextSrs, gradeFromResult, addDays } from '../lib/srs';
+import { DAILY_REVIEW_CAP } from '../constants';
 
 type WpRow = { word_id: number; ease: number; interval_d: number; reps: number; due_date: string };
 
@@ -95,6 +96,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const profileIdRef    = useRef<string | null>(null);
   const dbRef           = useRef<typeof supabase>(supabase);
   const lastMissionDate = useRef<string>(toDateStr(new Date()));
+  const autoCheckedRef  = useRef(false);
 
   // ── 콘텐츠 로드 (courses + words) ─────────────────────────────
   useEffect(() => {
@@ -313,6 +315,17 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     setHydrated(true);
   }, [allWords, ready]);
 
+  // ── 첫 학습 단어 초기 SRS 시드 (wpRows에 없는 단어만, due = 내일) ──
+  const seedInitialSrs = async (words: Word[], status: 'known' | 'unknown', profileId: string) => {
+    const fresh = words.filter(w => !wpRows.some(r => r.word_id === w.id));
+    if (fresh.length === 0) return;
+    const due = addDays(new Date(), 1);
+    const seed = fresh.map(w => ({ user_id: profileId, word_id: w.id, status, ease: 2.5, interval_d: 1, reps: 0, due_date: due }));
+    const { error } = await dbRef.current.from('word_progress').upsert(seed, { onConflict: 'user_id,word_id' });
+    if (error) { console.error('[sync] 초기 SRS 시드 실패:', error); return; }
+    setWpRows(prev => [...prev, ...fresh.map(w => ({ word_id: w.id, ease: 2.5, interval_d: 1, reps: 0, due_date: due }))]);
+  };
+
   // ── knownWords → word_progress upsert (2초 디바운스) ──────────
   useDebouncedEffect(async () => {
     if (!ready || knownWords.length === 0) return;
@@ -321,6 +334,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     const rows = knownWords.map(w => ({ user_id: profileId, word_id: w.id, status: 'known' as const }));
     const { error } = await dbRef.current.from('word_progress').upsert(rows, { onConflict: 'user_id,word_id' });
     if (error) console.error('[sync] word_progress(known) 저장 실패:', error);
+    await seedInitialSrs(knownWords, 'known', profileId);
   }, [knownWords, ready], 2000);
 
   // ── unknownWords → word_progress upsert ───────────────────────
@@ -331,6 +345,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     const rows = unknownWords.map(w => ({ user_id: profileId, word_id: w.id, status: 'unknown' as const }));
     const { error } = await dbRef.current.from('word_progress').upsert(rows, { onConflict: 'user_id,word_id' });
     if (error) console.error('[sync] word_progress(unknown) 저장 실패:', error);
+    await seedInitialSrs(unknownWords, 'unknown', profileId);
   }, [unknownWords, ready], 2000);
 
   // ── checkIn — 출석 버튼 클릭 시 ────────────────────────────────
@@ -351,9 +366,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     if (error) console.error('[checkIn] checkin RPC 실패:', error);
   };
 
-  // ── 앱 진입 시 자동 출석 ──────────────────────────────────────
+  // ── 앱 진입 시 자동 출석 (세션 1회 래치) ──────────────────────
   useEffect(() => {
-    if (!ready || !profileIdRef.current) return;
+    if (!ready || !profileIdRef.current || autoCheckedRef.current) return;
+    autoCheckedRef.current = true;
     const today = toDateStr(new Date());
     if (!attendanceDates.includes(today)) {
       logClick('checkin_auto');
@@ -447,6 +463,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     return wpRows
       .filter(r => r.due_date <= todayStr)
       .sort((a, b) => a.due_date.localeCompare(b.due_date))
+      .slice(0, DAILY_REVIEW_CAP)
       .map(r => byId.get(r.word_id))
       .filter(Boolean) as Word[];
   }, [wpRows, allWords]);
