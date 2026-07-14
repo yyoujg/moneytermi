@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { Card } from '../ui/Card';
+import { toDateStr } from '../../lib/date';
 
 const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -13,7 +14,7 @@ export const AttendanceCalendar = ({ attendanceDates }: { attendanceDates: strin
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const attendSet = new Set(attendanceDates);
-  const todayStr = today.toISOString().slice(0, 10);
+  const todayStr = toDateStr(today);
 
   const toStr = (y: number, m: number, d: number) =>
     `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;

@@ -1,3 +1,5 @@
+import { toDateStr } from './date';
+
 // SM-2 경량판. grade: 0=again, 1=hard, 2=good
 export type Grade = 0 | 1 | 2;
 
@@ -26,7 +28,7 @@ export function nextSrs(s: SrsState, grade: Grade): SrsState {
 export function addDays(base: Date, days: number): string {
   const d = new Date(base);
   d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10); // YYYY-MM-DD
+  return toDateStr(d); // KST YYYY-MM-DD
 }
 
 // 정오답 신호 → grade (나중 3버튼 전환 시 이 함수만 교체)
