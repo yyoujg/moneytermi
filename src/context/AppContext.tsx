@@ -349,6 +349,13 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     if (error) console.error('[checkIn] checkin RPC 실패:', error);
   };
 
+  // ── 앱 진입 시 자동 출석 ──────────────────────────────────────
+  useEffect(() => {
+    if (!ready || !profileIdRef.current) return;
+    const today = toDateStr(new Date());
+    if (!attendanceDates.includes(today)) checkIn();
+  }, [ready]);
+
   // ── 자정 미션 초기화 ──────────────────────────────────────────
   useEffect(() => {
     if (!ready) return;
@@ -381,6 +388,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       setKnownWords(prev => prev.filter(w => w.id !== word.id));
       setUnknownWords(prev => prev.some(w => w.id === word.id) ? prev : [...prev, word]);
     } else {
+      if (knownWords.length === 0) logClick('activation_first_card');
       setKnownWords(prev => prev.some(w => w.id === word.id) ? prev : [...prev, word]);
       setUnknownWords(prev => prev.filter(w => w.id !== word.id));
     }

@@ -33,12 +33,12 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
     `brand/success/danger/warning`로, 임의 `text-[Npx]` 60곳을 토큰/기존 스케일로 1:1 치환. 시각 변화 없음.
   - 간격(p/m/gap)은 Tailwind 스케일이 이미 토큰이라 미변경(over-engineering 회피).
 
-- **radius 토큰화 + 버튼/입력 pill**
+- **radius 토큰화 + 버튼/입력 pill** (`ff82a1c`)
   - `@theme`에 `--radius-card`(16)·`--radius-button`(pill)·`--radius-chip`(12) 정의. `rounded-2xl`→`rounded-card`,
     `rounded-xl`→`rounded-chip` 전면 치환. BUTTON/INPUT 25곳을 `rounded-button`(pill)으로 — 둥근 nav와 톤 일치.
     `rounded-full`(원형·진행바·점)·`rounded-t*`는 유지.
 
-- **카드 등 컴포넌트화 + 세로 간격 통일**
+- **카드 등 컴포넌트화 + 세로 간격 통일** (`ff82a1c`, `62c2ee2`)
   - 신규 `src/components/ui/`의 `Card`(tone card/surface · pad none/sm/md/lg)·`IconBox`·`StatCard`로 반복 마크업 단일화.
   - **전 화면 적용**: 모든 card/surface 카드 표면을 `<Card>`로 교체(Home·MyPage·Course·League·Review·Quiz·WordCard·
     CourseWordList·LeagueRules·Actions·SettingsSheet·NicknameSheet·DailyAlarm·AttendanceCalendar). 홈 통계 3종 `<StatCard>`,
@@ -49,7 +49,7 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
 
 ### UX
 
-- **다크 모드 보정**
+- **다크 모드 보정** (`b3a4851`, `1693847`)
   - 하단 NavBar 알약에 `border-[var(--color-line)]` 추가 — 다크 캔버스에서 그림자만으로 안 보이던
     가장자리를 토큰 보더로 구분. (`NavBar.tsx`)
   - **TDS 바텀시트 다크 미적용 해결**: TDS 시트 배경은 OS `prefers-color-scheme` 기준 `var(--adaptiveBackground)`
@@ -59,7 +59,7 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
     `var(--color-card/surface)`로 `!important` 오버라이드**(`<html>.dark`라 body 포털까지 상속). 시트 헤더 5종은
     TDS 기본 텍스트라 `color: var(--color-ink)` 명시. `useTheme.isDark`+`ColorSchemeArea`는 Switch 등 컨텍스트
     컴포넌트용으로 유지. (`index.css`, 5개 Sheet, `useTheme.tsx`, `main.tsx`)
-- **화면 폴리시** (`17baa25`, `d237bd3`)
+- **화면 폴리시** (`17baa25`, `d237bd3`, `bf2ccd0`, `1693847`)
   - 홈 복습 카드 `<button>`(블록 중첩 오버플로)→`<div role="button">` 코스카드 패턴으로 겹침 수정.
   - 홈/실천 하단 여백(`pb-32`), 실천 섹션 헤더↔항목 간격(margin 미반영 대비 flex-gap), 퀴즈/복습 뜻↔설명 간격 보강.
   - NavBar 6탭 간격, 실천 화면 접근성(aria-label·탭 타깃), 복습 진입 흰 깜빡임 제거.

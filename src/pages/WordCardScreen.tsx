@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Check, ExternalLink, Target } from 'lucide-r
 import { toast } from 'sonner';
 import type { Word, ActionTemplate } from '../types';
 import { useAppContext } from '../context/AppContext';
+import { logClick } from '../lib/analytics';
 import { useNews, type NaverNewsItem } from '../hooks/useNews';
 import { ActionPickerSheet } from '../components/ActionPickerSheet';
 import { Card } from '../components/ui/Card';
@@ -279,6 +280,7 @@ const WordCardScreen = () => {
 
   const goNext = () => {
     if (autoAdvance) {
+      if (knownWords.length === 0) logClick('activation_first_card');
       setKnownWords(prev => prev.some(w => w.id === word.id) ? prev : [...prev, word]);
       setWordIndex(i => i + 1);
     } else if (wordIndex < words.length - 1) {
