@@ -94,6 +94,21 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
   - `autoCheckedRef`로 StrictMode 이중 실행 시 `checkin_auto` 이벤트 중복 로깅 방지(RPC는
     idempotent라 데이터는 원래 안전). (`src/context/AppContext.tsx`)
 
+- **완료 화면 "다음 단어 계속 배우기" CTA** (`4eefc66`)
+  - 신규 CTA가 단어 1개만 로드하면서 완료 화면에 이어 학습 경로가 없던 문제. 신규 CTA가
+    코스 전체를 `continueWords`로 함께 넘겨, 완료 화면에서 미학습 단어가 남으면 주 CTA를
+    "다음 단어 계속 배우기 →"로 노출(autoAdvance 이어감). `continue_after_first` 계측(첫 완료 1회).
+    (`src/pages/WordCardScreen.tsx`, `src/pages/HomeScreen.tsx`)
+
+- **복습 큐 상한 `DAILY_REVIEW_CAP = 10`** (`4eefc66`)
+  - `dueQueue`를 due 오래된 순 상위 10개로 상한 → 홈 "오늘 복습할 단어 N개" 폭주 방지.
+    (`src/constants.ts`, `src/context/AppContext.tsx`)
+
+- **SRS 초기 due 백필 SQL** (`fb3a257`)
+  - status-only 시절 생성돼 `due_date=오늘`로 즉시 due이던 기존 행을, 복습 이력 없는
+    것만(`last_grade IS NULL`) 시드 정책(due=내일, interval_d=1)으로 정렬. 1회성 수동 실행.
+    (`supabase/migration_srs_backfill.sql`)
+
 - **문서 코드 정합성 정정** (`12d7c1f`)
   - `APP_INTRO` HashRouter→BrowserRouter, `DATA_STRUCTURE` SRS·실천 예정→배포됨 및 발송코드
     `moneytermi-DAILY_TERM_PUSH2`, `DAILY_TERM_PUSH` 동의 노출 위치 구현 반영,

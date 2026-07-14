@@ -325,6 +325,7 @@ type StoredProfile = {
 | 스키마(콘텐츠) | supabase/migration_content_tables.sql |
 | 포인트 무결성(RPC + 권한) | supabase/migration_points_integrity.sql |
 | 푸시 마이그레이션(미배포) | supabase/migration_push_subscriptions.sql |
+| SRS 초기 due 백필(1회성 수동 실행) | supabase/migration_srs_backfill.sql |
 | 콘텐츠 시드 1탄(절세·ETF·배당·시장·연금·공모주) | moneytermi_seed_finance_concepts.sql |
 | 콘텐츠 시드 2탄(청년정책·통장·청약·매매) | moneytermi_seed_policy_housing.sql |
 | 클라이언트 상태 + 동기화 | src/context/AppContext.tsx |
@@ -356,7 +357,7 @@ CREATE INDEX IF NOT EXISTS idx_wp_due ON word_progress(user_id, due_date);
 ```
 
 - 채점 3버튼(again/hard/good) → SM-2 lite로 `interval_d`·`ease`·`due_date` 갱신.
-- "오늘 복습 큐": `WHERE due_date <= CURRENT_DATE ORDER BY due_date`.
+- "오늘 복습 큐"(`dueQueue`): `due_date <= 오늘(KST)` 필터 → due 오래된 순 정렬 → 상위 `DAILY_REVIEW_CAP`(10, `src/constants.ts`)개로 상한. 홈 "오늘 복습할 단어 N개"는 최대 10.
 - RLS: 기존 `word_progress`(본인 행) 정책 그대로 적용. 포인트는 기존 `submit_quiz_answer` RPC 유지.
 
 ### 8.2 실천 레이어 (배포됨) — `actions` / `user_actions`
