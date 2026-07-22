@@ -191,6 +191,9 @@ localStorage / 토스앱 Storage   React AppContext           Supabase (PostgreS
 - `profiles.notification_agreed` BOOLEAN NOT NULL default false
 - 부분 인덱스 `idx_profiles_push_targets` (notification_agreed AND toss_user_key IS NOT NULL)
 
+> 주의: `toss_user_key`(BIGINT)는 토스 로그인 userKey 전용이다. `getAnonymousKey` hash를 담는
+> `toss_anonymous_key`(TEXT, `migration_toss_anonymous_key.sql`)와 이름이 비슷하지만 별개 컬럼이다.
+
 (Edge Function `supabase/functions/toss-register-push`, `daily-term-push`에서 이 컬럼들을 참조한다.)
 
 ## 3. TypeScript 도메인 타입
