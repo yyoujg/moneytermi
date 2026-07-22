@@ -10,6 +10,7 @@ export type Database = {
         Row: {
           id: string;
           guest_token: string;
+          toss_anonymous_key: string | null;
           auth_id: string | null;
           nickname: string;
           email: string | null;
@@ -24,6 +25,7 @@ export type Database = {
         Insert: {
           id?: string;
           guest_token?: string;
+          toss_anonymous_key?: string | null;
           auth_id?: string | null;
           nickname?: string;
           email?: string | null;
@@ -38,6 +40,7 @@ export type Database = {
         Update: {
           id?: string;
           guest_token?: string;
+          toss_anonymous_key?: string | null;
           auth_id?: string | null;
           nickname?: string;
           email?: string | null;
@@ -302,6 +305,19 @@ export type Database = {
           p_email: string;
         };
         Returns: undefined;
+      };
+      resolve_profile_by_toss_key: {
+        Args: {
+          p_toss_key: string;
+          p_guest_token?: string | null;
+        };
+        Returns: {
+          out_id: string;
+          out_guest_token: string;
+          out_nickname: string;
+          out_is_guest: boolean;
+          out_league_tier: string;
+        }[];
       };
       submit_quiz_answer: {
         Args: {

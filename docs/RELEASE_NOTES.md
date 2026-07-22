@@ -5,6 +5,25 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
 
 ---
 
+## 2026-07-22 — 토스 익명 키로 프로필 식별 (재설치 복구)
+
+의도: 지금까지 사용자 식별은 `guest_token`(localStorage)만 사용해 재설치·기기 변경 시 토큰이
+소실되면 새 프로필이 생성돼 학습 진행도(word_progress·attendance·points·리그)가 전부 유실됐다
+(APPS_IN_TOSS_TODO A-1). 토스 `getAnonymousKey()` hash(미니앱별 고유·기기 무관)를 프로필에 붙여
+식별 키로 써서 재설치해도 같은 프로필로 복구한다. 기존 사용자는 첫 실행 시 저장된 게스트 프로필에
+키가 붙어 승격되므로 유실 없음. 토스 로그인(`appLogin`)은 범위 밖(A-1 유지).
+
+주요 변경:
+- DB: `profiles.toss_anonymous_key TEXT UNIQUE` + `resolve_profile_by_toss_key(p_toss_key, p_guest_token)`
+  RPC(SECURITY DEFINER, 조회/승격/생성). `supabase/migration_toss_anonymous_key.sql`(수동 실행),
+  `supabase/schema.sql`, 검증용 `supabase/test_resolve_profile.sql`.
+- 클라: `src/hooks/useAuth.tsx` `initAuth()` — 토스 키 조회 → 저장 키 일치 시 즉시 복원, 아니면 RPC로
+  조회/승격/스위칭, 키 없음(브라우저/구버전)·RPC 실패 시 기존 게스트 경로로 폴백. `src/lib/database.types.ts`.
+
+⚠️ 코호트 주의: 이 변경 전엔 재설치 = 새 프로필 = 신규 유저로 집계됐고, 이후엔 재설치가 동일 프로필로
+합쳐진다. 코호트 기준선이 배포일에서 끊기므로 배포 전/후를 섞어 분석하지 말 것.
+**배포 시 실제 프로덕션 반영 시각(마이그레이션 적용 + 코드 배포 완료 시점)을 분 단위로 여기에 기입할 것.**
+
 ## 2026-07-14 — 신규 유저 활성화 / 재방문 트리거
 
 판정 근거: 신규 유입은 홈에서 46%가 아무것도 안 하고 이탈(빈 성적표), 출석 발견율 2.6%,

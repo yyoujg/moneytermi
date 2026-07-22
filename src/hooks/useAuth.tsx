@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, createContext } from 'react';
-import { closeView } from '@apps-in-toss/web-framework';
+import { closeView, getAnonymousKey } from '@apps-in-toss/web-framework';
 import type { AuthState, AuthUser } from '../types';
 import { supabase } from '../lib/supabase';
 import { Storage } from '../lib/storage';
@@ -25,6 +25,19 @@ type StoredProfile = {
   nickname: string;
   isGuest: boolean;
   leagueTier: string;
+  tossAnonymousKey?: string;
+};
+
+// 토스 익명 키(getAnonymousKey hash) 조회. undefined(구 앱버전) / 'ERROR' / 예외 전부 null 폴백.
+// 브라우저(localhost)엔 브리지가 없어 null → 기존 게스트 생성 경로로 흐른다.
+const fetchTossKey = async (): Promise<string | null> => {
+  try {
+    const r = await getAnonymousKey();
+    if (!r || typeof r === 'string') return null;
+    return r.type === 'HASH' && r.hash ? r.hash : null;
+  } catch {
+    return null;
+  }
 };
 
 export const loadStoredProfile = async (): Promise<StoredProfile | null> => {
@@ -72,20 +85,61 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const initAuth = async () => {
-    // 1. 저장된 프로필 있으면 복원
-    const stored = await loadStoredProfile();
-    if (stored) {
-      setProfileId(stored.profileId);
-      setGuestToken(stored.guestToken);
+    const restoreStored = (sp: StoredProfile) => {
+      setProfileId(sp.profileId);
+      setGuestToken(sp.guestToken);
       setAuthState({
-        user: {
-          id: stored.profileId,
-          nickname: stored.nickname,
-          isGuest: stored.isGuest,
-          leagueTier: stored.leagueTier,
-        },
+        user: { id: sp.profileId, nickname: sp.nickname, isGuest: sp.isGuest, leagueTier: sp.leagueTier },
         accessToken: null, refreshToken: null, isAuthenticated: true,
       });
+    };
+
+    const stored = await loadStoredProfile();
+
+    // 토스 익명 키 조회 (로컬 브리지, 네트워크 없음)
+    const tossKey = await fetchTossKey();
+
+    // 저장된 프로필이 이미 이 토스 키로 확정돼 있으면 RPC 없이 즉시 복원 (부팅 성능 유지)
+    if (stored?.tossAnonymousKey && stored.tossAnonymousKey === tossKey) {
+      restoreStored(stored);
+      return;
+    }
+
+    // 토스 키가 있으면 서버에서 프로필 조회(기존)/승격/생성. 재설치·기기변경해도 같은 프로필로 복구.
+    if (tossKey) {
+      try {
+        const { data, error } = await supabase.rpc('resolve_profile_by_toss_key', {
+          p_toss_key: tossKey,
+          p_guest_token: stored?.guestToken ?? null,
+        });
+        const row = data?.[0];
+        if (!error && row) {
+          const toStore: StoredProfile = {
+            profileId: row.out_id,
+            guestToken: row.out_guest_token,
+            nickname: row.out_nickname,
+            isGuest: row.out_is_guest,
+            leagueTier: row.out_league_tier,
+            tossAnonymousKey: tossKey,
+          };
+          try {
+            await Storage.setItem(STORAGE_KEY, JSON.stringify(toStore));
+          } catch (err) {
+            console.warn('토스 키 프로필 저장 실패:', err);
+          }
+          restoreStored(toStore);
+          return;
+        }
+        console.warn('resolve_profile_by_toss_key 실패, 게스트 경로로 폴백:', error);
+      } catch (err) {
+        console.warn('resolve_profile_by_toss_key 예외, 게스트 경로로 폴백:', err);
+      }
+    }
+
+    // 토스 키 없음(브라우저/구버전) 또는 RPC 실패 → 기존 게스트 로직
+    // 1. 저장된 프로필 있으면 복원
+    if (stored) {
+      restoreStored(stored);
       return;
     }
 

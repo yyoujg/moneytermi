@@ -1,5 +1,9 @@
 -- 스마트 발송(기능성 메시지) 대상 식별용 컬럼 + 매일 발송 스케줄
 -- Toss bulk-send API는 사용자별 정수 userKey가 필요하므로 profiles에 저장한다.
+--
+-- 주의: 여기 toss_user_key(BIGINT)는 토스 로그인 userKey 전용이다.
+--       getAnonymousKey hash를 담는 toss_anonymous_key(TEXT, migration_toss_anonymous_key.sql)와
+--       이름이 비슷하지만 별개 컬럼이다.
 
 ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS toss_user_key      BIGINT  UNIQUE,
