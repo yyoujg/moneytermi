@@ -27,7 +27,7 @@ localStorage / 토스앱 Storage   React AppContext           Supabase (PostgreS
 
 ## 2. Supabase 스키마
 
-출처: `supabase/schema.sql`, `supabase/migration_content_tables.sql`, `supabase/migration_points_integrity.sql`, `supabase/migration_push_subscriptions.sql`, 타입: `src/lib/database.types.ts`
+출처: `supabase/schema.sql`, `supabase/migration_content_tables.sql`, `supabase/migration_points_integrity.sql`, `supabase/migration_league_rls.sql`, `supabase/migration_profiles_grants.sql`, `supabase/migration_push_subscriptions.sql`, 타입: `src/lib/database.types.ts`
 
 ### 2.1 사용자 데이터 테이블
 
@@ -159,17 +159,36 @@ localStorage / 토스앱 Storage   React AppContext           Supabase (PostgreS
 
 ### 2.4 RLS / 권한 요약
 
-- profiles / word_progress / daily_missions / attendance: RLS 활성. `auth_id = auth.uid()` 또는 `guest_token = request.headers ->> 'x-guest-token'` 으로 본인 행 식별.
-- profiles INSERT는 최초 게스트 생성을 위해 `WITH CHECK (true)` 허용.
+- word_progress / daily_missions / attendance: RLS 활성. `auth_id = auth.uid()` 또는 `guest_token = request.headers ->> 'x-guest-token'` 으로 본인 행 식별.
+- profiles: UPDATE는 위와 동일하게 본인 행만. **SELECT는 리그 랭킹 표시를 위해 전체 공개**(`profiles_select_public USING (true)`, `migration_league_rls.sql`). 대신 노출 컬럼을 GRANT로 제한한다(아래 참조).
+- profiles INSERT는 최초 게스트 생성만 허용 — `WITH CHECK`로 `points = 0`, `league_tier = 'bronze'`, `auth_id/email IS NULL`, `is_guest = true` 를 강제.
 - 콘텐츠 테이블(words/courses/course_words/league_tiers)도 RLS 활성이며 정책은 `public_read`(SELECT)만 — 쓰기 정책이 없어 anon은 읽기만 가능(정답 키 `words` 변조 차단). **`sort_order` 추가는 컬럼 확장이므로 기존 `courses` RLS/정책에 영향 없음.**
 
 #### 포인트 무결성 — 직접 쓰기 차단 (migration_points_integrity.sql)
 
 포인트가 늘어나는 경로를 RPC로만 한정한다.
 
-- profiles: `points` 직접 UPDATE 차단 — `REVOKE UPDATE ON profiles` 후 컬럼 단위로 `emoji`/`nickname`만 GRANT. SELECT·INSERT는 유지.
+- profiles: `points` 직접 UPDATE 차단 — `REVOKE UPDATE ON profiles` 후 컬럼 단위로 `emoji`/`nickname`만 GRANT. (SELECT·INSERT는 이때 미처리 → `migration_profiles_grants.sql`에서 마저 좁힘)
 - daily_missions / attendance: 클라 직접 INSERT/UPDATE/DELETE 차단(SELECT만 GRANT). 쓰기는 RPC가 소유.
 - word_progress: 본인 행 INSERT/UPDATE 유지(포인트와 무관한 학습 상태). **SRS 필드 추가 시에도 이 원칙 유지 — 일정 필드는 포인트 무관이라 클라 직접 쓰기 가능.**
+
+#### profiles 컬럼 단위 권한 (migration_profiles_grants.sql)
+
+포인트 무결성 마이그레이션이 UPDATE만 좁히고 INSERT/SELECT는 테이블 전체 권한을 남겨둔 것을 마저 처리한다.
+
+- **INSERT** — `REVOKE INSERT` 후 `guest_token`만 컬럼 GRANT. 나머지는 DEFAULT로 채워진다.
+  이전에는 `WITH CHECK (true)` + 테이블 INSERT 권한이라 anon key만으로
+  `points`/`league_tier`를 지정한 프로필을 만들어 리그 랭킹 상단을 차지할 수 있었다.
+- **SELECT** — `REVOKE SELECT` 후 `id, nickname, emoji, league_tier, points, quiz_combo, is_guest, created_at, updated_at`만 GRANT.
+  `migration_league_rls.sql`이 정책을 `USING (true)`로 열면서 **`guest_token`까지 전체 공개**됐었다.
+  `guest_token`은 `x-guest-token` 헤더로 쓰이는 인증 자격증명이므로, 조회한 토큰으로 임의 사용자를 가장할 수 있었다.
+  `auth_id`/`email`도 함께 제외.
+
+> 앱 레이어 필터링은 방어가 아니다 — anon key로 PostgREST를 직접 호출하면 앱을 통과하지 않는다.
+> 컬럼 노출은 GRANT로만 막을 수 있다.
+
+클라 영향: `useAuth.tsx`의 게스트 생성이 `select()`(= `select *`) 대신
+`select('id, nickname, league_tier')`로 컬럼을 명시해야 한다.
 
 #### SECURITY DEFINER 함수 (RPC)
 
@@ -327,6 +346,8 @@ type StoredProfile = {
 | 스키마(사용자 데이터) | supabase/schema.sql |
 | 스키마(콘텐츠) | supabase/migration_content_tables.sql |
 | 포인트 무결성(RPC + 권한) | supabase/migration_points_integrity.sql |
+| 리그 공개 SELECT 정책 | supabase/migration_league_rls.sql |
+| profiles 컬럼 단위 INSERT/SELECT 권한 | supabase/migration_profiles_grants.sql |
 | 푸시 마이그레이션(미배포) | supabase/migration_push_subscriptions.sql |
 | 콘텐츠 시드 1탄(절세·ETF·배당·시장·연금·공모주) | moneytermi_seed_finance_concepts.sql |
 | 콘텐츠 시드 2탄(청년정책·통장·청약·매매) | moneytermi_seed_policy_housing.sql |

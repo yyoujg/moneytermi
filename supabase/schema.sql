@@ -126,8 +126,16 @@ CREATE POLICY "profiles_select" ON public.profiles
     OR guest_token = (current_setting('request.headers', true)::json->>'x-guest-token')::uuid
   );
 
+-- 최초 게스트 생성만 허용. points/league_tier 등을 지정한 프로필 주입 차단
+-- (실제 컬럼 제한은 아래 8번 컬럼 단위 GRANT 가 담당, 이 정책은 이중 방어)
 CREATE POLICY "profiles_insert" ON public.profiles
-  FOR INSERT WITH CHECK (true);   -- 최초 생성은 허용 (anon key 로 호출)
+  FOR INSERT WITH CHECK (
+    auth_id     IS NULL
+    AND email   IS NULL
+    AND is_guest    = true
+    AND points      = 0
+    AND league_tier = 'bronze'
+  );
 
 CREATE POLICY "profiles_update" ON public.profiles
   FOR UPDATE USING (
@@ -168,7 +176,14 @@ CREATE POLICY "attendance_own" ON public.attendance
 -- ──────────────────────────────────────────
 -- 8. anon 롤 권한 부여 (RLS가 실제 접근을 제한하지만, 테이블 접근 자체는 허용)
 -- ──────────────────────────────────────────
-GRANT SELECT, INSERT, UPDATE        ON public.profiles       TO anon;
+-- profiles 는 컬럼 단위로 부여한다.
+--   INSERT: guest_token 만 (나머지는 DEFAULT)
+--   SELECT: guest_token(인증 자격증명) / auth_id / email 제외
+--   UPDATE: migration_points_integrity.sql 에서 emoji, nickname 만으로 축소
+GRANT INSERT (guest_token) ON public.profiles TO anon;
+GRANT SELECT (id, nickname, emoji, league_tier, points, is_guest, created_at, updated_at)
+  ON public.profiles TO anon;
+GRANT UPDATE (nickname, emoji) ON public.profiles TO anon;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.word_progress  TO anon;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.daily_missions TO anon;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.attendance     TO anon;
@@ -261,5 +276,8 @@ BEGIN
 END;
 $$;
 
+-- REVOKE FROM PUBLIC 후에는 authenticated/service_role 도 EXECUTE 를 잃으므로 명시 부여.
 REVOKE EXECUTE ON FUNCTION public.resolve_profile_by_toss_key(TEXT, UUID) FROM PUBLIC;
 GRANT  EXECUTE ON FUNCTION public.resolve_profile_by_toss_key(TEXT, UUID) TO anon;
+GRANT  EXECUTE ON FUNCTION public.resolve_profile_by_toss_key(TEXT, UUID) TO authenticated;
+GRANT  EXECUTE ON FUNCTION public.resolve_profile_by_toss_key(TEXT, UUID) TO service_role;

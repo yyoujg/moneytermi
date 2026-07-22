@@ -149,7 +149,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const { data: profile, error } = await supabase
         .from('profiles')
         .insert({ guest_token: newGuestToken })
-        .select()
+        .select('id, nickname, league_tier')
         .single();
 
       if (!error && profile) {

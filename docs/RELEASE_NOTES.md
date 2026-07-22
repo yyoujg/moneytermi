@@ -24,6 +24,46 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
 합쳐진다. 코호트 기준선이 배포일에서 끊기므로 배포 전/후를 섞어 분석하지 말 것.
 **배포 시 실제 프로덕션 반영 시각(마이그레이션 적용 + 코드 배포 완료 시점)을 분 단위로 여기에 기입할 것.**
 
+---
+
+## 2026-07-22 — 저장소 public 전환 준비 / profiles 권한 정리
+
+사용자 노출 변경 없음. 저장소를 public으로 돌리기 전 점검에서 나온 항목들.
+
+### 민감정보 정리
+
+하드코딩된 시크릿은 없었다(`.env` 커밋 이력 없음, Edge Function 전부 `Deno.env.get`,
+CI는 GitHub Secrets). `.gitignore` 규칙이 추가되기 *전에* 커밋되어 계속 추적 중이던 파일을 해제.
+
+- `supabase/.temp/` — `pooler-url`(DB 호스트+유저명, 비밀번호 없음), `project-ref`
+- `.claude/settings.local.json` — 로컬 절대경로, 권한 허용 목록
+- `moneytermi.ait` — 4.3MB 빌드 산출물(자격증명 미포함 확인). `.gitignore` 추가
+- `granite.config.ts` — 홈 LAN IP 하드코딩 → `process.env.AIT_DEV_HOST ?? '0.0.0.0'`
+- `.env.example` 추가, README에 Edge Function 측 env 설정 위치 명시
+
+git 이력은 재작성하지 않았다. project ref는 `VITE_SUPABASE_URL`로 클라이언트 번들에
+인라인되는 설계상 공개 값이고 비밀번호가 없어 실질 위험이 낮다.
+
+### profiles 권한 구멍 2건 (migration_profiles_grants.sql — 운영 DB 수동 실행 필요)
+
+`migration_points_integrity.sql`이 UPDATE만 컬럼 단위로 좁히고 INSERT/SELECT는
+테이블 전체 권한을 남겨둔 것이 원인.
+
+- **INSERT** — `WITH CHECK (true)` + 테이블 INSERT 권한이라 anon key만으로
+  `points`/`league_tier`를 지정한 프로필 생성이 가능했다(리그 랭킹 즉시 1위).
+  → `guest_token`만 컬럼 GRANT + 정책 `WITH CHECK` 강화
+- **SELECT** — `migration_league_rls.sql`이 랭킹 표시용으로 정책을 `USING (true)`로 열면서
+  `guest_token`까지 전체 공개됐다. `guest_token`은 `x-guest-token` 헤더로 쓰이는
+  인증 자격증명이라 조회한 토큰으로 임의 사용자를 가장할 수 있었다.
+  → 비민감 컬럼 9개만 GRANT (`guest_token`/`auth_id`/`email` 제외)
+
+앱 레이어 필터링은 방어가 되지 않는다(anon key로 PostgREST 직접 호출 가능).
+
+변경 파일: `supabase/migration_profiles_grants.sql`(신규), `supabase/schema.sql`,
+`src/hooks/useAuth.tsx`(게스트 생성 `select()` → 컬럼 명시), `docs/DATA_STRUCTURE.md` §2.4
+
+---
+
 ## 2026-07-14 — 신규 유저 활성화 / 재방문 트리거
 
 판정 근거: 신규 유입은 홈에서 46%가 아무것도 안 하고 이탈(빈 성적표), 출석 발견율 2.6%,

@@ -33,3 +33,7 @@ dist-ssr
 .granite
 .claude/settings.local.json
 supabase/.temp/
+
+# 빌드 산출물 (ait build 생성 → ait deploy 소비)
+moneytermi.ait
+.tmp_ait/
