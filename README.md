@@ -67,13 +67,27 @@ intoss-private://appsintoss?_deploymentId={deploymentId}
 
 ## 환경 변수
 
+`.env.example`을 `.env`로 복사한 뒤 값을 채워주세요.
+
 | 변수명 | 설명 |
 |--------|------|
 | `VITE_SUPABASE_URL` | Supabase 프로젝트 URL |
 | `VITE_SUPABASE_ANON_KEY` | Supabase anon 키 |
+| `VITE_SENTRY_DSN` | Sentry DSN (선택) |
+| `AIT_DEV_HOST` | 실기기 QR 테스트용 개발 서버 LAN IP (선택, 기본 `0.0.0.0`) |
+
+Edge Function에서 쓰는 아래 키는 `.env`가 아니라 Supabase 대시보드
+(Edge Functions > Secrets)에서 설정해요.
+
+| 변수명 | 사용처 |
+|--------|--------|
+| `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET` | `naver-news` |
+| `SUPABASE_SERVICE_ROLE_KEY`, `CRON_SECRET` | `daily-term-push` |
 
 ## GitHub Secrets
 
 | 시크릿명 | 설명 |
 |----------|------|
 | `AIT_API_KEY` | 앱인토스 콘솔 API 키 |
+| `VITE_SUPABASE_URL` | Supabase 프로젝트 URL |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anon 키 |
