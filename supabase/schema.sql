@@ -276,5 +276,8 @@ BEGIN
 END;
 $$;
 
+-- REVOKE FROM PUBLIC 후에는 authenticated/service_role 도 EXECUTE 를 잃으므로 명시 부여.
 REVOKE EXECUTE ON FUNCTION public.resolve_profile_by_toss_key(TEXT, UUID) FROM PUBLIC;
 GRANT  EXECUTE ON FUNCTION public.resolve_profile_by_toss_key(TEXT, UUID) TO anon;
+GRANT  EXECUTE ON FUNCTION public.resolve_profile_by_toss_key(TEXT, UUID) TO authenticated;
+GRANT  EXECUTE ON FUNCTION public.resolve_profile_by_toss_key(TEXT, UUID) TO service_role;
