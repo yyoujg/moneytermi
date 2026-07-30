@@ -18,6 +18,14 @@ const matchAllowed = (p: string | null | undefined): string | null => {
   return ALLOWED_PATHS.has(pathOnly) ? pathOnly : null;
 };
 
+export function parseReferrer(raw: string | null | undefined): string {
+  if (!raw) return 'organic';
+  const q = raw.split('?')[1];
+  if (!q) return 'organic';
+  const ref = new URLSearchParams(q).get('referrer');
+  return ref?.trim() || 'organic';
+}
+
 export function parseLandingPath(raw: string | null | undefined): string | null {
   if (!raw) return null;
   const s = raw.trim();

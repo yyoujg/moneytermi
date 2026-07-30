@@ -310,6 +310,7 @@ export type Database = {
         Args: {
           p_toss_key: string;
           p_guest_token?: string | null;
+          p_referrer?: string | null;
         };
         Returns: {
           out_id: string;

@@ -1,8 +1,9 @@
 import { useState, useEffect, useContext, createContext } from 'react';
-import { closeView, getAnonymousKey } from '@apps-in-toss/web-framework';
+import { closeView, getAnonymousKey, getSchemeUri } from '@apps-in-toss/web-framework';
 import type { AuthState, AuthUser } from '../types';
 import { supabase } from '../lib/supabase';
 import { Storage } from '../lib/storage';
+import { parseReferrer } from '../lib/landing';
 
 const STORAGE_KEY = 'moneytermi_auth';
 
@@ -108,9 +109,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // 토스 키가 있으면 서버에서 프로필 조회(기존)/승격/생성. 재설치·기기변경해도 같은 프로필로 복구.
     if (tossKey) {
       try {
+        let schemeUri = '';
+        try { schemeUri = getSchemeUri(); } catch { schemeUri = ''; }
         const { data, error } = await supabase.rpc('resolve_profile_by_toss_key', {
           p_toss_key: tossKey,
           p_guest_token: stored?.guestToken ?? null,
+          p_referrer: parseReferrer(schemeUri),
         });
         const row = data?.[0];
         if (!error && row) {
