@@ -6,8 +6,8 @@ import * as Sentry from '@sentry/react';
 import { closeView, graniteEvent, getSchemeUri } from '@apps-in-toss/web-framework';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { AuthProvider } from './hooks/useAuth';
-import { parseLandingPath } from './lib/landing';
-import { logScreen } from './lib/analytics';
+import { parseLandingPath, parseReferrer } from './lib/landing';
+import { logScreen, logClick } from './lib/analytics';
 import { useSafeAreaInsets } from './hooks/useSafeAreaInsets';
 import NavBar from './components/NavBar';
 
@@ -89,12 +89,7 @@ function resolveLandingTarget(): string {
     schemeUri = '';
   }
   const target = parseLandingPath(schemeUri);
-  // 진단(한시): 기기가 스킴을 pathname으로 주는지 getSchemeUri로 주는지 Sentry로 확정. PROD 빌드에서만 전송됨.
-  const loc = globalThis.location;
-  Sentry.captureMessage('deep-link', {
-    level: 'info',
-    extra: { schemeUri, target, href: loc?.href, pathname: loc?.pathname, hash: loc?.hash },
-  });
+  logClick('entry', { referrer: parseReferrer(schemeUri), target: target ?? '' });
   resolvedLanding = target ?? '/home';
   return resolvedLanding;
 }
