@@ -10,40 +10,19 @@ import { requestAppReview } from '../lib/review';
 import { logClick } from '../lib/analytics';
 import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
 import { Card } from '../components/ui/Card';
-
-export const getOptions = (correctWord: Word, knownWords: Word[], allWords: Word[]): string[] => {
-  const pool = knownWords.length >= 4 ? knownWords : allWords;
-  const others = pool.filter(w => w.id !== correctWord.id);
-  const shuffled = [...others].sort(() => Math.random() - 0.5);
-
-  const wrong: string[] = [];
-  for (const w of shuffled) {
-    if (wrong.length >= 3) break;
-    wrong.push(w.word);
-  }
-
-  if (wrong.length < 3) {
-    const fallback = allWords.filter(w => w.id !== correctWord.id).sort(() => Math.random() - 0.5);
-    for (const w of fallback) {
-      if (wrong.length >= 3) break;
-      if (!wrong.includes(w.word)) wrong.push(w.word);
-    }
-  }
-
-  return [...wrong.slice(0, 3), correctWord.word].sort(() => Math.random() - 0.5);
-};
-
-// 콤보 기반 포인트 계산
-export const calcEarned = (combo: number): number => {
-  if (combo >= 5) return 20;
-  if (combo >= 3) return 15;
-  return 10;
-};
+import { buildQuizItem, pickQuizType, type QuizOption } from '../lib/quiz';
 
 const QuizScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { points, otherLeagueUsers, allWords, knownWords, submitQuizAnswer } = useAppContext();
+  const { points, otherLeagueUsers, allWords, knownWords, courses, submitQuizAnswer } = useAppContext();
+
+  // 단어 id → 코스 카테고리 (오답 보기를 같은 주제로 뽑기 위함)
+  const categoryOf = useMemo(() => {
+    const map = new Map<number, string>();
+    for (const c of courses) for (const w of c.words) map.set(w.id, c.category);
+    return (id: number) => map.get(id);
+  }, [courses]);
 
   const passedQueue: Word[] = (location.state as { quizQueue?: Word[] } | null)?.quizQueue ?? [];
   const quizQueue: Word[] = passedQueue.length > 0
@@ -64,10 +43,11 @@ const QuizScreen = () => {
 
   const currentWord = quizQueue[currentQuizIndex];
 
-  const options = useMemo(() => {
-    if (!currentWord) return [];
-    return getOptions(currentWord, knownWords, allWords);
-  }, [currentWord?.id, allWords, knownWords]);
+  const quizItem = useMemo(() => {
+    if (!currentWord) return null;
+    return buildQuizItem(pickQuizType(currentWord), currentWord, knownWords, allWords, categoryOf);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentWord?.id, allWords, knownWords, categoryOf]);
 
   // +P 팝업 트리거
   useEffect(() => {
@@ -149,18 +129,18 @@ const QuizScreen = () => {
 
   const progressPercent = (currentQuizIndex / quizQueue.length) * 100;
 
-  const handleSelect = async (option: string) => {
+  const handleSelect = async (option: QuizOption) => {
     if (status !== 'idle') return;
-    setSelected(option);
+    setSelected(option.answer);
     // 즉시 피드백은 낙관적 (정답 단어는 클라가 이미 앎). 포인트·콤보는 서버가 채점.
-    const isCorrect = option === currentWord.word;
+    const isCorrect = option.isCorrect;
 
     if (isCorrect) {
       feedbackCorrect(soundOn, vibrationOn);
       setStatus('correct');
       setCorrectCount(c => c + 1);
 
-      const res = await submitQuizAnswer(currentWord.id, option, 'mc', false, currentQuizIndex === 0);
+      const res = await submitQuizAnswer(currentWord.id, option.answer, 'mc', false, currentQuizIndex === 0);
       if (res) {
         setCombo(res.combo);
         setMaxCombo(m => Math.max(m, res.combo));
@@ -181,7 +161,7 @@ const QuizScreen = () => {
       setShake(true);
       setTimeout(() => setShake(false), 500);
       // 서버 콤보도 초기화 (오답 기록)
-      void submitQuizAnswer(currentWord.id, option, 'mc', false, currentQuizIndex === 0);
+      void submitQuizAnswer(currentWord.id, option.answer, 'mc', false, currentQuizIndex === 0);
       // 오답: 900ms 후 재시도
       setTimeout(() => {
         setSelected(null);
@@ -264,13 +244,15 @@ const QuizScreen = () => {
           ${status === 'wrong' ? 'bg-[var(--color-card)] ring-2 ring-danger-500/30' : ''}
           ${shake ? 'shake' : ''}
         `}>
-          <span className="text-2xs font-medium text-[var(--color-ink-4)] tracking-widest uppercase">이 뜻에 맞는 용어는?</span>
+          <span className="text-2xs font-medium text-[var(--color-ink-4)] tracking-widest uppercase">{quizItem?.promptLabel}</span>
 
-          <p className="text-xl font-bold text-[var(--color-ink)] leading-snug mb-2">{currentWord.meaning}</p>
+          <p className="text-xl font-bold text-[var(--color-ink)] leading-snug mb-2 break-keep">{quizItem?.promptMain}</p>
 
-          <div className="bg-[var(--color-canvas)] rounded-chip px-4 py-3">
-            <p className="text-sm text-[var(--color-ink-3)] leading-relaxed break-keep">{currentWord.detailedMeaning}</p>
-          </div>
+          {quizItem?.promptSub && (
+            <div className="bg-[var(--color-canvas)] rounded-chip px-4 py-3">
+              <p className="text-sm text-[var(--color-ink-3)] leading-relaxed break-keep">{quizItem.promptSub}</p>
+            </div>
+          )}
 
           {status === 'correct' && (
             <div className="flex items-center gap-2">
@@ -286,11 +268,11 @@ const QuizScreen = () => {
           )}
         </div>
 
-        {/* 객관식 선택지 */}
-        <div className="grid grid-cols-2 gap-2">
-          {options.map((option) => {
-            const isSelected = selected === option;
-            const isCorrectOption = option === currentWord.word;
+        {/* 객관식 선택지 (뜻 보기는 길어서 1열) */}
+        <div className={`grid gap-2 ${quizItem?.type === 'word_to_meaning' ? 'grid-cols-1' : 'grid-cols-2'}`}>
+          {quizItem?.options.map((opt, i) => {
+            const isSelected = selected === opt.answer;
+            const isCorrectOption = opt.isCorrect;
             let optionStyle = 'bg-[var(--color-card)] text-[var(--color-ink)] active:bg-[var(--color-line)]';
 
             if (status !== 'idle') {
@@ -305,11 +287,11 @@ const QuizScreen = () => {
 
             return (
               <button
-                key={option}
-                onClick={() => handleSelect(option)}
-                className={`relative py-4 px-4 rounded-card text-sm font-bold text-left transition-all duration-150 ${optionStyle}`}
+                key={`${i}-${opt.answer}`}
+                onClick={() => handleSelect(opt)}
+                className={`relative py-4 px-4 pr-9 rounded-card text-sm font-bold text-left break-keep transition-all duration-150 ${optionStyle}`}
               >
-                {option}
+                {opt.label}
                 {status !== 'idle' && isCorrectOption && (
                   <Check size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-success-400" />
                 )}
