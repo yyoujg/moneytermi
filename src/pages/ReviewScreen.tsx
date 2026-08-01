@@ -5,6 +5,7 @@ import { Spacing } from '@toss/tds-mobile';
 import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
 import { requestAppReview } from '../lib/review';
+import { answerMatches } from '../lib/answer';
 import { logClick } from '../lib/analytics';
 import { Card } from '../components/ui/Card';
 import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
@@ -72,8 +73,8 @@ const QuizPage = () => {
     if (status !== 'idle' || !input.trim()) return;
 
     // 즉시 피드백은 낙관적, 포인트·콤보·m3는 서버가 채점
-    const clean = (s: string) => s.replace(/\s+/g, '').toLowerCase();
-    const isCorrect = clean(input) === clean(word.word);
+    // 괄호 약어·슬래시 항목도 정답 인정 (서버 answer_matches와 동일 규칙)
+    const isCorrect = answerMatches(input, word.word);
 
     // SRS 일정은 단어별 첫 제출 결과로 한 번만 기록
     if (!graded.current) {
