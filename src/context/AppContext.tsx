@@ -409,7 +409,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       setKnownWords(prev => prev.filter(w => w.id !== word.id));
       setUnknownWords(prev => prev.some(w => w.id === word.id) ? prev : [...prev, word]);
     } else {
-      if (knownWords.length === 0) logClick('activation_first_card');
+      if (knownWords.length === 0) { logClick('activation_first_card'); requestAppReview(); }
       setKnownWords(prev => prev.some(w => w.id === word.id) ? prev : [...prev, word]);
       setUnknownWords(prev => prev.filter(w => w.id !== word.id));
     }
