@@ -353,6 +353,16 @@ export type Database = {
           ok: boolean;
         };
       };
+      claim_referral_reward: {
+        Args: {
+          p_reward_amount: number;
+          p_reward_unit?: string;
+        };
+        Returns: {
+          points: number;
+          credited: number;
+        };
+      };
     };
     Enums: {
       [_ in never]: never;

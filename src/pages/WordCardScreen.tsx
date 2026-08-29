@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import type { Word, ActionTemplate } from '../types';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
+import { requestAppReview } from '../lib/review';
 import { useNews, type NaverNewsItem } from '../hooks/useNews';
 import { ActionPickerSheet } from '../components/ActionPickerSheet';
 import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
@@ -302,7 +303,7 @@ const WordCardScreen = () => {
 
   const goNext = () => {
     if (autoAdvance) {
-      if (knownWords.length === 0) logClick('activation_first_card');
+      if (knownWords.length === 0) { logClick('activation_first_card'); requestAppReview(); }
       setKnownWords(prev => prev.some(w => w.id === word.id) ? prev : [...prev, word]);
       setWordIndex(i => i + 1);
     } else if (wordIndex < words.length - 1) {

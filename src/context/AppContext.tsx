@@ -42,6 +42,7 @@ type AppContextValue = {
   missions: Missions;
   setMissions: React.Dispatch<React.SetStateAction<Missions>>;
   claimReward: (missionId: keyof Missions) => Promise<void>;
+  claimReferralReward: (amount: number, unit: string) => Promise<number | null>;
   submitQuizAnswer: (
     wordId: number, answer: string, mode: 'mc' | 'typed',
     usedHint: boolean, sessionStart: boolean,
@@ -409,7 +410,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       setKnownWords(prev => prev.filter(w => w.id !== word.id));
       setUnknownWords(prev => prev.some(w => w.id === word.id) ? prev : [...prev, word]);
     } else {
-      if (knownWords.length === 0) logClick('activation_first_card');
+      if (knownWords.length === 0) { logClick('activation_first_card'); requestAppReview(); }
       setKnownWords(prev => prev.some(w => w.id === word.id) ? prev : [...prev, word]);
       setUnknownWords(prev => prev.filter(w => w.id !== word.id));
     }
@@ -436,6 +437,17 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     setMissions(prev => ({ ...prev, [missionId]: { ...prev[missionId], isRewarded: true } }));
     logClick('mission_reward_claim', { mission_id: missionId, reward: mission.reward });
     requestAppReview();
+  };
+
+  // ── claimReferralReward — 친구초대(contactsViral) 리워드, 서버가 상한 적용 후 적립 ──
+  const claimReferralReward = async (amount: number, unit: string) => {
+    const { data, error } = await dbRef.current.rpc('claim_referral_reward', {
+      p_reward_amount: amount, p_reward_unit: unit,
+    });
+    if (error || !data) { console.error('[claimReferralReward] 실패:', error); return null; }
+    setPoints(data.points);
+    logClick('referral_reward_claim', { amount: data.credited });
+    return data.credited as number;
   };
 
   // ── submitQuizAnswer — 서버 채점 (포인트·콤보·m3 서버 소유) ────
@@ -550,6 +562,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       unknownWords, setUnknownWords,
       missions, setMissions,
       claimReward,
+      claimReferralReward,
       submitQuizAnswer,
       toggleKnown,
       checkIn,
