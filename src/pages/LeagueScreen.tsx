@@ -1,22 +1,37 @@
 
 
-import { useMemo } from 'react';
-import { Info, Zap, Trophy, TrendingUp, TrendingDown, Share2 } from 'lucide-react';
+import { useEffect, useMemo, useRef } from 'react';
+import { Info, Zap, Trophy, TrendingUp, TrendingDown, Share2, Gift } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { TextButton, List, ListRow, Badge, Spacing } from '@toss/tds-mobile';
 import { CURRENT_LEAGUE_ID, LEAGUE_TIERS } from '../constants';
 import { useAppContext } from '../context/AppContext';
 import { Card } from '../components/ui/Card';
 import { useAuth } from '../hooks/useAuth';
 import { shareTossLink } from '../lib/share';
+import { isReferralEnabled, startReferralInvite } from '../lib/referral';
 import { logClick } from '../lib/analytics';
 
 const RANK_MEDALS = ['🥇', '🥈', '🥉'];
 
 const LeagueScreen = () => {
   const navigate = useNavigate();
-  const { points, otherLeagueUsers, myEmoji } = useAppContext();
+  const { points, otherLeagueUsers, myEmoji, claimReferralReward } = useAppContext();
   const { user } = useAuth();
+  const referralCleanupRef = useRef<(() => void) | null>(null);
+
+  const handleInviteFriends = () => {
+    logClick('referral_invite_start');
+    referralCleanupRef.current?.();
+    referralCleanupRef.current = startReferralInvite((amount, unit) => {
+      claimReferralReward(amount, unit).then(credited => {
+        if (credited) toast.success(`친구 초대 완료! +${credited}${unit}`);
+      });
+    }) ?? null;
+  };
+
+  useEffect(() => () => referralCleanupRef.current?.(), []);
 
   const myName = `나 (${user?.nickname ?? '예비슈퍼개미'})`;
 
@@ -256,6 +271,15 @@ const LeagueScreen = () => {
             <span className="text-2xs text-[var(--color-ink-4)]">하위 {demoteZone}명 강등</span>
           </div>
         </div>
+
+        {isReferralEnabled() && (
+          <button
+            onClick={handleInviteFriends}
+            className="w-full flex items-center justify-center gap-1.5 bg-[var(--color-card)] rounded-chip px-3 py-3 mb-4 text-sm font-bold text-brand-500 active:opacity-70"
+          >
+            <Gift size={15} /> 친구 초대하고 포인트 받기
+          </button>
+        )}
 
         <Spacing size={8} />
       </div>
