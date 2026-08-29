@@ -52,6 +52,57 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
 
 ---
 
+## 2026-08-29 커밋 / 출시 대기 (번들 20260829-117, PR #27) — 신규 진입 버그 수정 + 친구 초대 리워드
+
+콘솔 생성일시 2026-08-29 15:44 (SDK 2.6.1), 현재 검토 중.
+**검수 통과 후 실제 출시일시(기능 도달일 D0 기준)를 여기 및 상단 릴리즈 날짜 대장에 기입할 것.**
+
+### 토스 콘솔 출시노트 (사용자 노출용 — 아래 평문 그대로 등록)
+
+```
+이번 업데이트 주요 내용
+
+[친구 초대하고 포인트 받기]
+토스 친구를 초대하면 포인트를 받을 수 있어요. 리그 화면에서 초대해보세요.
+
+[더 안정적인 시작 화면]
+앱을 처음 시작할 때 불안정하던 부분을 고쳤어요.
+```
+
+### 🐛 버그 수정 — 신규 게스트 진입 전체 차단
+
+`word_progress_own`/`daily_missions_own`/`attendance_own` RLS 정책이 `profiles.guest_token`을
+직접 서브쿼리하는데, 이전 `migration_profiles_grants.sql`이 anon의 `profiles` SELECT를
+9개 컬럼(guest_token·auth_id 제외)으로 좁히면서 이 서브쿼리가 permission denied로 깨졌다.
+신규 게스트가 앱 진입 시 스플래시에서 멈추는 심각도 높은 버그였다(기존 게스트는 로컬에 저장된
+프로필로 우회 복원되어 영향 없음 — 그래서 발견이 늦었다).
+
+`current_profile_id()`(SECURITY DEFINER, `migration_points_integrity.sql`에서 이미
+같은 문제 해결용으로 도입돼 있었으나 이 세 정책만 반영이 안 돼 있었다) 를 쓰도록 세 정책을 교체.
+
+변경 파일: `supabase/migration_fix_rls_profiles_permission.sql`(신규, 운영 DB 수동 실행 필요)
+
+### 🎁 친구 초대 공유 리워드
+
+앱인토스 SDK `contactsViral`(친구초대) 연동. 콘솔 "미니앱 > 공유 리워드" 메뉴에서 발급한
+moduleId를 env로 주입하며, 미설정 시 기능 자체가 숨겨진다(`VITE_SHARE_REWARD_MODULE_ID`).
+
+리워드 지급은 콘솔이 아니라 파트너(우리) 책임이라, 서버 RPC `claim_referral_reward`가
+1회 최대 50P·일일 합계 최대 200P로 클램프한 뒤 적립한다 — `sendViral` 이벤트에 중복 지급
+방지용 고유 키가 없어서 둔 방어용 상한이다. 콘솔의 친구별 "보냄" 상태 자체가 1차 중복 방지 역할을
+하므로, 이 클램프는 2차 안전장치.
+
+변경 파일: `src/lib/referral.ts`(신규), `src/context/AppContext.tsx`(`claimReferralReward`),
+`src/pages/LeagueScreen.tsx`(친구 초대 버튼 + 리워드 토스트), `supabase/migration_referral.sql`(신규)
+
+### 기타
+
+- 첫 학습 카드 완료 시점(`activation_first_card`)에 `requestAppReview()` 호출 추가 —
+  `src/context/AppContext.tsx`(`toggleKnown`), `src/pages/WordCardScreen.tsx`(`goNext`)
+- 앱인토스 콘솔 등록용 앱 정보(부제/상세설명/페르소나/검색 키워드) 초안 — `docs/APP_STORE_LISTING.md`(신규)
+
+---
+
 ## 2026-07-22 커밋 / 출시 대기 (번들 20260722-112) — 토스 익명 키로 프로필 식별 (재설치 복구)
 
 의도: 지금까지 사용자 식별은 `guest_token`(localStorage)만 사용해 재설치·기기 변경 시 토큰이
