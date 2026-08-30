@@ -1,7 +1,7 @@
 
 
 import { useEffect, useMemo, useRef } from 'react';
-import { Info, Zap, Trophy, TrendingUp, TrendingDown, Share2, Gift } from 'lucide-react';
+import { Info, Zap, Trophy, TrendingUp, TrendingDown, Share2, Gift, Play } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { TextButton, List, ListRow, Badge, Spacing } from '@toss/tds-mobile';
@@ -11,13 +11,14 @@ import { Card } from '../components/ui/Card';
 import { useAuth } from '../hooks/useAuth';
 import { shareTossLink } from '../lib/share';
 import { isReferralEnabled, startReferralInvite } from '../lib/referral';
+import { isRewardedAdEnabled, showRewardedAd } from '../lib/ads';
 import { logClick } from '../lib/analytics';
 
 const RANK_MEDALS = ['🥇', '🥈', '🥉'];
 
 const LeagueScreen = () => {
   const navigate = useNavigate();
-  const { points, otherLeagueUsers, myEmoji, claimReferralReward } = useAppContext();
+  const { points, otherLeagueUsers, myEmoji, claimReferralReward, claimAdReward } = useAppContext();
   const { user } = useAuth();
   const referralCleanupRef = useRef<(() => void) | null>(null);
 
@@ -32,6 +33,15 @@ const LeagueScreen = () => {
   };
 
   useEffect(() => () => referralCleanupRef.current?.(), []);
+
+  const handleWatchAd = () => {
+    logClick('rewarded_ad_start');
+    showRewardedAd((amount, unit) => {
+      claimAdReward(amount, unit).then(credited => {
+        if (credited) toast.success(`광고 시청 완료! +${credited}${unit}`);
+      });
+    });
+  };
 
   const myName = `나 (${user?.nickname ?? '예비슈퍼개미'})`;
 
@@ -275,9 +285,18 @@ const LeagueScreen = () => {
         {isReferralEnabled() && (
           <button
             onClick={handleInviteFriends}
-            className="w-full flex items-center justify-center gap-1.5 bg-[var(--color-card)] rounded-chip px-3 py-3 mb-4 text-sm font-bold text-brand-500 active:opacity-70"
+            className="w-full flex items-center justify-center gap-1.5 bg-[var(--color-card)] rounded-chip px-3 py-3 mb-2 text-sm font-bold text-brand-500 active:opacity-70"
           >
             <Gift size={15} /> 친구 초대하고 포인트 받기
+          </button>
+        )}
+
+        {isRewardedAdEnabled() && (
+          <button
+            onClick={handleWatchAd}
+            className="w-full flex items-center justify-center gap-1.5 bg-[var(--color-card)] rounded-chip px-3 py-3 mb-4 text-sm font-bold text-brand-500 active:opacity-70"
+          >
+            <Play size={15} /> 광고 보고 포인트 받기
           </button>
         )}
 

@@ -363,6 +363,16 @@ export type Database = {
           credited: number;
         };
       };
+      claim_ad_reward: {
+        Args: {
+          p_reward_amount: number;
+          p_reward_unit?: string;
+        };
+        Returns: {
+          points: number;
+          credited: number;
+        };
+      };
     };
     Enums: {
       [_ in never]: never;
