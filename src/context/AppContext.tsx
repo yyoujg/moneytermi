@@ -43,6 +43,7 @@ type AppContextValue = {
   setMissions: React.Dispatch<React.SetStateAction<Missions>>;
   claimReward: (missionId: keyof Missions) => Promise<void>;
   claimReferralReward: (amount: number, unit: string) => Promise<number | null>;
+  claimAdReward: (amount: number, unit: string) => Promise<number | null>;
   submitQuizAnswer: (
     wordId: number, answer: string, mode: 'mc' | 'typed',
     usedHint: boolean, sessionStart: boolean,
@@ -450,6 +451,17 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     return data.credited as number;
   };
 
+  // ── claimAdReward — 리워드 광고(loadFullScreenAd/showFullScreenAd), 서버가 상한 적용 후 적립 ──
+  const claimAdReward = async (amount: number, unit: string) => {
+    const { data, error } = await dbRef.current.rpc('claim_ad_reward', {
+      p_reward_amount: amount, p_reward_unit: unit,
+    });
+    if (error || !data) { console.error('[claimAdReward] 실패:', error); return null; }
+    setPoints(data.points);
+    logClick('ad_reward_claim', { amount: data.credited });
+    return data.credited as number;
+  };
+
   // ── submitQuizAnswer — 서버 채점 (포인트·콤보·m3 서버 소유) ────
   const submitQuizAnswer = async (
     wordId: number, answer: string, mode: 'mc' | 'typed',
@@ -563,6 +575,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       missions, setMissions,
       claimReward,
       claimReferralReward,
+      claimAdReward,
       submitQuizAnswer,
       toggleKnown,
       checkIn,
