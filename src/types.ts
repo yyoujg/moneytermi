@@ -47,24 +47,3 @@ export type Missions = {
   m1: Mission;
   m3: Mission;
 };
-
-export type ActionTemplate = {
-  id: string;
-  title: string;
-  description: string;
-  wordId?: number;
-  courseId?: string;
-  position: number;
-};
-
-export type ActionStatus = 'todo' | 'doing' | 'done';
-
-export type UserAction = {
-  id: string;
-  actionId?: string;
-  customTitle?: string;
-  status: ActionStatus;
-  dueDate?: string;
-  completedAt?: string;
-  createdAt?: string;
-};

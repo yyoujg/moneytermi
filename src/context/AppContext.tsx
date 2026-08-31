@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useMemo } from 'react';
-import type { Word, Course, Missions, ActionTemplate, UserAction } from '../types';
+import type { Word, Course, Missions } from '../types';
 import { supabase, getGuestClient } from '../lib/supabase';
 import { loadStoredProfile } from '../hooks/useAuth';
 import { useDebouncedEffect } from '../hooks/useDebouncedEffect';
@@ -11,16 +11,6 @@ import { nextSrs, gradeFromResult, addDays } from '../lib/srs';
 import { DAILY_REVIEW_CAP } from '../constants';
 
 type WpRow = { word_id: number; ease: number; interval_d: number; reps: number; due_date: string };
-
-const mapUserAction = (r: any): UserAction => ({
-  id: r.id,
-  actionId: r.action_id ?? undefined,
-  customTitle: r.custom_title ?? undefined,
-  status: r.status,
-  dueDate: r.due_date ?? undefined,
-  completedAt: r.completed_at ?? undefined,
-  createdAt: r.created_at ?? undefined,
-});
 
 export type LeagueUser = {
   id: string;
@@ -56,13 +46,6 @@ type AppContextValue = {
   allWords: Word[];
   dueQueue: Word[];
   recordReview: (wordId: number, correct: boolean, usedHint: boolean) => Promise<void>;
-  allActions: ActionTemplate[];
-  myActions: UserAction[];
-  actionsByWord: (wordId: number) => ActionTemplate[];
-  addAction: (actionId: string) => Promise<void>;
-  addCustomAction: (title: string) => Promise<void>;
-  toggleAction: (id: string) => Promise<void>;
-  removeAction: (id: string) => Promise<void>;
   myEmoji: string;
   updateMyEmoji: (emoji: string) => Promise<void>;
 };
@@ -84,8 +67,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [courses, setCourses]             = useState<Course[]>([]);
   const [allWords, setAllWords]           = useState<Word[]>([]);
   const [wpRows, setWpRows]               = useState<WpRow[]>([]);
-  const [allActions, setAllActions]       = useState<ActionTemplate[]>([]);
-  const [myActions, setMyActions]         = useState<UserAction[]>([]);
   const [myEmoji, setMyEmoji]             = useState<string>('😊');
   const [ready, setReady]                 = useState(false);
   const [hydrated, setHydrated]           = useState(false);
@@ -104,11 +85,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const loadContent = async () => {
       try {
-      const [{ data: wordsData }, { data: cwData }, { data: coursesData }, { data: actionsData }] = await Promise.all([
+      const [{ data: wordsData }, { data: cwData }, { data: coursesData }] = await Promise.all([
         supabase.from('words').select('*').order('id'),
         supabase.from('course_words').select('course_id, word_id, position').order('position'),
         supabase.from('courses').select('*').order('sort_order', { ascending: true }),
-        supabase.from('actions').select('*').order('position'),
       ]);
       if (!wordsData || !coursesData || !cwData) return;
 
@@ -138,14 +118,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
       setCourses(builtCourses);
       setAllWords(Array.from(wordMap.values()));
-      if (actionsData) setAllActions(actionsData.map((a: any) => ({
-        id: a.id,
-        title: a.title,
-        description: a.description,
-        wordId: a.word_id ?? undefined,
-        courseId: a.course_id ?? undefined,
-        position: a.position,
-      })));
       } catch (e) {
         console.error('[AppContext] 콘텐츠 로드 실패:', e);
       }
@@ -284,13 +256,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
           emoji: u.emoji,
         })));
       }
-
-      // 7. user_actions — 본인 실천 체크리스트
-      const { data: ua } = await db
-        .from('user_actions')
-        .select('*')
-        .eq('user_id', profileId);
-      if (ua) setMyActions(ua.map(mapUserAction));
 
       } catch (e) {
         console.error('[AppContext] 초기 로드 실패:', e);
@@ -516,55 +481,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     if (error) console.error('[recordReview] word_progress 저장 실패:', error);
   };
 
-  // ── 실천(actions) — status 직접 쓰기, 포인트 무관 ────────────────
-  const actionsByWord = (wordId: number) => allActions.filter(a => a.wordId === wordId);
-
-  const addAction = async (actionId: string) => {
-    if (myActions.some(a => a.actionId === actionId)) return;
-    const profileId = profileIdRef.current;
-    if (!profileId) return;
-    const { data, error } = await dbRef.current
-      .from('user_actions')
-      .upsert({ user_id: profileId, action_id: actionId, status: 'todo' }, { onConflict: 'user_id,action_id' })
-      .select()
-      .single();
-    if (error || !data) { console.error('[addAction] 실패:', error); return; }
-    setMyActions(prev => [...prev.filter(a => a.actionId !== actionId), mapUserAction(data)]);
-  };
-
-  const addCustomAction = async (title: string) => {
-    const profileId = profileIdRef.current;
-    if (!profileId) return;
-    const { data, error } = await dbRef.current
-      .from('user_actions')
-      .insert({ user_id: profileId, custom_title: title, status: 'todo' })
-      .select()
-      .single();
-    if (error || !data) { console.error('[addCustomAction] 실패:', error); return; }
-    setMyActions(prev => [...prev, mapUserAction(data)]);
-  };
-
-  const toggleAction = async (id: string) => {
-    const target = myActions.find(a => a.id === id);
-    if (!target) return;
-    const done = target.status !== 'done';
-    const completedAt = done ? new Date().toISOString() : undefined;
-    setMyActions(prev => prev.map(a => a.id === id
-      ? { ...a, status: done ? 'done' : 'todo', completedAt }
-      : a));
-    const { error } = await dbRef.current
-      .from('user_actions')
-      .update({ status: done ? 'done' : 'todo', completed_at: done ? completedAt : null })
-      .eq('id', id);
-    if (error) console.error('[toggleAction] 실패:', error);
-  };
-
-  const removeAction = async (id: string) => {
-    setMyActions(prev => prev.filter(a => a.id !== id));
-    const { error } = await dbRef.current.from('user_actions').delete().eq('id', id);
-    if (error) console.error('[removeAction] 실패:', error);
-  };
-
   return (
     <AppContext.Provider value={{
       ready,
@@ -585,13 +501,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       allWords,
       dueQueue,
       recordReview,
-      allActions,
-      myActions,
-      actionsByWord,
-      addAction,
-      addCustomAction,
-      toggleAction,
-      removeAction,
       myEmoji,
       updateMyEmoji,
     }}>
