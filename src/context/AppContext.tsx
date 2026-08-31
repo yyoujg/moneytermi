@@ -12,13 +12,6 @@ import { DAILY_REVIEW_CAP } from '../constants';
 
 type WpRow = { word_id: number; ease: number; interval_d: number; reps: number; due_date: string };
 
-export type LeagueUser = {
-  id: string;
-  name: string;
-  points: number;
-  emoji: string;
-};
-
 type AppContextValue = {
   ready: boolean;
   hydrated: boolean;
@@ -40,7 +33,6 @@ type AppContextValue = {
   ) => Promise<{ correct: boolean; earned: number; combo: number; points: number; m3Current: number } | null>;
   toggleKnown: (word: Word) => void;
   attendanceDates: string[];
-  otherLeagueUsers: LeagueUser[];
   checkIn: () => Promise<void>;
   courses: Course[];
   allWords: Word[];
@@ -63,7 +55,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [unknownWords, setUnknownWords]   = useState<Word[]>([]);
   const [missions, setMissions]           = useState<Missions>(DEFAULT_MISSIONS);
   const [attendanceDates, setAttendanceDates] = useState<string[]>([]);
-  const [otherLeagueUsers, setOtherLeagueUsers] = useState<LeagueUser[]>([]);
   const [courses, setCourses]             = useState<Course[]>([]);
   const [allWords, setAllWords]           = useState<Word[]>([]);
   const [wpRows, setWpRows]               = useState<WpRow[]>([]);
@@ -239,23 +230,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         .eq('id', profileId)
         .single();
       if (myProfile?.emoji) setMyEmoji(myProfile.emoji);
-
-      // 6. 리그 유저 — 본인 제외한 전체 프로필 (공개 SELECT)
-      const { data: league } = await supabase
-        .from('profiles')
-        .select('id, nickname, points, emoji')
-        .neq('id', profileId)
-        .order('points', { ascending: false })
-        .limit(49);
-
-      if (league) {
-        setOtherLeagueUsers(league.map(u => ({
-          id: u.id,
-          name: u.nickname,
-          points: u.points,
-          emoji: u.emoji,
-        })));
-      }
 
       } catch (e) {
         console.error('[AppContext] 초기 로드 실패:', e);
@@ -496,7 +470,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       toggleKnown,
       checkIn,
       attendanceDates,
-      otherLeagueUsers,
       courses,
       allWords,
       dueQueue,

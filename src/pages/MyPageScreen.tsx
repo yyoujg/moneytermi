@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { BookOpen, Settings, LogOut, ChevronRight, Zap, Trophy, ShieldAlert, Pencil } from 'lucide-react';
+import { BookOpen, Settings, LogOut, ChevronRight, Zap, ShieldAlert, Pencil } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { toast } from 'sonner';
-import { CURRENT_LEAGUE_NAME } from '../constants';
+import { getGrowthStage } from '../constants';
 import { List, ListRow, Spacing, ConfirmDialog } from '@toss/tds-mobile';
 import { useAuth } from '../hooks/useAuth';
 import { AttendanceCalendar } from '../components/mypage/AttendanceCalendar';
@@ -15,6 +15,7 @@ import { IconBox } from '../components/ui/IconBox';
 
 const MyPageScreen = () => {
   const { points, knownWords, attendanceDates, missions, checkIn, myEmoji, updateMyEmoji } = useAppContext();
+  const stage = getGrowthStage(points);
   const { user, isGuest, updateNickname, logout } = useAuth();
   const [showGuide, setShowGuide]                 = useState(false);
   const [showSettings, setShowSettings]           = useState(false);
@@ -98,8 +99,8 @@ const MyPageScreen = () => {
               <Pencil size={13} className="text-[var(--color-ink-4)] group-active:text-brand-400" />
             </button>
             <div className="flex items-center gap-1.5 mt-1">
-              <Trophy size={12} className="text-brand-400" />
-              <span className="text-xs text-[var(--color-ink-3)] font-medium">{CURRENT_LEAGUE_NAME} 리그</span>
+              <span className="text-xs">{stage.emoji}</span>
+              <span className="text-xs text-[var(--color-ink-3)] font-medium">{stage.name} 단계</span>
             </div>
             {isGuest && (
               <span className="inline-flex items-center gap-1 mt-1.5 text-3xs font-medium text-[var(--color-ink-4)] px-2 py-0.5 rounded-full" style={{ backgroundColor: 'var(--color-surface)' }}>

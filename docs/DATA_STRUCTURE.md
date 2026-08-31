@@ -42,7 +42,7 @@ localStorage / 토스앱 Storage   React AppContext           Supabase (PostgreS
 | nickname | TEXT | NOT NULL, default '예비슈퍼개미' | 닉네임 |
 | email | TEXT | UNIQUE | 이메일 |
 | is_guest | BOOLEAN | NOT NULL, default true | 게스트 여부 |
-| league_tier | TEXT | NOT NULL, default 'bronze', CHECK in (bronze,silver,gold,platinum,diamond) | 리그 티어 |
+| league_tier | TEXT | NOT NULL, default 'bronze', CHECK in (bronze,silver,gold,platinum,diamond) | (앱 미사용) 리그 티어 — 애초에 앱이 안 읽었고, 성장 단계는 `points` 기반으로 클라에서 계산 |
 | points | INTEGER | NOT NULL, default 0, CHECK >= 0 | 포인트 (서버 RPC만 갱신) |
 | quiz_combo | INTEGER | NOT NULL, default 0, CHECK >= 0 | 서버 채점용 연속 정답(콤보) 상태 |
 | emoji | TEXT | NOT NULL, default 'orange' | 프로필 이모지 |
@@ -144,8 +144,8 @@ localStorage / 토스앱 Storage   React AppContext           Supabase (PostgreS
 | position | INTEGER | NOT NULL | 코스 내 순서 |
 | | | PK (course_id, word_id) | |
 
-#### league_tiers
-리그 티어 마스터. 데이터: 1 알개미, 2 뽀시래기, 3 왕개미, 4 전투개미, 5 슈퍼개미.
+#### league_tiers (앱 미사용)
+리그 티어 마스터. 데이터: 1 알개미, 2 뽀시래기, 3 왕개미, 4 전투개미, 5 슈퍼개미. 애초에 앱 코드가 조회한 적 없는 죽은 테이블이었고, 2026-08-31 "캐릭터 키우기" 전환 이후로도 여전히 미사용(단계 이름은 `src/constants.ts`에 하드코딩).
 
 | 컬럼 | 타입 | 제약 | 의미 |
 |------|------|------|------|
@@ -154,13 +154,13 @@ localStorage / 토스앱 Storage   React AppContext           Supabase (PostgreS
 
 ### 2.3 뷰
 
-#### league_rankings
-`profiles` 기반 랭킹 뷰. 컬럼: id, nickname, emoji, league_tier, points, `rank_in_tier`(티어 내 순위), `rank_overall`(전체 순위). 현재 앱 코드는 이 뷰 대신 `profiles`를 직접 조회한다.
+#### league_rankings (앱 미사용)
+`profiles` 기반 랭킹 뷰. 컬럼: id, nickname, emoji, league_tier, points, `rank_in_tier`(티어 내 순위), `rank_overall`(전체 순위). 원래도 앱 코드는 이 뷰 대신 `profiles`를 직접 조회했고, 2026-08-31 "캐릭터 키우기" 전환으로 그 직접 조회마저 제거돼 이 뷰는 아무도 안 쓴다.
 
 ### 2.4 RLS / 권한 요약
 
 - word_progress / daily_missions / attendance: RLS 활성. `auth_id = auth.uid()` 또는 `guest_token = request.headers ->> 'x-guest-token'` 으로 본인 행 식별.
-- profiles: UPDATE는 위와 동일하게 본인 행만. **SELECT는 리그 랭킹 표시를 위해 전체 공개**(`profiles_select_public USING (true)`, `migration_league_rls.sql`). 대신 노출 컬럼을 GRANT로 제한한다(아래 참조).
+- profiles: UPDATE/SELECT 모두 본인 행만(`current_profile_id()` 기반). 과거 `profiles_select_public USING (true)`(`migration_league_rls.sql`)로 리그 리더보드용 전체 공개였으나, 2026-08-31 "캐릭터 키우기" 전환으로 리더보드 자체가 사라지면서 근거를 잃어 `migration_profiles_select_own.sql`로 본인 행만 허용하도록 좁혔다. 남아있던 유일한 타 유저 조회(닉네임 중복 체크)는 `is_nickname_taken(p_nickname, p_exclude_id)` SECURITY DEFINER RPC로 옮겼다(boolean만 반환, 행 데이터 비노출). 게스트 최초 생성 INSERT...RETURNING도 SELECT 정책의 영향을 받으므로 `useAuth.tsx`에서 `getGuestClient(newGuestToken)`(x-guest-token 헤더 포함)로 요청하도록 함께 수정.
 - profiles INSERT는 최초 게스트 생성만 허용 — `WITH CHECK`로 `points = 0`, `league_tier = 'bronze'`, `auth_id/email IS NULL`, `is_guest = true` 를 강제.
 - 콘텐츠 테이블(words/courses/course_words/league_tiers)도 RLS 활성이며 정책은 `public_read`(SELECT)만 — 쓰기 정책이 없어 anon은 읽기만 가능(정답 키 `words` 변조 차단). **`sort_order` 추가는 컬럼 확장이므로 기존 `courses` RLS/정책에 영향 없음.**
 
@@ -264,14 +264,13 @@ type Missions = { m1: Mission; m3: Mission };
 | toggleKnown | (word) => void | known/unknown 토글 |
 | checkIn | () => Promise<void> | 출석 체크 (앱 진입 시 오늘 미출석이면 자동 1회 호출) |
 | attendanceDates | string[] | 출석 날짜 (KST YYYY-MM-DD) |
-| otherLeagueUsers | LeagueUser[] | 본인 제외 다른 사용자(최대 49명) |
 | courses | Course[] | 코스 목록 (sort_order 오름차순 정렬) |
 | allWords | Word[] | 전체 용어 |
 | myEmoji / updateMyEmoji | string | 내 프로필 이모지 |
+| claimReferralReward | (amount, unit) => Promise<number \| null> | 친구초대 리워드 수령 (claim_referral_reward RPC, 서버가 상한 적용) |
+| claimAdReward | (amount, unit) => Promise<number \| null> | 리워드 광고 수령 (claim_ad_reward RPC, 서버가 상한 적용) |
 
-```ts
-type LeagueUser = { id: string; name: string; points: number; emoji: string };
-```
+2026-08-31 "캐릭터 키우기" 전환으로 `otherLeagueUsers`/`LeagueUser`(다른 유저 리더보드)는 제거됐다. 캐릭터 성장 단계는 `src/constants.ts`의 `getGrowthStage(points)`가 `points`로부터 클라이언트에서 직접 계산한다(서버 RPC 불필요, `points` 자체가 이미 서버 권위).
 
 ### 4.2 localStorage 키
 
@@ -309,7 +308,6 @@ type StoredProfile = {
    - daily_missions: 오늘 날짜 행으로 current/is_rewarded를 max 병합.
    - attendance: 최근 60일 조회. 오늘 포함 시 m1 자동 완료.
    - emoji: 내 프로필 이모지 로드.
-   - 리그: 본인 제외 프로필을 points 내림차순 49명 조회.
 
 ### 5.2 디바운스 동기화
 
