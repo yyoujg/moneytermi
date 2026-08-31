@@ -62,7 +62,7 @@ const WordCard = ({
     <Card pad="lg">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1">
-          <h1 className="text-[28px] font-black text-[var(--color-ink)] leading-[1.2] tracking-[-0.03em] break-keep mb-2">
+          <h1 className="text-[28px] font-black text-[var(--color-ink)] leading-[1.2] tracking-[-0.03em] break-keep mb-2!">
             {word.word}
           </h1>
           <p className="text-sm text-[var(--color-ink-2)] font-medium break-keep leading-[1.7] tracking-[-0.01em]">{word.meaning}</p>
@@ -113,11 +113,11 @@ const WordCard = ({
                   <Highlight text={stripHtml(item.title)} keyword={keyword} />
                 </p>
                 {item.description && (
-                  <p className="text-xs text-[var(--color-ink-3)] break-keep leading-[1.6] tracking-[-0.01em] line-clamp-2 mt-1">
+                  <p className="text-xs text-[var(--color-ink-3)] break-keep leading-[1.6] tracking-[-0.01em] line-clamp-2 mt-1!">
                     <Highlight text={stripHtml(item.description)} keyword={keyword} />
                   </p>
                 )}
-                <p className="text-2xs text-[var(--color-ink-4)] mt-1">
+                <p className="text-2xs text-[var(--color-ink-4)] mt-1!">
                   {new Date(item.pubDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
                 </p>
               </div>
@@ -208,11 +208,11 @@ const WordCardScreen = () => {
         <div className="flex-1 flex flex-col items-center justify-center gap-5 p-8">
           <div className="w-20 h-20 bg-[var(--color-card)] rounded-full flex items-center justify-center text-4xl">🎉</div>
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-[var(--color-ink)] mb-1">학습 완료!</h2>
+            <h2 className="text-2xl font-bold text-[var(--color-ink)] mb-1!">학습 완료!</h2>
             <p className="text-sm text-[var(--color-ink-4)]">{words.length}개 단어를 학습했어요</p>
           </div>
           <Card pad="md" className="w-full">
-            <p className="text-xs text-[var(--color-ink-4)] mb-3">방금 배운 단어, 바로 확인해볼까요?</p>
+            <p className="text-xs text-[var(--color-ink-4)] mb-3!">방금 배운 단어, 바로 확인해볼까요?</p>
             <div className="flex flex-wrap gap-1.5">
               {words.slice(0, 5).map(w => (
                 <span key={w.id} className="text-xs px-2.5 py-1 rounded-full bg-[var(--color-surface)] text-[var(--color-ink-2)]">{w.word}</span>

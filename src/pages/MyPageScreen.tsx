@@ -79,7 +79,7 @@ const MyPageScreen = () => {
 
       {/* 프로필 헤더 */}
       <div className="bg-[var(--color-card)] pt-4 px-5 pb-5">
-        <h2 className="text-xl font-bold mb-4 text-[var(--color-ink)]">마이페이지</h2>
+        <h2 className="text-xl font-bold mb-4! text-[var(--color-ink)]">마이페이지</h2>
         <div className="flex items-center gap-4 mb-4">
           <button
             onClick={() => setShowEmojiPicker(true)}
@@ -174,7 +174,7 @@ const MyPageScreen = () => {
         </div>
 
         <Spacing size={4} />
-        <p className="text-center text-2xs text-[var(--color-ink-4)] font-medium mb-2">머니터미 v1.0.0</p>
+        <p className="text-center text-2xs text-[var(--color-ink-4)] font-medium mb-2!">머니터미 v1.0.0</p>
       </div>
     </div>
   );

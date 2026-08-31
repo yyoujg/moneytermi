@@ -78,7 +78,7 @@ const QuizScreen = () => {
         <div className="flex-1 flex flex-col items-center justify-center px-8 gap-5">
           <div className="text-6xl">🎉</div>
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-[var(--color-ink)] mb-1">퀴즈 완료!</h2>
+            <h2 className="text-2xl font-bold text-[var(--color-ink)] mb-1!">퀴즈 완료!</h2>
             <p className="text-sm text-[var(--color-ink-4)]">{quizQueue.length}문제 완료</p>
           </div>
 
@@ -246,7 +246,7 @@ const QuizScreen = () => {
         `}>
           <span className="text-2xs font-medium text-[var(--color-ink-4)] tracking-widest uppercase">{quizItem?.promptLabel}</span>
 
-          <p className="text-xl font-bold text-[var(--color-ink)] leading-snug mb-2 break-keep">{quizItem?.promptMain}</p>
+          <p className="text-xl font-bold text-[var(--color-ink)] leading-snug mb-2! break-keep">{quizItem?.promptMain}</p>
 
           {quizItem?.promptSub && (
             <div className="bg-[var(--color-canvas)] rounded-chip px-4 py-3">

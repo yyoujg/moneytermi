@@ -238,7 +238,7 @@ const HomeScreen = () => {
                 <p className={`text-sm font-bold ${m3.isRewarded ? 'text-[var(--color-ink-4)] line-through' : 'text-[var(--color-ink)]'}`}>
                   {m3.title}
                 </p>
-                <p className="text-xs text-[var(--color-ink-4)] mt-0.5">+{m3.reward}P</p>
+                <p className="text-xs text-[var(--color-ink-4)] mt-0.5!">+{m3.reward}P</p>
               </div>
               {m3.isRewarded
                 ? <Badge color="elephant" size="small" variant="fill">완료</Badge>
@@ -274,7 +274,7 @@ const HomeScreen = () => {
                   {mission.isRewarded
                     ? <span className="text-2xs text-[var(--color-ink-4)]">+{mission.reward}P</span>
                     : isCompleted
-                    ? <button onClick={() => claimReward(mission.id as keyof Missions)} className="px-2.5 py-1 rounded-button bg-brand-500 text-white text-2xs font-bold active:bg-brand-600">받기</button>
+                    ? <button onClick={() => claimReward(mission.id as keyof Missions)} className="px-2.5 py-1 rounded-button bg-brand-500 text-white text-4xs font-bold active:bg-brand-600">받기</button>
                     : <span className="text-2xs text-[var(--color-ink-4)]">+{mission.reward}P</span>
                   }
                 </div>

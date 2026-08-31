@@ -44,7 +44,7 @@ const CourseWordListScreen = () => {
               <span className="text-2xs font-medium text-[var(--color-ink-3)] px-2.5 py-1 rounded-full" style={{ backgroundColor: 'var(--color-surface)' }}>{course.level}</span>
               {isCompleted && <Badge color="green" size="small" variant="fill">완료</Badge>}
             </div>
-            <h2 className="text-base font-bold text-[var(--color-ink)] mt-1 truncate">{course.title}</h2>
+            <h2 className="text-base font-bold text-[var(--color-ink)] mt-1! truncate">{course.title}</h2>
           </div>
         </div>
 
@@ -63,10 +63,10 @@ const CourseWordListScreen = () => {
       <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">
         <Spacing size={16} />
         <div className="px-5">
-          <p className="text-xs font-bold text-[var(--color-ink-3)] mb-2">수록 단어 {course.words.length}개</p>
+          <p className="text-xs font-bold text-[var(--color-ink-3)] mb-3!">수록 단어 {course.words.length}개</p>
         </div>
 
-        <div className="px-5">
+        <div className="px-5 mt-1">
           <Card pad="none" className="overflow-hidden divide-y divide-[var(--color-surface)]">
             {sortedWords.map((word, idx) => {
               const isKnown = knownWords.some(kw => kw.id === word.id);

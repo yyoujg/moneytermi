@@ -33,7 +33,7 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
                 type="button"
                 onClick={() => setTheme(val)}
                 className={`flex-1 py-2 rounded-button text-xs font-bold transition-colors
-                  ${theme === val ? 'bg-brand-500 text-white' : 'bg-[var(--color-card)] text-[var(--color-ink-3)]'}`}
+                  ${theme === val ? 'bg-brand-500 text-white' : 'bg-[var(--color-card)] border border-[var(--color-line)] text-[var(--color-ink-3)]'}`}
               >
                 {label}
               </button>

@@ -100,12 +100,11 @@ const QuizPage = () => {
     return (
       <div className="flex flex-col h-full bg-[var(--color-canvas)] items-center justify-center p-6 pb-32">
         <div className="w-20 h-20 bg-brand-500/10 rounded-full flex items-center justify-center text-4xl mb-4">✅</div>
-        <h2 className="text-xl font-bold text-[var(--color-ink)] mb-1">오늘 복습 완료</h2>
-        <p className="text-sm text-[var(--color-ink-3)] mb-8">지금 복습할 단어가 없어요</p>
+        <h2 className="text-xl font-bold text-[var(--color-ink)] mb-2!">오늘 복습 완료</h2>
+        <p className="text-sm text-[var(--color-ink-3)] mb-16!">지금 복습할 단어가 없어요</p>
         <button
           onClick={() => navigate('/home')}
-          className="px-6 py-4 rounded-button text-white text-xs font-bold active:opacity-90"
-          style={{ backgroundColor: 'var(--color-brand-500)' }}
+          className="w-full max-w-sm py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90"
         >
           홈으로
         </button>
@@ -117,8 +116,8 @@ const QuizPage = () => {
     return (
       <div className="flex flex-col h-full bg-[var(--color-canvas)] items-center justify-center p-6 pb-32">
         <div className="w-20 h-20 bg-brand-500/10 rounded-full flex items-center justify-center text-4xl mb-4">🏆</div>
-        <h2 className="text-xl font-bold text-[var(--color-ink)] mb-1">오늘 복습 완료!</h2>
-        <p className="text-sm text-[var(--color-ink-3)] mb-6">{queue.length}문제 중 {totalCorrect}개 정답</p>
+        <h2 className="text-xl font-bold text-[var(--color-ink)] mb-1!">오늘 복습 완료!</h2>
+        <p className="text-sm text-[var(--color-ink-3)] mb-6!">{queue.length}문제 중 {totalCorrect}개 정답</p>
         <div className="flex items-center gap-2 bg-brand-500/10 border border-brand-500/20 rounded-card px-5 py-3 mb-8">
           <Zap size={16} className="text-brand-500 fill-current" />
           <span className="text-sm font-bold text-[var(--color-ink)]">누적 포인트 {points} P</span>
@@ -128,8 +127,7 @@ const QuizPage = () => {
         </div>
         <button
           onClick={() => navigate('/home')}
-          className="px-6 py-4 rounded-button text-white text-xs font-bold active:opacity-90"
-          style={{ backgroundColor: 'var(--color-brand-500)' }}
+          className="w-full max-w-sm py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90"
         >
           홈으로
         </button>
@@ -172,9 +170,9 @@ const QuizPage = () => {
       <div className="flex-1 flex flex-col px-5 py-4">
         {/* 문제 카드 */}
         <Card pad="lg" className="mb-4 flex-1">
-          <p className="text-2xs font-medium text-[var(--color-ink-4)] mb-3 tracking-wide uppercase">뜻을 보고 용어를 맞혀보세요</p>
+          <p className="text-2xs font-medium text-[var(--color-ink-4)] mb-3! tracking-wide uppercase">뜻을 보고 용어를 맞혀보세요</p>
 
-          <p className="text-lg font-bold text-[var(--color-ink)] leading-relaxed mb-6">{word.meaning}</p>
+          <p className="text-lg font-bold text-[var(--color-ink)] leading-relaxed mb-6!">{word.meaning}</p>
 
           {showHint && (
             <Card tone="surface" pad="none" className="px-4 py-3 flex items-center gap-2 mb-4">
@@ -184,7 +182,7 @@ const QuizPage = () => {
           )}
 
           <Card tone="surface" pad="md">
-            <p className="text-xs font-bold text-[var(--color-ink-3)] mb-1.5">상세 설명</p>
+            <p className="text-xs font-bold text-[var(--color-ink-3)] mb-1.5!">상세 설명</p>
             <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep">{word.detailedMeaning}</p>
           </Card>
         </Card>
@@ -207,10 +205,10 @@ const QuizPage = () => {
               style={{ caretColor: 'var(--color-brand-500)' }}
             />
             {status === 'correct' && (
-              <p className="text-xs font-bold text-success-400 mt-1.5 px-1">정답! +{earnedPreview}P</p>
+              <p className="text-xs font-bold text-success-400 mt-1.5! px-1">정답! +{earnedPreview}P</p>
             )}
             {status === 'wrong' && (
-              <p className="text-xs font-bold text-danger-400 mt-1.5 px-1">틀렸어요. 다시 시도해보세요!</p>
+              <p className="text-xs font-bold text-danger-400 mt-1.5! px-1">틀렸어요. 다시 시도해보세요!</p>
             )}
           </div>
 
