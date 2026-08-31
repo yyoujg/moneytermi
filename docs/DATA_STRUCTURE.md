@@ -362,7 +362,7 @@ type StoredProfile = {
 
 ## 8. 로드맵
 
-> 8.1 SRS·8.2 실천은 **배포 완료**(라이브 DB 반영). 8.3 시장지표만 미실행.
+> 8.1 SRS는 **배포 완료**(라이브 DB 반영). 8.2 실천은 2026-08-31 앱 코드에서 제거됨(개념이 애매하다는 판단, `docs/RELEASE_NOTES.md` 참고) — `actions`/`user_actions` 테이블은 DB에 남아 있지만 앱에서 더 이상 쓰지 않는다. 8.3 시장지표는 미실행.
 
 ### 8.1 SRS 간격반복 (배포됨) — `word_progress` 확장
 
@@ -383,7 +383,7 @@ CREATE INDEX IF NOT EXISTS idx_wp_due ON word_progress(user_id, due_date);
 - "오늘 복습 큐": `WHERE due_date <= CURRENT_DATE ORDER BY due_date`.
 - RLS: 기존 `word_progress`(본인 행) 정책 그대로 적용. 포인트는 기존 `submit_quiz_answer` RPC 유지.
 
-### 8.2 실천 레이어 (배포됨) — `actions` / `user_actions`
+### 8.2 실천 레이어 (2026-08-31 앱에서 제거, 테이블은 DB에 남음) — `actions` / `user_actions`
 
 개념을 내 할 일로 전환. 콘텐츠(공개)와 사용자 실천(본인 소유)을 분리.
 

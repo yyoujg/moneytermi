@@ -20,7 +20,6 @@ const CourseWordListScreen = React.lazy(() => import('./pages/CourseWordListScre
 const WordCardScreen = React.lazy(() => import('./pages/WordCardScreen'));
 const LeagueRulesScreen = React.lazy(() => import('./pages/LeagueRulesScreen'));
 const MyPageScreen = React.lazy(() => import('./pages/MyPageScreen'));
-const ActionsScreen = React.lazy(() => import('./pages/ActionsScreen'));
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -150,7 +149,6 @@ const Layout = () => {
         <Route path="/course" element={<CourseScreen />} />
         <Route path="/league" element={<LeagueScreen />} />
         <Route path="/review" element={<ReviewScreen />} />
-        <Route path="/actions" element={<ActionsScreen />} />
         <Route path="/my" element={<MyPageScreen />} />
 <Route path="/course/words" element={<CourseWordListScreen />} />
         <Route path="/word-card" element={<WordCardScreen />} />
