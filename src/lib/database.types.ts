@@ -313,6 +313,13 @@ export type Database = {
           credited: number;
         };
       };
+      is_nickname_taken: {
+        Args: {
+          p_nickname: string;
+          p_exclude_id: string;
+        };
+        Returns: boolean;
+      };
     };
     Enums: {
       [_ in never]: never;
