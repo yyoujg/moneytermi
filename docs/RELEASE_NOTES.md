@@ -56,6 +56,39 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
 
 ---
 
+## 2026-08-31 커밋 / 출시 대기 (번들 미정, PR #29) — 실천 기능 제거
+
+**배포 시 실제 프로덕션 반영 시각과 번들 ID를 여기 및 상단 릴리즈 날짜 대장에 기입할 것.**
+
+### 토스 콘솔 출시노트 (사용자 노출용 — 아래 평문 그대로 등록)
+
+```
+이번 업데이트 주요 내용
+
+[더 간단해진 화면]
+자주 쓰이지 않던 메뉴를 정리해서 화면 구성을 더 간단하게 만들었어요.
+```
+
+### 🗑 실천(Actions) 기능 제거
+
+제품 개념이 애매하다는 판단으로 전체 제거. 하단 탭이 6개(홈/코스/리그/퀴즈/실천/MY)에서
+5개(홈/코스/리그/퀴즈/MY)로 줄었다.
+
+정리 범위: 네비게이션 탭, `/actions` 라우트, `WordCardScreen`의 "🎯 실천하기" CTA,
+`AppContext`의 관련 상태/함수 7개(`allActions`/`myActions`/`actionsByWord`/`addAction`/
+`addCustomAction`/`toggleAction`/`removeAction`), `types.ts`의 `ActionTemplate`/`ActionStatus`/
+`UserAction`, `database.types.ts`의 테이블 타입, MyPage FAQ 2건, 문서 3곳
+(`README.md`/`docs/APP_INTRO.md`/`docs/DATA_STRUCTURE.md`).
+
+`actions`/`user_actions` 테이블 자체는 DB에 그대로 둠 — 미사용 상태로 보존, 드롭은 별도 요청 시.
+
+변경 파일: `src/pages/ActionsScreen.tsx`(삭제), `src/components/ActionPickerSheet.tsx`(삭제),
+`src/App.tsx`, `src/components/NavBar.tsx`, `src/pages/WordCardScreen.tsx`,
+`src/context/AppContext.tsx`, `src/types.ts`, `src/lib/database.types.ts`,
+`src/components/mypage/GuideSheet.tsx`
+
+---
+
 ## 2026-08-30 커밋 / 2026-08-31 09:43 출시 (번들 20260830-118, PR #28) — 리워드 광고 연동
 
 콘솔 생성일시 2026-08-30 20:32 (SDK 2.6.1) → 09:43 출시. 생성~출시 13시간 11분.
