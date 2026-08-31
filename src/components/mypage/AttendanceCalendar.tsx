@@ -39,7 +39,7 @@ export const AttendanceCalendar = ({ attendanceDates }: { attendanceDates: strin
         </button>
         <div className="text-center">
           <p className="text-sm font-bold text-[var(--color-ink)]">{year}년 {month + 1}월</p>
-          <p className="text-2xs text-brand-400 font-semibold mt-0.5">이번 달 {attendCount}일 출석</p>
+          <p className="text-2xs text-brand-400 font-semibold mt-0.5!">이번 달 {attendCount}일 출석</p>
         </div>
         <button
           onClick={() => setViewDate(new Date(year, month + 1, 1))}

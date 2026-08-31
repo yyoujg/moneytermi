@@ -47,7 +47,7 @@ const CourseScreen = () => {
           <div className="flex items-center justify-between mb-1">
             <div>
               <h2 className="text-xl font-bold text-[var(--color-ink)]">학습 코스</h2>
-              <p className="text-xs text-[var(--color-ink-3)] mt-0.5">{totalKnown}개 완료 · {totalWords - totalKnown}개 남음</p>
+              <p className="text-xs text-[var(--color-ink-3)] mt-0.5!">{totalKnown}개 완료 · {totalWords - totalKnown}개 남음</p>
             </div>
             <button
               onClick={() => { setShowSearch(s => !s); }}
@@ -79,7 +79,7 @@ const CourseScreen = () => {
                           className={`w-full text-left px-5 py-3.5 flex items-center justify-between active:bg-[var(--color-card)] ${idx < searchResults.length - 1 ? 'border-b border-[var(--color-line)]' : ''}`}>
                           <div>
                             <p className="text-sm font-bold text-[var(--color-ink)]">{word.word}</p>
-                            <p className="text-xs text-[var(--color-ink-3)] mt-0.5 truncate max-w-[240px]">{word.meaning}</p>
+                            <p className="text-xs text-[var(--color-ink-3)] mt-0.5! truncate max-w-[240px]">{word.meaning}</p>
                           </div>
                           <ChevronRight size={14} className="text-[var(--color-ink-4)] shrink-0 ml-2" />
                         </button>
@@ -158,7 +158,7 @@ const CourseScreen = () => {
                   )}
                 </div>
 
-                <h3 className="text-[15px] font-bold leading-tight mb-1 text-[var(--color-ink)]">
+                <h3 className="text-[15px] font-bold leading-tight mb-1! text-[var(--color-ink)]">
                   {course.title}
                 </h3>
                 <p className="text-xs text-[var(--color-ink-4)]">

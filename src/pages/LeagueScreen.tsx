@@ -72,7 +72,7 @@ const LeagueScreen = () => {
             <span className="text-xs font-medium text-[var(--color-ink-3)]">{user?.nickname ?? '예비슈퍼개미'}</span>
           </div>
           <div className="text-7xl mb-2">{stage.emoji}</div>
-          <p className="text-lg font-bold text-[var(--color-ink)] mb-3">{stage.name}</p>
+          <p className="text-lg font-bold text-[var(--color-ink)] mb-3!">{stage.name}</p>
 
           <div className="w-full">
             <div className="w-full bg-[var(--color-surface)] rounded-full h-1.5 overflow-hidden mb-1.5">
@@ -119,23 +119,27 @@ const LeagueScreen = () => {
 
       {/* 포인트 획득 — 스크롤 영역 */}
       <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden px-5 pt-4 pb-24">
-        {isReferralEnabled() && (
-          <button
-            onClick={handleInviteFriends}
-            className="w-full flex items-center justify-center gap-1.5 bg-[var(--color-card)] rounded-chip px-3 py-3 mb-2 text-sm font-bold text-brand-500 active:opacity-70"
-          >
-            <Gift size={15} /> 친구 초대하고 포인트 받기
-          </button>
-        )}
+        <div className="flex flex-col gap-2 mb-4!">
+          {isReferralEnabled() && (
+            <button
+              onClick={handleInviteFriends}
+              className="w-full flex items-center justify-center gap-1.5 rounded-chip px-3 py-3 text-sm font-bold text-brand-500 active:opacity-70"
+              style={{ backgroundColor: 'var(--color-brand-soft)' }}
+            >
+              <Gift size={15} /> 친구 초대하고 포인트 받기
+            </button>
+          )}
 
-        {isRewardedAdEnabled() && (
-          <button
-            onClick={handleWatchAd}
-            className="w-full flex items-center justify-center gap-1.5 bg-[var(--color-card)] rounded-chip px-3 py-3 mb-4 text-sm font-bold text-brand-500 active:opacity-70"
-          >
-            <Play size={15} /> 광고 보고 포인트 받기
-          </button>
-        )}
+          {isRewardedAdEnabled() && (
+            <button
+              onClick={handleWatchAd}
+              className="w-full flex items-center justify-center gap-1.5 rounded-chip px-3 py-3 text-sm font-bold text-brand-500 active:opacity-70"
+              style={{ backgroundColor: 'var(--color-brand-soft)' }}
+            >
+              <Play size={15} /> 광고 보고 포인트 받기
+            </button>
+          )}
+        </div>
 
         <Spacing size={8} />
       </div>

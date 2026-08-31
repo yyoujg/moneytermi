@@ -14,7 +14,7 @@ export const GuideSheet = ({ open, onClose }: { open: boolean; onClose: () => vo
     <div className="px-5 pb-6 flex flex-col gap-3">
       {FAQ_ITEMS.map((item, i) => (
         <div key={i} className="bg-[var(--color-canvas)] rounded-card px-4 py-4">
-          <p className="text-sm font-bold text-[var(--color-ink)] mb-1.5">Q. {item.q}</p>
+          <p className="text-sm font-bold text-[var(--color-ink)] mb-1.5!">Q. {item.q}</p>
           <p className="text-xs text-[var(--color-ink-3)] leading-relaxed">{item.a}</p>
         </div>
       ))}

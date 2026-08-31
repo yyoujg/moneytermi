@@ -18,9 +18,27 @@
   --text-3xs: 10px;
   --text-4xs: 9px;
   --radius-card: 16px;
-  --radius-button: 9999px;
+  --radius-button: 16px;
   --radius-chip: 12px;
 }
+
+/* TDS가 주입하는 리셋(button { border-radius: 0 }, unlayered)이 Tailwind
+   유틸리티보다 항상 이겨서 <button>의 rounded-* 클래스가 무시된다.
+   버튼에 쓰이는 3개 radius 토큰만 여기서 강제로 되돌린다. */
+button.rounded-button { border-radius: var(--radius-button) !important; }
+button.rounded-chip { border-radius: var(--radius-chip) !important; }
+button.rounded-card { border-radius: var(--radius-card) !important; }
+
+/* 같은 리셋이 button/input/select/textarea의 font-size·line-height도
+   inherit로 강제한다. 실제 쓰는 text-* 사이즈 토큰마다 되돌린다. */
+button.text-4xs, input.text-4xs, select.text-4xs, textarea.text-4xs { font-size: var(--text-4xs) !important; }
+button.text-3xs, input.text-3xs, select.text-3xs, textarea.text-3xs { font-size: var(--text-3xs) !important; }
+button.text-2xs, input.text-2xs, select.text-2xs, textarea.text-2xs { font-size: var(--text-2xs) !important; }
+button.text-xs, input.text-xs, select.text-xs, textarea.text-xs { font-size: var(--text-xs) !important; line-height: var(--text-xs--line-height) !important; }
+button.text-sm, input.text-sm, select.text-sm, textarea.text-sm { font-size: var(--text-sm) !important; line-height: var(--text-sm--line-height) !important; }
+button.text-base, input.text-base, select.text-base, textarea.text-base { font-size: var(--text-base) !important; line-height: var(--text-base--line-height) !important; }
+button.text-lg, input.text-lg, select.text-lg, textarea.text-lg { font-size: var(--text-lg) !important; line-height: var(--text-lg--line-height) !important; }
+button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var(--text-xl) !important; line-height: var(--text-xl--line-height) !important; }
 
 @keyframes bounce-up {
   0%, 100% { transform: translateY(0); opacity: 0.5; }
