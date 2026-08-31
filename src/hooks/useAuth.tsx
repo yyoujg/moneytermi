@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, createContext } from 'react';
 import { closeView, getAnonymousKey, getSchemeUri } from '@apps-in-toss/web-framework';
 import type { AuthState, AuthUser } from '../types';
-import { supabase } from '../lib/supabase';
+import { supabase, getGuestClient } from '../lib/supabase';
 import { Storage } from '../lib/storage';
 import { parseReferrer } from '../lib/landing';
 
@@ -150,7 +150,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // 2. 첫 방문: Supabase에 게스트 프로필 생성
     try {
       const newGuestToken = uuid();
-      const { data: profile, error } = await supabase
+      // RLS SELECT 정책이 본인 행만 허용하므로, INSERT...RETURNING이 방금 만든 행을
+      // "본인 행"으로 인식하도록 x-guest-token 헤더가 실린 게스트 클라이언트로 요청한다.
+      const { data: profile, error } = await getGuestClient(newGuestToken)
         .from('profiles')
         .insert({ guest_token: newGuestToken })
         .select('id, nickname, league_tier')
@@ -204,14 +206,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (trimmed === authState.user?.nickname) return { error: '현재 닉네임과 동일해요' };
 
     if (profileId) {
-      const { data: existing } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('nickname', trimmed)
-        .neq('id', profileId)
-        .maybeSingle();
+      const { data: taken } = await supabase.rpc('is_nickname_taken', {
+        p_nickname: trimmed, p_exclude_id: profileId,
+      });
 
-      if (existing) return { error: '이미 사용 중인 닉네임이에요' };
+      if (taken) return { error: '이미 사용 중인 닉네임이에요' };
 
       const { error: updateError } = await supabase
         .from('profiles')

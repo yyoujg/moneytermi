@@ -1,11 +1,11 @@
-import { PenLine, Compass, Home, Trophy, User } from 'lucide-react';
+import { PenLine, Compass, Home, Sprout, User } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSafeAreaInsets } from '../hooks/useSafeAreaInsets';
 
 const NAV_ITEMS = [
   { path: '/home', icon: Home, label: '홈' },
   { path: '/course', icon: Compass, label: '코스' },
-  { path: '/league', icon: Trophy, label: '리그' },
+  { path: '/league', icon: Sprout, label: '성장' },
   { path: '/review', icon: PenLine, label: '퀴즈' },
   { path: '/my', icon: User, label: 'MY' },
 ];

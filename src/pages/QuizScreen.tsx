@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
 import { useSettings } from '../hooks/useSettings';
-import { calculateRank } from '../utils/league';
+import { getGrowthStage } from '../constants';
 import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
 import { requestAppReview } from '../lib/review';
 import { logClick } from '../lib/analytics';
@@ -15,7 +15,7 @@ import { buildQuizItem, pickQuizType, type QuizOption } from '../lib/quiz';
 const QuizScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { points, otherLeagueUsers, allWords, knownWords, courses, submitQuizAnswer } = useAppContext();
+  const { points, allWords, knownWords, courses, submitQuizAnswer } = useAppContext();
 
   // 단어 id → 코스 카테고리 (오답 보기를 같은 주제로 뽑기 위함)
   const categoryOf = useMemo(() => {
@@ -69,9 +69,9 @@ const QuizScreen = () => {
   // 완료 화면
   if (!quizQueue || quizQueue.length === 0 || currentQuizIndex >= quizQueue.length) {
     const accuracy = quizQueue.length > 0 ? Math.round((correctCount / quizQueue.length) * 100) : 0;
-    const myRank = calculateRank(otherLeagueUsers, points);
-    const prevRank = calculateRank(otherLeagueUsers, points - totalEarned);
-    const rankRose = prevRank > myRank;
+    const stageBefore = getGrowthStage(points - totalEarned);
+    const stageAfter = getGrowthStage(points);
+    const stageUp = stageAfter.id > stageBefore.id;
 
     return (
       <div className="flex h-full flex-col bg-[var(--color-canvas)]">
@@ -101,12 +101,12 @@ const QuizScreen = () => {
               <span className="text-sm text-[var(--color-ink-4)]">최고 연속 정답</span>
               <span className="text-xl font-bold text-[var(--color-ink)]">{maxCombo}연속 🔥</span>
             </div>
-            {rankRose && (
+            {stageUp && (
               <>
                 <div className="h-px bg-[var(--color-line)]" />
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-[var(--color-ink-4)]">순위 변화</span>
-                  <span className="text-sm font-bold text-success-400">🔥 {prevRank}위 → {myRank}위 상승!</span>
+                  <span className="text-sm text-[var(--color-ink-4)]">단계 변화</span>
+                  <span className="text-sm font-bold text-success-400">🎉 {stageBefore.name} → {stageAfter.name} 승급!</span>
                 </div>
               </>
             )}

@@ -4,11 +4,10 @@ import { List, ListRow, Spacing } from '@toss/tds-mobile';
 import { Card } from '../components/ui/Card';
 
 const RULES = [
-  { icon: '📅', title: '리그 기간', desc: '매주 월요일 00:00에 초기화돼요.' },
-  { icon: '▲', title: '승급 조건', desc: '매주 상위 5명은 다음 리그로 승급해요.' },
-  { icon: '▼', title: '강등 조건', desc: '매주 하위 5명은 이전 리그로 강등돼요.' },
-  { icon: '⚡', title: '포인트 획득', desc: '학습 완료, 퀴즈 정답, 미션 달성 시 포인트를 얻어요.' },
-  { icon: '🏆', title: '리그 단계', desc: '알개미 → 뽀시래기 → 왕개미 → 전투개미 → 슈퍼개미 순서로 올라가요.' },
+  { icon: '🌱', title: '캐릭터 성장', desc: '포인트를 모으면 캐릭터가 알개미 → 뽀시래기 → 왕개미 → 전투개미 → 슈퍼개미 순서로 자라요.' },
+  { icon: '⚡', title: '포인트 획득', desc: '학습 완료, 퀴즈 정답, 미션 달성, 출석 시 포인트를 얻어요.' },
+  { icon: '🎁', title: '친구 초대', desc: '친구를 초대하면 추가 포인트를 받을 수 있어요.' },
+  { icon: '📺', title: '광고 시청', desc: '광고를 끝까지 보면 추가 포인트를 받을 수 있어요.' },
 ];
 
 const LeagueRulesScreen = () => {
@@ -25,7 +24,7 @@ const LeagueRulesScreen = () => {
           >
             <ChevronLeft size={20} className="text-[var(--color-ink-2)]" />
           </button>
-          <h2 className="text-base font-bold text-[var(--color-ink)]">리그 안내</h2>
+          <h2 className="text-base font-bold text-[var(--color-ink)]">캐릭터 키우기 안내</h2>
         </div>
       </div>
 

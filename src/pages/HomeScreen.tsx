@@ -2,19 +2,18 @@ import { ChevronRight, Zap, Flame, BookOpen, PenLine, RotateCcw } from 'lucide-r
 import { Badge, TextButton } from '@toss/tds-mobile';
 import { useNavigate } from 'react-router-dom';
 import type { Mission, Missions } from '../types';
-import { CURRENT_LEAGUE_NAME } from '../constants';
+import { getGrowthStage } from '../constants';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
 import { toDateStr } from '../lib/date';
 import { useAuth } from '../hooks/useAuth';
-import { calculateRank } from '../utils/league';
 import { WeeklyBarChart } from '../components/home/WeeklyBarChart';
 import { Card } from '../components/ui/Card';
 import { StatCard } from '../components/ui/StatCard';
 
 const HomeScreen = () => {
   const navigate = useNavigate();
-  const { hydrated, points, knownWords, unknownWords, knownIds, missions, claimReward, attendanceDates, otherLeagueUsers, courses, allWords, dueQueue, myEmoji } = useAppContext();
+  const { hydrated, points, knownWords, unknownWords, knownIds, missions, claimReward, attendanceDates, courses, allWords, dueQueue, myEmoji } = useAppContext();
   const { user } = useAuth();
   const totalWords = allWords.length;
   const isNewUser = hydrated && knownWords.length + unknownWords.length === 0;
@@ -38,8 +37,8 @@ const HomeScreen = () => {
   const todayDone = m3.current >= m3.target ? 1 : 0;
   const todayTotal = 1;
 
-  // 리그 순위 계산
-  const myRank = calculateRank(otherLeagueUsers, points);
+  // 캐릭터 성장 단계
+  const stage = getGrowthStage(points);
 
   // 이어서 시작할 코스 (가장 진행중인 것)
   const nextCourse = courses.find(c => {
@@ -60,7 +59,7 @@ const HomeScreen = () => {
         <div className="flex justify-between items-center mb-4">
           <div>
             <div className="inline-flex items-center px-2 py-1 rounded mb-2" style={{ backgroundColor: 'var(--color-surface)' }}>
-              <span className="text-2xs font-medium text-[var(--color-ink-4)]">{CURRENT_LEAGUE_NAME} 리그</span>
+              <span className="text-2xs font-medium text-[var(--color-ink-4)]">{stage.emoji} {stage.name}</span>
             </div>
             <h1 className="text-xl font-bold text-[var(--color-ink)]">안녕하세요, {user?.nickname ?? '예비슈퍼개미'}님</h1>
           </div>
@@ -93,11 +92,17 @@ const HomeScreen = () => {
           {/* 압박 텍스트 */}
           {todayDone < todayTotal && (() => {
             const remainP = Object.values(missions).filter(m => !m.isRewarded && m.current < m.target).reduce((s, m) => s + m.reward, 0);
-            const estimatedRank = calculateRank(otherLeagueUsers, points + remainP);
+            const afterStage = getGrowthStage(points + remainP);
+            const stageUp = afterStage.id > stage.id;
+            const pointsToNext = stage.nextMinPoints !== null ? Math.max(stage.nextMinPoints - points - remainP, 0) : null;
             return (
               <div className="rounded-chip px-3 py-3 mb-3 flex flex-col gap-1.5" style={{ backgroundColor: 'var(--color-brand-soft)' }}>
                 <p className="text-xs font-bold text-brand-400">
-                  🔥 지금 하면 +{remainP}P (현재 {myRank}위 → {estimatedRank}위)
+                  {stageUp
+                    ? `🎉 지금 하면 +${remainP}P — ${afterStage.emoji} ${afterStage.name}(으)로 성장!`
+                    : pointsToNext !== null
+                    ? `🔥 지금 하면 +${remainP}P (다음 단계까지 ${pointsToNext}P)`
+                    : `🔥 지금 하면 +${remainP}P`}
                 </p>
                 <p className="text-2xs text-[var(--color-ink-3)]">
                   ⏰ 자정에 초기화 — 오늘 안 하면 기회 사라짐
