@@ -6,6 +6,7 @@ import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
 import { requestAppReview } from '../lib/review';
+import { claimPromotion } from '../lib/promotion';
 import { useNews, type NaverNewsItem } from '../hooks/useNews';
 import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
 import { Card } from '../components/ui/Card';
@@ -157,7 +158,7 @@ const WordCard = ({
 const WordCardScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { courses, allWords, knownWords, knownIds, toggleKnown, setKnownWords } = useAppContext();
+  const { courses, allWords, knownWords, knownIds, toggleKnown, setKnownWords, claimPromotionReward } = useAppContext();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const state = location.state as {
@@ -270,7 +271,11 @@ const WordCardScreen = () => {
 
   const goNext = () => {
     if (autoAdvance) {
-      if (knownWords.length === 0) { logClick('activation_first_card'); requestAppReview(); }
+      if (knownWords.length === 0) {
+        logClick('activation_first_card');
+        requestAppReview();
+        claimPromotion().then(amount => { if (amount) claimPromotionReward(amount); });
+      }
       setKnownWords(prev => prev.some(w => w.id === word.id) ? prev : [...prev, word]);
       setWordIndex(i => i + 1);
     } else if (wordIndex < words.length - 1) {
