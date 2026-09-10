@@ -5,6 +5,7 @@ import { loadStoredProfile } from '../hooks/useAuth';
 import { useDebouncedEffect } from '../hooks/useDebouncedEffect';
 import { Storage } from '../lib/storage';
 import { requestAppReview } from '../lib/review';
+import { claimPromotion } from '../lib/promotion';
 import { logClick } from '../lib/analytics';
 import { toDateStr } from '../lib/date';
 import { nextSrs, gradeFromResult, addDays } from '../lib/srs';
@@ -27,6 +28,7 @@ type AppContextValue = {
   claimReward: (missionId: keyof Missions) => Promise<void>;
   claimReferralReward: (amount: number, unit: string) => Promise<number | null>;
   claimAdReward: (amount: number, unit: string) => Promise<number | null>;
+  claimPromotionReward: (amount: number) => Promise<number | null>;
   submitQuizAnswer: (
     wordId: number, answer: string, mode: 'mc' | 'typed',
     usedHint: boolean, sessionStart: boolean,
@@ -350,7 +352,11 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       setKnownWords(prev => prev.filter(w => w.id !== word.id));
       setUnknownWords(prev => prev.some(w => w.id === word.id) ? prev : [...prev, word]);
     } else {
-      if (knownWords.length === 0) { logClick('activation_first_card'); requestAppReview(); }
+      if (knownWords.length === 0) {
+        logClick('activation_first_card');
+        requestAppReview();
+        claimPromotion().then(amount => { if (amount) claimPromotionReward(amount); });
+      }
       setKnownWords(prev => prev.some(w => w.id === word.id) ? prev : [...prev, word]);
       setUnknownWords(prev => prev.filter(w => w.id !== word.id));
     }
@@ -387,6 +393,17 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     if (error || !data) { console.error('[claimReferralReward] 실패:', error); return null; }
     setPoints(data.points);
     logClick('referral_reward_claim', { amount: data.credited });
+    return data.credited as number;
+  };
+
+  // ── claimPromotionReward — 프로모션(grantPromotionReward), 유저당 1회만 서버가 적립 ──
+  const claimPromotionReward = async (amount: number) => {
+    const { data, error } = await dbRef.current.rpc('claim_promotion_reward', {
+      p_reward_amount: amount,
+    });
+    if (error || !data) { console.error('[claimPromotionReward] 실패:', error); return null; }
+    setPoints(data.points);
+    logClick('promotion_reward_claim', { amount: data.credited });
     return data.credited as number;
   };
 
@@ -466,6 +483,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       claimReward,
       claimReferralReward,
       claimAdReward,
+      claimPromotionReward,
       submitQuizAnswer,
       toggleKnown,
       checkIn,

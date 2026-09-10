@@ -6,6 +6,7 @@
 
 | 번들 | 콘솔 출시일시 (KST) | 기능 도달일(D0 기준) | 주요 기능 |
 |------|--------------------|--------------------|-----------|
+| 20260831-121 | 2026-08-31 18:45 | 2026-08-31 | 실천 기능 제거, 캐릭터 키우기 전환, profiles RLS 강화, TDS CSS 리셋 버그 수정 |
 | 20260830-118 | 2026-08-31 09:43 | 2026-08-31 | 리워드 광고 연동 |
 | 20260829-117 | 2026-08-29 16:15 | 2026-08-29 | 신규 게스트 진입 차단 버그 수정, 친구 초대 공유 리워드 |
 | 20260801-116 | 2026-08-06 16:48 | 2026-08-06 | acquisition_channel 컬럼, referrer 파싱 (07-30 113~115 검토취소·재시도 후 최종 출시) |
@@ -47,6 +48,7 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
 | `20260714-110` | 07-14 21:52 | 07-16 15:12 | 1일 17시간 |
 | `20260829-117` | 08-29 15:44 | 08-29 16:15 | 31분 (이례적으로 빠름) |
 | `20260830-118` | 08-30 20:32 | 08-31 09:43 | 13시간 11분 |
+| `20260831-121` | 08-31 15:44 | 08-31 18:45 | 3시간 1분 |
 
 > **운영 규칙**: 검수 2~3일 지연이 구조적이다. 유입 스파이크가 예상되면 **역산해 최소 3영업일
 > 전에 배포를 제출**한다. 07-15(최대 코호트)가 개선 전 빌드를 받은 것이 이 규칙이 없어서였다.
@@ -56,9 +58,80 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
 
 ---
 
-## 2026-08-31 커밋 / 출시 대기 (번들 미정, PR #29) — 실천 기능 제거
+## 2026-08-31 커밋 / 2026-08-31 18:45 출시 (번들 20260831-121, PR #31) — TDS 전역 CSS 리셋 버그 수정
 
-**배포 시 실제 프로덕션 반영 시각과 번들 ID를 여기 및 상단 릴리즈 날짜 대장에 기입할 것.**
+번들 121이 PR #29(실천 기능 제거)·#30(캐릭터 키우기+RLS)·#31(이 항목)을 한꺼번에 묶어 출시.
+콘솔 생성일시 2026-08-31 15:44 (SDK 2.6.1) → 18:45 출시. 생성~출시 3시간 1분.
+
+### 토스 콘솔 출시노트 (사용자 노출용 — 아래 평문 그대로 등록)
+
+```
+이번 업데이트 주요 내용
+
+[더 깔끔해진 화면]
+버튼 모양과 화면 간격을 다듬어서 더 보기 편하게 만들었어요.
+```
+
+### 🐛 TDS 전역 CSS 리셋에 씹히던 margin/radius/font-size 수정
+
+`@toss/tds-mobile`이 주입하는 unlayered 리셋(부트스트랩 리부트 스타일)이 Tailwind 유틸리티보다
+항상 이겨서, `p`/`h1-h6`의 margin, `button`의 border-radius, `button`/`input`의
+font-size·line-height가 화면 곳곳에서 조용히 무시되고 있었다. 예: CTA 버튼이 `text-sm`(14px)
+지정에도 실제로는 16px로, `rounded-button` 지정에도 각진 모서리로 렌더링되던 문제.
+
+정리 범위: `p`/`h1-h6` margin 유틸리티 22곳에 Tailwind v4 `!important` 문법(`mb-3!` 등) 적용
+(10개 파일), `index.css`에 `button.rounded-*`/`button·input.text-*` 전역 오버라이드 추가,
+`--radius-button`을 9999px(완전 pill)에서 16px로 변경(카드/칩과 통일), LeagueScreen 리워드
+버튼 2개는 margin 대신 flex `gap`으로 간격 처리.
+
+변경 파일: `src/index.css`, `src/pages/{ReviewScreen,QuizScreen,LeagueScreen,MyPageScreen,
+CourseScreen,CourseWordListScreen,HomeScreen,WordCardScreen}.tsx`,
+`src/components/mypage/{GuideSheet,AttendanceCalendar,SettingsSheet}.tsx`
+
+---
+
+## 2026-08-31 커밋 / 2026-08-31 18:45 출시 (번들 20260831-121, PR #30) — 랭크 → 캐릭터 키우기 전환 + profiles RLS 보안 강화
+
+번들 121로 PR #29·#30(이 항목)·#31과 함께 출시. 상세는 위 PR #31 항목 참고.
+
+### 토스 콘솔 출시노트 (사용자 노출용 — 아래 평문 그대로 등록)
+
+```
+이번 업데이트 주요 내용
+
+[캐릭터 키우기로 새단장]
+다른 사람과 순위를 겨루던 리그 대신, 내 캐릭터를 알개미부터 슈퍼개미까지
+직접 키우는 방식으로 바꿨어요. 학습할수록 캐릭터가 자라나요.
+```
+
+### 🎮 랭크 시스템 제거, 솔로 캐릭터 성장으로 전환
+
+다른 유저와 순위를 비교하던 리더보드를 없애고, 기존 5단계 이름(알개미~슈퍼개미)을 재활용한
+솔로 성장 시스템으로 교체. 성장 단계는 `getGrowthStage(points)`로 클라이언트가 직접 계산
+(새 RPC 불필요, `points`는 이미 서버 권위). 친구초대/광고 리워드 버튼은 그대로 유지, 위치만
+이동. 하드코딩돼 있던 `CURRENT_LEAGUE_ID=1` 버그도 함께 해소(지금까지 모든 유저가 항상
+"알개미"로만 보였음).
+
+변경 파일: `src/constants.ts`, `src/pages/LeagueScreen.tsx`, `src/pages/LeagueRulesScreen.tsx`,
+`src/context/AppContext.tsx`, `src/pages/HomeScreen.tsx`, `src/pages/QuizScreen.tsx`,
+`src/pages/MyPageScreen.tsx`, `src/components/NavBar.tsx`, `src/utils/league.ts`(삭제)
+
+### 🔒 profiles SELECT를 본인 행만 허용하도록 강화
+
+캐릭터 키우기 전환으로 다른 유저 프로필을 읽던 마지막 코드(리그 리더보드)가 사라지면서
+`profiles_select_public(USING (true))`이 근거 없는 과다 노출 상태가 됐던 것을 본인 행만
+허용하도록 좁힘. 남아있던 유일한 타 유저 조회(닉네임 중복 체크)는 `is_nickname_taken`
+SECURITY DEFINER RPC로 이전. 게스트 최초 생성 시 `getGuestClient`로 x-guest-token 헤더를
+실어야 하는 부작용도 함께 수정(안 그러면 신규 가입이 깨짐).
+
+변경 파일: `src/hooks/useAuth.tsx`, `src/lib/database.types.ts`,
+`supabase/migration_profiles_select_own.sql`(신규, 운영 DB 실행 완료)
+
+---
+
+## 2026-08-31 커밋 / 2026-08-31 18:45 출시 (번들 20260831-121, PR #29) — 실천 기능 제거
+
+번들 121로 PR #30·#31과 함께 출시. 상세는 위 PR #31 항목 참고.
 
 ### 토스 콘솔 출시노트 (사용자 노출용 — 아래 평문 그대로 등록)
 

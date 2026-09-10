@@ -1,4 +1,4 @@
-import { generateHapticFeedback } from '@apps-in-toss/web-bridge';
+import { generateHapticFeedback } from '@apps-in-toss/web-framework';
 
 function playTone(
   freq: number,

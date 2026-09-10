@@ -313,6 +313,15 @@ export type Database = {
           credited: number;
         };
       };
+      claim_promotion_reward: {
+        Args: {
+          p_reward_amount: number;
+        };
+        Returns: {
+          points: number;
+          credited: number;
+        };
+      };
       is_nickname_taken: {
         Args: {
           p_nickname: string;
