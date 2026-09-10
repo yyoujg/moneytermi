@@ -704,8 +704,9 @@ git 이력은 재작성하지 않았다. project ref는 `VITE_SUPABASE_URL`로 �
 ## 배포 시 필요한 조치 (개발자 체크리스트)
 
 - [ ] Supabase에 `migration_points_integrity.sql` 적용(미적용 시 RPC 부재로 채점/적립 실패).
-- [ ] Supabase Auth URL Configuration에 origin 등록:
+- [x] Supabase Auth URL Configuration에 origin 등록:
       `https://moneytermi.apps.tossmini.com`, `https://moneytermi.private-apps.tossmini.com`.
+      (2026-09-10 대시보드에서 직접 확인 — 둘 다 Redirect URLs에 이미 등록됨)
 - [ ] 모든 테이블 RLS 활성 상태 재확인.
 - [ ] (실기기 확인) `intoss://moneytermi/word-card` 딥링크 진입 시 단어 정상 표시.
 - [ ] (실기기 확인) 노치/홈 인디케이터 영역 침범 없음(SafeAreaInsets).
