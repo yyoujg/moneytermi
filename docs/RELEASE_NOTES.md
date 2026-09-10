@@ -6,6 +6,7 @@
 
 | 번들 | 콘솔 출시일시 (KST) | 기능 도달일(D0 기준) | 주요 기능 |
 |------|--------------------|--------------------|-----------|
+| 20260910-122 | 2026-09-10 11:05 | 2026-09-10 | SDK 3.4.0 마이그레이션, 프로모션 SDK 연동 |
 | 20260831-121 | 2026-08-31 18:45 | 2026-08-31 | 실천 기능 제거, 캐릭터 키우기 전환, profiles RLS 강화, TDS CSS 리셋 버그 수정 |
 | 20260830-118 | 2026-08-31 09:43 | 2026-08-31 | 리워드 광고 연동 |
 | 20260829-117 | 2026-08-29 16:15 | 2026-08-29 | 신규 게스트 진입 차단 버그 수정, 친구 초대 공유 리워드 |
@@ -49,12 +50,76 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
 | `20260829-117` | 08-29 15:44 | 08-29 16:15 | 31분 (이례적으로 빠름) |
 | `20260830-118` | 08-30 20:32 | 08-31 09:43 | 13시간 11분 |
 | `20260831-121` | 08-31 15:44 | 08-31 18:45 | 3시간 1분 |
+| `20260910-122` | 09-10 10:26 | 09-10 11:05 | 39분 |
 
 > **운영 규칙**: 검수 2~3일 지연이 구조적이다. 유입 스파이크가 예상되면 **역산해 최소 3영업일
 > 전에 배포를 제출**한다. 07-15(최대 코호트)가 개선 전 빌드를 받은 것이 이 규칙이 없어서였다.
 
 > **TODO**: 06-20 / 06-17 / 06-16 항목의 실제 출시일은 미확인이다.
 > 앱인토스 콘솔 → 버전 내역 2~8페이지에서 확인해 채울 것.
+
+---
+
+## 2026-09-10 커밋 / 2026-09-10 11:05 출시 (번들 20260910-122, PR #32) — 프로모션 SDK 연동
+
+콘솔 생성일시 2026-09-10 10:26 (SDK 3.4.0) → 11:05 출시. 생성~출시 39분.
+
+### 🎁 프로모션 SDK 연동 (첫 카드 완료 시 1회 지급)
+
+`grantPromotionReward` 연동. 콘솔 "혜택 탭"에서 발급받은 promotionCode를 env로 주입하며,
+미설정 시 기능 자체가 숨겨진다(`VITE_PROMOTION_CODE`). 검토 단계에서는 `TEST_{promotionCode}`를
+그대로 넣어 쓸 수 있고, 코드 쪽에서 별도 분기가 필요 없다(콘솔이 검증만 다르게 할 뿐 SDK 호출은
+동일).
+
+리워드 지급은 친구 초대/광고 리워드와 동일한 서버 권위 패턴 — 서버 RPC `claim_promotion_reward`가
+1회만 지급되도록 테이블 PK로 중복 방지하고 지급액을 0~100P로 클램프한 뒤 적립한다.
+
+변경 파일: `src/lib/promotion.ts`(신규), `src/context/AppContext.tsx`(`claimPromotionReward`),
+`src/pages/WordCardScreen.tsx`, `src/lib/database.types.ts`, `.env.example`,
+`supabase/migration_promotion.sql`(신규, 운영 DB 실행 필요)
+
+⚠️ 9/10 앱인토스 공지: 9/30부터 시작하는 비게임 미니앱 전체 점검에서 "테스트 프로모션 키를
+그대로 사용하는 경우"가 반복 위반 사례로 명시됐다. 콘솔에서 실제 promotionCode 발급받아
+`VITE_PROMOTION_CODE`에 반영하기 전엔 배포하지 말 것.
+
+---
+
+## 2026-09-10 커밋 / 2026-09-10 11:05 출시 (번들 20260910-122, PR #32) — apps-in-toss SDK 3.x 마이그레이션
+
+번들 122로 위 프로모션 SDK 연동 항목과 함께 출시.
+
+### 🔧 SDK 2.6.1 → 3.4.0 업그레이드
+
+앱인토스 공지(2026-10-05부터 SDK 3.x 미만 미니앱 신규 등록 제한) 대응. **3.x 전환 후 2.x로
+롤백 불가**라 공식 마이그레이션 가이드 + 패키지 타입 선언을 직접 확인해 리스크를 서면으로
+확정한 뒤 진행(`requestReview`/`share`/`contactsViral`/`loadFullScreenAd` 등 기존 플랫 함수
+호출 12개는 3.4.0에서도 deprecated 표시만 붙고 그대로 동작 확인, 코드 변경 없음).
+
+- `granite.config.ts` → `apps-in-toss.config.ts`로 파일명·필드 변경(`webView`/`webBundleDir`로
+  개명, `web` 블록 삭제 — `package.json` `build` 스크립트가 `vite build && ait build`로 직접
+  체이닝하도록 변경).
+- `@toss/tds-mobile`/`@toss/tds-mobile-ait` 2.4.1로 동반 업그레이드(공식 가이드 요구사항).
+- `generateHapticFeedback` import 출처를 `@apps-in-toss/web-bridge`(3.x 안정 버전 없음) →
+  `@apps-in-toss/web-framework`로 변경. 함수 자체는 그대로 export됨(3.4.0 타입 선언 확인).
+
+검증: `tsc --noEmit`·`vitest`(41/41)·`npm run dev` 브라우저 렌더링·`npm run build`
+(`vite build && ait build`, `.ait` 산출물 확인) 전부 통과.
+
+변경 파일: `package.json`, `package-lock.json`, `apps-in-toss.config.ts`(신규,
+`granite.config.ts` 삭제), `src/lib/feedback.ts`
+
+### 📌 8/25 Origin 복귀 공지 대응 확인
+
+앱인토스가 8/25부터 미니앱 Origin을 3.x 임시 Origin에서 2.x 때 Origin으로 되돌리면서 안내한
+두 조치를 확인:
+
+- **localStorage 병합**: 머니터미는 2.6.1 → 3.4.0으로 바로 이동했고 중간에 문제였던
+  3.0.0~3.1.0 임시 Origin으로 출시한 적이 없어 해당 없음(병합할 구 데이터 자체가 없음).
+- **CORS 허용 Origin**: `supabase/functions/{naver-news,toss-register-push}`의 Edge Function
+  둘 다 `Access-Control-Allow-Origin: '*'`(전체 허용)이라 코드 변경 불필요. 다만 Supabase
+  **Auth URL Configuration**(대시보드 설정, 코드로 확인 불가)에
+  `https://moneytermi.apps.tossmini.com`/`https://moneytermi.private-apps.tossmini.com`가
+  등록돼 있는지는 아래 체크리스트 항목대로 직접 확인 필요.
 
 ---
 
