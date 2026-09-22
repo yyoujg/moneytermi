@@ -6,6 +6,7 @@
 
 | 번들 | 콘솔 출시일시 (KST) | 기능 도달일(D0 기준) | 주요 기능 |
 |------|--------------------|--------------------|-----------|
+| 20260922-1xx (콘솔 확인 후 기입) | 출시 대기 | — | 계측 보정(알림 동의·리뷰 요청·복습 카드), 뉴스 외부 링크 제거, CI env 주입(리워드 광고·친구 초대 실제 도달) |
 | 20260910-122 | 2026-09-10 11:05 | 2026-09-10 | SDK 3.4.0 마이그레이션, 프로모션 SDK 연동 |
 | 20260831-121 | 2026-08-31 18:45 | 2026-08-31 | 실천 기능 제거, 캐릭터 키우기 전환, profiles RLS 강화, TDS CSS 리셋 버그 수정 |
 | 20260830-118 | 2026-08-31 09:43 | 2026-08-31 | 리워드 광고 연동 |
@@ -57,6 +58,96 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
 
 > **TODO**: 06-20 / 06-17 / 06-16 항목의 실제 출시일은 미확인이다.
 > 앱인토스 콘솔 → 버전 내역 2~8페이지에서 확인해 채울 것.
+
+---
+
+## 2026-09-22 커밋 / 출시 대기 (번들 20260922-1xx, PR #33) — 계측 보정 + 뉴스 외부 링크 제거 + CI env 주입
+
+CI 배포 완료 2026-09-22 13:57 (SDK 3.4.0, 워크플로 런 35688830131). 콘솔 생성일시·번들 ID·출시일시는
+콘솔 확인 후 기입. 앱인토스 비게임 전수 점검(9/30~) 대비 사전 검수 요청용 번들.
+
+### 토스 콘솔 출시노트 (사용자 노출용 — 아래 평문 그대로 등록)
+
+```
+이번 업데이트 주요 내용
+
+[더 안정적인 앱]
+단어 카드의 뉴스 섹션을 정리하고, 앱 내부 동작을 개선했어요.
+```
+
+### 📊 알림 동의 · 리뷰 요청 · 복습 카드 계측 보정
+
+콘솔 실측에서 `notification_agree` 1건 vs 실제 푸시 발송 대상 6~8명, 리뷰 요청 13회 호출 vs 실제 리뷰
+2개, `review_start` 14일간 0건 — 세 지표 모두 원인을 가릴 이벤트가 없었다.
+
+- **알림 동의**: `notification_agree`가 버튼 탭 시점에 찍히던 것을 토스 동의 시트 결과 시점으로 이동.
+  `useNotificationAgreement.requestAgreement(source)`가 `Promise<'agreed'|'rejected'|'error'>`를 반환하고
+  resolve 직전에 `notification_agree / notification_reject / notification_agree_error`를 `source`
+  (`prompt_card` | `settings`)와 함께 기록. 마이페이지 토글 경로(`SettingsSheet`)는 이전까지 무계측이었다 —
+  prompt 카드는 디바이스당 1회만 뜨므로 실제 동의 대다수가 settings 경로일 가능성이 있어 분리 필수.
+  카드에는 `notification_prompt_tap`(탭 시점)·`notification_prompt_later`(나중에) 추가.
+  → `prompt_tap - (agree+reject+error)` = 시트를 응답 없이 닫은 수, `prompt_view - prompt_tap - prompt_later` = 무반응.
+- **리뷰 요청**: `requestAppReview` 3경로 로깅 `review_request_unsupported / called / error`.
+  `called`는 SDK가 resolve했다는 뜻일 뿐 실제 리뷰 시트 노출 여부는 플랫폼이 제어하므로 알 수 없다.
+  호출부(QuizScreen, ReviewScreen, AppContext.claimReward)는 미수정.
+- **복습 카드**: 홈 "오늘 복습할 단어 N개" 카드 렌더 시 `review_prompt_view { count }`. 세션 1회 `useRef`
+  래치 + `hydrated` 가드(hydration 전 프레임 오발화 방지). 이제 "카드가 안 뜬다"와 "떠도 안 누른다"가 갈린다.
+
+⚠️ 지표 해석: 이 번들 출시 전 `notification_agree`는 "탭 수"이고 출시 후는 "동의 수"다. 전/후를 이어 붙이지 말 것.
+
+순수 로직(`toAgreementOutcome`, `agreementLogName`) vitest 추가. 포인트/미션/RPC 경로 미접촉.
+
+변경 파일: `src/hooks/useNotificationAgreement.ts`(+`.test.ts`), `src/components/DailyAlarmPromptCard.tsx`,
+`src/components/mypage/SettingsSheet.tsx`, `src/lib/review.ts`, `src/pages/HomeScreen.tsx`
+
+### 🗞 단어카드 뉴스 외부 링크 제거 (변형 A′)
+
+"🗞 실시간 뉴스" 항목이 `<a target="_blank">`로 네이버 뉴스 원문을 열어 웹뷰가 미니앱을 떠나고 있었다
+(콘솔 이벤트에 `/news/articleView.html::screen` 등 외부 언론사 URL이 화면 이벤트로 기록됨). 토스 UX 원칙의
+"아웃랜딩 유도" 위반 소지(전수 점검 대표 사례). `<a>` → `<div>`, `ExternalLink` 아이콘 제거, 헤더를
+"🗞 실시간 뉴스 (출처: 네이버 뉴스)"로 변경해 출처 표기만 남김. 제목/요약/날짜/키워드 하이라이트는 유지.
+`useNews.ts`·`naver-news` Edge Function 불변. 네이버 오픈API 약관의 "원문 링크 제공 의무" 여부는
+미확인(약관 페이지 접근 불가) — 토스 쪽 리스크(검색·전체탭·공유링크 차단)가 비대칭적으로 커서 링크 제거를 택함.
+
+변경 파일: `src/pages/WordCardScreen.tsx`
+
+### 🔧 CI 배포 빌드에 광고·초대·Sentry env 주입 — 리워드 광고·친구 초대는 이 번들에서 처음 실제 도달
+
+`.github/workflows/deploy.yml`이 `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY`만 주입하고 있었고, GitHub
+secrets에 `VITE_REWARDED_AD_GROUP_ID`/`VITE_SHARE_REWARD_MODULE_ID`가 등록돼 있지 않았다. 코드는 이 env가
+없으면 기능을 숨기므로(`isRewardedAdEnabled()` / `isReferralEnabled()`), CI가 만든 번들은 리워드 광고·친구
+초대 버튼이 없는 상태로 배포됐다.
+
+CI 런 시각과 콘솔 생성시각 대조로 CI 빌드였음이 확정된 번들: **118**(8/30 20:31 런 = 20:32 생성),
+**121**(8/31 15:43 런 = 15:44 생성), **122**(9/10 10:26 런 = 10:26 생성). 즉 위 대장의
+"20260830-118 리워드 광고 연동", 그리고 121·122에서도 광고·초대 버튼은 라이브에 없었다.
+117(친구 초대, 8/29 15:44 생성)은 대조 가능한 CI 런이 없어 로컬 빌드로 추정(추측).
+
+조치: secrets 2개 등록(로컬 `.env` 값 그대로), workflow에 `VITE_SENTRY_DSN`(secret은 있었으나 미주입)
+포함 3개 주입 추가. **이 번들부터 광고·초대·Sentry가 켜진 채 빌드된다.**
+
+⚠️ 코호트 주의: 리워드 광고·친구 초대의 실제 기능 도달일은 118/117이 아니라 **이 번들의 출시일**이다.
+`ad_reward_*`, `referral_*` 계열 지표를 8/29~9/22 구간에서 0으로 읽었다면 기능이 꺼져 있었기 때문이다.
+출시 후 대장 표의 118·117 행에 주석을 달 것.
+
+변경 파일: `.github/workflows/deploy.yml`
+
+### 📋 전수 점검 사전 감사 결과 (코드 변경 없음, 기록용)
+
+- 테스트 광고/프로모션 키: 잔존 없음. 광고 ID `ait.v2.live.*`(env 단일), `VITE_PROMOTION_CODE`는 `.env`에
+  키 자체가 없어 프로모션 비활성(산출물에서 dead-code 제거 확인).
+- Origin 복귀(8/25 공지): 2.6.1 → 3.4.0 직행이라 임시 Origin 이력 없음. 토스 앱 내부는 SDK 네이티브
+  `Storage`만 사용(raw localStorage 0건) → `Migration.getOriginStorage()` 적용 불필요. CORS는 `naver-news`
+  Edge Function `*` 허용 확인, 코드 변경 없음.
+- 뒤로가기 중복: `withBackButton: true` 전역 + 자체 `ChevronLeft` 버튼 4곳(`/course/words`, `/word-card`,
+  `/league/rules`, `/quiz`) 동시 노출 = 대표 사례 해당. 4곳 모두 절대 경로 push라 `/home → 카드 → [자체 뒤로]
+  → [토스 뒤로]` 시 카드로 되돌아가는 스택 증식 있음. **미수정 — 실기기 확인 후 별도 PR.**
+- 발견: 클라이언트는 `resolve_profile_by_toss_key`에 `p_referrer`(3번째 인자)를 보내지만 repo SQL은
+  2-인자 버전뿐(`acquisition_channel` 마이그레이션도 repo에 없음). 번들 116에서 기능이 출시됐으므로 DB에는
+  대시보드로 직접 적용된 것으로 추정(추측). 대시보드에서 3-인자 오버로드 존재 확인 필요 — 없으면 콜드스타트
+  RPC가 매번 실패해 게스트 폴백 → Storage 유실 시 새 프로필 생성.
+- `App.tsx` Sentry 딥링크 진단 코드는 `731dccf`(7/30)에서 이미 제거돼 있음. 현재는 `logClick('entry',
+  { referrer, target })`으로 대체.
 
 ---
 
