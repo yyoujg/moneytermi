@@ -6,6 +6,7 @@
 
 | 번들 | 콘솔 출시일시 (KST) | 기능 도달일(D0 기준) | 주요 기능 |
 |------|--------------------|--------------------|-----------|
+| 20260922-1xx+1 (PR #34, 미머지) | 출시 대기 | — | 하단 NavBar 가림 해소(--nav-height), 자체 뒤로가기 navigate(-1), MY→마이, 토스트 단위 표기 |
 | 20260922-1xx (콘솔 확인 후 기입) | 출시 대기 | — | 계측 보정(알림 동의·리뷰 요청·복습 카드), 뉴스 외부 링크 제거, CI env 주입(리워드 광고·친구 초대 실제 도달) |
 | 20260910-122 | 2026-09-10 11:05 | 2026-09-10 | SDK 3.4.0 마이그레이션, 프로모션 SDK 연동 |
 | 20260831-121 | 2026-08-31 18:45 | 2026-08-31 | 실천 기능 제거, 캐릭터 키우기 전환, profiles RLS 강화, TDS CSS 리셋 버그 수정 |
@@ -58,6 +59,56 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
 
 > **TODO**: 06-20 / 06-17 / 06-16 항목의 실제 출시일은 미확인이다.
 > 앱인토스 콘솔 → 버전 내역 2~8페이지에서 확인해 채울 것.
+
+---
+
+## 2026-09-22 커밋 / 출시 대기 (번들 미생성, PR #34) — 하단 NavBar 가림 해소 + 뒤로가기 스택 증식 수정 + 검수 문구 대응
+
+PR #33 번들(아래 항목)과 별개로 머지 대기. 9/30 전수 점검 전 마지막 배포 후보. 머지 시 CI가 번들 생성.
+
+### 🐛 하단 NavBar가 화면 내용을 가리던 문제 — NavBar 높이를 단일 소스로
+
+실기기에서 하단 알약 NavBar가 콘텐츠를 덮는 것이 확인됐다. 원인은 화면별 매직넘버:
+NavBar 점유 높이는 알약 89px + 하단 여백 24px + safe area bottom = **113px + inset**인데,
+코스/마이/성장은 `pb-24`(96px)라 인셋 0 기기(안드로이드 대다수)에서도 17px 가려졌고,
+홈/퀴즈의 `pb-32`(128px)도 인셋 34px(아이폰)에서는 19px 부족했다.
+
+수정: `NavBar`가 `useLayoutEffect`로 자기 래퍼 `offsetHeight`를 실측해 `document.documentElement`에
+`--nav-height`로 주입(`insets.bottom` 변화 시 재측정). `index.css`에 `@utility pb-nav
+{ padding-bottom: calc(var(--nav-height, 113px) + 15px) }` 하나를 정의하고 5개 탭 화면의 최하단
+컨테이너가 이 클래스만 쓴다. `+15px`는 기존 홈 기준선(128 = 113 + 15)을 그대로 유지하기 위한 값.
+
+before/after(인셋 0): 홈·퀴즈 128 → 128(변화 없음), 코스·마이·성장 96 → 128. 인셋 34에서는 5화면 모두 162.
+브라우저 실측(768px / 375×520 두 뷰포트, 스크롤 최하단 leaf bottom − 알약 top): 홈 −63, 코스 −15,
+성장 −8.5, 퀴즈 −65~−189, 마이 −23.1 (음수 = 겹침 없음). 인셋 > 0 상태는 브라우저에서 재현 불가 — 실기기 확인 항목.
+
+별도 이슈: `LeagueScreen` 루트가 뷰포트보다 6.5px 크게 렌더됨(헤더 높이, 이 변경과 무관, 수정 전부터 존재).
+겹침은 아니라 이번엔 미수정 — GitHub 이슈로 기록.
+
+변경 파일: `src/components/NavBar.tsx`, `src/index.css`,
+`src/pages/{HomeScreen,CourseScreen,LeagueScreen,ReviewScreen,MyPageScreen}.tsx`
+
+### 🔙 자체 뒤로가기 버튼 4곳 절대 경로 push → `navigate(-1)` (제거는 보류)
+
+`/course/words`, `/word-card`, `/league/rules`, `/quiz`의 `ChevronLeft` 버튼이 `navigate('/course')`처럼
+절대 경로를 push해 `/home → 카드 → [자체 뒤로] /home(idx 2) → [토스 뒤로] 카드`로 되돌아가는 스택 증식이
+있었다. 히스토리 pop으로 변경. 딥링크 콜드 진입이 가능한 3곳(`landing.ts` `ALLOWED_PATHS`)은
+`history.state.idx > 0 ? navigate(-1) : navigate(기존 경로, { replace: true })`로 분기(`/word-card`는
+`backPath`·`backState` 유지). 브라우저 실측 `/league(idx 1) → /league/rules(idx 2) → [자체 뒤로] → /league(idx 1)`.
+
+토스 네비바 뒤로가기와의 **중복 노출 해소(자체 버튼 제거)는 보류** — 네비바 버튼이 `backEvent`를 발화하는지
+`history.back()`인지 실기기 미확인이라, 후자면 `/home`(idx 0)에서 무동작이고 자체 버튼까지 없애면 앱을 나갈
+수 없게 된다. 실기기 확인 후 별도 PR.
+
+변경 파일: `src/pages/{CourseWordListScreen,WordCardScreen,LeagueRulesScreen,QuizScreen}.tsx`
+
+### ✏️ 검수 체크리스트 "영어 텍스트" 대응
+
+- 하단 탭 `MY` → `마이` (`src/components/NavBar.tsx`)
+- 리워드 토스트 `+${credited}${unit}` → `+${credited}P` (`src/pages/LeagueScreen.tsx`). `credited`는 서버가 적립한
+  앱 포인트라 SDK가 준 `rewardUnit`/`unitType` 원문(값 미확인, 영문 가능)을 붙이는 게 부정확했다. 앱 관용 표기
+  `P`(`+5P 보너스`, `누적 포인트 N P`)로 통일. SDK unit은 RPC 저장용으로는 그대로 전달.
+- `FAQ`, `x2 보너스`, `+5P`는 관용 표기로 미변경.
 
 ---
 
