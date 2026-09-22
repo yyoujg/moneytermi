@@ -142,7 +142,7 @@ const QuizPage = () => {
   const earnedPreview = (showHint ? 5 : 10) + (combo >= 2 ? combo * 2 : 0);
 
   return (
-    <div className="flex flex-col h-full bg-[var(--color-canvas)] pb-nav">
+    <div className="flex flex-col h-full bg-[var(--color-canvas)] pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
       {/* 헤더 */}
       <div className="bg-[var(--color-card)] pt-4 px-5 pb-4 border-b border-[var(--color-line)]">
         <div className="flex justify-between items-center mb-3">
