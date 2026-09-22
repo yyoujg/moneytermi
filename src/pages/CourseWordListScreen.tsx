@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Lock, CheckCircle } from 'lucide-react';
+import { ChevronRight, Lock, CheckCircle } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Badge, Spacing } from '@toss/tds-mobile';
 import type { Course } from '../types';
@@ -33,12 +33,6 @@ const CourseWordListScreen = () => {
       {/* 헤더 */}
       <div className="pt-4 px-5 pb-4 bg-[var(--color-card)]">
         <div className="flex items-center gap-3 mb-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-[var(--color-surface)] shrink-0"
-          >
-            <ChevronLeft size={20} className="text-[var(--color-ink-2)]" />
-          </button>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="text-2xs font-medium text-[var(--color-ink-3)] px-2.5 py-1 rounded-full" style={{ backgroundColor: 'var(--color-surface)' }}>{course.level}</span>
