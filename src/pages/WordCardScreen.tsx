@@ -309,6 +309,13 @@ const WordCardScreen = () => {
 
       {/* 상단 바 */}
       <div className="pt-4 px-4 pb-2 bg-[var(--color-card)] flex items-center gap-3">
+        <button
+          onClick={() => ((window.history.state?.idx ?? 0) > 0 ? navigate(-1) : navigate(backPath, { replace: true, state: backState }))}
+          className="w-9 h-9 flex items-center justify-center rounded-full bg-[var(--color-surface)] shrink-0"
+        >
+          <ChevronLeft size={20} className="text-[var(--color-ink-2)]" />
+        </button>
+
         {/* 단어 dots */}
         <div className="flex-1 flex items-center gap-1.5 overflow-x-auto [&::-webkit-scrollbar]:hidden py-1">
           {words.map((w, i) => {

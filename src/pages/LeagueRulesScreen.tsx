@@ -1,3 +1,5 @@
+import { ChevronLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { List, ListRow, Spacing } from '@toss/tds-mobile';
 import { Card } from '../components/ui/Card';
 
@@ -9,12 +11,21 @@ const RULES = [
 ];
 
 const LeagueRulesScreen = () => {
+  const navigate = useNavigate();
 
   return (
     <div className="flex flex-col h-full bg-[var(--color-canvas)]">
       {/* 헤더 */}
       <div className="pt-4 px-5 pb-4 bg-[var(--color-card)]">
-        <h2 className="text-base font-bold text-[var(--color-ink)]">캐릭터 키우기 안내</h2>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => ((window.history.state?.idx ?? 0) > 0 ? navigate(-1) : navigate('/league', { replace: true }))}
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-[var(--color-surface)]"
+          >
+            <ChevronLeft size={20} className="text-[var(--color-ink-2)]" />
+          </button>
+          <h2 className="text-base font-bold text-[var(--color-ink)]">캐릭터 키우기 안내</h2>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">
