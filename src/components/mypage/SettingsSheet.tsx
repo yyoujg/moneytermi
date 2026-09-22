@@ -75,7 +75,7 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
         {/* 학습 알림 */}
         <button
           type="button"
-          onClick={requestAgreement}
+          onClick={() => requestAgreement('settings')}
           disabled={agreed}
           className="flex items-center justify-between bg-[var(--color-surface)] rounded-card px-4 py-4 text-left disabled:opacity-100"
         >

@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Check, ExternalLink } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
@@ -88,7 +88,7 @@ const WordCard = ({
 
     {/* 실시간 뉴스 */}
     <Card pad="none" className="px-5 pt-4 pb-5 flex flex-col gap-2.5">
-      <p className="text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]">🗞 실시간 뉴스</p>
+      <p className="text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]">🗞 실시간 뉴스 (출처: 네이버 뉴스)</p>
       {newsLoading ? (
         <div className="flex flex-col gap-3.5">
           {[1, 2, 3].map(i => (
@@ -102,13 +102,7 @@ const WordCard = ({
       ) : newsItems.length > 0 ? (
         <div className="flex flex-col gap-3.5">
           {newsItems.map((item, i) => (
-            <a
-              key={i}
-              href={item.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-start gap-2 active:opacity-60"
-            >
+            <div key={i} className="flex items-start gap-2">
               <div className="flex-1">
                 <p className="text-[13px] font-semibold text-[var(--color-ink)] break-keep leading-[1.55] tracking-[-0.01em] line-clamp-2">
                   <Highlight text={stripHtml(item.title)} keyword={keyword} />
@@ -122,8 +116,7 @@ const WordCard = ({
                   {new Date(item.pubDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
                 </p>
               </div>
-              <ExternalLink size={13} className="text-[var(--color-line)] shrink-0 mt-0.5" />
-            </a>
+            </div>
           ))}
         </div>
       ) : (

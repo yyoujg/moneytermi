@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { ChevronRight, Zap, Flame, BookOpen, PenLine, RotateCcw } from 'lucide-react';
 import { Badge, TextButton } from '@toss/tds-mobile';
 import { useNavigate } from 'react-router-dom';
@@ -17,6 +18,14 @@ const HomeScreen = () => {
   const { user } = useAuth();
   const totalWords = allWords.length;
   const isNewUser = hydrated && knownWords.length + unknownWords.length === 0;
+
+  // 복습 카드 노출 로깅 (세션 1회 래치, hydration 전 프레임 오발화 방지)
+  const reviewPromptLoggedRef = useRef(false);
+  useEffect(() => {
+    if (!hydrated || dueQueue.length === 0 || reviewPromptLoggedRef.current) return;
+    reviewPromptLoggedRef.current = true;
+    logClick('review_prompt_view', { count: dueQueue.length });
+  }, [hydrated, dueQueue.length]);
 
   // 연속 출석일
   const streak = (() => {
