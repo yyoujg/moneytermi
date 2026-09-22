@@ -61,7 +61,7 @@ const HomeScreen = () => {
     : [];
 
   return (
-    <div className="flex flex-col h-full pb-32 overflow-y-auto [&::-webkit-scrollbar]:hidden" style={{ backgroundColor: 'var(--color-canvas)' }}>
+    <div className="flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden" style={{ backgroundColor: 'var(--color-canvas)' }}>
 
       {/* 헤더 */}
       <div className="pt-4 px-5 pb-4">

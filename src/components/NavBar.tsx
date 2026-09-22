@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef } from 'react';
 import { PenLine, Compass, Home, Sprout, User } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSafeAreaInsets } from '../hooks/useSafeAreaInsets';
@@ -14,12 +15,23 @@ const NavBar = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const insets = useSafeAreaInsets();
+  const wrapRef = useRef<HTMLDivElement>(null);
 
   const HIDDEN_PATHS = ['/quiz', '/course/words', '/word-card', '/league/rules'];
-  if (HIDDEN_PATHS.some(p => pathname.startsWith(p))) return null;
+  const hidden = HIDDEN_PATHS.some(p => pathname.startsWith(p));
+
+  // NavBar가 화면 하단에서 차지하는 높이(알약 + 하단 여백 + safe area)를 --nav-height로 공개.
+  // 화면들은 pb-nav(index.css)로 이 값만큼 하단 패딩을 확보한다.
+  useLayoutEffect(() => {
+    if (!wrapRef.current) return;
+    document.documentElement.style.setProperty('--nav-height', `${wrapRef.current.offsetHeight}px`);
+  }, [hidden, insets.bottom]);
+
+  if (hidden) return null;
 
   return (
     <div
+      ref={wrapRef}
       className="absolute bottom-0 w-full flex justify-center z-50 pointer-events-none"
       style={{ paddingBottom: 24 + insets.bottom }}
     >

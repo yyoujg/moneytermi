@@ -98,7 +98,7 @@ const QuizPage = () => {
 
   if (isEmpty) {
     return (
-      <div className="flex flex-col h-full bg-[var(--color-canvas)] items-center justify-center p-6 pb-32">
+      <div className="flex flex-col h-full bg-[var(--color-canvas)] items-center justify-center p-6 pb-nav">
         <div className="w-20 h-20 bg-brand-500/10 rounded-full flex items-center justify-center text-4xl mb-4">✅</div>
         <h2 className="text-xl font-bold text-[var(--color-ink)] mb-2!">오늘 복습 완료</h2>
         <p className="text-sm text-[var(--color-ink-3)] mb-16!">지금 복습할 단어가 없어요</p>
@@ -114,7 +114,7 @@ const QuizPage = () => {
 
   if (isFinished) {
     return (
-      <div className="flex flex-col h-full bg-[var(--color-canvas)] items-center justify-center p-6 pb-32">
+      <div className="flex flex-col h-full bg-[var(--color-canvas)] items-center justify-center p-6 pb-nav">
         <div className="w-20 h-20 bg-brand-500/10 rounded-full flex items-center justify-center text-4xl mb-4">🏆</div>
         <h2 className="text-xl font-bold text-[var(--color-ink)] mb-1!">오늘 복습 완료!</h2>
         <p className="text-sm text-[var(--color-ink-3)] mb-6!">{queue.length}문제 중 {totalCorrect}개 정답</p>
@@ -142,7 +142,7 @@ const QuizPage = () => {
   const earnedPreview = (showHint ? 5 : 10) + (combo >= 2 ? combo * 2 : 0);
 
   return (
-    <div className="flex flex-col h-full bg-[var(--color-canvas)] pb-32">
+    <div className="flex flex-col h-full bg-[var(--color-canvas)] pb-nav">
       {/* 헤더 */}
       <div className="bg-[var(--color-card)] pt-4 px-5 pb-4 border-b border-[var(--color-line)]">
         <div className="flex justify-between items-center mb-3">

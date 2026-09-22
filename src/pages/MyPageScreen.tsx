@@ -41,7 +41,7 @@ const MyPageScreen = () => {
   ];
 
   return (
-    <div className="flex flex-col h-full bg-[var(--color-canvas)] pb-24 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+    <div className="flex flex-col h-full bg-[var(--color-canvas)] pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
       <GuideSheet open={showGuide} onClose={() => setShowGuide(false)} />
       <EmojiPickerSheet
         open={showEmojiPicker}

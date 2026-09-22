@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* 하단 NavBar에 가려지지 않도록 화면 최하단 컨테이너에 주는 패딩.
+   --nav-height는 NavBar가 실측해 주입(알약 + 24px 여백 + safe area bottom).
+   +15px는 기존 홈 화면 기준선(pb-32 = 128px = 113 + 15)을 그대로 유지하기 위한 값. */
+@utility pb-nav {
+  padding-bottom: calc(var(--nav-height, 113px) + 15px);
+}
+
 /* 브랜드/시맨틱 색 토큰 — 라이트/다크 공통(브랜드 색은 양 테마 유지) */
 @theme {
   --color-brand-200: #fed7aa;

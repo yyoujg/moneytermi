@@ -39,7 +39,7 @@ const CourseScreen = () => {
   const allCategories = ['전체', ...categories];
 
   return (
-    <div className="flex flex-col h-full bg-[var(--color-canvas)] pb-24 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+    <div className="flex flex-col h-full bg-[var(--color-canvas)] pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
 
       {/* 헤더 */}
       <div className="sticky top-0 z-20 bg-[var(--color-card)]">

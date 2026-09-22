@@ -118,7 +118,7 @@ const LeagueScreen = () => {
       </div>
 
       {/* 포인트 획득 — 스크롤 영역 */}
-      <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden px-5 pt-4 pb-24">
+      <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden px-5 pt-4 pb-nav">
         <div className="flex flex-col gap-2 mb-4!">
           {isReferralEnabled() && (
             <button
