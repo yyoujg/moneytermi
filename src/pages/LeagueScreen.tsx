@@ -22,7 +22,7 @@ const LeagueScreen = () => {
     referralCleanupRef.current?.();
     referralCleanupRef.current = startReferralInvite((amount, unit) => {
       claimReferralReward(amount, unit).then(credited => {
-        if (credited) toast.success(`친구 초대 완료! +${credited}${unit}`);
+        if (credited) toast.success(`친구 초대 완료! +${credited}P`);
       });
     }) ?? null;
   };
@@ -33,7 +33,7 @@ const LeagueScreen = () => {
     logClick('rewarded_ad_start');
     showRewardedAd((amount, unit) => {
       claimAdReward(amount, unit).then(credited => {
-        if (credited) toast.success(`광고 시청 완료! +${credited}${unit}`);
+        if (credited) toast.success(`광고 시청 완료! +${credited}P`);
       });
     });
   };
@@ -118,7 +118,7 @@ const LeagueScreen = () => {
       </div>
 
       {/* 포인트 획득 — 스크롤 영역 */}
-      <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden px-5 pt-4 pb-24">
+      <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden px-5 pt-4 pb-nav">
         <div className="flex flex-col gap-2 mb-4!">
           {isReferralEnabled() && (
             <button

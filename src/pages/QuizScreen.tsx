@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { ChevronLeft, Zap, Check, X } from 'lucide-react';
+import { Zap, Check, X } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
@@ -179,9 +179,6 @@ const QuizScreen = () => {
     <div className="flex flex-col h-full bg-[var(--color-canvas)]">
       {/* 헤더 */}
       <div className="pt-4 px-5 pb-3 flex justify-between items-center bg-[var(--color-card)]">
-        <button onClick={() => navigate('/home')} className="p-2 -ml-2">
-          <ChevronLeft size={24} className="text-[var(--color-ink-3)]" />
-        </button>
         <span className="text-xs font-medium text-[var(--color-ink-4)]">{currentQuizIndex + 1} / {quizQueue.length}</span>
         {/* 포인트 + 팝업 */}
         <div className="relative flex items-center gap-1">

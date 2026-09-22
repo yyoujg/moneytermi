@@ -100,10 +100,10 @@ const WordCard = ({
           ))}
         </div>
       ) : newsItems.length > 0 ? (
-        <div className="flex flex-col gap-3.5">
+        <div className="flex flex-col divide-y divide-[var(--color-line)]">
           {newsItems.map((item, i) => (
-            <div key={i} className="flex items-start gap-2">
-              <div className="flex-1">
+            <div key={i} className="py-3 first:pt-0 last:pb-0">
+              <div>
                 <p className="text-[13px] font-semibold text-[var(--color-ink)] break-keep leading-[1.55] tracking-[-0.01em] line-clamp-2">
                   <Highlight text={stripHtml(item.title)} keyword={keyword} />
                 </p>
@@ -309,13 +309,6 @@ const WordCardScreen = () => {
 
       {/* 상단 바 */}
       <div className="pt-4 px-4 pb-2 bg-[var(--color-card)] flex items-center gap-3">
-        <button
-          onClick={() => navigate(backPath, backState ? { state: backState } : undefined)}
-          className="w-9 h-9 flex items-center justify-center rounded-full bg-[var(--color-surface)] shrink-0"
-        >
-          <ChevronLeft size={20} className="text-[var(--color-ink-2)]" />
-        </button>
-
         {/* 단어 dots */}
         <div className="flex-1 flex items-center gap-1.5 overflow-x-auto [&::-webkit-scrollbar]:hidden py-1">
           {words.map((w, i) => {
