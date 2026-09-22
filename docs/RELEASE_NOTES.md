@@ -6,7 +6,7 @@
 
 | 번들 | 콘솔 출시일시 (KST) | 기능 도달일(D0 기준) | 주요 기능 |
 |------|--------------------|--------------------|-----------|
-| 20260922-1xx+1 (PR #34, 미머지) | 출시 대기 | — | 하단 NavBar 가림 해소(--nav-height), 자체 뒤로가기 navigate(-1), MY→마이, 토스트 단위 표기 |
+| 20260922-1xx+1 (PR #34, 미머지) | 출시 대기 | — | 하단 NavBar 가림 해소(--nav-height), 자체 뒤로가기 4곳 제거, 뉴스 목록 구분선, MY→마이, 토스트 단위 표기 |
 | 20260922-1xx (콘솔 확인 후 기입) | 출시 대기 | — | 계측 보정(알림 동의·리뷰 요청·복습 카드), 뉴스 외부 링크 제거, CI env 주입(리워드 광고·친구 초대 실제 도달) |
 | 20260910-122 | 2026-09-10 11:05 | 2026-09-10 | SDK 3.4.0 마이그레이션, 프로모션 SDK 연동 |
 | 20260831-121 | 2026-08-31 18:45 | 2026-08-31 | 실천 기능 제거, 캐릭터 키우기 전환, profiles RLS 강화, TDS CSS 리셋 버그 수정 |
@@ -88,19 +88,29 @@ before/after(인셋 0): 홈·퀴즈 128 → 128(변화 없음), 코스·마이·
 변경 파일: `src/components/NavBar.tsx`, `src/index.css`,
 `src/pages/{HomeScreen,CourseScreen,LeagueScreen,ReviewScreen,MyPageScreen}.tsx`
 
-### 🔙 자체 뒤로가기 버튼 4곳 절대 경로 push → `navigate(-1)` (제거는 보류)
+### 🔙 자체 뒤로가기 버튼 4곳 제거 — 토스 네비바 뒤로가기와 중복 노출 해소
 
-`/course/words`, `/word-card`, `/league/rules`, `/quiz`의 `ChevronLeft` 버튼이 `navigate('/course')`처럼
-절대 경로를 push해 `/home → 카드 → [자체 뒤로] /home(idx 2) → [토스 뒤로] 카드`로 되돌아가는 스택 증식이
-있었다. 히스토리 pop으로 변경. 딥링크 콜드 진입이 가능한 3곳(`landing.ts` `ALLOWED_PATHS`)은
-`history.state.idx > 0 ? navigate(-1) : navigate(기존 경로, { replace: true })`로 분기(`/word-card`는
-`backPath`·`backState` 유지). 브라우저 실측 `/league(idx 1) → /league/rules(idx 2) → [자체 뒤로] → /league(idx 1)`.
+콘솔 공지 가이드 위반 대표 사례 "토스 네비게이션 바의 뒤로가기 버튼과 미니앱 자체 구현 뒤로가기 버튼의 중복
+노출" 대응. `apps-in-toss.config.ts` `withBackButton: true`인데 `/course/words`, `/word-card`, `/league/rules`,
+`/quiz` 헤더가 각자 `ChevronLeft` 버튼을 렌더하고 있었다.
 
-토스 네비바 뒤로가기와의 **중복 노출 해소(자체 버튼 제거)는 보류** — 네비바 버튼이 `backEvent`를 발화하는지
-`history.back()`인지 실기기 미확인이라, 후자면 `/home`(idx 0)에서 무동작이고 자체 버튼까지 없애면 앱을 나갈
-수 없게 된다. 실기기 확인 후 별도 PR.
+실기기 확인(9/22): 토스 네비바 뒤로가기가 `/home`(history idx 0)에서 미니앱을 정상 종료하고, 바텀시트가 열려
+있으면 시트만 닫는다 → 자체 버튼을 없애도 사용자가 갇히지 않음. 4곳 제거, 뒤로가기는 `App.tsx`
+`BackEventHandler`(`backEvent` → idx>0이면 `navigate(-1)`, 아니면 `/home`, `/home`이면 `closeView`)가 담당.
+완료 화면 "코스로 돌아가기"·전진 CTA·바텀시트는 유지.
+
+부수 효과: 기존 자체 버튼이 절대 경로를 push해 `/home → 카드 → [자체 뒤로] /home(idx 2) → [토스 뒤로] 카드`로
+되돌아가던 스택 증식도 함께 사라짐.
 
 변경 파일: `src/pages/{CourseWordListScreen,WordCardScreen,LeagueRulesScreen,QuizScreen}.tsx`
+
+### 🗞 뉴스 목록 — 탭 불가임을 시각적으로 명확히 (A′ 후속)
+
+PR #33에서 `<a>` → `<div>`로 바꾼 뒤 실기기 피드백 "뉴스 클릭이 안 된다". 카드 안 굵은 제목 목록이라 탭
+가능해 보인 것. `active`/`hover`/`cursor` 클래스와 아이콘은 이미 없었음(실측 0건). 항목 간 `gap-3.5` 대신
+`divide-y divide-[var(--color-line)]` + `py-3`로 읽기용 리스트임을 드러냄. 제목/요약/날짜/하이라이트 불변.
+
+변경 파일: `src/pages/WordCardScreen.tsx`
 
 ### ✏️ 검수 체크리스트 "영어 텍스트" 대응
 
