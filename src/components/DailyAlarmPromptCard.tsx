@@ -43,13 +43,13 @@ export const DailyAlarmPromptCard = () => {
       </div>
       <div className="flex gap-2">
         <button
-          onClick={() => setShow(false)}
+          onClick={() => { logClick('notification_prompt_later'); setShow(false); }}
           className="flex-1 py-3 rounded-button text-sm font-bold text-[var(--color-ink-2)] bg-[var(--color-surface)] active:opacity-90"
         >
           나중에
         </button>
         <button
-          onClick={() => { logClick('notification_agree'); requestAgreement(); }}
+          onClick={() => { logClick('notification_prompt_tap', { source: 'prompt_card' }); requestAgreement('prompt_card'); }}
           className="flex-1 py-3 rounded-button text-sm font-bold text-white bg-brand-500 active:opacity-90"
         >
           알림 받기
