@@ -27,6 +27,9 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+          VITE_SHARE_REWARD_MODULE_ID: ${{ secrets.VITE_SHARE_REWARD_MODULE_ID }}
+          VITE_REWARDED_AD_GROUP_ID: ${{ secrets.VITE_REWARDED_AD_GROUP_ID }}
 
       - name: Deploy
         run: npx ait deploy --api-key ${{ secrets.AIT_API_KEY }}
