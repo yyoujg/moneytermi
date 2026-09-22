@@ -7,7 +7,7 @@ const NAV_ITEMS = [
   { path: '/course', icon: Compass, label: '코스' },
   { path: '/league', icon: Sprout, label: '성장' },
   { path: '/review', icon: PenLine, label: '퀴즈' },
-  { path: '/my', icon: User, label: 'MY' },
+  { path: '/my', icon: User, label: '마이' },
 ];
 
 const NavBar = () => {
