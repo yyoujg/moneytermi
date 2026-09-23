@@ -191,17 +191,41 @@ PR #33에서 `<a>` → `<div>`로 바꾼 뒤 실기기 피드백 "뉴스 클릭�
 2. 후속으로 "눌러도 반응 없는데 눌릴 것처럼 보인다"는 피드백에 `gap` → `divide-y` 구분선 리스트로 변경.
 3. **9/22 검수 반려**: "서비스 이용을 위한 외부 링크가 정상적으로 열리지 않아요. 서비스 이용에 필요한 외부
    링크가 정상적으로 열리도록 수정해 주세요."
-4. 1·2를 원복. 뉴스 항목은 `<a href={item.link} target="_blank" rel="noopener noreferrer">` +
-   `ExternalLink` 아이콘 + `active:opacity-60` + `gap-3.5` 구조로 되돌렸다(번들 111·116·117·118·121·122에서
-   검수를 통과한 구조). `onClick`에 `logClick('news_link_click', { word })` 추가 — 실제 사용률을 재서 향후
-   `Device.openURL` 전환 검토의 근거로 쓴다. 헤더 "🗞 실시간 뉴스 (출처: 네이버 뉴스)"는 텍스트 라벨이라
-   반려 사유와 무관해 유지.
+4. 번들 125에서 1·2를 원복 — `<a href target="_blank" rel="noopener noreferrer">` + `ExternalLink` +
+   `active:opacity-60` + `gap-3.5`(번들 111~122에서 검수를 통과한 구조)로 되돌리고 `news_link_click` 로깅 추가.
+5. **9/23 동일 사유로 2회차 반려.** 원복 커밋은 125에 정상 포함됐음을 확인(`84e2676`의 `WordCardScreen.tsx`에
+   `<a target="_blank">` 존재). 즉 **원복으로도 링크가 열리지 않았다.**
+6. 원인 가설: **SDK 3.x 웹뷰에서 `<a target="_blank">`가 동작하지 않는다.** 과거 통과 이력(111~121)은 모두
+   SDK 2.6.1 시절이고, 3.4.0으로 올린 뒤 첫 검수가 이번이었다. 앱인토스 공식 문서
+   (`documentation/common/screen/open-url`)는 외부 링크를 `openURL`로 여는 것만 안내한다 —
+   "WebView 환경에서는 브라우저 탭이 새로 열리며, 기본 앱에서는 외부 앱 또는 브라우저로 전환돼요."
+   ⚠️ SDK 패키지(`index.d.ts`, `CHANGELOG.md`)에는 `target="_blank"`에 대한 언급이 **없다**. 미동작은
+   문서화된 사실이 아니라 반려 2회 + 문서상 권장 경로로부터의 추론이다.
+7. **번들 126에서 `Device.openURL`로 전환**(아래 항목).
 
-**판단 교훈**: 뉴스 원문 링크는 토스 기준에서 아웃랜딩 위반이 아니라 "서비스 이용에 필요한 외부 링크"였다.
-공지의 "아웃랜딩 유도" 사례를 넓게 해석해 선제 제거한 것이 오히려 반려 사유가 됐다. 기준이 불확실한 항목은
-검수를 통과한 이력이 있는 구조를 유지하고, 문의 답변을 받은 뒤 바꾸는 편이 낫다.
+**판단 교훈 2가지**
+- 뉴스 원문 링크는 토스 기준에서 아웃랜딩 위반이 아니라 "서비스 이용에 필요한 외부 링크"다. 공지의 "아웃랜딩
+  유도" 사례를 넓게 해석해 선제 제거한 것이 1회차 반려 사유가 됐다.
+- **SDK 메이저 업그레이드 후에는 "예전에 검수를 통과한 구조"가 근거가 되지 못한다.** 2회차 반려는 검증된
+  구조로 되돌렸기 때문에 오히려 늦어졌다. 3.x 전환 시점에 웹 표준 API(`<a target="_blank">`, `window.open`)를
+  쓰는 지점을 SDK 문서와 대조했어야 했다.
 
 변경 파일: `src/pages/WordCardScreen.tsx`
+
+### 🔗 외부 링크를 `Device.openURL`로 전환 (번들 126, 반려 2회 대응)
+
+`src/lib/external.ts` 신설 — `openExternalUrl(url)`이 `Device.openURL(url)`을 먼저 호출하고, reject되면
+`window.open(url, '_blank', 'noopener')`로 폴백한다(`review.ts` 패턴의 try/catch + 조용한 실패).
+**환경 판정은 하지 않는다**: `ReactNativeWebView` 유무 같은 스니핑 대신 `Device.openURL`을 항상 먼저 await하고
+실패했을 때만 폴백하므로, 토스 앱 안에서는 브리지가 응답하는 한 반드시 `openURL`이 쓰인다. 폴백이 도는 경로에
+`external_open_fallback` 로깅을 붙여 실기기에서 폴백이 돌고 있는지(= openURL이 실패하는지) 확인할 수 있게 했다.
+
+뉴스 항목은 `<a href target="_blank">` → `<button type="button" onClick>`. `ExternalLink` 아이콘,
+`active:opacity-60`, `flex items-start gap-2`, 리스트 `gap-3.5`, 헤더 "(출처: 네이버 뉴스)" 전부 유지
+(외부로 나간다는 어포던스는 남겨야 한다). 브라우저 실측: 항목 클릭 → `Device.openURL` reject →
+`window.open('https://n.news.naver.com/...', '_blank', 'noopener')` 호출 확인.
+
+변경 파일: `src/lib/external.ts`(신규), `src/pages/WordCardScreen.tsx`
 
 ### 🔧 CI 배포 빌드에 광고·초대·Sentry env 주입 — 리워드 광고·친구 초대는 이 번들에서 처음 실제 도달
 
