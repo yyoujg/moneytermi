@@ -15,7 +15,7 @@
 ### 콘솔 캠페인 설정 (STEP 1)
 
 - 발송 방법: 토스에게 발송 요청하기
-- 발송 코드(기능성 캠페인 templateSetCode): `moneytermi-DAILY_TERM_PUSH2` (`moneytermi-` 접두사는 콘솔이 자동 부여)
+- 발송 코드(기능성 캠페인 templateSetCode): `moneytermi-DAILY_TERM_PUSH3` (캠페인 123696. `moneytermi-` 접두사는 콘솔이 자동 부여하지만, 앱 `TEMPLATE_CODE`에는 접두사를 **포함한 전체 문자열**을 넣는다)
 - 제목: 오늘의 용어 / 내용: 오늘의 경제 용어가 도착했어요.
 - 이동 URL: `intoss://moneytermi/word-card`
 - 발송 계획: 정기발송 / 매일 / 09:00 / 종료일 없음
@@ -29,7 +29,7 @@
 - 동의문 제목(~하기 형): `오늘의 용어 학습 알림 받기`
 - 안내 문구: `매일 오전 9시, 그날의 새로운 경제 용어를 학습할 수 있도록 '오늘의 용어' 알림을 보내드려요.`
   - 발송 시점("매일 오전 9시") + 상황·목적("그날의 새로운 경제 용어를 학습할 수 있도록") 모두 포함
-- 코드: `moneytermi-DAILY_TERM_PUSH2` (앱 TEMPLATE_CODE와 일치)
+- 코드: `moneytermi-DAILY_TERM_PUSH3` (앱 TEMPLATE_CODE와 일치)
 
 > 1차 반려(캠페인 34372): 동의문에 발송 시점·목적 누락 + 불명확 단어("치치카")로 반려됨.
 > -> 위 문구로 시점·목적을 명시하고 불명확 단어 제거하여 재검수 요청.
@@ -37,10 +37,20 @@
 ## 앱 코드 (STEP 2)
 
 - `src/hooks/useNotificationAgreement.ts`
-  - `requestNotificationAgreement({ options: { templateCode: 'moneytermi-DAILY_TERM_PUSH2' } })` 만 호출
+  - `requestNotificationAgreement({ options: { templateCode: 'moneytermi-DAILY_TERM_PUSH3' } })` 만 호출
   - `templateCode`는 콘솔에 등록된 코드와 정확히 일치해야 동의 UI가 뜬다. 토스 문서가
-    "동의문 코드"와 "캠페인 발송 코드"를 혼용하지만, 현재 콘솔엔 캠페인 발송 코드
-    `moneytermi-DAILY_TERM_PUSH2` 하나만 존재하므로 그 값을 쓴다.
+    "동의문 코드"와 "캠페인 발송 코드"를 혼용하지만, 콘솔엔 캠페인 발송 코드만 존재하므로 그 값을 쓴다.
+  - ⚠️ **발송 코드는 중복 등록이 불가능하다(실측)**. 같은 코드로 캠페인을 복사·재등록하면 서버가
+    HTTP 200을 주면서 실제로는 생성하지 않는다. 캠페인 내용을 고쳐야 하는데 "발송됨" 상태라
+    수정이 막혀 있으면, **새 발송 코드**(PUSH2 → PUSH3)로 새 캠페인을 만들고 앱의 `TEMPLATE_CODE`를
+    함께 바꾸는 수밖에 없다.
+
+### 캠페인 이력
+
+| 발송 코드 | 캠페인 | 상태 |
+|---|---|---|
+| `moneytermi-DAILY_TERM_PUSH2` | 39540 | 이동 URL 오입력으로 알림 클릭이 동작하지 않음. 발송됨 상태라 수정 불가 → PUSH3 검증 후 예약 취소 |
+| `moneytermi-DAILY_TERM_PUSH3` | 123696 | 현행. 번들 129부터 앱이 이 코드를 호출 |
   - `appLogin`/userKey 등록 없음
   - 동의 여부는 Supabase가 아닌 로컬 Storage에 저장 (UI 토글 표시용일 뿐, 발송 모수는 토스가 관리)
 - `src/components/mypage/SettingsSheet.tsx`
