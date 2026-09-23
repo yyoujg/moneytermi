@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
@@ -100,10 +100,17 @@ const WordCard = ({
           ))}
         </div>
       ) : newsItems.length > 0 ? (
-        <div className="flex flex-col divide-y divide-[var(--color-line)]">
+        <div className="flex flex-col gap-3.5">
           {newsItems.map((item, i) => (
-            <div key={i} className="py-3 first:pt-0 last:pb-0">
-              <div>
+            <a
+              key={i}
+              href={item.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => logClick('news_link_click', { word: word.word })}
+              className="flex items-start gap-2 active:opacity-60"
+            >
+              <div className="flex-1">
                 <p className="text-[13px] font-semibold text-[var(--color-ink)] break-keep leading-[1.55] tracking-[-0.01em] line-clamp-2">
                   <Highlight text={stripHtml(item.title)} keyword={keyword} />
                 </p>
@@ -116,7 +123,8 @@ const WordCard = ({
                   {new Date(item.pubDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
                 </p>
               </div>
-            </div>
+              <ExternalLink size={13} className="text-[var(--color-line)] shrink-0 mt-0.5" />
+            </a>
           ))}
         </div>
       ) : (
