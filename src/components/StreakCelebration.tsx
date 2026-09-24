@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Check, Flame } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
-import { getGrowthStage } from '../constants';
 import { logClick } from '../lib/analytics';
 import { toDateStr } from '../lib/date';
 import { calcStreak, streakMessage, weekDays } from '../lib/streak';
@@ -12,7 +11,7 @@ import { Storage } from '../lib/storage';
 const KEY = 'streak_celebrated_date';
 
 export const StreakCelebration = () => {
-  const { attendanceDates, xp, hydrated } = useAppContext();
+  const { attendanceDates, myEmoji, hydrated } = useAppContext();
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -32,22 +31,21 @@ export const StreakCelebration = () => {
 
   const streak = calcStreak(attendanceDates);
   const week = weekDays(attendanceDates);
-  const stage = getGrowthStage(xp);
 
   return (
     <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-6 px-6 bg-[var(--color-canvas)]">
 
       {/* 불꽃 + 일수 */}
       <div className="flex flex-col items-center">
-        <Flame size={72} className="text-brand-500 fill-current" />
-        <p className="text-5xl font-black text-[var(--color-ink)] mt-1!">{streak}</p>
-        <p className="text-sm font-medium text-[var(--color-ink-3)] mt-2!">일 연속 학습 중이에요</p>
+        <Flame size={72} className="text-brand-500 fill-current anim-pop-in" />
+        <p className="text-5xl font-black text-[var(--color-ink)] mt-1! anim-pop-in" style={{ '--i': 2 } as React.CSSProperties}>{streak}</p>
+        <p className="text-sm font-medium text-[var(--color-ink-3)] mt-2! anim-fade-up" style={{ '--i': 3 } as React.CSSProperties}>일 연속 학습 중이에요</p>
       </div>
 
       {/* 이번 주 */}
       <div className="flex gap-2">
-        {week.map(d => (
-          <div key={d.label} className="flex flex-col items-center gap-1.5">
+        {week.map((d, i) => (
+          <div key={d.label} className="flex flex-col items-center gap-1.5 anim-pop-in" style={{ '--i': 4 + i } as React.CSSProperties}>
             <div
               className="w-9 h-9 flex items-center justify-center"
               style={{
@@ -66,9 +64,9 @@ export const StreakCelebration = () => {
         ))}
       </div>
 
-      {/* 캐릭터 말풍선 */}
-      <div className="flex items-center gap-3">
-        <span className="text-4xl shrink-0">{stage.emoji}</span>
+      {/* 내 아바타 말풍선 */}
+      <div className="flex items-center gap-3 anim-fade-up" style={{ '--i': 8 } as React.CSSProperties}>
+        <span className="text-4xl shrink-0">{myEmoji}</span>
         <div className="rounded-card bg-[var(--color-card)] px-4 py-3 max-w-[220px]">
           <p className="text-sm font-medium text-[var(--color-ink-2)] break-keep leading-relaxed">
             {streakMessage(streak)}
@@ -78,7 +76,8 @@ export const StreakCelebration = () => {
 
       <button
         onClick={() => { logClick('streak_close', { streak }); setShow(false); }}
-        className="w-full max-w-xs py-4 rounded-button text-sm font-bold text-white bg-brand-500 active:opacity-90"
+        className="w-full max-w-xs py-4 rounded-button text-sm font-bold text-white bg-brand-500 active:opacity-90 anim-fade-up"
+        style={{ '--i': 9 } as React.CSSProperties}
       >
         돌아가기
       </button>
