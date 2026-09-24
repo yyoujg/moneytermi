@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { BookOpen, Settings, LogOut, ChevronRight, Zap, ShieldAlert, Pencil } from 'lucide-react';
+import { BookOpen, Settings, LogOut, ChevronRight, Zap, Flame, ShieldAlert, Pencil } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { getGrowthStage } from '../constants';
+import { calcStreak } from '../lib/streak';
 import { List, ListRow, Spacing, ConfirmDialog } from '@toss/tds-mobile';
 import { useAuth } from '../hooks/useAuth';
 import { AttendanceCalendar } from '../components/mypage/AttendanceCalendar';
@@ -16,6 +17,7 @@ import { IconBox } from '../components/ui/IconBox';
 const MyPageScreen = () => {
   const { points, knownWords, attendanceDates, missions, myEmoji, updateMyEmoji } = useAppContext();
   const stage = getGrowthStage(points);
+  const streak = calcStreak(attendanceDates);
   const { user, isGuest, updateNickname, logout } = useAuth();
   const [showGuide, setShowGuide]                 = useState(false);
   const [showSettings, setShowSettings]           = useState(false);
@@ -93,10 +95,6 @@ const MyPageScreen = () => {
               <p className="font-bold text-[var(--color-ink)] text-base">{user?.nickname ?? '예비슈퍼개미'}</p>
               <Pencil size={13} className="text-[var(--color-ink-4)] group-active:text-brand-400" />
             </button>
-            <div className="flex items-center gap-1.5 mt-1">
-              <span className="text-xs">{stage.emoji}</span>
-              <span className="text-xs text-[var(--color-ink-3)] font-medium">{stage.name} 단계</span>
-            </div>
             {isGuest && (
               <span className="inline-flex items-center gap-1 mt-1.5 text-3xs font-medium text-[var(--color-ink-4)] px-2 py-0.5 rounded-full" style={{ backgroundColor: 'var(--color-surface)' }}>
                 <ShieldAlert size={10} className="text-[var(--color-ink-4)]" /> 게스트 계정
@@ -105,26 +103,30 @@ const MyPageScreen = () => {
           </div>
         </div>
 
-        {/* 통계 */}
-        <div className="flex gap-3">
-          <Card tone="surface" pad="md" className="flex-1">
-            <div className="flex items-center gap-1.5 mb-2">
-              <Zap size={13} className="text-[var(--color-ink-4)] fill-current" />
-              <span className="text-2xs font-medium text-[var(--color-ink-4)]">누적 포인트</span>
-            </div>
-            <p className="text-3xl font-bold text-[var(--color-ink)]">
-              {points.toLocaleString()}<span className="text-sm font-medium text-[var(--color-ink-4)] ml-1">P</span>
-            </p>
-          </Card>
-          <Card tone="surface" pad="md" className="flex-1">
-            <div className="flex items-center gap-1.5 mb-2">
-              <BookOpen size={13} className="text-[var(--color-ink-4)]" />
-              <span className="text-2xs font-medium text-[var(--color-ink-4)]">학습한 단어</span>
-            </div>
-            <p className="text-3xl font-bold text-[var(--color-ink)]">
-              {knownWords.length}<span className="text-sm font-medium text-[var(--color-ink-4)] ml-1">개</span>
-            </p>
-          </Card>
+        {/* 한눈에 보기 — 연속 학습일 / 현재 단계 / 포인트 */}
+        <Card tone="surface" pad="md">
+          <div className="flex items-stretch">
+            {[
+              { icon: <Flame size={14} className="text-brand-500 fill-current" />, label: '연속 학습', value: streak, unit: '일' },
+              { icon: <span className="text-sm leading-none">{stage.emoji}</span>, label: '현재 단계', value: stage.name, unit: '' },
+              { icon: <Zap size={14} className="text-brand-500 fill-current" />, label: '포인트', value: points.toLocaleString(), unit: 'P' },
+            ].map((it, i) => (
+              <div key={it.label} className={`flex-1 flex flex-col items-center gap-1 ${i < 2 ? 'border-r border-[var(--color-line)]' : ''}`}>
+                <div className="flex items-center gap-1">
+                  {it.icon}
+                  <span className="text-2xs font-medium text-[var(--color-ink-4)]">{it.label}</span>
+                </div>
+                <p className="text-lg font-bold text-[var(--color-ink)] leading-tight">
+                  {it.value}<span className="text-xs font-medium text-[var(--color-ink-4)] ml-0.5">{it.unit}</span>
+                </p>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <div className="flex items-center justify-center gap-1.5 mt-3">
+          <BookOpen size={12} className="text-[var(--color-ink-4)]" />
+          <span className="text-2xs text-[var(--color-ink-4)]">학습한 단어 {knownWords.length}개</span>
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { ChevronRight, Zap, Flame, BookOpen, PenLine, RotateCcw } from 'lucide-react';
-import { Badge, TextButton } from '@toss/tds-mobile';
+import { ChevronRight, Zap, Flame, BookOpen, RotateCcw } from 'lucide-react';
+import { Badge } from '@toss/tds-mobile';
 import { useNavigate } from 'react-router-dom';
 import type { Mission, Missions } from '../types';
 import { getGrowthStage } from '../constants';
@@ -14,7 +14,7 @@ import { StatCard } from '../components/ui/StatCard';
 
 const HomeScreen = () => {
   const navigate = useNavigate();
-  const { hydrated, points, knownWords, unknownWords, knownIds, missions, claimReward, attendanceDates, courses, allWords, dueQueue, myEmoji } = useAppContext();
+  const { hydrated, points, knownWords, unknownWords, missions, claimReward, attendanceDates, allWords, dueQueue, myEmoji } = useAppContext();
   const { user } = useAuth();
   const totalWords = allWords.length;
   const isNewUser = hydrated && knownWords.length + unknownWords.length === 0;
@@ -29,24 +29,8 @@ const HomeScreen = () => {
 
   const streak = calcStreak(attendanceDates);
 
-  // 오늘 목표 (m3: 퀴즈)
   const m3 = missions.m3;
-  const todayDone = m3.current >= m3.target ? 1 : 0;
-  const todayTotal = 1;
-
-  // 캐릭터 성장 단계
   const stage = getGrowthStage(points);
-
-  // 이어서 시작할 코스 (가장 진행중인 것)
-  const nextCourse = courses.find(c => {
-    const known = c.words.filter(w => knownIds.has(w.id)).length;
-    return known < c.words.length;
-  }) ?? courses[0];
-
-  // 퀴즈 대상 단어
-  const quizWords = knownWords.length > 0
-    ? [...knownWords].sort(() => Math.random() - 0.5).slice(0, 5)
-    : [];
 
   return (
     <div className="flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden" style={{ backgroundColor: 'var(--color-canvas)' }}>
@@ -64,70 +48,6 @@ const HomeScreen = () => {
             <span className="text-lg">{myEmoji}</span>
           </div>
         </div>
-
-        {/* 오늘 목표 카드 (핵심 CTA) */}
-        <Card pad="lg" className="mb-4">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-medium text-[var(--color-ink-4)]">오늘 목표</p>
-            <span className="text-xs font-bold text-brand-500">{todayDone}/{todayTotal} 완료</span>
-          </div>
-
-          <div className="flex gap-3 mb-3">
-            {/* 퀴즈 목표 */}
-            <div className={`flex-1 rounded-chip p-3 ${m3.current >= m3.target ? 'bg-brand-500/10' : 'bg-[var(--color-surface)]'}`}>
-              <div className="flex items-center gap-2 mb-1.5">
-                <PenLine size={13} className={m3.current >= m3.target ? 'text-brand-500' : 'text-[var(--color-ink-4)]'} />
-                <span className="text-2xs font-medium text-[var(--color-ink-4)]">퀴즈 정답</span>
-              </div>
-              <p className="text-lg font-bold text-[var(--color-ink)]">
-                {m3.current}
-                <span className="text-xs text-[var(--color-ink-4)] ml-1">/{m3.target}회</span>
-              </p>
-            </div>
-          </div>
-
-          {/* 압박 텍스트 */}
-          {todayDone < todayTotal && (() => {
-            const remainP = Object.values(missions).filter(m => !m.isRewarded && m.current < m.target).reduce((s, m) => s + m.reward, 0);
-            const afterStage = getGrowthStage(points + remainP);
-            const stageUp = afterStage.id > stage.id;
-            const pointsToNext = stage.nextMinPoints !== null ? Math.max(stage.nextMinPoints - points - remainP, 0) : null;
-            return (
-              <div className="rounded-chip px-3 py-3 mb-3 flex flex-col gap-1.5" style={{ backgroundColor: 'var(--color-brand-soft)' }}>
-                <p className="text-xs font-bold text-brand-400">
-                  {stageUp
-                    ? `🎉 지금 하면 +${remainP}P — ${afterStage.emoji} ${afterStage.name}(으)로 성장!`
-                    : pointsToNext !== null
-                    ? `🔥 지금 하면 +${remainP}P (다음 단계까지 ${pointsToNext}P)`
-                    : `🔥 지금 하면 +${remainP}P`}
-                </p>
-                <p className="text-2xs text-[var(--color-ink-3)]">
-                  ⏰ 자정에 초기화 — 오늘 안 하면 기회 사라짐
-                </p>
-              </div>
-            );
-          })()}
-
-          {/* 단일 CTA */}
-          <div className="flex flex-col" style={{ gap: 12 }}>
-            <button
-              onClick={() => { if (isNewUser) logClick('home_cta_click'); logClick('course_start', { course_id: nextCourse.id, title: nextCourse.title }); const words = isNewUser && nextCourse.words.length > 0 ? [nextCourse.words[0]] : nextCourse.words; navigate('/word-card', { state: { words, index: 0, backPath: '/home', autoAdvance: true, continueWords: isNewUser ? nextCourse.words : undefined } }); }}
-              className="w-full py-4 rounded-button bg-brand-500 text-white text-sm font-bold active:opacity-90 flex items-center justify-center gap-2"
-            >
-              {isNewUser ? '단어 1개만 배워볼까요?' : '오늘 학습 시작하기'}
-              <ChevronRight size={16} />
-            </button>
-
-            {quizWords.length > 0 && (
-              <button
-                onClick={() => navigate('/quiz', { state: { quizQueue: quizWords } })}
-                className="w-full py-3 rounded-button bg-[var(--color-surface)] text-xs font-medium text-[var(--color-ink-3)] active:opacity-70"
-              >
-                퀴즈 풀기 →
-              </button>
-            )}
-          </div>
-        </Card>
 
         {/* 오늘 복습 카드 */}
         {dueQueue.length > 0 && (
@@ -182,45 +102,8 @@ const HomeScreen = () => {
         )}
       </div>
 
-      {/* 코스 + 미션 */}
+      {/* 미션 */}
       <div className="px-5 flex flex-col gap-4">
-        {/* 코스 */}
-        <div>
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="text-sm font-bold text-[var(--color-ink-2)]">코스</h2>
-            <TextButton size="small" onClick={() => navigate('/course')}>
-              <span className="whitespace-nowrap flex items-center text-[var(--color-ink-4)]">전체보기 <ChevronRight size={13} /></span>
-            </TextButton>
-          </div>
-          <div className="flex flex-col gap-2.5">
-            {courses.slice(0, 2).map((course) => {
-              const courseKnownCount = course.words.filter((w) => knownIds.has(w.id)).length;
-              const progressPct = Math.round((courseKnownCount / course.words.length) * 100);
-              return (
-                <Card
-                  key={course.id}
-                  pad="md"
-                  onClick={() => navigate('/word-card', { state: { words: course.words, index: 0, backPath: '/home', autoAdvance: true } })}
-                  className="flex items-center gap-4 active:opacity-80 cursor-pointer"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-3xs font-medium px-2 py-0.5 rounded text-[var(--color-ink-4)]" style={{ backgroundColor: 'var(--color-surface)' }}>{course.level}</span>
-                      <h3 className="text-sm font-bold text-[var(--color-ink)] truncate">{course.title}</h3>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 bg-[var(--color-surface)] rounded-full h-1 overflow-hidden">
-                        <div className="bg-brand-500 h-full rounded-full" style={{ width: `${progressPct}%` }} />
-                      </div>
-                      <span className="text-2xs font-bold text-brand-500 shrink-0 whitespace-nowrap">{progressPct}%</span>
-                    </div>
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-
         {/* 미션 */}
         <Card pad="lg" className="mb-4">
           <div className="flex justify-between items-center mb-3">
