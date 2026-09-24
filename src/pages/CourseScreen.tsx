@@ -7,11 +7,9 @@ import { useAppContext } from '../context/AppContext';
 import { useHearts } from '../hooks/useHearts';
 import { getGrowthStage } from '../constants';
 import { logClick } from '../lib/analytics';
-import { buildPath, connectorD, nodeOffsetX, ROW, SPAN, type PathNode } from '../lib/path';
+import { buildPath, connectorD, NODE, nodeColor, nodeOffsetX, ROW, SPAN, type PathNode } from '../lib/path';
 import { MAX_HEARTS } from '../lib/hearts';
 import { Card } from '../components/ui/Card';
-
-const NODE = 64;
 
 // 노드 원. TDS 리셋이 <button>의 rounded-*를 먹으므로 borderRadius는 인라인 스타일로 준다
 // (인라인이 unlayered 리셋을 이긴다). button을 유지해야 포커스/Enter/disabled가 공짜로 따라온다.
@@ -24,14 +22,13 @@ const NodeCircle = ({ node, index, isFocus, onTap, nodeRef }: {
 }) => {
   const locked = node.state === 'locked';
   const done = node.state === 'done';
-  const face = done
-    ? 'var(--color-brand-500)'
-    : locked
-      ? 'var(--color-surface)'
-      : node.type === 'quiz'
-        ? 'var(--color-card)'
-        : 'var(--color-brand-500)';
-  const shadow = done || (!locked && node.type === 'lesson') ? 'var(--color-brand-600)' : 'var(--color-line)';
+  const color = nodeColor(index);
+  const face = locked
+    ? 'var(--color-surface)'
+    : node.type === 'quiz'
+      ? 'var(--color-card)'
+      : color.face;
+  const shadow = locked ? 'var(--color-line)' : color.shadow;
 
   return (
     <button
@@ -49,8 +46,8 @@ const NodeCircle = ({ node, index, isFocus, onTap, nodeRef }: {
         height: NODE,
         borderRadius: 9999,
         background: face,
-        boxShadow: `0 5px 0 ${shadow}${isFocus ? ', 0 0 0 6px var(--color-brand-soft)' : ''}`,
-        border: node.type === 'quiz' && !locked ? '2px solid var(--color-brand-500)' : 'none',
+        boxShadow: `0 5px 0 ${shadow}${isFocus ? `, 0 0 0 6px ${color.face}33` : ''}`,
+        border: node.type === 'quiz' && !locked ? `2px solid ${color.face}` : 'none',
       }}
     >
       {locked
@@ -58,7 +55,7 @@ const NodeCircle = ({ node, index, isFocus, onTap, nodeRef }: {
         : done
           ? <Check size={26} strokeWidth={3} className="text-white" />
           : node.type === 'quiz'
-            ? <PenLine size={22} className="text-brand-500" />
+            ? <PenLine size={22} style={{ color: color.face }} />
             : <span className="text-xl">📖</span>}
     </button>
   );

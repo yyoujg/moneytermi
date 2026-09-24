@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { chunkWords, buildPath, nodeOffsetX, connectorD, SPAN } from './path';
+import { chunkWords, buildPath, nodeOffsetX, nodeColor, connectorD, SPAN, ROW, NODE } from './path';
 import type { Course, Word } from '../types';
 
 const makeWords = (n: number): Word[] =>
@@ -138,5 +138,27 @@ describe('기하', () => {
     expect(c1x).toBe(sx);      // 시작 제어점 x == 시작 x
     expect(ex).toBe(SPAN + 68);
     expect(c2x).toBe(ex);      // 끝 제어점 x == 끝 x
+  });
+});
+
+describe('커넥터가 노드를 침범하지 않는다', () => {
+  it('시작/끝 y가 노드 반지름 밖에 있다', () => {
+    const n = connectorD(0, 48).match(/-?\d+(?:\.\d+)?/g)!.map(Number);
+    const startY = n[1], endY = n[7];
+    expect(startY).toBeGreaterThan(NODE / 2);       // 이전 노드 아래쪽 밖
+    expect(endY).toBeLessThan(ROW - NODE / 2);      // 다음 노드 위쪽 밖
+  });
+});
+
+describe('nodeColor', () => {
+  it('6주기로 반복하고 인접한 노드는 색이 다르다', () => {
+    for (let i = 0; i < 24; i++) {
+      expect(nodeColor(i)).toEqual(nodeColor(i + 6));
+      expect(nodeColor(i).face).not.toBe(nodeColor(i + 1).face);
+    }
+  });
+
+  it('첫 노드는 브랜드 색', () => {
+    expect(nodeColor(0).face).toBe('#f97316');
   });
 });

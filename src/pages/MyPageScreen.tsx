@@ -6,6 +6,7 @@ import { getGrowthStage } from '../constants';
 import { List, ListRow, Spacing, ConfirmDialog } from '@toss/tds-mobile';
 import { useAuth } from '../hooks/useAuth';
 import { AttendanceCalendar } from '../components/mypage/AttendanceCalendar';
+import { GrowthCard } from '../components/mypage/GrowthCard';
 import { GuideSheet } from '../components/mypage/GuideSheet';
 import { EmojiPickerSheet } from '../components/mypage/EmojiPickerSheet';
 import { SettingsSheet } from '../components/mypage/SettingsSheet';
@@ -134,6 +135,8 @@ const MyPageScreen = () => {
       </div>
 
       <div className="px-5 pt-5 flex flex-col gap-4">
+        <GrowthCard />
+
         {/* 출석 달력 */}
         <div>
           <div className="flex items-center justify-between mb-3">

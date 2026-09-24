@@ -14,7 +14,6 @@ import NavBar from './components/NavBar';
 const HomeScreen = React.lazy(() => import('./pages/HomeScreen'));
 const CourseScreen = React.lazy(() => import('./pages/CourseScreen'));
 const ReviewScreen = React.lazy(() => import('./pages/ReviewScreen'));
-const LeagueScreen = React.lazy(() => import('./pages/LeagueScreen'));
 const QuizScreen = React.lazy(() => import('./pages/QuizScreen'));
 const WordCardScreen = React.lazy(() => import('./pages/WordCardScreen'));
 const LeagueRulesScreen = React.lazy(() => import('./pages/LeagueRulesScreen'));
@@ -88,7 +87,7 @@ function resolveLandingTarget(): string {
   }
   const target = parseLandingPath(schemeUri);
   logClick('entry', { referrer: parseReferrer(schemeUri), target: target ?? '' });
-  resolvedLanding = target ?? '/home';
+  resolvedLanding = target ?? '/course';
   return resolvedLanding;
 }
 
@@ -108,8 +107,8 @@ const BackEventHandler = () => {
             return;
           }
 
-          if (location.pathname !== '/home') {
-            navigate('/home', { replace: true });
+          if (location.pathname !== '/course') {
+            navigate('/course', { replace: true });
             return;
           }
 
@@ -146,7 +145,7 @@ const Layout = () => {
         <Route path="/" element={<Navigate to={resolveLandingTarget()} replace />} />
         <Route path="/home" element={<HomeScreen />} />
         <Route path="/course" element={<CourseScreen />} />
-        <Route path="/league" element={<LeagueScreen />} />
+        <Route path="/league" element={<Navigate to="/my" replace />} />
         <Route path="/review" element={<ReviewScreen />} />
         <Route path="/my" element={<MyPageScreen />} />
         <Route path="/word-card" element={<WordCardScreen />} />

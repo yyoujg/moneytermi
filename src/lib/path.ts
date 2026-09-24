@@ -25,17 +25,35 @@ const LESSONS_PER_QUIZ = 3;
 // 노드 1개가 차지하는 세로 높이와 커넥터 svg 반폭.
 export const ROW = 112;
 export const SPAN = 80;
+export const NODE = 64;
+const GAP = 6; // 노드 테두리와 점선 사이 여백
 
 // 8스텝 지그재그. 320px 화면 기준 여유 폭은 ±106px이라 68은 안전하다.
 const OFFSETS = [0, 48, 68, 48, 0, -48, -68, -48];
 export const nodeOffsetX = (i: number) => OFFSETS[i % OFFSETS.length];
 
+// 노드마다 다른 색. 라이트/다크 양쪽에서 흰 아이콘이 읽히는 채도로 고르고,
+// 아래쪽 입체 그림자는 같은 계열의 진한 색을 쓴다.
+const NODE_COLORS = [
+  { face: '#f97316', shadow: '#c2410c' }, // 브랜드 오렌지
+  { face: '#22c55e', shadow: '#15803d' }, // 초록
+  { face: '#3b82f6', shadow: '#1d4ed8' }, // 파랑
+  { face: '#a855f7', shadow: '#7e22ce' }, // 보라
+  { face: '#ec4899', shadow: '#be185d' }, // 핑크
+  { face: '#14b8a6', shadow: '#0f766e' }, // 청록
+];
+export const nodeColor = (i: number) => NODE_COLORS[i % NODE_COLORS.length];
+
 // 양 끝 접선이 수직인 큐빅. 노드마다 조각을 그려도 이음새가 보이지 않는다.
 // (배너 높이가 한글 줄바꿈에 따라 변해서 섹션 전체를 한 장의 svg로 그릴 수 없다)
+// 시작/끝을 노드 반지름 + 여백만큼 잘라내 점선이 노드 위로 지나가지 않게 한다.
+// 제어점 x를 끝점 x와 같게 두는 한 접선은 수직으로 유지된다.
 export const connectorD = (fromX: number, toX: number): string => {
   const x1 = SPAN + fromX;
   const x2 = SPAN + toX;
-  return `M ${x1} 0 C ${x1} ${ROW * 0.42}, ${x2} ${ROW * 0.58}, ${x2} ${ROW}`;
+  const y1 = NODE / 2 + GAP;
+  const y2 = ROW - NODE / 2 - GAP;
+  return `M ${x1} ${y1} C ${x1} ${ROW * 0.42}, ${x2} ${ROW * 0.58}, ${x2} ${y2}`;
 };
 
 // 균등 분배. n=6 -> 3,3 / n=7 -> 4,3 / n=10 -> 4,3,3 / n=23 -> 4,4,4,4,4,3
