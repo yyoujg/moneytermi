@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, createContext } from 'react';
 import { closeView, getAnonymousKey, getSchemeUri } from '@apps-in-toss/web-framework';
 import type { AuthState, AuthUser } from '../types';
-import { DEFAULT_NICKNAME } from '../constants';
+import { randomNickname } from '../lib/nickname';
 import { supabase, getGuestClient } from '../lib/supabase';
 import { Storage } from '../lib/storage';
 import { parseReferrer } from '../lib/landing';
@@ -182,10 +182,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // 3. 오프라인 폴백
     const id = uuid();
+    const offlineNickname = randomNickname();
     const token = uuid();
     const toStore: StoredProfile = {
       profileId: id, guestToken: token,
-      nickname: DEFAULT_NICKNAME, isGuest: true, leagueTier: 'bronze',
+      nickname: offlineNickname, isGuest: true, leagueTier: 'bronze',
     };
     try {
       await Storage.setItem(STORAGE_KEY, JSON.stringify(toStore));
@@ -195,7 +196,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setProfileId(id);
     setGuestToken(token);
     setAuthState({
-      user: { id, nickname: DEFAULT_NICKNAME, isGuest: true, leagueTier: 'bronze' },
+      user: { id, nickname: offlineNickname, isGuest: true, leagueTier: 'bronze' },
       accessToken: null, refreshToken: null, isAuthenticated: true,
     });
   };
