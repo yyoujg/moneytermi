@@ -1,7 +1,6 @@
-import React, { useMemo, useRef, useState, useLayoutEffect } from 'react';
-import { BookOpen, Check, ChevronRight, Flame, Lock, PenLine, Play, X, Zap } from 'lucide-react';
+import React, { useMemo, useRef, useLayoutEffect } from 'react';
+import { BookOpen, Check, Flame, Lock, PenLine, Play, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { SearchField } from '@toss/tds-mobile';
 import { toast } from 'sonner';
 import { useAppContext } from '../context/AppContext';
 import { getGrowthStage } from '../constants';
@@ -9,7 +8,6 @@ import { calcStreak } from '../lib/streak';
 import { isRewardedAdEnabled, showRewardedAd } from '../lib/ads';
 import { logClick } from '../lib/analytics';
 import { buildPath, connectorD, NODE, nodeOffsetX, ROW, SPAN, sectionColor, type PathNode } from '../lib/path';
-import { Card } from '../components/ui/Card';
 
 // 노드 원. TDS 리셋이 <button>의 rounded-*를 먹으므로 borderRadius는 인라인 스타일로 준다
 // (인라인이 unlayered 리셋을 이긴다). button을 유지해야 포커스/Enter/disabled가 공짜로 따라온다.
@@ -64,11 +62,7 @@ const NodeCircle = ({ node, index, color, isFocus, onTap, nodeRef }: {
 
 const CourseScreen = () => {
   const navigate = useNavigate();
-  const { hydrated, knownIds, courses, allWords, knownWords, points, attendanceDates, claimAdReward } = useAppContext();
-
-  const [query, setQuery] = useState('');
-  const [focused, setFocused] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
+  const { hydrated, knownIds, courses, knownWords, points, attendanceDates, claimAdReward } = useAppContext();
 
   const sections = useMemo(() => buildPath(courses, knownIds), [courses, knownIds]);
 
@@ -88,20 +82,6 @@ const CourseScreen = () => {
     didScroll.current = true;
     focusRef.current?.scrollIntoView({ block: 'center' });
   }, [hydrated, focusId]);
-
-  const trimmed = query.trim();
-  const searchResults = trimmed.length > 0
-    ? allWords.filter(w => w.word.includes(trimmed) || w.meaning.includes(trimmed) || w.detailedMeaning.includes(trimmed))
-    : [];
-  const showResults = focused && trimmed.length > 0;
-
-  const handleResultClick = (wordId: number) => {
-    const course = courses.find(c => c.words.some(w => w.id === wordId));
-    if (!course) return;
-    const index = course.words.findIndex(w => w.id === wordId);
-    setQuery(''); setFocused(false); setShowSearch(false);
-    navigate('/word-card', { state: { words: course.words, index, backPath: '/course' } });
-  };
 
   const handleNodeTap = (node: PathNode, index: number, courseKnown: number) => {
     logClick('path_node_click', { course_id: node.courseId, type: node.type, index, state: node.state });
@@ -135,69 +115,24 @@ const CourseScreen = () => {
   return (
     <div className="flex flex-col h-full bg-[var(--color-canvas)] pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
 
-      {/* 헤더 */}
-      <div className="sticky top-0 z-20 bg-[var(--color-card)]">
-        <div className="pt-4 px-5 pb-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-[var(--color-ink)]">홈</h2>
-            <button
-              onClick={() => setShowSearch(s => !s)}
-              className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors
-                ${showSearch ? 'bg-brand-500 text-white' : 'bg-[var(--color-surface)] text-[var(--color-ink-3)]'}`}
-            >
-              {showSearch ? <X size={15} /> : <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>}
-            </button>
-          </div>
-
-          {/* 한 줄 요약 — 포인트를 누르면 광고로 충전 */}
-          <div className="flex items-center gap-3 mt-2 text-2xs text-[var(--color-ink-3)]">
-            <span className="flex items-center gap-1"><Flame size={12} className="text-brand-500 fill-current" />{streak}일</span>
-            <span className="flex items-center gap-1">{stage.emoji}{stage.name}</span>
-            <button
-              onClick={handleAdForPoints}
-              disabled={!isRewardedAdEnabled()}
-              className="flex items-center gap-1 disabled:opacity-100"
-            >
-              <Zap size={12} className="text-brand-500 fill-current" />
-              {points.toLocaleString()}P
-              {isRewardedAdEnabled() && <Play size={10} className="text-brand-500 ml-0.5" />}
-            </button>
-            <span className="flex items-center gap-1"><BookOpen size={12} />{totalKnown}개</span>
-          </div>
-
-          {/* 검색창 */}
-          {showSearch && (
-            <div className="mt-3 relative">
-              <SearchField
-                value={query}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
-                onDeleteClick={() => setQuery('')}
-                onFocus={() => setFocused(true)}
-                onBlur={() => setTimeout(() => setFocused(false), 150)}
-                placeholder="용어 검색"
-              />
-              {showResults && (
-                <Card pad="none" className="absolute top-[52px] left-0 right-0 z-50 overflow-hidden">
-                  {searchResults.length === 0
-                    ? <div className="px-5 py-5 text-center text-sm text-[var(--color-ink-3)]">검색 결과가 없어요</div>
-                    : <div className="max-h-56 overflow-y-auto [&::-webkit-scrollbar]:hidden">
-                      {searchResults.map((word, idx) => (
-                        <button key={word.id} onMouseDown={() => handleResultClick(word.id)}
-                          className={`w-full text-left px-5 py-3.5 flex items-center justify-between active:bg-[var(--color-card)] ${idx < searchResults.length - 1 ? 'border-b border-[var(--color-line)]' : ''}`}>
-                          <div>
-                            <p className="text-sm font-bold text-[var(--color-ink)]">{word.word}</p>
-                            <p className="text-xs text-[var(--color-ink-3)] mt-0.5! truncate max-w-[240px]">{word.meaning}</p>
-                          </div>
-                          <ChevronRight size={14} className="text-[var(--color-ink-4)] shrink-0 ml-2" />
-                        </button>
-                      ))}
-                    </div>
-                  }
-                </Card>
-              )}
-            </div>
-          )}
+      {/* 헤더 — 한 줄 요약만 */}
+      <div className="sticky top-0 z-20 bg-[var(--color-card)] px-5 pt-4 pb-3">
+        {/* 한 줄 요약 — 포인트를 누르면 광고로 충전 */}
+        <div className="flex items-center gap-3 mt-2 text-2xs text-[var(--color-ink-3)]">
+          <span className="flex items-center gap-1"><Flame size={12} className="text-brand-500 fill-current" />{streak}일</span>
+          <span className="flex items-center gap-1">{stage.emoji}{stage.name}</span>
+          <button
+            onClick={handleAdForPoints}
+            disabled={!isRewardedAdEnabled()}
+            className="flex items-center gap-1 disabled:opacity-100"
+          >
+            <Zap size={12} className="text-brand-500 fill-current" />
+            {points.toLocaleString()}P
+            {isRewardedAdEnabled() && <Play size={10} className="text-brand-500 ml-0.5" />}
+          </button>
+          <span className="flex items-center gap-1"><BookOpen size={12} />{totalKnown}개</span>
         </div>
+
       </div>
 
       {/* 패스 */}

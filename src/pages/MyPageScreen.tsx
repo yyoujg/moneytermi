@@ -3,6 +3,7 @@ import { BookOpen, Settings, LogOut, ChevronRight, Zap, Flame, ShieldAlert, Penc
 import { useAppContext } from '../context/AppContext';
 import { DEFAULT_NICKNAME, getGrowthStage } from '../constants';
 import { calcStreak } from '../lib/streak';
+import { buildBadges } from '../lib/badges';
 import { List, ListRow, Spacing, ConfirmDialog } from '@toss/tds-mobile';
 import { useAuth } from '../hooks/useAuth';
 import { GuideSheet } from '../components/mypage/GuideSheet';
@@ -16,6 +17,8 @@ const MyPageScreen = () => {
   const { points, knownWords, attendanceDates, myEmoji, updateMyEmoji } = useAppContext();
   const stage = getGrowthStage(points);
   const streak = calcStreak(attendanceDates);
+  const badges = buildBadges({ words: knownWords.length, streak, points });
+  const earned = badges.filter(b => b.earned).length;
   const { user, isGuest, updateNickname, logout } = useAuth();
   const [showGuide, setShowGuide]                 = useState(false);
   const [showSettings, setShowSettings]           = useState(false);
@@ -108,27 +111,54 @@ const MyPageScreen = () => {
               { icon: <Flame size={14} className="text-brand-500 fill-current" />, label: '연속 학습', value: streak, unit: '일' },
               { icon: <span className="text-sm leading-none">{stage.emoji}</span>, label: '현재 단계', value: stage.name, unit: '' },
               { icon: <Zap size={14} className="text-brand-500 fill-current" />, label: '포인트', value: points.toLocaleString(), unit: 'P' },
-            ].map((it, i) => (
-              <div key={it.label} className={`flex-1 flex flex-col items-center gap-1 ${i < 2 ? 'border-r border-[var(--color-line)]' : ''}`}>
+              { icon: <BookOpen size={14} className="text-brand-500" />, label: '학습한 단어', value: knownWords.length, unit: '개' },
+            ].map((it, i, arr) => (
+              <div key={it.label} className={`flex-1 flex flex-col items-center gap-1 ${i < arr.length - 1 ? 'border-r border-[var(--color-line)]' : ''}`}>
                 <div className="flex items-center gap-1">
                   {it.icon}
-                  <span className="text-2xs font-medium text-[var(--color-ink-4)]">{it.label}</span>
+                  <span className="text-3xs font-medium text-[var(--color-ink-4)] whitespace-nowrap">{it.label}</span>
                 </div>
-                <p className="text-lg font-bold text-[var(--color-ink)] leading-tight">
-                  {it.value}<span className="text-xs font-medium text-[var(--color-ink-4)] ml-0.5">{it.unit}</span>
+                <p className="text-base font-bold text-[var(--color-ink)] leading-tight">
+                  {it.value}<span className="text-2xs font-medium text-[var(--color-ink-4)] ml-0.5">{it.unit}</span>
                 </p>
               </div>
             ))}
           </div>
         </Card>
 
-        <div className="flex items-center justify-center gap-1.5 mt-3">
-          <BookOpen size={12} className="text-[var(--color-ink-4)]" />
-          <span className="text-2xs text-[var(--color-ink-4)]">학습한 단어 {knownWords.length}개</span>
-        </div>
       </div>
 
       <div className="px-5 pt-5 flex flex-col gap-4">
+        {/* 배지 */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-bold text-[var(--color-ink-2)]">배지</p>
+            <span className="text-2xs font-medium text-[var(--color-ink-4)]">{earned} / {badges.length}</span>
+          </div>
+          <Card pad="md">
+            <div className="grid grid-cols-5 gap-y-4">
+              {badges.map(b => (
+                <div key={b.id} className="flex flex-col items-center gap-1">
+                  <div
+                    className="w-11 h-11 flex items-center justify-center text-xl"
+                    style={{
+                      borderRadius: 9999,
+                      background: b.earned ? 'var(--color-brand-soft)' : 'var(--color-surface)',
+                      filter: b.earned ? 'none' : 'grayscale(1)',
+                      opacity: b.earned ? 1 : 0.45,
+                    }}
+                  >
+                    {b.icon}
+                  </div>
+                  <span className={`text-3xs text-center leading-tight ${b.earned ? 'font-bold text-[var(--color-ink-2)]' : 'text-[var(--color-ink-4)]'}`}>
+                    {b.title}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+
         {/* 메뉴 */}
         <div>
           <Card pad="none" className="overflow-hidden">
