@@ -1,3 +1,8 @@
+// 프로필 생성 시 서버/클라가 넣는 기본 닉네임. 이 값이면 사용자가 아직 직접 정하지 않은 것으로 보고
+// 앱 진입 시 설정을 강제한다(App.tsx NicknameGate).
+export const DEFAULT_NICKNAME = '예비슈퍼개미';
+export const isDefaultNickname = (n?: string | null) => !n?.trim() || n.trim() === DEFAULT_NICKNAME;
+
 export type GrowthStage = {
   id: number;
   name: string;

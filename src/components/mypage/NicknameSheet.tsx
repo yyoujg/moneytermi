@@ -8,13 +8,16 @@ export const NicknameSheet = ({
   currentNickname,
   onClose,
   onSave,
+  required = false,
 }: {
   open: boolean;
   currentNickname: string;
   onClose: () => void;
   onSave: (nickname: string) => Promise<{ error: string | null }>;
+  required?: boolean;
 }) => {
-  const [value, setValue] = useState(currentNickname);
+  // 필수 모드에서는 기본 닉네임을 미리 채우지 않는다 — 그대로 저장하면 게이트가 무의미해진다.
+  const [value, setValue] = useState(required ? '' : currentNickname);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -36,8 +39,18 @@ export const NicknameSheet = ({
   };
 
   return (
-    <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>닉네임 변경</span>} hasTextField>
+    <BottomSheet
+      open={open}
+      onDimmerClick={required ? () => {} : onClose}
+      header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>{required ? '닉네임을 정해주세요' : '닉네임 변경'}</span>}
+      hasTextField
+    >
       <div className="px-5 pb-6 flex flex-col gap-5">
+        {required && (
+          <p className="text-xs text-[var(--color-ink-3)] leading-relaxed">
+            학습 기록과 랭킹에 쓰일 이름이에요. 나중에 마이페이지에서 바꿀 수 있어요.
+          </p>
+        )}
         <div className="flex flex-col gap-2">
           <Card tone="surface" pad="none" className={`flex items-center gap-3 px-4 py-3.5 transition-colors ${error ? 'ring-2 ring-danger-400/50' : ''}`}>
             <input
@@ -64,7 +77,7 @@ export const NicknameSheet = ({
           disabled={loading || value.trim().length === 0}
           className="w-full py-4 rounded-button bg-brand-500 text-white text-sm font-bold active:bg-brand-600 disabled:opacity-40 transition-colors"
         >
-          {loading ? '확인 중...' : '저장하기'}
+          {loading ? '확인 중...' : required ? '시작하기' : '저장하기'}
         </button>
       </div>
     </BottomSheet>

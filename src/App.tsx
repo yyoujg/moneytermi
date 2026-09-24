@@ -5,7 +5,9 @@ import { Component, type ReactNode, type ErrorInfo } from 'react';
 import * as Sentry from '@sentry/react';
 import { closeView, graniteEvent, getSchemeUri } from '@apps-in-toss/web-framework';
 import { AppProvider, useAppContext } from './context/AppContext';
-import { AuthProvider } from './hooks/useAuth';
+import { AuthProvider, useAuth } from './hooks/useAuth';
+import { isDefaultNickname } from './constants';
+import { NicknameSheet } from './components/mypage/NicknameSheet';
 import { parseLandingPath, parseReferrer } from './lib/landing';
 import { logScreen, logClick } from './lib/analytics';
 import { useSafeAreaInsets } from './hooks/useSafeAreaInsets';
@@ -133,6 +135,21 @@ const ScreenLogger = () => {
   return null;
 };
 
+// 기본 닉네임이면 앱을 쓰기 전에 직접 정하게 한다.
+const NicknameGate = () => {
+  const { user, updateNickname } = useAuth();
+  if (!user || !isDefaultNickname(user.nickname)) return null;
+  return (
+    <NicknameSheet
+      open
+      required
+      currentNickname={user.nickname}
+      onClose={() => {}}
+      onSave={updateNickname}
+    />
+  );
+};
+
 const Layout = () => {
   const { ready } = useAppContext();
 
@@ -140,6 +157,7 @@ const Layout = () => {
 
   return (
     <div className="flex-1 w-full h-full relative">
+      <NicknameGate />
       <React.Suspense fallback={<LoadingScreen />}>
       <Routes>
         <Route path="/" element={<Navigate to={resolveLandingTarget()} replace />} />
