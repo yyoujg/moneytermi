@@ -10,8 +10,7 @@ import { requestAppReview } from '../lib/review';
 import { claimPromotion } from '../lib/promotion';
 import { useNews, type NaverNewsItem } from '../hooks/useNews';
 import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
-import { feedbackCorrect } from '../lib/feedback';
-import { useSettings } from '../hooks/useSettings';
+import { feedbackLearned, feedbackLessonComplete } from '../lib/feedback';
 import { StreakCelebration } from '../components/StreakCelebration';
 import { Card } from '../components/ui/Card';
 
@@ -200,11 +199,10 @@ const WordCardScreen = () => {
   const autoAdvance = state?.autoAdvance ?? false;
 
   const [wordIndex, setWordIndex] = React.useState(state?.index ?? 0);
-  const { soundOn, vibrationOn } = useSettings();
   // 단어 하나를 끝냈을 때 하단에 뜨는 "좋아요!" 패널. 계속하기를 눌러야 다음으로 간다.
   const [learned, setLearned] = React.useState<Word | null>(null);
   useEffect(() => { setLearned(null); }, [wordIndex]);
-  const celebrateLearned = (w: Word) => { feedbackCorrect(soundOn, vibrationOn); setLearned(w); };
+  const celebrateLearned = (w: Word) => { feedbackLearned(); setLearned(w); };
   // 관련 용어 클릭처럼 같은 라우트로 다시 navigate하면 재마운트가 없어 index가 이전 값에 머문다.
   useEffect(() => { setWordIndex(state?.index ?? 0); }, [state]);
 
@@ -228,6 +226,7 @@ const WordCardScreen = () => {
     if (!done) { completedRef.current = false; return; }
     if (completedRef.current) return;
     completedRef.current = true;
+    feedbackLessonComplete();
     toast.success('학습 완료!');
     refreshPoints();
   }, [wordIndex, words.length, autoAdvance]);

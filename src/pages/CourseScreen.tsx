@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
 import { LESSON_COST } from '../constants';
+import { feedbackNodeTap, feedbackSpend } from '../lib/feedback';
 import { loadDoneNodes } from '../lib/pathProgress';
 import { buildPath, connectorD, NODE, nodeOffsetX, ROW, SPAN, sectionColor, type PathNode } from '../lib/path';
 
@@ -107,6 +108,7 @@ const CourseScreen = () => {
       const pool = learned.length > 0 ? learned : node.words;
       const size = node.type === 'review' ? 10 : 5;
       const queue = [...pool].sort(() => Math.random() - 0.5).slice(0, size);
+      feedbackNodeTap();
       navigate('/quiz', { state: { quizQueue: queue, backPath: '/course', nodeId: node.id } });
       return;
     }
@@ -118,6 +120,7 @@ const CourseScreen = () => {
     // 레슨은 포인트가 든다. 부족하면 상점(광고 보기)으로, 서버 차감이 실패해도 마찬가지.
     if (points < LESSON_COST) { logClick('lesson_blocked_points', { points }); openShop('lesson'); return; }
     if (!(await spendPoints(LESSON_COST, 'lesson'))) { openShop('lesson'); return; }
+    feedbackSpend();
     navigate('/word-card', { state: { words: node.words, index: 0, backPath: '/course', autoAdvance: true } });
   };
 

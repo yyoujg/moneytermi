@@ -8,6 +8,7 @@ import { calcStreak } from '../lib/streak';
 import { isRewardedAdEnabled, showRewardedAd } from '../lib/ads';
 import { LESSON_COST, XP_BONUS_POINTS, XP_BONUS_STEP } from '../constants';
 import { useCountUp } from '../hooks/useCountUp';
+import { feedbackClaim, feedbackBoost } from '../lib/feedback';
 
 // 모든 화면 상단 고정 바. 왼쪽 로고, 오른쪽에 아이콘 + 숫자만 나열한다(티어는 마이페이지에만).
 // 아이콘은 마이페이지 요약 카드와 같은 lucide 세트를 쓴다.
@@ -33,14 +34,14 @@ export const TopBar = () => {
     logClick('rewarded_ad_start', { from: 'topbar_shop' });
     showRewardedAd((amount, unit) => {
       claimAdReward(amount, unit).then(credited => {
-        if (credited) toast.success(`+${credited}P 받았어요`);
+        if (credited) { feedbackClaim(); toast.success(`+${credited}P 받았어요`); }
       });
     });
     closeShop();
   };
 
   const handleBoost = async () => {
-    if (await buyBoost()) { toast.success('30분간 XP 2배! ⚡'); closeShop(); }
+    if (await buyBoost()) { feedbackBoost(); toast.success('30분간 XP 2배! ⚡'); closeShop(); }
     else toast.error('포인트가 부족해요');
   };
 

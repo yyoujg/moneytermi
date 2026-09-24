@@ -2,8 +2,7 @@ import { useEffect, useRef } from 'react';
 import { ChevronRight, RotateCcw, Flame, ArrowRight } from 'lucide-react';
 import { Badge } from '@toss/tds-mobile';
 import { toast } from 'sonner';
-import { feedbackCorrect } from '../lib/feedback';
-import { useSettings } from '../hooks/useSettings';
+import { feedbackClaim, feedbackError } from '../lib/feedback';
 import { useNavigate } from 'react-router-dom';
 import { DEFAULT_NICKNAME, MISSION_XP, getGrowthStage } from '../constants';
 import { useAppContext } from '../context/AppContext';
@@ -18,7 +17,6 @@ const HomeScreen = () => {
   const navigate = useNavigate();
   const { hydrated, xp, knownWords, unknownWords, missions, claimReward, attendanceDates, dueQueue, myEmoji } = useAppContext();
   const { user } = useAuth();
-  const { soundOn, vibrationOn } = useSettings();
   const isNewUser = hydrated && knownWords.length + unknownWords.length === 0;
 
   // 복습 카드 노출 로깅 (세션 1회 래치, hydration 전 프레임 오발화 방지)
@@ -36,9 +34,10 @@ const HomeScreen = () => {
   const handleClaim = async (missionId: string, reward: number) => {
     const ok = await claimReward(missionId);
     if (ok) {
-      feedbackCorrect(soundOn, vibrationOn);
+      feedbackClaim();
       toast.success(`+${reward}P · +${MISSION_XP} XP 받았어요`);
     } else {
+      feedbackError();
       toast.error('보상을 받지 못했어요. 잠시 후 다시 시도해주세요');
     }
   };

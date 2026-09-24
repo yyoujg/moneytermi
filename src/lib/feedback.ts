@@ -1,80 +1,141 @@
 import { generateHapticFeedback } from '@apps-in-toss/web-framework';
 
-function playTone(
-  freq: number,
-  dur: number,
-  type: OscillatorType = 'sine',
-  vol = 0.28,
-) {
-  try {
-    const AudioCtx = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    const ctx = new AudioCtx();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.frequency.value = freq;
-    osc.type = type;
-    gain.gain.setValueAtTime(vol, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
-    osc.start();
-    osc.stop(ctx.currentTime + dur);
-    osc.onended = () => ctx.close();
-  } catch {
-    // Web Audio not supported
-  }
-}
+// ── 설정 (useSettings가 로드/토글할 때 갱신) ─────────────────────
+// useSettings는 화면마다 독립 상태라, 설정 시트에서 바꾼 값을 다른 화면이 바로 따르게 하려면 모듈 플래그가 필요하다.
+export const hapticPrefs = { enabled: true };
+export const soundPrefs = { enabled: true };
 
-// 정답: 밝은 두 음 (C5 → G5)
-function playCorrectSound() {
-  playTone(523, 0.1);
-  setTimeout(() => playTone(784, 0.15), 90);
-}
-
-// 오답: 낮은 버저음
-function playWrongSound() {
-  playTone(180, 0.28, 'sawtooth', 0.18);
-}
-
-// 웹뷰 밖(브라우저)에서는 SDK가 동기로 throw해서 .catch로는 못 잡는다. 햅틱 실패가 채점을 막으면 안 된다.
+// ── 햅틱 ─────────────────────────────────────────────────────────
 type Haptic = 'tickWeak' | 'tap' | 'tickMedium' | 'softMedium' | 'basicWeak' | 'basicMedium' | 'success' | 'error' | 'wiggle' | 'confetti';
 const haptic = (type: Haptic) => {
+  if (!hapticPrefs.enabled) return;
   if (import.meta.env.DEV) (window as unknown as { __lastHaptic?: string }).__lastHaptic = type;   // 브라우저 검증용
+  // 웹뷰 밖(브라우저)에서는 SDK가 동기로 throw해서 .catch로는 못 잡는다. 진동 실패가 흐름을 막으면 안 된다.
   try { generateHapticFeedback({ type }).catch(() => {}); } catch { /* not in webview */ }
 };
+const hapticSeq = (steps: [Haptic, number][]) => steps.forEach(([t, at]) => setTimeout(() => haptic(t), at));
 
-// 진동 설정의 최신값. useSettings가 로드/토글할 때 갱신하고, 전역 탭 진동(useTapHaptics)이 읽는다.
-// (useSettings는 화면마다 독립 상태라, 설정 시트에서 끈 값을 다른 화면이 바로 알 방법이 이것뿐이다)
-export const hapticPrefs = { enabled: true };
+// ── 효과음 (Web Audio, 짧은 합성음) ───────────────────────────────
+let ctx: AudioContext | null = null;
+const audio = (): AudioContext | null => {
+  try {
+    const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AC) return null;
+    ctx ??= new AC();
+    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+    return ctx;
+  } catch { return null; }
+};
+type Note = { f: number; at?: number; dur?: number; type?: OscillatorType; vol?: number; to?: number };
+// 음 하나: f(Hz)에서 시작해 to가 있으면 그 주파수로 미끄러진다. at(초) 뒤에 dur(초) 동안.
+const play = (notes: Note[]) => {
+  if (!soundPrefs.enabled) return;
+  if (import.meta.env.DEV) (window as unknown as { __lastSfx?: number[] }).__lastSfx = notes.map(n => n.f);
+  const c = audio(); if (!c) return;
+  const now = c.currentTime;
+  for (const n of notes) {
+    try {
+      const osc = c.createOscillator(); const gain = c.createGain();
+      osc.connect(gain); gain.connect(c.destination);
+      osc.type = n.type ?? 'sine';
+      const t0 = now + (n.at ?? 0); const dur = n.dur ?? 0.12; const vol = n.vol ?? 0.22;
+      osc.frequency.setValueAtTime(n.f, t0);
+      if (n.to) osc.frequency.exponentialRampToValueAtTime(n.to, t0 + dur);
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(vol, t0 + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      osc.start(t0); osc.stop(t0 + dur + 0.02);
+    } catch { /* ignore */ }
+  }
+};
+// 음이름 → Hz
+const N = { C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99, A5: 880, B5: 987.77, C6: 1046.5, E6: 1318.5, G6: 1568 };
 
-// 모든 버튼 누름: 짧은 틱. 결과 진동(정답·축하)은 각자 따로 울린다.
-export function feedbackTick() {
-  if (hapticPrefs.enabled) haptic('tickMedium');
+// ── 이벤트별 조합 ──────────────────────────────────────────────────
+// 버튼 누름: 짧은 틱 (소리 없음 — 전역이라 시끄럽다)
+export function feedbackTick() { haptic('tickMedium'); }
+
+// 패스 노드 탭 (레슨 시작·퀴즈 진입): 톡 하는 팝
+export function feedbackNodeTap() {
+  haptic('basicMedium');
+  play([{ f: 620, to: 880, dur: 0.08, vol: 0.14 }]);
 }
 
-// 마일스톤 축하: 축포를 두 번, 사이에 성공 진동
-export function feedbackCelebrate(vibration: boolean) {
-  if (!vibration) return;
-  haptic('confetti');
-  setTimeout(() => haptic('success'), 200);
-  setTimeout(() => haptic('confetti'), 450);
+// 포인트 소모 (레슨 시작 -10P): 낮게 쓱
+export function feedbackSpend() {
+  haptic('tap');
+  play([{ f: 440, to: 300, dur: 0.14, type: 'triangle', vol: 0.12 }]);
 }
 
-// 버튼/노드 탭: 짧고 확실한 한 번
-export function feedbackTap(vibration: boolean) {
-  if (vibration) haptic('basicMedium');
+// 퀴즈 정답: 두 음. 콤보가 붙으면 음이 하나씩 더 올라가고 진동도 세진다
+export function feedbackCorrect(_sound?: boolean, _vib?: boolean, combo = 1) {
+  const notes: Note[] = [{ f: N.C5, dur: 0.1 }, { f: N.G5, at: 0.09, dur: 0.14 }];
+  if (combo >= 3) notes.push({ f: N.C6, at: 0.18, dur: 0.16 });
+  if (combo >= 5) notes.push({ f: N.E6, at: 0.27, dur: 0.2 });
+  play(notes);
+  if (combo >= 5) hapticSeq([['confetti', 0], ['success', 150], ['confetti', 300]]);
+  else if (combo >= 3) hapticSeq([['success', 0], ['basicMedium', 160]]);
+  else hapticSeq([['success', 0], ['basicMedium', 140]]);
 }
 
-// 정답: 요란하게 — 축포 → 성공 → 묵직한 마무리를 짧은 간격으로 연타
-export function feedbackCorrect(sound: boolean, vibration: boolean) {
-  if (sound) playCorrectSound();
-  if (!vibration) return;
-  haptic('confetti');
-  setTimeout(() => haptic('success'), 120);
-  setTimeout(() => haptic('basicMedium'), 260);
+// 오답: 낮은 버저 + error
+export function feedbackWrong() {
+  play([{ f: 180, dur: 0.26, type: 'sawtooth', vol: 0.16 }]);
+  haptic('error');
 }
 
-export function feedbackWrong(sound: boolean, vibration: boolean) {
-  if (sound) playWrongSound();
-  if (vibration) haptic('error');
+// 단어 하나 학습 완료 ("좋아요!" 패널): 부드러운 딩
+export function feedbackLearned() {
+  play([{ f: N.E5, dur: 0.1, vol: 0.18 }, { f: N.A5, at: 0.08, dur: 0.22, vol: 0.18 }]);
+  haptic('softMedium');
+}
+
+// 레슨(단어 묶음) 완료: 짧은 팡파르
+export function feedbackLessonComplete() {
+  play([{ f: N.C5, dur: 0.12 }, { f: N.E5, at: 0.1, dur: 0.12 }, { f: N.G5, at: 0.2, dur: 0.12 }, { f: N.C6, at: 0.3, dur: 0.3 }]);
+  hapticSeq([['success', 0], ['confetti', 250]]);
+}
+
+// 퀴즈/복습 완료: 정답률 100%면 한 음 더 높이 올라간다
+export function feedbackQuizComplete(perfect: boolean) {
+  const notes: Note[] = [{ f: N.G5, dur: 0.1 }, { f: N.C6, at: 0.1, dur: 0.14 }, { f: N.E6, at: 0.22, dur: 0.3 }];
+  if (perfect) notes.push({ f: N.G6, at: 0.36, dur: 0.4, vol: 0.2 });
+  play(notes);
+  hapticSeq(perfect ? [['confetti', 0], ['success', 200], ['confetti', 420]] : [['success', 0], ['basicMedium', 200]]);
+}
+
+// 티어 승급: 웅장하게
+export function feedbackTierUp() {
+  play([{ f: N.C5, dur: 0.14 }, { f: N.E5, at: 0.12, dur: 0.14 }, { f: N.G5, at: 0.24, dur: 0.14 }, { f: N.C6, at: 0.36, dur: 0.5 }, { f: N.G5, at: 0.36, dur: 0.5, vol: 0.12 }]);
+  hapticSeq([['confetti', 0], ['confetti', 220], ['success', 480]]);
+}
+
+// 보상 수령 (미션·광고): 동전 두 개
+export function feedbackClaim() {
+  play([{ f: N.B5, dur: 0.07, type: 'square', vol: 0.09 }, { f: N.E6, at: 0.07, dur: 0.2, type: 'square', vol: 0.09 }]);
+  hapticSeq([['success', 0], ['tap', 120]]);
+}
+
+// 부스트 구매: 위로 쓸어 올라가는 파워업
+export function feedbackBoost() {
+  play([{ f: 300, to: 1200, dur: 0.45, type: 'triangle', vol: 0.16 }, { f: N.E6, at: 0.4, dur: 0.25, vol: 0.14 }]);
+  hapticSeq([['wiggle', 0], ['success', 350]]);
+}
+
+// 연속 학습 축하 (평소): 차임
+export function feedbackStreak() {
+  play([{ f: N.C5, dur: 0.3, vol: 0.14 }, { f: N.E5, at: 0.06, dur: 0.3, vol: 0.14 }, { f: N.G5, at: 0.12, dur: 0.4, vol: 0.14 }]);
+  haptic('success');
+}
+
+// 마일스톤(7·14·30일…): 팡파르 + 축포 연타
+export function feedbackCelebrate() {
+  play([{ f: N.C5, dur: 0.12 }, { f: N.E5, at: 0.1, dur: 0.12 }, { f: N.G5, at: 0.2, dur: 0.12 }, { f: N.C6, at: 0.3, dur: 0.16 }, { f: N.E6, at: 0.42, dur: 0.5 }]);
+  hapticSeq([['confetti', 0], ['success', 200], ['confetti', 450], ['confetti', 700]]);
+}
+
+// 실패 알림 (보상 수령 실패 등): 짧고 낮게
+export function feedbackError() {
+  play([{ f: 220, dur: 0.12, type: 'sawtooth', vol: 0.1 }, { f: 180, at: 0.12, dur: 0.16, type: 'sawtooth', vol: 0.1 }]);
+  haptic('error');
 }
