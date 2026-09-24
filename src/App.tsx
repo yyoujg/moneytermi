@@ -12,6 +12,7 @@ import { parseLandingPath, parseReferrer } from './lib/landing';
 import { logScreen, logClick } from './lib/analytics';
 import { useSafeAreaInsets } from './hooks/useSafeAreaInsets';
 import NavBar from './components/NavBar';
+import { TopBar } from './components/TopBar';
 
 const HomeScreen = React.lazy(() => import('./pages/HomeScreen'));
 const CourseScreen = React.lazy(() => import('./pages/CourseScreen'));
@@ -156,8 +157,9 @@ const Layout = () => {
   if (!ready) return <LoadingScreen />;
 
   return (
-    <div className="flex-1 w-full h-full relative">
+    <div className="flex-1 w-full h-full flex flex-col relative">
       <NicknameGate />
+      <TopBar />
       <React.Suspense fallback={<LoadingScreen />}>
       <Routes>
         <Route path="/" element={<Navigate to={resolveLandingTarget()} replace />} />

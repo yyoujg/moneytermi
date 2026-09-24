@@ -1,11 +1,8 @@
 import React, { useMemo, useRef, useLayoutEffect } from 'react';
-import { BookOpen, Check, Flame, Lock, PenLine, Play, Zap } from 'lucide-react';
+import { Check, Lock, PenLine } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
 import { useAppContext } from '../context/AppContext';
 import { getGrowthStage } from '../constants';
-import { calcStreak } from '../lib/streak';
-import { isRewardedAdEnabled, showRewardedAd } from '../lib/ads';
 import { logClick } from '../lib/analytics';
 import { buildPath, connectorD, NODE, nodeOffsetX, ROW, SPAN, sectionColor, type PathNode } from '../lib/path';
 
@@ -62,7 +59,7 @@ const NodeCircle = ({ node, index, color, isFocus, onTap, nodeRef }: {
 
 const CourseScreen = () => {
   const navigate = useNavigate();
-  const { hydrated, knownIds, courses, knownWords, points, attendanceDates, claimAdReward } = useAppContext();
+  const { hydrated, knownIds, courses, points } = useAppContext();
 
   const sections = useMemo(() => buildPath(courses, knownIds), [courses, knownIds]);
 
@@ -98,42 +95,9 @@ const CourseScreen = () => {
     navigate('/word-card', { state: { words: node.words, index: 0, backPath: '/course', autoAdvance: true } });
   };
 
-  const totalKnown = knownWords.length;
-  const streak = calcStreak(attendanceDates);
-  const stage = getGrowthStage(points);
-
-  const handleAdForPoints = () => {
-    if (!isRewardedAdEnabled()) return;
-    logClick('rewarded_ad_start', { from: 'home_points' });
-    showRewardedAd((amount, unit) => {
-      claimAdReward(amount, unit).then(credited => {
-        if (credited) toast.success(`+${credited}P 받았어요`);
-      });
-    });
-  };
-
   return (
     <div className="flex flex-col h-full bg-[var(--color-canvas)] pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
 
-      {/* 헤더 — 한 줄 요약만 */}
-      <div className="sticky top-0 z-20 h-12 shrink-0 flex items-center bg-[var(--color-card)] px-5">
-        {/* 한 줄 요약 — 포인트를 누르면 광고로 충전 */}
-        <div className="flex items-center gap-3 text-2xs text-[var(--color-ink-3)]">
-          <span className="flex items-center gap-1"><Flame size={12} className="text-brand-500 fill-current" />{streak}일</span>
-          <span className="flex items-center gap-1">{stage.emoji}{stage.name}</span>
-          <button
-            onClick={handleAdForPoints}
-            disabled={!isRewardedAdEnabled()}
-            className="flex items-center gap-1 disabled:opacity-100"
-          >
-            <Zap size={12} className="text-brand-500 fill-current" />
-            {points.toLocaleString()}P
-            {isRewardedAdEnabled() && <Play size={10} className="text-brand-500 ml-0.5" />}
-          </button>
-          <span className="flex items-center gap-1"><BookOpen size={12} />{totalKnown}개</span>
-        </div>
-
-      </div>
 
       {/* 패스 */}
       {sections.map((sec, si) => {
@@ -141,7 +105,7 @@ const CourseScreen = () => {
         return (
         <section key={sec.course.id}>
           {/* 코스 배너 */}
-          <div className="sticky top-12 z-10 mx-5 mt-5 mb-1 rounded-card px-5 py-4 shadow-md" style={{ background: color.face }}>
+          <div className="sticky top-0 z-10 mx-5 mt-5 mb-1 rounded-card px-5 py-4 shadow-md" style={{ background: color.face }}>
             <p className="text-2xs font-bold text-white/70">{sec.course.level} · {sec.course.category}</p>
             <h3 className="text-base font-bold text-white mt-1! break-keep">{sec.course.title}</h3>
             <p className="text-2xs text-white/80 mt-1.5!">{sec.knownCount} / {sec.course.words.length} 단어</p>
