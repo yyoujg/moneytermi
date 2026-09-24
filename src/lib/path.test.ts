@@ -62,12 +62,12 @@ describe('buildPath', () => {
 
   it('레슨 3개마다 + 끝에 퀴즈', () => {
     const [sec] = buildPath([course], new Set());
-    expect(sec.nodes.map(n => n.type)).toEqual(['lesson', 'lesson', 'lesson', 'quiz', 'lesson', 'quiz']);
+    expect(sec.nodes.map(n => n.type)).toEqual(['lesson', 'lesson', 'lesson', 'quiz', 'lesson', 'quiz', 'review']);
   });
 
   it('레슨이 3개 이하면 끝에 퀴즈 1개만', () => {
     const [sec] = buildPath([makeCourse('c2', 12)], new Set());
-    expect(sec.nodes.map(n => n.type)).toEqual(['lesson', 'lesson', 'lesson', 'quiz']);
+    expect(sec.nodes.map(n => n.type)).toEqual(['lesson', 'lesson', 'lesson', 'quiz', 'review']);
   });
 
   it('진도 0: 첫 레슨이 current, 나머지 locked', () => {
@@ -160,5 +160,38 @@ describe('sectionColor', () => {
 
   it('첫 코스는 브랜드 색', () => {
     expect(sectionColor(0).face).toBe('#f97316');
+  });
+});
+
+describe('누적 복습 노드', () => {
+  const a = makeCourse('a', 8);
+  const b = makeCourse('b', 8);
+
+  it('코스마다 끝에 review 노드가 하나씩 붙는다', () => {
+    const secs = buildPath([a, b], new Set());
+    for (const s of secs) {
+      expect(s.nodes.filter(n => n.type === 'review')).toHaveLength(1);
+      expect(s.nodes[s.nodes.length - 1].type).toBe('review');
+    }
+  });
+
+  it('앞 코스 단어까지 누적한다', () => {
+    const [s1, s2] = buildPath([a, b], new Set());
+    const r1 = s1.nodes.find(n => n.type === 'review')!;
+    const r2 = s2.nodes.find(n => n.type === 'review')!;
+    expect(r1.words).toHaveLength(8);
+    expect(r2.words).toHaveLength(16);
+    expect(r2.words.slice(0, 8).map(w => w.id)).toEqual(a.words.map(w => w.id));
+  });
+
+  it('그 코스를 다 끝내야 열린다', () => {
+    const locked = buildPath([a], new Set())[0].nodes.find(n => n.type === 'review')!;
+    expect(locked.state).toBe('locked');
+    const open = buildPath([a], new Set(a.words.map(w => w.id)))[0].nodes.find(n => n.type === 'review')!;
+    expect(open.state).toBe('available');
+  });
+
+  it('단어 없는 코스에는 붙지 않는다', () => {
+    expect(buildPath([makeCourse('empty', 0)], new Set())[0].nodes).toEqual([]);
   });
 });

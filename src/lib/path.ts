@@ -2,7 +2,7 @@ import type { Course, Word } from '../types';
 
 // 코스의 단어를 3~5개 묶음(레슨)으로 나누고, 레슨 3개마다 퀴즈 노드를 끼운 패스를 만든다.
 // 진도 판정은 기존 규칙 그대로 — 단어가 knownIds에 있으면 완료, 코스별로 첫 미완료 레슨이 현재 위치.
-export type PathNodeType = 'lesson' | 'quiz';
+export type PathNodeType = 'lesson' | 'quiz' | 'review';
 export type PathNodeState = 'done' | 'current' | 'available' | 'locked';
 
 export type PathNode = {
@@ -73,7 +73,8 @@ export const chunkWords = (words: Word[], target = 4): Word[][] => {
   return out;
 };
 
-const buildSection = (course: Course, knownIds: Set<number>): PathSection => {
+// 코스 끝 누적 복습 노드에 담을 단어. 앞 코스들 + 이 코스 전체.
+const buildSection = (course: Course, knownIds: Set<number>, carried: Word[]): PathSection => {
   const lessons = chunkWords(course.words);
   const doneFlags = lessons.map(ws => ws.every(w => knownIds.has(w.id)));
   const currentIdx = doneFlags.findIndex(d => !d);
@@ -103,6 +104,17 @@ const buildSection = (course: Course, knownIds: Set<number>): PathSection => {
   });
   if (lessons.length > 0) pushQuiz(lessons.length - 1);
 
+  // 코스를 끝내면 지금까지 배운 것 전체를 한 번 훑는다.
+  if (lessons.length > 0) {
+    nodes.push({
+      id: `${course.id}-r`,
+      type: 'review',
+      courseId: course.id,
+      words: [...carried, ...course.words],
+      state: doneFlags.every(Boolean) ? 'available' : 'locked',
+    });
+  }
+
   return {
     course,
     nodes,
@@ -110,5 +122,11 @@ const buildSection = (course: Course, knownIds: Set<number>): PathSection => {
   };
 };
 
-export const buildPath = (courses: Course[], knownIds: Set<number>): PathSection[] =>
-  courses.map(c => buildSection(c, knownIds));
+export const buildPath = (courses: Course[], knownIds: Set<number>): PathSection[] => {
+  const carried: Word[] = [];
+  return courses.map(c => {
+    const sec = buildSection(c, knownIds, [...carried]);
+    carried.push(...c.words);
+    return sec;
+  });
+};

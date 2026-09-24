@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useLayoutEffect } from 'react';
-import { Check, Lock, PenLine } from 'lucide-react';
+import { Check, Lock, PenLine, RotateCcw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { getGrowthStage } from '../constants';
@@ -19,9 +19,10 @@ const NodeCircle = ({ node, index, color, isFocus, onTap, nodeRef }: {
   const locked = node.state === 'locked';
   const done = node.state === 'done';
   // 잠긴 노드도 자기 색을 알파로 흐리게 보여준다. 전부 회색이면 팔레트가 보이지 않는다.
+  const outlined = node.type === 'quiz' || node.type === 'review';
   const face = locked
     ? `${color.face}33`
-    : node.type === 'quiz'
+    : outlined
       ? 'var(--color-card)'
       : color.face;
   const shadow = locked ? `${color.shadow}33` : color.shadow;
@@ -32,7 +33,7 @@ const NodeCircle = ({ node, index, color, isFocus, onTap, nodeRef }: {
       type="button"
       disabled={locked}
       onClick={onTap}
-      aria-label={`${node.type === 'quiz' ? '퀴즈' : '학습'} ${index + 1}`}
+      aria-label={`${node.type === 'quiz' ? '퀴즈' : node.type === 'review' ? '누적 복습' : '학습'} ${index + 1}`}
       className="absolute flex items-center justify-center active:translate-y-[3px] disabled:opacity-50"
       style={{
         top: (ROW - NODE) / 2,
@@ -43,7 +44,7 @@ const NodeCircle = ({ node, index, color, isFocus, onTap, nodeRef }: {
         borderRadius: 9999,
         background: face,
         boxShadow: `0 5px 0 ${shadow}${isFocus ? `, 0 0 0 6px ${color.face}33` : ''}`,
-        border: node.type === 'quiz' && !locked ? `2px solid ${color.face}` : 'none',
+        border: outlined && !locked ? `2px solid ${color.face}` : 'none',
       }}
     >
       {locked
@@ -52,7 +53,9 @@ const NodeCircle = ({ node, index, color, isFocus, onTap, nodeRef }: {
           ? <Check size={26} strokeWidth={3} className="text-white" />
           : node.type === 'quiz'
             ? <PenLine size={22} style={{ color: color.face }} />
-            : <span className="text-xl">📖</span>}
+            : node.type === 'review'
+              ? <RotateCcw size={22} style={{ color: color.face }} />
+              : <span className="text-xl">📖</span>}
     </button>
   );
 };
@@ -83,8 +86,13 @@ const CourseScreen = () => {
   const handleNodeTap = (node: PathNode, index: number, courseKnown: number) => {
     logClick('path_node_click', { course_id: node.courseId, type: node.type, index, state: node.state });
 
-    if (node.type === 'quiz') {
-      navigate('/quiz', { state: { quizQueue: node.words.slice(0, 5), backPath: '/course' } });
+    if (node.type === 'quiz' || node.type === 'review') {
+      // 복습은 지금까지 배운 것 중에서만 낸다. 아직 아무것도 안 배웠으면 그냥 앞에서 자른다.
+      const learned = node.words.filter(w => knownIds.has(w.id));
+      const pool = learned.length > 0 ? learned : node.words;
+      const size = node.type === 'review' ? 10 : 5;
+      const queue = [...pool].sort(() => Math.random() - 0.5).slice(0, size);
+      navigate('/quiz', { state: { quizQueue: queue, backPath: '/course' } });
       return;
     }
 
