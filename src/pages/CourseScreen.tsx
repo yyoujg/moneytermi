@@ -1,8 +1,7 @@
 import React, { useMemo, useRef, useLayoutEffect } from 'react';
-import { Check, Lock, PenLine, RotateCcw } from 'lucide-react';
+import { BookOpen, Check, Lock, PenLine, RotateCcw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
-import { getGrowthStage } from '../constants';
 import { logClick } from '../lib/analytics';
 import { buildPath, connectorD, NODE, nodeOffsetX, ROW, SPAN, sectionColor, type PathNode } from '../lib/path';
 
@@ -34,7 +33,7 @@ const NodeCircle = ({ node, index, color, isFocus, onTap, nodeRef }: {
       disabled={locked}
       onClick={onTap}
       aria-label={`${node.type === 'quiz' ? '퀴즈' : node.type === 'review' ? '누적 복습' : '학습'} ${index + 1}`}
-      className="absolute flex items-center justify-center active:translate-y-[3px] disabled:opacity-50"
+      className="absolute flex items-center justify-center active:translate-y-[3px] disabled:opacity-50 disabled:pointer-events-none"
       style={{
         top: (ROW - NODE) / 2,
         left: `calc(50% + ${nodeOffsetX(index)}px)`,
@@ -55,14 +54,14 @@ const NodeCircle = ({ node, index, color, isFocus, onTap, nodeRef }: {
             ? <PenLine size={22} style={{ color: color.face }} />
             : node.type === 'review'
               ? <RotateCcw size={22} style={{ color: color.face }} />
-              : <span className="text-xl">📖</span>}
+              : <BookOpen size={24} className="text-white" />}
     </button>
   );
 };
 
 const CourseScreen = () => {
   const navigate = useNavigate();
-  const { hydrated, knownIds, courses, xp } = useAppContext();
+  const { hydrated, knownIds, courses } = useAppContext();
 
   const sections = useMemo(() => buildPath(courses, knownIds), [courses, knownIds]);
 
@@ -84,6 +83,8 @@ const CourseScreen = () => {
   }, [hydrated, focusId]);
 
   const handleNodeTap = (node: PathNode, index: number, courseKnown: number) => {
+    // disabled 버튼은 click이 안 오지만, 웹뷰/리셋 CSS에 따라 새는 경우가 있어 한 번 더 막는다.
+    if (node.state === 'locked') return;
     logClick('path_node_click', { course_id: node.courseId, type: node.type, index, state: node.state });
 
     if (node.type === 'quiz' || node.type === 'review') {
@@ -113,8 +114,8 @@ const CourseScreen = () => {
         return (
         <section key={sec.course.id}>
           {/* 코스 배너 */}
-          <div className="sticky top-0 z-10 mx-5 mt-5 mb-1 rounded-card px-5 py-4 shadow-md" style={{ background: color.face }}>
-            <p className="text-2xs font-bold text-white/70">{sec.course.level} · {sec.course.category}</p>
+          <div className="sticky top-4 z-10 mx-5 mt-5 mb-1 rounded-card px-5 py-4 shadow-md" style={{ background: color.face }}>
+            <p className="text-2xs font-bold text-white/70">{sec.course.level} · 코스 {si + 1}/{sections.length}</p>
             <h3 className="text-base font-bold text-white mt-1! break-keep">{sec.course.title}</h3>
             <p className="text-2xs text-white/80 mt-1.5!">{sec.knownCount} / {sec.course.words.length} 단어</p>
           </div>
@@ -146,16 +147,11 @@ const CourseScreen = () => {
                   <>
                     <div
                       className="absolute animate-bounce-up rounded-chip bg-[var(--color-card)] px-3 py-1.5 shadow-lg"
-                      style={{ top: -14, left: `calc(50% + ${nodeOffsetX(k)}px)`, marginLeft: -26 }}
+                      // 노드 위 30px. 행 밖(-14 등)으로 내보내면 sticky 배너(z-10) 뒤로 들어가 잘린다.
+                      style={{ top: (ROW - NODE) / 2 - 30, left: `calc(50% + ${nodeOffsetX(k)}px)`, marginLeft: -26 }}
                     >
                       <span className="text-2xs font-bold text-brand-500">시작</span>
                     </div>
-                    <span
-                      className="absolute text-4xl pointer-events-none select-none"
-                      style={{ top: (ROW - NODE) / 2 + 6, left: `calc(50% + ${nodeOffsetX(k) + 56}px)` }}
-                    >
-                      {getGrowthStage(xp).emoji}
-                    </span>
                   </>
                 )}
 

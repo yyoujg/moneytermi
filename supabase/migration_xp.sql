@@ -10,6 +10,7 @@
 --
 -- 선행: migration_missions_slots.sql, migration_weekly_league.sql
 -- 적용: 대시보드 SQL Editor에서 STEP별로 나눠 실행. 실패 지점이 보이도록 트랜잭션으로 묶지 않는다.
+-- 2026-09-24 점검: STEP 4~8이 빠진 채 운영됐다(증상: XP가 0 고정, 리그 비어 있음). STEP 4~8 재실행 후 migration_revoke_helpers.sql.
 
 -- ===== STEP 1 : 컬럼 =====
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS xp          INTEGER     NOT NULL DEFAULT 0;

@@ -131,7 +131,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
           { id: d.mission_id, title: d.title, target: d.target, reward: d.reward, current: 0, isRewarded: false, sortOrder: d.sort_order },
         ]));
         missionBaseRef.current = base;
-        setMissions(prev => Object.keys(prev).length <= 2 ? base : prev);
+        // load()와 순서가 뒤바뀌어도 정의는 서버 것, 진행도는 이미 받은 것을 유지한다.
+        setMissions(prev => Object.fromEntries(Object.entries(base).map(([k, m]) =>
+          [k, prev[k] ? { ...m, current: prev[k].current, isRewarded: prev[k].isRewarded } : m])));
       }
       } catch (e) {
         console.error('[AppContext] 콘텐츠 로드 실패:', e);
@@ -238,7 +240,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         };
       });
       setMissions(merged);
-      missionBaseRef.current = base;
 
       // 4. attendance
       const { data: att, error: attLoadErr } = await db
@@ -251,14 +252,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
       const dates = att ? att.map(a => a.date) : [];
       setAttendanceDates(dates);
-
-      // 오늘 이미 출석했으면 m1 자동 완료
-      if (dates.includes(today)) {
-        setMissions(prev => ({
-          ...prev,
-          m1: { ...prev.m1, current: 1 },
-        }));
-      }
 
       // 5. 내 프로필 이모지 로드
       const { data: myProfile } = await db
@@ -348,11 +341,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (!ready || !profileIdRef.current || autoCheckedRef.current) return;
     autoCheckedRef.current = true;
-    const today = toDateStr(new Date());
-    if (!attendanceDates.includes(today)) {
-      logClick('checkin_auto');
-      checkIn();
-    }
+    // 출석은 서버가 하루 1회로 막지만 m1 미션은 8시간 슬롯마다 다시 채워야 하므로 매번 부른다.
+    if (!attendanceDates.includes(toDateStr(new Date()))) logClick('checkin_auto');
+    checkIn();
   }, [ready]);
 
   // ── 8시간마다 미션 초기화 (KST 0/8/16시) ──────────────────────
@@ -363,6 +354,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       const t = setTimeout(() => {
         lastMissionDate.current = `${toDateStr(new Date())}#${missionSlot()}`;
         setMissions(missionBaseRef.current);
+        checkIn();
         scheduleReset();
       }, msUntilNextSlot() + 1000);
 

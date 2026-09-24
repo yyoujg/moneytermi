@@ -2,6 +2,7 @@ import { useState, useEffect, useContext, createContext } from 'react';
 import { closeView, getAnonymousKey, getSchemeUri } from '@apps-in-toss/web-framework';
 import type { AuthState, AuthUser } from '../types';
 import { randomNickname } from '../lib/nickname';
+import { isDefaultNickname } from '../constants';
 import { supabase, getGuestClient } from '../lib/supabase';
 import { Storage } from '../lib/storage';
 import { parseReferrer } from '../lib/landing';
@@ -206,6 +207,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (!trimmed) return { error: '닉네임을 입력해주세요' };
     if (trimmed.length > 10) return { error: '닉네임은 10자 이내로 입력해주세요' };
     if (trimmed === authState.user?.nickname) return { error: '현재 닉네임과 동일해요' };
+    if (isDefaultNickname(trimmed)) return { error: '다른 닉네임을 정해주세요' };
 
     if (profileId) {
       const { data: taken } = await supabase.rpc('is_nickname_taken', {

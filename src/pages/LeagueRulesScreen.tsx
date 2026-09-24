@@ -1,48 +1,21 @@
-import { List, ListRow, Spacing } from '@toss/tds-mobile';
+import { Spacing } from '@toss/tds-mobile';
 import { Card } from '../components/ui/Card';
+import { LeagueRules } from '../components/LeagueRules';
 
-const RULES = [
-  { icon: '🏆', title: '리그 티어', desc: '포인트를 모으면 브론즈 → 실버 → 골드 → 플래티넘 → 다이아 순서로 티어가 올라가요.' },
-  { icon: '⚡', title: '포인트 획득', desc: '학습 완료, 퀴즈 정답, 미션 달성, 출석 시 포인트를 얻어요.' },
-  { icon: '🎁', title: '친구 초대', desc: '친구를 초대하면 추가 포인트를 받을 수 있어요.' },
-  { icon: '📺', title: '광고 시청', desc: '광고를 끝까지 보면 추가 포인트를 받을 수 있어요.' },
-];
-
-const LeagueRulesScreen = () => {
-
-  return (
-    <div className="flex flex-col h-full bg-[var(--color-canvas)]">
-      {/* 헤더 */}
-      <div className="pt-4 px-5 pb-4 bg-[var(--color-card)]">
-        <h2 className="text-base font-bold text-[var(--color-ink)]">리그 안내</h2>
-      </div>
-
-      <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">
-        <Spacing size={20} />
-        <div className="px-5">
-          <Card pad="none" className="overflow-hidden">
-            <List>
-              {RULES.map(({ icon, title, desc }) => (
-                <ListRow
-                  key={title}
-                  border="none"
-                  left={<span className="text-2xl w-9 text-center shrink-0">{icon}</span>}
-                  contents={
-                    <ListRow.Texts
-                      type="2RowTypeA"
-                      top={<span className="text-[var(--color-ink)]">{title}</span>}
-                      bottom={<span className="text-[var(--color-ink-3)]">{desc}</span>}
-                    />
-                  }
-                />
-              ))}
-            </List>
-          </Card>
-        </div>
-        <Spacing size={40} />
-      </div>
+// 딥링크(/league/rules)용. 리그 화면 안에서는 같은 내용을 바텀시트로 띄운다.
+const LeagueRulesScreen = () => (
+  <div className="flex flex-col h-full bg-[var(--color-canvas)]">
+    <div className="pt-4 px-5 pb-4 bg-[var(--color-card)]">
+      <h2 className="text-base font-bold text-[var(--color-ink)]">리그 안내</h2>
     </div>
-  );
-};
+    <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+      <Spacing size={20} />
+      <div className="px-5">
+        <Card pad="none" className="overflow-hidden"><LeagueRules /></Card>
+      </div>
+      <Spacing size={40} />
+    </div>
+  </div>
+);
 
 export default LeagueRulesScreen;

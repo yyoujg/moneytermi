@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { BottomSheet } from '@toss/tds-mobile';
+import { Flame, Sparkles, Zap, BookOpen, Tv } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
 import { calcStreak } from '../lib/streak';
 import { isRewardedAdEnabled, showRewardedAd } from '../lib/ads';
 
-// 모든 화면 상단 고정 바. 왼쪽 로고, 오른쪽에 이모지 + 숫자만 나열한다(티어는 마이페이지에만).
+// 모든 화면 상단 고정 바. 왼쪽 로고, 오른쪽에 아이콘 + 숫자만 나열한다(티어는 마이페이지에만).
+// 아이콘은 마이페이지 요약 카드와 같은 lucide 세트를 쓴다.
 // 포인트를 누르면 구매 시트가 열린다(광고 충전 / XP 2배 부스트).
 export const TopBar = () => {
   const { points, xp, boostUntil, knownWords, attendanceDates, claimAdReward, buyBoost } = useAppContext();
@@ -45,12 +47,12 @@ export const TopBar = () => {
         <span className="text-base font-black tracking-tight text-brand-500">머니터미</span>
 
         <div className="flex items-center gap-3 text-sm font-bold text-[var(--color-ink-2)]">
-          <span className="flex items-center gap-1">🔥{streak}</span>
-          <span className="flex items-center gap-1">✨{xp.toLocaleString()}</span>
-          <button onClick={() => setShopOpen(true)} className="flex items-center gap-1 active:opacity-60">
-            ⚡{points.toLocaleString()}
+          <span className="flex items-center gap-1"><Flame size={15} className="text-brand-500 fill-current" />{streak}</span>
+          <span className="flex items-center gap-1"><Sparkles size={15} className="text-brand-500" />{xp.toLocaleString()}</span>
+          <button onClick={() => setShopOpen(true)} aria-label="포인트 상점" className="flex items-center gap-1 active:opacity-60">
+            <Zap size={15} className="text-brand-500 fill-current" />{points.toLocaleString()}
           </button>
-          <span className="flex items-center gap-1">📖{knownWords.length}</span>
+          <span className="flex items-center gap-1"><BookOpen size={15} className="text-brand-500" />{knownWords.length}</span>
           {boostLeft > 0 && (
             <span className="text-xs font-bold text-brand-500">
               ×2 {Math.floor(boostLeft / 60000)}:{String(Math.floor((boostLeft % 60000) / 1000)).padStart(2, '0')}
@@ -65,14 +67,14 @@ export const TopBar = () => {
         header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>포인트 상점</span>}
       >
         <div className="px-5 pb-6 flex flex-col gap-2">
-          <p className="text-xs text-[var(--color-ink-3)] mb-1">보유 ⚡{points.toLocaleString()}P</p>
+          <p className="flex items-center gap-1 text-xs text-[var(--color-ink-3)] mb-1">보유 <Zap size={12} className="text-brand-500 fill-current" />{points.toLocaleString()}P</p>
 
           <button
             onClick={handleAd}
             className="w-full flex items-center justify-between rounded-chip px-4 py-4 text-sm font-bold text-brand-500 active:opacity-70"
             style={{ backgroundColor: 'var(--color-brand-soft)' }}
           >
-            <span>📺 광고 보고 포인트 받기</span>
+            <span className="flex items-center gap-2"><Tv size={16} />광고 보고 포인트 받기</span>
             <span className="text-2xs font-medium">무료</span>
           </button>
 
@@ -82,7 +84,7 @@ export const TopBar = () => {
             className="w-full flex items-center justify-between rounded-chip px-4 py-4 text-sm font-bold text-brand-500 active:opacity-70 disabled:opacity-40"
             style={{ backgroundColor: 'var(--color-brand-soft)' }}
           >
-            <span>⚡ {boostLeft > 0 ? '부스트 사용 중' : 'XP 2배 부스트'}</span>
+            <span className="flex items-center gap-2"><Zap size={16} className="fill-current" />{boostLeft > 0 ? '부스트 사용 중' : 'XP 2배 부스트'}</span>
             <span className="text-2xs font-medium">300P · 30분</span>
           </button>
 

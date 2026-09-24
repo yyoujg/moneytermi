@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Zap, Check, X } from 'lucide-react';
+import { Zap, Check, X, Flame } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
@@ -16,7 +16,7 @@ import { buildQuizItem, pickQuizType, type QuizOption } from '../lib/quiz';
 const QuizScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { points, xp, allWords, knownWords, courses, submitQuizAnswer } = useAppContext();
+  const { xp, allWords, knownWords, courses, submitQuizAnswer } = useAppContext();
 
   // 단어 id → 코스 카테고리 (오답 보기를 같은 주제로 뽑기 위함)
   const categoryOf = useMemo(() => {
@@ -28,9 +28,14 @@ const QuizScreen = () => {
   const navState = location.state as { quizQueue?: Word[]; backPath?: string } | null;
   const passedQueue: Word[] = navState?.quizQueue ?? [];
   const backPath = navState?.backPath ?? '/home';
-  const quizQueue: Word[] = passedQueue.length > 0
-    ? passedQueue
-    : [...knownWords].sort(() => Math.random() - 0.5).slice(0, 10);
+  // state 없이 진입하면 아는 단어 10개를 한 번만 섞는다. 렌더마다 섞으면 문제가 바뀐다.
+  const [randomQueue, setRandomQueue] = useState<Word[]>([]);
+  useEffect(() => {
+    if (passedQueue.length === 0 && randomQueue.length === 0 && knownWords.length > 0) {
+      setRandomQueue([...knownWords].sort(() => Math.random() - 0.5).slice(0, 10));
+    }
+  }, [knownWords]);
+  const quizQueue: Word[] = passedQueue.length > 0 ? passedQueue : randomQueue;
 
   const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
   // 티어는 XP 기준이다. 부스트로 배수가 붙을 수 있어 클라에서 계산하지 않고 시작 시점 값을 기억한다.
@@ -177,8 +182,8 @@ const QuizScreen = () => {
   };
 
   // 스트릭 메시지
-  const streakMessage = combo >= 5 ? { text: `⚡ ${combo}연속! x2 보너스`, color: 'text-warning-400' }
-    : combo >= 3 ? { text: `🔥 ${combo}연속! +5P 보너스`, color: 'text-brand-400' }
+  const streakMessage = combo >= 5 ? { Icon: Zap, text: `${combo}연속! x2 보너스`, color: 'text-warning-400' }
+    : combo >= 3 ? { Icon: Flame, text: `${combo}연속! +5P 보너스`, color: 'text-brand-400' }
     : null;
 
   return (
@@ -186,8 +191,8 @@ const QuizScreen = () => {
       {/* 헤더 */}
       <div className="pt-4 px-5 pb-3 flex justify-between items-center bg-[var(--color-card)]">
         <span className="text-xs font-medium text-[var(--color-ink-4)]">{currentQuizIndex + 1} / {quizQueue.length}</span>
-        {/* 포인트 + 팝업 */}
-        <div className="relative flex items-center gap-1">
+        {/* 획득 포인트 팝업 (보유 포인트는 상단바에 있다) */}
+        <div className="relative h-5 w-12">
           {showPointPop && (
             <span
               key={totalEarned}
@@ -197,8 +202,6 @@ const QuizScreen = () => {
               +{lastEarned}P
             </span>
           )}
-          <Zap size={13} className="text-[var(--color-ink-4)] fill-current" />
-          <span className="text-sm font-bold text-[var(--color-ink)]">{points}</span>
         </div>
       </div>
 
@@ -236,8 +239,8 @@ const QuizScreen = () => {
       <div className="flex-1 flex flex-col px-5 py-5 gap-4">
         {/* 스트릭 배너 */}
         {streakMessage && status === 'idle' && (
-          <div className={`flex items-center justify-center py-2 rounded-chip bg-[var(--color-card)] ${streakMessage.color} text-xs font-bold`}>
-            {streakMessage.text}
+          <div className={`flex items-center justify-center gap-1 py-2 rounded-chip bg-[var(--color-card)] ${streakMessage.color} text-xs font-bold`}>
+            <streakMessage.Icon size={13} className="fill-current" />{streakMessage.text}
           </div>
         )}
 
@@ -261,7 +264,7 @@ const QuizScreen = () => {
             <div className="flex items-center gap-2">
               <span className="text-sm font-bold text-success-400">정답!</span>
               <span className="text-xs font-bold text-success-400">+{lastEarned}P</span>
-              {combo >= 3 && <span className="text-xs font-bold text-brand-400">🔥 {combo}연속</span>}
+              {combo >= 3 && <span className="flex items-center gap-0.5 text-xs font-bold text-brand-400"><Flame size={12} className="fill-current" />{combo}연속</span>}
             </div>
           )}
           {status === 'wrong' && (

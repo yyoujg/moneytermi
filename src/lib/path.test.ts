@@ -121,14 +121,17 @@ describe('buildPath', () => {
 });
 
 describe('기하', () => {
-  it('오프셋은 8주기이고 0에서 시작한다', () => {
-    expect(nodeOffsetX(0)).toBe(0);
-    expect(nodeOffsetX(8)).toBe(0);
-    for (let i = 0; i < 64; i++) expect(nodeOffsetX(i)).toBe(nodeOffsetX(i + 8));
+  it('오프셋은 왼쪽-오른쪽을 교대하고 폭은 일정하지 않다', () => {
+    expect(nodeOffsetX(0)).toBeLessThan(0);
+    for (let i = 0; i < 64; i++) expect(Math.sign(nodeOffsetX(i))).toBe(-Math.sign(nodeOffsetX(i + 1)));
+    expect(new Set(Array.from({ length: 12 }, (_, i) => Math.abs(nodeOffsetX(i)))).size).toBeGreaterThan(1);
   });
 
-  it('오프셋이 화면 밖으로 나가지 않는다 (320px 기준 여유 ±106)', () => {
-    for (let i = 0; i < 64; i++) expect(Math.abs(nodeOffsetX(i))).toBeLessThanOrEqual(68);
+  it('오프셋이 화면 밖으로 나가지 않는다 (320px 기준 한계 ±128, svg 반폭 안)', () => {
+    for (let i = 0; i < 64; i++) {
+      expect(Math.abs(nodeOffsetX(i))).toBeLessThanOrEqual(112);
+      expect(Math.abs(nodeOffsetX(i))).toBeLessThan(SPAN);
+    }
   });
 
   it('커넥터 양 끝 접선이 수직이다 — 조각을 이어도 이음새가 안 보이는 조건', () => {
@@ -182,6 +185,14 @@ describe('누적 복습 노드', () => {
     expect(r1.words).toHaveLength(8);
     expect(r2.words).toHaveLength(16);
     expect(r2.words.slice(0, 8).map(w => w.id)).toEqual(a.words.map(w => w.id));
+  });
+
+  it('앞 코스를 다 끝내지 않으면 다음 코스는 전부 잠긴다', () => {
+    const [, s2] = buildPath([a, b], new Set());
+    expect(s2.nodes.every(n => n.state === 'locked')).toBe(true);
+    // 픽스처 a·b는 같은 단어 id를 쓰므로 a를 다 알면 b도 done이 된다. 잠금이 풀리는지만 본다.
+    const [, open] = buildPath([a, b], new Set(a.words.map(w => w.id)));
+    expect(open.nodes.some(n => n.state !== 'locked')).toBe(true);
   });
 
   it('그 코스를 다 끝내야 열린다', () => {

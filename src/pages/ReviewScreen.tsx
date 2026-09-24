@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronRight, Lightbulb, Zap } from 'lucide-react';
+import { ChevronRight, Lightbulb, Zap, Flame } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Spacing } from '@toss/tds-mobile';
 import type { Word } from '../types';
@@ -151,8 +151,8 @@ const QuizPage = () => {
           <h2 className="text-xl font-bold text-[var(--color-ink)]">퀴즈</h2>
           <div className="flex items-center gap-2">
             {combo >= 2 && (
-              <div className="bg-brand-500 text-white text-2xs font-bold px-2.5 py-1 rounded-full">
-                🔥 {combo}연속
+              <div className="flex items-center gap-0.5 bg-brand-500 text-white text-2xs font-bold px-2.5 py-1 rounded-full">
+                <Flame size={11} className="fill-current" />{combo}연속
               </div>
             )}
             <div className="flex items-center gap-1 bg-brand-500/10 border border-brand-500/20 rounded-full px-3 py-1.5">

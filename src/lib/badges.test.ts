@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { BADGES, buildBadges, earnedCount } from './badges';
 
-const S = (words = 0, streak = 0, points = 0) => ({ words, streak, points });
+const S = (words = 0, streak = 0, xp = 0) => ({ words, streak, xp });
 
 describe('buildBadges', () => {
   it('아무것도 안 했으면 하나도 못 받는다', () => {

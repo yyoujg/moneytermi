@@ -17,7 +17,7 @@ const MyPageScreen = () => {
   const { points, xp, knownWords, attendanceDates, myEmoji, updateMyEmoji } = useAppContext();
   const stage = getGrowthStage(xp);
   const streak = calcStreak(attendanceDates);
-  const badges = buildBadges({ words: knownWords.length, streak, points: xp });
+  const badges = buildBadges({ words: knownWords.length, streak, xp });
 
   const earned = badges.filter(b => b.earned).length;
   const { user, isGuest, updateNickname, logout } = useAuth();

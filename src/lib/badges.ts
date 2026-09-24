@@ -1,6 +1,6 @@
-// 배지/업적 — 이미 있는 값(포인트·연속 학습일·학습한 단어 수)에서 파생한다.
+// 배지/업적 — 이미 있는 값(XP·연속 학습일·학습한 단어 수)에서 파생한다.
 // 획득 기록을 따로 저장하지 않으므로 서버 변경이 필요 없고, 조건을 다시 만족하면 항상 같은 결과가 나온다.
-export type BadgeStat = 'words' | 'streak' | 'points';
+export type BadgeStat = 'words' | 'streak' | 'xp';
 
 export type BadgeDef = {
   id: string;
@@ -18,12 +18,12 @@ export const BADGES: BadgeDef[] = [
   { id: 's3',    icon: '🔥', title: '3일 연속',    stat: 'streak', need: 3 },
   { id: 's7',    icon: '⚡', title: '일주일 연속', stat: 'streak', need: 7 },
   { id: 's30',   icon: '🏅', title: '한 달 연속',  stat: 'streak', need: 30 },
-  { id: 'p100',  icon: '🪙', title: '100P',        stat: 'points', need: 100 },
-  { id: 'p1000', icon: '💰', title: '1,000P',      stat: 'points', need: 1000 },
-  { id: 'p5000', icon: '👑', title: '5,000P',      stat: 'points', need: 5000 },
+  { id: 'x100',  icon: '🪙', title: '100 XP',      stat: 'xp',     need: 100 },
+  { id: 'x500',  icon: '💰', title: '500 XP',      stat: 'xp',     need: 500 },
+  { id: 'x1000', icon: '👑', title: '1,000 XP',    stat: 'xp',     need: 1000 },
 ];
 
-export type BadgeStats = { words: number; streak: number; points: number };
+export type BadgeStats = { words: number; streak: number; xp: number };
 export type Badge = BadgeDef & { earned: boolean; progress: number };
 
 export const buildBadges = (stats: BadgeStats): Badge[] =>

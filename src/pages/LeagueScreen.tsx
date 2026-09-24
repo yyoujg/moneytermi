@@ -1,39 +1,42 @@
 import { useEffect, useState } from 'react';
 import { Info, Share2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { TextButton, Spacing } from '@toss/tds-mobile';
+import { BottomSheet, TextButton, Spacing } from '@toss/tds-mobile';
 import { GROWTH_STAGES, getGrowthStage } from '../constants';
 import { useAppContext } from '../context/AppContext';
 import { useAuth } from '../hooks/useAuth';
-import { supabase } from '../lib/supabase';
+import { supabase, getGuestClient } from '../lib/supabase';
 import { logClick } from '../lib/analytics';
 import { shareTossLink } from '../lib/share';
 import { daysUntilReset } from '../lib/league';
 import { Card } from '../components/ui/Card';
+import { LeagueRules } from '../components/LeagueRules';
 
 type Row = { rank: number; nickname: string; emoji: string; points: number; is_me: boolean };
 type MyRank = { rank: number | null; total: number; points: number };
 
 const MEDAL = ['🥇', '🥈', '🥉'];
+const SHARE_MSG = '머니터미에서 경제 용어 배우고 리그 순위 올려봐요!';
 
 const LeagueScreen = () => {
-  const navigate = useNavigate();
   const { xp, myEmoji } = useAppContext();
-  const { user } = useAuth();
+  const { user, guestToken } = useAuth();
   const [rows, setRows] = useState<Row[] | null>(null);
   const [mine, setMine] = useState<MyRank | null>(null);
   const [failed, setFailed] = useState(false);
+  const [sheet, setSheet] = useState<'share' | 'rules' | null>(null);
 
   useEffect(() => {
+    // current_profile_id()는 x-guest-token 헤더로 나를 찾는다. 기본 클라이언트면 내 순위가 null이다.
+    const db = guestToken ? getGuestClient(guestToken) : supabase;
     Promise.all([
-      supabase.rpc('leaderboard_top', { p_limit: 10 }),
-      supabase.rpc('my_league_rank'),
+      db.rpc('leaderboard_top', { p_limit: 10 }),
+      db.rpc('my_league_rank'),
     ]).then(([top, my]) => {
       if (top.error || my.error) { setFailed(true); return; }
       setRows((top.data ?? []) as Row[]);
       setMine(my.data as MyRank);
     }).catch(() => setFailed(true));
-  }, []);
+  }, [guestToken]);
 
   const stage = getGrowthStage(xp);
   const next = stage.nextMinPoints;
@@ -44,16 +47,10 @@ const LeagueScreen = () => {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-[var(--color-ink)]">리그</h2>
           <div className="flex items-center gap-1">
-            <TextButton
-              size="small"
-              onClick={() => {
-                logClick('league_share');
-                shareTossLink('intoss://moneytermi/league', '머니터미에서 경제 용어 배우고 리그 순위 올려봐요!');
-              }}
-            >
+            <TextButton size="small" onClick={() => setSheet('share')}>
               <span className="flex items-center gap-1"><Share2 size={13} />공유</span>
             </TextButton>
-            <TextButton size="small" onClick={() => navigate('/league/rules')}>
+            <TextButton size="small" onClick={() => setSheet('rules')}>
               <span className="flex items-center gap-1"><Info size={13} />안내</span>
             </TextButton>
           </div>
@@ -166,6 +163,37 @@ const LeagueScreen = () => {
 
         <Spacing size={8} />
       </div>
+
+      <BottomSheet
+        open={sheet === 'rules'}
+        onDimmerClick={() => setSheet(null)}
+        header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>리그 안내</span>}
+      >
+        <div className="px-3 pb-6"><LeagueRules /></div>
+      </BottomSheet>
+
+      <BottomSheet
+        open={sheet === 'share'}
+        onDimmerClick={() => setSheet(null)}
+        header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>리그 공유</span>}
+      >
+        <div className="px-5 pb-6 flex flex-col gap-3">
+          <Card tone="surface" pad="md">
+            <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep">{SHARE_MSG}</p>
+            <p className="text-2xs text-[var(--color-ink-4)] mt-2!">intoss://moneytermi/league</p>
+          </Card>
+          <button
+            onClick={() => {
+              logClick('league_share');
+              shareTossLink('intoss://moneytermi/league', SHARE_MSG);
+              setSheet(null);
+            }}
+            className="w-full py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90"
+          >
+            토스로 공유하기
+          </button>
+        </div>
+      </BottomSheet>
     </div>
   );
 };

@@ -17,7 +17,7 @@
   (`src/hooks/useAuth.tsx`). 토스 로그인 미연동.
 - **문제**: 정책상 미니앱 로그인은 "토스 로그인만" 허용되며 자체/간편 로그인 단독 사용은
   제한됨. 단 기능성 푸시 자체는 **"토스에게 발송 요청"(서버리스) 방식이면 토스 로그인 불필요**
-  (`moneytermi-DAILY_TERM_PUSH2`는 이 방식으로 운영). 토스 로그인이 필수가 되는 경우는 직접 API
+  (`moneytermi-DAILY_TERM_PUSH3`는 이 방식으로 운영). 토스 로그인이 필수가 되는 경우는 직접 API
   발송(userKey 필요)·프로모션·토스페이 도입 시다. 부수적으로 게스트 토큰은 기기 변경/재설치 시
   소실되어 학습 진행도가 유실됨.
 - **권장 조치**: 토스 로그인 연동 후 `userKey`로 사용자 식별. 기존 게스트 프로필을
@@ -33,7 +33,7 @@
 ## C. 선택 (성장 / 마케팅 / 수익화)
 
 ### C-1. Segments + Smart Message 고도화
-- **현재 상태**: 콘솔 기능성 캠페인(`moneytermi-DAILY_TERM_PUSH2`) "토스에게 발송 요청"만 사용.
+- **현재 상태**: 콘솔 기능성 캠페인(`moneytermi-DAILY_TERM_PUSH3`) "토스에게 발송 요청"만 사용.
 - **권장 조치**: 세그먼트 기반 타게팅 발송으로 확장(토스 로그인 연동 전제, A-1 의존).
 - **근거**: [세그먼트](https://developers-apps-in-toss.toss.im/segment/intro.md),
   [스마트 메시지 개발](https://developers-apps-in-toss.toss.im/smart-message/develop.md)
@@ -67,7 +67,7 @@
 - **이용약관 / 개인정보처리방침 URL** 등록
 - **복호화 키 + AAD**: 콘솔이 이메일로 발급 → 서버에 안전 보관(사용자 정보 복호화용, 클라 노출 금지)
 - **연결 해제(unlink) 콜백**: 콜백 URL + Basic Auth 자격증명 등록(GET/POST 지원)
-- 참고: 기능성 푸시(스마트 메시지 `moneytermi-DAILY_TERM_PUSH2`)는 "토스에게 발송 요청" 방식이라 **토스 로그인 불필요**(A-1). 배포 완료.
+- 참고: 기능성 푸시(스마트 메시지 `moneytermi-DAILY_TERM_PUSH3`)는 "토스에게 발송 요청" 방식이라 **토스 로그인 불필요**(A-1). 배포 완료.
 
 ### E-2. 스마트 메시지(기능성 푸시) — DAILY_TERM_PUSH 상세 절차
 경로: 콘솔 → 워크스페이스 → 미니앱 → 좌측 **스마트 메시지**.
@@ -75,9 +75,9 @@
 데일리 용어는 매일 09:00 반복·고정 문구이므로 **콘솔 발송("토스에 발송 요청")** 방식 사용(동의문 연결 필수).
 
 > 정정(2026-06): 콘솔엔 별도 "동의문 코드" 없이 기능성 캠페인 발송 코드
-> `moneytermi-DAILY_TERM_PUSH2` 하나만 존재한다. 토스 문서가 동의문 코드/캠페인 발송 코드를
+> `moneytermi-DAILY_TERM_PUSH3` 하나만 존재한다. 토스 문서가 동의문 코드/캠페인 발송 코드를
 > 혼용하나, 앱의 `requestNotificationAgreement({ templateCode })`에는 콘솔에 실재하는 코드
-> (`moneytermi-DAILY_TERM_PUSH2`)를 넣어야 동의 UI가 뜬다. 발송은 "토스에게 발송 요청"이라
+> (`moneytermi-DAILY_TERM_PUSH3`)를 넣어야 동의 UI가 뜬다. 발송은 "토스에게 발송 요청"이라
 > 앱이 발송 API를 직접 호출하지 않는다(서버/userKey/mTLS 불필요).
 
 **1) 알림 동의문 등록** (스마트 메시지 → 알림 동의 탭 → 등록)
@@ -85,7 +85,7 @@
 - 안내 문구: `매일 오전 9시, 그날의 새로운 경제 용어를 학습할 수 있도록 '오늘의 용어' 알림을 보내드려요.`
   (발송 시점 + 상황·목적을 함께 적어야 검수 통과. 불명확 단어 금지)
 - 발송 시점/방식: 정해진 시간(매일 09:00 KST)
-- **코드: `moneytermi-DAILY_TERM_PUSH2`** — `src/hooks/useNotificationAgreement.ts`의 TEMPLATE_CODE와 반드시 일치
+- **코드: `moneytermi-DAILY_TERM_PUSH3`** — `src/hooks/useNotificationAgreement.ts`의 TEMPLATE_CODE와 반드시 일치
 - 서비스명/수신거부/고객센터 문구는 자동 포함
 - 반려 이력: 캠페인 34372 1차 반려(발송 시점·목적 누락 + 불명확 단어 "치치카") → 위 문구로 보강
 
@@ -115,7 +115,7 @@
 
 ### 1단계 — 사업자등록 불필요 (✅ 앱 출시 완료)
 워크스페이스/앱 등록/테스트/검수/출시 완료. 남은 콘솔 작업:
-- **스마트 메시지(푸시) 템플릿** (E-2) — ✅ 등록·운영 중 (`moneytermi-DAILY_TERM_PUSH2`)
+- **스마트 메시지(푸시) 템플릿** (E-2) — ✅ 등록·운영 중 (`moneytermi-DAILY_TERM_PUSH3`)
 - (선택) **세그먼트** (C-1)
 
 ### 2단계 — 사업자등록 필요 (등록 후)
@@ -132,7 +132,7 @@
 - 햅틱 피드백 `generateHapticFeedback` — `src/lib/feedback.ts`
 - `closeView`, `graniteEvent` backEvent 처리 — `src/App.tsx`, `src/hooks/useAuth.tsx`
 - 딥링크 파싱 `getSchemeUri` + `parseLandingPath` — `src/App.tsx`, `src/lib/landing.ts`
-- `navigationBar.withBackButton`, brand(displayName/primaryColor/icon) — `granite.config.ts`
+- `navigationBar.withBackButton`, brand(displayName/primaryColor/icon) — `apps-in-toss.config.ts`
 - TDS + `TDSMobileAITProvider` — `src/main.tsx`
 - 푸시 동의 `requestNotificationAgreement` — `src/hooks/useNotificationAgreement.ts`
 - Sentry 에러 모니터링, Supabase RLS

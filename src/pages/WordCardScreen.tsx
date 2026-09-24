@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Check, ExternalLink } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, ExternalLink, BookOpen, Newspaper, Link2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
@@ -73,6 +73,8 @@ const WordCard = ({
         {onToggleKnown && (
           <button
             onClick={onToggleKnown}
+            aria-label={isKnown ? '알고 있어요 해제' : '알고 있어요'}
+            aria-pressed={isKnown}
             className={`shrink-0 mt-1 w-8 h-8 rounded-full flex items-center justify-center transition-colors
               ${isKnown ? 'bg-brand-500 text-white' : 'bg-[var(--color-surface)] text-[var(--color-ink-4)]'}`}
           >
@@ -84,13 +86,13 @@ const WordCard = ({
 
     {/* 자세히 알아보기 */}
     <Card pad="none" className="px-5 pt-4 pb-5 flex flex-col gap-2.5">
-      <p className="text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]">📖 자세히 알아보기</p>
+      <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><BookOpen size={13} />자세히 알아보기</p>
       <p className="text-sm leading-[1.8] text-[var(--color-ink-2)] font-medium break-keep tracking-[-0.01em]">{word.detailedMeaning}</p>
     </Card>
 
     {/* 실시간 뉴스 */}
     <Card pad="none" className="px-5 pt-4 pb-5 flex flex-col gap-2.5">
-      <p className="text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]">🗞 실시간 뉴스 (출처: 네이버 뉴스)</p>
+      <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><Newspaper size={13} />실시간 뉴스 (출처: 네이버 뉴스)</p>
       {newsLoading ? (
         <div className="flex flex-col gap-3.5">
           {[1, 2, 3].map(i => (
@@ -135,7 +137,7 @@ const WordCard = ({
     {/* 관련 용어 */}
     {validRelated.length > 0 && (
       <Card pad="none" className="px-5 py-4 flex flex-col gap-2.5">
-        <p className="text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]">🔗 관련 용어</p>
+        <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><Link2 size={13} />관련 용어</p>
         <div className="flex flex-col">
           {validRelated.map((tag, i) => (
             <button
@@ -159,7 +161,7 @@ const WordCard = ({
 const WordCardScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { courses, allWords, knownWords, knownIds, toggleKnown, setKnownWords, claimPromotionReward } = useAppContext();
+  const { courses, allWords, knownWords, knownIds, hydrated, toggleKnown, setKnownWords, claimPromotionReward } = useAppContext();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const state = location.state as {
@@ -173,16 +175,25 @@ const WordCardScreen = () => {
 
   // 콜드 딥링크(state 없음) 진입 시: 미완료 코스 우선으로 기본 단어 로드
   const isDeepLink = !state?.words?.length;
+  // 딥링크 코스는 한 번 정하면 고정한다. knownIds를 따라가면 마지막 단어를 체크한 순간 코스가 바뀌어 index가 어긋난다.
+  const deepWordsRef = useRef<Word[] | null>(null);
   const words = React.useMemo<Word[]>(() => {
     if (state?.words?.length) return state.words;
+    if (deepWordsRef.current) return deepWordsRef.current;
+    if (!hydrated) return [];
     const course = courses.find(c => c.words.some(w => !knownIds.has(w.id))) ?? courses[0];
+    if (course) deepWordsRef.current = course.words;
     return course?.words ?? [];
-  }, [state, courses, knownIds]);
+  }, [state, courses, knownIds, hydrated]);
   const backPath = state?.backPath ?? (isDeepLink ? '/home' : '/course');
   const backState = state?.backState;
   const autoAdvance = state?.autoAdvance ?? false;
 
   const [wordIndex, setWordIndex] = React.useState(state?.index ?? 0);
+
+  // 로딩이 끝났는데도 보여줄 단어가 없으면 돌아간다. 렌더 중 navigate는 안 된다.
+  const noWords = words.length === 0 && !(isDeepLink && (courses.length === 0 || !hydrated));
+  useEffect(() => { if (noWords) navigate(backPath, { replace: true }); }, [noWords]);
 
   // 단어 변경 시 스크롤 맨 위로
   useEffect(() => {
@@ -261,12 +272,7 @@ const WordCardScreen = () => {
     );
   }
 
-  if (!words.length) {
-    // 딥링크 진입 직후 콘텐츠 로딩 대기 — 로딩 끝났는데도 비면 폴백
-    if (isDeepLink && courses.length === 0) return null;
-    navigate(backPath, { replace: true });
-    return null;
-  }
+  if (!words.length) return null;
 
   const word = words[wordIndex];
   const isKnown = knownWords.some(w => w.id === word.id);
@@ -327,6 +333,7 @@ const WordCardScreen = () => {
               <button
                 key={w.id}
                 disabled={!accessible}
+                aria-label={`${i + 1}번째 단어 ${w.word}`}
                 onClick={() => accessible && setWordIndex(i)}
                 className={`shrink-0 rounded-full transition-all
                   ${i === wordIndex
