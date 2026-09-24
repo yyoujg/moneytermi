@@ -214,11 +214,15 @@ const WordCardScreen = () => {
   const { newsItems, newsLoading } = useNews(words, wordIndex);
 
   // autoAdvance 완료 토스트 + 잔고 갱신 (새 단어 XP의 50단위 보너스 포인트는 서버에서만 계산된다)
+  // 같은 완료에 effect가 다시 돌아도(단어 목록 참조 변경, dev StrictMode) 토스트는 한 번만
+  const completedRef = useRef(false);
   useEffect(() => {
-    if (autoAdvance && words.length > 0 && wordIndex >= words.length) {
-      toast.success('학습 완료!');
-      refreshPoints();
-    }
+    const done = autoAdvance && words.length > 0 && wordIndex >= words.length;
+    if (!done) { completedRef.current = false; return; }
+    if (completedRef.current) return;
+    completedRef.current = true;
+    toast.success('학습 완료!');
+    refreshPoints();
   }, [wordIndex, words.length, autoAdvance]);
 
   // autoAdvance 완료 화면
@@ -229,13 +233,14 @@ const WordCardScreen = () => {
       .slice(0, Math.min(5, knownWords.length));
     return (
       <div className="flex h-full flex-col bg-[var(--color-canvas)]">
-        <div className="flex-1 flex flex-col items-center justify-center gap-5 p-8">
-          <div className="w-20 h-20 bg-[var(--color-card)] rounded-full flex items-center justify-center text-4xl">🎉</div>
-          <div className="text-center">
+        {/* 카드 + 알림 카드 + 축하가 작은 화면에서 넘칠 수 있어 이 영역만 스크롤 */}
+        <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden flex flex-col items-center justify-center-safe gap-5 p-8">
+          <div className="w-20 h-20 bg-[var(--color-card)] rounded-full flex items-center justify-center text-4xl anim-pop-in">🎉</div>
+          <div className="text-center anim-fade-up" style={{ '--i': 1 } as React.CSSProperties}>
             <h2 className="text-2xl font-bold text-[var(--color-ink)] mb-1!">학습 완료!</h2>
             <p className="text-sm text-[var(--color-ink-4)]">{words.length}개 단어를 학습했어요</p>
           </div>
-          <Card pad="md" className="w-full">
+          <Card pad="md" className="w-full anim-fade-up" style={{ '--i': 2 } as React.CSSProperties}>
             <p className="text-xs text-[var(--color-ink-4)] mb-3!">방금 배운 단어, 바로 확인해볼까요?</p>
             <div className="flex flex-wrap gap-1.5">
               {words.slice(0, 5).map(w => (
@@ -265,7 +270,7 @@ const WordCardScreen = () => {
             }
             return (
               <button
-                onClick={() => navigate('/quiz', { state: { quizQueue: quizWords } })}
+                onClick={() => navigate('/quiz', { state: { quizQueue: quizWords, backPath } })}
                 className="w-full py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90"
               >
                 바로 퀴즈 풀기 →
