@@ -2,7 +2,7 @@ import { List, ListRow, Spacing } from '@toss/tds-mobile';
 import { Card } from '../components/ui/Card';
 
 const RULES = [
-  { icon: '🌱', title: '캐릭터 성장', desc: '포인트를 모으면 캐릭터가 알개미 → 뽀시래기 → 왕개미 → 전투개미 → 슈퍼개미 순서로 자라요.' },
+  { icon: '🏆', title: '리그 티어', desc: '포인트를 모으면 브론즈 → 실버 → 골드 → 플래티넘 → 다이아 순서로 티어가 올라가요.' },
   { icon: '⚡', title: '포인트 획득', desc: '학습 완료, 퀴즈 정답, 미션 달성, 출석 시 포인트를 얻어요.' },
   { icon: '🎁', title: '친구 초대', desc: '친구를 초대하면 추가 포인트를 받을 수 있어요.' },
   { icon: '📺', title: '광고 시청', desc: '광고를 끝까지 보면 추가 포인트를 받을 수 있어요.' },
@@ -14,7 +14,7 @@ const LeagueRulesScreen = () => {
     <div className="flex flex-col h-full bg-[var(--color-canvas)]">
       {/* 헤더 */}
       <div className="pt-4 px-5 pb-4 bg-[var(--color-card)]">
-        <h2 className="text-base font-bold text-[var(--color-ink)]">캐릭터 키우기 안내</h2>
+        <h2 className="text-base font-bold text-[var(--color-ink)]">리그 안내</h2>
       </div>
 
       <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">

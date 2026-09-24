@@ -19,6 +19,7 @@ const CourseScreen = React.lazy(() => import('./pages/CourseScreen'));
 const ReviewScreen = React.lazy(() => import('./pages/ReviewScreen'));
 const QuizScreen = React.lazy(() => import('./pages/QuizScreen'));
 const WordCardScreen = React.lazy(() => import('./pages/WordCardScreen'));
+const LeagueScreen = React.lazy(() => import('./pages/LeagueScreen'));
 const LeagueRulesScreen = React.lazy(() => import('./pages/LeagueRulesScreen'));
 const MyPageScreen = React.lazy(() => import('./pages/MyPageScreen'));
 
@@ -165,7 +166,7 @@ const Layout = () => {
         <Route path="/" element={<Navigate to={resolveLandingTarget()} replace />} />
         <Route path="/home" element={<HomeScreen />} />
         <Route path="/course" element={<CourseScreen />} />
-        <Route path="/league" element={<Navigate to="/my" replace />} />
+        <Route path="/league" element={<LeagueScreen />} />
         <Route path="/review" element={<ReviewScreen />} />
         <Route path="/my" element={<MyPageScreen />} />
         <Route path="/word-card" element={<WordCardScreen />} />

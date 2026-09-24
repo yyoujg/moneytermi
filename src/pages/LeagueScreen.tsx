@@ -1,0 +1,155 @@
+import { useEffect, useState } from 'react';
+import { Info, Share2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { TextButton, Spacing } from '@toss/tds-mobile';
+import { GROWTH_STAGES, getGrowthStage } from '../constants';
+import { useAppContext } from '../context/AppContext';
+import { useAuth } from '../hooks/useAuth';
+import { supabase } from '../lib/supabase';
+import { logClick } from '../lib/analytics';
+import { shareTossLink } from '../lib/share';
+import { Card } from '../components/ui/Card';
+
+type Row = { rank: number; nickname: string; emoji: string; points: number; is_me: boolean };
+type MyRank = { rank: number | null; total: number; points: number };
+
+const MEDAL = ['🥇', '🥈', '🥉'];
+
+const LeagueScreen = () => {
+  const navigate = useNavigate();
+  const { points, myEmoji } = useAppContext();
+  const { user } = useAuth();
+  const [rows, setRows] = useState<Row[] | null>(null);
+  const [mine, setMine] = useState<MyRank | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    Promise.all([
+      supabase.rpc('leaderboard_top', { p_limit: 50 }),
+      supabase.rpc('my_league_rank'),
+    ]).then(([top, my]) => {
+      if (top.error || my.error) { setFailed(true); return; }
+      setRows((top.data ?? []) as Row[]);
+      setMine(my.data as MyRank);
+    }).catch(() => setFailed(true));
+  }, []);
+
+  const stage = getGrowthStage(points);
+  const next = stage.nextMinPoints;
+
+  return (
+    <div className="flex flex-col h-full bg-[var(--color-canvas)] pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
+      <div className="bg-[var(--color-card)] pt-4 px-5 pb-5">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-[var(--color-ink)]">리그</h2>
+          <div className="flex items-center gap-1">
+            <TextButton
+              size="small"
+              onClick={() => {
+                logClick('league_share');
+                shareTossLink('intoss://moneytermi/league', '머니터미에서 경제 용어 배우고 리그 순위 올려봐요!');
+              }}
+            >
+              <span className="flex items-center gap-1"><Share2 size={13} />공유</span>
+            </TextButton>
+            <TextButton size="small" onClick={() => navigate('/league/rules')}>
+              <span className="flex items-center gap-1"><Info size={13} />안내</span>
+            </TextButton>
+          </div>
+        </div>
+
+        {/* 내 티어 */}
+        <Card tone="surface" pad="lg" className="flex flex-col items-center text-center">
+          <div className="text-6xl mb-2">{stage.emoji}</div>
+          <p className="text-lg font-bold text-[var(--color-ink)] mb-1!">{stage.name}</p>
+          <p className="text-xs text-[var(--color-ink-3)] mb-3!">
+            {mine?.rank ? `${mine.total}명 중 ${mine.rank}위` : '순위는 포인트를 모으면 생겨요'}
+          </p>
+          <div className="w-full bg-[var(--color-card)] rounded-full h-1.5 overflow-hidden mb-1.5">
+            <div
+              className="bg-brand-500 h-full rounded-full transition-all duration-700"
+              style={{ width: `${next === null ? 100 : Math.min(100, Math.round(((points - stage.minPoints) / (next - stage.minPoints)) * 100))}%` }}
+            />
+          </div>
+          <p className="text-xs text-[var(--color-ink-4)]">
+            {next === null ? '최고 티어예요 🎉' : `다음 티어까지 ${next - points}P`}
+          </p>
+        </Card>
+
+        {/* 티어 로드맵 */}
+        <div className="flex justify-between items-start relative mt-5">
+          <div className="absolute top-4 left-4 right-4 h-[2px] bg-[var(--color-line)] z-0 rounded-full">
+            <div
+              className="h-full bg-brand-500 rounded-full transition-all duration-1000"
+              style={{ width: `${((stage.id - 1) / (GROWTH_STAGES.length - 1)) * 100}%` }}
+            />
+          </div>
+          {GROWTH_STAGES.map(s => {
+            const isCurrent = s.id === stage.id;
+            return (
+              <div key={s.id} className="flex flex-col items-center relative z-10 w-14">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm transition-all
+                  ${isCurrent ? 'bg-brand-500 scale-110' : s.id < stage.id ? 'bg-[var(--color-line)]' : 'bg-[var(--color-surface)]'}`}>
+                  {s.emoji}
+                </div>
+                <span className={`text-3xs font-medium text-center mt-1.5 ${isCurrent ? 'text-brand-500' : 'text-[var(--color-ink-4)]'}`}>
+                  {s.name}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 랭킹 */}
+      <div className="px-5 pt-5">
+        <p className="text-sm font-bold text-[var(--color-ink-2)] mb-3!">전체 순위</p>
+
+        {failed && (
+          <Card pad="lg">
+            <p className="text-sm text-[var(--color-ink-3)] text-center">순위를 불러오지 못했어요</p>
+          </Card>
+        )}
+
+        {!failed && rows === null && (
+          <Card pad="lg">
+            <div className="flex flex-col gap-3">
+              {[1, 2, 3].map(i => <div key={i} className="h-5 bg-[var(--color-surface)] rounded animate-pulse" />)}
+            </div>
+          </Card>
+        )}
+
+        {!failed && rows?.length === 0 && (
+          <Card pad="lg">
+            <p className="text-sm text-[var(--color-ink-3)] text-center">아직 순위에 오른 사람이 없어요.<br />먼저 학습해서 1위를 차지해보세요!</p>
+          </Card>
+        )}
+
+        {!failed && rows && rows.length > 0 && (
+          <Card pad="none" className="overflow-hidden">
+            {rows.map((r, i) => (
+              <div
+                key={`${r.rank}-${i}`}
+                className={`flex items-center gap-3 px-4 py-3 ${i < rows.length - 1 ? 'border-b border-[var(--color-line)]' : ''}`}
+                style={r.is_me ? { backgroundColor: 'var(--color-brand-soft)' } : undefined}
+              >
+                <span className="w-7 text-center text-sm font-bold text-[var(--color-ink-3)] shrink-0">
+                  {r.rank <= 3 ? MEDAL[r.rank - 1] : r.rank}
+                </span>
+                <span className="text-lg shrink-0">{r.is_me ? myEmoji : r.emoji}</span>
+                <span className={`flex-1 text-sm truncate ${r.is_me ? 'font-bold text-brand-500' : 'font-medium text-[var(--color-ink)]'}`}>
+                  {r.is_me ? (user?.nickname ?? r.nickname) : r.nickname}
+                </span>
+                <span className="text-sm font-bold text-[var(--color-ink-2)] shrink-0">{r.points.toLocaleString()}P</span>
+              </div>
+            ))}
+          </Card>
+        )}
+
+        <Spacing size={8} />
+      </div>
+    </div>
+  );
+};
+
+export default LeagueScreen;

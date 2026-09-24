@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef } from 'react';
-import { Home, ListChecks, User } from 'lucide-react';
+import { Home, ListChecks, Trophy, User } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSafeAreaInsets } from '../hooks/useSafeAreaInsets';
 
@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from '../hooks/useSafeAreaInsets';
 const NAV_ITEMS = [
   { path: '/course', icon: Home, label: '홈' },
   { path: '/home', icon: ListChecks, label: '퀘스트' },
+  { path: '/league', icon: Trophy, label: '리그' },
   { path: '/my', icon: User, label: '마이' },
 ];
 
