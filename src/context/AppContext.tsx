@@ -191,6 +191,11 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         setPoints(profile.points);  // 서버 단일 진실원
         setGems(profile.gems ?? 0);
         setBoostUntil(profile.boost_until ? new Date(profile.boost_until).getTime() : null);
+      } else if (profileErr) {
+        // migration_gems 적용 전에는 gems/boost_until 컬럼이 없어 위 조회가 통째로 실패한다.
+        // 포인트만이라도 읽어 앱이 멈추지 않게 한다.
+        const { data: basic } = await db.from('profiles').select('points').eq('id', profileId).single();
+        if (basic) setPoints(basic.points);
       }
 
       // 2. word_progress → 실제 Word 객체 복원

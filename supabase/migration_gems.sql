@@ -10,15 +10,23 @@
 -- 부스트로 늘어난 포인트는 point_events 트리거가 잡아 리그에도 반영된다.
 --
 -- 선행: migration_missions_slots.sql (submit_quiz_answer를 여기서 다시 덮어쓴다)
--- 적용: Supabase 대시보드 SQL Editor에서 실행.
+--
+-- 적용: 대시보드 SQL Editor에서 STEP별로 나눠 실행한다.
+--       한 번에 실행해 중간에 실패하면 어디서 멈췄는지 알기 어렵다.
+--       (앞서 BEGIN/COMMIT로 묶어 실행했다가 전체 롤백돼 컬럼이 안 생긴 적 있음)
 
-BEGIN;
-
+-- ===== STEP 1 =====
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS gems        INTEGER     NOT NULL DEFAULT 0 CHECK (gems >= 0);
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS boost_until TIMESTAMPTZ;
 
-GRANT SELECT (gems, boost_until) ON public.profiles TO anon, authenticated;
+-- 확인: SELECT gems, boost_until FROM public.profiles LIMIT 1;  ← 여기서 컬럼이 보여야 한다
 
+-- ===== STEP 2 =====
+-- profiles는 컬럼 단위로 SELECT 권한이 걸려 있어(schema.sql) 새 컬럼도 따로 열어줘야 한다.
+GRANT SELECT (gems, boost_until) ON public.profiles TO anon;
+GRANT SELECT (gems, boost_until) ON public.profiles TO authenticated;
+
+-- ===== STEP 3 =====
 -- ──────────────────────────────────────────
 -- 1. 퀴즈 채점 — 정답이면 젬 +1, 부스트 중이면 포인트 2배
 --    (migration_missions_slots.sql 버전에 젬/부스트만 얹었다)
@@ -103,6 +111,7 @@ BEGIN
 END;
 $$;
 
+-- ===== STEP 4 =====
 -- ──────────────────────────────────────────
 -- 2. 환전 — 10젬 단위로 젬당 10P
 -- ──────────────────────────────────────────
@@ -130,6 +139,7 @@ BEGIN
 END;
 $$;
 
+-- ===== STEP 5 =====
 -- ──────────────────────────────────────────
 -- 3. 부스트 — 30젬, 30분, 2배. 이미 켜져 있으면 거절(중복 구매 방지)
 -- ──────────────────────────────────────────
@@ -158,11 +168,13 @@ BEGIN
 END;
 $$;
 
+-- ===== STEP 6 =====
 GRANT EXECUTE ON FUNCTION public.submit_quiz_answer(INTEGER, TEXT, TEXT, BOOLEAN, BOOLEAN) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.exchange_gems(INTEGER) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.buy_boost()            TO anon, authenticated;
 
-COMMIT;
+-- ===== STEP 7 =====
+NOTIFY pgrst, 'reload schema';
 
 -- 확인
 --   SELECT gems, boost_until FROM public.profiles WHERE id = '<프로필 UUID>';
