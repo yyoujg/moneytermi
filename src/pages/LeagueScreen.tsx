@@ -26,7 +26,7 @@ const LeagueScreen = () => {
 
   useEffect(() => {
     Promise.all([
-      supabase.rpc('leaderboard_top', { p_limit: 50 }),
+      supabase.rpc('leaderboard_top', { p_limit: 10 }),
       supabase.rpc('my_league_rank'),
     ]).then(([top, my]) => {
       if (top.error || my.error) { setFailed(true); return; }
@@ -106,7 +106,7 @@ const LeagueScreen = () => {
       {/* 랭킹 */}
       <div className="px-5 pt-5">
         <div className="flex items-baseline justify-between mb-3">
-          <p className="text-sm font-bold text-[var(--color-ink-2)]">이번 주 순위</p>
+          <p className="text-sm font-bold text-[var(--color-ink-2)]">이번 주 TOP 10</p>
           <span className="text-2xs text-[var(--color-ink-4)]">매주 월요일 초기화 · {daysUntilReset()}일 남음</span>
         </div>
 
@@ -148,6 +148,19 @@ const LeagueScreen = () => {
                 <span className="text-sm font-bold text-[var(--color-ink-2)] shrink-0">{r.points.toLocaleString()}P</span>
               </div>
             ))}
+
+            {/* 10위 밖이면 내 순위를 맨 아래에 따로 붙인다 */}
+            {mine?.rank != null && !rows.some(r => r.is_me) && (
+              <div
+                className="flex items-center gap-3 px-4 py-3 border-t-2 border-dashed border-[var(--color-line)]"
+                style={{ backgroundColor: 'var(--color-brand-soft)' }}
+              >
+                <span className="w-7 text-center text-sm font-bold text-brand-500 shrink-0">{mine.rank}</span>
+                <span className="text-lg shrink-0">{myEmoji}</span>
+                <span className="flex-1 text-sm font-bold text-brand-500 truncate">{user?.nickname ?? '나'}</span>
+                <span className="text-sm font-bold text-[var(--color-ink-2)] shrink-0">{mine.points.toLocaleString()}P</span>
+              </div>
+            )}
           </Card>
         )}
 
