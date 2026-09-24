@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { ChevronRight, RotateCcw, Flame, ArrowRight } from 'lucide-react';
 import { Badge } from '@toss/tds-mobile';
+import { toast } from 'sonner';
+import { feedbackCorrect } from '../lib/feedback';
+import { useSettings } from '../hooks/useSettings';
 import { useNavigate } from 'react-router-dom';
 import { DEFAULT_NICKNAME, MISSION_XP, getGrowthStage } from '../constants';
 import { useAppContext } from '../context/AppContext';
@@ -15,6 +18,7 @@ const HomeScreen = () => {
   const navigate = useNavigate();
   const { hydrated, xp, knownWords, unknownWords, missions, claimReward, attendanceDates, dueQueue, myEmoji } = useAppContext();
   const { user } = useAuth();
+  const { soundOn, vibrationOn } = useSettings();
   const isNewUser = hydrated && knownWords.length + unknownWords.length === 0;
 
   // 복습 카드 노출 로깅 (세션 1회 래치, hydration 전 프레임 오발화 방지)
@@ -27,6 +31,17 @@ const HomeScreen = () => {
 
   const missionList = Object.values(missions).sort((a, b) => a.sortOrder - b.sortOrder);
   const streak = calcStreak(attendanceDates);
+
+  // 보상 수령: 성공하면 토스트 + 정답과 같은 햅틱, 실패(슬롯이 바뀌었거나 네트워크)면 이유를 알려준다
+  const handleClaim = async (missionId: string, reward: number) => {
+    const ok = await claimReward(missionId);
+    if (ok) {
+      feedbackCorrect(soundOn, vibrationOn);
+      toast.success(`+${reward}P · +${MISSION_XP} XP 받았어요`);
+    } else {
+      toast.error('보상을 받지 못했어요. 잠시 후 다시 시도해주세요');
+    }
+  };
   const resetLabel = `${Math.ceil(msUntilNextSlot() / 3600000)}시간 뒤 초기화`;
   const stage = getGrowthStage(xp);
 
@@ -112,9 +127,9 @@ const HomeScreen = () => {
                       <p className="text-2xs text-[var(--color-ink-4)] mt-0.5!">+{mission.reward}P · +{MISSION_XP} XP</p>
                     </div>
                     {mission.isRewarded
-                      ? <Badge color="elephant" size="small" variant="fill">완료</Badge>
+                      ? <span className="anim-pop-in inline-flex"><Badge color="elephant" size="small" variant="fill">완료</Badge></span>
                       : done
-                        ? <button onClick={() => claimReward(mission.id)} className="anim-attn px-3 py-1.5 rounded-button bg-brand-500 text-white text-xs font-bold active:bg-brand-600 shrink-0">받기</button>
+                        ? <button onClick={() => handleClaim(mission.id, mission.reward)} className="anim-attn px-3 py-1.5 rounded-button bg-brand-500 text-white text-xs font-bold active:bg-brand-600 shrink-0">받기</button>
                         : <span className="text-base font-bold text-[var(--color-ink)] shrink-0">{mission.current}<span className="text-xs text-[var(--color-ink-4)]">/{mission.target}</span></span>
                     }
                   </div>

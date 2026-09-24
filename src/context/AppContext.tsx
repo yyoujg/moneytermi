@@ -9,7 +9,7 @@ import { claimPromotion } from '../lib/promotion';
 import { logClick } from '../lib/analytics';
 import { missionSlot, msUntilNextSlot, toDateStr } from '../lib/date';
 import { nextSrs, gradeFromResult, addDays } from '../lib/srs';
-import { DAILY_REVIEW_CAP } from '../constants';
+import { DAILY_REVIEW_CAP, MISSION_XP } from '../constants';
 
 type WpRow = { word_id: number; ease: number; interval_d: number; reps: number; due_date: string };
 
@@ -34,7 +34,7 @@ type AppContextValue = {
   setUnknownWords: React.Dispatch<React.SetStateAction<Word[]>>;
   missions: Missions;
   setMissions: React.Dispatch<React.SetStateAction<Missions>>;
-  claimReward: (missionId: keyof Missions) => Promise<void>;
+  claimReward: (missionId: keyof Missions) => Promise<boolean>;
   claimReferralReward: (amount: number, unit: string) => Promise<number | null>;
   claimAdReward: (amount: number, unit: string) => Promise<number | null>;
   claimPromotionReward: (amount: number) => Promise<number | null>;
@@ -399,18 +399,21 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   // ── claimReward — 서버가 자격 검증 후 적립 ─────────────────────
-  const claimReward = async (missionId: keyof Missions) => {
+  // 성공 여부를 돌려줘 화면이 토스트/햅틱을 결정한다
+  const claimReward = async (missionId: keyof Missions): Promise<boolean> => {
     const mission = missions[missionId];
-    if (mission.current < mission.target || mission.isRewarded) return;
+    if (mission.current < mission.target || mission.isRewarded) return false;
     const today = toDateStr(new Date());
     const { data, error } = await dbRef.current.rpc('claim_mission_reward', {
       p_mission_id: missionId, p_date: today,
     });
-    if (error || !data) { console.error('[claimReward] 실패:', error); return; }
+    if (error || !data) { console.error('[claimReward] 실패:', error); return false; }
     setPoints(data.points);
+    setXp(x => x + MISSION_XP);   // 서버가 같이 준 XP. 부스트 중이면 다음 갱신 때 정확한 값으로 맞춰진다
     setMissions(prev => ({ ...prev, [missionId]: { ...prev[missionId], isRewarded: true } }));
     logClick('mission_reward_claim', { mission_id: missionId, reward: mission.reward });
     requestAppReview();
+    return true;
   };
 
   // ── claimReferralReward — 친구초대(contactsViral) 리워드, 서버가 상한 적용 후 적립 ──
