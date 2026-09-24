@@ -7,7 +7,7 @@ import { useSettings } from '../hooks/useSettings';
 import { useCountUp } from '../hooks/useCountUp';
 import { markNodeDone } from '../lib/pathProgress';
 import { getGrowthStage } from '../constants';
-import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
+import { feedbackCorrect, feedbackWrong, feedbackQuizComplete, feedbackTierUp } from '../lib/feedback';
 import { requestAppReview } from '../lib/review';
 import { logClick } from '../lib/analytics';
 import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
@@ -74,6 +74,9 @@ const QuizScreen = () => {
   const finished = quizQueue.length > 0 && currentQuizIndex >= quizQueue.length;
   useEffect(() => {
     if (finished) {
+      // 승급이면 웅장하게, 아니면 정답률에 따라
+      if (getGrowthStage(xp).id > getGrowthStage(xpAtStart.current).id) feedbackTierUp();
+      else feedbackQuizComplete(correctCount === quizQueue.length);
       logClick('quiz_complete', { mode: 'quiz', total: quizQueue.length, correct: correctCount, node_id: navState?.nodeId });
       if (navState?.nodeId) markNodeDone(navState.nodeId);   // 패스의 퀴즈·복습 노드를 완료 표시
       requestAppReview();
@@ -177,7 +180,7 @@ const QuizScreen = () => {
     const isCorrect = option.isCorrect;
 
     if (isCorrect) {
-      feedbackCorrect(soundOn, vibrationOn);
+      feedbackCorrect(soundOn, vibrationOn, combo + 1);
       setStatus('correct');
       setCorrectCount(c => c + 1);
 
@@ -197,7 +200,7 @@ const QuizScreen = () => {
         setStatus('idle');
       }, 300);
     } else {
-      feedbackWrong(soundOn, vibrationOn);
+      feedbackWrong();
       setCombo(0);
       setStatus('wrong');
       setShake(true);

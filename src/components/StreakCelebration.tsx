@@ -4,8 +4,7 @@ import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
 import { toDateStr } from '../lib/date';
 import { calcStreak, streakMessage, streakMilestone, weekDays } from '../lib/streak';
-import { feedbackCelebrate } from '../lib/feedback';
-import { useSettings } from '../hooks/useSettings';
+import { feedbackCelebrate, feedbackStreak } from '../lib/feedback';
 import { Storage } from '../lib/storage';
 
 // 학습을 끝낸 뒤 하루 1회 뜨는 연속학습 축하 화면.
@@ -14,7 +13,6 @@ const KEY = 'streak_celebrated_date';
 
 export const StreakCelebration = () => {
   const { attendanceDates, myEmoji, hydrated } = useAppContext();
-  const { vibrationOn } = useSettings();
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -27,7 +25,7 @@ export const StreakCelebration = () => {
       setShow(true);
       Storage.setItem(KEY, today).catch(() => {});
       const milestone = streakMilestone(streak);
-      if (milestone) feedbackCelebrate(vibrationOn);
+      if (milestone) feedbackCelebrate(); else feedbackStreak();
       logClick('streak_view', { streak, milestone: milestone ?? undefined });
     });
   }, [hydrated, attendanceDates]);

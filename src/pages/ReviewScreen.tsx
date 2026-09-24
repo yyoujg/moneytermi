@@ -8,7 +8,7 @@ import { requestAppReview } from '../lib/review';
 import { answerMatches } from '../lib/answer';
 import { logClick } from '../lib/analytics';
 import { maskTerm } from '../lib/quiz';
-import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
+import { feedbackCorrect, feedbackWrong, feedbackQuizComplete } from '../lib/feedback';
 import { useSettings } from '../hooks/useSettings';
 import { Card } from '../components/ui/Card';
 import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
@@ -60,6 +60,7 @@ const QuizPage = () => {
   const completed = started && index >= queue.length;
   useEffect(() => {
     if (completed) {
+      feedbackQuizComplete(totalCorrect === queue.length);
       logClick('quiz_complete', { mode: 'review', total: queue.length, correct: totalCorrect });
       requestAppReview();
     }
@@ -88,14 +89,14 @@ const QuizPage = () => {
     }
 
     if (isCorrect) {
-      feedbackCorrect(soundOn, vibrationOn);
+      feedbackCorrect(soundOn, vibrationOn, combo + 1);
       setTotalCorrect((c) => c + 1);
       setStatus('correct');
       const res = await submitQuizAnswer(word.id, input, 'typed', showHint, index === 0);
       if (res) setCombo(res.combo);
       setTimeout(goNext, 900);
     } else {
-      feedbackWrong(soundOn, vibrationOn);
+      feedbackWrong();
       setCombo(0);
       setStatus('wrong');
       void submitQuizAnswer(word.id, input, 'typed', showHint, index === 0);
