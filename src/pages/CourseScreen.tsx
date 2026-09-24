@@ -1,14 +1,14 @@
 import React, { useMemo, useRef, useState, useLayoutEffect } from 'react';
-import { Check, ChevronRight, Heart, Lock, PenLine, X } from 'lucide-react';
+import { BookOpen, Check, ChevronRight, Flame, Lock, PenLine, Play, X, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { SearchField } from '@toss/tds-mobile';
 import { toast } from 'sonner';
 import { useAppContext } from '../context/AppContext';
-import { useHearts } from '../hooks/useHearts';
 import { getGrowthStage } from '../constants';
+import { calcStreak } from '../lib/streak';
+import { isRewardedAdEnabled, showRewardedAd } from '../lib/ads';
 import { logClick } from '../lib/analytics';
 import { buildPath, connectorD, NODE, nodeOffsetX, ROW, SPAN, sectionColor, type PathNode } from '../lib/path';
-import { MAX_HEARTS } from '../lib/hearts';
 import { Card } from '../components/ui/Card';
 
 // 노드 원. TDS 리셋이 <button>의 rounded-*를 먹으므로 borderRadius는 인라인 스타일로 준다
@@ -64,8 +64,7 @@ const NodeCircle = ({ node, index, color, isFocus, onTap, nodeRef }: {
 
 const CourseScreen = () => {
   const navigate = useNavigate();
-  const { hydrated, knownIds, courses, allWords, knownWords, points } = useAppContext();
-  const { hearts, loaded: heartsLoaded, trySpend, msUntilNext } = useHearts();
+  const { hydrated, knownIds, courses, allWords, knownWords, points, attendanceDates, claimAdReward } = useAppContext();
 
   const [query, setQuery] = useState('');
   const [focused, setFocused] = useState(false);
@@ -112,21 +111,26 @@ const CourseScreen = () => {
       return;
     }
 
-    // 이미 끝낸 레슨 복습은 하트를 쓰지 않는다. 하트가 없어도 복습은 막지 않는다.
-    if (node.state !== 'done') {
-      if (!trySpend()) {
-        logClick('path_heart_empty', { course_id: node.courseId });
-        const min = Math.ceil(msUntilNext() / 60000);
-        toast.error(`하트가 없어요. ${min}분 뒤에 1개 충전돼요`);
-        return;
-      }
-      if (courseKnown === 0) logClick('course_start', { course_id: node.courseId, title: node.courseId });
+    if (node.state !== 'done' && courseKnown === 0) {
+      logClick('course_start', { course_id: node.courseId, title: node.courseId });
     }
 
     navigate('/word-card', { state: { words: node.words, index: 0, backPath: '/course', autoAdvance: true } });
   };
 
   const totalKnown = knownWords.length;
+  const streak = calcStreak(attendanceDates);
+  const stage = getGrowthStage(points);
+
+  const handleAdForPoints = () => {
+    if (!isRewardedAdEnabled()) return;
+    logClick('rewarded_ad_start', { from: 'home_points' });
+    showRewardedAd((amount, unit) => {
+      claimAdReward(amount, unit).then(credited => {
+        if (credited) toast.success(`+${credited}P 받았어요`);
+      });
+    });
+  };
 
   return (
     <div className="flex flex-col h-full bg-[var(--color-canvas)] pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
@@ -135,25 +139,30 @@ const CourseScreen = () => {
       <div className="sticky top-0 z-20 bg-[var(--color-card)]">
         <div className="pt-4 px-5 pb-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-[var(--color-ink)]">홈</h2>
-              <p className="text-xs text-[var(--color-ink-3)] mt-0.5!">{totalKnown}개 완료 · {allWords.length - totalKnown}개 남음</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-[var(--color-surface)]">
-                <Heart size={13} className="text-danger-400 fill-current" />
-                <span className="text-xs font-bold text-[var(--color-ink-2)]">
-                  {heartsLoaded ? hearts : MAX_HEARTS}
-                </span>
-              </div>
-              <button
-                onClick={() => setShowSearch(s => !s)}
-                className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors
-                  ${showSearch ? 'bg-brand-500 text-white' : 'bg-[var(--color-surface)] text-[var(--color-ink-3)]'}`}
-              >
-                {showSearch ? <X size={15} /> : <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>}
-              </button>
-            </div>
+            <h2 className="text-xl font-bold text-[var(--color-ink)]">홈</h2>
+            <button
+              onClick={() => setShowSearch(s => !s)}
+              className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors
+                ${showSearch ? 'bg-brand-500 text-white' : 'bg-[var(--color-surface)] text-[var(--color-ink-3)]'}`}
+            >
+              {showSearch ? <X size={15} /> : <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>}
+            </button>
+          </div>
+
+          {/* 한 줄 요약 — 포인트를 누르면 광고로 충전 */}
+          <div className="flex items-center gap-3 mt-2 text-2xs text-[var(--color-ink-3)]">
+            <span className="flex items-center gap-1"><Flame size={12} className="text-brand-500 fill-current" />{streak}일</span>
+            <span className="flex items-center gap-1">{stage.emoji}{stage.name}</span>
+            <button
+              onClick={handleAdForPoints}
+              disabled={!isRewardedAdEnabled()}
+              className="flex items-center gap-1 disabled:opacity-100"
+            >
+              <Zap size={12} className="text-brand-500 fill-current" />
+              {points.toLocaleString()}P
+              {isRewardedAdEnabled() && <Play size={10} className="text-brand-500 ml-0.5" />}
+            </button>
+            <span className="flex items-center gap-1"><BookOpen size={12} />{totalKnown}개</span>
           </div>
 
           {/* 검색창 */}

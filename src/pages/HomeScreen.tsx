@@ -3,7 +3,7 @@ import { ChevronRight, Zap, Flame, BookOpen, RotateCcw } from 'lucide-react';
 import { Badge } from '@toss/tds-mobile';
 import { useNavigate } from 'react-router-dom';
 import type { Mission, Missions } from '../types';
-import { getGrowthStage } from '../constants';
+import { DEFAULT_NICKNAME, getGrowthStage } from '../constants';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
 import { calcStreak } from '../lib/streak';
@@ -42,7 +42,7 @@ const HomeScreen = () => {
             <div className="inline-flex items-center px-2 py-1 rounded mb-2" style={{ backgroundColor: 'var(--color-surface)' }}>
               <span className="text-2xs font-medium text-[var(--color-ink-4)]">{stage.emoji} {stage.name}</span>
             </div>
-            <h1 className="text-xl font-bold text-[var(--color-ink)]">안녕하세요, {user?.nickname ?? '예비슈퍼개미'}님</h1>
+            <h1 className="text-xl font-bold text-[var(--color-ink)]">안녕하세요, {user?.nickname ?? DEFAULT_NICKNAME}님</h1>
           </div>
           <div className="w-10 h-10 bg-[var(--color-surface)] rounded-full flex items-center justify-center overflow-hidden shrink-0">
             <span className="text-lg">{myEmoji}</span>

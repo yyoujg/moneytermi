@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { BookOpen, Settings, LogOut, ChevronRight, Zap, Flame, ShieldAlert, Pencil } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
-import { getGrowthStage } from '../constants';
+import { DEFAULT_NICKNAME, getGrowthStage } from '../constants';
 import { calcStreak } from '../lib/streak';
 import { List, ListRow, Spacing, ConfirmDialog } from '@toss/tds-mobile';
 import { useAuth } from '../hooks/useAuth';
 import { AttendanceCalendar } from '../components/mypage/AttendanceCalendar';
-import { GrowthCard } from '../components/mypage/GrowthCard';
 import { GuideSheet } from '../components/mypage/GuideSheet';
 import { EmojiPickerSheet } from '../components/mypage/EmojiPickerSheet';
 import { SettingsSheet } from '../components/mypage/SettingsSheet';
@@ -92,7 +91,7 @@ const MyPageScreen = () => {
               onClick={() => setShowNicknameSheet(true)}
               className="flex items-center gap-1.5 group active:opacity-70"
             >
-              <p className="font-bold text-[var(--color-ink)] text-base">{user?.nickname ?? '예비슈퍼개미'}</p>
+              <p className="font-bold text-[var(--color-ink)] text-base">{user?.nickname ?? DEFAULT_NICKNAME}</p>
               <Pencil size={13} className="text-[var(--color-ink-4)] group-active:text-brand-400" />
             </button>
             {isGuest && (
@@ -131,8 +130,6 @@ const MyPageScreen = () => {
       </div>
 
       <div className="px-5 pt-5 flex flex-col gap-4">
-        <GrowthCard />
-
         {/* 출석 달력 */}
         <div>
           <div className="flex items-center justify-between mb-3">

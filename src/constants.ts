@@ -1,7 +1,12 @@
 // 프로필 생성 시 서버/클라가 넣는 기본 닉네임. 이 값이면 사용자가 아직 직접 정하지 않은 것으로 보고
 // 앱 진입 시 설정을 강제한다(App.tsx NicknameGate).
-export const DEFAULT_NICKNAME = '예비슈퍼개미';
-export const isDefaultNickname = (n?: string | null) => !n?.trim() || n.trim() === DEFAULT_NICKNAME;
+export const DEFAULT_NICKNAME = '새친구';
+// 개미 컨셉을 걷어내기 전 기본값도 함께 막는다 — 기존 사용자가 그대로 남아 있다.
+const LEGACY_DEFAULT_NICKNAMES = ['예비슈퍼개미'];
+export const isDefaultNickname = (n?: string | null) => {
+  const v = n?.trim();
+  return !v || v === DEFAULT_NICKNAME || LEGACY_DEFAULT_NICKNAMES.includes(v);
+};
 
 export type GrowthStage = {
   id: number;
@@ -11,12 +16,13 @@ export type GrowthStage = {
   nextMinPoints: number | null; // null = 최고 단계
 };
 
+// 리그 티어. 누적 포인트로 결정된다.
 export const GROWTH_STAGES: Omit<GrowthStage, 'nextMinPoints'>[] = [
-  { id: 1, name: '알개미',   emoji: '🥚', minPoints: 0 },
-  { id: 2, name: '뽀시래기', emoji: '🐛', minPoints: 100 },
-  { id: 3, name: '왕개미',   emoji: '🐜', minPoints: 500 },
-  { id: 4, name: '전투개미', emoji: '🐝', minPoints: 1500 },
-  { id: 5, name: '슈퍼개미', emoji: '🦸', minPoints: 4000 },
+  { id: 1, name: '브론즈',   emoji: '🥉', minPoints: 0 },
+  { id: 2, name: '실버',     emoji: '🥈', minPoints: 100 },
+  { id: 3, name: '골드',     emoji: '🥇', minPoints: 500 },
+  { id: 4, name: '플래티넘', emoji: '💠', minPoints: 1500 },
+  { id: 5, name: '다이아',   emoji: '💎', minPoints: 4000 },
 ];
 
 export const getGrowthStage = (points: number): GrowthStage => {
