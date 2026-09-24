@@ -9,6 +9,7 @@ import { answerMatches } from '../lib/answer';
 import { logClick } from '../lib/analytics';
 import { Card } from '../components/ui/Card';
 import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
+import { StreakCelebration } from '../components/StreakCelebration';
 
 type Status = 'idle' | 'correct' | 'wrong';
 
@@ -124,6 +125,7 @@ const QuizPage = () => {
         </div>
         <div className="w-full max-w-sm mb-8">
           <DailyAlarmPromptCard />
+          <StreakCelebration />
         </div>
         <button
           onClick={() => navigate('/home')}

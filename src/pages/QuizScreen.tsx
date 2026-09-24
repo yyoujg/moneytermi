@@ -9,6 +9,7 @@ import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
 import { requestAppReview } from '../lib/review';
 import { logClick } from '../lib/analytics';
 import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
+import { StreakCelebration } from '../components/StreakCelebration';
 import { Card } from '../components/ui/Card';
 import { buildQuizItem, pickQuizType, type QuizOption } from '../lib/quiz';
 
@@ -115,6 +116,7 @@ const QuizScreen = () => {
           </Card>
 
           <DailyAlarmPromptCard />
+          <StreakCelebration />
         </div>
 
         <div className="px-5 pb-12 flex flex-col gap-3">

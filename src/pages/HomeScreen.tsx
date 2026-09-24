@@ -6,7 +6,7 @@ import type { Mission, Missions } from '../types';
 import { getGrowthStage } from '../constants';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
-import { toDateStr } from '../lib/date';
+import { calcStreak } from '../lib/streak';
 import { useAuth } from '../hooks/useAuth';
 import { WeeklyBarChart } from '../components/home/WeeklyBarChart';
 import { Card } from '../components/ui/Card';
@@ -27,19 +27,7 @@ const HomeScreen = () => {
     logClick('review_prompt_view', { count: dueQueue.length });
   }, [hydrated, dueQueue.length]);
 
-  // 연속 출석일
-  const streak = (() => {
-    const today = new Date();
-    let count = 0;
-    const s = new Set(attendanceDates);
-    for (let i = 0; i < 365; i++) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      if (s.has(toDateStr(d))) count++;
-      else break;
-    }
-    return count;
-  })();
+  const streak = calcStreak(attendanceDates);
 
   // 오늘 목표 (m3: 퀴즈)
   const m3 = missions.m3;

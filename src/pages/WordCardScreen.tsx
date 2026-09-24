@@ -10,6 +10,7 @@ import { requestAppReview } from '../lib/review';
 import { claimPromotion } from '../lib/promotion';
 import { useNews, type NaverNewsItem } from '../hooks/useNews';
 import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
+import { StreakCelebration } from '../components/StreakCelebration';
 import { Card } from '../components/ui/Card';
 
 const ACCENT = 'var(--color-brand-500)';
@@ -221,6 +222,7 @@ const WordCardScreen = () => {
             </div>
           </Card>
           <DailyAlarmPromptCard />
+          <StreakCelebration />
         </div>
         <div className="px-5 pb-12 flex flex-col gap-2.5">
           {(() => {
