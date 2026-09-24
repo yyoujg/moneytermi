@@ -55,9 +55,11 @@ const WordCard = ({
   keyword: string;
   allWords: Word[];
 }) => {
-  const validRelated = (word.relatedWords ?? []).filter(
-    rw => allWords.some(w => w.word === rw)
-  );
+  // 연관검색어는 '주가지수' 같은 기본형으로 적혀 있고 단어는 '주가지수선물거래(…)'처럼 긴 경우가 있어 기본형으로도 맞춘다.
+  const baseOf = (w: string) => w.split(/[(/;]/)[0].trim();
+  const validRelated = (word.relatedWords ?? [])
+    .map(rw => allWords.find(w => w.word === rw)?.word ?? allWords.find(w => baseOf(w.word) === baseOf(rw))?.word)
+    .filter((w, i, arr): w is string => !!w && w !== word.word && arr.indexOf(w) === i);
   return (
   <div className="flex flex-col gap-3 px-5 pb-6">
 

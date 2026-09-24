@@ -76,8 +76,25 @@ const QuizScreen = () => {
     }
   }, [finished]);
 
+  // 풀 문제가 없을 때(아는 단어 0개로 딥링크 진입 등). 완료 화면으로 보내면 "0문제 완료 🎉"가 뜬다.
+  if (quizQueue.length === 0) {
+    return (
+      <div className="flex h-full flex-col bg-[var(--color-canvas)]">
+        <div className="flex-1 flex flex-col items-center justify-center px-8 gap-3 text-center">
+          <h2 className="text-xl font-bold text-[var(--color-ink)]">아직 풀 문제가 없어요</h2>
+          <p className="text-sm text-[var(--color-ink-4)] break-keep">단어를 먼저 배우면 배운 단어로 퀴즈를 낼 수 있어요.</p>
+        </div>
+        <div className="px-5 pb-12">
+          <button onClick={() => navigate('/course')} className="w-full py-4 rounded-button text-sm font-bold text-white bg-brand-500 active:opacity-90">
+            학습하러 가기
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // 완료 화면
-  if (!quizQueue || quizQueue.length === 0 || currentQuizIndex >= quizQueue.length) {
+  if (currentQuizIndex >= quizQueue.length) {
     const accuracy = quizQueue.length > 0 ? Math.round((correctCount / quizQueue.length) * 100) : 0;
     const stageBefore = getGrowthStage(xpAtStart.current);
     const stageAfter = getGrowthStage(xp);
@@ -235,8 +252,8 @@ const QuizScreen = () => {
         />
       </div>
 
-      {/* 콘텐츠 */}
-      <div className="flex-1 flex flex-col px-5 py-5 gap-4">
+      {/* 콘텐츠 — 뜻 보기 4개가 길면 작은 화면에서 넘치므로 이 영역만 스크롤 */}
+      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col px-5 py-5 gap-4 [&::-webkit-scrollbar]:hidden">
         {/* 스트릭 배너 */}
         {streakMessage && status === 'idle' && (
           <div className={`flex items-center justify-center gap-1 py-2 rounded-chip bg-[var(--color-card)] ${streakMessage.color} text-xs font-bold`}>

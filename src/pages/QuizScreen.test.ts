@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { maskTerm } from '../lib/quiz';
 import { calcEarned, getOptions, getDistractors, buildQuizItem, pickQuizType, clozeText } from '../lib/quiz';
 import type { Word } from '../types';
 
@@ -148,5 +149,19 @@ describe('getDistractors 카테고리 우선', () => {
 
   it('categoryOf 없으면 기존 동작(3개 반환)', () => {
     expect(getDistractors(allWords[0], allWords, allWords)).toHaveLength(3);
+  });
+});
+
+describe('maskTerm', () => {
+  it('용어와 바로 뒤 영문 괄호를 가린다', () => {
+    expect(maskTerm('가정의 수입과 지출을 표시한 것을 가계수지(Household Income)라 한다.', '가계수지'))
+      .toBe('가정의 수입과 지출을 표시한 것을 ____라 한다.');
+  });
+  it('괄호/슬래시가 붙은 단어는 기본형도 가린다', () => {
+    expect(maskTerm('공급사용표는 산업연관표의 기초다.', '공급사용표(SUT)')).toBe('____는 산업연관표의 기초다.');
+    expect(maskTerm('중개무역과 중계무역은 다르다.', '중개무역/중계무역')).toBe('____과 중계무역은 다르다.');
+  });
+  it('용어가 없으면 그대로', () => {
+    expect(maskTerm('아무 관련 없는 문장', '가계수지')).toBe('아무 관련 없는 문장');
   });
 });

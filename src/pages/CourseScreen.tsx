@@ -3,6 +3,8 @@ import { BookOpen, Check, Lock, PenLine, RotateCcw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
+import { feedbackTap } from '../lib/feedback';
+import { useSettings } from '../hooks/useSettings';
 import { buildPath, connectorD, NODE, nodeOffsetX, ROW, SPAN, sectionColor, type PathNode } from '../lib/path';
 
 // 노드 원. TDS 리셋이 <button>의 rounded-*를 먹으므로 borderRadius는 인라인 스타일로 준다
@@ -62,6 +64,7 @@ const NodeCircle = ({ node, index, color, isFocus, onTap, nodeRef }: {
 const CourseScreen = () => {
   const navigate = useNavigate();
   const { hydrated, knownIds, courses } = useAppContext();
+  const { vibrationOn } = useSettings();
 
   const sections = useMemo(() => buildPath(courses, knownIds), [courses, knownIds]);
 
@@ -85,6 +88,7 @@ const CourseScreen = () => {
   const handleNodeTap = (node: PathNode, index: number, courseKnown: number) => {
     // disabled 버튼은 click이 안 오지만, 웹뷰/리셋 CSS에 따라 새는 경우가 있어 한 번 더 막는다.
     if (node.state === 'locked') return;
+    feedbackTap(vibrationOn);
     logClick('path_node_click', { course_id: node.courseId, type: node.type, index, state: node.state });
 
     if (node.type === 'quiz' || node.type === 'review') {
