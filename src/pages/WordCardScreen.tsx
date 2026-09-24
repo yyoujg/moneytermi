@@ -54,6 +54,14 @@ const wordExtras = (word: Word, allWords: Word[]) => {
   return { detail, related };
 };
 
+// 본문이 500자 안팎의 한 덩어리라 문장 2개씩 문단으로 나눈다
+const toParagraphs = (text: string) => {
+  const sentences = text.split(/(?<=[.!?])\s+/);
+  const out: string[] = [];
+  for (let i = 0; i < sentences.length; i += 2) out.push(sentences.slice(i, i + 2).join(' '));
+  return out;
+};
+
 const WordCard = ({
   word,
   step,
@@ -110,7 +118,11 @@ const WordCard = ({
     {step === 'detail' && detail && (
       <Card pad="none" className="px-5 pt-4 pb-5 flex flex-col gap-2.5">
         <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><BookOpen size={13} />자세히 알아보기</p>
-        <p className="text-sm leading-[1.8] text-[var(--color-ink-2)] font-medium break-keep tracking-[-0.01em]">{detail}</p>
+        <div className="flex flex-col gap-3">
+          {toParagraphs(detail).map((para, i) => (
+            <p key={i} className="text-sm leading-[1.8] text-[var(--color-ink-2)] font-medium break-keep tracking-[-0.01em]">{para}</p>
+          ))}
+        </div>
       </Card>
     )}
 
