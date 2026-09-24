@@ -116,9 +116,9 @@ const CourseScreen = () => {
     <div className="flex flex-col h-full bg-[var(--color-canvas)] pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
 
       {/* 헤더 — 한 줄 요약만 */}
-      <div className="sticky top-0 z-20 bg-[var(--color-card)] px-5 pt-4 pb-3">
+      <div className="sticky top-0 z-20 h-12 shrink-0 flex items-center bg-[var(--color-card)] px-5">
         {/* 한 줄 요약 — 포인트를 누르면 광고로 충전 */}
-        <div className="flex items-center gap-3 mt-2 text-2xs text-[var(--color-ink-3)]">
+        <div className="flex items-center gap-3 text-2xs text-[var(--color-ink-3)]">
           <span className="flex items-center gap-1"><Flame size={12} className="text-brand-500 fill-current" />{streak}일</span>
           <span className="flex items-center gap-1">{stage.emoji}{stage.name}</span>
           <button
@@ -141,7 +141,7 @@ const CourseScreen = () => {
         return (
         <section key={sec.course.id}>
           {/* 코스 배너 */}
-          <div className="mx-5 mt-5 mb-1 rounded-card px-5 py-4" style={{ background: color.face }}>
+          <div className="sticky top-12 z-10 mx-5 mt-5 mb-1 rounded-card px-5 py-4 shadow-md" style={{ background: color.face }}>
             <p className="text-2xs font-bold text-white/70">{sec.course.level} · {sec.course.category}</p>
             <h3 className="text-base font-bold text-white mt-1! break-keep">{sec.course.title}</h3>
             <p className="text-2xs text-white/80 mt-1.5!">{sec.knownCount} / {sec.course.words.length} 단어</p>
