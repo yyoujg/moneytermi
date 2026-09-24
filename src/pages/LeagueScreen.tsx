@@ -15,7 +15,13 @@ type Row = { rank: number; nickname: string; emoji: string; points: number; is_m
 type MyRank = { rank: number | null; total: number; points: number };
 
 const MEDAL = ['🥇', '🥈', '🥉'];
-const SHARE_MSG = '머니터미에서 경제 용어 배우고 리그 순위 올려봐요!';
+// 공유 문구: 이번 주 성과가 있으면 그걸 앞세운다
+const shareMessage = (tier: string, weeklyXp: number, rank: number | null | undefined) =>
+  rank
+    ? `이번 주 ${weeklyXp.toLocaleString()}XP로 리그 ${rank}위! 머니터미에서 경제 용어 같이 배워요`
+    : weeklyXp > 0
+      ? `이번 주 ${weeklyXp.toLocaleString()}XP 모았어요. 머니터미에서 경제 용어 같이 배워요`
+      : `머니터미에서 경제 용어 배우고 ${tier} 리그부터 올라가봐요!`;
 
 const LeagueScreen = () => {
   const { xp, myEmoji } = useAppContext();
@@ -181,17 +187,26 @@ const LeagueScreen = () => {
         header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>리그 공유</span>}
       >
         <div className="px-5 pb-6 flex flex-col gap-3">
-          <Card tone="surface" pad="md">
-            <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep">{SHARE_MSG}</p>
-            <p className="text-2xs text-[var(--color-ink-4)] mt-2!">intoss://moneytermi/league</p>
+          {/* 받는 사람이 보게 될 내용 미리보기: 내 카드 + 문구. 내부 스킴 주소는 보여주지 않는다 */}
+          <Card tone="surface" pad="md" className="flex flex-col gap-3 anim-fade-up">
+            <div className="flex items-center gap-3">
+              <span className="w-11 h-11 flex items-center justify-center text-2xl shrink-0" style={{ borderRadius: 9999, background: 'var(--color-card)' }}>{myEmoji}</span>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-[var(--color-ink)] truncate">{user?.nickname ?? '나'}</p>
+                <p className="text-2xs text-[var(--color-ink-4)]">{stage.emoji} {stage.name} · 이번 주 {(mine?.points ?? 0).toLocaleString()}XP{mine?.rank ? ` · ${mine.rank}위` : ''}</p>
+              </div>
+            </div>
+            <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep">{shareMessage(stage.name, mine?.points ?? 0, mine?.rank)}</p>
           </Card>
+          <p className="text-2xs text-[var(--color-ink-4)] px-1 anim-fade-up" style={{ '--i': 1 } as React.CSSProperties}>머니터미로 바로 열리는 토스 링크가 함께 보내져요.</p>
           <button
             onClick={() => {
-              logClick('league_share');
-              shareTossLink('intoss://moneytermi/league', SHARE_MSG);
+              logClick('league_share', { rank: mine?.rank ?? null, weekly_xp: mine?.points ?? 0 });
+              shareTossLink('intoss://moneytermi/league', shareMessage(stage.name, mine?.points ?? 0, mine?.rank));
               setSheet(null);
             }}
-            className="w-full py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90"
+            className="w-full py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90 anim-fade-up"
+            style={{ '--i': 2 } as React.CSSProperties}
           >
             토스로 공유하기
           </button>
