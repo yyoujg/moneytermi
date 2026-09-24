@@ -305,8 +305,8 @@ const QuizScreen = () => {
           )}
         </div>
 
-        {/* 객관식 선택지 (뜻 보기는 길어서 1열) */}
-        <div className={`grid gap-2 ${quizItem?.type === 'word_to_meaning' ? 'grid-cols-1' : 'grid-cols-2'}`}>
+        {/* 객관식 선택지: 유형과 무관하게 한 줄에 하나 */}
+        <div className="grid grid-cols-1 gap-2">
           {quizItem?.options.map((opt, i) => {
             const isSelected = selected === opt.answer;
             const isCorrectOption = opt.isCorrect;
