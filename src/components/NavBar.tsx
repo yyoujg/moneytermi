@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef } from 'react';
-import { PenLine, Home, ListChecks, User } from 'lucide-react';
+import { Home, ListChecks, User } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSafeAreaInsets } from '../hooks/useSafeAreaInsets';
 
@@ -8,7 +8,6 @@ import { useSafeAreaInsets } from '../hooks/useSafeAreaInsets';
 const NAV_ITEMS = [
   { path: '/course', icon: Home, label: '홈' },
   { path: '/home', icon: ListChecks, label: '퀘스트' },
-  { path: '/review', icon: PenLine, label: '퀴즈' },
   { path: '/my', icon: User, label: '마이' },
 ];
 
@@ -46,12 +45,12 @@ const NavBar = () => {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className="flex flex-col items-center px-2 py-2 transition-all duration-200"
+              aria-label={item.label}
+              className="flex items-center justify-center px-2 py-1 transition-all duration-200"
             >
-              <div className={`w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200 ${isActive ? 'bg-brand-500 text-white' : 'text-[var(--color-ink-4)]'}`}>
-                <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />
+              <div className={`w-11 h-11 flex items-center justify-center rounded-full transition-all duration-200 ${isActive ? 'bg-brand-500 text-white' : 'text-[var(--color-ink-4)]'}`}>
+                <Icon size={22} strokeWidth={isActive ? 2.5 : 1.8} />
               </div>
-              <span className={`text-3xs mt-1 transition-colors ${isActive ? 'font-bold text-brand-500' : 'font-medium text-[var(--color-ink-4)]'}`}>{item.label}</span>
             </button>
           );
         })}
