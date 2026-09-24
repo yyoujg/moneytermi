@@ -14,14 +14,25 @@
 -- 적용: 대시보드 SQL Editor에서 STEP별로 실행.
 
 -- ===== STEP 1 : 백업 =====
+-- 백업 테이블은 RLS를 켜고 클라이언트 권한을 회수한다. 정책을 만들지 않으므로
+-- anon/authenticated로는 접근할 수 없고 대시보드(service role)에서만 보인다.
+-- word_progress_backup에는 전체 사용자의 학습 진도가 들어가므로 특히 중요하다.
 DROP TABLE IF EXISTS public.words_backup_20260924;
 CREATE TABLE public.words_backup_20260924 AS SELECT * FROM public.words;
+ALTER TABLE public.words_backup_20260924 ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.words_backup_20260924 FROM anon, authenticated;
 DROP TABLE IF EXISTS public.courses_backup_20260924;
 CREATE TABLE public.courses_backup_20260924 AS SELECT * FROM public.courses;
+ALTER TABLE public.courses_backup_20260924 ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.courses_backup_20260924 FROM anon, authenticated;
 DROP TABLE IF EXISTS public.course_words_backup_20260924;
 CREATE TABLE public.course_words_backup_20260924 AS SELECT * FROM public.course_words;
+ALTER TABLE public.course_words_backup_20260924 ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.course_words_backup_20260924 FROM anon, authenticated;
 DROP TABLE IF EXISTS public.word_progress_backup_20260924;
 CREATE TABLE public.word_progress_backup_20260924 AS SELECT * FROM public.word_progress;
+ALTER TABLE public.word_progress_backup_20260924 ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON public.word_progress_backup_20260924 FROM anon, authenticated;
 -- 확인: SELECT count(*) FROM public.words_backup_20260924;
 
 -- ===== STEP 2 : 기존 데이터 삭제 =====
