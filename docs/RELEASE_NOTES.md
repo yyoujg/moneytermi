@@ -127,7 +127,8 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
 | `migration_revoke_helpers.sql` | ✅ 적용 (2026-09-24) — `bump_mission`/`add_xp` anon 노출 차단, `word_progress` DELETE 회수 |
 | `words_bok/00~11` | ✅ 적용 (2026-09-24) — 경제금융용어 800선 716단어 / 29코스. 이전 데이터는 `*_backup_20260924` |
 | `words_bok/15_words_fix_1~2.sql` | ✅ 적용 (2026-09-25) — 본문에 남아 있던 PDF 여백 색인 글자(`…평균 ㄱ 생산비용도`) 제거, 86행 |
-| `migration_points_economy.sql` | ✅ 적용 (2026-09-25) — 시작 잔고 100P(기존 유저 1회 +100P), `spend_points` RPC, `add_xp`에 XP 50마다 +50P |
+| `migration_xp.sql` STEP 10 | ✅ 재적용 (2026-09-25) — 리그 순위 함수가 포인트 버전(`point_events`)으로 남아 있던 것을 발견(99명이 200XP로 표시). XP 버전으로 교체 |
+| `migration_points_economy.sql` | ✅ 적용 (2026-09-25) — 시작 잔고 100P(기존 유저 1회 +100P), `spend_points` RPC, `add_xp`에 XP 50마다 +50P. STEP 1의 +100이 두 번 실행돼(357명 전원 +200) `points - 100`으로 보정함 |
 | `words_bok/14_words_fix_1~5.sql` | ✅ 적용 (2026-09-24) — **800선 본문 재추출**. 첫 추출이 페이지 러닝헤더(인접 용어명)를 본문에 끼워 넣어 103개 오염·8개 이상 본문 뒤바뀜(예: DTI 뜻이 청산소 본문). `parse800.py`로 재추출, 338행 UPDATE. 진도·코스 무관 |
 | `words_bok/13_recategorize.sql` | ✅ 적용 (2026-09-24) — 코스를 가나다순 29개에서 **17주제 37개**로 재분류(경제 기초 → 가계 → 물가 → 경기 → 고용 → 금리 → 은행 → 주식·채권 → 파생 → 외환 → 무역 → 국제기구 → 재정 → 규제 → 지급결제 → 핀테크 → 기업). 분류 원본 `categories.py`. 진도 보존 |
 

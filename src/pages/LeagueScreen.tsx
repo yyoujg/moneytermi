@@ -104,7 +104,7 @@ const LeagueScreen = () => {
       <div className="px-5 pt-5">
         <div className="flex items-baseline justify-between mb-3">
           <p className="text-sm font-bold text-[var(--color-ink-2)]">이번 주 TOP 10</p>
-          <span className="text-2xs text-[var(--color-ink-4)]">매주 월요일 초기화 · {daysUntilReset()}일 남음</span>
+          <span className="text-2xs text-[var(--color-ink-4)]">매주 월요일 초기화</span>
         </div>
 
         {failed && (
