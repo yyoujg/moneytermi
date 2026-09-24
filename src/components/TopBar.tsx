@@ -2,12 +2,11 @@ import { useEffect, useState } from 'react';
 import { BottomSheet } from '@toss/tds-mobile';
 import { toast } from 'sonner';
 import { useAppContext } from '../context/AppContext';
-import { getGrowthStage } from '../constants';
 import { logClick } from '../lib/analytics';
 import { calcStreak } from '../lib/streak';
 import { isRewardedAdEnabled, showRewardedAd } from '../lib/ads';
 
-// 모든 화면 상단 고정 바. 왼쪽 로고, 오른쪽에 이모지 + 숫자만 나열한다.
+// 모든 화면 상단 고정 바. 왼쪽 로고, 오른쪽에 이모지 + 숫자만 나열한다(티어는 마이페이지에만).
 // 포인트를 누르면 구매 시트가 열린다(광고 충전 / XP 2배 부스트).
 export const TopBar = () => {
   const { points, xp, boostUntil, knownWords, attendanceDates, claimAdReward, buyBoost } = useAppContext();
@@ -15,7 +14,6 @@ export const TopBar = () => {
   const [shopOpen, setShopOpen] = useState(false);
 
   const streak = calcStreak(attendanceDates);
-  const stage = getGrowthStage(xp);
   const boostLeft = boostUntil ? boostUntil - now : 0;
 
   // 부스트가 켜져 있는 동안만 1초 타이머. TopBar만 리렌더된다.
@@ -48,7 +46,6 @@ export const TopBar = () => {
 
         <div className="flex items-center gap-3 text-sm font-bold text-[var(--color-ink-2)]">
           <span className="flex items-center gap-1">🔥{streak}</span>
-          <span className="flex items-center gap-1">{stage.emoji}</span>
           <span className="flex items-center gap-1">✨{xp.toLocaleString()}</span>
           <button onClick={() => setShopOpen(true)} className="flex items-center gap-1 active:opacity-60">
             ⚡{points.toLocaleString()}
