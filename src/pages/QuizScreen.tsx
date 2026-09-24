@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Zap, Check, X, Flame } from 'lucide-react';
+import { Zap, Check, X, Flame, Sparkles } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
@@ -120,13 +120,21 @@ const QuizScreen = () => {
             </div>
             <div className="h-px bg-[var(--color-line)]" />
             <div className="flex justify-between items-center">
+              <span className="text-sm text-[var(--color-ink-4)]">획득 XP</span>
+              <div className="flex items-center gap-1.5">
+                <Sparkles size={14} className="text-brand-500" />
+                <span className="text-xl font-bold text-[var(--color-ink)]">+{Math.max(0, xp - xpAtStart.current)}</span>
+              </div>
+            </div>
+            <div className="h-px bg-[var(--color-line)]" />
+            <div className="flex justify-between items-center">
               <span className="text-sm text-[var(--color-ink-4)]">정답률</span>
               <span className="text-xl font-bold text-[var(--color-ink)]">{accuracy}%</span>
             </div>
             <div className="h-px bg-[var(--color-line)]" />
             <div className="flex justify-between items-center">
               <span className="text-sm text-[var(--color-ink-4)]">최고 연속 정답</span>
-              <span className="text-xl font-bold text-[var(--color-ink)]">{maxCombo}연속 🔥</span>
+              <span className="flex items-center gap-1 text-xl font-bold text-[var(--color-ink)]">{maxCombo}연속<Flame size={18} className="text-brand-500 fill-current" /></span>
             </div>
             {stageUp && (
               <>
@@ -169,9 +177,10 @@ const QuizScreen = () => {
       setCorrectCount(c => c + 1);
 
       const res = await submitQuizAnswer(currentWord.id, option.answer, 'mc', false, currentQuizIndex === 0);
+      const nextCombo = res ? res.combo : combo + 1;   // 서버 응답이 없으면(오프라인) 로컬로 센다
+      setCombo(nextCombo);
+      setMaxCombo(m => Math.max(m, nextCombo));
       if (res) {
-        setCombo(res.combo);
-        setMaxCombo(m => Math.max(m, res.combo));
         setTotalEarned(t => t + res.earned);
         setLastEarned(res.earned);
         setShowPointPop(true);
