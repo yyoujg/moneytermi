@@ -75,20 +75,28 @@ const CourseScreen = () => {
   const sections = useMemo(() => buildPath(courses, knownIds), [courses, knownIds]);
 
   // current 노드는 코스마다 하나씩 생긴다. 장식(링·"시작" 말풍선)은 패스 순서상 첫 번째에만 붙인다.
-  const focusId = useMemo(() => {
+  // 진행 중인 노드와 그 노드가 섹션 안에서 몇 번째인지 (계산이 가벼워 memo 없이)
+  const findFocus = () => {
     for (const sec of sections) {
-      const n = sec.nodes.find(node => node.state === 'current');
-      if (n) return n.id;
+      const k = sec.nodes.findIndex(node => node.state === 'current');
+      if (k >= 0) return { id: sec.nodes[k].id, index: k, courseId: sec.course.id };
     }
     return null;
-  }, [sections]);
+  };
+  const focus = findFocus();
+  const focusId = focus?.id ?? null;
 
   const focusRef = useRef<HTMLButtonElement>(null);
+  const focusSectionRef = useRef<HTMLElement>(null);
   const didScroll = useRef(false);
+  // 첫 진입 스크롤: 진행 중인 섹션이 화면 맨 위에 오게 한다. 노드가 섹션 앞부분이면 배너부터 보이도록 섹션 시작에,
+  // 더 아래면 노드를 가운데에(배너는 sticky라 위에 붙어 어느 섹션인지 보인다). 이전 완료 섹션 배너가 같이 보이지 않게.
   useLayoutEffect(() => {
-    if (didScroll.current || !hydrated || !focusId) return;
+    if (didScroll.current || !hydrated || !focus) return;
     didScroll.current = true;
-    focusRef.current?.scrollIntoView({ block: 'center' });
+    if (focus.index <= 2) focusSectionRef.current?.scrollIntoView({ block: 'start' });
+    else focusRef.current?.scrollIntoView({ block: 'center' });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated, focusId]);
 
   const handleNodeTap = async (node: PathNode, index: number, courseKnown: number) => {
@@ -125,7 +133,7 @@ const CourseScreen = () => {
       {sections.map((sec, si) => {
         const color = sectionColor(si);
         return (
-        <section key={sec.course.id}>
+        <section key={sec.course.id} ref={sec.course.id === focus?.courseId ? focusSectionRef : undefined}>
           {/* 코스 배너 */}
           <div className="anim-fade-up sticky top-4 z-10 mx-5 mt-5 mb-1 rounded-card px-5 py-4 shadow-md" style={{ background: color.face }}>
             <p className="text-2xs font-bold text-white/70">{sec.course.level} · 코스 {si + 1}/{sections.length}</p>
