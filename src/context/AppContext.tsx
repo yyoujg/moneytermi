@@ -113,6 +113,21 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
       setCourses(builtCourses);
       setAllWords(Array.from(wordMap.values()));
+
+      // 미션 정의는 공개 데이터라 프로필이 없어도 받을 수 있다.
+      const { data: defs } = await supabase
+        .from('mission_defs')
+        .select('mission_id, title, target, reward, sort_order')
+        .eq('active', true)
+        .order('sort_order');
+      if (defs && defs.length > 0) {
+        const base: Missions = Object.fromEntries(defs.map(d => [
+          d.mission_id,
+          { id: d.mission_id, title: d.title, target: d.target, reward: d.reward, current: 0, isRewarded: false, sortOrder: d.sort_order },
+        ]));
+        missionBaseRef.current = base;
+        setMissions(prev => Object.keys(prev).length <= 2 ? base : prev);
+      }
       } catch (e) {
         console.error('[AppContext] 콘텐츠 로드 실패:', e);
       }
@@ -185,20 +200,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         })));
       }
 
-      // 3. 미션 정의 + 현재 슬롯 진행도
+      // 3. 현재 슬롯 진행도 (미션 정의는 loadContent에서 이미 받아 둔다)
       const slot = missionSlot();
-      const { data: defs } = await db
-        .from('mission_defs')
-        .select('mission_id, title, target, reward, sort_order')
-        .eq('active', true)
-        .order('sort_order');
-
-      const base: Missions = defs && defs.length > 0
-        ? Object.fromEntries(defs.map((d: { mission_id: string; title: string; target: number; reward: number; sort_order: number }) => [
-            d.mission_id,
-            { id: d.mission_id, title: d.title, target: d.target, reward: d.reward, current: 0, isRewarded: false, sortOrder: d.sort_order },
-          ]))
-        : DEFAULT_MISSIONS;
+      const base = missionBaseRef.current;
 
       // slot 컬럼이 아직 없는 DB에서도 동작하도록 실패하면 날짜만으로 다시 조회한다.
       let dm = (await db.from('daily_missions')
