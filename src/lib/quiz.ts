@@ -57,6 +57,17 @@ export type QuizItem = {
 
 const BLANK = '____';
 
+// 뜻 문장에 용어 자체가 들어 있는 경우가 많다(800선 716개 중 403개). 보기/문제에 쓸 때 용어를 가린다.
+// '가계수지(Household's ...)'처럼 바로 뒤에 붙은 영문 괄호도 함께 가린다. 괄호·슬래시 앞부분(기본형)도 가린다.
+export const maskTerm = (text: string, word: string): string => {
+  const base = word.split(/[(/;]/)[0].trim();
+  const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const targets = [...new Set([word, base].filter(t => t.length >= 2))].sort((a, b) => b.length - a.length);
+  let out = text;
+  for (const t of targets) out = out.replace(new RegExp(`${esc(t)}(\\s*\\([^)]*\\))?`, 'g'), BLANK);
+  return out;
+};
+
 // cloze는 예문에 단어가 그대로 들어있을 때만 가능
 export const clozeText = (word: Word): string | null => {
   const ex = word.newsExample?.trim();
@@ -82,8 +93,8 @@ export const buildQuizItem = (
 
   if (type === 'word_to_meaning') {
     const opts: QuizOption[] = shuffle([
-      { label: correctWord.meaning, answer: correctWord.word, isCorrect: true },
-      ...distractors.map(w => ({ label: w.meaning, answer: w.word, isCorrect: false })),
+      { label: maskTerm(correctWord.meaning, correctWord.word), answer: correctWord.word, isCorrect: true },
+      ...distractors.map(w => ({ label: maskTerm(w.meaning, w.word), answer: w.word, isCorrect: false })),
     ]);
     return { type, promptLabel: '이 용어의 뜻은?', promptMain: correctWord.word, options: opts };
   }
@@ -95,15 +106,15 @@ export const buildQuizItem = (
   ]);
 
   if (type === 'cloze') {
-    const blanked = clozeText(correctWord) ?? correctWord.meaning;
+    const blanked = clozeText(correctWord) ?? maskTerm(correctWord.meaning, correctWord.word);
     return { type, promptLabel: '빈칸에 들어갈 용어는?', promptMain: blanked, options: opts };
   }
 
   return {
     type: 'meaning_to_word',
     promptLabel: '이 뜻에 맞는 용어는?',
-    promptMain: correctWord.meaning,
-    promptSub: correctWord.detailedMeaning,
+    // detailedMeaning은 수백 자라 문제로 쓰기엔 길다. 첫 문장(meaning)만, 용어는 가려서.
+    promptMain: maskTerm(correctWord.meaning, correctWord.word),
     options: opts,
   };
 };

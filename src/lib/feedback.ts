@@ -36,12 +36,35 @@ function playWrongSound() {
   playTone(180, 0.28, 'sawtooth', 0.18);
 }
 
+// 웹뷰 밖(브라우저)에서는 SDK가 동기로 throw해서 .catch로는 못 잡는다. 햅틱 실패가 채점을 막으면 안 된다.
+type Haptic = 'tickWeak' | 'tap' | 'tickMedium' | 'softMedium' | 'basicWeak' | 'basicMedium' | 'success' | 'error' | 'wiggle' | 'confetti';
+const haptic = (type: Haptic) => {
+  try { generateHapticFeedback({ type }).catch(() => {}); } catch { /* not in webview */ }
+};
+
+// 마일스톤 축하: 축포를 두 번, 사이에 성공 진동
+export function feedbackCelebrate(vibration: boolean) {
+  if (!vibration) return;
+  haptic('confetti');
+  setTimeout(() => haptic('success'), 200);
+  setTimeout(() => haptic('confetti'), 450);
+}
+
+// 버튼/노드 탭: 짧고 확실한 한 번
+export function feedbackTap(vibration: boolean) {
+  if (vibration) haptic('basicMedium');
+}
+
+// 정답: 요란하게 — 축포 → 성공 → 묵직한 마무리를 짧은 간격으로 연타
 export function feedbackCorrect(sound: boolean, vibration: boolean) {
   if (sound) playCorrectSound();
-  if (vibration) generateHapticFeedback({ type: 'success' }).catch(() => {});
+  if (!vibration) return;
+  haptic('confetti');
+  setTimeout(() => haptic('success'), 120);
+  setTimeout(() => haptic('basicMedium'), 260);
 }
 
 export function feedbackWrong(sound: boolean, vibration: boolean) {
   if (sound) playWrongSound();
-  if (vibration) generateHapticFeedback({ type: 'error' }).catch(() => {});
+  if (vibration) haptic('error');
 }

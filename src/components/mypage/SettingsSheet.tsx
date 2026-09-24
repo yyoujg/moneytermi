@@ -1,4 +1,4 @@
-import { Volume2, VolumeX, Bell, Moon } from 'lucide-react';
+import { Volume2, VolumeX, Bell, Moon, Vibrate } from 'lucide-react';
 import { Switch, BottomSheet } from '@toss/tds-mobile';
 import { useSettings } from '../../hooks/useSettings';
 import { useNotificationAgreement } from '../../hooks/useNotificationAgreement';
@@ -62,7 +62,7 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
         <Card tone="surface" pad="md" className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-chip bg-[var(--color-line)] flex items-center justify-center">
-              <span className={`text-base ${vibrationOn ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-4)]'}`}>📳</span>
+              <Vibrate size={16} className={vibrationOn ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-4)]'} />
             </div>
             <div>
               <p className="text-sm font-semibold text-[var(--color-ink)]">진동</p>

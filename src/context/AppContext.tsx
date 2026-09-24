@@ -7,9 +7,9 @@ import { Storage } from '../lib/storage';
 import { requestAppReview } from '../lib/review';
 import { claimPromotion } from '../lib/promotion';
 import { logClick } from '../lib/analytics';
-import { toDateStr } from '../lib/date';
+import { missionSlot, msUntilNextSlot, toDateStr } from '../lib/date';
 import { nextSrs, gradeFromResult, addDays } from '../lib/srs';
-import { DAILY_REVIEW_CAP } from '../constants';
+import { DAILY_REVIEW_CAP, MISSION_XP } from '../constants';
 
 type WpRow = { word_id: number; ease: number; interval_d: number; reps: number; due_date: string };
 
@@ -18,6 +18,15 @@ type AppContextValue = {
   hydrated: boolean;
   points: number;
   setPoints: React.Dispatch<React.SetStateAction<number>>;
+  xp: number;
+  boostUntil: number | null;
+  buyBoost: () => Promise<boolean>;
+  spendPoints: (amount: number, reason: string) => Promise<boolean>;
+  refreshPoints: () => Promise<void>;
+  shopReason: 'lesson' | null;
+  shopOpen: boolean;
+  openShop: (reason?: 'lesson') => void;
+  closeShop: () => void;
   knownWords: Word[];
   knownIds: Set<number>;
   setKnownWords: React.Dispatch<React.SetStateAction<Word[]>>;
@@ -25,7 +34,7 @@ type AppContextValue = {
   setUnknownWords: React.Dispatch<React.SetStateAction<Word[]>>;
   missions: Missions;
   setMissions: React.Dispatch<React.SetStateAction<Missions>>;
-  claimReward: (missionId: keyof Missions) => Promise<void>;
+  claimReward: (missionId: keyof Missions) => Promise<boolean>;
   claimReferralReward: (amount: number, unit: string) => Promise<number | null>;
   claimAdReward: (amount: number, unit: string) => Promise<number | null>;
   claimPromotionReward: (amount: number) => Promise<number | null>;
@@ -46,13 +55,18 @@ type AppContextValue = {
 
 const AppContext = createContext<AppContextValue | null>(null);
 
+// mission_defs 테이블을 아직 적용하지 않은 환경용 폴백. 서버에서 정의를 받으면 대체된다.
 const DEFAULT_MISSIONS: Missions = {
-  m1: { id: 'm1', title: '앱 출석하기',         reward: 10, current: 0, target: 1, isRewarded: false },
-  m3: { id: 'm3', title: '퀴즈 정답 3회 맞히기', reward: 30, current: 0, target: 3, isRewarded: false },
+  m1: { id: 'm1', title: '앱 출석하기',         reward: 10, current: 0, target: 1, isRewarded: false, sortOrder: 10 },
+  m3: { id: 'm3', title: '퀴즈 정답 3회 맞히기', reward: 30, current: 0, target: 3, isRewarded: false, sortOrder: 30 },
 };
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [points, setPoints]               = useState(0);
+  const [xp, setXp]                       = useState(0);
+  const [boostUntil, setBoostUntil]       = useState<number | null>(null);
+  const [shopOpen, setShopOpen]           = useState(false);
+  const [shopReason, setShopReason]       = useState<'lesson' | null>(null);
   const [knownWords, setKnownWords]       = useState<Word[]>([]);
   const [unknownWords, setUnknownWords]   = useState<Word[]>([]);
   const [missions, setMissions]           = useState<Missions>(DEFAULT_MISSIONS);
@@ -73,6 +87,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const dbRef           = useRef<typeof supabase>(supabase);
   const lastMissionDate = useRef<string>(toDateStr(new Date()));
   const autoCheckedRef  = useRef(false);
+  const missionBaseRef  = useRef<Missions>(DEFAULT_MISSIONS);
 
   // ── 콘텐츠 로드 (courses + words) ─────────────────────────────
   useEffect(() => {
@@ -111,6 +126,23 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
       setCourses(builtCourses);
       setAllWords(Array.from(wordMap.values()));
+
+      // 미션 정의는 공개 데이터라 프로필이 없어도 받을 수 있다.
+      const { data: defs } = await supabase
+        .from('mission_defs')
+        .select('mission_id, title, target, reward, sort_order')
+        .eq('active', true)
+        .order('sort_order');
+      if (defs && defs.length > 0) {
+        const base: Missions = Object.fromEntries(defs.map(d => [
+          d.mission_id,
+          { id: d.mission_id, title: d.title, target: d.target, reward: d.reward, current: 0, isRewarded: false, sortOrder: d.sort_order },
+        ]));
+        missionBaseRef.current = base;
+        // load()와 순서가 뒤바뀌어도 정의는 서버 것, 진행도는 이미 받은 것을 유지한다.
+        setMissions(prev => Object.fromEntries(Object.entries(base).map(([k, m]) =>
+          [k, prev[k] ? { ...m, current: prev[k].current, isRewarded: prev[k].isRewarded } : m])));
+      }
       } catch (e) {
         console.error('[AppContext] 콘텐츠 로드 실패:', e);
       }
@@ -150,7 +182,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       // 1. points — DB값과 로컬값 중 큰 값 유지 (로딩 중 적립 포인트 보존)
       const { data: profile, error: profileErr } = await db
         .from('profiles')
-        .select('points')
+        .select('points, xp, boost_until')
         .eq('id', profileId)
         .single();
 
@@ -164,7 +196,16 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
       if (profileErr) console.error('[load] profiles fetch 실패:', profileErr);
-      if (profile) setPoints(profile.points);  // 서버 단일 진실원
+      if (profile) {
+        setPoints(profile.points);  // 서버 단일 진실원
+        setXp(profile.xp ?? 0);
+        setBoostUntil(profile.boost_until ? new Date(profile.boost_until).getTime() : null);
+      } else if (profileErr) {
+        // migration_xp 적용 전에는 xp/boost_until 컬럼이 없어 위 조회가 통째로 실패한다.
+        // 포인트만이라도 읽어 앱이 멈추지 않게 한다.
+        const { data: basic } = await db.from('profiles').select('points').eq('id', profileId).single();
+        if (basic) setPoints(basic.points);
+      }
 
       // 2. word_progress → 실제 Word 객체 복원
       const { data: progress } = await db
@@ -183,27 +224,30 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         })));
       }
 
-      // 3. daily_missions
-      const { data: dm } = await db
-        .from('daily_missions')
-        .select('mission_id, current, is_rewarded')
-        .eq('user_id', profileId)
-        .eq('date', today);
+      // 3. 현재 슬롯 진행도 (미션 정의는 loadContent에서 이미 받아 둔다)
+      const slot = missionSlot();
+      const base = missionBaseRef.current;
 
-      if (dm && dm.length > 0) {
-        setMissions(prev => {
-          const next = { ...prev };
-          dm.forEach(row => {
-            const key = row.mission_id as keyof Missions;
-            if (next[key]) next[key] = {
-              ...next[key],
-              current: Math.max(next[key].current, row.current),
-              isRewarded: next[key].isRewarded || row.is_rewarded,
-            };
-          });
-          return next;
-        });
+      // slot 컬럼이 아직 없는 DB에서도 동작하도록 실패하면 날짜만으로 다시 조회한다.
+      let dm = (await db.from('daily_missions')
+        .select('mission_id, current, is_rewarded')
+        .eq('user_id', profileId).eq('date', today).eq('slot', slot)).data;
+      if (!dm) {
+        dm = (await db.from('daily_missions')
+          .select('mission_id, current, is_rewarded')
+          .eq('user_id', profileId).eq('date', today)).data;
       }
+
+      const merged = { ...base };
+      (dm ?? []).forEach(row => {
+        const m = merged[row.mission_id];
+        if (m) merged[row.mission_id] = {
+          ...m,
+          current: Math.max(m.current, row.current),
+          isRewarded: m.isRewarded || row.is_rewarded,
+        };
+      });
+      setMissions(merged);
 
       // 4. attendance
       const { data: att, error: attLoadErr } = await db
@@ -216,14 +260,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
       const dates = att ? att.map(a => a.date) : [];
       setAttendanceDates(dates);
-
-      // 오늘 이미 출석했으면 m1 자동 완료
-      if (dates.includes(today)) {
-        setMissions(prev => ({
-          ...prev,
-          m1: { ...prev.m1, current: 1 },
-        }));
-      }
 
       // 5. 내 프로필 이모지 로드
       const { data: myProfile } = await db
@@ -313,30 +349,22 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (!ready || !profileIdRef.current || autoCheckedRef.current) return;
     autoCheckedRef.current = true;
-    const today = toDateStr(new Date());
-    if (!attendanceDates.includes(today)) {
-      logClick('checkin_auto');
-      checkIn();
-    }
+    // 출석은 서버가 하루 1회로 막지만 m1 미션은 8시간 슬롯마다 다시 채워야 하므로 매번 부른다.
+    if (!attendanceDates.includes(toDateStr(new Date()))) logClick('checkin_auto');
+    checkIn();
   }, [ready]);
 
-  // ── 자정 미션 초기화 ──────────────────────────────────────────
+  // ── 8시간마다 미션 초기화 (KST 0/8/16시) ──────────────────────
   useEffect(() => {
     if (!ready) return;
 
     const scheduleReset = () => {
-      const now = new Date();
-      const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-      const msUntilMidnight = next.getTime() - now.getTime();
-
       const t = setTimeout(() => {
-        const today = toDateStr(new Date());
-        if (today !== lastMissionDate.current) {
-          lastMissionDate.current = today;
-          setMissions(DEFAULT_MISSIONS);
-        }
+        lastMissionDate.current = `${toDateStr(new Date())}#${missionSlot()}`;
+        setMissions(missionBaseRef.current);
+        checkIn();
         scheduleReset();
-      }, msUntilMidnight);
+      }, msUntilNextSlot() + 1000);
 
       return t;
     };
@@ -371,18 +399,21 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   // ── claimReward — 서버가 자격 검증 후 적립 ─────────────────────
-  const claimReward = async (missionId: keyof Missions) => {
+  // 성공 여부를 돌려줘 화면이 토스트/햅틱을 결정한다
+  const claimReward = async (missionId: keyof Missions): Promise<boolean> => {
     const mission = missions[missionId];
-    if (mission.current < mission.target || mission.isRewarded) return;
+    if (mission.current < mission.target || mission.isRewarded) return false;
     const today = toDateStr(new Date());
     const { data, error } = await dbRef.current.rpc('claim_mission_reward', {
       p_mission_id: missionId, p_date: today,
     });
-    if (error || !data) { console.error('[claimReward] 실패:', error); return; }
+    if (error || !data) { console.error('[claimReward] 실패:', error); return false; }
     setPoints(data.points);
+    setXp(x => x + MISSION_XP);   // 서버가 같이 준 XP. 부스트 중이면 다음 갱신 때 정확한 값으로 맞춰진다
     setMissions(prev => ({ ...prev, [missionId]: { ...prev[missionId], isRewarded: true } }));
     logClick('mission_reward_claim', { mission_id: missionId, reward: mission.reward });
     requestAppReview();
+    return true;
   };
 
   // ── claimReferralReward — 친구초대(contactsViral) 리워드, 서버가 상한 적용 후 적립 ──
@@ -429,12 +460,44 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     });
     if (error || !data) { console.error('[submitQuizAnswer] 실패:', error); return null; }
     setPoints(data.points);
+    if (typeof data.xp === 'number') setXp(data.xp);
     setMissions(prev => ({ ...prev, m3: { ...prev.m3, current: data.m3_current } }));
     return {
       correct: data.correct, earned: data.earned, combo: data.combo,
       points: data.points, m3Current: data.m3_current,
     };
   };
+
+  // ── 상점 — 부스트 구매 (서버가 차감·검증) ──────────────────────
+  const buyBoost = async (): Promise<boolean> => {
+    const { data, error } = await dbRef.current.rpc('buy_boost');
+    if (error || !data) { console.error('[buyBoost] 실패:', error); return false; }
+    setPoints(data.points);
+    setBoostUntil(new Date(data.boost_until).getTime());
+    logClick('boost_buy');
+    return true;
+  };
+
+  // ── 포인트 소모 (레슨 시작) — 서버가 잔고를 검증한다 ─────────────
+  const spendPoints = async (amount: number, reason: string): Promise<boolean> => {
+    if (!profileIdRef.current) { setPoints(p => p - amount); return true; }   // 오프라인 폴백: 로컬만
+    const { data, error } = await dbRef.current.rpc('spend_points', { p_amount: amount, p_reason: reason });
+    if (error || !data) { console.error('[spendPoints] 실패:', error); return false; }
+    setPoints(data.points);
+    logClick('points_spend', { reason, amount });
+    return true;
+  };
+
+  // XP 마일스톤 보너스(50 XP마다 50P)는 서버 트리거에서 들어와 클라가 모른다. 레슨 끝에 다시 읽는다.
+  const refreshPoints = async () => {
+    const profileId = profileIdRef.current;
+    if (!profileId) return;
+    const { data } = await dbRef.current.from('profiles').select('points, xp').eq('id', profileId).single();
+    if (data) { setPoints(data.points); setXp(data.xp); }
+  };
+
+  const openShop = (reason?: 'lesson') => { setShopReason(reason ?? null); setShopOpen(true); };
+  const closeShop = () => setShopOpen(false);
 
   // ── 오늘 복습 큐 (due_date <= 오늘) ────────────────────────────
   const dueQueue = useMemo(() => {
@@ -479,6 +542,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       points, setPoints,
       knownWords, knownIds, setKnownWords,
       unknownWords, setUnknownWords,
+      xp, boostUntil, buyBoost,
+      spendPoints, refreshPoints, shopReason, shopOpen, openShop, closeShop,
       missions, setMissions,
       claimReward,
       claimReferralReward,

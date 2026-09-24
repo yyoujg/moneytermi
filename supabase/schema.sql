@@ -26,7 +26,7 @@ CREATE TABLE public.profiles (
   guest_token        UUID        UNIQUE NOT NULL DEFAULT gen_random_uuid(),
   toss_anonymous_key TEXT        UNIQUE,
   auth_id            UUID        UNIQUE REFERENCES auth.users(id) ON DELETE SET NULL,
-  nickname           TEXT        NOT NULL DEFAULT '예비슈퍼개미',
+  nickname           TEXT        NOT NULL DEFAULT '예비슈퍼개미',  -- 현재 DB는 random_nickname() (migration_random_nickname.sql)
   email              TEXT        UNIQUE,
   is_guest           BOOLEAN     NOT NULL DEFAULT true,
   league_tier        TEXT        NOT NULL DEFAULT 'bronze'

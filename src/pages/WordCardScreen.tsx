@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Check, ExternalLink } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, ExternalLink, BookOpen, Newspaper, Link2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
@@ -10,6 +10,7 @@ import { requestAppReview } from '../lib/review';
 import { claimPromotion } from '../lib/promotion';
 import { useNews, type NaverNewsItem } from '../hooks/useNews';
 import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
+import { StreakCelebration } from '../components/StreakCelebration';
 import { Card } from '../components/ui/Card';
 
 const ACCENT = 'var(--color-brand-500)';
@@ -54,9 +55,14 @@ const WordCard = ({
   keyword: string;
   allWords: Word[];
 }) => {
-  const validRelated = (word.relatedWords ?? []).filter(
-    rw => allWords.some(w => w.word === rw)
-  );
+  // 연관검색어는 '주가지수' 같은 기본형으로 적혀 있고 단어는 '주가지수선물거래(…)'처럼 긴 경우가 있어 기본형으로도 맞춘다.
+  const baseOf = (w: string) => w.split(/[(/;]/)[0].trim();
+  const detail = word.detailedMeaning.startsWith(word.meaning)
+    ? word.detailedMeaning.slice(word.meaning.length).trim()
+    : word.detailedMeaning;
+  const validRelated = (word.relatedWords ?? [])
+    .map(rw => allWords.find(w => w.word === rw)?.word ?? allWords.find(w => baseOf(w.word) === baseOf(rw))?.word)
+    .filter((w, i, arr): w is string => !!w && w !== word.word && arr.indexOf(w) === i);
   return (
   <div className="flex flex-col gap-3 px-5 pb-6">
 
@@ -72,7 +78,10 @@ const WordCard = ({
         {onToggleKnown && (
           <button
             onClick={onToggleKnown}
-            className={`shrink-0 mt-1 w-8 h-8 rounded-full flex items-center justify-center transition-colors
+            aria-label={isKnown ? '알고 있어요 해제' : '알고 있어요'}
+            aria-pressed={isKnown}
+            style={{ borderRadius: 9999 }}
+            className={`shrink-0 mt-1 w-8 h-8 flex items-center justify-center transition-colors
               ${isKnown ? 'bg-brand-500 text-white' : 'bg-[var(--color-surface)] text-[var(--color-ink-4)]'}`}
           >
             <Check size={16} strokeWidth={2.5} />
@@ -81,15 +90,17 @@ const WordCard = ({
       </div>
     </Card>
 
-    {/* 자세히 알아보기 */}
-    <Card pad="none" className="px-5 pt-4 pb-5 flex flex-col gap-2.5">
-      <p className="text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]">📖 자세히 알아보기</p>
-      <p className="text-sm leading-[1.8] text-[var(--color-ink-2)] font-medium break-keep tracking-[-0.01em]">{word.detailedMeaning}</p>
-    </Card>
+    {/* 자세히 알아보기 — 요약은 본문 첫 문장이라 그 부분은 빼고 이어지는 내용만 */}
+    {detail && (
+      <Card pad="none" className="px-5 pt-4 pb-5 flex flex-col gap-2.5">
+        <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><BookOpen size={13} />자세히 알아보기</p>
+        <p className="text-sm leading-[1.8] text-[var(--color-ink-2)] font-medium break-keep tracking-[-0.01em]">{detail}</p>
+      </Card>
+    )}
 
     {/* 실시간 뉴스 */}
     <Card pad="none" className="px-5 pt-4 pb-5 flex flex-col gap-2.5">
-      <p className="text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]">🗞 실시간 뉴스 (출처: 네이버 뉴스)</p>
+      <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><Newspaper size={13} />실시간 뉴스 (출처: 네이버 뉴스)</p>
       {newsLoading ? (
         <div className="flex flex-col gap-3.5">
           {[1, 2, 3].map(i => (
@@ -134,7 +145,7 @@ const WordCard = ({
     {/* 관련 용어 */}
     {validRelated.length > 0 && (
       <Card pad="none" className="px-5 py-4 flex flex-col gap-2.5">
-        <p className="text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]">🔗 관련 용어</p>
+        <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><Link2 size={13} />관련 용어</p>
         <div className="flex flex-col">
           {validRelated.map((tag, i) => (
             <button
@@ -158,7 +169,7 @@ const WordCard = ({
 const WordCardScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { courses, allWords, knownWords, knownIds, toggleKnown, setKnownWords, claimPromotionReward } = useAppContext();
+  const { courses, allWords, knownWords, knownIds, hydrated, toggleKnown, setKnownWords, claimPromotionReward, refreshPoints } = useAppContext();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const state = location.state as {
@@ -172,16 +183,27 @@ const WordCardScreen = () => {
 
   // 콜드 딥링크(state 없음) 진입 시: 미완료 코스 우선으로 기본 단어 로드
   const isDeepLink = !state?.words?.length;
+  // 딥링크 코스는 한 번 정하면 고정한다. knownIds를 따라가면 마지막 단어를 체크한 순간 코스가 바뀌어 index가 어긋난다.
+  const deepWordsRef = useRef<Word[] | null>(null);
   const words = React.useMemo<Word[]>(() => {
     if (state?.words?.length) return state.words;
+    if (deepWordsRef.current) return deepWordsRef.current;
+    if (!hydrated) return [];
     const course = courses.find(c => c.words.some(w => !knownIds.has(w.id))) ?? courses[0];
+    if (course) deepWordsRef.current = course.words;
     return course?.words ?? [];
-  }, [state, courses, knownIds]);
+  }, [state, courses, knownIds, hydrated]);
   const backPath = state?.backPath ?? (isDeepLink ? '/home' : '/course');
   const backState = state?.backState;
   const autoAdvance = state?.autoAdvance ?? false;
 
   const [wordIndex, setWordIndex] = React.useState(state?.index ?? 0);
+  // 관련 용어 클릭처럼 같은 라우트로 다시 navigate하면 재마운트가 없어 index가 이전 값에 머문다.
+  useEffect(() => { setWordIndex(state?.index ?? 0); }, [state]);
+
+  // 로딩이 끝났는데도 보여줄 단어가 없으면 돌아간다. 렌더 중 navigate는 안 된다.
+  const noWords = words.length === 0 && !(isDeepLink && (courses.length === 0 || !hydrated));
+  useEffect(() => { if (noWords) navigate(backPath, { replace: true }); }, [noWords]);
 
   // 단어 변경 시 스크롤 맨 위로
   useEffect(() => {
@@ -191,11 +213,16 @@ const WordCardScreen = () => {
   // 뉴스 (현재 단어 로드 + 다음 단어 prefetch)
   const { newsItems, newsLoading } = useNews(words, wordIndex);
 
-  // autoAdvance 완료 토스트
+  // autoAdvance 완료 토스트 + 잔고 갱신 (새 단어 XP의 50단위 보너스 포인트는 서버에서만 계산된다)
+  // 같은 완료에 effect가 다시 돌아도(단어 목록 참조 변경, dev StrictMode) 토스트는 한 번만
+  const completedRef = useRef(false);
   useEffect(() => {
-    if (autoAdvance && words.length > 0 && wordIndex >= words.length) {
-      toast.success('학습 완료!');
-    }
+    const done = autoAdvance && words.length > 0 && wordIndex >= words.length;
+    if (!done) { completedRef.current = false; return; }
+    if (completedRef.current) return;
+    completedRef.current = true;
+    toast.success('학습 완료!');
+    refreshPoints();
   }, [wordIndex, words.length, autoAdvance]);
 
   // autoAdvance 완료 화면
@@ -206,13 +233,14 @@ const WordCardScreen = () => {
       .slice(0, Math.min(5, knownWords.length));
     return (
       <div className="flex h-full flex-col bg-[var(--color-canvas)]">
-        <div className="flex-1 flex flex-col items-center justify-center gap-5 p-8">
-          <div className="w-20 h-20 bg-[var(--color-card)] rounded-full flex items-center justify-center text-4xl">🎉</div>
-          <div className="text-center">
+        {/* 카드 + 알림 카드 + 축하가 작은 화면에서 넘칠 수 있어 이 영역만 스크롤 */}
+        <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden flex flex-col items-center justify-center-safe gap-5 p-8">
+          <div className="w-20 h-20 bg-[var(--color-card)] rounded-full flex items-center justify-center text-4xl anim-pop-in">🎉</div>
+          <div className="text-center anim-fade-up" style={{ '--i': 1 } as React.CSSProperties}>
             <h2 className="text-2xl font-bold text-[var(--color-ink)] mb-1!">학습 완료!</h2>
             <p className="text-sm text-[var(--color-ink-4)]">{words.length}개 단어를 학습했어요</p>
           </div>
-          <Card pad="md" className="w-full">
+          <Card pad="md" className="w-full anim-fade-up" style={{ '--i': 2 } as React.CSSProperties}>
             <p className="text-xs text-[var(--color-ink-4)] mb-3!">방금 배운 단어, 바로 확인해볼까요?</p>
             <div className="flex flex-wrap gap-1.5">
               {words.slice(0, 5).map(w => (
@@ -221,6 +249,7 @@ const WordCardScreen = () => {
             </div>
           </Card>
           <DailyAlarmPromptCard />
+          <StreakCelebration />
         </div>
         <div className="px-5 pb-12 flex flex-col gap-2.5">
           {(() => {
@@ -241,7 +270,7 @@ const WordCardScreen = () => {
             }
             return (
               <button
-                onClick={() => navigate('/quiz', { state: { quizQueue: quizWords } })}
+                onClick={() => navigate('/quiz', { state: { quizQueue: quizWords, backPath } })}
                 className="w-full py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90"
               >
                 바로 퀴즈 풀기 →
@@ -259,12 +288,7 @@ const WordCardScreen = () => {
     );
   }
 
-  if (!words.length) {
-    // 딥링크 진입 직후 콘텐츠 로딩 대기 — 로딩 끝났는데도 비면 폴백
-    if (isDeepLink && courses.length === 0) return null;
-    navigate(backPath, { replace: true });
-    return null;
-  }
+  if (!words.length) return null;
 
   const word = words[wordIndex];
   const isKnown = knownWords.some(w => w.id === word.id);
@@ -325,8 +349,10 @@ const WordCardScreen = () => {
               <button
                 key={w.id}
                 disabled={!accessible}
+                aria-label={`${i + 1}번째 단어 ${w.word}`}
                 onClick={() => accessible && setWordIndex(i)}
-                className={`shrink-0 rounded-full transition-all
+                style={{ borderRadius: 9999 }}
+                className={`shrink-0 transition-all
                   ${i === wordIndex
                     ? 'w-5 h-2 bg-brand-500'
                     : known
@@ -345,6 +371,7 @@ const WordCardScreen = () => {
 
       {/* 스크롤 영역 */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden pt-2">
+        <div key={word.id} className="anim-slide-in">
         <WordCard
           word={word}
           isKnown={isKnown}
@@ -361,6 +388,7 @@ const WordCardScreen = () => {
           keyword={word.word}
           allWords={allWords}
         />
+        </div>
       </div>
 
       {/* 하단 네비게이션 */}

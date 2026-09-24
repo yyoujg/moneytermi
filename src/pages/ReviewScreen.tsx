@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronRight, Lightbulb, Zap } from 'lucide-react';
+import { ChevronRight, Lightbulb, Zap, Flame } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Spacing } from '@toss/tds-mobile';
 import type { Word } from '../types';
@@ -7,8 +7,12 @@ import { useAppContext } from '../context/AppContext';
 import { requestAppReview } from '../lib/review';
 import { answerMatches } from '../lib/answer';
 import { logClick } from '../lib/analytics';
+import { maskTerm } from '../lib/quiz';
+import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
+import { useSettings } from '../hooks/useSettings';
 import { Card } from '../components/ui/Card';
 import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
+import { StreakCelebration } from '../components/StreakCelebration';
 
 type Status = 'idle' | 'correct' | 'wrong';
 
@@ -23,7 +27,8 @@ const shuffle = <T,>(arr: T[]): T[] => {
 
 const QuizPage = () => {
   const navigate = useNavigate();
-  const { points, dueQueue, submitQuizAnswer, recordReview } = useAppContext();
+  const { points, dueQueue, knownWords, submitQuizAnswer, recordReview } = useAppContext();
+  const { soundOn, vibrationOn } = useSettings();
 
   const [queue, setQueue] = useState<Word[]>([]);
   const [started, setStarted] = useState(false);
@@ -83,12 +88,14 @@ const QuizPage = () => {
     }
 
     if (isCorrect) {
+      feedbackCorrect(soundOn, vibrationOn);
       setTotalCorrect((c) => c + 1);
       setStatus('correct');
       const res = await submitQuizAnswer(word.id, input, 'typed', showHint, index === 0);
       if (res) setCombo(res.combo);
       setTimeout(goNext, 900);
     } else {
+      feedbackWrong(soundOn, vibrationOn);
       setCombo(0);
       setStatus('wrong');
       void submitQuizAnswer(word.id, input, 'typed', showHint, index === 0);
@@ -97,16 +104,20 @@ const QuizPage = () => {
   };
 
   if (isEmpty) {
+    // 아직 배운 단어가 없으면 '완료'가 아니라 '시작 전'이다
+    const nothingLearned = knownWords.length === 0;
     return (
       <div className="flex flex-col h-full bg-[var(--color-canvas)] items-center justify-center p-6 pb-nav">
-        <div className="w-20 h-20 bg-brand-500/10 rounded-full flex items-center justify-center text-4xl mb-4">✅</div>
-        <h2 className="text-xl font-bold text-[var(--color-ink)] mb-2!">오늘 복습 완료</h2>
-        <p className="text-sm text-[var(--color-ink-3)] mb-16!">지금 복습할 단어가 없어요</p>
+        <div className="w-20 h-20 bg-brand-500/10 rounded-full flex items-center justify-center text-4xl mb-4">{nothingLearned ? '📖' : '✅'}</div>
+        <h2 className="text-xl font-bold text-[var(--color-ink)] mb-2!">{nothingLearned ? '복습할 단어가 아직 없어요' : '오늘 복습 완료'}</h2>
+        <p className="text-sm text-[var(--color-ink-3)] mb-16! text-center break-keep">
+          {nothingLearned ? '단어를 배우면 다음 날부터 복습이 열려요' : '지금 복습할 단어가 없어요'}
+        </p>
         <button
-          onClick={() => navigate('/home')}
+          onClick={() => navigate(nothingLearned ? '/course' : '/home')}
           className="w-full max-w-sm py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90"
         >
-          홈으로
+          {nothingLearned ? '학습하러 가기' : '퀘스트로'}
         </button>
       </div>
     );
@@ -114,7 +125,7 @@ const QuizPage = () => {
 
   if (isFinished) {
     return (
-      <div className="flex flex-col h-full bg-[var(--color-canvas)] items-center justify-center p-6 pb-nav">
+      <div className="flex flex-col h-full bg-[var(--color-canvas)] items-center justify-center-safe p-6 pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
         <div className="w-20 h-20 bg-brand-500/10 rounded-full flex items-center justify-center text-4xl mb-4">🏆</div>
         <h2 className="text-xl font-bold text-[var(--color-ink)] mb-1!">오늘 복습 완료!</h2>
         <p className="text-sm text-[var(--color-ink-3)] mb-6!">{queue.length}문제 중 {totalCorrect}개 정답</p>
@@ -124,12 +135,13 @@ const QuizPage = () => {
         </div>
         <div className="w-full max-w-sm mb-8">
           <DailyAlarmPromptCard />
+          <StreakCelebration />
         </div>
         <button
           onClick={() => navigate('/home')}
           className="w-full max-w-sm py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90"
         >
-          홈으로
+          퀘스트로
         </button>
       </div>
     );
@@ -146,18 +158,13 @@ const QuizPage = () => {
       {/* 헤더 */}
       <div className="bg-[var(--color-card)] pt-4 px-5 pb-4 border-b border-[var(--color-line)]">
         <div className="flex justify-between items-center mb-3">
-          <h2 className="text-xl font-bold text-[var(--color-ink)]">퀴즈</h2>
-          <div className="flex items-center gap-2">
-            {combo >= 2 && (
-              <div className="bg-brand-500 text-white text-2xs font-bold px-2.5 py-1 rounded-full">
-                🔥 {combo}연속
-              </div>
-            )}
-            <div className="flex items-center gap-1 bg-brand-500/10 border border-brand-500/20 rounded-full px-3 py-1.5">
-              <Zap size={13} className="text-brand-500 fill-current" />
-              <span className="text-xs font-bold text-[var(--color-ink)]">{points} P</span>
+          <h2 className="text-xl font-bold text-[var(--color-ink)]">복습</h2>
+          {/* 보유 포인트는 상단바에 있다 */}
+          {combo >= 2 && (
+            <div className="flex items-center gap-0.5 bg-brand-500 text-white text-2xs font-bold px-2.5 py-1 rounded-full">
+              <Flame size={11} className="fill-current" />{combo}연속
             </div>
-          </div>
+          )}
         </div>
         <div className="flex items-center gap-3">
           <div className="flex-1 bg-[var(--color-line)] rounded-full h-1.5 overflow-hidden">
@@ -169,10 +176,10 @@ const QuizPage = () => {
 
       <div className="flex-1 flex flex-col px-5 py-4">
         {/* 문제 카드 */}
-        <Card pad="lg" className="mb-4 flex-1">
+        <Card key={word.id} pad="lg" className="mb-4 flex-1 anim-slide-in">
           <p className="text-2xs font-medium text-[var(--color-ink-4)] mb-3! tracking-wide uppercase">뜻을 보고 용어를 맞혀보세요</p>
 
-          <p className="text-lg font-bold text-[var(--color-ink)] leading-relaxed mb-6!">{word.meaning}</p>
+          <p className="text-lg font-bold text-[var(--color-ink)] leading-relaxed mb-6!">{maskTerm(word.meaning, word.word)}</p>
 
           {showHint && (
             <Card tone="surface" pad="none" className="px-4 py-3 flex items-center gap-2 mb-4">
@@ -183,7 +190,7 @@ const QuizPage = () => {
 
           <Card tone="surface" pad="md">
             <p className="text-xs font-bold text-[var(--color-ink-3)] mb-1.5!">상세 설명</p>
-            <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep">{word.detailedMeaning}</p>
+            <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep">{maskTerm(word.detailedMeaning, word.word)}</p>
           </Card>
         </Card>
 

@@ -5,19 +5,21 @@ import { Component, type ReactNode, type ErrorInfo } from 'react';
 import * as Sentry from '@sentry/react';
 import { closeView, graniteEvent, getSchemeUri } from '@apps-in-toss/web-framework';
 import { AppProvider, useAppContext } from './context/AppContext';
-import { AuthProvider } from './hooks/useAuth';
+import { AuthProvider, useAuth } from './hooks/useAuth';
+import { isDefaultNickname } from './constants';
+import { NicknameSheet } from './components/mypage/NicknameSheet';
 import { parseLandingPath, parseReferrer } from './lib/landing';
 import { logScreen, logClick } from './lib/analytics';
 import { useSafeAreaInsets } from './hooks/useSafeAreaInsets';
 import NavBar from './components/NavBar';
+import { TopBar } from './components/TopBar';
 
 const HomeScreen = React.lazy(() => import('./pages/HomeScreen'));
 const CourseScreen = React.lazy(() => import('./pages/CourseScreen'));
 const ReviewScreen = React.lazy(() => import('./pages/ReviewScreen'));
-const LeagueScreen = React.lazy(() => import('./pages/LeagueScreen'));
 const QuizScreen = React.lazy(() => import('./pages/QuizScreen'));
-const CourseWordListScreen = React.lazy(() => import('./pages/CourseWordListScreen'));
 const WordCardScreen = React.lazy(() => import('./pages/WordCardScreen'));
+const LeagueScreen = React.lazy(() => import('./pages/LeagueScreen'));
 const LeagueRulesScreen = React.lazy(() => import('./pages/LeagueRulesScreen'));
 const MyPageScreen = React.lazy(() => import('./pages/MyPageScreen'));
 
@@ -89,7 +91,7 @@ function resolveLandingTarget(): string {
   }
   const target = parseLandingPath(schemeUri);
   logClick('entry', { referrer: parseReferrer(schemeUri), target: target ?? '' });
-  resolvedLanding = target ?? '/home';
+  resolvedLanding = target ?? '/course';
   return resolvedLanding;
 }
 
@@ -109,8 +111,8 @@ const BackEventHandler = () => {
             return;
           }
 
-          if (location.pathname !== '/home') {
-            navigate('/home', { replace: true });
+          if (location.pathname !== '/course') {
+            navigate('/course', { replace: true });
             return;
           }
 
@@ -135,14 +137,34 @@ const ScreenLogger = () => {
   return null;
 };
 
+// 기본 닉네임이면 앱을 쓰기 전에 직접 정하게 한다.
+const NicknameGate = () => {
+  const { user, updateNickname } = useAuth();
+  if (!user || !isDefaultNickname(user.nickname)) return null;
+  return (
+    <NicknameSheet
+      open
+      required
+      currentNickname={user.nickname}
+      onClose={() => {}}
+      onSave={updateNickname}
+    />
+  );
+};
+
 const Layout = () => {
+  const { pathname } = useLocation();
   const { ready } = useAppContext();
 
   if (!ready) return <LoadingScreen />;
 
   return (
-    <div className="flex-1 w-full h-full relative">
+    <div className="flex-1 w-full h-full flex flex-col relative">
+      <NicknameGate />
+      <TopBar />
       <React.Suspense fallback={<LoadingScreen />}>
+      {/* 경로가 바뀌면 래퍼가 다시 마운트되며 밀려 들어온다 */}
+      <div key={pathname} className="flex-1 min-h-0 flex flex-col anim-slide-in">
       <Routes>
         <Route path="/" element={<Navigate to={resolveLandingTarget()} replace />} />
         <Route path="/home" element={<HomeScreen />} />
@@ -150,11 +172,11 @@ const Layout = () => {
         <Route path="/league" element={<LeagueScreen />} />
         <Route path="/review" element={<ReviewScreen />} />
         <Route path="/my" element={<MyPageScreen />} />
-<Route path="/course/words" element={<CourseWordListScreen />} />
         <Route path="/word-card" element={<WordCardScreen />} />
         <Route path="/league/rules" element={<LeagueRulesScreen />} />
         <Route path="/quiz" element={<QuizScreen />} />
       </Routes>
+      </div>
       </React.Suspense>
       <NavBar />
     </div>

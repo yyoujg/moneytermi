@@ -56,6 +56,41 @@ button.text-base, input.text-base, select.text-base, textarea.text-base { font-s
 button.text-lg, input.text-lg, select.text-lg, textarea.text-lg { font-size: var(--text-lg) !important; line-height: var(--text-lg--line-height) !important; }
 button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var(--text-xl) !important; line-height: var(--text-xl--line-height) !important; }
 
+/* ── 공용 모션 ──
+   .anim-fade-up  : 아래에서 떠오르며 등장. --i 로 순차 지연(60ms 단위)
+   .anim-pop-in   : 튀어나오듯 등장. --i 로 순차 지연(50ms 단위)
+   .anim-slide-in : 오른쪽에서 밀려 들어옴(화면 전환·카드 교체)
+   .anim-bump     : 값이 바뀔 때 한 번 커졌다 돌아옴(key를 바꿔 재생)
+   .anim-attn     : 눌러야 할 버튼의 잔잔한 파동 */
+@keyframes fade-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes pop-in { 0% { opacity: 0; transform: scale(0.6); } 70% { transform: scale(1.08); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes slide-in { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: none; } }
+@keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.3); } 100% { transform: scale(1); } }
+@keyframes attn { 0%, 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.55); } 70% { box-shadow: 0 0 0 9px rgba(249, 115, 22, 0); } }
+.anim-fade-up  { animation: fade-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: calc(var(--i, 0) * 60ms); }
+.anim-pop-in   { animation: pop-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both; animation-delay: calc(var(--i, 0) * 50ms); }
+.anim-slide-in { animation: slide-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.anim-bump     { display: inline-block; animation: bump 0.35s ease-out; }
+.anim-attn     { animation: attn 1.4s ease-out infinite; }
+/* 마일스톤 축하 색종이: 위에서 흔들리며 떨어진다. --x(가로 위치 %), --d(지연), --r(회전 방향)은 인라인 */
+@keyframes confetti-fall {
+  0%   { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 0; }
+  10%  { opacity: 1; }
+  100% { transform: translate3d(calc(var(--r, 1) * 40px), 110vh, 0) rotate(calc(var(--r, 1) * 720deg)); opacity: 0.9; }
+}
+.anim-confetti {
+  position: absolute; top: 0; left: var(--x, 50%); width: 8px; height: 14px; border-radius: 2px;
+  animation: confetti-fall 2.8s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+  animation-delay: var(--d, 0s);
+  pointer-events: none;
+}
+/* 누르는 느낌: 모든 활성 버튼이 살짝 눌린다 */
+button:not(:disabled):active { transform: scale(0.97); }
+@media (prefers-reduced-motion: reduce) {
+  .anim-fade-up, .anim-pop-in, .anim-slide-in, .anim-bump, .anim-attn, .anim-confetti,
+  .animate-node-hop, .animate-node-ground { animation: none !important; }
+}
+
 @keyframes bounce-up {
   0%, 100% { transform: translateY(0); opacity: 0.5; }
   50% { transform: translateY(-4px); opacity: 1; }
@@ -69,6 +104,21 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
 }
 .animate-bounce-down {
   animation: bounce-down 1.4s ease-in-out infinite;
+}
+/* 패스에서 다음에 누를 노드: 제자리 점프. 바닥 그림자는 노드가 떠 있을 때 작고 옅어진다 */
+@keyframes node-hop {
+  0%, 100% { transform: translateY(0); }
+  45%, 55% { transform: translateY(-10px); }
+}
+@keyframes node-ground {
+  0%, 100% { transform: scaleX(1); opacity: 0.45; }
+  45%, 55% { transform: scaleX(0.6); opacity: 0.2; }
+}
+.animate-node-hop {
+  animation: node-hop 1.1s cubic-bezier(0.34, 1.2, 0.64, 1) infinite;
+}
+.animate-node-ground {
+  animation: node-ground 1.1s cubic-bezier(0.34, 1.2, 0.64, 1) infinite;
 }
 
 html,

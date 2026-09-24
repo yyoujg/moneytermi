@@ -1,148 +1,217 @@
-import { useEffect, useRef } from 'react';
-import { Info, Share2, Gift, Play } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-import { TextButton, Spacing } from '@toss/tds-mobile';
+import { useEffect, useState } from 'react';
+import { Info, Share2 } from 'lucide-react';
+import { BottomSheet, TextButton, Spacing } from '@toss/tds-mobile';
 import { GROWTH_STAGES, getGrowthStage } from '../constants';
 import { useAppContext } from '../context/AppContext';
 import { useAuth } from '../hooks/useAuth';
-import { shareTossLink } from '../lib/share';
-import { isReferralEnabled, startReferralInvite } from '../lib/referral';
-import { isRewardedAdEnabled, showRewardedAd } from '../lib/ads';
+import { supabase, getGuestClient } from '../lib/supabase';
 import { logClick } from '../lib/analytics';
+import { shareTossLink } from '../lib/share';
+import { daysUntilReset } from '../lib/league';
+import { Card } from '../components/ui/Card';
+import { LeagueRules } from '../components/LeagueRules';
+
+type Row = { rank: number; nickname: string; emoji: string; points: number; is_me: boolean };
+type MyRank = { rank: number | null; total: number; points: number };
+
+const MEDAL = ['🥇', '🥈', '🥉'];
+// 공유 문구: 이번 주 성과가 있으면 그걸 앞세운다
+const shareMessage = (tier: string, weeklyXp: number, rank: number | null | undefined) =>
+  rank
+    ? `이번 주 ${weeklyXp.toLocaleString()}XP로 리그 ${rank}위! 머니터미에서 경제 용어 같이 배워요`
+    : weeklyXp > 0
+      ? `이번 주 ${weeklyXp.toLocaleString()}XP 모았어요. 머니터미에서 경제 용어 같이 배워요`
+      : `머니터미에서 경제 용어 배우고 ${tier} 리그부터 올라가봐요!`;
 
 const LeagueScreen = () => {
-  const navigate = useNavigate();
-  const { points, myEmoji, claimReferralReward, claimAdReward } = useAppContext();
-  const { user } = useAuth();
-  const referralCleanupRef = useRef<(() => void) | null>(null);
+  const { xp, myEmoji } = useAppContext();
+  const { user, guestToken } = useAuth();
+  const [rows, setRows] = useState<Row[] | null>(null);
+  const [mine, setMine] = useState<MyRank | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [sheet, setSheet] = useState<'share' | 'rules' | null>(null);
+  // 진행 바를 0에서 실제 값까지 차오르게: 마운트 다음 프레임에 값을 넣는다
+  const [barReady, setBarReady] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setBarReady(true), 80); return () => clearTimeout(t); }, []);
 
-  const handleInviteFriends = () => {
-    logClick('referral_invite_start');
-    referralCleanupRef.current?.();
-    referralCleanupRef.current = startReferralInvite((amount, unit) => {
-      claimReferralReward(amount, unit).then(credited => {
-        if (credited) toast.success(`친구 초대 완료! +${credited}P`);
-      });
-    }) ?? null;
-  };
+  useEffect(() => {
+    // current_profile_id()는 x-guest-token 헤더로 나를 찾는다. 기본 클라이언트면 내 순위가 null이다.
+    const db = guestToken ? getGuestClient(guestToken) : supabase;
+    Promise.all([
+      db.rpc('leaderboard_top', { p_limit: 10 }),
+      db.rpc('my_league_rank'),
+    ]).then(([top, my]) => {
+      if (top.error || my.error) { setFailed(true); return; }
+      setRows((top.data ?? []) as Row[]);
+      setMine(my.data as MyRank);
+    }).catch(() => setFailed(true));
+  }, [guestToken]);
 
-  useEffect(() => () => referralCleanupRef.current?.(), []);
-
-  const handleWatchAd = () => {
-    logClick('rewarded_ad_start');
-    showRewardedAd((amount, unit) => {
-      claimAdReward(amount, unit).then(credited => {
-        if (credited) toast.success(`광고 시청 완료! +${credited}P`);
-      });
-    });
-  };
-
-  const stage = getGrowthStage(points);
-  const progressPct = stage.nextMinPoints !== null
-    ? Math.min(100, Math.round(((points - stage.minPoints) / (stage.nextMinPoints - stage.minPoints)) * 100))
-    : 100;
+  const stage = getGrowthStage(xp);
+  const next = stage.nextMinPoints;
 
   return (
-    <div className="flex flex-col h-full bg-[var(--color-canvas)]">
-      {/* 헤더 */}
+    <div className="flex flex-col h-full bg-[var(--color-canvas)] pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
       <div className="bg-[var(--color-card)] pt-4 px-5 pb-5">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-[var(--color-ink)]">캐릭터 키우기</h2>
+          <h2 className="text-xl font-bold text-[var(--color-ink)]">리그</h2>
           <div className="flex items-center gap-1">
-            <TextButton
-              size="small"
-              onClick={() => {
-                logClick('league_share');
-                shareTossLink('intoss://moneytermi/league', '머니터미에서 경제 용어 배우고 내 캐릭터를 키워봐요!');
-              }}
-            >
+            <TextButton size="small" aria-label="리그 공유" onClick={() => setSheet('share')}>
               <span className="flex items-center gap-1"><Share2 size={13} />공유</span>
             </TextButton>
-            <TextButton size="small" onClick={() => navigate('/league/rules')}>
+            <TextButton size="small" aria-label="리그 안내" onClick={() => setSheet('rules')}>
               <span className="flex items-center gap-1"><Info size={13} />안내</span>
             </TextButton>
           </div>
         </div>
 
-        {/* 캐릭터 카드 */}
-        <div className="bg-[var(--color-canvas)] rounded-card p-5 flex flex-col items-center text-center mb-4">
-          <div className="flex items-center gap-1.5 mb-3">
-            <div className="w-7 h-7 bg-brand-500/10 rounded-full flex items-center justify-center text-sm">{myEmoji}</div>
-            <span className="text-xs font-medium text-[var(--color-ink-3)]">{user?.nickname ?? '예비슈퍼개미'}</span>
+        {/* 내 티어 */}
+        <Card tone="surface" pad="lg" className="flex flex-col items-center text-center anim-fade-up">
+          <div className="text-6xl mb-2 anim-pop-in">{stage.emoji}</div>
+          <p className="text-lg font-bold text-[var(--color-ink)] mb-1!">{stage.name}</p>
+          <p className="text-xs text-[var(--color-ink-3)] mb-1!">
+            {mine?.rank ? `${mine.total}명 중 ${mine.rank}위` : '이번 주 XP를 모으면 순위에 올라요'}
+          </p>
+          <p className="text-2xs font-medium text-brand-500 mb-3!">이번 주 {mine?.points?.toLocaleString() ?? 0}XP · {daysUntilReset()}일 남음</p>
+          <div className="w-full bg-[var(--color-card)] rounded-full h-1.5 overflow-hidden mb-1.5">
+            <div
+              className="bg-brand-500 h-full rounded-full transition-all duration-700"
+              style={{ width: barReady ? `${next === null ? 100 : Math.min(100, Math.round(((xp - stage.minPoints) / (next - stage.minPoints)) * 100))}%` : '0%' }}
+            />
           </div>
-          <div className="text-7xl mb-2">{stage.emoji}</div>
-          <p className="text-lg font-bold text-[var(--color-ink)] mb-3!">{stage.name}</p>
+          <p className="text-xs text-[var(--color-ink-4)]">
+            {next === null ? '최고 티어예요 🎉' : `다음 티어까지 ${next - xp}XP`}
+          </p>
+        </Card>
 
-          <div className="w-full">
-            <div className="w-full bg-[var(--color-surface)] rounded-full h-1.5 overflow-hidden mb-1.5">
-              <div className="bg-brand-500 h-full rounded-full transition-all duration-700" style={{ width: `${progressPct}%` }} />
-            </div>
-            <p className="text-xs text-[var(--color-ink-4)]">
-              {stage.nextMinPoints !== null
-                ? `다음 단계까지 ${stage.nextMinPoints - points}P`
-                : '최고 단계 달성! 🎉'}
-            </p>
+        {/* 티어 로드맵 */}
+        <div className="flex justify-between items-start relative mt-5">
+          <div className="absolute top-4 left-4 right-4 h-[2px] bg-[var(--color-line)] z-0 rounded-full">
+            <div
+              className="h-full bg-brand-500 rounded-full transition-all duration-1000"
+              style={{ width: `${((stage.id - 1) / (GROWTH_STAGES.length - 1)) * 100}%` }}
+            />
           </div>
-        </div>
-
-        {/* 단계 로드맵 */}
-        <div className="relative">
-          <div className="flex justify-between items-start relative">
-            <div className="absolute top-4 left-4 right-4 h-[2px] bg-[var(--color-line)] z-0 rounded-full">
-              <div
-                className="h-full bg-brand-500 rounded-full transition-all duration-1000"
-                style={{ width: `${((stage.id - 1) / (GROWTH_STAGES.length - 1)) * 100}%` }}
-              />
-            </div>
-            {GROWTH_STAGES.map((s) => {
-              const isCurrent = s.id === stage.id;
-              return (
-                <div key={s.id} className="flex flex-col items-center relative z-10 w-14">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm transition-all
-                    ${isCurrent ? 'bg-brand-500 scale-110' :
-                      s.id < stage.id ? 'bg-[var(--color-line)]' :
-                      'bg-[var(--color-surface)]'}`}
-                  >
-                    {s.emoji}
-                  </div>
-                  <span className={`text-3xs font-medium text-center mt-1.5 leading-tight
-                    ${isCurrent ? 'text-brand-500' : 'text-[var(--color-ink-4)]'}`}>
-                    {s.name}
-                  </span>
+          {GROWTH_STAGES.map(s => {
+            const isCurrent = s.id === stage.id;
+            return (
+              <div key={s.id} className="flex flex-col items-center relative z-10 w-14">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm transition-all
+                  ${isCurrent ? 'bg-brand-500 scale-110' : s.id < stage.id ? 'bg-[var(--color-line)]' : 'bg-[var(--color-surface)]'}`}>
+                  {s.emoji}
                 </div>
-              );
-            })}
-          </div>
+                <span className={`text-3xs font-medium text-center mt-1.5 ${isCurrent ? 'text-brand-500' : 'text-[var(--color-ink-4)]'}`}>
+                  {s.name}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* 포인트 획득 — 스크롤 영역 */}
-      <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden px-5 pt-4 pb-nav">
-        <div className="flex flex-col gap-2 mb-4!">
-          {isReferralEnabled() && (
-            <button
-              onClick={handleInviteFriends}
-              className="w-full flex items-center justify-center gap-1.5 rounded-chip px-3 py-3 text-sm font-bold text-brand-500 active:opacity-70"
-              style={{ backgroundColor: 'var(--color-brand-soft)' }}
-            >
-              <Gift size={15} /> 친구 초대하고 포인트 받기
-            </button>
-          )}
-
-          {isRewardedAdEnabled() && (
-            <button
-              onClick={handleWatchAd}
-              className="w-full flex items-center justify-center gap-1.5 rounded-chip px-3 py-3 text-sm font-bold text-brand-500 active:opacity-70"
-              style={{ backgroundColor: 'var(--color-brand-soft)' }}
-            >
-              <Play size={15} /> 광고 보고 포인트 받기
-            </button>
-          )}
+      {/* 랭킹 */}
+      <div className="px-5 pt-5">
+        <div className="flex items-baseline justify-between mb-3">
+          <p className="text-sm font-bold text-[var(--color-ink-2)]">이번 주 TOP 10</p>
+          <span className="text-2xs text-[var(--color-ink-4)]">매주 월요일 초기화</span>
         </div>
+
+        {failed && (
+          <Card pad="lg">
+            <p className="text-sm text-[var(--color-ink-3)] text-center">순위를 불러오지 못했어요</p>
+          </Card>
+        )}
+
+        {!failed && rows === null && (
+          <Card pad="lg">
+            <div className="flex flex-col gap-3">
+              {[1, 2, 3].map(i => <div key={i} className="h-5 bg-[var(--color-surface)] rounded animate-pulse" />)}
+            </div>
+          </Card>
+        )}
+
+        {!failed && rows?.length === 0 && (
+          <Card pad="lg">
+            <p className="text-sm text-[var(--color-ink-3)] text-center">이번 주엔 아직 아무도 없어요.<br />먼저 학습해서 1위를 차지해보세요!</p>
+          </Card>
+        )}
+
+        {!failed && rows && rows.length > 0 && (
+          <Card pad="none" className="overflow-hidden">
+            {rows.map((r, i) => (
+              <div
+                key={`${r.rank}-${i}`}
+                className={`anim-fade-up flex items-center gap-3 px-4 py-3 ${i < rows.length - 1 ? 'border-b border-[var(--color-line)]' : ''}`}
+                style={{ '--i': i, ...(r.is_me ? { backgroundColor: 'var(--color-brand-soft)' } : {}) } as React.CSSProperties}
+              >
+                <span className="w-7 text-center text-sm font-bold text-[var(--color-ink-3)] shrink-0">
+                  {r.rank <= 3 ? MEDAL[r.rank - 1] : r.rank}
+                </span>
+                <span className="text-lg shrink-0">{r.is_me ? myEmoji : r.emoji}</span>
+                <span className={`flex-1 text-sm truncate ${r.is_me ? 'font-bold text-brand-500' : 'font-medium text-[var(--color-ink)]'}`}>
+                  {r.is_me ? (user?.nickname ?? r.nickname) : r.nickname}
+                </span>
+                <span className="text-sm font-bold text-[var(--color-ink-2)] shrink-0">{r.points.toLocaleString()}XP</span>
+              </div>
+            ))}
+
+            {/* 10위 밖이면 내 순위를 맨 아래에 따로 붙인다 */}
+            {mine?.rank != null && !rows.some(r => r.is_me) && (
+              <div
+                className="flex items-center gap-3 px-4 py-3 border-t-2 border-dashed border-[var(--color-line)]"
+                style={{ backgroundColor: 'var(--color-brand-soft)' }}
+              >
+                <span className="w-7 text-center text-sm font-bold text-brand-500 shrink-0">{mine.rank}</span>
+                <span className="text-lg shrink-0">{myEmoji}</span>
+                <span className="flex-1 text-sm font-bold text-brand-500 truncate">{user?.nickname ?? '나'}</span>
+                <span className="text-sm font-bold text-[var(--color-ink-2)] shrink-0">{mine.points.toLocaleString()}XP</span>
+              </div>
+            )}
+          </Card>
+        )}
 
         <Spacing size={8} />
       </div>
+
+      <BottomSheet
+        open={sheet === 'rules'}
+        onDimmerClick={() => setSheet(null)}
+        header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>리그 안내</span>}
+      >
+        <div className="px-5 pb-6"><LeagueRules /></div>
+      </BottomSheet>
+
+      <BottomSheet
+        open={sheet === 'share'}
+        onDimmerClick={() => setSheet(null)}
+        header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>리그 공유</span>}
+      >
+        <div className="px-5 pb-6 flex flex-col gap-3">
+          {/* 받는 사람이 보게 될 내용 미리보기: 내 카드 + 문구. 내부 스킴 주소는 보여주지 않는다 */}
+          <Card tone="surface" pad="md" className="flex flex-col gap-3 anim-fade-up">
+            <div className="flex items-center gap-3">
+              <span className="w-11 h-11 flex items-center justify-center text-2xl shrink-0" style={{ borderRadius: 9999, background: 'var(--color-card)' }}>{myEmoji}</span>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-[var(--color-ink)] truncate">{user?.nickname ?? '나'}</p>
+                <p className="text-2xs text-[var(--color-ink-4)]">{stage.emoji} {stage.name} · 이번 주 {(mine?.points ?? 0).toLocaleString()}XP{mine?.rank ? ` · ${mine.rank}위` : ''}</p>
+              </div>
+            </div>
+            <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep">{shareMessage(stage.name, mine?.points ?? 0, mine?.rank)}</p>
+          </Card>
+          <p className="text-2xs text-[var(--color-ink-4)] px-1 anim-fade-up" style={{ '--i': 1 } as React.CSSProperties}>머니터미로 바로 열리는 토스 링크가 함께 보내져요.</p>
+          <button
+            onClick={() => {
+              logClick('league_share', { rank: mine?.rank ?? null, weekly_xp: mine?.points ?? 0 });
+              shareTossLink('intoss://moneytermi/league', shareMessage(stage.name, mine?.points ?? 0, mine?.rank));
+              setSheet(null);
+            }}
+            className="w-full py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90 anim-fade-up"
+            style={{ '--i': 2 } as React.CSSProperties}
+          >
+            토스로 공유하기
+          </button>
+        </div>
+      </BottomSheet>
     </div>
   );
 };

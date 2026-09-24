@@ -17,6 +17,8 @@ export type Database = {
           is_guest: boolean;
           league_tier: string;
           points: number;
+          xp: number;
+          boost_until: string | null;
           quiz_combo: number;
           emoji: string;
           created_at: string;
@@ -93,22 +95,50 @@ export type Database = {
         Row: {
           id: string;
           user_id: string;
-          mission_id: 'm1' | 'm3';
+          mission_id: string;
           date: string;
+          slot: number;
           current: number;
           is_rewarded: boolean;
         };
         Insert: {
           id?: string;
           user_id: string;
-          mission_id: 'm1' | 'm3';
+          mission_id: string;
           date?: string;
+          slot?: number;
           current?: number;
           is_rewarded?: boolean;
         };
         Update: {
           current?: number;
           is_rewarded?: boolean;
+        };
+        Relationships: [];
+      };
+      mission_defs: {
+        Row: {
+          mission_id: string;
+          title: string;
+          target: number;
+          reward: number;
+          sort_order: number;
+          active: boolean;
+        };
+        Insert: {
+          mission_id: string;
+          title: string;
+          target: number;
+          reward: number;
+          sort_order?: number;
+          active?: boolean;
+        };
+        Update: {
+          title?: string;
+          target?: number;
+          reward?: number;
+          sort_order?: number;
+          active?: boolean;
         };
         Relationships: [];
       };
@@ -273,7 +303,46 @@ export type Database = {
           earned: number;
           combo: number;
           points: number;
+          xp: number;
           m3_current: number;
+        };
+      };
+      spend_points: {
+        Args: {
+          p_amount: number;
+          p_reason?: string;
+        };
+        Returns: {
+          points: number;
+          reason: string;
+        };
+      };
+      buy_boost: {
+        Args: Record<string, never>;
+        Returns: {
+          points: number;
+          boost_until: string;
+        };
+      };
+      leaderboard_top: {
+        Args: {
+          p_limit?: number;
+        };
+        Returns: {
+          rank: number;
+          nickname: string;
+          emoji: string;
+          points: number;
+          is_me: boolean;
+        }[];
+      };
+      my_league_rank: {
+        Args: Record<string, never>;
+        Returns: {
+          rank: number | null;
+          total: number;
+          points: number;
+          week_start: string;
         };
       };
       claim_mission_reward: {
