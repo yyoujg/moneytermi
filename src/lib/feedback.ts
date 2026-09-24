@@ -134,6 +134,12 @@ export function feedbackCelebrate() {
   hapticSeq([['confetti', 0], ['success', 200], ['confetti', 450], ['confetti', 700]]);
 }
 
+// 배지 획득: 반짝이는 상승 아르페지오 + 축포
+export function feedbackBadge() {
+  play([{ f: N.E5, dur: 0.1, vol: 0.16 }, { f: N.G5, at: 0.08, dur: 0.1, vol: 0.16 }, { f: N.C6, at: 0.16, dur: 0.1, vol: 0.16 }, { f: N.E6, at: 0.24, dur: 0.16, vol: 0.16 }, { f: N.G6, at: 0.34, dur: 0.45, vol: 0.18 }]);
+  hapticSeq([['confetti', 0], ['success', 250], ['confetti', 500]]);
+}
+
 // 실패 알림 (보상 수령 실패 등): 짧고 낮게
 export function feedbackError() {
   play([{ f: 220, dur: 0.12, type: 'sawtooth', vol: 0.1 }, { f: 180, at: 0.12, dur: 0.16, type: 'sawtooth', vol: 0.1 }]);
