@@ -19,6 +19,14 @@ export type GrowthStage = {
 // 리그 티어. 누적 XP로 결정된다.
 // 기준선은 포인트 시절의 1/5 — XP는 포인트보다 훨씬 천천히 쌓인다(퀴즈 1정답 = 10~20P vs 2XP).
 // 4000XP는 퀴즈 2000문제라 사실상 도달 불가였다.
+// 포인트 경제 (migration_points_economy.sql). 레슨 시작 비용 / XP 마일스톤 보너스.
+export const LESSON_COST = 10;
+export const XP_BONUS_STEP = 50;
+export const XP_BONUS_POINTS = 50;
+
+// 미션 보상 수령 시 서버가 함께 주는 XP (migration_xp.sql STEP 7 claim_mission_reward → add_xp 5)
+export const MISSION_XP = 5;
+
 export const GROWTH_STAGES: Omit<GrowthStage, 'nextMinPoints'>[] = [
   { id: 1, name: '브론즈',   emoji: '🥉', minPoints: 0 },
   { id: 2, name: '실버',     emoji: '🥈', minPoints: 20 },

@@ -6,7 +6,8 @@
 줄 이음은 첫 추출의 정상 항목에서 학습한 문자별 공백 확률(join_table.json)로 결정한다.
 
 사용: python3 parse800.py [PDF경로]
-출력: 14_words_fix_N.sql (현재 SQL과 실질적으로 다른 행만 UPDATE, SQL Editor 한도에 맞춰 70행씩 분할)
+출력: NN_words_fix_N.sql (기준 = 소스 SQL + 이미 만든 fix 파일. 실질적으로 다른 행만 UPDATE, 70행씩 분할. NN은 다음 번호)
+       다시 돌릴 때마다 이전 fix 파일은 '적용된 것'으로 간주하므로, 만든 파일은 반드시 적용한 뒤 커밋할 것.
 """
 import glob, json, pathlib, re, subprocess, sys, tempfile
 
@@ -86,6 +87,19 @@ def main():
             cur[un(m.group(2))] = dict(id=int(m.group(1)), meaning=un(m.group(3)), detailed=un(m.group(4)),
                                        related=[un(x) for x in re.findall(r"'((?:[^']|'')*)'", m.group(7) or '')])
 
+    # 이미 만든 fix 파일을 순서대로 덮어써서 '현재 DB 상태'를 기준으로 삼는다
+    by_id = {c['id']: w for w, c in cur.items()}
+    fix_files = sorted(HERE.glob('[0-9][0-9]_words_fix*.sql'))
+    upd = re.compile(r"^UPDATE public\.words SET meaning = '((?:[^']|'')*)', detailed_meaning = '((?:[^']|'')*)', related_words = (ARRAY\[(.*?)\]::text\[\]|'\{\}'::text\[\]) WHERE id = (\d+);", re.M)
+    for f in fix_files:
+        for m in upd.finditer(f.read_text()):
+            w = by_id.get(int(m.group(5)))
+            if w:
+                cur[w].update(meaning=un(m.group(1)), detailed=un(m.group(2)),
+                              related=[un(x) for x in re.findall(r"'((?:[^']|'')*)'", m.group(4) or '')])
+    next_no = max([int(f.name[:2]) for f in fix_files] + [13]) + 1
+    print(f'기준: 소스 SQL + fix {len(fix_files)}개 적용, 출력 번호 {next_no}')
+
     terms = parse_index(lines, body_start)
     tn = {norm(t): t for t in terms}
     for w in cur:                       # 찾아보기에서 두 줄로 갈라진 긴 용어명은 DB 이름으로 보완
@@ -118,6 +132,9 @@ def main():
         for l in B[i + 1:end]:
             if is_noise(l):
                 continue
+            # 오른쪽 여백의 색인 글자(ㄱ, ㅅ …)가 본문 줄 끝에 넓은 공백 뒤로 붙는다
+            l = re.sub(r'\s{2,}[ㄱ-ㅎ]\s*$', '', l)
+            l = re.sub(r'^\s*[ㄱ-ㅎ]\s{2,}', '', l)
             s = l.strip()
             if s.startswith('연관검색어'):
                 related = [x.strip() for x in re.split(r',\s*', s.replace('연관검색어', '').strip()) if x.strip()]
@@ -160,8 +177,6 @@ def main():
     short = [w for w in cur if w in entries and len(entries[w]['meaning']) < 20]
     print(f'검증 — 인접 용어 끼어듦 {glued}개, 20자 미만 meaning {len(short)}개 {short[:5]}')
 
-    for old in HERE.glob('14_words_fix*.sql'):
-        old.unlink()
     CHUNK = 70   # 파일당 ~110KB. SQL Editor가 큰 쿼리를 거부한 적이 있어 넉넉히 나눈다
     parts = [ups[i:i + CHUNK] for i in range(0, len(ups), CHUNK)]
     for n, part in enumerate(parts, 1):
@@ -170,8 +185,8 @@ def main():
                f'-- 이 파일 {len(part)}행 / 전체 {len(ups)}행', ''] + part
         if n == len(parts):
             out += ['', "NOTIFY pgrst, 'reload schema';"]
-        (HERE / f'14_words_fix_{n}.sql').write_text('\n'.join(out) + '\n')
-    print(f'14_words_fix_1..{len(parts)}.sql 생성')
+        (HERE / f'{next_no}_words_fix_{n}.sql').write_text('\n'.join(out) + '\n')
+    print(f'{next_no}_words_fix_1..{len(parts)}.sql 생성 ({len(ups)}행)')
     json.dump({w: e for w, e in entries.items()}, open(pathlib.Path(tempfile.gettempdir()) / 'bok800_entries.json', 'w'), ensure_ascii=False)
 
 

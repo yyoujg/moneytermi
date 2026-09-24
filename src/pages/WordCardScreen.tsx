@@ -163,7 +163,7 @@ const WordCard = ({
 const WordCardScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { courses, allWords, knownWords, knownIds, hydrated, toggleKnown, setKnownWords, claimPromotionReward } = useAppContext();
+  const { courses, allWords, knownWords, knownIds, hydrated, toggleKnown, setKnownWords, claimPromotionReward, refreshPoints } = useAppContext();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const state = location.state as {
@@ -192,6 +192,8 @@ const WordCardScreen = () => {
   const autoAdvance = state?.autoAdvance ?? false;
 
   const [wordIndex, setWordIndex] = React.useState(state?.index ?? 0);
+  // 관련 용어 클릭처럼 같은 라우트로 다시 navigate하면 재마운트가 없어 index가 이전 값에 머문다.
+  useEffect(() => { setWordIndex(state?.index ?? 0); }, [state]);
 
   // 로딩이 끝났는데도 보여줄 단어가 없으면 돌아간다. 렌더 중 navigate는 안 된다.
   const noWords = words.length === 0 && !(isDeepLink && (courses.length === 0 || !hydrated));
@@ -205,10 +207,11 @@ const WordCardScreen = () => {
   // 뉴스 (현재 단어 로드 + 다음 단어 prefetch)
   const { newsItems, newsLoading } = useNews(words, wordIndex);
 
-  // autoAdvance 완료 토스트
+  // autoAdvance 완료 토스트 + 잔고 갱신 (새 단어 XP의 50단위 보너스 포인트는 서버에서만 계산된다)
   useEffect(() => {
     if (autoAdvance && words.length > 0 && wordIndex >= words.length) {
       toast.success('학습 완료!');
+      refreshPoints();
     }
   }, [wordIndex, words.length, autoAdvance]);
 

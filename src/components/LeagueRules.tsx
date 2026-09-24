@@ -1,28 +1,18 @@
-import { List, ListRow } from '@toss/tds-mobile';
-import { Trophy, Sparkles, Zap, CalendarDays } from 'lucide-react';
-
+// 리그 안내 항목. 마이페이지 '앱 사용법' 시트(GuideSheet)와 같은 카드 블록 스타일.
 const RULES = [
-  { Icon: Trophy, title: '리그 티어', desc: 'XP를 모으면 브론즈 → 실버 → 골드 → 플래티넘 → 다이아 순서로 티어가 올라가요.' },
-  { Icon: Sparkles, title: 'XP 획득', desc: '새 단어 1 · 퀴즈 정답 2 · 출석 3 · 미션 보상 수령 5 XP. 학습으로만 쌓여요.' },
-  { Icon: CalendarDays, title: '주간 순위', desc: '이번 주에 얻은 XP로 순위를 매기고, 매주 월요일 0시에 초기화돼요.' },
-  { Icon: Zap, title: '포인트', desc: '순위와 무관한 재화예요. 미션·퀴즈·광고·초대로 모아 XP 2배 부스트(300P · 30분)에 써요.' },
+  { title: '리그 티어', desc: 'XP를 모으면 브론즈 → 실버 → 골드 → 플래티넘 → 다이아 순서로 티어가 올라가요.' },
+  { title: 'XP 획득', desc: '새 단어 1 · 퀴즈 정답 2 · 출석 3 · 미션 보상 수령 5 XP. 학습으로만 쌓여요.' },
+  { title: '주간 순위', desc: '이번 주에 얻은 XP로 순위를 매기고, 매주 월요일 0시에 초기화돼요.' },
+  { title: '포인트', desc: '순위와 무관한 재화예요. 레슨 시작(10P)과 XP 2배 부스트(300P · 30분)에 쓰고, 퀴즈 정답·미션·XP 50마다 +50P·광고로 모아요.' },
 ];
 
 export const LeagueRules = () => (
-  <List>
-    {RULES.map(({ Icon, title, desc }) => (
-      <ListRow
-        key={title}
-        border="none"
-        left={<span className="w-9 flex justify-center shrink-0 text-brand-500"><Icon size={22} /></span>}
-        contents={
-          <ListRow.Texts
-            type="2RowTypeA"
-            top={<span className="text-[var(--color-ink)]">{title}</span>}
-            bottom={<span className="text-[var(--color-ink-3)]">{desc}</span>}
-          />
-        }
-      />
+  <div className="flex flex-col gap-3">
+    {RULES.map(item => (
+      <div key={item.title} className="bg-[var(--color-canvas)] rounded-card px-4 py-4">
+        <p className="text-sm font-bold text-[var(--color-ink)] mb-1.5!">{item.title}</p>
+        <p className="text-xs text-[var(--color-ink-3)] leading-relaxed">{item.desc}</p>
+      </div>
     ))}
-  </List>
+  </div>
 );

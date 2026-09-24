@@ -1,22 +1,19 @@
 import { useEffect, useRef } from 'react';
-import { ChevronRight, Zap, Flame, BookOpen, RotateCcw } from 'lucide-react';
+import { ChevronRight, RotateCcw } from 'lucide-react';
 import { Badge } from '@toss/tds-mobile';
 import { useNavigate } from 'react-router-dom';
-import { DEFAULT_NICKNAME, getGrowthStage } from '../constants';
+import { DEFAULT_NICKNAME, MISSION_XP, getGrowthStage } from '../constants';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
-import { calcStreak } from '../lib/streak';
 import { msUntilNextSlot } from '../lib/date';
 import { useAuth } from '../hooks/useAuth';
 import { WeeklyBarChart } from '../components/home/WeeklyBarChart';
 import { Card } from '../components/ui/Card';
-import { StatCard } from '../components/ui/StatCard';
 
 const HomeScreen = () => {
   const navigate = useNavigate();
-  const { hydrated, points, xp, knownWords, unknownWords, missions, claimReward, attendanceDates, allWords, dueQueue, myEmoji } = useAppContext();
+  const { hydrated, xp, knownWords, unknownWords, missions, claimReward, attendanceDates, dueQueue, myEmoji } = useAppContext();
   const { user } = useAuth();
-  const totalWords = allWords.length;
   const isNewUser = hydrated && knownWords.length + unknownWords.length === 0;
 
   // 복습 카드 노출 로깅 (세션 1회 래치, hydration 전 프레임 오발화 방지)
@@ -26,8 +23,6 @@ const HomeScreen = () => {
     reviewPromptLoggedRef.current = true;
     logClick('review_prompt_view', { count: dueQueue.length });
   }, [hydrated, dueQueue.length]);
-
-  const streak = calcStreak(attendanceDates);
 
   const missionList = Object.values(missions).sort((a, b) => a.sortOrder - b.sortOrder);
   const resetLabel = `${Math.ceil(msUntilNextSlot() / 3600000)}시간 뒤 초기화`;
@@ -71,27 +66,6 @@ const HomeScreen = () => {
           </Card>
         )}
 
-        {/* 빠른 통계 */}
-        {!isNewUser && (
-        <div className="flex gap-3 mb-4">
-          <StatCard
-            icon={<Zap size={14} className="text-[var(--color-ink-4)] fill-current shrink-0" />}
-            label="포인트"
-            value={<>{points.toLocaleString()}<span className="text-xs text-[var(--color-ink-4)] ml-0.5">P</span></>}
-          />
-          <StatCard
-            icon={<Flame size={14} className="text-[var(--color-ink-4)] shrink-0" />}
-            label="연속 출석"
-            value={<>{streak}<span className="text-xs text-[var(--color-ink-4)] ml-0.5">일</span></>}
-          />
-          <StatCard
-            icon={<BookOpen size={14} className="text-[var(--color-ink-4)] shrink-0" />}
-            label="학습 단어"
-            value={<>{knownWords.length}<span className="text-xs text-[var(--color-ink-4)] ml-0.5">/{totalWords}</span></>}
-          />
-        </div>
-        )}
-
         {/* 주간 바 차트 */}
         {!isNewUser && (
         <Card pad="none" className="px-5 pt-4 pb-4">
@@ -121,7 +95,7 @@ const HomeScreen = () => {
                       <p className={`text-sm font-bold truncate ${mission.isRewarded ? 'text-[var(--color-ink-4)] line-through' : 'text-[var(--color-ink)]'}`}>
                         {mission.title}
                       </p>
-                      <p className="text-2xs text-[var(--color-ink-4)] mt-0.5!">+{mission.reward}P</p>
+                      <p className="text-2xs text-[var(--color-ink-4)] mt-0.5!">+{mission.reward}P · +{MISSION_XP} XP</p>
                     </div>
                     {mission.isRewarded
                       ? <Badge color="elephant" size="small" variant="fill">완료</Badge>

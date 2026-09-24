@@ -1,5 +1,4 @@
 import { Spacing } from '@toss/tds-mobile';
-import { Card } from '../components/ui/Card';
 import { LeagueRules } from '../components/LeagueRules';
 
 // 딥링크(/league/rules)용. 리그 화면 안에서는 같은 내용을 바텀시트로 띄운다.
@@ -11,7 +10,7 @@ const LeagueRulesScreen = () => (
     <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">
       <Spacing size={20} />
       <div className="px-5">
-        <Card pad="none" className="overflow-hidden"><LeagueRules /></Card>
+        <LeagueRules />
       </div>
       <Spacing size={40} />
     </div>

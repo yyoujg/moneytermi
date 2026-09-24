@@ -307,6 +307,16 @@ export type Database = {
           m3_current: number;
         };
       };
+      spend_points: {
+        Args: {
+          p_amount: number;
+          p_reason?: string;
+        };
+        Returns: {
+          points: number;
+          reason: string;
+        };
+      };
       buy_boost: {
         Args: Record<string, never>;
         Returns: {

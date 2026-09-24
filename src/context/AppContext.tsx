@@ -21,6 +21,12 @@ type AppContextValue = {
   xp: number;
   boostUntil: number | null;
   buyBoost: () => Promise<boolean>;
+  spendPoints: (amount: number, reason: string) => Promise<boolean>;
+  refreshPoints: () => Promise<void>;
+  shopReason: 'lesson' | null;
+  shopOpen: boolean;
+  openShop: (reason?: 'lesson') => void;
+  closeShop: () => void;
   knownWords: Word[];
   knownIds: Set<number>;
   setKnownWords: React.Dispatch<React.SetStateAction<Word[]>>;
@@ -59,6 +65,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [points, setPoints]               = useState(0);
   const [xp, setXp]                       = useState(0);
   const [boostUntil, setBoostUntil]       = useState<number | null>(null);
+  const [shopOpen, setShopOpen]           = useState(false);
+  const [shopReason, setShopReason]       = useState<'lesson' | null>(null);
   const [knownWords, setKnownWords]       = useState<Word[]>([]);
   const [unknownWords, setUnknownWords]   = useState<Word[]>([]);
   const [missions, setMissions]           = useState<Missions>(DEFAULT_MISSIONS);
@@ -467,6 +475,27 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     return true;
   };
 
+  // ── 포인트 소모 (레슨 시작) — 서버가 잔고를 검증한다 ─────────────
+  const spendPoints = async (amount: number, reason: string): Promise<boolean> => {
+    if (!profileIdRef.current) { setPoints(p => p - amount); return true; }   // 오프라인 폴백: 로컬만
+    const { data, error } = await dbRef.current.rpc('spend_points', { p_amount: amount, p_reason: reason });
+    if (error || !data) { console.error('[spendPoints] 실패:', error); return false; }
+    setPoints(data.points);
+    logClick('points_spend', { reason, amount });
+    return true;
+  };
+
+  // XP 마일스톤 보너스(50 XP마다 50P)는 서버 트리거에서 들어와 클라가 모른다. 레슨 끝에 다시 읽는다.
+  const refreshPoints = async () => {
+    const profileId = profileIdRef.current;
+    if (!profileId) return;
+    const { data } = await dbRef.current.from('profiles').select('points, xp').eq('id', profileId).single();
+    if (data) { setPoints(data.points); setXp(data.xp); }
+  };
+
+  const openShop = (reason?: 'lesson') => { setShopReason(reason ?? null); setShopOpen(true); };
+  const closeShop = () => setShopOpen(false);
+
   // ── 오늘 복습 큐 (due_date <= 오늘) ────────────────────────────
   const dueQueue = useMemo(() => {
     const todayStr = toDateStr(new Date());
@@ -511,6 +540,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       knownWords, knownIds, setKnownWords,
       unknownWords, setUnknownWords,
       xp, boostUntil, buyBoost,
+      spendPoints, refreshPoints, shopReason, shopOpen, openShop, closeShop,
       missions, setMissions,
       claimReward,
       claimReferralReward,

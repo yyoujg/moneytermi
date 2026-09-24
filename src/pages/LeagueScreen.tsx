@@ -47,10 +47,10 @@ const LeagueScreen = () => {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-[var(--color-ink)]">리그</h2>
           <div className="flex items-center gap-1">
-            <TextButton size="small" onClick={() => setSheet('share')}>
+            <TextButton size="small" aria-label="리그 공유" onClick={() => setSheet('share')}>
               <span className="flex items-center gap-1"><Share2 size={13} />공유</span>
             </TextButton>
-            <TextButton size="small" onClick={() => setSheet('rules')}>
+            <TextButton size="small" aria-label="리그 안내" onClick={() => setSheet('rules')}>
               <span className="flex items-center gap-1"><Info size={13} />안내</span>
             </TextButton>
           </div>
@@ -169,7 +169,7 @@ const LeagueScreen = () => {
         onDimmerClick={() => setSheet(null)}
         header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>리그 안내</span>}
       >
-        <div className="px-3 pb-6"><LeagueRules /></div>
+        <div className="px-5 pb-6"><LeagueRules /></div>
       </BottomSheet>
 
       <BottomSheet

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
 import { feedbackTap } from '../lib/feedback';
+import { LESSON_COST } from '../constants';
 import { useSettings } from '../hooks/useSettings';
 import { buildPath, connectorD, NODE, nodeOffsetX, ROW, SPAN, sectionColor, type PathNode } from '../lib/path';
 
@@ -35,7 +36,7 @@ const NodeCircle = ({ node, index, color, isFocus, onTap, nodeRef }: {
       disabled={locked}
       onClick={onTap}
       aria-label={`${node.type === 'quiz' ? '퀴즈' : node.type === 'review' ? '누적 복습' : '학습'} ${index + 1}`}
-      className="absolute flex items-center justify-center active:translate-y-[3px] disabled:opacity-50 disabled:pointer-events-none"
+      className={`absolute flex items-center justify-center active:translate-y-[3px] disabled:opacity-50 disabled:pointer-events-none ${isFocus ? 'animate-node-hop' : ''}`}
       style={{
         top: (ROW - NODE) / 2,
         left: `calc(50% + ${nodeOffsetX(index)}px)`,
@@ -63,7 +64,7 @@ const NodeCircle = ({ node, index, color, isFocus, onTap, nodeRef }: {
 
 const CourseScreen = () => {
   const navigate = useNavigate();
-  const { hydrated, knownIds, courses } = useAppContext();
+  const { hydrated, knownIds, courses, points, spendPoints, openShop } = useAppContext();
   const { vibrationOn } = useSettings();
 
   const sections = useMemo(() => buildPath(courses, knownIds), [courses, knownIds]);
@@ -85,7 +86,7 @@ const CourseScreen = () => {
     focusRef.current?.scrollIntoView({ block: 'center' });
   }, [hydrated, focusId]);
 
-  const handleNodeTap = (node: PathNode, index: number, courseKnown: number) => {
+  const handleNodeTap = async (node: PathNode, index: number, courseKnown: number) => {
     // disabled 버튼은 click이 안 오지만, 웹뷰/리셋 CSS에 따라 새는 경우가 있어 한 번 더 막는다.
     if (node.state === 'locked') return;
     feedbackTap(vibrationOn);
@@ -105,6 +106,9 @@ const CourseScreen = () => {
       logClick('course_start', { course_id: node.courseId, title: node.courseId });
     }
 
+    // 레슨은 포인트가 든다. 부족하면 상점(광고 보기)으로, 서버 차감이 실패해도 마찬가지.
+    if (points < LESSON_COST) { logClick('lesson_blocked_points', { points }); openShop('lesson'); return; }
+    if (!(await spendPoints(LESSON_COST, 'lesson'))) { openShop('lesson'); return; }
     navigate('/word-card', { state: { words: node.words, index: 0, backPath: '/course', autoAdvance: true } });
   };
 
@@ -147,16 +151,17 @@ const CourseScreen = () => {
                   </svg>
                 )}
 
+                {/* 진행할 노드: 제자리에서 통통 뛰고, 바닥 그림자가 반대 위상으로 줄었다 커진다 */}
                 {isFocus && (
-                  <>
-                    <div
-                      className="absolute animate-bounce-up rounded-chip bg-[var(--color-card)] px-3 py-1.5 shadow-lg"
-                      // 노드 위 30px. 행 밖(-14 등)으로 내보내면 sticky 배너(z-10) 뒤로 들어가 잘린다.
-                      style={{ top: (ROW - NODE) / 2 - 30, left: `calc(50% + ${nodeOffsetX(k)}px)`, marginLeft: -26 }}
-                    >
-                      <span className="text-2xs font-bold text-brand-500">시작</span>
-                    </div>
-                  </>
+                  <span
+                    aria-hidden
+                    className="absolute pointer-events-none animate-node-ground"
+                    style={{
+                      top: (ROW - NODE) / 2 + NODE + 6, left: `calc(50% + ${nodeOffsetX(k)}px)`, marginLeft: -NODE * 0.4,
+                      width: NODE * 0.8, height: 10, borderRadius: 9999,
+                      background: color.shadow,
+                    }}
+                  />
                 )}
 
                 <NodeCircle

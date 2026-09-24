@@ -6,14 +6,14 @@ import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
 import { calcStreak } from '../lib/streak';
 import { isRewardedAdEnabled, showRewardedAd } from '../lib/ads';
+import { LESSON_COST, XP_BONUS_POINTS, XP_BONUS_STEP } from '../constants';
 
 // 모든 화면 상단 고정 바. 왼쪽 로고, 오른쪽에 아이콘 + 숫자만 나열한다(티어는 마이페이지에만).
 // 아이콘은 마이페이지 요약 카드와 같은 lucide 세트를 쓴다.
 // 포인트를 누르면 구매 시트가 열린다(광고 충전 / XP 2배 부스트).
 export const TopBar = () => {
-  const { points, xp, boostUntil, knownWords, attendanceDates, claimAdReward, buyBoost } = useAppContext();
+  const { points, xp, boostUntil, knownWords, attendanceDates, claimAdReward, buyBoost, shopOpen, shopReason, openShop, closeShop } = useAppContext();
   const [now, setNow] = useState(() => Date.now());
-  const [shopOpen, setShopOpen] = useState(false);
 
   const streak = calcStreak(attendanceDates);
   const boostLeft = boostUntil ? boostUntil - now : 0;
@@ -33,11 +33,11 @@ export const TopBar = () => {
         if (credited) toast.success(`+${credited}P 받았어요`);
       });
     });
-    setShopOpen(false);
+    closeShop();
   };
 
   const handleBoost = async () => {
-    if (await buyBoost()) { toast.success('30분간 XP 2배! ⚡'); setShopOpen(false); }
+    if (await buyBoost()) { toast.success('30분간 XP 2배! ⚡'); closeShop(); }
     else toast.error('포인트가 부족해요');
   };
 
@@ -49,7 +49,7 @@ export const TopBar = () => {
         <div className="flex items-center gap-3 text-sm font-bold text-[var(--color-ink-2)]">
           <span className="flex items-center gap-1"><Flame size={15} className="text-brand-500 fill-current" />{streak}</span>
           <span className="flex items-center gap-1"><Sparkles size={15} className="text-brand-500" />{xp.toLocaleString()}</span>
-          <button onClick={() => setShopOpen(true)} aria-label="포인트 상점" className="flex items-center gap-1 active:opacity-60">
+          <button onClick={() => openShop()} aria-label="포인트 상점" className="flex items-center gap-1 active:opacity-60">
             <Zap size={15} className="text-brand-500 fill-current" />{points.toLocaleString()}
           </button>
           <span className="flex items-center gap-1"><BookOpen size={15} className="text-brand-500" />{knownWords.length}</span>
@@ -63,10 +63,13 @@ export const TopBar = () => {
 
       <BottomSheet
         open={shopOpen}
-        onDimmerClick={() => setShopOpen(false)}
-        header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>포인트 상점</span>}
+        onDimmerClick={closeShop}
+        header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>{shopReason === 'lesson' ? '포인트가 부족해요' : '포인트 상점'}</span>}
       >
         <div className="px-5 pb-6 flex flex-col gap-2">
+          {shopReason === 'lesson' && (
+            <p className="text-sm font-bold text-[var(--color-ink)] mb-1 break-keep">레슨을 시작하려면 {LESSON_COST}P가 필요해요</p>
+          )}
           <p className="flex items-center gap-1 text-xs text-[var(--color-ink-3)] mb-1">보유 <Zap size={12} className="text-brand-500 fill-current" />{points.toLocaleString()}P</p>
 
           <button
@@ -88,8 +91,14 @@ export const TopBar = () => {
             <span className="text-2xs font-medium">300P · 30분</span>
           </button>
 
+          <div className="rounded-chip px-4 py-3 mt-1" style={{ backgroundColor: 'var(--color-surface)' }}>
+            <p className="text-2xs font-bold text-[var(--color-ink-3)] mb-1!">학습으로 모으기</p>
+            <p className="text-2xs text-[var(--color-ink-4)] leading-relaxed break-keep">
+              퀴즈 정답 +10~20P · 미션 보상 +10~50P · XP {XP_BONUS_STEP}마다 +{XP_BONUS_POINTS}P
+            </p>
+          </div>
           <p className="text-2xs text-[var(--color-ink-4)] mt-1 leading-relaxed">
-            포인트는 순위에 반영되지 않아요. 리그 순위는 학습으로 쌓는 XP로만 정해져요.
+            레슨 시작에 {LESSON_COST}P가 들어요. 퀴즈·복습은 무료. 포인트는 순위에 반영되지 않아요.
           </p>
         </div>
       </BottomSheet>
