@@ -16,13 +16,15 @@ export type GrowthStage = {
   nextMinPoints: number | null; // null = 최고 단계
 };
 
-// 리그 티어. 누적 포인트로 결정된다.
+// 리그 티어. 누적 XP로 결정된다.
+// 기준선은 포인트 시절의 1/5 — XP는 포인트보다 훨씬 천천히 쌓인다(퀴즈 1정답 = 10~20P vs 2XP).
+// 4000XP는 퀴즈 2000문제라 사실상 도달 불가였다.
 export const GROWTH_STAGES: Omit<GrowthStage, 'nextMinPoints'>[] = [
   { id: 1, name: '브론즈',   emoji: '🥉', minPoints: 0 },
-  { id: 2, name: '실버',     emoji: '🥈', minPoints: 100 },
-  { id: 3, name: '골드',     emoji: '🥇', minPoints: 500 },
-  { id: 4, name: '플래티넘', emoji: '💠', minPoints: 1500 },
-  { id: 5, name: '다이아',   emoji: '💎', minPoints: 4000 },
+  { id: 2, name: '실버',     emoji: '🥈', minPoints: 20 },
+  { id: 3, name: '골드',     emoji: '🥇', minPoints: 100 },
+  { id: 4, name: '플래티넘', emoji: '💠', minPoints: 300 },
+  { id: 5, name: '다이아',   emoji: '💎', minPoints: 800 },
 ];
 
 export const getGrowthStage = (points: number): GrowthStage => {
