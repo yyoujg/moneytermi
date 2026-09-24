@@ -10,6 +10,7 @@ import { GuideSheet } from '../components/mypage/GuideSheet';
 import { EmojiPickerSheet } from '../components/mypage/EmojiPickerSheet';
 import { SettingsSheet } from '../components/mypage/SettingsSheet';
 import { NicknameSheet } from '../components/mypage/NicknameSheet';
+import { BadgeCelebration } from '../components/mypage/BadgeCelebration';
 import { Card } from '../components/ui/Card';
 import { IconBox } from '../components/ui/IconBox';
 
@@ -38,6 +39,7 @@ const MyPageScreen = () => {
 
   return (
     <div className="flex flex-col h-full bg-[var(--color-canvas)] pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
+      <BadgeCelebration badges={badges} />
       <GuideSheet open={showGuide} onClose={() => setShowGuide(false)} />
       <EmojiPickerSheet
         open={showEmojiPicker}
