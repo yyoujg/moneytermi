@@ -32,9 +32,9 @@ const GAP = 6; // 노드 테두리와 점선 사이 여백
 const OFFSETS = [0, 48, 68, 48, 0, -48, -68, -48];
 export const nodeOffsetX = (i: number) => OFFSETS[i % OFFSETS.length];
 
-// 노드마다 다른 색. 라이트/다크 양쪽에서 흰 아이콘이 읽히는 채도로 고르고,
-// 아래쪽 입체 그림자는 같은 계열의 진한 색을 쓴다.
-const NODE_COLORS = [
+// 레슨(코스 섹션)마다 다른 색. 한 코스 안의 노드는 같은 색을 공유하고, 다음 코스에서 색이 바뀐다.
+// 라이트/다크 양쪽에서 흰 아이콘이 읽히는 채도로 고르고, 입체 그림자는 같은 계열의 진한 색.
+const SECTION_COLORS = [
   { face: '#f97316', shadow: '#c2410c' }, // 브랜드 오렌지
   { face: '#22c55e', shadow: '#15803d' }, // 초록
   { face: '#3b82f6', shadow: '#1d4ed8' }, // 파랑
@@ -42,7 +42,7 @@ const NODE_COLORS = [
   { face: '#ec4899', shadow: '#be185d' }, // 핑크
   { face: '#14b8a6', shadow: '#0f766e' }, // 청록
 ];
-export const nodeColor = (i: number) => NODE_COLORS[i % NODE_COLORS.length];
+export const sectionColor = (i: number) => SECTION_COLORS[i % SECTION_COLORS.length];
 
 // 양 끝 접선이 수직인 큐빅. 노드마다 조각을 그려도 이음새가 보이지 않는다.
 // (배너 높이가 한글 줄바꿈에 따라 변해서 섹션 전체를 한 장의 svg로 그릴 수 없다)

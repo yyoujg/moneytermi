@@ -7,22 +7,22 @@ import { useAppContext } from '../context/AppContext';
 import { useHearts } from '../hooks/useHearts';
 import { getGrowthStage } from '../constants';
 import { logClick } from '../lib/analytics';
-import { buildPath, connectorD, NODE, nodeColor, nodeOffsetX, ROW, SPAN, type PathNode } from '../lib/path';
+import { buildPath, connectorD, NODE, nodeOffsetX, ROW, SPAN, sectionColor, type PathNode } from '../lib/path';
 import { MAX_HEARTS } from '../lib/hearts';
 import { Card } from '../components/ui/Card';
 
 // 노드 원. TDS 리셋이 <button>의 rounded-*를 먹으므로 borderRadius는 인라인 스타일로 준다
 // (인라인이 unlayered 리셋을 이긴다). button을 유지해야 포커스/Enter/disabled가 공짜로 따라온다.
-const NodeCircle = ({ node, index, isFocus, onTap, nodeRef }: {
+const NodeCircle = ({ node, index, color, isFocus, onTap, nodeRef }: {
   node: PathNode;
   index: number;
+  color: { face: string; shadow: string };
   isFocus: boolean;
   onTap: () => void;
   nodeRef?: React.Ref<HTMLButtonElement>;
 }) => {
   const locked = node.state === 'locked';
   const done = node.state === 'done';
-  const color = nodeColor(index);
   // 잠긴 노드도 자기 색을 알파로 흐리게 보여준다. 전부 회색이면 팔레트가 보이지 않는다.
   const face = locked
     ? `${color.face}33`
@@ -192,10 +192,12 @@ const CourseScreen = () => {
       </div>
 
       {/* 패스 */}
-      {sections.map(sec => (
+      {sections.map((sec, si) => {
+        const color = sectionColor(si);
+        return (
         <section key={sec.course.id}>
           {/* 코스 배너 */}
-          <div className="mx-5 mt-5 mb-1 rounded-card bg-brand-500 px-5 py-4">
+          <div className="mx-5 mt-5 mb-1 rounded-card px-5 py-4" style={{ background: color.face }}>
             <p className="text-2xs font-bold text-white/70">{sec.course.level} · {sec.course.category}</p>
             <h3 className="text-base font-bold text-white mt-1! break-keep">{sec.course.title}</h3>
             <p className="text-2xs text-white/80 mt-1.5!">{sec.knownCount} / {sec.course.words.length} 단어</p>
@@ -219,7 +221,7 @@ const CourseScreen = () => {
                       strokeWidth={6}
                       strokeLinecap="round"
                       strokeDasharray="1 14"
-                      stroke={node.state === 'done' ? 'var(--color-brand-300)' : 'var(--color-ink-4)'}
+                      stroke={node.state === 'done' ? color.face : 'var(--color-ink-4)'}
                     />
                   </svg>
                 )}
@@ -244,6 +246,7 @@ const CourseScreen = () => {
                 <NodeCircle
                   node={node}
                   index={k}
+                  color={color}
                   isFocus={isFocus}
                   nodeRef={isFocus ? focusRef : undefined}
                   onTap={() => handleNodeTap(node, k, sec.knownCount)}
@@ -252,7 +255,8 @@ const CourseScreen = () => {
             );
           })}
         </section>
-      ))}
+        );
+      })}
     </div>
   );
 };
