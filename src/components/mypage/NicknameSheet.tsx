@@ -66,7 +66,7 @@ export const NicknameSheet = ({
             />
             <span className="text-xs text-[var(--color-ink-4)] shrink-0">{value.length}/10</span>
             {value.length > 0 && (
-              <button onClick={() => { setValue(''); setError(null); }} aria-label="지우기" className="w-5 h-5 flex items-center justify-center rounded-full bg-[var(--color-line)]">
+              <button onClick={() => { setValue(''); setError(null); }} aria-label="지우기" style={{ borderRadius: 9999 }} className="w-5 h-5 flex items-center justify-center bg-[var(--color-line)]">
                 <X size={10} className="text-white" />
               </button>
             )}
