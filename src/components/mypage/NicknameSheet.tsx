@@ -22,9 +22,14 @@ export const NicknameSheet = ({
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // 시트는 항상 마운트돼 있고 open만 바뀐다. 열릴 때마다 값을 현재 닉네임으로 되돌리고 포커스를 준다.
   useEffect(() => {
-    setTimeout(() => inputRef.current?.focus(), 100);
-  }, []);
+    if (!open) return;
+    setValue(required ? '' : currentNickname);
+    setError(null);
+    const t = setTimeout(() => inputRef.current?.focus(), 150);
+    return () => clearTimeout(t);
+  }, [open, required, currentNickname]);
 
   const handleSave = async () => {
     setLoading(true);
@@ -76,7 +81,7 @@ export const NicknameSheet = ({
 
         <button
           onClick={handleSave}
-          disabled={loading || value.trim().length === 0}
+          disabled={loading || value.trim().length === 0 || (!required && value.trim() === currentNickname)}
           className="w-full py-4 rounded-button bg-brand-500 text-white text-sm font-bold active:bg-brand-600 disabled:opacity-40 transition-colors"
         >
           {loading ? '확인 중...' : required ? '시작하기' : '저장하기'}
