@@ -10,7 +10,6 @@ import { isDefaultNickname } from './constants';
 import { NicknameSheet } from './components/mypage/NicknameSheet';
 import { parseLandingPath, parseReferrer } from './lib/landing';
 import { logScreen, logClick } from './lib/analytics';
-import { useSafeAreaInsets } from './hooks/useSafeAreaInsets';
 import NavBar from './components/NavBar';
 import { TopBar } from './components/TopBar';
 
@@ -184,7 +183,6 @@ const Layout = () => {
 };
 
 export default function App() {
-  const insets = useSafeAreaInsets();
   return (
     <ErrorBoundary>
       <AuthProvider>
@@ -193,10 +191,9 @@ export default function App() {
           <BackEventHandler />
           <ScreenLogger />
           <Toaster position="top-center" duration={1800} richColors />
-          <div
-            className="w-full max-w-md mx-auto bg-[var(--color-canvas)] h-[100dvh] overflow-hidden relative font-sans text-[var(--color-ink)] flex flex-col"
-            style={{ paddingTop: insets.top }}
-          >
+          {/* 상단 인셋은 더하지 않는다 — 토스 웹뷰는 네이티브 내비게이션 바 아래에서 시작해 상태바와 겹치지 않는다.
+              하단 인셋은 NavBar가 직접 처리한다. */}
+          <div className="w-full max-w-md mx-auto bg-[var(--color-canvas)] h-[100dvh] overflow-hidden relative font-sans text-[var(--color-ink)] flex flex-col">
             <ErrorBoundary>
               <Layout />
             </ErrorBoundary>
