@@ -18,7 +18,7 @@ const MEDAL = ['🥇', '🥈', '🥉'];
 
 const LeagueScreen = () => {
   const navigate = useNavigate();
-  const { points, myEmoji } = useAppContext();
+  const { xp, myEmoji } = useAppContext();
   const { user } = useAuth();
   const [rows, setRows] = useState<Row[] | null>(null);
   const [mine, setMine] = useState<MyRank | null>(null);
@@ -35,7 +35,7 @@ const LeagueScreen = () => {
     }).catch(() => setFailed(true));
   }, []);
 
-  const stage = getGrowthStage(points);
+  const stage = getGrowthStage(xp);
   const next = stage.nextMinPoints;
 
   return (
@@ -64,17 +64,17 @@ const LeagueScreen = () => {
           <div className="text-6xl mb-2">{stage.emoji}</div>
           <p className="text-lg font-bold text-[var(--color-ink)] mb-1!">{stage.name}</p>
           <p className="text-xs text-[var(--color-ink-3)] mb-1!">
-            {mine?.rank ? `${mine.total}명 중 ${mine.rank}위` : '이번 주 포인트를 모으면 순위에 올라요'}
+            {mine?.rank ? `${mine.total}명 중 ${mine.rank}위` : '이번 주 XP를 모으면 순위에 올라요'}
           </p>
-          <p className="text-2xs font-medium text-brand-500 mb-3!">이번 주 {mine?.points?.toLocaleString() ?? 0}P · {daysUntilReset()}일 남음</p>
+          <p className="text-2xs font-medium text-brand-500 mb-3!">이번 주 {mine?.points?.toLocaleString() ?? 0}XP · {daysUntilReset()}일 남음</p>
           <div className="w-full bg-[var(--color-card)] rounded-full h-1.5 overflow-hidden mb-1.5">
             <div
               className="bg-brand-500 h-full rounded-full transition-all duration-700"
-              style={{ width: `${next === null ? 100 : Math.min(100, Math.round(((points - stage.minPoints) / (next - stage.minPoints)) * 100))}%` }}
+              style={{ width: `${next === null ? 100 : Math.min(100, Math.round(((xp - stage.minPoints) / (next - stage.minPoints)) * 100))}%` }}
             />
           </div>
           <p className="text-xs text-[var(--color-ink-4)]">
-            {next === null ? '최고 티어예요 🎉' : `다음 티어까지 ${next - points}P`}
+            {next === null ? '최고 티어예요 🎉' : `다음 티어까지 ${next - xp}XP`}
           </p>
         </Card>
 
@@ -145,7 +145,7 @@ const LeagueScreen = () => {
                 <span className={`flex-1 text-sm truncate ${r.is_me ? 'font-bold text-brand-500' : 'font-medium text-[var(--color-ink)]'}`}>
                   {r.is_me ? (user?.nickname ?? r.nickname) : r.nickname}
                 </span>
-                <span className="text-sm font-bold text-[var(--color-ink-2)] shrink-0">{r.points.toLocaleString()}P</span>
+                <span className="text-sm font-bold text-[var(--color-ink-2)] shrink-0">{r.points.toLocaleString()}XP</span>
               </div>
             ))}
 
@@ -158,7 +158,7 @@ const LeagueScreen = () => {
                 <span className="w-7 text-center text-sm font-bold text-brand-500 shrink-0">{mine.rank}</span>
                 <span className="text-lg shrink-0">{myEmoji}</span>
                 <span className="flex-1 text-sm font-bold text-brand-500 truncate">{user?.nickname ?? '나'}</span>
-                <span className="text-sm font-bold text-[var(--color-ink-2)] shrink-0">{mine.points.toLocaleString()}P</span>
+                <span className="text-sm font-bold text-[var(--color-ink-2)] shrink-0">{mine.points.toLocaleString()}XP</span>
               </div>
             )}
           </Card>

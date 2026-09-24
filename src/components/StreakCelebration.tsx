@@ -12,7 +12,7 @@ import { Storage } from '../lib/storage';
 const KEY = 'streak_celebrated_date';
 
 export const StreakCelebration = () => {
-  const { attendanceDates, points, hydrated } = useAppContext();
+  const { attendanceDates, xp, hydrated } = useAppContext();
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export const StreakCelebration = () => {
 
   const streak = calcStreak(attendanceDates);
   const week = weekDays(attendanceDates);
-  const stage = getGrowthStage(points);
+  const stage = getGrowthStage(xp);
 
   return (
     <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-6 px-6 bg-[var(--color-canvas)]">

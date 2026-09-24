@@ -14,7 +14,7 @@ import { StatCard } from '../components/ui/StatCard';
 
 const HomeScreen = () => {
   const navigate = useNavigate();
-  const { hydrated, points, knownWords, unknownWords, missions, claimReward, attendanceDates, allWords, dueQueue, myEmoji } = useAppContext();
+  const { hydrated, points, xp, knownWords, unknownWords, missions, claimReward, attendanceDates, allWords, dueQueue, myEmoji } = useAppContext();
   const { user } = useAuth();
   const totalWords = allWords.length;
   const isNewUser = hydrated && knownWords.length + unknownWords.length === 0;
@@ -31,7 +31,7 @@ const HomeScreen = () => {
 
   const missionList = Object.values(missions).sort((a, b) => a.sortOrder - b.sortOrder);
   const resetLabel = `${Math.ceil(msUntilNextSlot() / 3600000)}시간 뒤 초기화`;
-  const stage = getGrowthStage(points);
+  const stage = getGrowthStage(xp);
 
   return (
     <div className="flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden" style={{ backgroundColor: 'var(--color-canvas)' }}>

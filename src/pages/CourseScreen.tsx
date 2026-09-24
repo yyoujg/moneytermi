@@ -62,7 +62,7 @@ const NodeCircle = ({ node, index, color, isFocus, onTap, nodeRef }: {
 
 const CourseScreen = () => {
   const navigate = useNavigate();
-  const { hydrated, knownIds, courses, points } = useAppContext();
+  const { hydrated, knownIds, courses, xp } = useAppContext();
 
   const sections = useMemo(() => buildPath(courses, knownIds), [courses, knownIds]);
 
@@ -154,7 +154,7 @@ const CourseScreen = () => {
                       className="absolute text-4xl pointer-events-none select-none"
                       style={{ top: (ROW - NODE) / 2 + 6, left: `calc(50% + ${nodeOffsetX(k) + 56}px)` }}
                     >
-                      {getGrowthStage(points).emoji}
+                      {getGrowthStage(xp).emoji}
                     </span>
                   </>
                 )}

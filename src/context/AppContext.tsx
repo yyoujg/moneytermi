@@ -18,9 +18,8 @@ type AppContextValue = {
   hydrated: boolean;
   points: number;
   setPoints: React.Dispatch<React.SetStateAction<number>>;
-  gems: number;
+  xp: number;
   boostUntil: number | null;
-  exchangeGems: (amount: number) => Promise<boolean>;
   buyBoost: () => Promise<boolean>;
   knownWords: Word[];
   knownIds: Set<number>;
@@ -58,7 +57,7 @@ const DEFAULT_MISSIONS: Missions = {
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [points, setPoints]               = useState(0);
-  const [gems, setGems]                   = useState(0);
+  const [xp, setXp]                       = useState(0);
   const [boostUntil, setBoostUntil]       = useState<number | null>(null);
   const [knownWords, setKnownWords]       = useState<Word[]>([]);
   const [unknownWords, setUnknownWords]   = useState<Word[]>([]);
@@ -173,7 +172,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       // 1. points — DB값과 로컬값 중 큰 값 유지 (로딩 중 적립 포인트 보존)
       const { data: profile, error: profileErr } = await db
         .from('profiles')
-        .select('points, gems, boost_until')
+        .select('points, xp, boost_until')
         .eq('id', profileId)
         .single();
 
@@ -189,10 +188,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       if (profileErr) console.error('[load] profiles fetch 실패:', profileErr);
       if (profile) {
         setPoints(profile.points);  // 서버 단일 진실원
-        setGems(profile.gems ?? 0);
+        setXp(profile.xp ?? 0);
         setBoostUntil(profile.boost_until ? new Date(profile.boost_until).getTime() : null);
       } else if (profileErr) {
-        // migration_gems 적용 전에는 gems/boost_until 컬럼이 없어 위 조회가 통째로 실패한다.
+        // migration_xp 적용 전에는 xp/boost_until 컬럼이 없어 위 조회가 통째로 실패한다.
         // 포인트만이라도 읽어 앱이 멈추지 않게 한다.
         const { data: basic } = await db.from('profiles').select('points').eq('id', profileId).single();
         if (basic) setPoints(basic.points);
@@ -458,7 +457,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     });
     if (error || !data) { console.error('[submitQuizAnswer] 실패:', error); return null; }
     setPoints(data.points);
-    if (typeof data.gems === 'number') setGems(data.gems);
+    if (typeof data.xp === 'number') setXp(data.xp);
     setMissions(prev => ({ ...prev, m3: { ...prev.m3, current: data.m3_current } }));
     return {
       correct: data.correct, earned: data.earned, combo: data.combo,
@@ -466,20 +465,11 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     };
   };
 
-  // ── 상점 — 젬 환전 / 부스트 구매 (서버가 차감·검증) ────────────
-  const exchangeGems = async (amount: number): Promise<boolean> => {
-    const { data, error } = await dbRef.current.rpc('exchange_gems', { p_gems: amount });
-    if (error || !data) { console.error('[exchangeGems] 실패:', error); return false; }
-    setGems(data.gems);
-    setPoints(data.points);
-    logClick('gem_exchange', { gems: amount });
-    return true;
-  };
-
+  // ── 상점 — 부스트 구매 (서버가 차감·검증) ──────────────────────
   const buyBoost = async (): Promise<boolean> => {
     const { data, error } = await dbRef.current.rpc('buy_boost');
     if (error || !data) { console.error('[buyBoost] 실패:', error); return false; }
-    setGems(data.gems);
+    setPoints(data.points);
     setBoostUntil(new Date(data.boost_until).getTime());
     logClick('boost_buy');
     return true;
@@ -528,7 +518,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       points, setPoints,
       knownWords, knownIds, setKnownWords,
       unknownWords, setUnknownWords,
-      gems, boostUntil, exchangeGems, buyBoost,
+      xp, boostUntil, buyBoost,
       missions, setMissions,
       claimReward,
       claimReferralReward,

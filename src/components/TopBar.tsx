@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BookOpen, Flame, Gem, Play, Zap } from 'lucide-react';
+import { BookOpen, Flame, Play, Sparkles, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAppContext } from '../context/AppContext';
 import { getGrowthStage } from '../constants';
@@ -10,7 +10,7 @@ import { isRewardedAdEnabled, showRewardedAd } from '../lib/ads';
 // 모든 화면 상단 고정 바. 왼쪽 로고, 오른쪽 연속일·티어·포인트·학습단어.
 // 포인트를 누르면 광고를 보고 충전한다.
 export const TopBar = () => {
-  const { points, gems, boostUntil, knownWords, attendanceDates, claimAdReward } = useAppContext();
+  const { points, xp, boostUntil, knownWords, attendanceDates, claimAdReward } = useAppContext();
   const [now, setNow] = useState(() => Date.now());
   const streak = calcStreak(attendanceDates);
   const boostLeft = boostUntil ? boostUntil - now : 0;
@@ -21,7 +21,7 @@ export const TopBar = () => {
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, [boostUntil]);
-  const stage = getGrowthStage(points);
+  const stage = getGrowthStage(xp);
 
   const handleAd = () => {
     if (!isRewardedAdEnabled()) return;
@@ -48,7 +48,7 @@ export const TopBar = () => {
           {isRewardedAdEnabled() && <Play size={10} className="text-brand-500" />}
         </button>
         <span className="flex items-center gap-1">
-          <Gem size={12} className="text-brand-500" />{gems}
+          <Sparkles size={12} className="text-brand-500" />{xp.toLocaleString()}XP
         </span>
         <span className="flex items-center gap-1">
           <BookOpen size={12} />{knownWords.length}개

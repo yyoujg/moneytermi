@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Zap, Check, X } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { Word } from '../types';
@@ -16,7 +16,7 @@ import { buildQuizItem, pickQuizType, type QuizOption } from '../lib/quiz';
 const QuizScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { points, allWords, knownWords, courses, submitQuizAnswer } = useAppContext();
+  const { points, xp, allWords, knownWords, courses, submitQuizAnswer } = useAppContext();
 
   // 단어 id → 코스 카테고리 (오답 보기를 같은 주제로 뽑기 위함)
   const categoryOf = useMemo(() => {
@@ -33,6 +33,8 @@ const QuizScreen = () => {
     : [...knownWords].sort(() => Math.random() - 0.5).slice(0, 10);
 
   const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
+  // 티어는 XP 기준이다. 부스트로 배수가 붙을 수 있어 클라에서 계산하지 않고 시작 시점 값을 기억한다.
+  const xpAtStart = useRef(xp);
   const [combo, setCombo] = useState(0);
   const [maxCombo, setMaxCombo] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
@@ -72,8 +74,8 @@ const QuizScreen = () => {
   // 완료 화면
   if (!quizQueue || quizQueue.length === 0 || currentQuizIndex >= quizQueue.length) {
     const accuracy = quizQueue.length > 0 ? Math.round((correctCount / quizQueue.length) * 100) : 0;
-    const stageBefore = getGrowthStage(points - totalEarned);
-    const stageAfter = getGrowthStage(points);
+    const stageBefore = getGrowthStage(xpAtStart.current);
+    const stageAfter = getGrowthStage(xp);
     const stageUp = stageAfter.id > stageBefore.id;
 
     return (

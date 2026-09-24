@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BookOpen, Settings, LogOut, ChevronRight, Zap, Flame, Gem, ShieldAlert, Pencil, Play } from 'lucide-react';
+import { BookOpen, Settings, LogOut, ChevronRight, Zap, Flame, Sparkles, ShieldAlert, Pencil, Play } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { DEFAULT_NICKNAME, getGrowthStage } from '../constants';
 import { calcStreak } from '../lib/streak';
@@ -15,10 +15,10 @@ import { Card } from '../components/ui/Card';
 import { IconBox } from '../components/ui/IconBox';
 
 const MyPageScreen = () => {
-  const { points, gems, boostUntil, exchangeGems, buyBoost, knownWords, attendanceDates, myEmoji, updateMyEmoji } = useAppContext();
-  const stage = getGrowthStage(points);
+  const { points, xp, boostUntil, buyBoost, knownWords, attendanceDates, myEmoji, updateMyEmoji } = useAppContext();
+  const stage = getGrowthStage(xp);
   const streak = calcStreak(attendanceDates);
-  const badges = buildBadges({ words: knownWords.length, streak, points });
+  const badges = buildBadges({ words: knownWords.length, streak, points: xp });
   const [nowTs, setNowTs] = useState(() => Date.now());
   const boostActive = boostUntil !== null && boostUntil > nowTs;
   const earned = badges.filter(b => b.earned).length;
@@ -122,6 +122,7 @@ const MyPageScreen = () => {
             {[
               { icon: <Flame size={14} className="text-brand-500 fill-current" />, label: '연속 학습', value: streak, unit: '일' },
               { icon: <span className="text-sm leading-none">{stage.emoji}</span>, label: '현재 단계', value: stage.name, unit: '' },
+              { icon: <Sparkles size={14} className="text-brand-500" />, label: 'XP', value: xp.toLocaleString(), unit: '' },
               { icon: <Zap size={14} className="text-brand-500 fill-current" />, label: '포인트', value: points.toLocaleString(), unit: 'P' },
               { icon: <BookOpen size={14} className="text-brand-500" />, label: '학습한 단어', value: knownWords.length, unit: '개' },
             ].map((it, i, arr) => (
@@ -146,35 +147,21 @@ const MyPageScreen = () => {
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-bold text-[var(--color-ink-2)]">상점</p>
             <span className="flex items-center gap-1 text-2xs font-bold text-[var(--color-ink-3)]">
-              <Gem size={12} className="text-brand-500" />{gems}
+              <Zap size={12} className="text-brand-500 fill-current" />{points.toLocaleString()}P
             </span>
           </div>
           <Card pad="md" className="flex flex-col gap-2">
             <button
-              disabled={gems < 10}
+              disabled={points < 300 || boostActive}
               onClick={async () => {
-                const n = Math.floor(gems / 10) * 10;
-                if (await exchangeGems(n)) toast.success(`${n}💎 → +${n * 10}P`);
-                else toast.error('환전에 실패했어요');
+                if (await buyBoost()) toast.success('30분간 XP 2배! ⚡');
+                else toast.error('포인트가 부족해요');
               }}
               className="w-full flex items-center justify-between rounded-chip px-4 py-3 text-sm font-bold text-brand-500 disabled:opacity-40"
               style={{ backgroundColor: 'var(--color-brand-soft)' }}
             >
-              <span className="flex items-center gap-1.5"><Zap size={15} className="fill-current" />포인트로 바꾸기</span>
-              <span className="text-2xs font-medium">10💎 = 100P</span>
-            </button>
-
-            <button
-              disabled={gems < 30 || boostActive}
-              onClick={async () => {
-                if (await buyBoost()) toast.success('30분간 포인트 2배! ⚡');
-                else toast.error('부스트를 살 수 없어요');
-              }}
-              className="w-full flex items-center justify-between rounded-chip px-4 py-3 text-sm font-bold text-brand-500 disabled:opacity-40"
-              style={{ backgroundColor: 'var(--color-brand-soft)' }}
-            >
-              <span className="flex items-center gap-1.5"><Play size={15} />{boostActive ? '부스트 사용 중' : '포인트 2배 부스트'}</span>
-              <span className="text-2xs font-medium">30💎 · 30분</span>
+              <span className="flex items-center gap-1.5"><Play size={15} />{boostActive ? '부스트 사용 중' : 'XP 2배 부스트'}</span>
+              <span className="text-2xs font-medium">300P · 30분</span>
             </button>
           </Card>
         </div>
