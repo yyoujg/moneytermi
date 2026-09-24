@@ -125,7 +125,7 @@ const QuizPage = () => {
 
   if (isFinished) {
     return (
-      <div className="flex flex-col h-full bg-[var(--color-canvas)] items-center justify-center p-6 pb-nav">
+      <div className="flex flex-col h-full bg-[var(--color-canvas)] items-center justify-center-safe p-6 pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
         <div className="w-20 h-20 bg-brand-500/10 rounded-full flex items-center justify-center text-4xl mb-4">🏆</div>
         <h2 className="text-xl font-bold text-[var(--color-ink)] mb-1!">오늘 복습 완료!</h2>
         <p className="text-sm text-[var(--color-ink-3)] mb-6!">{queue.length}문제 중 {totalCorrect}개 정답</p>

@@ -104,7 +104,8 @@ const QuizScreen = () => {
 
     return (
       <div className="flex h-full flex-col bg-[var(--color-canvas)]">
-        <div className="flex-1 flex flex-col items-center justify-center px-8 gap-5">
+        {/* 결과 카드 + 알림 카드 + 축하가 작은 화면에서 넘칠 수 있어 이 영역만 스크롤 */}
+        <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden flex flex-col items-center justify-center-safe px-8 py-6 gap-5">
           <div className="text-6xl anim-pop-in">🎉</div>
           <div className="text-center anim-fade-up" style={{ '--i': 1 } as React.CSSProperties}>
             <h2 className="text-2xl font-bold text-[var(--color-ink)] mb-1!">퀴즈 완료!</h2>
