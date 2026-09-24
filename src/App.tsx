@@ -12,6 +12,7 @@ import { parseLandingPath, parseReferrer } from './lib/landing';
 import { logScreen, logClick } from './lib/analytics';
 import NavBar from './components/NavBar';
 import { TopBar } from './components/TopBar';
+import { useTapHaptics } from './hooks/useTapHaptics';
 
 const HomeScreen = React.lazy(() => import('./pages/HomeScreen'));
 const CourseScreen = React.lazy(() => import('./pages/CourseScreen'));
@@ -183,6 +184,7 @@ const Layout = () => {
 };
 
 export default function App() {
+  useTapHaptics();   // 모든 버튼 누름에 짧은 진동
   return (
     <ErrorBoundary>
       <AuthProvider>

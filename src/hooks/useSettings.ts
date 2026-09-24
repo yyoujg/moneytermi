@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Storage } from '../lib/storage';
+import { hapticPrefs } from '../lib/feedback';
 
 // 효과음/진동 설정 (Storage 키 setting_sound / setting_vibration, 'on'|'off')
 export const useSettings = () => {
@@ -8,7 +9,7 @@ export const useSettings = () => {
 
   useEffect(() => {
     Storage.getItem('setting_sound').then(v => { if (v !== null) setSoundOn(v !== 'off'); }).catch(() => {});
-    Storage.getItem('setting_vibration').then(v => { if (v !== null) setVibrationOn(v !== 'off'); }).catch(() => {});
+    Storage.getItem('setting_vibration').then(v => { if (v !== null) { setVibrationOn(v !== 'off'); hapticPrefs.enabled = v !== 'off'; } }).catch(() => {});
   }, []);
 
   const toggleSound = () => setSoundOn(prev => {
@@ -20,6 +21,7 @@ export const useSettings = () => {
   const toggleVibration = () => setVibrationOn(prev => {
     const next = !prev;
     Storage.setItem('setting_vibration', next ? 'on' : 'off');
+    hapticPrefs.enabled = next;
     return next;
   });
 
