@@ -5,7 +5,6 @@ import { DEFAULT_NICKNAME, getGrowthStage } from '../constants';
 import { calcStreak } from '../lib/streak';
 import { List, ListRow, Spacing, ConfirmDialog } from '@toss/tds-mobile';
 import { useAuth } from '../hooks/useAuth';
-import { AttendanceCalendar } from '../components/mypage/AttendanceCalendar';
 import { GuideSheet } from '../components/mypage/GuideSheet';
 import { EmojiPickerSheet } from '../components/mypage/EmojiPickerSheet';
 import { SettingsSheet } from '../components/mypage/SettingsSheet';
@@ -14,7 +13,7 @@ import { Card } from '../components/ui/Card';
 import { IconBox } from '../components/ui/IconBox';
 
 const MyPageScreen = () => {
-  const { points, knownWords, attendanceDates, missions, myEmoji, updateMyEmoji } = useAppContext();
+  const { points, knownWords, attendanceDates, myEmoji, updateMyEmoji } = useAppContext();
   const stage = getGrowthStage(points);
   const streak = calcStreak(attendanceDates);
   const { user, isGuest, updateNickname, logout } = useAuth();
@@ -130,17 +129,6 @@ const MyPageScreen = () => {
       </div>
 
       <div className="px-5 pt-5 flex flex-col gap-4">
-        {/* 출석 달력 */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-bold text-[var(--color-ink-2)]">출석 현황</p>
-            {missions.m1.current >= missions.m1.target && (
-              <span className="text-xs font-bold text-success-500">✅ 오늘 출석 완료</span>
-            )}
-          </div>
-          <AttendanceCalendar attendanceDates={attendanceDates} />
-        </div>
-
         {/* 메뉴 */}
         <div>
           <Card pad="none" className="overflow-hidden">
