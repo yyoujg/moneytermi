@@ -25,7 +25,7 @@ export const TopBar = () => {
 
   return (
     <div className="shrink-0 h-12 flex items-center justify-between px-5 bg-[var(--color-card)] border-b border-[var(--color-line)]">
-      <img src="/favicon.svg" alt="머니터미" className="h-7 w-7" />
+      <span className="text-base font-black tracking-tight text-brand-500">머니터미</span>
 
       <div className="flex items-center gap-3 text-2xs font-medium text-[var(--color-ink-3)]">
         <span className="flex items-center gap-1">
