@@ -75,13 +75,14 @@ export const TopBar = () => {
           )}
           <p className="flex items-center gap-1 text-xs text-[var(--color-ink-3)] mb-1">보유 <Zap size={12} className="text-brand-500 fill-current" />{points.toLocaleString()}P</p>
 
+          {/* 레슨이 막혀서 열렸을 땐 광고가 주행동이라 채운 버튼으로 */}
           <button
             onClick={handleAd}
-            className="w-full flex items-center justify-between rounded-chip px-4 py-4 text-sm font-bold text-brand-500 active:opacity-70"
-            style={{ backgroundColor: 'var(--color-brand-soft)' }}
+            className={`w-full flex items-center justify-between rounded-chip px-4 py-4 text-sm font-bold active:opacity-70 ${shopReason === 'lesson' ? 'text-white bg-brand-500 anim-attn' : 'text-brand-500'}`}
+            style={shopReason === 'lesson' ? undefined : { backgroundColor: 'var(--color-brand-soft)' }}
           >
             <span className="flex items-center gap-2"><Tv size={16} />광고 보고 포인트 받기</span>
-            <span className="text-2xs font-medium">무료</span>
+            <span className="text-2xs font-medium opacity-80">시청하고 받기</span>
           </button>
 
           <button
@@ -91,7 +92,11 @@ export const TopBar = () => {
             style={{ backgroundColor: 'var(--color-brand-soft)' }}
           >
             <span className="flex items-center gap-2"><Zap size={16} className="fill-current" />{boostLeft > 0 ? '부스트 사용 중' : 'XP 2배 부스트'}</span>
-            <span className="text-2xs font-medium">300P · 30분</span>
+            <span className="text-2xs font-medium">
+              {boostLeft > 0
+                ? `${Math.floor(boostLeft / 60000)}:${String(Math.floor((boostLeft % 60000) / 1000)).padStart(2, '0')} 남음`
+                : points < 300 ? `${(300 - points).toLocaleString()}P 더 필요` : '300P · 30분'}
+            </span>
           </button>
 
           <div className="rounded-chip px-4 py-3 mt-1" style={{ backgroundColor: 'var(--color-surface)' }}>
