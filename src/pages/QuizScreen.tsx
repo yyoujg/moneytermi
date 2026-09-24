@@ -193,26 +193,23 @@ const QuizScreen = () => {
         setLastEarned(res.earned);
         setShowPointPop(true);
       }
-      // 정답: 300ms 후 자동 이동
-      setTimeout(() => {
-        setCurrentQuizIndex(i => i + 1);
-        setSelected(null);
-        setStatus('idle');
-      }, 300);
+      // 다음 문제로는 하단 패널의 계속하기가 넘긴다
     } else {
       feedbackWrong();
       setCombo(0);
       setStatus('wrong');
       setShake(true);
       setTimeout(() => setShake(false), 500);
-      // 서버 콤보도 초기화 (오답 기록)
+      // 서버 콤보도 초기화 (오답 기록). 정답을 보여주고 계속하기로 다음 문제.
       void submitQuizAnswer(currentWord.id, option.answer, 'mc', false, currentQuizIndex === 0);
-      // 오답: 900ms 후 재시도
-      setTimeout(() => {
-        setSelected(null);
-        setStatus('idle');
-      }, 900);
     }
+  };
+
+  // 패널의 계속하기: 다음 문제
+  const goNextQuestion = () => {
+    setCurrentQuizIndex(i => i + 1);
+    setSelected(null);
+    setStatus('idle');
   };
 
   // 스트릭 메시지
@@ -294,18 +291,6 @@ const QuizScreen = () => {
             </div>
           )}
 
-          {status === 'correct' && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-success-400">정답!</span>
-              <span className="text-xs font-bold text-success-400">+{lastEarned}P</span>
-              {combo >= 3 && <span className="flex items-center gap-0.5 text-xs font-bold text-brand-400"><Flame size={12} className="fill-current" />{combo}연속</span>}
-            </div>
-          )}
-          {status === 'wrong' && (
-            <p className="text-sm font-bold text-danger-400">
-              정답: <span className="text-[var(--color-ink)]">{currentWord.word}</span>
-            </p>
-          )}
         </div>
 
         {/* 객관식 선택지: 유형과 무관하게 한 줄에 하나 */}
@@ -344,6 +329,43 @@ const QuizScreen = () => {
           })}
         </div>
       </div>
+
+      {/* 답을 고른 뒤: 결과 + 단어 뜻 + 계속하기 (듀오링고식) */}
+      {status !== 'idle' && (
+        <div
+          key={currentQuizIndex}
+          className={`anim-slide-up px-5 pt-4 pb-8 flex flex-col gap-3 border-t ${status === 'correct' ? 'bg-success-500/15 border-success-500/20' : 'bg-danger-500/15 border-danger-500/20'}`}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className={`w-7 h-7 flex items-center justify-center text-white ${status === 'correct' ? 'bg-success-500' : 'bg-danger-500'}`} style={{ borderRadius: 9999 }}>
+                {status === 'correct' ? <Check size={16} strokeWidth={3} /> : <X size={16} strokeWidth={3} />}
+              </span>
+              <p className={`text-lg font-black ${status === 'correct' ? 'text-success-400' : 'text-danger-400'}`}>
+                {status === 'correct' ? '좋아요!' : '아쉬워요'}
+              </p>
+            </div>
+            {status === 'correct' && (
+              <span className="flex items-center gap-1.5 text-xs font-bold text-success-400">
+                +{lastEarned}P
+                {combo >= 3 && <span className="flex items-center gap-0.5 text-brand-400"><Flame size={12} className="fill-current" />{combo}연속</span>}
+              </span>
+            )}
+          </div>
+          <div>
+            <p className={`text-xs font-bold mb-1! ${status === 'correct' ? 'text-success-400' : 'text-danger-400'}`}>
+              {status === 'correct' ? '의미' : `정답: ${currentWord.word}`}
+            </p>
+            <p className="text-sm font-medium text-[var(--color-ink)] leading-relaxed break-keep">{currentWord.meaning}</p>
+          </div>
+          <button
+            onClick={goNextQuestion}
+            className={`w-full py-4 rounded-button text-sm font-bold text-white active:opacity-90 ${status === 'correct' ? 'bg-success-500' : 'bg-danger-500'}`}
+          >
+            {currentQuizIndex === quizQueue.length - 1 ? '결과 보기' : '계속하기'}
+          </button>
+        </div>
+      )}
     </div>
   );
 };

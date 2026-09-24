@@ -216,14 +216,10 @@ const WordCardScreen = () => {
   const autoAdvance = state?.autoAdvance ?? false;
 
   const [wordIndex, setWordIndex] = React.useState(state?.index ?? 0);
-  // 단어 하나를 끝냈을 때 하단에 뜨는 "좋아요!" 패널. 계속하기를 눌러야 다음으로 간다.
-  const [learned, setLearned] = React.useState<Word | null>(null);
-  useEffect(() => { setLearned(null); }, [wordIndex]);
 
   // 단어 안의 단계 (뜻 → 자세히 → 뉴스 → 관련 용어). 단어가 바뀌면 처음부터.
   const [stepIdx, setStepIdx] = React.useState(0);
   useEffect(() => { setStepIdx(0); }, [wordIndex]);
-  const celebrateLearned = (w: Word) => { feedbackLearned(); setLearned(w); };
   // 관련 용어 클릭처럼 같은 라우트로 다시 navigate하면 재마운트가 없어 index가 이전 값에 머문다.
   useEffect(() => { setWordIndex(state?.index ?? 0); }, [state]);
 
@@ -333,16 +329,11 @@ const WordCardScreen = () => {
         claimPromotion().then(amount => { if (amount) claimPromotionReward(amount); });
       }
       setKnownWords(prev => prev.some(w => w.id === word.id) ? prev : [...prev, word]);
-      celebrateLearned(word);   // 다음 단어/완료로 넘어가는 건 패널의 계속하기가 한다
+      feedbackLearned();
+      setWordIndex(i => i + 1);
     } else if (wordIndex < words.length - 1) {
       setWordIndex(i => i + 1);
     }
-  };
-
-  // 패널의 계속하기: 레슨이면 다음 단어(마지막이면 완료 화면), 둘러보기면 다음 단어가 있을 때만
-  const continueAfterLearned = () => {
-    setLearned(null);
-    if (autoAdvance || wordIndex < words.length - 1) setWordIndex(i => i + 1);
   };
 
   const goPrev = () => {
@@ -434,7 +425,11 @@ const WordCardScreen = () => {
           isKnown={isKnown}
           onToggleKnown={autoAdvance ? undefined : () => {
             toggleKnown(word);
-            if (!isKnown) celebrateLearned(word);
+            if (!isKnown) {
+              feedbackLearned();
+              toast.success('알고 있어요!');
+              if (wordIndex < words.length - 1) setWordIndex(i => i + 1);
+            }
           }}
           onRelatedClick={handleRelatedWordClick}
           newsItems={newsItems}
@@ -444,27 +439,7 @@ const WordCardScreen = () => {
         </div>
       </div>
 
-      {/* 단어 완료 패널 — 하단 네비게이션 자리에 대신 뜬다 */}
-      {learned ? (
-        <div key={learned.id} className="anim-slide-up px-5 pt-4 pb-8 flex flex-col gap-3 bg-success-500/15 border-t border-success-500/20">
-          <div className="flex items-center gap-2">
-            <span className="w-7 h-7 flex items-center justify-center bg-success-500 text-white" style={{ borderRadius: 9999 }}>
-              <Check size={16} strokeWidth={3} />
-            </span>
-            <p className="text-lg font-black text-success-400">좋아요!</p>
-          </div>
-          <div>
-            <p className="text-xs font-bold text-success-400 mb-1!">의미</p>
-            <p className="text-sm font-medium text-[var(--color-ink)] leading-relaxed break-keep">{learned.meaning}</p>
-          </div>
-          <button
-            onClick={continueAfterLearned}
-            className="w-full py-4 rounded-button bg-success-500 text-sm font-bold text-white active:opacity-90"
-          >
-            {autoAdvance && wordIndex === words.length - 1 ? '학습 마치기' : '계속하기'}
-          </button>
-        </div>
-      ) : (
+      {/* 하단 네비게이션 */}
       <div className="px-5 pb-8 pt-3 bg-[var(--color-card)] flex gap-3">
         <button
           onClick={goPrev}
@@ -488,7 +463,6 @@ const WordCardScreen = () => {
           {!lastStep || !autoAdvance || wordIndex < words.length - 1 ? <ChevronRight size={16} /> : null}
         </button>
       </div>
-      )}
     </div>
   );
 };
