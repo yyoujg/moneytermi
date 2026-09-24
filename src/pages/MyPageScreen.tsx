@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { BookOpen, Settings, LogOut, ChevronRight, Zap, Flame, ShieldAlert, Pencil } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { BookOpen, Settings, LogOut, ChevronRight, Zap, Flame, Gem, ShieldAlert, Pencil, Play } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { DEFAULT_NICKNAME, getGrowthStage } from '../constants';
 import { calcStreak } from '../lib/streak';
 import { buildBadges } from '../lib/badges';
+import { toast } from 'sonner';
 import { List, ListRow, Spacing, ConfirmDialog } from '@toss/tds-mobile';
 import { useAuth } from '../hooks/useAuth';
 import { GuideSheet } from '../components/mypage/GuideSheet';
@@ -14,10 +15,12 @@ import { Card } from '../components/ui/Card';
 import { IconBox } from '../components/ui/IconBox';
 
 const MyPageScreen = () => {
-  const { points, knownWords, attendanceDates, myEmoji, updateMyEmoji } = useAppContext();
+  const { points, gems, boostUntil, exchangeGems, buyBoost, knownWords, attendanceDates, myEmoji, updateMyEmoji } = useAppContext();
   const stage = getGrowthStage(points);
   const streak = calcStreak(attendanceDates);
   const badges = buildBadges({ words: knownWords.length, streak, points });
+  const [nowTs, setNowTs] = useState(() => Date.now());
+  const boostActive = boostUntil !== null && boostUntil > nowTs;
   const earned = badges.filter(b => b.earned).length;
   const { user, isGuest, updateNickname, logout } = useAuth();
   const [showGuide, setShowGuide]                 = useState(false);
@@ -25,6 +28,15 @@ const MyPageScreen = () => {
   const [showLogoutDialog, setShowLogoutDialog]   = useState(false);
   const [showNicknameSheet, setShowNicknameSheet] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker]     = useState(false);
+
+  // 부스트가 끝나는 시점에 한 번만 다시 그린다.
+  useEffect(() => {
+    if (!boostUntil) return;
+    const left = boostUntil - Date.now();
+    if (left <= 0) return;
+    const t = setTimeout(() => setNowTs(Date.now()), left + 500);
+    return () => clearTimeout(t);
+  }, [boostUntil]);
 
   const handleMenuClick = (label: string) => {
     if (label === '앱 사용법') setShowGuide(true);
@@ -129,6 +141,44 @@ const MyPageScreen = () => {
       </div>
 
       <div className="px-5 pt-5 flex flex-col gap-4">
+        {/* 상점 */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-bold text-[var(--color-ink-2)]">상점</p>
+            <span className="flex items-center gap-1 text-2xs font-bold text-[var(--color-ink-3)]">
+              <Gem size={12} className="text-brand-500" />{gems}
+            </span>
+          </div>
+          <Card pad="md" className="flex flex-col gap-2">
+            <button
+              disabled={gems < 10}
+              onClick={async () => {
+                const n = Math.floor(gems / 10) * 10;
+                if (await exchangeGems(n)) toast.success(`${n}💎 → +${n * 10}P`);
+                else toast.error('환전에 실패했어요');
+              }}
+              className="w-full flex items-center justify-between rounded-chip px-4 py-3 text-sm font-bold text-brand-500 disabled:opacity-40"
+              style={{ backgroundColor: 'var(--color-brand-soft)' }}
+            >
+              <span className="flex items-center gap-1.5"><Zap size={15} className="fill-current" />포인트로 바꾸기</span>
+              <span className="text-2xs font-medium">10💎 = 100P</span>
+            </button>
+
+            <button
+              disabled={gems < 30 || boostActive}
+              onClick={async () => {
+                if (await buyBoost()) toast.success('30분간 포인트 2배! ⚡');
+                else toast.error('부스트를 살 수 없어요');
+              }}
+              className="w-full flex items-center justify-between rounded-chip px-4 py-3 text-sm font-bold text-brand-500 disabled:opacity-40"
+              style={{ backgroundColor: 'var(--color-brand-soft)' }}
+            >
+              <span className="flex items-center gap-1.5"><Play size={15} />{boostActive ? '부스트 사용 중' : '포인트 2배 부스트'}</span>
+              <span className="text-2xs font-medium">30💎 · 30분</span>
+            </button>
+          </Card>
+        </div>
+
         {/* 배지 */}
         <div>
           <div className="flex items-center justify-between mb-3">

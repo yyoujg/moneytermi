@@ -18,6 +18,10 @@ type AppContextValue = {
   hydrated: boolean;
   points: number;
   setPoints: React.Dispatch<React.SetStateAction<number>>;
+  gems: number;
+  boostUntil: number | null;
+  exchangeGems: (amount: number) => Promise<boolean>;
+  buyBoost: () => Promise<boolean>;
   knownWords: Word[];
   knownIds: Set<number>;
   setKnownWords: React.Dispatch<React.SetStateAction<Word[]>>;
@@ -54,6 +58,8 @@ const DEFAULT_MISSIONS: Missions = {
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [points, setPoints]               = useState(0);
+  const [gems, setGems]                   = useState(0);
+  const [boostUntil, setBoostUntil]       = useState<number | null>(null);
   const [knownWords, setKnownWords]       = useState<Word[]>([]);
   const [unknownWords, setUnknownWords]   = useState<Word[]>([]);
   const [missions, setMissions]           = useState<Missions>(DEFAULT_MISSIONS);
@@ -167,7 +173,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       // 1. points — DB값과 로컬값 중 큰 값 유지 (로딩 중 적립 포인트 보존)
       const { data: profile, error: profileErr } = await db
         .from('profiles')
-        .select('points')
+        .select('points, gems, boost_until')
         .eq('id', profileId)
         .single();
 
@@ -181,7 +187,11 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
       if (profileErr) console.error('[load] profiles fetch 실패:', profileErr);
-      if (profile) setPoints(profile.points);  // 서버 단일 진실원
+      if (profile) {
+        setPoints(profile.points);  // 서버 단일 진실원
+        setGems(profile.gems ?? 0);
+        setBoostUntil(profile.boost_until ? new Date(profile.boost_until).getTime() : null);
+      }
 
       // 2. word_progress → 실제 Word 객체 복원
       const { data: progress } = await db
@@ -443,11 +453,31 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     });
     if (error || !data) { console.error('[submitQuizAnswer] 실패:', error); return null; }
     setPoints(data.points);
+    if (typeof data.gems === 'number') setGems(data.gems);
     setMissions(prev => ({ ...prev, m3: { ...prev.m3, current: data.m3_current } }));
     return {
       correct: data.correct, earned: data.earned, combo: data.combo,
       points: data.points, m3Current: data.m3_current,
     };
+  };
+
+  // ── 상점 — 젬 환전 / 부스트 구매 (서버가 차감·검증) ────────────
+  const exchangeGems = async (amount: number): Promise<boolean> => {
+    const { data, error } = await dbRef.current.rpc('exchange_gems', { p_gems: amount });
+    if (error || !data) { console.error('[exchangeGems] 실패:', error); return false; }
+    setGems(data.gems);
+    setPoints(data.points);
+    logClick('gem_exchange', { gems: amount });
+    return true;
+  };
+
+  const buyBoost = async (): Promise<boolean> => {
+    const { data, error } = await dbRef.current.rpc('buy_boost');
+    if (error || !data) { console.error('[buyBoost] 실패:', error); return false; }
+    setGems(data.gems);
+    setBoostUntil(new Date(data.boost_until).getTime());
+    logClick('boost_buy');
+    return true;
   };
 
   // ── 오늘 복습 큐 (due_date <= 오늘) ────────────────────────────
@@ -493,6 +523,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       points, setPoints,
       knownWords, knownIds, setKnownWords,
       unknownWords, setUnknownWords,
+      gems, boostUntil, exchangeGems, buyBoost,
       missions, setMissions,
       claimReward,
       claimReferralReward,
