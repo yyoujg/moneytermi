@@ -72,10 +72,22 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
 .anim-slide-in { animation: slide-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
 .anim-bump     { display: inline-block; animation: bump 0.35s ease-out; }
 .anim-attn     { animation: attn 1.4s ease-out infinite; }
+/* 마일스톤 축하 색종이: 위에서 흔들리며 떨어진다. --x(가로 위치 %), --d(지연), --r(회전 방향)은 인라인 */
+@keyframes confetti-fall {
+  0%   { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 0; }
+  10%  { opacity: 1; }
+  100% { transform: translate3d(calc(var(--r, 1) * 40px), 110vh, 0) rotate(calc(var(--r, 1) * 720deg)); opacity: 0.9; }
+}
+.anim-confetti {
+  position: absolute; top: 0; left: var(--x, 50%); width: 8px; height: 14px; border-radius: 2px;
+  animation: confetti-fall 2.8s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+  animation-delay: var(--d, 0s);
+  pointer-events: none;
+}
 /* 누르는 느낌: 모든 활성 버튼이 살짝 눌린다 */
 button:not(:disabled):active { transform: scale(0.97); }
 @media (prefers-reduced-motion: reduce) {
-  .anim-fade-up, .anim-pop-in, .anim-slide-in, .anim-bump, .anim-attn,
+  .anim-fade-up, .anim-pop-in, .anim-slide-in, .anim-bump, .anim-attn, .anim-confetti,
   .animate-node-hop, .animate-node-ground { animation: none !important; }
 }
 

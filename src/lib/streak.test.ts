@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calcStreak, weekDays, streakMessage } from './streak';
+import { calcStreak, weekDays, streakMessage, streakMilestone } from './streak';
 import { toDateStr } from './date';
 
 // 기준일: 2026-09-24(목)
@@ -67,5 +67,13 @@ describe('streakMessage', () => {
     expect(new Set(msgs).size).toBe(6); // 0과 1은 같은 문구
     expect(streakMessage(0)).toBe(streakMessage(1));
     expect(streakMessage(45)).toBe(streakMessage(30));
+  });
+});
+
+describe('streakMilestone', () => {
+  it('7·14·30·50·100일째에만 라벨을 준다', () => {
+    expect(streakMilestone(7)).toBe('일주일 연속!');
+    expect(streakMilestone(30)).toBe('한 달 연속!');
+    for (const n of [0, 1, 6, 8, 13, 29, 31]) expect(streakMilestone(n)).toBeNull();
   });
 });

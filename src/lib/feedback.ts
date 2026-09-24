@@ -42,6 +42,14 @@ const haptic = (type: Haptic) => {
   try { generateHapticFeedback({ type }).catch(() => {}); } catch { /* not in webview */ }
 };
 
+// 마일스톤 축하: 축포를 두 번, 사이에 성공 진동
+export function feedbackCelebrate(vibration: boolean) {
+  if (!vibration) return;
+  haptic('confetti');
+  setTimeout(() => haptic('success'), 200);
+  setTimeout(() => haptic('confetti'), 450);
+}
+
 // 버튼/노드 탭: 짧고 확실한 한 번
 export function feedbackTap(vibration: boolean) {
   if (vibration) haptic('basicMedium');

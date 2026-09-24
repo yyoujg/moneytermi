@@ -38,6 +38,12 @@ export const weekDays = (attendanceDates: string[], today: Date = new Date()): W
   });
 };
 
+// 특별히 크게 축하하는 연속 일수. 정확히 그 날에만 (7일째 하루) 마일스톤 화면을 띄운다.
+const MILESTONES: Record<number, string> = {
+  7: '일주일 연속!', 14: '2주 연속!', 30: '한 달 연속!', 50: '50일 연속!', 100: '100일 연속!',
+};
+export const streakMilestone = (streak: number): string | null => MILESTONES[streak] ?? null;
+
 export const streakMessage = (streak: number): string => {
   if (streak >= 30) return '한 달 연속이라니, 이건 습관이에요 🔥';
   if (streak >= 14) return '2주 연속! 이제 멈추기가 더 어려울걸요';
