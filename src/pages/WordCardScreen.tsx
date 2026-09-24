@@ -57,6 +57,9 @@ const WordCard = ({
 }) => {
   // 연관검색어는 '주가지수' 같은 기본형으로 적혀 있고 단어는 '주가지수선물거래(…)'처럼 긴 경우가 있어 기본형으로도 맞춘다.
   const baseOf = (w: string) => w.split(/[(/;]/)[0].trim();
+  const detail = word.detailedMeaning.startsWith(word.meaning)
+    ? word.detailedMeaning.slice(word.meaning.length).trim()
+    : word.detailedMeaning;
   const validRelated = (word.relatedWords ?? [])
     .map(rw => allWords.find(w => w.word === rw)?.word ?? allWords.find(w => baseOf(w.word) === baseOf(rw))?.word)
     .filter((w, i, arr): w is string => !!w && w !== word.word && arr.indexOf(w) === i);
@@ -77,7 +80,8 @@ const WordCard = ({
             onClick={onToggleKnown}
             aria-label={isKnown ? '알고 있어요 해제' : '알고 있어요'}
             aria-pressed={isKnown}
-            className={`shrink-0 mt-1 w-8 h-8 rounded-full flex items-center justify-center transition-colors
+            style={{ borderRadius: 9999 }}
+            className={`shrink-0 mt-1 w-8 h-8 flex items-center justify-center transition-colors
               ${isKnown ? 'bg-brand-500 text-white' : 'bg-[var(--color-surface)] text-[var(--color-ink-4)]'}`}
           >
             <Check size={16} strokeWidth={2.5} />
@@ -86,11 +90,13 @@ const WordCard = ({
       </div>
     </Card>
 
-    {/* 자세히 알아보기 */}
-    <Card pad="none" className="px-5 pt-4 pb-5 flex flex-col gap-2.5">
-      <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><BookOpen size={13} />자세히 알아보기</p>
-      <p className="text-sm leading-[1.8] text-[var(--color-ink-2)] font-medium break-keep tracking-[-0.01em]">{word.detailedMeaning}</p>
-    </Card>
+    {/* 자세히 알아보기 — 요약은 본문 첫 문장이라 그 부분은 빼고 이어지는 내용만 */}
+    {detail && (
+      <Card pad="none" className="px-5 pt-4 pb-5 flex flex-col gap-2.5">
+        <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><BookOpen size={13} />자세히 알아보기</p>
+        <p className="text-sm leading-[1.8] text-[var(--color-ink-2)] font-medium break-keep tracking-[-0.01em]">{detail}</p>
+      </Card>
+    )}
 
     {/* 실시간 뉴스 */}
     <Card pad="none" className="px-5 pt-4 pb-5 flex flex-col gap-2.5">
@@ -340,7 +346,8 @@ const WordCardScreen = () => {
                 disabled={!accessible}
                 aria-label={`${i + 1}번째 단어 ${w.word}`}
                 onClick={() => accessible && setWordIndex(i)}
-                className={`shrink-0 rounded-full transition-all
+                style={{ borderRadius: 9999 }}
+                className={`shrink-0 transition-all
                   ${i === wordIndex
                     ? 'w-5 h-2 bg-brand-500'
                     : known
