@@ -3,10 +3,8 @@ import { BookOpen, Check, Lock, PenLine, RotateCcw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
-import { feedbackTap } from '../lib/feedback';
 import { LESSON_COST } from '../constants';
 import { loadDoneNodes } from '../lib/pathProgress';
-import { useSettings } from '../hooks/useSettings';
 import { buildPath, connectorD, NODE, nodeOffsetX, ROW, SPAN, sectionColor, type PathNode } from '../lib/path';
 
 // 노드 원. TDS 리셋이 <button>의 rounded-*를 먹으므로 borderRadius는 인라인 스타일로 준다
@@ -67,7 +65,6 @@ const NodeCircle = ({ node, index, color, isFocus, onTap, nodeRef }: {
 const CourseScreen = () => {
   const navigate = useNavigate();
   const { hydrated, knownIds, courses, points, spendPoints, openShop } = useAppContext();
-  const { vibrationOn } = useSettings();
   // 이 기기에서 끝낸 퀴즈·복습 노드. 화면에 돌아올 때마다 다시 읽는다(퀴즈 끝내고 돌아온 직후 반영).
   const [doneNodes, setDoneNodes] = useState<Set<string>>(new Set());
   useEffect(() => { loadDoneNodes().then(setDoneNodes); }, []);
@@ -75,26 +72,33 @@ const CourseScreen = () => {
   const sections = useMemo(() => buildPath(courses, knownIds), [courses, knownIds]);
 
   // current 노드는 코스마다 하나씩 생긴다. 장식(링·"시작" 말풍선)은 패스 순서상 첫 번째에만 붙인다.
-  const focusId = useMemo(() => {
+  // 진행 중인 노드와 그 노드가 섹션 안에서 몇 번째인지 (계산이 가벼워 memo 없이)
+  const findFocus = () => {
     for (const sec of sections) {
-      const n = sec.nodes.find(node => node.state === 'current');
-      if (n) return n.id;
+      const k = sec.nodes.findIndex(node => node.state === 'current');
+      if (k >= 0) return { id: sec.nodes[k].id, index: k, courseId: sec.course.id };
     }
     return null;
-  }, [sections]);
+  };
+  const focus = findFocus();
+  const focusId = focus?.id ?? null;
 
   const focusRef = useRef<HTMLButtonElement>(null);
+  const focusSectionRef = useRef<HTMLElement>(null);
   const didScroll = useRef(false);
+  // 첫 진입 스크롤: 진행 중인 섹션이 화면 맨 위에 오게 한다. 노드가 섹션 앞부분이면 배너부터 보이도록 섹션 시작에,
+  // 더 아래면 노드를 가운데에(배너는 sticky라 위에 붙어 어느 섹션인지 보인다). 이전 완료 섹션 배너가 같이 보이지 않게.
   useLayoutEffect(() => {
-    if (didScroll.current || !hydrated || !focusId) return;
+    if (didScroll.current || !hydrated || !focus) return;
     didScroll.current = true;
-    focusRef.current?.scrollIntoView({ block: 'center' });
+    if (focus.index <= 2) focusSectionRef.current?.scrollIntoView({ block: 'start' });
+    else focusRef.current?.scrollIntoView({ block: 'center' });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated, focusId]);
 
   const handleNodeTap = async (node: PathNode, index: number, courseKnown: number) => {
     // disabled 버튼은 click이 안 오지만, 웹뷰/리셋 CSS에 따라 새는 경우가 있어 한 번 더 막는다.
     if (node.state === 'locked') return;
-    feedbackTap(vibrationOn);
     logClick('path_node_click', { course_id: node.courseId, type: node.type, index, state: node.state });
 
     if (node.type === 'quiz' || node.type === 'review') {
@@ -125,9 +129,9 @@ const CourseScreen = () => {
       {sections.map((sec, si) => {
         const color = sectionColor(si);
         return (
-        <section key={sec.course.id}>
+        <section key={sec.course.id} ref={sec.course.id === focus?.courseId ? focusSectionRef : undefined}>
           {/* 코스 배너 */}
-          <div className="anim-fade-up sticky top-4 z-10 mx-5 mt-5 mb-1 rounded-card px-5 py-4 shadow-md" style={{ background: color.face }}>
+          <div className="sticky top-4 z-10 mx-5 mt-5 mb-1 rounded-card px-5 py-4 shadow-md" style={{ background: color.face }}>
             <p className="text-2xs font-bold text-white/70">{sec.course.level} · 코스 {si + 1}/{sections.length}</p>
             <h3 className="text-base font-bold text-white mt-1! break-keep">{sec.course.title}</h3>
             <p className="text-2xs text-white/80 mt-1.5!">{sec.knownCount} / {sec.course.words.length} 단어</p>
@@ -136,7 +140,7 @@ const CourseScreen = () => {
           {sec.nodes.map((node, k) => {
             const isFocus = node.id === focusId;
             return (
-              <div key={node.id} className="relative anim-fade-up" style={{ height: ROW, '--i': Math.min(k, 6) } as React.CSSProperties}>
+              <div key={node.id} className="relative" style={{ height: ROW }}>
                 {k > 0 && (
                   <svg
                     aria-hidden

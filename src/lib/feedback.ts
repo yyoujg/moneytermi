@@ -39,8 +39,18 @@ function playWrongSound() {
 // 웹뷰 밖(브라우저)에서는 SDK가 동기로 throw해서 .catch로는 못 잡는다. 햅틱 실패가 채점을 막으면 안 된다.
 type Haptic = 'tickWeak' | 'tap' | 'tickMedium' | 'softMedium' | 'basicWeak' | 'basicMedium' | 'success' | 'error' | 'wiggle' | 'confetti';
 const haptic = (type: Haptic) => {
+  if (import.meta.env.DEV) (window as unknown as { __lastHaptic?: string }).__lastHaptic = type;   // 브라우저 검증용
   try { generateHapticFeedback({ type }).catch(() => {}); } catch { /* not in webview */ }
 };
+
+// 진동 설정의 최신값. useSettings가 로드/토글할 때 갱신하고, 전역 탭 진동(useTapHaptics)이 읽는다.
+// (useSettings는 화면마다 독립 상태라, 설정 시트에서 끈 값을 다른 화면이 바로 알 방법이 이것뿐이다)
+export const hapticPrefs = { enabled: true };
+
+// 모든 버튼 누름: 짧은 틱. 결과 진동(정답·축하)은 각자 따로 울린다.
+export function feedbackTick() {
+  if (hapticPrefs.enabled) haptic('tickMedium');
+}
 
 // 마일스톤 축하: 축포를 두 번, 사이에 성공 진동
 export function feedbackCelebrate(vibration: boolean) {

@@ -12,6 +12,7 @@ import { parseLandingPath, parseReferrer } from './lib/landing';
 import { logScreen, logClick } from './lib/analytics';
 import NavBar from './components/NavBar';
 import { TopBar } from './components/TopBar';
+import { useTapHaptics } from './hooks/useTapHaptics';
 
 const HomeScreen = React.lazy(() => import('./pages/HomeScreen'));
 const CourseScreen = React.lazy(() => import('./pages/CourseScreen'));
@@ -162,8 +163,8 @@ const Layout = () => {
       <NicknameGate />
       <TopBar />
       <React.Suspense fallback={<LoadingScreen />}>
-      {/* 경로가 바뀌면 래퍼가 다시 마운트되며 밀려 들어온다 */}
-      <div key={pathname} className="flex-1 min-h-0 flex flex-col anim-slide-in">
+      {/* 경로가 바뀌면 래퍼가 다시 마운트되며 페이드인. (transform 전환은 기기에서 무거워 opacity만) */}
+      <div key={pathname} className="flex-1 min-h-0 flex flex-col anim-fade">
       <Routes>
         <Route path="/" element={<Navigate to={resolveLandingTarget()} replace />} />
         <Route path="/home" element={<HomeScreen />} />
@@ -183,6 +184,7 @@ const Layout = () => {
 };
 
 export default function App() {
+  useTapHaptics();   // 모든 버튼 누름에 짧은 진동
   return (
     <ErrorBoundary>
       <AuthProvider>
