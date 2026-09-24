@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { BookOpen, Settings, LogOut, ChevronRight, Zap, ShieldAlert, Pencil } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
-import { toast } from 'sonner';
 import { getGrowthStage } from '../constants';
 import { List, ListRow, Spacing, ConfirmDialog } from '@toss/tds-mobile';
 import { useAuth } from '../hooks/useAuth';
@@ -15,7 +14,7 @@ import { Card } from '../components/ui/Card';
 import { IconBox } from '../components/ui/IconBox';
 
 const MyPageScreen = () => {
-  const { points, knownWords, attendanceDates, missions, checkIn, myEmoji, updateMyEmoji } = useAppContext();
+  const { points, knownWords, attendanceDates, missions, myEmoji, updateMyEmoji } = useAppContext();
   const stage = getGrowthStage(points);
   const { user, isGuest, updateNickname, logout } = useAuth();
   const [showGuide, setShowGuide]                 = useState(false);
@@ -28,11 +27,6 @@ const MyPageScreen = () => {
     if (label === '앱 사용법') setShowGuide(true);
     else if (label === '앱 설정') setShowSettings(true);
     else if (label === '로그아웃') setShowLogoutDialog(true);
-  };
-
-  const handleCheckIn = async () => {
-    await checkIn();
-    toast.success('📅 오늘 출석 완료! +10P');
   };
 
   const MENU_ITEMS = [
@@ -141,10 +135,9 @@ const MyPageScreen = () => {
         <div>
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-bold text-[var(--color-ink-2)]">출석 현황</p>
-            {missions.m1.current < missions.m1.target
-              ? <button onClick={handleCheckIn} className="flex items-center gap-1 px-3.5 py-1.5 rounded-button bg-brand-500 text-white text-xs font-bold active:opacity-80">✋ 출석하기</button>
-              : <span className="text-xs font-bold text-success-500">✅ 출석 완료</span>
-            }
+            {missions.m1.current >= missions.m1.target && (
+              <span className="text-xs font-bold text-success-500">✅ 오늘 출석 완료</span>
+            )}
           </div>
           <AttendanceCalendar attendanceDates={attendanceDates} />
         </div>

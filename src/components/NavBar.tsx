@@ -1,12 +1,12 @@
 import { useLayoutEffect, useRef } from 'react';
-import { PenLine, Compass, ListChecks, User } from 'lucide-react';
+import { PenLine, Home, ListChecks, User } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSafeAreaInsets } from '../hooks/useSafeAreaInsets';
 
 // 코스(패스)가 메인. /home은 경로를 그대로 두고 라벨만 퀘스트로 바꾼다 —
 // 딥링크 allowlist와 푸시 랜딩이 /home을 쓰고 있어 경로를 바꾸면 같이 깨진다.
 const NAV_ITEMS = [
-  { path: '/course', icon: Compass, label: '코스' },
+  { path: '/course', icon: Home, label: '홈' },
   { path: '/home', icon: ListChecks, label: '퀘스트' },
   { path: '/review', icon: PenLine, label: '퀴즈' },
   { path: '/my', icon: User, label: '마이' },

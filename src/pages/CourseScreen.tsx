@@ -23,12 +23,13 @@ const NodeCircle = ({ node, index, isFocus, onTap, nodeRef }: {
   const locked = node.state === 'locked';
   const done = node.state === 'done';
   const color = nodeColor(index);
+  // 잠긴 노드도 자기 색을 알파로 흐리게 보여준다. 전부 회색이면 팔레트가 보이지 않는다.
   const face = locked
-    ? 'var(--color-surface)'
+    ? `${color.face}33`
     : node.type === 'quiz'
       ? 'var(--color-card)'
       : color.face;
-  const shadow = locked ? 'var(--color-line)' : color.shadow;
+  const shadow = locked ? `${color.shadow}33` : color.shadow;
 
   return (
     <button
@@ -51,7 +52,7 @@ const NodeCircle = ({ node, index, isFocus, onTap, nodeRef }: {
       }}
     >
       {locked
-        ? <Lock size={22} className="text-[var(--color-ink-4)]" />
+        ? <Lock size={22} style={{ color: color.shadow, opacity: 0.55 }} />
         : done
           ? <Check size={26} strokeWidth={3} className="text-white" />
           : node.type === 'quiz'
@@ -135,7 +136,7 @@ const CourseScreen = () => {
         <div className="pt-4 px-5 pb-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold text-[var(--color-ink)]">학습 코스</h2>
+              <h2 className="text-xl font-bold text-[var(--color-ink)]">홈</h2>
               <p className="text-xs text-[var(--color-ink-3)] mt-0.5!">{totalKnown}개 완료 · {allWords.length - totalKnown}개 남음</p>
             </div>
             <div className="flex items-center gap-2">
