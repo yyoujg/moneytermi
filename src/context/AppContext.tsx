@@ -7,7 +7,7 @@ import { Storage } from '../lib/storage';
 import { requestAppReview } from '../lib/review';
 import { claimPromotion } from '../lib/promotion';
 import { logClick } from '../lib/analytics';
-import { toDateStr } from '../lib/date';
+import { missionSlot, msUntilNextSlot, toDateStr } from '../lib/date';
 import { nextSrs, gradeFromResult, addDays } from '../lib/srs';
 import { DAILY_REVIEW_CAP } from '../constants';
 
@@ -46,9 +46,10 @@ type AppContextValue = {
 
 const AppContext = createContext<AppContextValue | null>(null);
 
+// mission_defs 테이블을 아직 적용하지 않은 환경용 폴백. 서버에서 정의를 받으면 대체된다.
 const DEFAULT_MISSIONS: Missions = {
-  m1: { id: 'm1', title: '앱 출석하기',         reward: 10, current: 0, target: 1, isRewarded: false },
-  m3: { id: 'm3', title: '퀴즈 정답 3회 맞히기', reward: 30, current: 0, target: 3, isRewarded: false },
+  m1: { id: 'm1', title: '앱 출석하기',         reward: 10, current: 0, target: 1, isRewarded: false, sortOrder: 10 },
+  m3: { id: 'm3', title: '퀴즈 정답 3회 맞히기', reward: 30, current: 0, target: 3, isRewarded: false, sortOrder: 30 },
 };
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
@@ -73,6 +74,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const dbRef           = useRef<typeof supabase>(supabase);
   const lastMissionDate = useRef<string>(toDateStr(new Date()));
   const autoCheckedRef  = useRef(false);
+  const missionBaseRef  = useRef<Missions>(DEFAULT_MISSIONS);
 
   // ── 콘텐츠 로드 (courses + words) ─────────────────────────────
   useEffect(() => {
@@ -183,27 +185,42 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         })));
       }
 
-      // 3. daily_missions
-      const { data: dm } = await db
-        .from('daily_missions')
-        .select('mission_id, current, is_rewarded')
-        .eq('user_id', profileId)
-        .eq('date', today);
+      // 3. 미션 정의 + 현재 슬롯 진행도
+      const slot = missionSlot();
+      const { data: defs } = await db
+        .from('mission_defs')
+        .select('mission_id, title, target, reward, sort_order')
+        .eq('active', true)
+        .order('sort_order');
 
-      if (dm && dm.length > 0) {
-        setMissions(prev => {
-          const next = { ...prev };
-          dm.forEach(row => {
-            const key = row.mission_id as keyof Missions;
-            if (next[key]) next[key] = {
-              ...next[key],
-              current: Math.max(next[key].current, row.current),
-              isRewarded: next[key].isRewarded || row.is_rewarded,
-            };
-          });
-          return next;
-        });
+      const base: Missions = defs && defs.length > 0
+        ? Object.fromEntries(defs.map((d: { mission_id: string; title: string; target: number; reward: number; sort_order: number }) => [
+            d.mission_id,
+            { id: d.mission_id, title: d.title, target: d.target, reward: d.reward, current: 0, isRewarded: false, sortOrder: d.sort_order },
+          ]))
+        : DEFAULT_MISSIONS;
+
+      // slot 컬럼이 아직 없는 DB에서도 동작하도록 실패하면 날짜만으로 다시 조회한다.
+      let dm = (await db.from('daily_missions')
+        .select('mission_id, current, is_rewarded')
+        .eq('user_id', profileId).eq('date', today).eq('slot', slot)).data;
+      if (!dm) {
+        dm = (await db.from('daily_missions')
+          .select('mission_id, current, is_rewarded')
+          .eq('user_id', profileId).eq('date', today)).data;
       }
+
+      const merged = { ...base };
+      (dm ?? []).forEach(row => {
+        const m = merged[row.mission_id];
+        if (m) merged[row.mission_id] = {
+          ...m,
+          current: Math.max(m.current, row.current),
+          isRewarded: m.isRewarded || row.is_rewarded,
+        };
+      });
+      setMissions(merged);
+      missionBaseRef.current = base;
 
       // 4. attendance
       const { data: att, error: attLoadErr } = await db
@@ -320,23 +337,16 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [ready]);
 
-  // ── 자정 미션 초기화 ──────────────────────────────────────────
+  // ── 8시간마다 미션 초기화 (KST 0/8/16시) ──────────────────────
   useEffect(() => {
     if (!ready) return;
 
     const scheduleReset = () => {
-      const now = new Date();
-      const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-      const msUntilMidnight = next.getTime() - now.getTime();
-
       const t = setTimeout(() => {
-        const today = toDateStr(new Date());
-        if (today !== lastMissionDate.current) {
-          lastMissionDate.current = today;
-          setMissions(DEFAULT_MISSIONS);
-        }
+        lastMissionDate.current = `${toDateStr(new Date())}#${missionSlot()}`;
+        setMissions(missionBaseRef.current);
         scheduleReset();
-      }, msUntilMidnight);
+      }, msUntilNextSlot() + 1000);
 
       return t;
     };

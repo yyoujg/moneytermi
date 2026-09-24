@@ -2,11 +2,11 @@ import { useEffect, useRef } from 'react';
 import { ChevronRight, Zap, Flame, BookOpen, RotateCcw } from 'lucide-react';
 import { Badge } from '@toss/tds-mobile';
 import { useNavigate } from 'react-router-dom';
-import type { Mission, Missions } from '../types';
 import { DEFAULT_NICKNAME, getGrowthStage } from '../constants';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
 import { calcStreak } from '../lib/streak';
+import { msUntilNextSlot } from '../lib/date';
 import { useAuth } from '../hooks/useAuth';
 import { WeeklyBarChart } from '../components/home/WeeklyBarChart';
 import { Card } from '../components/ui/Card';
@@ -29,7 +29,8 @@ const HomeScreen = () => {
 
   const streak = calcStreak(attendanceDates);
 
-  const m3 = missions.m3;
+  const missionList = Object.values(missions).sort((a, b) => a.sortOrder - b.sortOrder);
+  const resetLabel = `${Math.ceil(msUntilNextSlot() / 3600000)}시간 뒤 초기화`;
   const stage = getGrowthStage(points);
 
   return (
@@ -102,61 +103,38 @@ const HomeScreen = () => {
         )}
       </div>
 
-      {/* 미션 */}
+      {/* 오늘의 미션 */}
       <div className="px-5 flex flex-col gap-4">
-        {/* 미션 */}
         <Card pad="lg" className="mb-4">
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-sm font-bold text-[var(--color-ink-2)]">오늘의 미션</h2>
-            <span className="text-2xs font-medium text-[var(--color-ink-4)]">자정 초기화</span>
+            <span className="text-2xs font-medium text-[var(--color-ink-4)]">{resetLabel}</span>
           </div>
 
-          {/* 핵심 미션: 퀴즈 3문제 */}
-          <div className={`rounded-card p-4 mb-3 ${m3.isRewarded ? 'bg-[var(--color-surface)]' : m3.current >= m3.target ? 'bg-brand-500/10' : 'bg-[var(--color-surface)]'}`}>
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <p className={`text-sm font-bold ${m3.isRewarded ? 'text-[var(--color-ink-4)] line-through' : 'text-[var(--color-ink)]'}`}>
-                  {m3.title}
-                </p>
-                <p className="text-xs text-[var(--color-ink-4)] mt-0.5!">+{m3.reward}P</p>
-              </div>
-              {m3.isRewarded
-                ? <Badge color="elephant" size="small" variant="fill">완료</Badge>
-                : m3.current >= m3.target
-                ? <button onClick={() => claimReward('m3')} className="px-3 py-1.5 rounded-button bg-brand-500 text-white text-xs font-bold active:bg-brand-600">받기</button>
-                : <span className="text-lg font-bold text-[var(--color-ink)]">{m3.current}<span className="text-sm text-[var(--color-ink-4)]">/{m3.target}</span></span>
-              }
-            </div>
-            {/* 진행 바 */}
-            <div className="flex gap-1">
-              {Array.from({ length: m3.target }).map((_, i) => (
-                <div key={i} className={`flex-1 h-1.5 rounded-full transition-all duration-300 ${i < m3.current ? 'bg-brand-500' : 'bg-[var(--color-line)]'}`} />
-              ))}
-            </div>
-          </div>
-
-          {/* 보조 미션 */}
-          <div className="flex flex-col gap-0">
-            {([missions.m1] as Mission[]).map((mission, idx) => {
-              const isCompleted = mission.current >= mission.target;
+          <div className="flex flex-col">
+            {missionList.map((mission, idx) => {
+              const done = mission.current >= mission.target;
               return (
-                <div key={mission.id} className={`flex justify-between items-center py-3 ${idx === 0 ? '' : ''}`}>
-                  <div className="flex items-center gap-2.5">
-                    <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 text-4xs font-bold ${
-                      mission.isRewarded ? 'bg-brand-500 text-white' : isCompleted ? 'bg-brand-500/20 text-brand-500' : 'bg-[var(--color-surface)] text-[var(--color-ink-4)]'
-                    }`}>
-                      {(mission.isRewarded || isCompleted) ? '✓' : ''}
+                <div key={mission.id} className={idx > 0 ? 'pt-3 mt-3 border-t border-[var(--color-line)]' : ''}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="min-w-0">
+                      <p className={`text-sm font-bold truncate ${mission.isRewarded ? 'text-[var(--color-ink-4)] line-through' : 'text-[var(--color-ink)]'}`}>
+                        {mission.title}
+                      </p>
+                      <p className="text-2xs text-[var(--color-ink-4)] mt-0.5!">+{mission.reward}P</p>
                     </div>
-                    <span className={`text-xs font-medium ${mission.isRewarded ? 'text-[var(--color-ink-4)] line-through' : 'text-[var(--color-ink-2)]'}`}>
-                      {mission.title}
-                    </span>
+                    {mission.isRewarded
+                      ? <Badge color="elephant" size="small" variant="fill">완료</Badge>
+                      : done
+                        ? <button onClick={() => claimReward(mission.id)} className="px-3 py-1.5 rounded-button bg-brand-500 text-white text-xs font-bold active:bg-brand-600 shrink-0">받기</button>
+                        : <span className="text-base font-bold text-[var(--color-ink)] shrink-0">{mission.current}<span className="text-xs text-[var(--color-ink-4)]">/{mission.target}</span></span>
+                    }
                   </div>
-                  {mission.isRewarded
-                    ? <span className="text-2xs text-[var(--color-ink-4)]">+{mission.reward}P</span>
-                    : isCompleted
-                    ? <button onClick={() => claimReward(mission.id as keyof Missions)} className="px-2.5 py-1 rounded-button bg-brand-500 text-white text-4xs font-bold active:bg-brand-600">받기</button>
-                    : <span className="text-2xs text-[var(--color-ink-4)]">+{mission.reward}P</span>
-                  }
+                  <div className="flex gap-1">
+                    {Array.from({ length: mission.target }).map((_, i) => (
+                      <div key={i} className={`flex-1 h-1.5 rounded-full transition-all duration-300 ${i < mission.current ? 'bg-brand-500' : 'bg-[var(--color-line)]'}`} />
+                    ))}
+                  </div>
                 </div>
               );
             })}

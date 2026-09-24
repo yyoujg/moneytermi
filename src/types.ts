@@ -34,7 +34,7 @@ export type Course = {
   words: Word[];
 };
 
-export type Mission = {
+type MissionBase = {
   id: string;
   title: string;
   reward: number;
@@ -43,7 +43,6 @@ export type Mission = {
   isRewarded: boolean;
 };
 
-export type Missions = {
-  m1: Mission;
-  m3: Mission;
-};
+// 미션 종류는 서버 mission_defs가 정한다(고정 키 아님).
+export type Mission = MissionBase & { sortOrder: number };
+export type Missions = Record<string, Mission>;
