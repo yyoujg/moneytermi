@@ -1,24 +1,96 @@
-import React, { useState } from 'react';
-import { CheckCircle, ChevronRight, X, Play } from 'lucide-react';
+import React, { useMemo, useRef, useState, useLayoutEffect } from 'react';
+import { Check, ChevronRight, Heart, Lock, PenLine, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { SearchField, Menu, Spacing } from '@toss/tds-mobile';
+import { SearchField } from '@toss/tds-mobile';
+import { toast } from 'sonner';
 import { useAppContext } from '../context/AppContext';
+import { useHearts } from '../hooks/useHearts';
+import { getGrowthStage } from '../constants';
 import { logClick } from '../lib/analytics';
+import { buildPath, connectorD, nodeOffsetX, ROW, SPAN, type PathNode } from '../lib/path';
+import { MAX_HEARTS } from '../lib/hearts';
 import { Card } from '../components/ui/Card';
+
+const NODE = 64;
+
+// 노드 원. TDS 리셋이 <button>의 rounded-*를 먹으므로 borderRadius는 인라인 스타일로 준다
+// (인라인이 unlayered 리셋을 이긴다). button을 유지해야 포커스/Enter/disabled가 공짜로 따라온다.
+const NodeCircle = ({ node, index, isFocus, onTap, nodeRef }: {
+  node: PathNode;
+  index: number;
+  isFocus: boolean;
+  onTap: () => void;
+  nodeRef?: React.Ref<HTMLButtonElement>;
+}) => {
+  const locked = node.state === 'locked';
+  const done = node.state === 'done';
+  const face = done
+    ? 'var(--color-brand-500)'
+    : locked
+      ? 'var(--color-surface)'
+      : node.type === 'quiz'
+        ? 'var(--color-card)'
+        : 'var(--color-brand-500)';
+  const shadow = done || (!locked && node.type === 'lesson') ? 'var(--color-brand-600)' : 'var(--color-line)';
+
+  return (
+    <button
+      ref={nodeRef}
+      type="button"
+      disabled={locked}
+      onClick={onTap}
+      aria-label={`${node.type === 'quiz' ? '퀴즈' : '학습'} ${index + 1}`}
+      className="absolute flex items-center justify-center active:translate-y-[3px] disabled:opacity-50"
+      style={{
+        top: (ROW - NODE) / 2,
+        left: `calc(50% + ${nodeOffsetX(index)}px)`,
+        marginLeft: -NODE / 2,
+        width: NODE,
+        height: NODE,
+        borderRadius: 9999,
+        background: face,
+        boxShadow: `0 5px 0 ${shadow}${isFocus ? ', 0 0 0 6px var(--color-brand-soft)' : ''}`,
+        border: node.type === 'quiz' && !locked ? '2px solid var(--color-brand-500)' : 'none',
+      }}
+    >
+      {locked
+        ? <Lock size={22} className="text-[var(--color-ink-4)]" />
+        : done
+          ? <Check size={26} strokeWidth={3} className="text-white" />
+          : node.type === 'quiz'
+            ? <PenLine size={22} className="text-brand-500" />
+            : <span className="text-xl">📖</span>}
+    </button>
+  );
+};
 
 const CourseScreen = () => {
   const navigate = useNavigate();
-  const { knownWords, courses, allWords } = useAppContext();
+  const { hydrated, knownIds, courses, allWords, knownWords, points } = useAppContext();
+  const { hearts, loaded: heartsLoaded, trySpend, msUntilNext } = useHearts();
 
   const [query, setQuery] = useState('');
   const [focused, setFocused] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
-  const [activeCategory, setActiveCategory] = useState<string>('전체');
 
-  const categories = [...new Set(courses.map(c => c.category))];
-  const filteredCourses = activeCategory === '전체'
-    ? courses
-    : courses.filter(c => c.category === activeCategory);
+  const sections = useMemo(() => buildPath(courses, knownIds), [courses, knownIds]);
+
+  // current 노드는 코스마다 하나씩 생긴다. 장식(링·"시작" 말풍선)은 패스 순서상 첫 번째에만 붙인다.
+  const focusId = useMemo(() => {
+    for (const sec of sections) {
+      const n = sec.nodes.find(node => node.state === 'current');
+      if (n) return n.id;
+    }
+    return null;
+  }, [sections]);
+
+  const focusRef = useRef<HTMLButtonElement>(null);
+  const didScroll = useRef(false);
+  useLayoutEffect(() => {
+    if (didScroll.current || !hydrated || !focusId) return;
+    didScroll.current = true;
+    focusRef.current?.scrollIntoView({ block: 'center' });
+  }, [hydrated, focusId]);
 
   const trimmed = query.trim();
   const searchResults = trimmed.length > 0
@@ -34,9 +106,29 @@ const CourseScreen = () => {
     navigate('/word-card', { state: { words: course.words, index, backPath: '/course' } });
   };
 
-  const totalWords = allWords.length;
+  const handleNodeTap = (node: PathNode, index: number, courseKnown: number) => {
+    logClick('path_node_click', { course_id: node.courseId, type: node.type, index, state: node.state });
+
+    if (node.type === 'quiz') {
+      navigate('/quiz', { state: { quizQueue: node.words.slice(0, 5), backPath: '/course' } });
+      return;
+    }
+
+    // 이미 끝낸 레슨 복습은 하트를 쓰지 않는다. 하트가 없어도 복습은 막지 않는다.
+    if (node.state !== 'done') {
+      if (!trySpend()) {
+        logClick('path_heart_empty', { course_id: node.courseId });
+        const min = Math.ceil(msUntilNext() / 60000);
+        toast.error(`하트가 없어요. ${min}분 뒤에 1개 충전돼요`);
+        return;
+      }
+      if (courseKnown === 0) logClick('course_start', { course_id: node.courseId, title: node.courseId });
+    }
+
+    navigate('/word-card', { state: { words: node.words, index: 0, backPath: '/course', autoAdvance: true } });
+  };
+
   const totalKnown = knownWords.length;
-  const allCategories = ['전체', ...categories];
 
   return (
     <div className="flex flex-col h-full bg-[var(--color-canvas)] pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
@@ -44,18 +136,26 @@ const CourseScreen = () => {
       {/* 헤더 */}
       <div className="sticky top-0 z-20 bg-[var(--color-card)]">
         <div className="pt-4 px-5 pb-4">
-          <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold text-[var(--color-ink)]">학습 코스</h2>
-              <p className="text-xs text-[var(--color-ink-3)] mt-0.5!">{totalKnown}개 완료 · {totalWords - totalKnown}개 남음</p>
+              <p className="text-xs text-[var(--color-ink-3)] mt-0.5!">{totalKnown}개 완료 · {allWords.length - totalKnown}개 남음</p>
             </div>
-            <button
-              onClick={() => { setShowSearch(s => !s); }}
-              className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors
-                ${showSearch ? 'bg-brand-500 text-white' : 'bg-[var(--color-surface)] text-[var(--color-ink-3)]'}`}
-            >
-              {showSearch ? <X size={15} /> : <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>}
-            </button>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-[var(--color-surface)]">
+                <Heart size={13} className="text-danger-400 fill-current" />
+                <span className="text-xs font-bold text-[var(--color-ink-2)]">
+                  {heartsLoaded ? hearts : MAX_HEARTS}
+                </span>
+              </div>
+              <button
+                onClick={() => setShowSearch(s => !s)}
+                className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors
+                  ${showSearch ? 'bg-brand-500 text-white' : 'bg-[var(--color-surface)] text-[var(--color-ink-3)]'}`}
+              >
+                {showSearch ? <X size={15} /> : <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>}
+              </button>
+            </div>
           </div>
 
           {/* 검색창 */}
@@ -91,114 +191,70 @@ const CourseScreen = () => {
             </div>
           )}
         </div>
-
-        {/* 전체 진행 세그먼트 바 */}
-        <div className="px-5 pb-2 flex gap-[2px]">
-          {allWords.map(word => {
-            const isKnown = knownWords.some(kw => kw.id === word.id);
-            return <div key={word.id} className={`flex-1 h-1.5 rounded-full transition-all duration-500 ${isKnown ? 'bg-brand-400' : 'bg-[var(--color-surface)]'}`} />;
-          })}
-        </div>
-
-        {/* 카테고리 필터 */}
-        <div className="px-5 pb-3">
-          <Menu.Trigger
-            dropdown={
-              <Menu.Dropdown header={<Menu.Header>카테고리</Menu.Header>}>
-                {allCategories.map(cat => (
-                  <Menu.DropdownItem
-                    key={cat}
-                    onClick={() => setActiveCategory(cat)}
-                    right={activeCategory === cat ? <span className="text-brand-500 text-xs font-bold">✓</span> : undefined}
-                  >
-                    {cat}
-                  </Menu.DropdownItem>
-                ))}
-              </Menu.Dropdown>
-            }
-          >
-            <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--color-surface)] text-xs font-medium text-[var(--color-ink-3)]">
-              {activeCategory}
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-            </button>
-          </Menu.Trigger>
-        </div>
       </div>
 
-      {/* 코스 목록 */}
-      <div className="px-5 pt-5 flex flex-col gap-3">
-        {filteredCourses.map((course) => {
-          const courseKnownCount = course.words.filter(w => knownWords.some(kw => kw.id === w.id)).length;
-          const progressPct = Math.round((courseKnownCount / course.words.length) * 100);
-          const isCompleted = progressPct === 100;
-          const hasStarted = courseKnownCount > 0;
+      {/* 패스 */}
+      {sections.map(sec => (
+        <section key={sec.course.id}>
+          {/* 코스 배너 */}
+          <div className="mx-5 mt-5 mb-1 rounded-card bg-brand-500 px-5 py-4">
+            <p className="text-2xs font-bold text-white/70">{sec.course.level} · {sec.course.category}</p>
+            <h3 className="text-base font-bold text-white mt-1! break-keep">{sec.course.title}</h3>
+            <p className="text-2xs text-white/80 mt-1.5!">{sec.knownCount} / {sec.course.words.length} 단어</p>
+          </div>
 
-          return (
-            <Card key={course.id} pad="none" className="overflow-hidden">
-
-              {/* 카드 헤더 */}
-              <div
-                onClick={() => navigate('/course/words', { state: { course } })}
-                className="px-5 pt-5 pb-4 cursor-pointer active:opacity-80"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <span
-                    className="text-2xs font-medium px-2.5 py-1 rounded-full text-[var(--color-ink-3)]"
-                    style={{ backgroundColor: 'var(--color-surface)' }}
+          {sec.nodes.map((node, k) => {
+            const isFocus = node.id === focusId;
+            return (
+              <div key={node.id} className="relative" style={{ height: ROW }}>
+                {k > 0 && (
+                  <svg
+                    aria-hidden
+                    width={SPAN * 2}
+                    height={ROW}
+                    className="absolute pointer-events-none"
+                    style={{ left: `calc(50% - ${SPAN}px)`, top: -ROW / 2 }}
                   >
-                    {course.level}
-                  </span>
-                  {isCompleted && (
-                    <span className="flex items-center gap-1 text-2xs font-bold text-brand-500">
-                      <CheckCircle size={12} /> 완료
-                    </span>
-                  )}
-                  {!isCompleted && hasStarted && (
-                    <span className="text-2xs font-bold text-brand-500">{progressPct}%</span>
-                  )}
-                </div>
-
-                <h3 className="text-[15px] font-bold leading-tight mb-1! text-[var(--color-ink)]">
-                  {course.title}
-                </h3>
-                <p className="text-xs text-[var(--color-ink-4)]">
-                  {course.description}
-                </p>
-              </div>
-
-              {/* 진행 바 + 버튼 */}
-              <div className="px-5 pt-4 pb-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="flex-1 bg-[var(--color-surface)] rounded-full h-1.5 overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-700 ${isCompleted ? 'bg-brand-500' : 'bg-brand-300'}`}
-                      style={{ width: `${progressPct}%` }}
+                    <path
+                      d={connectorD(nodeOffsetX(k - 1), nodeOffsetX(k))}
+                      fill="none"
+                      strokeWidth={6}
+                      strokeLinecap="round"
+                      strokeDasharray="1 14"
+                      stroke={node.state === 'done' ? 'var(--color-brand-300)' : 'var(--color-ink-4)'}
                     />
-                  </div>
-                  <span className="text-2xs font-bold text-[var(--color-ink-3)] shrink-0 w-8 text-right">
-                    {courseKnownCount}/{course.words.length}
-                  </span>
-                </div>
+                  </svg>
+                )}
 
-                <button
-                  onClick={() => { logClick('course_start', { course_id: course.id, title: course.title }); navigate('/word-card', { state: { words: [...course.words].sort((a, b) => a.difficulty - b.difficulty), index: 0, backPath: '/course', autoAdvance: true } }); }}
-                  className={`w-full flex items-center justify-center gap-1.5 py-3.5 rounded-button text-xs font-bold transition-colors
-                    ${isCompleted
-                      ? 'bg-brand-500/10 text-brand-400 border border-brand-500/20 active:bg-brand-500/20'
-                      : hasStarted
-                        ? 'bg-brand-500 text-white active:bg-brand-600'
-                        : 'bg-[var(--color-line)] text-[var(--color-ink-2)] active:opacity-80'
-                    }`}
-                >
-                  <Play size={14} />
-                  {isCompleted ? '다시 복습하기' : hasStarted ? '이어서 학습하기' : '코스 시작하기'}
-                </button>
+                {isFocus && (
+                  <>
+                    <div
+                      className="absolute animate-bounce-up rounded-chip bg-[var(--color-card)] px-3 py-1.5 shadow-lg"
+                      style={{ top: -14, left: `calc(50% + ${nodeOffsetX(k)}px)`, marginLeft: -26 }}
+                    >
+                      <span className="text-2xs font-bold text-brand-500">시작</span>
+                    </div>
+                    <span
+                      className="absolute text-4xl pointer-events-none select-none"
+                      style={{ top: (ROW - NODE) / 2 + 6, left: `calc(50% + ${nodeOffsetX(k) + 56}px)` }}
+                    >
+                      {getGrowthStage(points).emoji}
+                    </span>
+                  </>
+                )}
+
+                <NodeCircle
+                  node={node}
+                  index={k}
+                  isFocus={isFocus}
+                  nodeRef={isFocus ? focusRef : undefined}
+                  onTap={() => handleNodeTap(node, k, sec.knownCount)}
+                />
               </div>
-            </Card>
-          );
-        })}
-        <Spacing size={8} />
-      </div>
+            );
+          })}
+        </section>
+      ))}
     </div>
   );
 };

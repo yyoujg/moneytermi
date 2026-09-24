@@ -24,7 +24,9 @@ const QuizScreen = () => {
     return (id: number) => map.get(id);
   }, [courses]);
 
-  const passedQueue: Word[] = (location.state as { quizQueue?: Word[] } | null)?.quizQueue ?? [];
+  const navState = location.state as { quizQueue?: Word[]; backPath?: string } | null;
+  const passedQueue: Word[] = navState?.quizQueue ?? [];
+  const backPath = navState?.backPath ?? '/home';
   const quizQueue: Word[] = passedQueue.length > 0
     ? passedQueue
     : [...knownWords].sort(() => Math.random() - 0.5).slice(0, 10);
@@ -117,10 +119,10 @@ const QuizScreen = () => {
 
         <div className="px-5 pb-12 flex flex-col gap-3">
           <button
-            onClick={() => navigate('/home')}
+            onClick={() => navigate(backPath)}
             className="w-full py-4 rounded-button text-sm font-bold text-white bg-brand-500 active:opacity-90"
           >
-            홈으로
+            {backPath === '/course' ? '코스로' : '홈으로'}
           </button>
         </div>
       </div>

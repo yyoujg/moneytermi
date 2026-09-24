@@ -17,7 +17,7 @@ const NavBar = () => {
   const insets = useSafeAreaInsets();
   const wrapRef = useRef<HTMLDivElement>(null);
 
-  const HIDDEN_PATHS = ['/quiz', '/course/words', '/word-card', '/league/rules'];
+  const HIDDEN_PATHS = ['/quiz', '/word-card', '/league/rules'];
   const hidden = HIDDEN_PATHS.some(p => pathname.startsWith(p));
 
   // NavBar가 화면 하단에서 차지하는 높이(알약 + 하단 여백 + safe area)를 --nav-height로 공개.
