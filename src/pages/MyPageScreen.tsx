@@ -97,6 +97,10 @@ const MyPageScreen = () => {
               <p className="font-bold text-[var(--color-ink)] text-base">{user?.nickname ?? DEFAULT_NICKNAME}</p>
               <Pencil size={13} className="text-[var(--color-ink-4)] group-active:text-brand-400" />
             </button>
+            <div className="flex items-center gap-1 mt-1">
+              <span className="text-sm">{stage.emoji}</span>
+              <span className="text-xs font-bold text-[var(--color-ink-3)]">{stage.name}</span>
+            </div>
             {isGuest && (
               <span className="inline-flex items-center gap-1 mt-1.5 text-3xs font-medium text-[var(--color-ink-4)] px-2 py-0.5 rounded-full" style={{ backgroundColor: 'var(--color-surface)' }}>
                 <ShieldAlert size={10} className="text-[var(--color-ink-4)]" /> 게스트 계정
@@ -105,12 +109,11 @@ const MyPageScreen = () => {
           </div>
         </div>
 
-        {/* 한눈에 보기 — 연속 학습일 / 현재 단계 / 포인트 */}
+        {/* 한눈에 보기 — 연속 학습일 / XP / 포인트 / 학습한 단어 */}
         <Card tone="surface" pad="md">
           <div className="flex items-stretch">
             {[
               { icon: <Flame size={14} className="text-brand-500 fill-current" />, label: '연속 학습', value: streak, unit: '일' },
-              { icon: <span className="text-sm leading-none">{stage.emoji}</span>, label: '현재 단계', value: stage.name, unit: '' },
               { icon: <Sparkles size={14} className="text-brand-500" />, label: 'XP', value: xp.toLocaleString(), unit: '' },
               { icon: <Zap size={14} className="text-brand-500 fill-current" />, label: '포인트', value: points.toLocaleString(), unit: 'P' },
               { icon: <BookOpen size={14} className="text-brand-500" />, label: '학습한 단어', value: knownWords.length, unit: '개' },
