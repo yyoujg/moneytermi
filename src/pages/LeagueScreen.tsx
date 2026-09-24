@@ -8,6 +8,7 @@ import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import { logClick } from '../lib/analytics';
 import { shareTossLink } from '../lib/share';
+import { daysUntilReset } from '../lib/league';
 import { Card } from '../components/ui/Card';
 
 type Row = { rank: number; nickname: string; emoji: string; points: number; is_me: boolean };
@@ -62,9 +63,10 @@ const LeagueScreen = () => {
         <Card tone="surface" pad="lg" className="flex flex-col items-center text-center">
           <div className="text-6xl mb-2">{stage.emoji}</div>
           <p className="text-lg font-bold text-[var(--color-ink)] mb-1!">{stage.name}</p>
-          <p className="text-xs text-[var(--color-ink-3)] mb-3!">
-            {mine?.rank ? `${mine.total}명 중 ${mine.rank}위` : '순위는 포인트를 모으면 생겨요'}
+          <p className="text-xs text-[var(--color-ink-3)] mb-1!">
+            {mine?.rank ? `${mine.total}명 중 ${mine.rank}위` : '이번 주 포인트를 모으면 순위에 올라요'}
           </p>
+          <p className="text-2xs font-medium text-brand-500 mb-3!">이번 주 {mine?.points?.toLocaleString() ?? 0}P · {daysUntilReset()}일 남음</p>
           <div className="w-full bg-[var(--color-card)] rounded-full h-1.5 overflow-hidden mb-1.5">
             <div
               className="bg-brand-500 h-full rounded-full transition-all duration-700"
@@ -103,7 +105,10 @@ const LeagueScreen = () => {
 
       {/* 랭킹 */}
       <div className="px-5 pt-5">
-        <p className="text-sm font-bold text-[var(--color-ink-2)] mb-3!">전체 순위</p>
+        <div className="flex items-baseline justify-between mb-3">
+          <p className="text-sm font-bold text-[var(--color-ink-2)]">이번 주 순위</p>
+          <span className="text-2xs text-[var(--color-ink-4)]">매주 월요일 초기화 · {daysUntilReset()}일 남음</span>
+        </div>
 
         {failed && (
           <Card pad="lg">
@@ -121,7 +126,7 @@ const LeagueScreen = () => {
 
         {!failed && rows?.length === 0 && (
           <Card pad="lg">
-            <p className="text-sm text-[var(--color-ink-3)] text-center">아직 순위에 오른 사람이 없어요.<br />먼저 학습해서 1위를 차지해보세요!</p>
+            <p className="text-sm text-[var(--color-ink-3)] text-center">이번 주엔 아직 아무도 없어요.<br />먼저 학습해서 1위를 차지해보세요!</p>
           </Card>
         )}
 
