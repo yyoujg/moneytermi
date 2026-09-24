@@ -153,6 +153,7 @@ const NicknameGate = () => {
 };
 
 const Layout = () => {
+  const { pathname } = useLocation();
   const { ready } = useAppContext();
 
   if (!ready) return <LoadingScreen />;
@@ -162,6 +163,8 @@ const Layout = () => {
       <NicknameGate />
       <TopBar />
       <React.Suspense fallback={<LoadingScreen />}>
+      {/* 경로가 바뀌면 래퍼가 다시 마운트되며 밀려 들어온다 */}
+      <div key={pathname} className="flex-1 min-h-0 flex flex-col anim-slide-in">
       <Routes>
         <Route path="/" element={<Navigate to={resolveLandingTarget()} replace />} />
         <Route path="/home" element={<HomeScreen />} />
@@ -173,6 +176,7 @@ const Layout = () => {
         <Route path="/league/rules" element={<LeagueRulesScreen />} />
         <Route path="/quiz" element={<QuizScreen />} />
       </Routes>
+      </div>
       </React.Suspense>
       <NavBar />
     </div>

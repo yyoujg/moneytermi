@@ -366,6 +366,7 @@ const WordCardScreen = () => {
 
       {/* 스크롤 영역 */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden pt-2">
+        <div key={word.id} className="anim-slide-in">
         <WordCard
           word={word}
           isKnown={isKnown}
@@ -382,6 +383,7 @@ const WordCardScreen = () => {
           keyword={word.word}
           allWords={allWords}
         />
+        </div>
       </div>
 
       {/* 하단 네비게이션 */}

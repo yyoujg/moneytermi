@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { ChevronRight, RotateCcw } from 'lucide-react';
+import { ChevronRight, RotateCcw, Flame, ArrowRight } from 'lucide-react';
 import { Badge } from '@toss/tds-mobile';
 import { useNavigate } from 'react-router-dom';
 import { DEFAULT_NICKNAME, MISSION_XP, getGrowthStage } from '../constants';
@@ -7,7 +7,8 @@ import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
 import { msUntilNextSlot } from '../lib/date';
 import { useAuth } from '../hooks/useAuth';
-import { WeeklyBarChart } from '../components/home/WeeklyBarChart';
+import { WeekStrip } from '../components/home/WeekStrip';
+import { calcStreak } from '../lib/streak';
 import { Card } from '../components/ui/Card';
 
 const HomeScreen = () => {
@@ -25,24 +26,46 @@ const HomeScreen = () => {
   }, [hydrated, dueQueue.length]);
 
   const missionList = Object.values(missions).sort((a, b) => a.sortOrder - b.sortOrder);
+  const streak = calcStreak(attendanceDates);
   const resetLabel = `${Math.ceil(msUntilNextSlot() / 3600000)}시간 뒤 초기화`;
   const stage = getGrowthStage(xp);
 
   return (
     <div className="flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden" style={{ backgroundColor: 'var(--color-canvas)' }}>
 
-      {/* 헤더 */}
+      {/* 히어로: 인사 · 티어 · 이번 주 출석 스트립 */}
       <div className="pt-4 px-5 pb-4">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <div className="inline-flex items-center px-2 py-1 rounded mb-2" style={{ backgroundColor: 'var(--color-surface)' }}>
-              <span className="text-2xs font-medium text-[var(--color-ink-4)]">{stage.emoji} {stage.name}</span>
+        <div
+          className="rounded-card px-5 pt-5 pb-4 text-white shadow-lg anim-fade-up"
+          style={{ background: 'linear-gradient(135deg, #f97316 0%, #fb923c 100%)' }}
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 flex items-center justify-center text-2xl shrink-0" style={{ borderRadius: 9999, background: 'rgba(255,255,255,0.22)' }}>
+              {myEmoji}
             </div>
-            <h1 className="text-xl font-bold text-[var(--color-ink)]">안녕하세요, {user?.nickname ?? DEFAULT_NICKNAME}님</h1>
+            <div className="min-w-0 flex-1">
+              <p className="text-base font-bold truncate">안녕하세요, {user?.nickname ?? DEFAULT_NICKNAME}님</p>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="inline-flex items-center gap-1 text-2xs font-bold px-2 py-0.5" style={{ borderRadius: 9999, background: 'rgba(255,255,255,0.22)' }}>
+                  {stage.emoji} {stage.name}
+                </span>
+                <span className="inline-flex items-center gap-0.5 text-2xs font-bold">
+                  <Flame size={12} className="fill-current" />{streak}일 연속
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="w-10 h-10 bg-[var(--color-surface)] rounded-full flex items-center justify-center overflow-hidden shrink-0">
-            <span className="text-lg">{myEmoji}</span>
-          </div>
+
+          {isNewUser ? (
+            <button
+              onClick={() => navigate('/course')}
+              className="w-full flex items-center justify-between rounded-button bg-white px-4 py-3 text-sm font-bold text-brand-500 active:opacity-90"
+            >
+              오늘 첫 단어를 배워봐요 <ArrowRight size={16} />
+            </button>
+          ) : (
+            <WeekStrip attendanceDates={attendanceDates} />
+          )}
         </div>
 
         {/* 오늘 복습 카드 */}
@@ -51,7 +74,8 @@ const HomeScreen = () => {
             pad="md"
             role="button"
             onClick={() => { logClick('review_start', { count: dueQueue.length }); navigate('/review'); }}
-            className="mb-4 flex items-center justify-between active:opacity-80 cursor-pointer"
+            className="mt-4 flex items-center justify-between active:opacity-80 cursor-pointer anim-fade-up"
+            style={{ '--i': 1 } as React.CSSProperties}
           >
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-full bg-brand-500/10 flex items-center justify-center shrink-0">
@@ -65,21 +89,11 @@ const HomeScreen = () => {
             <ChevronRight size={16} className="text-[var(--color-ink-4)]" />
           </Card>
         )}
-
-        {/* 주간 바 차트 */}
-        {!isNewUser && (
-        <Card pad="none" className="px-5 pt-4 pb-4">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-bold text-[var(--color-ink)]">이번 주</p>
-          </div>
-          <WeeklyBarChart attendanceDates={attendanceDates} />
-        </Card>
-        )}
       </div>
 
       {/* 오늘의 미션 */}
       <div className="px-5 flex flex-col gap-4">
-        <Card pad="lg" className="mb-4">
+        <Card pad="lg" className="mb-4 anim-fade-up">
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-sm font-bold text-[var(--color-ink-2)]">오늘의 미션</h2>
             <span className="text-2xs font-medium text-[var(--color-ink-4)]">{resetLabel}</span>
@@ -89,7 +103,7 @@ const HomeScreen = () => {
             {missionList.map((mission, idx) => {
               const done = mission.current >= mission.target;
               return (
-                <div key={mission.id} className={idx > 0 ? 'pt-3 mt-3 border-t border-[var(--color-line)]' : ''}>
+                <div key={mission.id} className={`anim-fade-up ${idx > 0 ? 'pt-3 mt-3 border-t border-[var(--color-line)]' : ''}`} style={{ '--i': idx } as React.CSSProperties}>
                   <div className="flex items-center justify-between mb-2">
                     <div className="min-w-0">
                       <p className={`text-sm font-bold truncate ${mission.isRewarded ? 'text-[var(--color-ink-4)] line-through' : 'text-[var(--color-ink)]'}`}>
@@ -100,7 +114,7 @@ const HomeScreen = () => {
                     {mission.isRewarded
                       ? <Badge color="elephant" size="small" variant="fill">완료</Badge>
                       : done
-                        ? <button onClick={() => claimReward(mission.id)} className="px-3 py-1.5 rounded-button bg-brand-500 text-white text-xs font-bold active:bg-brand-600 shrink-0">받기</button>
+                        ? <button onClick={() => claimReward(mission.id)} className="anim-attn px-3 py-1.5 rounded-button bg-brand-500 text-white text-xs font-bold active:bg-brand-600 shrink-0">받기</button>
                         : <span className="text-base font-bold text-[var(--color-ink)] shrink-0">{mission.current}<span className="text-xs text-[var(--color-ink-4)]">/{mission.target}</span></span>
                     }
                   </div>

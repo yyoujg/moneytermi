@@ -7,6 +7,7 @@ import { logClick } from '../lib/analytics';
 import { calcStreak } from '../lib/streak';
 import { isRewardedAdEnabled, showRewardedAd } from '../lib/ads';
 import { LESSON_COST, XP_BONUS_POINTS, XP_BONUS_STEP } from '../constants';
+import { useCountUp } from '../hooks/useCountUp';
 
 // 모든 화면 상단 고정 바. 왼쪽 로고, 오른쪽에 아이콘 + 숫자만 나열한다(티어는 마이페이지에만).
 // 아이콘은 마이페이지 요약 카드와 같은 lucide 세트를 쓴다.
@@ -17,6 +18,8 @@ export const TopBar = () => {
 
   const streak = calcStreak(attendanceDates);
   const boostLeft = boostUntil ? boostUntil - now : 0;
+  const xpShown = useCountUp(xp);
+  const pointsShown = useCountUp(points);
 
   // 부스트가 켜져 있는 동안만 1초 타이머. TopBar만 리렌더된다.
   useEffect(() => {
@@ -47,12 +50,12 @@ export const TopBar = () => {
         <span className="text-base font-black tracking-tight text-brand-500">머니터미</span>
 
         <div className="flex items-center gap-3 text-sm font-bold text-[var(--color-ink-2)]">
-          <span className="flex items-center gap-1"><Flame size={15} className="text-brand-500 fill-current" />{streak}</span>
-          <span className="flex items-center gap-1"><Sparkles size={15} className="text-brand-500" />{xp.toLocaleString()}</span>
+          <span className="flex items-center gap-1"><Flame size={15} className="text-brand-500 fill-current" /><span key={streak} className="anim-bump">{streak}</span></span>
+          <span className="flex items-center gap-1"><Sparkles size={15} className="text-brand-500" /><span key={xp} className="anim-bump">{xpShown.toLocaleString()}</span></span>
           <button onClick={() => openShop()} aria-label="포인트 상점" className="flex items-center gap-1 active:opacity-60">
-            <Zap size={15} className="text-brand-500 fill-current" />{points.toLocaleString()}
+            <Zap size={15} className="text-brand-500 fill-current" /><span key={points} className="anim-bump">{pointsShown.toLocaleString()}</span>
           </button>
-          <span className="flex items-center gap-1"><BookOpen size={15} className="text-brand-500" />{knownWords.length}</span>
+          <span className="flex items-center gap-1"><BookOpen size={15} className="text-brand-500" /><span key={knownWords.length} className="anim-bump">{knownWords.length}</span></span>
           {boostLeft > 0 && (
             <span className="text-xs font-bold text-brand-500">
               ×2 {Math.floor(boostLeft / 60000)}:{String(Math.floor((boostLeft % 60000) / 1000)).padStart(2, '0')}

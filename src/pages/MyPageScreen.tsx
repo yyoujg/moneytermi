@@ -85,7 +85,7 @@ const MyPageScreen = () => {
         </div>
 
         {/* 한눈에 보기 — 연속 학습일 / XP / 포인트 / 학습한 단어 */}
-        <Card tone="surface" pad="md">
+        <Card tone="surface" pad="md" className="anim-fade-up">
           <div className="flex items-stretch">
             {[
               { icon: <Flame size={14} className="text-brand-500 fill-current" />, label: '연속 학습', value: streak, unit: '일' },
@@ -117,8 +117,8 @@ const MyPageScreen = () => {
           </div>
           <Card pad="md">
             <div className="grid grid-cols-5 gap-y-4">
-              {badges.map(b => (
-                <div key={b.id} className="flex flex-col items-center gap-1">
+              {badges.map((b, i) => (
+                <div key={b.id} className="flex flex-col items-center gap-1 anim-pop-in" style={{ '--i': i } as React.CSSProperties}>
                   <div
                     className="w-11 h-11 flex items-center justify-center text-xl"
                     style={{

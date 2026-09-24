@@ -24,6 +24,9 @@ const LeagueScreen = () => {
   const [mine, setMine] = useState<MyRank | null>(null);
   const [failed, setFailed] = useState(false);
   const [sheet, setSheet] = useState<'share' | 'rules' | null>(null);
+  // 진행 바를 0에서 실제 값까지 차오르게: 마운트 다음 프레임에 값을 넣는다
+  const [barReady, setBarReady] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setBarReady(true), 80); return () => clearTimeout(t); }, []);
 
   useEffect(() => {
     // current_profile_id()는 x-guest-token 헤더로 나를 찾는다. 기본 클라이언트면 내 순위가 null이다.
@@ -57,8 +60,8 @@ const LeagueScreen = () => {
         </div>
 
         {/* 내 티어 */}
-        <Card tone="surface" pad="lg" className="flex flex-col items-center text-center">
-          <div className="text-6xl mb-2">{stage.emoji}</div>
+        <Card tone="surface" pad="lg" className="flex flex-col items-center text-center anim-fade-up">
+          <div className="text-6xl mb-2 anim-pop-in">{stage.emoji}</div>
           <p className="text-lg font-bold text-[var(--color-ink)] mb-1!">{stage.name}</p>
           <p className="text-xs text-[var(--color-ink-3)] mb-1!">
             {mine?.rank ? `${mine.total}명 중 ${mine.rank}위` : '이번 주 XP를 모으면 순위에 올라요'}
@@ -67,7 +70,7 @@ const LeagueScreen = () => {
           <div className="w-full bg-[var(--color-card)] rounded-full h-1.5 overflow-hidden mb-1.5">
             <div
               className="bg-brand-500 h-full rounded-full transition-all duration-700"
-              style={{ width: `${next === null ? 100 : Math.min(100, Math.round(((xp - stage.minPoints) / (next - stage.minPoints)) * 100))}%` }}
+              style={{ width: barReady ? `${next === null ? 100 : Math.min(100, Math.round(((xp - stage.minPoints) / (next - stage.minPoints)) * 100))}%` : '0%' }}
             />
           </div>
           <p className="text-xs text-[var(--color-ink-4)]">
@@ -132,8 +135,8 @@ const LeagueScreen = () => {
             {rows.map((r, i) => (
               <div
                 key={`${r.rank}-${i}`}
-                className={`flex items-center gap-3 px-4 py-3 ${i < rows.length - 1 ? 'border-b border-[var(--color-line)]' : ''}`}
-                style={r.is_me ? { backgroundColor: 'var(--color-brand-soft)' } : undefined}
+                className={`anim-fade-up flex items-center gap-3 px-4 py-3 ${i < rows.length - 1 ? 'border-b border-[var(--color-line)]' : ''}`}
+                style={{ '--i': i, ...(r.is_me ? { backgroundColor: 'var(--color-brand-soft)' } : {}) } as React.CSSProperties}
               >
                 <span className="w-7 text-center text-sm font-bold text-[var(--color-ink-3)] shrink-0">
                   {r.rank <= 3 ? MEDAL[r.rank - 1] : r.rank}

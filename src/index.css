@@ -56,6 +56,29 @@ button.text-base, input.text-base, select.text-base, textarea.text-base { font-s
 button.text-lg, input.text-lg, select.text-lg, textarea.text-lg { font-size: var(--text-lg) !important; line-height: var(--text-lg--line-height) !important; }
 button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var(--text-xl) !important; line-height: var(--text-xl--line-height) !important; }
 
+/* ── 공용 모션 ──
+   .anim-fade-up  : 아래에서 떠오르며 등장. --i 로 순차 지연(60ms 단위)
+   .anim-pop-in   : 튀어나오듯 등장. --i 로 순차 지연(50ms 단위)
+   .anim-slide-in : 오른쪽에서 밀려 들어옴(화면 전환·카드 교체)
+   .anim-bump     : 값이 바뀔 때 한 번 커졌다 돌아옴(key를 바꿔 재생)
+   .anim-attn     : 눌러야 할 버튼의 잔잔한 파동 */
+@keyframes fade-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes pop-in { 0% { opacity: 0; transform: scale(0.6); } 70% { transform: scale(1.08); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes slide-in { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: none; } }
+@keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.3); } 100% { transform: scale(1); } }
+@keyframes attn { 0%, 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.55); } 70% { box-shadow: 0 0 0 9px rgba(249, 115, 22, 0); } }
+.anim-fade-up  { animation: fade-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: calc(var(--i, 0) * 60ms); }
+.anim-pop-in   { animation: pop-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both; animation-delay: calc(var(--i, 0) * 50ms); }
+.anim-slide-in { animation: slide-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.anim-bump     { display: inline-block; animation: bump 0.35s ease-out; }
+.anim-attn     { animation: attn 1.4s ease-out infinite; }
+/* 누르는 느낌: 모든 활성 버튼이 살짝 눌린다 */
+button:not(:disabled):active { transform: scale(0.97); }
+@media (prefers-reduced-motion: reduce) {
+  .anim-fade-up, .anim-pop-in, .anim-slide-in, .anim-bump, .anim-attn,
+  .animate-node-hop, .animate-node-ground { animation: none !important; }
+}
+
 @keyframes bounce-up {
   0%, 100% { transform: translateY(0); opacity: 0.5; }
   50% { transform: translateY(-4px); opacity: 1; }

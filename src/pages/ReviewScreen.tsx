@@ -176,7 +176,7 @@ const QuizPage = () => {
 
       <div className="flex-1 flex flex-col px-5 py-4">
         {/* 문제 카드 */}
-        <Card pad="lg" className="mb-4 flex-1">
+        <Card key={word.id} pad="lg" className="mb-4 flex-1 anim-slide-in">
           <p className="text-2xs font-medium text-[var(--color-ink-4)] mb-3! tracking-wide uppercase">뜻을 보고 용어를 맞혀보세요</p>
 
           <p className="text-lg font-bold text-[var(--color-ink)] leading-relaxed mb-6!">{maskTerm(word.meaning, word.word)}</p>

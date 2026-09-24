@@ -122,7 +122,7 @@ const CourseScreen = () => {
         return (
         <section key={sec.course.id}>
           {/* 코스 배너 */}
-          <div className="sticky top-4 z-10 mx-5 mt-5 mb-1 rounded-card px-5 py-4 shadow-md" style={{ background: color.face }}>
+          <div className="anim-fade-up sticky top-4 z-10 mx-5 mt-5 mb-1 rounded-card px-5 py-4 shadow-md" style={{ background: color.face }}>
             <p className="text-2xs font-bold text-white/70">{sec.course.level} · 코스 {si + 1}/{sections.length}</p>
             <h3 className="text-base font-bold text-white mt-1! break-keep">{sec.course.title}</h3>
             <p className="text-2xs text-white/80 mt-1.5!">{sec.knownCount} / {sec.course.words.length} 단어</p>
@@ -131,7 +131,7 @@ const CourseScreen = () => {
           {sec.nodes.map((node, k) => {
             const isFocus = node.id === focusId;
             return (
-              <div key={node.id} className="relative" style={{ height: ROW }}>
+              <div key={node.id} className="relative anim-fade-up" style={{ height: ROW, '--i': Math.min(k, 6) } as React.CSSProperties}>
                 {k > 0 && (
                   <svg
                     aria-hidden

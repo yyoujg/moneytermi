@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
 import { useSettings } from '../hooks/useSettings';
+import { useCountUp } from '../hooks/useCountUp';
 import { getGrowthStage } from '../constants';
 import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
 import { requestAppReview } from '../lib/review';
@@ -52,6 +53,7 @@ const QuizScreen = () => {
   const { soundOn, vibrationOn } = useSettings();
 
   const currentWord = quizQueue[currentQuizIndex];
+  const earnedShown = useCountUp(totalEarned);
 
   const quizItem = useMemo(() => {
     if (!currentWord) return null;
@@ -103,19 +105,19 @@ const QuizScreen = () => {
     return (
       <div className="flex h-full flex-col bg-[var(--color-canvas)]">
         <div className="flex-1 flex flex-col items-center justify-center px-8 gap-5">
-          <div className="text-6xl">🎉</div>
-          <div className="text-center">
+          <div className="text-6xl anim-pop-in">🎉</div>
+          <div className="text-center anim-fade-up" style={{ '--i': 1 } as React.CSSProperties}>
             <h2 className="text-2xl font-bold text-[var(--color-ink)] mb-1!">퀴즈 완료!</h2>
             <p className="text-sm text-[var(--color-ink-4)]">{quizQueue.length}문제 완료</p>
           </div>
 
           {/* 결과 카드 */}
-          <Card pad="lg" className="w-full flex flex-col gap-4">
+          <Card pad="lg" className="w-full flex flex-col gap-4 anim-fade-up" style={{ '--i': 2 } as React.CSSProperties}>
             <div className="flex justify-between items-center">
               <span className="text-sm text-[var(--color-ink-4)]">획득 포인트</span>
               <div className="flex items-center gap-1.5">
                 <Zap size={14} className="text-brand-500 fill-current" />
-                <span className="text-xl font-bold text-brand-500">+{totalEarned}P</span>
+                <span className="text-xl font-bold text-brand-500">+{earnedShown}P</span>
               </div>
             </div>
             <div className="h-px bg-[var(--color-line)]" />
@@ -271,7 +273,7 @@ const QuizScreen = () => {
         )}
 
         {/* 문제 카드 */}
-        <div className={`rounded-card p-5 flex-1 flex flex-col justify-center gap-4
+        <div key={currentQuizIndex} className={`anim-slide-in rounded-card p-5 flex-1 flex flex-col justify-center gap-4
           ${status === 'correct' ? 'flash-correct ring-2 ring-success-500/40' : 'bg-[var(--color-card)]'}
           ${status === 'wrong' ? 'bg-[var(--color-card)] ring-2 ring-danger-500/30' : ''}
           ${shake ? 'shake' : ''}
@@ -321,7 +323,8 @@ const QuizScreen = () => {
               <button
                 key={`${i}-${opt.answer}`}
                 onClick={() => handleSelect(opt)}
-                className={`relative py-4 px-4 pr-9 rounded-card text-sm font-bold text-left break-keep transition-all duration-150 ${optionStyle}`}
+                className={`anim-fade-up relative py-4 px-4 pr-9 rounded-card text-sm font-bold text-left break-keep transition-all duration-150 ${optionStyle}`}
+                style={{ '--i': i + 1 } as React.CSSProperties}
               >
                 {opt.label}
                 {status !== 'idle' && isCorrectOption && (
