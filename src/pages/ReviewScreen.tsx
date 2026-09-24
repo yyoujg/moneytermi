@@ -27,7 +27,7 @@ const shuffle = <T,>(arr: T[]): T[] => {
 
 const QuizPage = () => {
   const navigate = useNavigate();
-  const { points, dueQueue, submitQuizAnswer, recordReview } = useAppContext();
+  const { points, dueQueue, knownWords, submitQuizAnswer, recordReview } = useAppContext();
   const { soundOn, vibrationOn } = useSettings();
 
   const [queue, setQueue] = useState<Word[]>([]);
@@ -104,16 +104,20 @@ const QuizPage = () => {
   };
 
   if (isEmpty) {
+    // 아직 배운 단어가 없으면 '완료'가 아니라 '시작 전'이다
+    const nothingLearned = knownWords.length === 0;
     return (
       <div className="flex flex-col h-full bg-[var(--color-canvas)] items-center justify-center p-6 pb-nav">
-        <div className="w-20 h-20 bg-brand-500/10 rounded-full flex items-center justify-center text-4xl mb-4">✅</div>
-        <h2 className="text-xl font-bold text-[var(--color-ink)] mb-2!">오늘 복습 완료</h2>
-        <p className="text-sm text-[var(--color-ink-3)] mb-16!">지금 복습할 단어가 없어요</p>
+        <div className="w-20 h-20 bg-brand-500/10 rounded-full flex items-center justify-center text-4xl mb-4">{nothingLearned ? '📖' : '✅'}</div>
+        <h2 className="text-xl font-bold text-[var(--color-ink)] mb-2!">{nothingLearned ? '복습할 단어가 아직 없어요' : '오늘 복습 완료'}</h2>
+        <p className="text-sm text-[var(--color-ink-3)] mb-16! text-center break-keep">
+          {nothingLearned ? '단어를 배우면 다음 날부터 복습이 열려요' : '지금 복습할 단어가 없어요'}
+        </p>
         <button
-          onClick={() => navigate('/home')}
+          onClick={() => navigate(nothingLearned ? '/course' : '/home')}
           className="w-full max-w-sm py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90"
         >
-          퀘스트로
+          {nothingLearned ? '학습하러 가기' : '퀘스트로'}
         </button>
       </div>
     );
