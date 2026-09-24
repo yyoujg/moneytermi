@@ -1,10 +1,11 @@
-import React, { useMemo, useRef, useLayoutEffect } from 'react';
+import React, { useMemo, useRef, useLayoutEffect, useEffect, useState } from 'react';
 import { BookOpen, Check, Lock, PenLine, RotateCcw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
 import { feedbackTap } from '../lib/feedback';
 import { LESSON_COST } from '../constants';
+import { loadDoneNodes } from '../lib/pathProgress';
 import { useSettings } from '../hooks/useSettings';
 import { buildPath, connectorD, NODE, nodeOffsetX, ROW, SPAN, sectionColor, type PathNode } from '../lib/path';
 
@@ -22,9 +23,10 @@ const NodeCircle = ({ node, index, color, isFocus, onTap, nodeRef }: {
   const done = node.state === 'done';
   // 잠긴 노드도 자기 색을 알파로 흐리게 보여준다. 전부 회색이면 팔레트가 보이지 않는다.
   const outlined = node.type === 'quiz' || node.type === 'review';
+  // 퀴즈·복습 노드는 테두리만 있는 모양이지만, 끝낸 뒤에는 레슨처럼 색을 채워 체크가 보이게 한다
   const face = locked
     ? `${color.face}33`
-    : outlined
+    : outlined && !done
       ? 'var(--color-card)'
       : color.face;
   const shadow = locked ? `${color.shadow}33` : color.shadow;
@@ -46,7 +48,7 @@ const NodeCircle = ({ node, index, color, isFocus, onTap, nodeRef }: {
         borderRadius: 9999,
         background: face,
         boxShadow: `0 5px 0 ${shadow}${isFocus ? `, 0 0 0 6px ${color.face}33` : ''}`,
-        border: outlined && !locked ? `2px solid ${color.face}` : 'none',
+        border: outlined && !locked && !done ? `2px solid ${color.face}` : 'none',
       }}
     >
       {locked
@@ -66,6 +68,9 @@ const CourseScreen = () => {
   const navigate = useNavigate();
   const { hydrated, knownIds, courses, points, spendPoints, openShop } = useAppContext();
   const { vibrationOn } = useSettings();
+  // 이 기기에서 끝낸 퀴즈·복습 노드. 화면에 돌아올 때마다 다시 읽는다(퀴즈 끝내고 돌아온 직후 반영).
+  const [doneNodes, setDoneNodes] = useState<Set<string>>(new Set());
+  useEffect(() => { loadDoneNodes().then(setDoneNodes); }, []);
 
   const sections = useMemo(() => buildPath(courses, knownIds), [courses, knownIds]);
 
@@ -98,7 +103,7 @@ const CourseScreen = () => {
       const pool = learned.length > 0 ? learned : node.words;
       const size = node.type === 'review' ? 10 : 5;
       const queue = [...pool].sort(() => Math.random() - 0.5).slice(0, size);
-      navigate('/quiz', { state: { quizQueue: queue, backPath: '/course' } });
+      navigate('/quiz', { state: { quizQueue: queue, backPath: '/course', nodeId: node.id } });
       return;
     }
 
@@ -165,7 +170,7 @@ const CourseScreen = () => {
                 )}
 
                 <NodeCircle
-                  node={node}
+                  node={doneNodes.has(node.id) && node.state === 'available' ? { ...node, state: 'done' } : node}
                   index={k}
                   color={color}
                   isFocus={isFocus}

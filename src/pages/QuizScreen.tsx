@@ -5,6 +5,7 @@ import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
 import { useSettings } from '../hooks/useSettings';
 import { useCountUp } from '../hooks/useCountUp';
+import { markNodeDone } from '../lib/pathProgress';
 import { getGrowthStage } from '../constants';
 import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
 import { requestAppReview } from '../lib/review';
@@ -26,7 +27,7 @@ const QuizScreen = () => {
     return (id: number) => map.get(id);
   }, [courses]);
 
-  const navState = location.state as { quizQueue?: Word[]; backPath?: string } | null;
+  const navState = location.state as { quizQueue?: Word[]; backPath?: string; nodeId?: string } | null;
   const passedQueue: Word[] = navState?.quizQueue ?? [];
   const backPath = navState?.backPath ?? '/home';
   // state 없이 진입하면 아는 단어 10개를 한 번만 섞는다. 렌더마다 섞으면 문제가 바뀐다.
@@ -73,7 +74,8 @@ const QuizScreen = () => {
   const finished = quizQueue.length > 0 && currentQuizIndex >= quizQueue.length;
   useEffect(() => {
     if (finished) {
-      logClick('quiz_complete', { mode: 'quiz', total: quizQueue.length, correct: correctCount });
+      logClick('quiz_complete', { mode: 'quiz', total: quizQueue.length, correct: correctCount, node_id: navState?.nodeId });
+      if (navState?.nodeId) markNodeDone(navState.nodeId);   // 패스의 퀴즈·복습 노드를 완료 표시
       requestAppReview();
     }
   }, [finished]);
