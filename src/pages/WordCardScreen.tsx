@@ -37,44 +37,67 @@ const Highlight = ({ text, keyword }: { text: string; keyword: string }) => {
 };
 
 // ── 단어 카드 본문 ────────────────────────────────────────────────
+// 단어 하나를 4단계로 나눠 본다: 뜻 → 자세히 알아보기 → 뉴스 → 관련 용어 (내용이 없는 단계는 건너뛴다)
+type WordStep = 'meaning' | 'detail' | 'news' | 'related';
+const STEP_LABEL: Record<WordStep, string> = { meaning: '뜻', detail: '자세히', news: '뉴스', related: '관련 용어' };
+
+// 자세히 알아보기 본문(요약과 겹치는 첫 문장 제외)과 유효한 관련 용어
+const wordExtras = (word: Word, allWords: Word[]) => {
+  // 연관검색어는 '주가지수' 같은 기본형으로 적혀 있고 단어는 '주가지수선물거래(…)'처럼 긴 경우가 있어 기본형으로도 맞춘다.
+  const baseOf = (w: string) => w.split(/[(/;]/)[0].trim();
+  const detail = word.detailedMeaning.startsWith(word.meaning)
+    ? word.detailedMeaning.slice(word.meaning.length).trim()
+    : word.detailedMeaning;
+  const related = (word.relatedWords ?? [])
+    .map(rw => allWords.find(w => w.word === rw)?.word ?? allWords.find(w => baseOf(w.word) === baseOf(rw))?.word)
+    .filter((w, i, arr): w is string => !!w && w !== word.word && arr.indexOf(w) === i);
+  return { detail, related };
+};
+
+// 본문이 500자 안팎의 한 덩어리라 문장 2개씩 문단으로 나눈다
+const toParagraphs = (text: string) => {
+  const sentences = text.split(/(?<=[.!?])\s+/);
+  const out: string[] = [];
+  for (let i = 0; i < sentences.length; i += 2) out.push(sentences.slice(i, i + 2).join(' '));
+  return out;
+};
+
 const WordCard = ({
   word,
+  step,
+  detail,
+  validRelated,
   isKnown,
   onToggleKnown,
   onRelatedClick,
   newsItems,
   newsLoading,
   keyword,
-  allWords,
 }: {
   word: Word;
+  step: WordStep;
+  detail: string;
+  validRelated: string[];
   isKnown: boolean;
   onToggleKnown?: () => void;
   onRelatedClick: (name: string) => void;
   newsItems: NaverNewsItem[];
   newsLoading: boolean;
   keyword: string;
-  allWords: Word[];
 }) => {
-  // 연관검색어는 '주가지수' 같은 기본형으로 적혀 있고 단어는 '주가지수선물거래(…)'처럼 긴 경우가 있어 기본형으로도 맞춘다.
-  const baseOf = (w: string) => w.split(/[(/;]/)[0].trim();
-  const detail = word.detailedMeaning.startsWith(word.meaning)
-    ? word.detailedMeaning.slice(word.meaning.length).trim()
-    : word.detailedMeaning;
-  const validRelated = (word.relatedWords ?? [])
-    .map(rw => allWords.find(w => w.word === rw)?.word ?? allWords.find(w => baseOf(w.word) === baseOf(rw))?.word)
-    .filter((w, i, arr): w is string => !!w && w !== word.word && arr.indexOf(w) === i);
   return (
   <div className="flex flex-col gap-3 px-5 pb-6">
 
-    {/* 단어 헤더 */}
-    <Card pad="lg">
+    {/* 단어 헤더 — 뜻 단계에서는 뜻까지, 나머지 단계에서는 제목만 작게 */}
+    <Card pad={step === 'meaning' ? 'lg' : 'md'}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1">
-          <h1 className="text-[28px] font-black text-[var(--color-ink)] leading-[1.2] tracking-[-0.03em] break-keep mb-2!">
+          <h1 className={`font-black text-[var(--color-ink)] tracking-[-0.03em] break-keep ${step === 'meaning' ? 'text-[28px] leading-[1.2] mb-2!' : 'text-lg leading-tight'}`}>
             {word.word}
           </h1>
-          <p className="text-sm text-[var(--color-ink-2)] font-medium break-keep leading-[1.7] tracking-[-0.01em]">{word.meaning}</p>
+          {step === 'meaning' && (
+            <p className="text-sm text-[var(--color-ink-2)] font-medium break-keep leading-[1.7] tracking-[-0.01em]">{word.meaning}</p>
+          )}
         </div>
         {onToggleKnown && (
           <button
@@ -92,14 +115,19 @@ const WordCard = ({
     </Card>
 
     {/* 자세히 알아보기 — 요약은 본문 첫 문장이라 그 부분은 빼고 이어지는 내용만 */}
-    {detail && (
+    {step === 'detail' && detail && (
       <Card pad="none" className="px-5 pt-4 pb-5 flex flex-col gap-2.5">
         <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><BookOpen size={13} />자세히 알아보기</p>
-        <p className="text-sm leading-[1.8] text-[var(--color-ink-2)] font-medium break-keep tracking-[-0.01em]">{detail}</p>
+        <div className="flex flex-col gap-3">
+          {toParagraphs(detail).map((para, i) => (
+            <p key={i} className="text-sm leading-[1.8] text-[var(--color-ink-2)] font-medium break-keep tracking-[-0.01em]">{para}</p>
+          ))}
+        </div>
       </Card>
     )}
 
     {/* 실시간 뉴스 */}
+    {step === 'news' && (
     <Card pad="none" className="px-5 pt-4 pb-5 flex flex-col gap-2.5">
       <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><Newspaper size={13} />실시간 뉴스 (출처: 네이버 뉴스)</p>
       {newsLoading ? (
@@ -142,9 +170,10 @@ const WordCard = ({
         <p className="text-[13px] text-[var(--color-ink-4)]">관련 뉴스를 찾을 수 없어요</p>
       )}
     </Card>
+    )}
 
     {/* 관련 용어 */}
-    {validRelated.length > 0 && (
+    {step === 'related' && validRelated.length > 0 && (
       <Card pad="none" className="px-5 py-4 flex flex-col gap-2.5">
         <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><Link2 size={13} />관련 용어</p>
         <div className="flex flex-col">
@@ -199,10 +228,10 @@ const WordCardScreen = () => {
   const autoAdvance = state?.autoAdvance ?? false;
 
   const [wordIndex, setWordIndex] = React.useState(state?.index ?? 0);
-  // 단어 하나를 끝냈을 때 하단에 뜨는 "좋아요!" 패널. 계속하기를 눌러야 다음으로 간다.
-  const [learned, setLearned] = React.useState<Word | null>(null);
-  useEffect(() => { setLearned(null); }, [wordIndex]);
-  const celebrateLearned = (w: Word) => { feedbackLearned(); setLearned(w); };
+
+  // 단어 안의 단계 (뜻 → 자세히 → 뉴스 → 관련 용어). 단어가 바뀌면 처음부터.
+  const [stepIdx, setStepIdx] = React.useState(0);
+  useEffect(() => { setStepIdx(0); }, [wordIndex]);
   // 관련 용어 클릭처럼 같은 라우트로 다시 navigate하면 재마운트가 없어 index가 이전 값에 머문다.
   useEffect(() => { setWordIndex(state?.index ?? 0); }, [state]);
 
@@ -213,7 +242,7 @@ const WordCardScreen = () => {
   // 단어 변경 시 스크롤 맨 위로
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [wordIndex]);
+  }, [wordIndex, stepIdx]);
 
   // 뉴스 (현재 단어 로드 + 다음 단어 prefetch)
   const { newsItems, newsLoading } = useNews(words, wordIndex);
@@ -298,8 +327,13 @@ const WordCardScreen = () => {
 
   const word = words[wordIndex];
   const isKnown = knownWords.some(w => w.id === word.id);
+  const { detail, related } = wordExtras(word, allWords);
+  const steps: WordStep[] = (['meaning', detail ? 'detail' : null, 'news', related.length ? 'related' : null] as (WordStep | null)[]).filter((x): x is WordStep => !!x);
+  const step = steps[Math.min(stepIdx, steps.length - 1)];
+  const lastStep = stepIdx >= steps.length - 1;
 
   const goNext = () => {
+    if (stepIdx < steps.length - 1) { setStepIdx(i => i + 1); return; }
     if (autoAdvance) {
       if (knownWords.length === 0) {
         logClick('activation_first_card');
@@ -307,19 +341,15 @@ const WordCardScreen = () => {
         claimPromotion().then(amount => { if (amount) claimPromotionReward(amount); });
       }
       setKnownWords(prev => prev.some(w => w.id === word.id) ? prev : [...prev, word]);
-      celebrateLearned(word);   // 다음 단어/완료로 넘어가는 건 패널의 계속하기가 한다
+      feedbackLearned();
+      setWordIndex(i => i + 1);
     } else if (wordIndex < words.length - 1) {
       setWordIndex(i => i + 1);
     }
   };
 
-  // 패널의 계속하기: 레슨이면 다음 단어(마지막이면 완료 화면), 둘러보기면 다음 단어가 있을 때만
-  const continueAfterLearned = () => {
-    setLearned(null);
-    if (autoAdvance || wordIndex < words.length - 1) setWordIndex(i => i + 1);
-  };
-
   const goPrev = () => {
+    if (stepIdx > 0) { setStepIdx(i => i - 1); return; }
     if (wordIndex > 0) setWordIndex(i => i - 1);
   };
 
@@ -381,68 +411,70 @@ const WordCardScreen = () => {
         <span className="text-xs font-bold text-[var(--color-ink-4)] shrink-0">{wordIndex + 1}/{words.length}</span>
       </div>
 
+      {/* 단계 표시: 뜻 · 자세히 · 뉴스 · 관련 용어 */}
+      <div className="px-4 pb-2.5 bg-[var(--color-card)] border-b border-[var(--color-line)] flex gap-1.5">
+        {steps.map((st, i) => (
+          <button
+            key={st}
+            type="button"
+            onClick={() => setStepIdx(i)}
+            aria-current={i === stepIdx ? 'step' : undefined}
+            className={`flex-1 py-1.5 rounded-chip text-2xs font-bold transition-colors ${i === stepIdx ? 'bg-brand-500 text-white' : i < stepIdx ? 'bg-brand-500/15 text-brand-500' : 'bg-[var(--color-surface)] text-[var(--color-ink-4)]'}`}
+          >
+            {STEP_LABEL[st]}
+          </button>
+        ))}
+      </div>
+
       {/* 스크롤 영역 */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden pt-2">
-        <div key={word.id} className="anim-slide-in">
+        <div key={`${word.id}-${step}`} className="anim-slide-in">
         <WordCard
           word={word}
+          step={step}
+          detail={detail}
+          validRelated={related}
           isKnown={isKnown}
           onToggleKnown={autoAdvance ? undefined : () => {
             toggleKnown(word);
-            if (!isKnown) celebrateLearned(word);
+            if (!isKnown) {
+              feedbackLearned();
+              toast.success('알고 있어요!');
+              if (wordIndex < words.length - 1) setWordIndex(i => i + 1);
+            }
           }}
           onRelatedClick={handleRelatedWordClick}
           newsItems={newsItems}
           newsLoading={newsLoading}
           keyword={word.word}
-          allWords={allWords}
         />
         </div>
       </div>
 
-      {/* 단어 완료 패널 — 하단 네비게이션 자리에 대신 뜬다 */}
-      {learned ? (
-        <div key={learned.id} className="anim-slide-up px-5 pt-4 pb-8 flex flex-col gap-3 bg-success-500/15 border-t border-success-500/20">
-          <div className="flex items-center gap-2">
-            <span className="w-7 h-7 flex items-center justify-center bg-success-500 text-white" style={{ borderRadius: 9999 }}>
-              <Check size={16} strokeWidth={3} />
-            </span>
-            <p className="text-lg font-black text-success-400">좋아요!</p>
-          </div>
-          <div>
-            <p className="text-xs font-bold text-success-400 mb-1!">의미</p>
-            <p className="text-sm font-medium text-[var(--color-ink)] leading-relaxed break-keep">{learned.meaning}</p>
-          </div>
-          <button
-            onClick={continueAfterLearned}
-            className="w-full py-4 rounded-button bg-success-500 text-sm font-bold text-white active:opacity-90"
-          >
-            {autoAdvance && wordIndex === words.length - 1 ? '학습 마치기' : '계속하기'}
-          </button>
-        </div>
-      ) : (
+      {/* 하단 네비게이션 */}
       <div className="px-5 pb-8 pt-3 bg-[var(--color-card)] flex gap-3">
         <button
           onClick={goPrev}
-          disabled={wordIndex === 0}
+          disabled={wordIndex === 0 && stepIdx === 0}
           className="flex-1 py-3.5 rounded-button bg-[var(--color-surface)] text-sm font-bold text-[var(--color-ink-2)] disabled:opacity-30 active:opacity-70 flex items-center justify-center gap-1"
         >
           <ChevronLeft size={16} /> 이전
         </button>
         <button
           onClick={goNext}
-          disabled={!autoAdvance && wordIndex === words.length - 1}
+          disabled={!autoAdvance && lastStep && wordIndex === words.length - 1}
           className="flex-[2] py-3.5 rounded-button text-sm font-bold text-white active:opacity-80 flex items-center justify-center gap-1 disabled:opacity-30"
           style={{ backgroundColor: ACCENT }}
         >
-          {autoAdvance
-            ? wordIndex === words.length - 1 ? '완료 🎉' : '다음 단어'
-            : '다음'
+          {!lastStep
+            ? STEP_LABEL[steps[stepIdx + 1]]
+            : autoAdvance
+              ? wordIndex === words.length - 1 ? '완료 🎉' : '다음 단어'
+              : '다음 단어'
           }
-          {!autoAdvance || wordIndex < words.length - 1 ? <ChevronRight size={16} /> : null}
+          {!lastStep || !autoAdvance || wordIndex < words.length - 1 ? <ChevronRight size={16} /> : null}
         </button>
       </div>
-      )}
     </div>
   );
 };
