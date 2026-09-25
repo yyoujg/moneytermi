@@ -52,8 +52,11 @@ const play = (notes: Note[]) => {
 const N = { C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99, A5: 880, B5: 987.77, C6: 1046.5, E6: 1318.5, G6: 1568 };
 
 // ── 이벤트별 조합 ──────────────────────────────────────────────────
-// 버튼 누름: 짧은 틱 (소리 없음 — 전역이라 시끄럽다)
-export function feedbackTick() { haptic('basicMedium'); }
+// 버튼 누름: 짧은 틱 + 아주 짧은 '톡' (전역이라 낮고 짧게)
+export function feedbackTick() {
+  haptic('basicMedium');
+  play([{ f: 1400, to: 900, dur: 0.04, type: 'triangle', vol: 0.08 }]);
+}
 
 // 패스 노드 탭 (레슨 시작·퀴즈 진입): 톡 하는 팝
 export function feedbackNodeTap() {
