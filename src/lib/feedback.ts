@@ -52,18 +52,21 @@ const play = (notes: Note[]) => {
 const N = { C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99, A5: 880, B5: 987.77, C6: 1046.5, E6: 1318.5, G6: 1568 };
 
 // ── 이벤트별 조합 ──────────────────────────────────────────────────
-// 버튼 누름: 짧은 틱 (소리 없음 — 전역이라 시끄럽다)
-export function feedbackTick() { haptic('tickMedium'); }
+// 버튼 누름: 짧은 틱 + 아주 짧은 '톡' (전역이라 낮고 짧게)
+export function feedbackTick() {
+  haptic('basicMedium');
+  play([{ f: 1400, to: 900, dur: 0.04, type: 'triangle', vol: 0.08 }]);
+}
 
 // 패스 노드 탭 (레슨 시작·퀴즈 진입): 톡 하는 팝
 export function feedbackNodeTap() {
-  haptic('basicMedium');
+  hapticSeq([['basicMedium', 0], ['basicMedium', 60]]);
   play([{ f: 620, to: 880, dur: 0.08, vol: 0.14 }]);
 }
 
 // 포인트 소모 (레슨 시작 -10P): 낮게 쓱
 export function feedbackSpend() {
-  haptic('tap');
+  haptic('basicMedium');
   play([{ f: 440, to: 300, dur: 0.14, type: 'triangle', vol: 0.12 }]);
 }
 
@@ -73,27 +76,27 @@ export function feedbackCorrect(_sound?: boolean, _vib?: boolean, combo = 1) {
   if (combo >= 3) notes.push({ f: N.C6, at: 0.18, dur: 0.16 });
   if (combo >= 5) notes.push({ f: N.E6, at: 0.27, dur: 0.2 });
   play(notes);
-  if (combo >= 5) hapticSeq([['confetti', 0], ['success', 150], ['confetti', 300]]);
-  else if (combo >= 3) hapticSeq([['success', 0], ['basicMedium', 160]]);
-  else hapticSeq([['success', 0], ['basicMedium', 140]]);
+  if (combo >= 5) hapticSeq([['confetti', 0], ['success', 150], ['confetti', 300], ['confetti', 450]]);
+  else if (combo >= 3) hapticSeq([['confetti', 0], ['success', 160], ['success', 320]]);
+  else hapticSeq([['success', 0], ['success', 140]]);
 }
 
 // 오답: 낮은 버저 + error
 export function feedbackWrong() {
   play([{ f: 180, dur: 0.26, type: 'sawtooth', vol: 0.16 }]);
-  haptic('error');
+  hapticSeq([['error', 0], ['error', 180]]);
 }
 
 // 단어 하나 학습 완료 ("좋아요!" 패널): 부드러운 딩
 export function feedbackLearned() {
   play([{ f: N.E5, dur: 0.1, vol: 0.18 }, { f: N.A5, at: 0.08, dur: 0.22, vol: 0.18 }]);
-  haptic('softMedium');
+  hapticSeq([['success', 0], ['basicMedium', 120]]);
 }
 
 // 레슨(단어 묶음) 완료: 짧은 팡파르
 export function feedbackLessonComplete() {
   play([{ f: N.C5, dur: 0.12 }, { f: N.E5, at: 0.1, dur: 0.12 }, { f: N.G5, at: 0.2, dur: 0.12 }, { f: N.C6, at: 0.3, dur: 0.3 }]);
-  hapticSeq([['success', 0], ['confetti', 250]]);
+  hapticSeq([['success', 0], ['confetti', 250], ['confetti', 450]]);
 }
 
 // 퀴즈/복습 완료: 정답률 100%면 한 음 더 높이 올라간다
@@ -101,7 +104,7 @@ export function feedbackQuizComplete(perfect: boolean) {
   const notes: Note[] = [{ f: N.G5, dur: 0.1 }, { f: N.C6, at: 0.1, dur: 0.14 }, { f: N.E6, at: 0.22, dur: 0.3 }];
   if (perfect) notes.push({ f: N.G6, at: 0.36, dur: 0.4, vol: 0.2 });
   play(notes);
-  hapticSeq(perfect ? [['confetti', 0], ['success', 200], ['confetti', 420]] : [['success', 0], ['basicMedium', 200]]);
+  hapticSeq(perfect ? [['confetti', 0], ['success', 200], ['confetti', 420], ['confetti', 620]] : [['success', 0], ['success', 200], ['confetti', 400]]);
 }
 
 // 티어 승급: 웅장하게
@@ -113,19 +116,19 @@ export function feedbackTierUp() {
 // 보상 수령 (미션·광고): 동전 두 개
 export function feedbackClaim() {
   play([{ f: N.B5, dur: 0.07, type: 'square', vol: 0.09 }, { f: N.E6, at: 0.07, dur: 0.2, type: 'square', vol: 0.09 }]);
-  hapticSeq([['success', 0], ['tap', 120]]);
+  hapticSeq([['success', 0], ['success', 120]]);
 }
 
 // 부스트 구매: 위로 쓸어 올라가는 파워업
 export function feedbackBoost() {
   play([{ f: 300, to: 1200, dur: 0.45, type: 'triangle', vol: 0.16 }, { f: N.E6, at: 0.4, dur: 0.25, vol: 0.14 }]);
-  hapticSeq([['wiggle', 0], ['success', 350]]);
+  hapticSeq([['wiggle', 0], ['success', 350], ['confetti', 500]]);
 }
 
 // 연속 학습 축하 (평소): 차임
 export function feedbackStreak() {
   play([{ f: N.C5, dur: 0.3, vol: 0.14 }, { f: N.E5, at: 0.06, dur: 0.3, vol: 0.14 }, { f: N.G5, at: 0.12, dur: 0.4, vol: 0.14 }]);
-  haptic('success');
+  hapticSeq([['success', 0], ['confetti', 200]]);
 }
 
 // 마일스톤(7·14·30일…): 팡파르 + 축포 연타
@@ -143,5 +146,5 @@ export function feedbackBadge() {
 // 실패 알림 (보상 수령 실패 등): 짧고 낮게
 export function feedbackError() {
   play([{ f: 220, dur: 0.12, type: 'sawtooth', vol: 0.1 }, { f: 180, at: 0.12, dur: 0.16, type: 'sawtooth', vol: 0.1 }]);
-  haptic('error');
+  hapticSeq([['error', 0], ['error', 160]]);
 }
