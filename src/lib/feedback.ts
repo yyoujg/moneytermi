@@ -31,7 +31,7 @@ type Note = { f: number; at?: number; dur?: number; type?: OscillatorType; vol?:
 const play = (notes: Note[]) => {
   if (!soundPrefs.enabled) return;
   if (import.meta.env.DEV) (window as unknown as { __lastSfx?: number[] }).__lastSfx = notes.map(n => n.f);
-  const c = audio(); if (!c) return;
+  const c = audio(); if (!c || c.state !== 'running') return;   // iOS: 첫 제스처 전엔 suspended — 쌓였다 한꺼번에 터지지 않게 건너뛴다
   const now = c.currentTime;
   for (const n of notes) {
     try {
