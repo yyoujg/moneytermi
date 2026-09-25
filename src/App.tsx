@@ -153,7 +153,8 @@ const NicknameGate = () => {
 };
 
 const Layout = () => {
-  const { pathname } = useLocation();
+  const location = useLocation();
+  const { pathname } = location;
   const { ready } = useAppContext();
 
   if (!ready) return <LoadingScreen />;
@@ -172,7 +173,8 @@ const Layout = () => {
         <Route path="/league" element={<LeagueScreen />} />
         <Route path="/review" element={<ReviewScreen />} />
         <Route path="/my" element={<MyPageScreen />} />
-        <Route path="/word-card" element={<WordCardScreen />} />
+        {/* 관련 용어 클릭처럼 같은 라우트로 다시 navigate해도 새로 마운트 — 이전 index/단계가 새 단어 목록에 남지 않게 */}
+        <Route path="/word-card" element={<WordCardScreen key={location.key} />} />
         <Route path="/league/rules" element={<LeagueRulesScreen />} />
         <Route path="/quiz" element={<QuizScreen />} />
       </Routes>

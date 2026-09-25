@@ -245,7 +245,8 @@ const QuizPage = () => {
           )}
           <button
             onClick={goNext}
-            className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-button bg-[var(--color-card)] text-xs font-bold text-[var(--color-ink-3)] active:opacity-70"
+            disabled={status !== 'idle'}
+            className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-button bg-[var(--color-card)] text-xs font-bold text-[var(--color-ink-3)] active:opacity-70 disabled:opacity-40"
           >
             <ChevronRight size={13} /> 건너뛰기
           </button>

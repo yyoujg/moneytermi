@@ -232,8 +232,6 @@ const WordCardScreen = () => {
   // 단어 안의 단계 (뜻 → 자세히 → 뉴스 → 관련 용어). 단어가 바뀌면 처음부터.
   const [stepIdx, setStepIdx] = React.useState(0);
   useEffect(() => { setStepIdx(0); }, [wordIndex]);
-  // 관련 용어 클릭처럼 같은 라우트로 다시 navigate하면 재마운트가 없어 index가 이전 값에 머문다.
-  useEffect(() => { setWordIndex(state?.index ?? 0); }, [state]);
 
   // 로딩이 끝났는데도 보여줄 단어가 없으면 돌아간다. 렌더 중 navigate는 안 된다.
   const noWords = words.length === 0 && !(isDeepLink && (courses.length === 0 || !hydrated));

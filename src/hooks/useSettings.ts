@@ -14,14 +14,14 @@ export const useSettings = () => {
 
   const toggleSound = () => setSoundOn(prev => {
     const next = !prev;
-    Storage.setItem('setting_sound', next ? 'on' : 'off');
+    Storage.setItem('setting_sound', next ? 'on' : 'off').catch(() => {});
     soundPrefs.enabled = next;
     return next;
   });
 
   const toggleVibration = () => setVibrationOn(prev => {
     const next = !prev;
-    Storage.setItem('setting_vibration', next ? 'on' : 'off');
+    Storage.setItem('setting_vibration', next ? 'on' : 'off').catch(() => {});
     hapticPrefs.enabled = next;
     return next;
   });

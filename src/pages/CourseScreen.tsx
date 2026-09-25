@@ -97,6 +97,7 @@ const CourseScreen = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated, focusId]);
 
+  const spending = useRef(false);   // 연타로 spend_points가 두 번 나가지 않게
   const handleNodeTap = async (node: PathNode, index: number, courseKnown: number) => {
     // disabled 버튼은 click이 안 오지만, 웹뷰/리셋 CSS에 따라 새는 경우가 있어 한 번 더 막는다.
     if (node.state === 'locked') return;
@@ -119,7 +120,11 @@ const CourseScreen = () => {
 
     // 레슨은 포인트가 든다. 부족하면 상점(광고 보기)으로, 서버 차감이 실패해도 마찬가지.
     if (points < LESSON_COST) { logClick('lesson_blocked_points', { points }); openShop('lesson'); return; }
-    if (!(await spendPoints(LESSON_COST, 'lesson'))) { openShop('lesson'); return; }
+    if (spending.current) return;
+    spending.current = true;
+    try {
+      if (!(await spendPoints(LESSON_COST, 'lesson'))) { openShop('lesson'); return; }
+    } finally { spending.current = false; }
     feedbackSpend();
     navigate('/word-card', { state: { words: node.words, index: 0, backPath: '/course', autoAdvance: true } });
   };

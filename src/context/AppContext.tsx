@@ -88,6 +88,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const lastMissionDate = useRef<string>(toDateStr(new Date()));
   const autoCheckedRef  = useRef(false);
   const missionBaseRef  = useRef<Missions>(DEFAULT_MISSIONS);
+  // 진행도 행이 정의보다 먼저 도착하면 모르는 미션 id가 버려진다. 정의가 오면 다시 합치도록 보관.
+  const missionRowsRef  = useRef<{ mission_id: string; current: number; is_rewarded: boolean }[]>([]);
+  const claimingRef     = useRef<Set<string>>(new Set());
 
   // ── 콘텐츠 로드 (courses + words) ─────────────────────────────
   useEffect(() => {
@@ -140,8 +143,14 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         ]));
         missionBaseRef.current = base;
         // load()와 순서가 뒤바뀌어도 정의는 서버 것, 진행도는 이미 받은 것을 유지한다.
-        setMissions(prev => Object.fromEntries(Object.entries(base).map(([k, m]) =>
-          [k, prev[k] ? { ...m, current: prev[k].current, isRewarded: prev[k].isRewarded } : m])));
+        setMissions(prev => Object.fromEntries(Object.entries(base).map(([k, m]) => {
+          const row = missionRowsRef.current.find(r => r.mission_id === k);
+          return [k, {
+            ...m,
+            current: Math.max(prev[k]?.current ?? 0, row?.current ?? 0),
+            isRewarded: (prev[k]?.isRewarded ?? false) || (row?.is_rewarded ?? false),
+          }];
+        })));
       }
       } catch (e) {
         console.error('[AppContext] 콘텐츠 로드 실패:', e);
@@ -238,6 +247,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
           .eq('user_id', profileId).eq('date', today)).data;
       }
 
+      missionRowsRef.current = dm ?? [];
       const merged = { ...base };
       (dm ?? []).forEach(row => {
         const m = merged[row.mission_id];
@@ -403,10 +413,14 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const claimReward = async (missionId: keyof Missions): Promise<boolean> => {
     const mission = missions[missionId];
     if (mission.current < mission.target || mission.isRewarded) return false;
+    if (claimingRef.current.has(missionId)) return false;   // 연타로 RPC 두 번 나가지 않게
+    claimingRef.current.add(missionId);
     const today = toDateStr(new Date());
-    const { data, error } = await dbRef.current.rpc('claim_mission_reward', {
-      p_mission_id: missionId, p_date: today,
-    });
+    let res;
+    try {
+      res = await dbRef.current.rpc('claim_mission_reward', { p_mission_id: missionId, p_date: today });
+    } finally { claimingRef.current.delete(missionId); }
+    const { data, error } = res;
     if (error || !data) { console.error('[claimReward] 실패:', error); return false; }
     setPoints(data.points);
     setXp(x => x + MISSION_XP);   // 서버가 같이 준 XP. 부스트 중이면 다음 갱신 때 정확한 값으로 맞춰진다
