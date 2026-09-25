@@ -52,21 +52,21 @@ const play = (notes: Note[]) => {
 const N = { C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99, A5: 880, B5: 987.77, C6: 1046.5, E6: 1318.5, G6: 1568 };
 
 // ── 이벤트별 조합 ──────────────────────────────────────────────────
-// 버튼 누름: 짧은 틱 + 아주 짧은 '톡' (전역이라 낮고 짧게)
+// 버튼 누름: 가장 강한 단발(success) + 아주 짧은 '톡'
 export function feedbackTick() {
-  haptic('basicMedium');
+  haptic('success');
   play([{ f: 1400, to: 900, dur: 0.04, type: 'triangle', vol: 0.08 }]);
 }
 
 // 패스 노드 탭 (레슨 시작·퀴즈 진입): 톡 하는 팝
 export function feedbackNodeTap() {
-  hapticSeq([['basicMedium', 0], ['basicMedium', 60]]);
+  hapticSeq([['success', 0], ['confetti', 80]]);
   play([{ f: 620, to: 880, dur: 0.08, vol: 0.14 }]);
 }
 
 // 포인트 소모 (레슨 시작 -10P): 낮게 쓱
 export function feedbackSpend() {
-  haptic('basicMedium');
+  hapticSeq([['success', 0], ['success', 80]]);
   play([{ f: 440, to: 300, dur: 0.14, type: 'triangle', vol: 0.12 }]);
 }
 
@@ -76,27 +76,27 @@ export function feedbackCorrect(_sound?: boolean, _vib?: boolean, combo = 1) {
   if (combo >= 3) notes.push({ f: N.C6, at: 0.18, dur: 0.16 });
   if (combo >= 5) notes.push({ f: N.E6, at: 0.27, dur: 0.2 });
   play(notes);
-  if (combo >= 5) hapticSeq([['confetti', 0], ['success', 150], ['confetti', 300], ['confetti', 450]]);
-  else if (combo >= 3) hapticSeq([['confetti', 0], ['success', 160], ['success', 320]]);
-  else hapticSeq([['success', 0], ['success', 140]]);
+  if (combo >= 5) hapticSeq([['confetti', 0], ['success', 120], ['confetti', 240], ['success', 360], ['confetti', 480]]);
+  else if (combo >= 3) hapticSeq([['confetti', 0], ['success', 140], ['confetti', 280], ['success', 420]]);
+  else hapticSeq([['success', 0], ['confetti', 140], ['success', 280]]);
 }
 
 // 오답: 낮은 버저 + error
 export function feedbackWrong() {
   play([{ f: 180, dur: 0.26, type: 'sawtooth', vol: 0.16 }]);
-  hapticSeq([['error', 0], ['error', 180]]);
+  hapticSeq([['error', 0], ['error', 160], ['error', 320]]);
 }
 
 // 단어 하나 학습 완료 ("좋아요!" 패널): 부드러운 딩
 export function feedbackLearned() {
   play([{ f: N.E5, dur: 0.1, vol: 0.18 }, { f: N.A5, at: 0.08, dur: 0.22, vol: 0.18 }]);
-  hapticSeq([['success', 0], ['basicMedium', 120]]);
+  hapticSeq([['success', 0], ['confetti', 120], ['success', 240]]);
 }
 
 // 레슨(단어 묶음) 완료: 짧은 팡파르
 export function feedbackLessonComplete() {
   play([{ f: N.C5, dur: 0.12 }, { f: N.E5, at: 0.1, dur: 0.12 }, { f: N.G5, at: 0.2, dur: 0.12 }, { f: N.C6, at: 0.3, dur: 0.3 }]);
-  hapticSeq([['success', 0], ['confetti', 250], ['confetti', 450]]);
+  hapticSeq([['success', 0], ['confetti', 200], ['success', 400], ['confetti', 600]]);
 }
 
 // 퀴즈/복습 완료: 정답률 100%면 한 음 더 높이 올라간다
@@ -104,47 +104,47 @@ export function feedbackQuizComplete(perfect: boolean) {
   const notes: Note[] = [{ f: N.G5, dur: 0.1 }, { f: N.C6, at: 0.1, dur: 0.14 }, { f: N.E6, at: 0.22, dur: 0.3 }];
   if (perfect) notes.push({ f: N.G6, at: 0.36, dur: 0.4, vol: 0.2 });
   play(notes);
-  hapticSeq(perfect ? [['confetti', 0], ['success', 200], ['confetti', 420], ['confetti', 620]] : [['success', 0], ['success', 200], ['confetti', 400]]);
+  hapticSeq(perfect ? [['confetti', 0], ['success', 180], ['confetti', 360], ['success', 540], ['confetti', 720]] : [['success', 0], ['confetti', 200], ['success', 400], ['confetti', 600]]);
 }
 
 // 티어 승급: 웅장하게
 export function feedbackTierUp() {
   play([{ f: N.C5, dur: 0.14 }, { f: N.E5, at: 0.12, dur: 0.14 }, { f: N.G5, at: 0.24, dur: 0.14 }, { f: N.C6, at: 0.36, dur: 0.5 }, { f: N.G5, at: 0.36, dur: 0.5, vol: 0.12 }]);
-  hapticSeq([['confetti', 0], ['confetti', 220], ['success', 480]]);
+  hapticSeq([['confetti', 0], ['success', 200], ['confetti', 400], ['success', 600], ['confetti', 800]]);
 }
 
 // 보상 수령 (미션·광고): 동전 두 개
 export function feedbackClaim() {
   play([{ f: N.B5, dur: 0.07, type: 'square', vol: 0.09 }, { f: N.E6, at: 0.07, dur: 0.2, type: 'square', vol: 0.09 }]);
-  hapticSeq([['success', 0], ['success', 120]]);
+  hapticSeq([['success', 0], ['confetti', 120], ['success', 240]]);
 }
 
 // 부스트 구매: 위로 쓸어 올라가는 파워업
 export function feedbackBoost() {
   play([{ f: 300, to: 1200, dur: 0.45, type: 'triangle', vol: 0.16 }, { f: N.E6, at: 0.4, dur: 0.25, vol: 0.14 }]);
-  hapticSeq([['wiggle', 0], ['success', 350], ['confetti', 500]]);
+  hapticSeq([['wiggle', 0], ['success', 300], ['confetti', 450], ['success', 600]]);
 }
 
 // 연속 학습 축하 (평소): 차임
 export function feedbackStreak() {
   play([{ f: N.C5, dur: 0.3, vol: 0.14 }, { f: N.E5, at: 0.06, dur: 0.3, vol: 0.14 }, { f: N.G5, at: 0.12, dur: 0.4, vol: 0.14 }]);
-  hapticSeq([['success', 0], ['confetti', 200]]);
+  hapticSeq([['success', 0], ['confetti', 200], ['success', 400]]);
 }
 
 // 마일스톤(7·14·30일…): 팡파르 + 축포 연타
 export function feedbackCelebrate() {
   play([{ f: N.C5, dur: 0.12 }, { f: N.E5, at: 0.1, dur: 0.12 }, { f: N.G5, at: 0.2, dur: 0.12 }, { f: N.C6, at: 0.3, dur: 0.16 }, { f: N.E6, at: 0.42, dur: 0.5 }]);
-  hapticSeq([['confetti', 0], ['success', 200], ['confetti', 450], ['confetti', 700]]);
+  hapticSeq([['confetti', 0], ['success', 180], ['confetti', 360], ['success', 540], ['confetti', 720], ['confetti', 900]]);
 }
 
 // 배지 획득: 반짝이는 상승 아르페지오 + 축포
 export function feedbackBadge() {
   play([{ f: N.E5, dur: 0.1, vol: 0.16 }, { f: N.G5, at: 0.08, dur: 0.1, vol: 0.16 }, { f: N.C6, at: 0.16, dur: 0.1, vol: 0.16 }, { f: N.E6, at: 0.24, dur: 0.16, vol: 0.16 }, { f: N.G6, at: 0.34, dur: 0.45, vol: 0.18 }]);
-  hapticSeq([['confetti', 0], ['success', 250], ['confetti', 500]]);
+  hapticSeq([['confetti', 0], ['success', 200], ['confetti', 400], ['success', 600], ['confetti', 800]]);
 }
 
 // 실패 알림 (보상 수령 실패 등): 짧고 낮게
 export function feedbackError() {
   play([{ f: 220, dur: 0.12, type: 'sawtooth', vol: 0.1 }, { f: 180, at: 0.12, dur: 0.16, type: 'sawtooth', vol: 0.1 }]);
-  hapticSeq([['error', 0], ['error', 160]]);
+  hapticSeq([['error', 0], ['error', 160], ['error', 320]]);
 }
