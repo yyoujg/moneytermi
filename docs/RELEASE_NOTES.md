@@ -68,6 +68,45 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
 
 ---
 
+## 2026-09-2x 머지 / 출시 대기 (PR #51) — 포인트·XP 시스템 점검
+
+코드 기준 점검(서버 SQL은 위 적용 표의 버전을 기준). 서버 보강 SQL 3개는 **적용 대기**, 클라이언트 수정은 서버 적용 전에도 동작한다(새 응답 필드는 옵션).
+
+### 발견과 조치
+
+| # | 어디 | 문제 | 조치 |
+|---|---|---|---|
+| 1 | 서버 `submit_quiz_answer` | 단어별·일별 상한이 없어 정답을 반복 호출하면 포인트·XP 무제한(주간 리그 1위 가능). typed 콤보 보너스 상한 없음 | 하루 150정답까지만 보상(`quiz_rewards_daily`), 이후 정답 처리만·`capped` 반환. 콤보 보너스 +18 상한 |
+| 2 | 서버 `word_progress` | `word_id`에 FK 없음 + anon INSERT 허용 → 가짜 id 대량 upsert로 XP·m2/m5 | FK 추가(`ON DELETE CASCADE`) |
+| 3 | 서버 `add_xp` | xp를 읽고 절대값으로 UPDATE → 동시 호출 시 XP 유실·50P 보너스 이중 지급 | 한 문장 `xp = xp + …`로 |
+| 4 | 서버 `claim_mission_reward` | EXISTS 검사와 UPDATE 분리 → 동시 2회 수령. 반환 `points`가 XP 지급 전 값 | 조건부 UPDATE 하나로, XP 지급 후 `points·xp` 반환 |
+| 5 | 서버 `profiles_insert` 정책 | `points = 0` 요구 vs 기본값 100 → 게스트 직접 INSERT(폴백 경로) 항상 실패 | 조건 제거(컬럼 GRANT가 guest_token만 허용) |
+| 6 | 서버 광고·추천 상한 | UTC 하루 기준(09:00 KST 리셋) | KST `mission_date()` |
+| 7 | 클라 미션 | m2/m4/m5 진행도를 시작·슬롯 리셋 때만 읽어 '받기'가 재시작 전엔 안 뜸 | `refreshMissions`를 단어 저장 뒤·퀴즈/복습 끝·출석 뒤에 호출 |
+| 8 | 클라 레슨 완료 | `refreshPoints`가 `word_progress` 2초 디바운스 저장보다 먼저 읽어 새 단어 XP·보너스 누락 | 저장 완료 직후 `refreshWallet`(points·xp·boost·missions) |
+| 9 | 클라 복습 | 획득 포인트를 로컬 공식으로 계산(`combo*2`, 서버는 `(combo-1)*2`), 응답 후 숫자가 한 단계 뜀 | 서버 `earned`만 표시 |
+| 10 | 클라 미션 수령 | `xp += 5` 고정(부스트면 10), 보너스 미반영 | 서버 응답 xp 사용, 축하 모달도 실제 증가분 |
+| 11 | 클라 퀴즈·복습 | 오답 제출이 `void` → 다음 정답 응답과 순서 뒤바뀌어 옛 값 덮어씀. 정답 직후 이전 문제 `+P` 잔상 | `await`, 응답 전 0으로 초기화 |
+| 12 | 클라 부스트 | 연타 가드 없음, 모든 실패가 "포인트가 부족해요" | in-flight 가드, 부스트 중이면 "이미 부스트 중이에요" |
+
+**보고만(이번 미수정)**: m5 '단어 카드 3개 보기'가 m2와 같은 새 단어 트리거로 카운트(사실상 "새 단어 3개"), `schema.sql`이 xp/boost/권한 현재 상태를 반영 안 함, 오프라인(프로필 없음) 레슨은 로컬 차감만 하고 시작(의도된 폴백).
+
+### 검증
+- vitest 111·`tsc` 통과. AppContext·WordCardScreen의 기존 eslint 오류(any 8건, Math.random)는 무관.
+- SQL 적용 후 확인 쿼리는 각 파일 끝. 파밍 상한은 게스트 토큰으로 같은 단어 정답을 151번 보내 `earned 0, capped true`인지로 확인 가능.
+
+### 토스 콘솔 출시노트 (사용자 노출용)
+
+```
+포인트와 XP가 더 정확해졌어요
+- 단어를 배우고 나면 XP와 미션 진행도가 바로 반영돼요 (앱을 다시 켜지 않아도 '받기' 버튼이 떠요)
+- 복습 정답 포인트가 실제 받은 금액으로 표시돼요
+- 미션 보상을 받을 때 부스트 배수와 보너스 포인트까지 정확히 보여줘요
+- 부스트를 두 번 누르면 "이미 부스트 중"이라고 알려줘요
+```
+
+---
+
 ## 2026-09-26 머지 / 17:30 배포 · 검수 요청 전 (PR #50) — 단어카드 '자세히' 용어 하이라이트
 
 CI run 36229981286 (08:30 UTC). **검수용 deploymentId `01a0dcd6-93f2-706a-8546-9b9bb4f0f5d8`**,
@@ -235,6 +274,7 @@ CI 배포 9회(중복 1 포함): run 36031409503(02:02, `01a0d45d`) → 상단 �
 | `migration_revoke_helpers.sql` | ✅ 적용 (2026-09-24) — `bump_mission`/`add_xp` anon 노출 차단, `word_progress` DELETE 회수 |
 | `words_bok/00~11` | ✅ 적용 (2026-09-24) — 경제금융용어 800선 716단어 / 29코스. 이전 데이터는 `*_backup_20260924` |
 | `words_bok/15_words_fix_1~2.sql` | ✅ 적용 (2026-09-25) — 본문에 남아 있던 PDF 여백 색인 글자(`…평균 ㄱ 생산비용도`) 제거, 86행 |
+| `migration_economy_hardening_1~3.sql` | ⏳ 적용 대기 (2026-09-26 생성, PR #51) — **포인트·XP 보강**. ① `add_xp` 한 문장 갱신(경합 시 XP 유실·50P 이중 지급 방지) ② `claim_mission_reward` 조건부 UPDATE로 이중 수령 차단 + XP 지급 후 잔고 반환 ③ 퀴즈 보상 하루 150정답 상한(`quiz_rewards_daily`)·typed 콤보 보너스 +18 상한 ④ `word_progress.word_id` FK ⑤ `profiles_insert` 정책의 points=0 조건 제거(기본값 100과 충돌) ⑥ 광고·추천 일일 상한 KST. 순서 1→2→3, 각 45줄 이하. **옛 마이그레이션 재실행 금지**(함수가 옛 버전으로 되돌아감) |
 | `words_bok/16_words_refine_1~36.sql` → `17_courses_1~2.sql` | ✅ 적용 완료 (2026-09-26) — SQL Editor가 45줄 넘는 붙여넣기의 앞부분만 실행해 3차례 부분 적용됐고 `16_words_refine_rest_1~15.sql`·`16_words_refine_1_rest.sql`·`17_courses_rest.sql`로 보충. 최종 덤프 검증: words 747·courses 39·course_words 747·뜻/힌트/본문 위반 0. 트리거 재활성화(`trg_word_progress_mission`)는 anon 키로 확인 불가 → SQL Editor 확인 쿼리로 점검 — **콘텐츠 정제**. 뜻 747개 전부 쉬운 한 줄로 재작성, 슬래시 항목 28개 분리(신규 31행·부모 진도 복사), 동의어 이름 정리 17, 힌트 181행 수정, 본문 줄이음 자국 138행, 코스 37→39. 순서 고정(17이 새 id 참조). 붙여넣는 동안 옛 단어 목록을 띄워 둔 클라이언트는 이름 바뀐 항목이 오답 처리될 수 있음(mc 채점 완전 일치) |
 | `migration_xp.sql` STEP 10 | ✅ 재적용 (2026-09-25) — 리그 순위 함수가 포인트 버전(`point_events`)으로 남아 있던 것을 발견(99명이 200XP로 표시). XP 버전으로 교체 |
 | `migration_points_economy.sql` | ✅ 적용 (2026-09-25) — 시작 잔고 100P(기존 유저 1회 +100P), `spend_points` RPC, `add_xp`에 XP 50마다 +50P. STEP 1의 +100이 두 번 실행돼(357명 전원 +200) `points - 100`으로 보정함 |
