@@ -65,16 +65,20 @@ const BLANK = '____';
 // 본문(복습 상세)에 용어 자체가 들어 있다. 보기/문제에 쓸 때 용어를 가린다.
 // 가리는 대상: 전체 단어, 괄호·슬래시 앞 기본형, 슬래시 각 조각, 괄호 안 약어(GDP). 바로 뒤에 붙은 영문 괄호도 함께.
 // 한글은 글자 사이 띄어쓰기가 달라도('국고 전산망') 가린다.
-export const maskTerm = (text: string, word: string): string => {
+// 용어를 찾는 정규식(g). 단어카드 '자세히' 하이라이트와 maskTerm이 같은 범위를 본다. 대상이 없으면 null.
+export const termPattern = (word: string): RegExp | null => {
   const base = word.split(/[(/;]/)[0].trim();
   const segments = word.split('/').map(s => s.replace(/\([^)]*\)/g, '').trim());
   const parens = [...word.matchAll(/\(([^)]*)\)/g)].map(m => m[1].trim());
   const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const pattern = (t: string) => /^[가-힣\s]+$/.test(t) ? t.replace(/\s+/g, '').split('').map(esc).join('\\s*') : esc(t);
   const targets = [...new Set([word, base, ...segments, ...parens].filter(t => t.length >= 2))].sort((a, b) => b.length - a.length);
-  let out = text;
-  for (const t of targets) out = out.replace(new RegExp(`${pattern(t)}(\\s*\\([^)]*\\))?`, 'g'), BLANK);
-  return out;
+  return targets.length ? new RegExp(targets.map(pattern).join('|'), 'g') : null;
+};
+
+export const maskTerm = (text: string, word: string): string => {
+  const p = termPattern(word);
+  return p ? text.replace(new RegExp(`(?:${p.source})(\\s*\\([^)]*\\))?`, 'g'), BLANK) : text;
 };
 
 // cloze는 예문에 단어가 그대로 들어있을 때만 가능
