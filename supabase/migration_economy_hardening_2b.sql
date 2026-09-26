@@ -11,7 +11,7 @@
 -- ===== STEP 3-1 : 일일 보상 카운터 =====
 -- (형식) SQL Editor가 45줄 넘는 붙여넣기의 앞부분만 실행한 적이 있어 문장을 150자 줄로 촘촘히 붙였다. 의미는 동일.
 
--- 2b: submit_quiz_answer 교체. 2a(테이블) 다음에 실행. 이 파일엔 CREATE TABLE이 없어 에디터가 문장을 쪼개지 않는다.
+-- 2b: submit_quiz_answer 교체. 2a(테이블) 다음에 실행. 이 파일엔 테이블 생성문이 없어 에디터가 문장을 쪼개지 않는다.
 
 CREATE OR REPLACE FUNCTION public.submit_quiz_answer( p_word_id       INTEGER, p_answer        TEXT, p_mode          TEXT,
 p_used_hint     BOOLEAN DEFAULT false, p_session_start BOOLEAN DEFAULT false ) RETURNS JSON LANGUAGE plpgsql SECURITY DEFINER AS $$ DECLARE
