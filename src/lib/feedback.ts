@@ -13,7 +13,8 @@ const haptic = (type: Haptic) => {
   // 웹뷰 밖(브라우저)에서는 SDK가 동기로 throw해서 .catch로는 못 잡는다. 진동 실패가 흐름을 막으면 안 된다.
   try { generateHapticFeedback({ type }).catch(() => {}); } catch { /* not in webview */ }
 };
-const hapticSeq = (steps: [Haptic, number][]) => steps.forEach(([t, at]) => setTimeout(() => haptic(t), at));
+// 첫 진동(at=0)은 setTimeout에 태우지 않고 즉시 — 타이머는 다음 매크로태스크라 렌더·이벤트 처리 뒤로 밀린다.
+const hapticSeq = (steps: [Haptic, number][]) => steps.forEach(([t, at]) => at === 0 ? haptic(t) : setTimeout(() => haptic(t), at));
 
 // ── 효과음 (Web Audio, 짧은 합성음) ───────────────────────────────
 let ctx: AudioContext | null = null;
@@ -83,6 +84,7 @@ const playFile = (name: Sfx): boolean => {
 const N = { C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99, A5: 880, B5: 987.77, C6: 1046.5, E6: 1318.5, G6: 1568 };
 
 // ── 이벤트별 조합 ──────────────────────────────────────────────────
+// 순서는 항상 진동 → 소리. 진동이 네이티브 브리지를 타는 만큼 소리 준비(오디오 컨텍스트·버퍼)보다 먼저 보낸다.
 // 버튼 누름: 가장 강한 단발(success) + 아주 짧은 '톡'
 export function feedbackTick() {
   haptic('success');
@@ -106,76 +108,76 @@ export function feedbackCorrect(_sound?: boolean, _vib?: boolean, combo = 1) {
   const notes: Note[] = [{ f: N.C5, dur: 0.1 }, { f: N.G5, at: 0.09, dur: 0.14 }];
   if (combo >= 3) notes.push({ f: N.C6, at: 0.18, dur: 0.16 });
   if (combo >= 5) notes.push({ f: N.E6, at: 0.27, dur: 0.2 });
-  if (!playFile(combo >= 5 ? 'combo_max' : combo >= 3 ? 'combo' : 'correct')) play(notes);
   if (combo >= 5) hapticSeq([['confetti', 0], ['success', 120], ['confetti', 240], ['success', 360], ['confetti', 480]]);
   else if (combo >= 3) hapticSeq([['confetti', 0], ['success', 140], ['confetti', 280], ['success', 420]]);
   else hapticSeq([['success', 0], ['confetti', 140], ['success', 280]]);
+  if (!playFile(combo >= 5 ? 'combo_max' : combo >= 3 ? 'combo' : 'correct')) play(notes);
 }
 
 // 오답: 낮은 버저 + error
 export function feedbackWrong() {
-  if (!playFile('wrong')) play([{ f: 180, dur: 0.26, type: 'sawtooth', vol: 0.16 }]);
   hapticSeq([['error', 0], ['error', 160], ['error', 320]]);
+  if (!playFile('wrong')) play([{ f: 180, dur: 0.26, type: 'sawtooth', vol: 0.16 }]);
 }
 
 // 단어 하나 학습 완료 ("좋아요!" 패널): 부드러운 딩
 export function feedbackLearned() {
-  if (!playFile('learned')) play([{ f: N.E5, dur: 0.1, vol: 0.18 }, { f: N.A5, at: 0.08, dur: 0.22, vol: 0.18 }]);
   hapticSeq([['success', 0], ['confetti', 120], ['success', 240]]);
+  if (!playFile('learned')) play([{ f: N.E5, dur: 0.1, vol: 0.18 }, { f: N.A5, at: 0.08, dur: 0.22, vol: 0.18 }]);
 }
 
 // 레슨(단어 묶음) 완료: 짧은 팡파르
 export function feedbackLessonComplete() {
-  if (!playFile('lesson')) play([{ f: N.C5, dur: 0.12 }, { f: N.E5, at: 0.1, dur: 0.12 }, { f: N.G5, at: 0.2, dur: 0.12 }, { f: N.C6, at: 0.3, dur: 0.3 }]);
   hapticSeq([['success', 0], ['confetti', 200], ['success', 400], ['confetti', 600]]);
+  if (!playFile('lesson')) play([{ f: N.C5, dur: 0.12 }, { f: N.E5, at: 0.1, dur: 0.12 }, { f: N.G5, at: 0.2, dur: 0.12 }, { f: N.C6, at: 0.3, dur: 0.3 }]);
 }
 
 // 퀴즈/복습 완료: 정답률 100%면 한 음 더 높이 올라간다
 export function feedbackQuizComplete(perfect: boolean) {
   const notes: Note[] = [{ f: N.G5, dur: 0.1 }, { f: N.C6, at: 0.1, dur: 0.14 }, { f: N.E6, at: 0.22, dur: 0.3 }];
   if (perfect) notes.push({ f: N.G6, at: 0.36, dur: 0.4, vol: 0.2 });
-  if (!playFile(perfect ? 'perfect' : 'quiz')) play(notes);
   hapticSeq(perfect ? [['confetti', 0], ['success', 180], ['confetti', 360], ['success', 540], ['confetti', 720]] : [['success', 0], ['confetti', 200], ['success', 400], ['confetti', 600]]);
+  if (!playFile(perfect ? 'perfect' : 'quiz')) play(notes);
 }
 
 // 티어 승급: 웅장하게
 export function feedbackTierUp() {
-  if (!playFile('tierup')) play([{ f: N.C5, dur: 0.14 }, { f: N.E5, at: 0.12, dur: 0.14 }, { f: N.G5, at: 0.24, dur: 0.14 }, { f: N.C6, at: 0.36, dur: 0.5 }, { f: N.G5, at: 0.36, dur: 0.5, vol: 0.12 }]);
   hapticSeq([['confetti', 0], ['success', 200], ['confetti', 400], ['success', 600], ['confetti', 800]]);
+  if (!playFile('tierup')) play([{ f: N.C5, dur: 0.14 }, { f: N.E5, at: 0.12, dur: 0.14 }, { f: N.G5, at: 0.24, dur: 0.14 }, { f: N.C6, at: 0.36, dur: 0.5 }, { f: N.G5, at: 0.36, dur: 0.5, vol: 0.12 }]);
 }
 
 // 보상 수령 (미션·광고): 동전 두 개
 export function feedbackClaim() {
-  if (!playFile('claim')) play([{ f: N.B5, dur: 0.07, type: 'square', vol: 0.09 }, { f: N.E6, at: 0.07, dur: 0.2, type: 'square', vol: 0.09 }]);
   hapticSeq([['success', 0], ['confetti', 120], ['success', 240]]);
+  if (!playFile('claim')) play([{ f: N.B5, dur: 0.07, type: 'square', vol: 0.09 }, { f: N.E6, at: 0.07, dur: 0.2, type: 'square', vol: 0.09 }]);
 }
 
 // 부스트 구매: 위로 쓸어 올라가는 파워업
 export function feedbackBoost() {
-  if (!playFile('boost')) play([{ f: 300, to: 1200, dur: 0.45, type: 'triangle', vol: 0.16 }, { f: N.E6, at: 0.4, dur: 0.25, vol: 0.14 }]);
   hapticSeq([['wiggle', 0], ['success', 300], ['confetti', 450], ['success', 600]]);
+  if (!playFile('boost')) play([{ f: 300, to: 1200, dur: 0.45, type: 'triangle', vol: 0.16 }, { f: N.E6, at: 0.4, dur: 0.25, vol: 0.14 }]);
 }
 
 // 연속 학습 축하 (평소): 차임
 export function feedbackStreak() {
-  if (!playFile('streak')) play([{ f: N.C5, dur: 0.3, vol: 0.14 }, { f: N.E5, at: 0.06, dur: 0.3, vol: 0.14 }, { f: N.G5, at: 0.12, dur: 0.4, vol: 0.14 }]);
   hapticSeq([['success', 0], ['confetti', 200], ['success', 400]]);
+  if (!playFile('streak')) play([{ f: N.C5, dur: 0.3, vol: 0.14 }, { f: N.E5, at: 0.06, dur: 0.3, vol: 0.14 }, { f: N.G5, at: 0.12, dur: 0.4, vol: 0.14 }]);
 }
 
 // 마일스톤(7·14·30일…): 팡파르 + 축포 연타
 export function feedbackCelebrate() {
-  if (!playFile('celebrate')) play([{ f: N.C5, dur: 0.12 }, { f: N.E5, at: 0.1, dur: 0.12 }, { f: N.G5, at: 0.2, dur: 0.12 }, { f: N.C6, at: 0.3, dur: 0.16 }, { f: N.E6, at: 0.42, dur: 0.5 }]);
   hapticSeq([['confetti', 0], ['success', 180], ['confetti', 360], ['success', 540], ['confetti', 720], ['confetti', 900]]);
+  if (!playFile('celebrate')) play([{ f: N.C5, dur: 0.12 }, { f: N.E5, at: 0.1, dur: 0.12 }, { f: N.G5, at: 0.2, dur: 0.12 }, { f: N.C6, at: 0.3, dur: 0.16 }, { f: N.E6, at: 0.42, dur: 0.5 }]);
 }
 
 // 배지 획득: 반짝이는 상승 아르페지오 + 축포
 export function feedbackBadge() {
-  if (!playFile('badge')) play([{ f: N.E5, dur: 0.1, vol: 0.16 }, { f: N.G5, at: 0.08, dur: 0.1, vol: 0.16 }, { f: N.C6, at: 0.16, dur: 0.1, vol: 0.16 }, { f: N.E6, at: 0.24, dur: 0.16, vol: 0.16 }, { f: N.G6, at: 0.34, dur: 0.45, vol: 0.18 }]);
   hapticSeq([['confetti', 0], ['success', 200], ['confetti', 400], ['success', 600], ['confetti', 800]]);
+  if (!playFile('badge')) play([{ f: N.E5, dur: 0.1, vol: 0.16 }, { f: N.G5, at: 0.08, dur: 0.1, vol: 0.16 }, { f: N.C6, at: 0.16, dur: 0.1, vol: 0.16 }, { f: N.E6, at: 0.24, dur: 0.16, vol: 0.16 }, { f: N.G6, at: 0.34, dur: 0.45, vol: 0.18 }]);
 }
 
 // 실패 알림 (보상 수령 실패 등): 짧고 낮게
 export function feedbackError() {
-  if (!playFile('error')) play([{ f: 220, dur: 0.12, type: 'sawtooth', vol: 0.1 }, { f: 180, at: 0.12, dur: 0.16, type: 'sawtooth', vol: 0.1 }]);
   hapticSeq([['error', 0], ['error', 160], ['error', 320]]);
+  if (!playFile('error')) play([{ f: 220, dur: 0.12, type: 'sawtooth', vol: 0.1 }, { f: 180, at: 0.12, dur: 0.16, type: 'sawtooth', vol: 0.1 }]);
 }

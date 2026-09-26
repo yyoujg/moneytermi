@@ -9,6 +9,7 @@ import { isRewardedAdEnabled, showRewardedAd } from '../lib/ads';
 import { LESSON_COST, XP_BONUS_POINTS, XP_BONUS_STEP } from '../constants';
 import { useCountUp } from '../hooks/useCountUp';
 import { feedbackClaim, feedbackBoost } from '../lib/feedback';
+import { PointCelebration, type PointReward } from './PointCelebration';
 
 // 모든 화면 상단 고정 바. 왼쪽 로고, 오른쪽에 아이콘 + 숫자만 나열한다(티어는 마이페이지에만).
 // 아이콘은 마이페이지 요약 카드와 같은 lucide 세트를 쓴다.
@@ -16,6 +17,7 @@ import { feedbackClaim, feedbackBoost } from '../lib/feedback';
 export const TopBar = () => {
   const { points, xp, boostUntil, knownWords, attendanceDates, claimAdReward, buyBoost, shopOpen, shopReason, openShop, closeShop } = useAppContext();
   const [now, setNow] = useState(() => Date.now());
+  const [celebration, setCelebration] = useState<PointReward | null>(null);
 
   const streak = calcStreak(attendanceDates);
   const boostLeft = boostUntil ? boostUntil - now : 0;
@@ -34,7 +36,7 @@ export const TopBar = () => {
     logClick('rewarded_ad_start', { from: 'topbar_shop' });
     showRewardedAd((amount, unit) => {
       claimAdReward(amount, unit).then(credited => {
-        if (credited) { feedbackClaim(); toast.success(`+${credited}P 받았어요`); }
+        if (credited) { feedbackClaim(); setCelebration({ points: credited, source: 'ad' }); }
       });
     });
     closeShop();
@@ -111,6 +113,7 @@ export const TopBar = () => {
           </p>
         </div>
       </BottomSheet>
+      {celebration && <PointCelebration reward={celebration} onClose={() => setCelebration(null)} />}
     </>
   );
 };

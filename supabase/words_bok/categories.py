@@ -29,7 +29,7 @@ TOPICS = [  # (category, level)  인덱스 1부터
     ('기업·산업·회계', 'Lv.4'),
 ]
 
-# word_id:topic. 애매한 것은 첫 번째 관련 주제에 뒀다.
+# word_id:topic. 애매한 것은 첫 번째 관련 주제에 뒀다. 717~747은 슬래시 항목을 나눈 자식(meanings.py SPLITS) — 부모와 같은 주제.
 #  - 120 금융의 증권화 -> 7(금융제도) (8 주식·채권 아님)
 #  - 383 연준, 433 ECB -> 383은 6(중앙은행), 433은 12(유럽 기구 묶음)
 #  - 6 가산금리, 463 COFIX -> 6(금리)
@@ -71,6 +71,7 @@ ASSIGN = """
 661:15 662:15 663:15 664:4 665:16 666:10 667:10 668:6 669:11 670:10 671:10 672:10 673:8 674:4 675:8 676:4 677:16 678:14 679:14 680:9
 681:15 682:9 683:14 684:16 685:6 686:12 687:1 688:8 689:6 690:12 691:12 692:12 693:4 694:3 695:15 696:15 697:17 698:12 699:12 700:11
 701:8 702:17 703:8 704:8 705:8 706:15 707:4 708:6 709:16 710:7 711:6 712:15 713:8 714:8 715:15 716:14
+717:7 718:13 719:7 720:5 721:5 722:10 723:4 724:1 725:8 726:15 727:15 728:12 729:9 730:10 731:4 732:6 733:4 734:15 735:8 736:4 737:15 738:6 739:14 740:5 741:4 742:7 743:4 744:4 745:4 746:7 747:10
 """
 
 
@@ -112,7 +113,7 @@ def main():
 
     q = lambda s: "'" + s.replace("'", "''") + "'"
     out = [
-        '-- ===== 코스 재분류: 가나다순 29개 -> 17주제 %d개 =====' % len(courses),
+        '-- ===== 코스 재분류: 17주제 %d개 (13_recategorize.sql 대체) =====' % len(courses),
         '-- categories.py가 생성. 손으로 고치지 말고 categories.py를 고친 뒤 다시 실행.',
         '-- word_progress는 건드리지 않는다(단어 id 동일). 12_course_titles.sql은 이 파일이 대체한다.',
         '',
@@ -124,13 +125,20 @@ def main():
         'INSERT INTO public.courses (id, level, title, description, category, sort_order) VALUES',
     ]
     out.append(',\n'.join(f"({q(c[0])},{q(c[1])},{q(c[2])},{q(c[3])},{q(c[4])},{c[5]})" for c in courses) + ';')
-    out += ['', '-- STEP 3 : 코스-단어 연결', 'INSERT INTO public.course_words (course_id, word_id, position) VALUES']
-    out.append(',\n'.join(f"('{c}',{w},{p})" for c, w, p in course_words) + ';')
-    out += ['', "NOTIFY pgrst, 'reload schema';", '',
+    # 코스-단어 연결은 코스별 INSERT 한 문장씩. 한 파일에 문장 25개 이하 (SQL Editor에서 큰 붙여넣기가 앞부분만 실행된 적이 있음)
+    stmts = ['-- STEP 3 : 코스-단어 연결']
+    for cid, *_ in courses:
+        rows = [(w, p) for c, w, p in course_words if c == cid]
+        stmts.append('INSERT INTO public.course_words (course_id, word_id, position) VALUES ' + ', '.join(f"('{cid}',{w},{p})" for w, p in rows) + ';')
+    tail = ['', "NOTIFY pgrst, 'reload schema';", '',
             '-- 확인:', f'-- SELECT count(*) FROM public.courses;       -- {len(courses)}',
             f'-- SELECT count(*) FROM public.course_words;  -- {len(course_words)}',
             "-- SELECT category, count(*) FROM public.courses c JOIN public.course_words cw ON cw.course_id = c.id GROUP BY 1 ORDER BY min(sort_order);"]
-    (HERE / '13_recategorize.sql').write_text('\n'.join(out) + '\n')
+    first, rest = stmts[:21], stmts[21:]
+    for old in HERE.glob('17_courses*.sql'):
+        old.unlink()
+    (HERE / '17_courses_1.sql').write_text('\n'.join(out + [''] + first) + '\n')
+    (HERE / '17_courses_2.sql').write_text('\n'.join(['-- ===== 코스 재분류 2/2 (categories.py 생성) — 17_courses_1.sql 다음에 실행 =====', ''] + rest + tail) + '\n')
 
     for ti, (cat, level) in enumerate(TOPICS, 1):
         ids = by_topic[ti]

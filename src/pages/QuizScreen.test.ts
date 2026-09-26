@@ -150,6 +150,23 @@ describe('getDistractors 카테고리 우선', () => {
   it('categoryOf 없으면 기존 동작(3개 반환)', () => {
     expect(getDistractors(allWords[0], allWords, allWords)).toHaveLength(3);
   });
+
+  it('정답과 기본형 앞 3글자가 같은 용어는 오답에서 뺀다', () => {
+    const pool = [
+      { ...makeWord(1), word: '통화정책수단' },
+      { ...makeWord(2), word: '통화정책체계' },
+      { ...makeWord(3), word: '통화정책 운영체제' },
+      { ...makeWord(4), word: '기준금리' },
+      { ...makeWord(5), word: '공개시장운영' },
+      { ...makeWord(6), word: '지급준비제도' },
+    ];
+    for (let i = 0; i < 20; i++) {
+      const d = getDistractors(pool[0], pool, pool).map(w => w.word);
+      expect(d).toHaveLength(3);
+      expect(d).not.toContain('통화정책체계');
+      expect(d).not.toContain('통화정책 운영체제');
+    }
+  });
 });
 
 describe('maskTerm', () => {
@@ -159,9 +176,16 @@ describe('maskTerm', () => {
   });
   it('괄호/슬래시가 붙은 단어는 기본형도 가린다', () => {
     expect(maskTerm('공급사용표는 산업연관표의 기초다.', '공급사용표(SUT)')).toBe('____는 산업연관표의 기초다.');
-    expect(maskTerm('중개무역과 중계무역은 다르다.', '중개무역/중계무역')).toBe('____과 중계무역은 다르다.');
+    expect(maskTerm('중개무역과 중계무역은 다르다.', '중개무역/중계무역')).toBe('____과 ____은 다르다.');
   });
   it('용어가 없으면 그대로', () => {
     expect(maskTerm('아무 관련 없는 문장', '가계수지')).toBe('아무 관련 없는 문장');
+  });
+  it('괄호 안 약어와 슬래시 뒷조각도 가린다', () => {
+    expect(maskTerm('GDP 대비 총부채 비율의 하락으로 측정된다.', '국내총생산(GDP)')).toBe('____ 대비 총부채 비율의 하락으로 측정된다.');
+    expect(maskTerm('명목금리에서 물가상승률을 뺀 것이 실질금리다.', '명목금리/실질금리')).toBe('____에서 물가상승률을 뺀 것이 ____다.');
+  });
+  it('한글은 띄어쓰기가 달라도 가린다', () => {
+    expect(maskTerm('한국은행이 구축한 전산망을 국고 전산망이라고 말하며', '국고전산망')).toBe('한국은행이 구축한 전산망을 ____이라고 말하며');
   });
 });

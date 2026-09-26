@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChevronRight, RotateCcw, Flame, ArrowRight } from 'lucide-react';
 import { Badge } from '@toss/tds-mobile';
 import { toast } from 'sonner';
@@ -12,6 +12,7 @@ import { useAuth } from '../hooks/useAuth';
 import { WeekStrip } from '../components/home/WeekStrip';
 import { calcStreak } from '../lib/streak';
 import { Card } from '../components/ui/Card';
+import { PointCelebration, type PointReward } from '../components/PointCelebration';
 
 const HomeScreen = () => {
   const navigate = useNavigate();
@@ -30,12 +31,13 @@ const HomeScreen = () => {
   const missionList = Object.values(missions).sort((a, b) => a.sortOrder - b.sortOrder);
   const streak = calcStreak(attendanceDates);
 
-  // 보상 수령: 성공하면 토스트 + 정답과 같은 햅틱, 실패(슬롯이 바뀌었거나 네트워크)면 이유를 알려준다
+  // 보상 수령: 성공하면 축하 모달 + 정답과 같은 햅틱, 실패(슬롯이 바뀌었거나 네트워크)면 이유를 알려준다
+  const [celebration, setCelebration] = useState<PointReward | null>(null);
   const handleClaim = async (missionId: string, reward: number) => {
     const ok = await claimReward(missionId);
     if (ok) {
       feedbackClaim();
-      toast.success(`+${reward}P · +${MISSION_XP} XP 받았어요`);
+      setCelebration({ points: reward, xp: MISSION_XP, source: 'mission' });
     } else {
       feedbackError();
       toast.error('보상을 받지 못했어요. 잠시 후 다시 시도해주세요');
@@ -143,6 +145,7 @@ const HomeScreen = () => {
           </div>
         </Card>
       </div>
+      {celebration && <PointCelebration reward={celebration} onClose={() => setCelebration(null)} />}
     </div>
   );
 };
