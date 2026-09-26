@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { maskTerm } from '../lib/quiz';
-import { calcEarned, getOptions, getDistractors, buildQuizItem, pickQuizType, clozeText } from '../lib/quiz';
+import { calcEarned, getOptions, getDistractors, buildQuizItem, pickQuizType, clozeText, termPattern } from '../lib/quiz';
 import type { Word } from '../types';
 
 // ── calcEarned ────────────────────────────────────────────────
@@ -184,6 +184,13 @@ describe('maskTerm', () => {
   it('괄호 안 약어와 슬래시 뒷조각도 가린다', () => {
     expect(maskTerm('GDP 대비 총부채 비율의 하락으로 측정된다.', '국내총생산(GDP)')).toBe('____ 대비 총부채 비율의 하락으로 측정된다.');
     expect(maskTerm('명목금리에서 물가상승률을 뺀 것이 실질금리다.', '명목금리/실질금리')).toBe('____에서 물가상승률을 뺀 것이 ____다.');
+  });
+  it('termPattern: 약어·띄어쓰기 변형에 매치하고 부분 문자열에는 안 맞는다', () => {
+    const p = termPattern('국내총생산(GDP)')!;
+    expect('GDP 대비'.match(p)).toEqual(['GDP']);
+    expect('국내 총생산의'.match(p)).toEqual(['국내 총생산']);
+    expect('생산'.match(p)).toBeNull();
+    expect(termPattern('a')).toBeNull();
   });
   it('한글은 띄어쓰기가 달라도 가린다', () => {
     expect(maskTerm('한국은행이 구축한 전산망을 국고 전산망이라고 말하며', '국고전산망')).toBe('한국은행이 구축한 전산망을 ____이라고 말하며');

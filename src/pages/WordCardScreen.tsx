@@ -13,6 +13,7 @@ import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
 import { feedbackLearned, feedbackLessonComplete } from '../lib/feedback';
 import { StreakCelebration } from '../components/StreakCelebration';
 import { Card } from '../components/ui/Card';
+import { termPattern } from '../lib/quiz';
 
 const ACCENT = 'var(--color-brand-500)';
 
@@ -22,13 +23,15 @@ const stripHtml = (s: string) => {
   return tmp.textContent ?? '';
 };
 
-const Highlight = ({ text, keyword }: { text: string; keyword: string }) => {
-  if (!keyword) return <>{text}</>;
-  const parts = text.split(new RegExp(`(${keyword})`, 'gi'));
+// 키워드(뉴스) 또는 정규식(자세히 본문의 용어)을 주황 형광으로. 캡처 그룹으로 나누면 홀수 인덱스가 매치다.
+const Highlight = ({ text, keyword, pattern }: { text: string; keyword: string; pattern?: RegExp }) => {
+  const source = pattern ? pattern.source : keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  if (!source) return <>{text}</>;
+  const parts = text.split(new RegExp(`(${source})`, pattern ? 'g' : 'gi'));
   return (
     <>
       {parts.map((part, i) =>
-        part.toLowerCase() === keyword.toLowerCase()
+        i % 2 === 1
           ? <mark key={i} style={{ background: 'var(--color-brand-cream)', color: 'var(--color-brand-500)', fontWeight: 700, borderRadius: 3, padding: '0 2px' }}>{part}</mark>
           : <span key={i}>{part}</span>
       )}
@@ -120,7 +123,9 @@ const WordCard = ({
         <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><BookOpen size={13} />자세히 알아보기</p>
         <div className="flex flex-col gap-3">
           {toParagraphs(detail).map((para, i) => (
-            <p key={i} className="text-sm leading-[1.8] text-[var(--color-ink-2)] font-medium break-keep tracking-[-0.01em]">{para}</p>
+            <p key={i} className="text-sm leading-[1.8] text-[var(--color-ink-2)] font-medium break-keep tracking-[-0.01em]">
+              <Highlight text={para} keyword={word.word} pattern={termPattern(word.word) ?? undefined} />
+            </p>
           ))}
         </div>
       </Card>
