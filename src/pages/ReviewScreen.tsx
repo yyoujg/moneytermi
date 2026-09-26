@@ -27,7 +27,7 @@ const shuffle = <T,>(arr: T[]): T[] => {
 
 const QuizPage = () => {
   const navigate = useNavigate();
-  const { points, dueQueue, knownWords, submitQuizAnswer, recordReview } = useAppContext();
+  const { points, dueQueue, knownWords, submitQuizAnswer, recordReview, refreshWallet } = useAppContext();
   const { soundOn, vibrationOn } = useSettings();
 
   const [queue, setQueue] = useState<Word[]>([]);
@@ -45,6 +45,8 @@ const QuizPage = () => {
   const [showHint, setShowHint] = useState(false);
   const [combo, setCombo] = useState(0);
   const [totalCorrect, setTotalCorrect] = useState(0);
+  const [lastEarned, setLastEarned] = useState(0);   // 서버가 채점한 금액. 응답 전엔 0
+  const [capped, setCapped] = useState(false);
   const graded = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -63,6 +65,7 @@ const QuizPage = () => {
       feedbackQuizComplete(totalCorrect === queue.length);
       logClick('quiz_complete', { mode: 'review', total: queue.length, correct: totalCorrect });
       requestAppReview();
+      void refreshWallet();   // m4·50XP 보너스 반영
     }
   }, [completed]);
 
@@ -92,15 +95,17 @@ const QuizPage = () => {
       feedbackCorrect(soundOn, vibrationOn, combo + 1);
       setTotalCorrect((c) => c + 1);
       setStatus('correct');
+      setLastEarned(0);
+      setCapped(false);
       const res = await submitQuizAnswer(word.id, input, 'typed', showHint, index === 0);
-      if (res) setCombo(res.combo);
+      if (res) { setCombo(res.combo); setLastEarned(res.earned); setCapped(res.capped); }
       setTimeout(goNext, 900);
     } else {
       feedbackWrong();
       setCombo(0);
       setStatus('wrong');
-      void submitQuizAnswer(word.id, input, 'typed', showHint, index === 0);
       setTimeout(() => { setStatus('idle'); setInput(''); }, 1000);
+      await submitQuizAnswer(word.id, input, 'typed', showHint, index === 0);   // 다음 정답 응답과 순서 보장
     }
   };
 
@@ -152,7 +157,6 @@ const QuizPage = () => {
   if (!word) return <div className="flex h-full items-center justify-center" style={{ backgroundColor: 'var(--color-canvas)' }} />;
 
   const progress = (index / queue.length) * 100;
-  const earnedPreview = (showHint ? 5 : 10) + (combo >= 2 ? combo * 2 : 0);
 
   return (
     <div className="flex flex-col h-full bg-[var(--color-canvas)] pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
@@ -213,7 +217,7 @@ const QuizPage = () => {
               style={{ caretColor: 'var(--color-brand-500)' }}
             />
             {status === 'correct' && (
-              <p className="text-xs font-bold text-success-400 mt-1.5! px-1">정답! +{earnedPreview}P</p>
+              <p className="text-xs font-bold text-success-400 mt-1.5! px-1">정답!{capped ? ' 오늘 보상 한도에 도달했어요' : lastEarned > 0 ? ` +${lastEarned}P` : ''}</p>
             )}
             {status === 'wrong' && (
               <p className="text-xs font-bold text-danger-400 mt-1.5! px-1">틀렸어요. 다시 시도해보세요!</p>

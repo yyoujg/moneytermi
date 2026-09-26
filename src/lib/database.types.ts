@@ -305,6 +305,7 @@ export type Database = {
           points: number;
           xp: number;
           m3_current: number;
+          capped?: boolean;   // migration_economy_hardening_2 이후
         };
       };
       spend_points: {
@@ -352,6 +353,8 @@ export type Database = {
         };
         Returns: {
           points: number;
+          xp?: number;       // migration_economy_hardening_1 이후
+          reward?: number;
         };
       };
       checkin: {

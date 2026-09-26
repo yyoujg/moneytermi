@@ -18,7 +18,7 @@ import { buildQuizItem, pickQuizType, type QuizOption } from '../lib/quiz';
 const QuizScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { xp, allWords, knownWords, courses, submitQuizAnswer } = useAppContext();
+  const { xp, allWords, knownWords, courses, submitQuizAnswer, refreshWallet } = useAppContext();
 
   // 단어 id → 코스 카테고리 (오답 보기를 같은 주제로 뽑기 위함)
   const categoryOf = useMemo(() => {
@@ -48,6 +48,7 @@ const QuizScreen = () => {
   const [status, setStatus] = useState<'idle' | 'correct' | 'wrong'>('idle');
   const [totalEarned, setTotalEarned] = useState(0);
   const [lastEarned, setLastEarned] = useState(0);
+  const [capped, setCapped] = useState(false);   // 하루 보상 한도(서버) 도달
   const [showPointPop, setShowPointPop] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
   const [shake, setShake] = useState(false);
@@ -80,6 +81,7 @@ const QuizScreen = () => {
       logClick('quiz_complete', { mode: 'quiz', total: quizQueue.length, correct: correctCount, node_id: navState?.nodeId });
       if (navState?.nodeId) markNodeDone(navState.nodeId);   // 패스의 퀴즈·복습 노드를 완료 표시
       requestAppReview();
+      void refreshWallet();   // m4(퀴즈 N문제)·50XP 보너스는 서버가 올린다 — 세션 끝에 한 번 읽는다
     }
   }, [finished]);
 
@@ -183,6 +185,8 @@ const QuizScreen = () => {
       feedbackCorrect(soundOn, vibrationOn, combo + 1);
       setStatus('correct');
       setCorrectCount(c => c + 1);
+      setLastEarned(0);   // 응답 전엔 이전 문제 금액이 남지 않게
+      setCapped(false);
 
       const res = await submitQuizAnswer(currentWord.id, option.answer, 'mc', false, currentQuizIndex === 0);
       const nextCombo = res ? res.combo : combo + 1;   // 서버 응답이 없으면(오프라인) 로컬로 센다
@@ -191,7 +195,8 @@ const QuizScreen = () => {
       if (res) {
         setTotalEarned(t => t + res.earned);
         setLastEarned(res.earned);
-        setShowPointPop(true);
+        setCapped(res.capped);
+        if (res.earned > 0) setShowPointPop(true);
       }
       // 다음 문제로는 하단 패널의 계속하기가 넘긴다
     } else {
@@ -200,8 +205,8 @@ const QuizScreen = () => {
       setStatus('wrong');
       setShake(true);
       setTimeout(() => setShake(false), 500);
-      // 서버 콤보도 초기화 (오답 기록). 정답을 보여주고 계속하기로 다음 문제.
-      void submitQuizAnswer(currentWord.id, option.answer, 'mc', false, currentQuizIndex === 0);
+      // 서버 콤보도 초기화 (오답 기록). 다음 정답 응답과 순서가 뒤바뀌지 않게 기다린다. 정답을 보여주고 계속하기로 다음 문제.
+      await submitQuizAnswer(currentWord.id, option.answer, 'mc', false, currentQuizIndex === 0);
     }
   };
 
@@ -347,7 +352,7 @@ const QuizScreen = () => {
             </div>
             {status === 'correct' && (
               <span className="flex items-center gap-1.5 text-xs font-bold text-success-400">
-                +{lastEarned}P
+                {capped ? <span className="text-[var(--color-ink-4)]">오늘 보상 한도 도달</span> : lastEarned > 0 ? `+${lastEarned}P` : null}
                 {combo >= 3 && <span className="flex items-center gap-0.5 text-brand-400"><Flame size={12} className="fill-current" />{combo}연속</span>}
               </span>
             )}

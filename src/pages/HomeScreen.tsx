@@ -34,10 +34,10 @@ const HomeScreen = () => {
   // 보상 수령: 성공하면 축하 모달 + 정답과 같은 햅틱, 실패(슬롯이 바뀌었거나 네트워크)면 이유를 알려준다
   const [celebration, setCelebration] = useState<PointReward | null>(null);
   const handleClaim = async (missionId: string, reward: number) => {
-    const ok = await claimReward(missionId);
-    if (ok) {
+    const res = await claimReward(missionId);
+    if (res) {
       feedbackClaim();
-      setCelebration({ points: reward, xp: MISSION_XP, source: 'mission' });
+      setCelebration({ points: reward, xp: res.xpGained, source: 'mission' });   // 부스트 중이면 10
     } else {
       feedbackError();
       toast.error('보상을 받지 못했어요. 잠시 후 다시 시도해주세요');

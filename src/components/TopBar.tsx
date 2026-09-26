@@ -43,7 +43,9 @@ export const TopBar = () => {
   };
 
   const handleBoost = async () => {
-    if (await buyBoost()) { feedbackBoost(); toast.success('30분간 XP 2배! ⚡'); closeShop(); }
+    const r = await buyBoost();
+    if (r === 'ok') { feedbackBoost(); toast.success('30분간 XP 2배! ⚡'); closeShop(); }
+    else if (r === 'active') { toast.error('이미 부스트 중이에요'); closeShop(); }
     else toast.error('포인트가 부족해요');
   };
 

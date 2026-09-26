@@ -204,7 +204,7 @@ const WordCard = ({
 const WordCardScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { courses, allWords, knownWords, knownIds, hydrated, toggleKnown, setKnownWords, claimPromotionReward, refreshPoints } = useAppContext();
+  const { courses, allWords, knownWords, knownIds, hydrated, toggleKnown, setKnownWords, claimPromotionReward } = useAppContext();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const state = location.state as {
@@ -250,7 +250,7 @@ const WordCardScreen = () => {
   // 뉴스 (현재 단어 로드 + 다음 단어 prefetch)
   const { newsItems, newsLoading } = useNews(words, wordIndex);
 
-  // autoAdvance 완료 토스트 + 잔고 갱신 (새 단어 XP의 50단위 보너스 포인트는 서버에서만 계산된다)
+  // autoAdvance 완료 토스트. 잔고·XP 갱신은 word_progress 저장(2초 디바운스)이 끝난 뒤 AppContext가 한다.
   // 같은 완료에 effect가 다시 돌아도(단어 목록 참조 변경, dev StrictMode) 토스트는 한 번만
   const completedRef = useRef(false);
   useEffect(() => {
@@ -260,7 +260,6 @@ const WordCardScreen = () => {
     completedRef.current = true;
     feedbackLessonComplete();
     toast.success('학습 완료!');
-    refreshPoints();
   }, [wordIndex, words.length, autoAdvance]);
 
   // autoAdvance 완료 화면
