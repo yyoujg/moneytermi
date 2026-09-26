@@ -1,6 +1,6 @@
 -- ============================================================
 -- 포인트·XP 경제 보강 1/3 (2026-09-26 점검) — add_xp 원자화, 미션 보상 원자화
--- 실행 순서: _1 → _2 → _3. 파일당 문장 수를 적게 유지한다(SQL Editor가 긴 붙여넣기의 앞부분만 실행한 적이 있음).
+-- 실행 순서: _1 → _2a → _2b → _3. 파일당 문장 수를 적게 유지한다(SQL Editor가 긴 붙여넣기의 앞부분만 실행한 적이 있음).
 --
 -- ⚠️ 옛 마이그레이션(migration_missions_slots.sql, migration_weekly_league.sql, migration_leaderboard*.sql,
 --    migration_points_economy.sql STEP 3)을 다시 실행하면 이 파일의 함수가 옛 버전으로 되돌아간다. 재실행 금지.
