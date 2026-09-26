@@ -216,12 +216,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (taken) return { error: '이미 사용 중인 닉네임이에요' };
 
-      const { error: updateError } = await supabase
+      // profiles_update 정책은 x-guest-token 헤더로 본인 행을 찾는다. 기본 클라이언트면 0행 갱신인데
+      // PostgREST는 이를 에러로 주지 않아 서버는 그대로고 내 기기만 바뀐다(다른 사람 리그에 옛 닉네임).
+      const db = guestToken ? getGuestClient(guestToken) : supabase;
+      const { data: updated, error: updateError } = await db
         .from('profiles')
         .update({ nickname: trimmed })
-        .eq('id', profileId);
+        .eq('id', profileId)
+        .select('id');
 
-      if (updateError) return { error: '닉네임 변경에 실패했어요' };
+      if (updateError || !updated?.length) return { error: '닉네임 변경에 실패했어요' };
     }
 
     const stored = await loadStoredProfile();
