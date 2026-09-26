@@ -20,9 +20,9 @@ type AppContextValue = {
   setPoints: React.Dispatch<React.SetStateAction<number>>;
   xp: number;
   boostUntil: number | null;
-  buyBoost: () => Promise<boolean>;
+  buyBoost: () => Promise<'ok' | 'active' | 'fail'>;
   spendPoints: (amount: number, reason: string) => Promise<boolean>;
-  refreshPoints: () => Promise<void>;
+  refreshWallet: () => Promise<void>;
   shopReason: 'lesson' | null;
   shopOpen: boolean;
   openShop: (reason?: 'lesson') => void;
@@ -34,14 +34,14 @@ type AppContextValue = {
   setUnknownWords: React.Dispatch<React.SetStateAction<Word[]>>;
   missions: Missions;
   setMissions: React.Dispatch<React.SetStateAction<Missions>>;
-  claimReward: (missionId: keyof Missions) => Promise<boolean>;
+  claimReward: (missionId: keyof Missions) => Promise<{ xpGained: number } | null>;
   claimReferralReward: (amount: number, unit: string) => Promise<number | null>;
   claimAdReward: (amount: number, unit: string) => Promise<number | null>;
   claimPromotionReward: (amount: number) => Promise<number | null>;
   submitQuizAnswer: (
     wordId: number, answer: string, mode: 'mc' | 'typed',
     usedHint: boolean, sessionStart: boolean,
-  ) => Promise<{ correct: boolean; earned: number; combo: number; points: number; m3Current: number } | null>;
+  ) => Promise<{ correct: boolean; earned: number; combo: number; points: number; m3Current: number; capped: boolean } | null>;
   toggleKnown: (word: Word) => void;
   attendanceDates: string[];
   checkIn: () => Promise<void>;
@@ -91,6 +91,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   // 진행도 행이 정의보다 먼저 도착하면 모르는 미션 id가 버려진다. 정의가 오면 다시 합치도록 보관.
   const missionRowsRef  = useRef<{ mission_id: string; current: number; is_rewarded: boolean }[]>([]);
   const claimingRef     = useRef<Set<string>>(new Set());
+  const boostingRef     = useRef(false);
 
   // ── 콘텐츠 로드 (courses + words) ─────────────────────────────
   useEffect(() => {
@@ -159,6 +160,39 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     loadContent();
   }, []);
 
+  // ── 미션 진행도 다시 읽기 ─────────────────────────────────────
+  // m2/m4/m5는 서버 트리거·RPC가 올리므로 클라가 스스로 알 수 없다. 시작·슬롯 리셋·단어 저장 뒤·퀴즈 끝에 부른다.
+  const refreshMissions = async () => {
+    const profileId = profileIdRef.current;
+    if (!profileId) return;
+    const db = dbRef.current;
+    const today = toDateStr(new Date());
+    const slot = missionSlot();
+    const base = missionBaseRef.current;
+
+    // slot 컬럼이 아직 없는 DB에서도 동작하도록 실패하면 날짜만으로 다시 조회한다.
+    let dm = (await db.from('daily_missions')
+      .select('mission_id, current, is_rewarded')
+      .eq('user_id', profileId).eq('date', today).eq('slot', slot)).data;
+    if (!dm) {
+      dm = (await db.from('daily_missions')
+        .select('mission_id, current, is_rewarded')
+        .eq('user_id', profileId).eq('date', today)).data;
+    }
+
+    missionRowsRef.current = dm ?? [];
+    const merged = { ...base };
+    (dm ?? []).forEach(row => {
+      const m = merged[row.mission_id];
+      if (m) merged[row.mission_id] = {
+        ...m,
+        current: Math.max(m.current, row.current),
+        isRewarded: m.isRewarded || row.is_rewarded,
+      };
+    });
+    setMissions(merged);
+  };
+
   // ── 초기 로드 (profileId 준비될 때까지 재시도) ────────────────
   useEffect(() => {
     let cancelled = false;
@@ -185,7 +219,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       profileIdRef.current = profileId;
       dbRef.current = p?.guestToken ? getGuestClient(p.guestToken) : supabase;
       const db = dbRef.current;
-      const today = toDateStr(new Date());
 
       try {
       // 1. points — DB값과 로컬값 중 큰 값 유지 (로딩 중 적립 포인트 보존)
@@ -234,30 +267,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       // 3. 현재 슬롯 진행도 (미션 정의는 loadContent에서 이미 받아 둔다)
-      const slot = missionSlot();
-      const base = missionBaseRef.current;
-
-      // slot 컬럼이 아직 없는 DB에서도 동작하도록 실패하면 날짜만으로 다시 조회한다.
-      let dm = (await db.from('daily_missions')
-        .select('mission_id, current, is_rewarded')
-        .eq('user_id', profileId).eq('date', today).eq('slot', slot)).data;
-      if (!dm) {
-        dm = (await db.from('daily_missions')
-          .select('mission_id, current, is_rewarded')
-          .eq('user_id', profileId).eq('date', today)).data;
-      }
-
-      missionRowsRef.current = dm ?? [];
-      const merged = { ...base };
-      (dm ?? []).forEach(row => {
-        const m = merged[row.mission_id];
-        if (m) merged[row.mission_id] = {
-          ...m,
-          current: Math.max(m.current, row.current),
-          isRewarded: m.isRewarded || row.is_rewarded,
-        };
-      });
-      setMissions(merged);
+      await refreshMissions();
 
       // 4. attendance
       const { data: att, error: attLoadErr } = await db
@@ -324,6 +334,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     const { error } = await dbRef.current.from('word_progress').upsert(rows, { onConflict: 'user_id,word_id' });
     if (error) console.error('[sync] word_progress(known) 저장 실패:', error);
     await seedInitialSrs(knownWords, 'known', profileId);
+    await refreshWallet();   // 새 단어 XP(트리거)·50XP 보너스·m2/m5는 이 저장이 끝나야 서버에 생긴다
   }, [knownWords, ready], 2000);
 
   // ── unknownWords → word_progress upsert ───────────────────────
@@ -353,6 +364,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
     const { error } = await dbRef.current.rpc('checkin', { p_date: today });
     if (error) console.error('[checkIn] checkin RPC 실패:', error);
+    else await refreshWallet();   // 출석 +3 XP(하루 1회)·m1 서버 진행도 반영
   };
 
   // ── 앱 진입 시 자동 출석 (세션 1회 래치) ──────────────────────
@@ -410,10 +422,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   // ── claimReward — 서버가 자격 검증 후 적립 ─────────────────────
   // 성공 여부를 돌려줘 화면이 토스트/햅틱을 결정한다
-  const claimReward = async (missionId: keyof Missions): Promise<boolean> => {
+  const claimReward = async (missionId: keyof Missions): Promise<{ xpGained: number } | null> => {
     const mission = missions[missionId];
-    if (mission.current < mission.target || mission.isRewarded) return false;
-    if (claimingRef.current.has(missionId)) return false;   // 연타로 RPC 두 번 나가지 않게
+    if (mission.current < mission.target || mission.isRewarded) return null;
+    if (claimingRef.current.has(missionId)) return null;   // 연타로 RPC 두 번 나가지 않게
     claimingRef.current.add(missionId);
     const today = toDateStr(new Date());
     let res;
@@ -421,13 +433,15 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       res = await dbRef.current.rpc('claim_mission_reward', { p_mission_id: missionId, p_date: today });
     } finally { claimingRef.current.delete(missionId); }
     const { data, error } = res;
-    if (error || !data) { console.error('[claimReward] 실패:', error); return false; }
+    if (error || !data) { console.error('[claimReward] 실패:', error); return null; }
+    // 서버가 XP 지급 뒤의 최종 잔고를 준다(부스트 배수·50XP 보너스 포함). 옛 서버면 xp가 없어 5로 본다.
+    const xpGained = typeof data.xp === 'number' ? Math.max(data.xp - xp, 0) : MISSION_XP;
     setPoints(data.points);
-    setXp(x => x + MISSION_XP);   // 서버가 같이 준 XP. 부스트 중이면 다음 갱신 때 정확한 값으로 맞춰진다
+    if (typeof data.xp === 'number') setXp(data.xp); else setXp(x => x + MISSION_XP);
     setMissions(prev => ({ ...prev, [missionId]: { ...prev[missionId], isRewarded: true } }));
     logClick('mission_reward_claim', { mission_id: missionId, reward: mission.reward });
     requestAppReview();
-    return true;
+    return { xpGained };
   };
 
   // ── claimReferralReward — 친구초대(contactsViral) 리워드, 서버가 상한 적용 후 적립 ──
@@ -478,18 +492,25 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     setMissions(prev => ({ ...prev, m3: { ...prev.m3, current: data.m3_current } }));
     return {
       correct: data.correct, earned: data.earned, combo: data.combo,
-      points: data.points, m3Current: data.m3_current,
+      points: data.points, m3Current: data.m3_current, capped: data.capped === true,
     };
   };
 
   // ── 상점 — 부스트 구매 (서버가 차감·검증) ──────────────────────
-  const buyBoost = async (): Promise<boolean> => {
-    const { data, error } = await dbRef.current.rpc('buy_boost');
-    if (error || !data) { console.error('[buyBoost] 실패:', error); return false; }
-    setPoints(data.points);
-    setBoostUntil(new Date(data.boost_until).getTime());
-    logClick('boost_buy');
-    return true;
+  const buyBoost = async (): Promise<'ok' | 'active' | 'fail'> => {
+    if (boostingRef.current) return 'fail';   // 연타 가드
+    boostingRef.current = true;
+    try {
+      const { data, error } = await dbRef.current.rpc('buy_boost');
+      if (error || !data) {
+        console.error('[buyBoost] 실패:', error);
+        return error?.message?.includes('boost already active') ? 'active' : 'fail';
+      }
+      setPoints(data.points);
+      setBoostUntil(new Date(data.boost_until).getTime());
+      logClick('boost_buy');
+      return 'ok';
+    } finally { boostingRef.current = false; }
   };
 
   // ── 포인트 소모 (레슨 시작) — 서버가 잔고를 검증한다 ─────────────
@@ -502,12 +523,17 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     return true;
   };
 
-  // XP 마일스톤 보너스(50 XP마다 50P)는 서버 트리거에서 들어와 클라가 모른다. 레슨 끝에 다시 읽는다.
-  const refreshPoints = async () => {
+  // 서버에서만 생기는 변화(새 단어 XP, 50XP 보너스, 출석 XP, 미션 진행도)를 한 번에 다시 읽는다.
+  const refreshWallet = async () => {
     const profileId = profileIdRef.current;
     if (!profileId) return;
-    const { data } = await dbRef.current.from('profiles').select('points, xp').eq('id', profileId).single();
-    if (data) { setPoints(data.points); setXp(data.xp); }
+    const { data } = await dbRef.current.from('profiles').select('points, xp, boost_until').eq('id', profileId).single();
+    if (data) {
+      setPoints(data.points);
+      setXp(data.xp ?? 0);
+      setBoostUntil(data.boost_until ? new Date(data.boost_until).getTime() : null);
+    }
+    await refreshMissions();
   };
 
   const openShop = (reason?: 'lesson') => { setShopReason(reason ?? null); setShopOpen(true); };
@@ -557,7 +583,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       knownWords, knownIds, setKnownWords,
       unknownWords, setUnknownWords,
       xp, boostUntil, buyBoost,
-      spendPoints, refreshPoints, shopReason, shopOpen, openShop, closeShop,
+      spendPoints, refreshWallet, shopReason, shopOpen, openShop, closeShop,
       missions, setMissions,
       claimReward,
       claimReferralReward,
