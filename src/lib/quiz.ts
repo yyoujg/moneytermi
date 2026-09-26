@@ -15,12 +15,17 @@ export const getDistractors = (
   const others = pool.filter(w => w.id !== correctWord.id);
   const shuffle = (a: Word[]): Word[] => [...a].sort(() => Math.random() - 0.5);
 
+  // 이름이 비슷한 용어(통화정책수단 vs 통화정책체계)는 오답으로 두지 않는다. 기본형 앞 3글자 비교.
+  const head = (w: string) => w.split(/[(/;]/)[0].replace(/\s+/g, '').slice(0, 3);
+  const myHead = head(correctWord.word);
+  const dissimilar = myHead.length >= 3 ? others.filter(w => head(w.word) !== myHead) : others;
+
   // 같은 카테고리 우선 정렬 (카테고리 정보 있을 때만)
   const cat = categoryOf?.(correctWord.id);
   const ranked = cat
-    ? [...shuffle(others.filter(w => categoryOf?.(w.id) === cat)),
-       ...shuffle(others.filter(w => categoryOf?.(w.id) !== cat))]
-    : shuffle(others);
+    ? [...shuffle(dissimilar.filter(w => categoryOf?.(w.id) === cat)),
+       ...shuffle(dissimilar.filter(w => categoryOf?.(w.id) !== cat))]
+    : shuffle(dissimilar);
 
   const wrong: Word[] = [];
   for (const w of ranked) {
@@ -57,14 +62,18 @@ export type QuizItem = {
 
 const BLANK = '____';
 
-// 뜻 문장에 용어 자체가 들어 있는 경우가 많다(800선 716개 중 403개). 보기/문제에 쓸 때 용어를 가린다.
-// '가계수지(Household's ...)'처럼 바로 뒤에 붙은 영문 괄호도 함께 가린다. 괄호·슬래시 앞부분(기본형)도 가린다.
+// 본문(복습 상세)에 용어 자체가 들어 있다. 보기/문제에 쓸 때 용어를 가린다.
+// 가리는 대상: 전체 단어, 괄호·슬래시 앞 기본형, 슬래시 각 조각, 괄호 안 약어(GDP). 바로 뒤에 붙은 영문 괄호도 함께.
+// 한글은 글자 사이 띄어쓰기가 달라도('국고 전산망') 가린다.
 export const maskTerm = (text: string, word: string): string => {
   const base = word.split(/[(/;]/)[0].trim();
+  const segments = word.split('/').map(s => s.replace(/\([^)]*\)/g, '').trim());
+  const parens = [...word.matchAll(/\(([^)]*)\)/g)].map(m => m[1].trim());
   const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const targets = [...new Set([word, base].filter(t => t.length >= 2))].sort((a, b) => b.length - a.length);
+  const pattern = (t: string) => /^[가-힣\s]+$/.test(t) ? t.replace(/\s+/g, '').split('').map(esc).join('\\s*') : esc(t);
+  const targets = [...new Set([word, base, ...segments, ...parens].filter(t => t.length >= 2))].sort((a, b) => b.length - a.length);
   let out = text;
-  for (const t of targets) out = out.replace(new RegExp(`${esc(t)}(\\s*\\([^)]*\\))?`, 'g'), BLANK);
+  for (const t of targets) out = out.replace(new RegExp(`${pattern(t)}(\\s*\\([^)]*\\))?`, 'g'), BLANK);
   return out;
 };
 

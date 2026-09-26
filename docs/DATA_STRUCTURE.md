@@ -3,7 +3,7 @@
 머니터미(moneytermi)의 데이터 모델과 저장/동기화 흐름을 한곳에 정리한 문서.
 
 > **최종 갱신 2026-09-24**
-> - 2026-09-24: 단어 전면 교체 — 한국은행 경제금융용어 800선 716단어. 코스는 17주제 37개(`supabase/words_bok/categories.py`, 적용 전엔 가나다순 29개). `word_progress` 초기화. 아래 233단어·22코스 표기는 교체 전 이력이다. `profiles.xp`·`boost_until`, `xp_events`, `mission_defs`, `daily_missions.slot` 추가(`migration_xp.sql`, `migration_missions_slots.sql`).
+> - 2026-09-24: 단어 전면 교체 — 한국은행 경제금융용어 800선 716단어. 코스는 17주제 37개(`supabase/words_bok/categories.py`, 적용 전엔 가나다순 29개). 2026-09-26 정제(`words_bok/16_*`·`17_courses.sql`): 뜻 전면 재작성, 슬래시 항목 분리로 747단어·39코스. `word_progress` 초기화. 아래 233단어·22코스 표기는 교체 전 이력이다. `profiles.xp`·`boost_until`, `xp_events`, `mission_defs`, `daily_missions.slot` 추가(`migration_xp.sql`, `migration_missions_slots.sql`).
 > - 실행 완료: `courses.sort_order` 추가(학습 순서 제어), 콘텐츠 시드 확장(`words` 총 233개·id 최대 2025), `related_words` 데이터 정합성 정리, **SRS 간격반복(`word_progress` 확장)·실천 레이어(`actions`/`user_actions`) 배포**, 자동 출석·신규 홈 첫 학습 CTA·날짜 KST 통일.
 > - 예정(미실행): 시장지표(`market_indicators`). → §8 로드맵 참고.
 
