@@ -23,5 +23,5 @@ NOTIFY pgrst, 'reload schema';
 
 -- 확인:
 -- SELECT count(*) FROM public.courses;       -- 60
--- SELECT count(*) FROM public.course_words;  -- 799
+-- SELECT count(*) FROM public.course_words;  -- 801
 -- SELECT category, count(*) FROM public.courses c JOIN public.course_words cw ON cw.course_id = c.id GROUP BY 1 ORDER BY min(sort_order);

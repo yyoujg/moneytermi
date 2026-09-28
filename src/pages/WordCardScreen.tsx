@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronRight, ExternalLink, BookOpen, Newspaper, Link2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ExternalLink, BookOpen, Newspaper, Link2 } from 'lucide-react';
 import { BottomSheet } from '@toss/tds-mobile';
 import { showModal } from '../components/AlertModal';
 import type { Word } from '../types';
@@ -74,6 +74,8 @@ const WordCard = ({
   newsItems,
   newsLoading,
   keyword,
+  termNames,
+  meaningOf,
 }: {
   word: Word;
   onDetail?: () => void;
@@ -82,7 +84,11 @@ const WordCard = ({
   newsItems: NaverNewsItem[];
   newsLoading: boolean;
   keyword: string;
+  termNames: string[];
+  meaningOf: (name: string) => string | undefined;
 }) => {
+  // 뉴스 가로 스와이프 중 손을 떼면 그 자리 카드의 click이 같이 불린다. 8px 넘게 움직였으면 그 click은 버린다
+  const newsDrag = useRef<{ x: number; y: number; moved: boolean } | null>(null);
   return (
   <div className="flex flex-col gap-3 px-5 pb-6">
 
@@ -112,9 +118,10 @@ const WordCard = ({
 
     {/* 순서: 단어+뜻 → 그래프·표 → 뉴스 → 관련 용어. 자세히 알아보기는 단어 카드의 버튼으로 여는 시트 */}
     {/* 그래프·표 — 뜻 바로 아래에서 그림으로 이해시킨다 */}
-    {word.visuals && word.visuals.length > 0 && <WordVisuals visuals={word.visuals} />}
+    {word.visuals && word.visuals.length > 0 && <WordVisuals visuals={word.visuals} terms={{ names: termNames, meaningOf, onClick: onRelatedClick }} />}
 
-    {/* 뉴스 — 기사마다 카드 하나 */}
+    {/* 뉴스 — 기사마다 카드 하나. 불러온 뒤 기사가 없으면 섹션째 숨긴다 */}
+    {(newsLoading || newsItems.length > 0) && (
     <div className="flex flex-col gap-3">
       <p className="flex items-center gap-1.5 px-1 pt-1 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><Newspaper size={13} />뉴스 속 {word.word}</p>
       {newsLoading ? (
@@ -127,12 +134,15 @@ const WordCard = ({
           </Card>
         ))}
         </div>
-      ) : newsItems.length > 0 ? (
-        // 가로로 넘기는 뉴스. 여기서 민 것은 단어 넘기기(화면 전체 슬라이드)로 가지 않게 막는다
+      ) : (
+        // 가로로 넘기는 뉴스
         <div
           className="-mx-5 px-5 scroll-px-5 flex gap-3 overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden"
           style={{ touchAction: 'pan-x pan-y' }}
-          onPointerDown={e => e.stopPropagation()}
+          onPointerDown={e => { newsDrag.current = { x: e.clientX, y: e.clientY, moved: false }; }}
+          onPointerMove={e => { const d = newsDrag.current; if (d && Math.hypot(e.clientX - d.x, e.clientY - d.y) > 8) d.moved = true; }}
+          onScroll={() => { if (newsDrag.current) newsDrag.current.moved = true; }}
+          onClickCapture={e => { if (newsDrag.current?.moved) { e.preventDefault(); e.stopPropagation(); } newsDrag.current = null; }}
         >
         {newsItems.map((item, i) => (
           <button
@@ -170,12 +180,9 @@ const WordCard = ({
           </button>
         ))}
         </div>
-      ) : (
-        <Card pad="none" className="px-5 py-4">
-          <p className="text-[13px] text-[var(--color-ink-4)]">관련 뉴스를 찾을 수 없어요</p>
-        </Card>
       )}
     </div>
+    )}
 
     {/* 관련 용어 */}
     {validRelated.length > 0 && (
@@ -254,9 +261,7 @@ const WordCardScreen = () => {
   // autoAdvance 완료 토스트. 잔고·XP 갱신은 word_progress 저장(2초 디바운스)이 끝난 뒤 AppContext가 한다.
   // 같은 완료에 effect가 다시 돌아도(단어 목록 참조 변경, dev StrictMode) 토스트는 한 번만
   const completedRef = useRef(false);
-  // 좌우 슬라이드: 손가락을 따라 움직이고, 놓으면 넘기거나 제자리로 돌아온다
-  const drag = useRef<{ x: number; y: number; axis: 'x' | 'y' | null } | null>(null);
-  const draggedRef = useRef(false);   // 가로로 끈 직후의 click(뉴스 링크 등)은 무시
+  // 이전·다음 버튼으로 넘길 때 화면이 옆으로 밀려나고 새 단어가 반대편에서 들어온다(손가락 스와이프는 없음 - 뉴스 가로 스크롤과 겹쳐서)
   const [dragX, setDragX] = React.useState(0);
   const [sliding, setSliding] = React.useState(false);
   useEffect(() => {
@@ -266,6 +271,11 @@ const WordCardScreen = () => {
     completedRef.current = true;
     feedbackLessonComplete();
   }, [wordIndex, words.length, autoAdvance]);
+
+  // 설명 글에서 강조할 다른 용어들(지금 단어는 빼고)
+  const curName = words[wordIndex]?.word;
+  const termNames = React.useMemo(() => allWords.map(w => w.word).filter(n => n !== curName), [allWords, curName]);
+  const meaningOf = React.useCallback((name: string) => allWords.find(w => w.word === name)?.meaning, [allWords]);
 
   // autoAdvance 완료 화면
   if (autoAdvance && words.length > 0 && wordIndex >= words.length) {
@@ -355,7 +365,7 @@ const WordCardScreen = () => {
     if (wordIndex > 0) setWordIndex(i => i - 1);
   };
 
-  // 왼쪽으로 밀면 다음, 오른쪽이면 이전. 넘길 수 없는 쪽은 저항감 있게 조금만 움직이고 돌아온다.
+  // 넘길 수 없는 쪽이면 제자리.
   const SLIDE_MS = 220;
   const canNext = autoAdvance || !lastWord;
   const canPrev = wordIndex > 0;
@@ -374,38 +384,6 @@ const WordCardScreen = () => {
       if (dir === 1) goNext(); else goPrev();
       requestAnimationFrame(() => requestAnimationFrame(() => settle(0)));
     });
-  };
-
-  const onDragStart = (e: React.PointerEvent) => {
-    if (sliding) return;
-    drag.current = { x: e.clientX, y: e.clientY, axis: null };
-    draggedRef.current = false;
-  };
-  const onDragMove = (e: React.PointerEvent) => {
-    const d = drag.current;
-    if (!d) return;
-    const dx = e.clientX - d.x;
-    const dy = e.clientY - d.y;
-    if (!d.axis) {
-      if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) d.axis = 'x';
-      else if (Math.abs(dy) > 8) d.axis = 'y';
-      else return;
-    }
-    if (d.axis !== 'x') return;
-    draggedRef.current = true;
-    setDragX((dx < 0 ? canNext : canPrev) ? dx : dx * 0.25);
-  };
-  const onDragEnd = (e: React.PointerEvent) => {
-    const d = drag.current;
-    drag.current = null;
-    if (!d || d.axis !== 'x') return;
-    const dx = e.clientX - d.x;
-    if (Math.abs(dx) > Math.min(80, width() * 0.2)) slide(dx < 0 ? 1 : -1);
-    else settle(0);
-  };
-  const onDragCancel = () => {
-    if (drag.current?.axis === 'x') settle(0);
-    drag.current = null;
   };
 
   const handleRelatedWordClick = (rawName: string) => {
@@ -432,16 +410,7 @@ const WordCardScreen = () => {
 
   return (
     <>
-    {/* 슬라이드 제스처는 화면 전체에서 받는다 */}
-    <div
-      className="flex flex-col h-full bg-[var(--color-canvas)] overflow-hidden"
-      style={{ touchAction: 'pan-y' }}
-      onPointerDown={onDragStart}
-      onPointerMove={onDragMove}
-      onPointerUp={onDragEnd}
-      onPointerCancel={onDragCancel}
-      onClickCapture={e => { if (draggedRef.current) { e.stopPropagation(); e.preventDefault(); draggedRef.current = false; } }}
-    >
+    <div className="flex flex-col h-full bg-[var(--color-canvas)] overflow-hidden">
 
       {/* 상단: 레슨 안의 단어 위치 */}
       <div className="px-5 pt-4 flex items-center justify-between gap-3">
@@ -462,7 +431,6 @@ const WordCardScreen = () => {
         ref={scrollRef}
         className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden pt-4"
         style={{
-          touchAction: 'pan-y',
           transform: `translateX(${dragX}px)`,
           transition: sliding ? `transform ${SLIDE_MS}ms cubic-bezier(0.25, 0.8, 0.25, 1)` : 'none',
         }}
@@ -476,13 +444,23 @@ const WordCardScreen = () => {
           newsItems={newsItems}
           newsLoading={newsLoading}
           keyword={word.word}
+          termNames={termNames}
+          meaningOf={meaningOf}
         />
         </div>
       </div>
 
-      {/* 하단: 다음. 스와이프로도 넘긴다 */}
+      {/* 하단: 이전 · 다음 */}
       <div className="px-5 pb-8 pt-3">
         <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => slide(-1)}
+            disabled={!canPrev}
+            className="flex-1 py-3.5 rounded-button bg-[var(--color-surface)] text-sm font-bold text-[var(--color-ink-2)] active:opacity-80 disabled:opacity-30 flex items-center justify-center gap-1"
+          >
+            <ChevronLeft size={16} />이전
+          </button>
           <button
             type="button"
             onClick={() => slide(1)}
@@ -495,7 +473,7 @@ const WordCardScreen = () => {
       </div>
     </div>
 
-    {/* 자세히 알아보기 — 스와이프 영역 밖(형제)에 둬서 시트 안을 밀어도 단어가 넘어가지 않는다 */}
+    {/* 자세히 알아보기 바텀시트 */}
     <BottomSheet
       open={detailOpen}
       onDimmerClick={() => setDetailOpen(false)}

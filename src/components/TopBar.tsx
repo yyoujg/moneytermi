@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import type React from 'react';
 import { BottomSheet } from '@toss/tds-mobile';
-import { Flame, Sparkles, Zap, BookOpen, Tv } from 'lucide-react';
+import { Zap, Tv } from 'lucide-react';
+import { StreakIcon, XpIcon, PointIcon, WordsIcon, STAT_COLOR } from './StatIcons';
 import { showModal } from './AlertModal';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
@@ -11,13 +14,34 @@ import { useCountUp } from '../hooks/useCountUp';
 import { feedbackClaim, feedbackBoost } from '../lib/feedback';
 import { PointCelebration, type PointReward } from './PointCelebration';
 
-// 모든 화면 상단 고정 바. 왼쪽 로고, 오른쪽에 아이콘 + 숫자만 나열한다(티어는 마이페이지에만).
-// 아이콘은 마이페이지 요약 카드와 같은 lucide 세트를 쓴다.
-// 포인트를 누르면 구매 시트가 열린다(광고 충전 / XP 2배 부스트).
+// 모든 화면 상단 고정 바. 아이콘 + 숫자만 나열한다(티어는 마이페이지에만).
+// 연속 학습·XP·배운 단어는 누르면 아래에 짧은 설명 말풍선, 포인트는 구매 시트(광고 충전 / XP 2배 부스트)가 열린다.
+type Tip = 'streak' | 'xp' | 'words';
+const TIP_W = 256;
 export const TopBar = () => {
   const { points, xp, boostUntil, knownWords, attendanceDates, claimAdReward, buyBoost, shopOpen, shopReason, openShop, closeShop } = useAppContext();
   const [now, setNow] = useState(() => Date.now());
   const [celebration, setCelebration] = useState<PointReward | null>(null);
+  const [tip, setTip] = useState<Tip | null>(null);
+  // 마이페이지는 같은 지표를 요약 카드로 보여주므로 바는 숨긴다(상점 시트는 다른 곳에서도 열리니 그대로 둔다)
+  const hideBar = useLocation().pathname === '/my';
+  const [tipPos, setTipPos] = useState({ left: 16, tail: 0 });   // 말풍선 위치: 아이콘 아래 가운데, 화면 밖으로 안 나가게 16px 안쪽에서 멈춘다
+
+  // 설명 말풍선은 3초 뒤 저절로 닫힌다. 같은 아이콘을 다시 누르면 바로 닫힌다
+  useEffect(() => {
+    if (!tip) return;
+    const t = setTimeout(() => setTip(null), 3000);
+    return () => clearTimeout(t);
+  }, [tip]);
+  const toggleTip = (t: Tip, e: React.MouseEvent<HTMLButtonElement>) => {
+    const bar = e.currentTarget.closest('[data-topbar]')!.getBoundingClientRect();
+    const btn = e.currentTarget.getBoundingClientRect();
+    const center = btn.left + btn.width / 2 - bar.left;
+    const left = Math.min(Math.max(center - TIP_W / 2, 16), bar.width - TIP_W - 16);
+    setTipPos({ left, tail: center - left });
+    logClick('topbar_tip', { tip: t });
+    setTip(cur => (cur === t ? null : t));
+  };
 
   const streak = calcStreak(attendanceDates);
   const boostLeft = boostUntil ? boostUntil - now : 0;
@@ -52,22 +76,42 @@ export const TopBar = () => {
   return (
     <>
       {/* 앱 이름·홈 이동은 토스 내비게이션 바가 맡는다. 자체 로고 헤더를 두면 검수에서 '자체 헤더 중복'으로 반려된다(2026-09-29) */}
-      <div className="shrink-0 h-12 flex items-center justify-end px-5 bg-[var(--color-card)] border-b border-[var(--color-line)]">
+      {!hideBar && <div data-topbar className="relative z-40 shrink-0 h-12 flex items-center justify-end px-5 bg-[var(--color-card)] border-b border-[var(--color-line)]">
 
-        <div className="flex items-center gap-3 text-sm font-bold text-[var(--color-ink-2)]">
-          <span className="flex items-center gap-1"><Flame size={15} className="text-brand-500 fill-current" /><span key={streak} className="anim-bump">{streak}</span></span>
-          <span className="flex items-center gap-1"><Sparkles size={15} className="text-brand-500" /><span key={xp} className="anim-bump">{xpShown.toLocaleString()}</span></span>
-          <button onClick={() => openShop()} aria-label="포인트 상점" className="flex items-center gap-1 active:opacity-60">
-            <Zap size={15} className="text-brand-500 fill-current" /><span key={points} className="anim-bump">{pointsShown.toLocaleString()}</span>
+        <div className="flex items-center gap-3 text-sm font-bold text-brand-500">
+          <button onClick={e => toggleTip('streak', e)} aria-label="연속 학습" className="flex items-center gap-1 active:opacity-60">
+            <StreakIcon size={15} /><span key={streak} className="anim-bump" style={{ color: STAT_COLOR.streak }}>{streak}</span>
           </button>
-          <span className="flex items-center gap-1"><BookOpen size={15} className="text-brand-500" /><span key={knownWords.length} className="anim-bump">{knownWords.length}</span></span>
+          <button onClick={e => toggleTip('xp', e)} aria-label="경험치" className="flex items-center gap-1 active:opacity-60">
+            <XpIcon size={15} /><span key={xp} className="anim-bump" style={{ color: STAT_COLOR.xp }}>{xpShown.toLocaleString()}</span>
+          </button>
+          <button onClick={() => { setTip(null); openShop(); }} aria-label="포인트 상점" className="flex items-center gap-1 active:opacity-60">
+            <PointIcon size={15} /><span key={points} className="anim-bump" style={{ color: STAT_COLOR.points }}>{pointsShown.toLocaleString()}</span>
+          </button>
+          <button onClick={e => toggleTip('words', e)} aria-label="배운 단어" className="flex items-center gap-1 active:opacity-60">
+            <WordsIcon size={16} /><span key={knownWords.length} className="anim-bump" style={{ color: STAT_COLOR.words }}>{knownWords.length}</span>
+          </button>
           {boostLeft > 0 && (
             <span className="text-xs font-bold text-brand-500">
               ×2 {Math.floor(boostLeft / 60000)}:{String(Math.floor((boostLeft % 60000) / 1000)).padStart(2, '0')}
             </span>
           )}
         </div>
-      </div>
+
+        {tip && (
+          <div role="status" onClick={() => setTip(null)} style={{ left: tipPos.left, width: TIP_W }} className="absolute top-full mt-2 rounded-chip bg-[#222] px-4 py-3 shadow-lg anim-pop-in">
+            <span className="absolute -top-1 w-2.5 h-2.5 rotate-45 bg-[#222]" style={{ left: tipPos.tail - 5 }} />
+            <p className="relative text-xs font-bold text-white">
+              {tip === 'streak' ? `연속 학습 ${streak}일` : tip === 'xp' ? `경험치(XP) ${xp.toLocaleString()}` : `배운 단어 ${knownWords.length}개`}
+            </p>
+            <p className="relative mt-1 text-2xs text-white leading-relaxed break-keep">
+              {tip === 'streak' ? '오늘까지 하루도 빠지지 않고 학습한 날 수예요. 하루라도 쉬면 처음부터 다시 세요.'
+                : tip === 'xp' ? `학습과 퀴즈로 쌓여요. 리그 순위와 성장 단계는 XP로 정해지고, XP ${XP_BONUS_STEP}마다 ${XP_BONUS_POINTS}P를 더 받아요.`
+                : '학습을 마친 단어 수예요. 같은 단어를 다시 배워도 늘지 않아요.'}
+            </p>
+          </div>
+        )}
+      </div>}
 
       <BottomSheet
         open={shopOpen}
@@ -78,7 +122,7 @@ export const TopBar = () => {
           {shopReason === 'lesson' && (
             <p className="text-sm font-bold text-[var(--color-ink)] mb-1 break-keep">레슨을 시작하려면 {LESSON_COST}P가 필요해요</p>
           )}
-          <p className="flex items-center gap-1 text-xs text-[var(--color-ink-3)] mb-1">보유 <Zap size={12} className="text-brand-500 fill-current" />{points.toLocaleString()}P</p>
+          <p className="flex items-center gap-1 text-xs text-[var(--color-ink-3)] mb-1">보유 <PointIcon size={12} />{points.toLocaleString()}P</p>
 
           {/* 레슨이 막혀서 열렸을 땐 광고가 주행동이라 채운 버튼으로 */}
           <button
