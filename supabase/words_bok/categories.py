@@ -75,6 +75,48 @@ ASSIGN = """
 """
 
 
+# ── 4단계 레벨 (2026-09-29) ─────────────────────────────────────────────
+# 1 기초 = 뉴스 기본 단어를 안다 / 2 중급 = 변수끼리 연결한다 / 3 고급 = 메커니즘을 설명한다 / 4 심화 = 모형·제도 세부.
+# 주제별 기본 레벨을 두고, 로드맵 핵심어와 기본값에서 벗어나는 단어만 LEVEL_OVERRIDES로 고친다.
+# 코스 = 레벨 순 -> 그 안에서 TOPICS 순 -> 25개 단위. 앞 코스를 끝내야 다음 코스가 열린다.
+LEVEL_NAMES = {1: '기초', 2: '중급', 3: '고급', 4: '심화'}
+TOPIC_LEVEL = {1: 1, 2: 1, 3: 2, 4: 2, 5: 2, 6: 2, 7: 2, 8: 2, 9: 3, 10: 2, 11: 2, 12: 3, 13: 2, 14: 4, 15: 4, 16: 2, 17: 2}
+LEVEL_OVERRIDES = """
+49:2 52:2 148:2 154:2 155:3 181:2 232:2 234:2 237:2 258:2 259:2 315:2 317:2 324:2 406:2 476:2 509:2 511:2 521:3 590:2 627:3 644:2
+782:2 790:2 791:2 792:3 795:2 796:2 797:3 798:4 799:2
+3:2 308:2 309:2 311:2 338:2 378:2 380:2 496:2 512:2 554:2 564:2
+454:1 191:1 310:1 219:1 286:1 291:1 363:1 35:2 68:2
+22:1 29:1 69:1 77:1 74:1 764:3 51:4 71:4 72:4 145:4 247:3 251:4 265:4 277:4 284:4 285:3 319:4 387:4 414:4 415:4 489:3 493:4 674:4
+579:3 585:3 745:3 531:3 557:4 623:4 639:3 640:3 664:4 163:3 34:3 36:3 143:3 707:3 175:3 76:3 723:3 70:3 79:3 44:3 576:3 624:3
+470:3 287:3 288:3 289:3 518:3 138:3 165:3 28:3
+39:1 583:1 573:1 33:1 720:1 721:1 650:1 451:1 508:1 740:1 609:1 637:1 364:1
+477:3 763:3 642:3 236:3 162:3 362:3 441:3 168:3
+142:1 749:1 750:1 536:1 646:1 41:1 238:1 617:1
+762:3 765:3 607:4 619:3 638:3 200:4 209:4 616:3 428:3 274:3 513:3 114:3 346:3 125:4 172:4 54:3 106:3 618:4 620:4 621:4 613:4 385:4
+614:4 615:3 622:3 549:3 584:3 597:3 598:3 599:3 668:3 685:4 708:4 711:4 689:3 217:4
+96:3 100:3 110:3 119:3 120:3 121:3 180:3 443:3 563:3 742:3 710:3 5:3 21:3 719:3 392:3 389:3 630:3 746:3 228:3 379:3 130:3
+528:1 570:1 92:1 524:1 673:1 136:1 766:3 767:3 768:3 769:3 777:3 231:3 169:4 725:4 187:4 252:4 735:4 301:3 358:3 423:4 447:4
+449:3 499:3 520:3 569:4 610:4 633:3 688:3 701:4 703:4 704:3 705:4 713:3 714:3 595:3 675:3 56:3 357:3 507:3 127:3 42:3 484:3 542:3 571:3
+280:1 294:1 220:2 208:2 199:2 729:2 426:2 194:2 295:2 396:2 331:2 600:2 632:2 523:2 593:2 652:2 78:2 397:2 538:2
+351:4 580:4 682:4 626:4 246:4
+751:1 412:1 410:1 672:1 747:1 107:3 59:3 778:3 779:4 260:3 278:3 332:4 333:4 296:3 297:4 566:3 330:3 206:3 730:3 177:3 222:3
+245:4 344:4 345:4 399:4 400:4 401:4 402:4 403:4 404:4 407:3 408:4 411:3 413:4 421:4 651:4 656:4 671:3 608:3 469:3 492:3 57:3
+26:1 244:1 479:1 266:1 243:1 83:4 90:3 250:4 320:3 384:4 439:4 446:3 458:3 555:4 649:3 669:4 158:4 151:3 532:3 533:3 657:3 654:3 700:3
+321:3 216:3 323:3 248:3
+88:2 302:2 303:2 102:2 184:2 62:2 86:1 190:2 728:2 262:2 263:2 432:2 433:2 692:2 691:2 690:2 605:2 455:2 32:2 215:2 335:2 101:2
+686:4 698:4 699:4 367:4 281:4 87:4
+10:1 718:1 75:1 63:1 490:1 491:1 586:1 192:2 467:2
+188:2 253:2 352:2 429:2 465:2 678:2 111:2 117:2 349:2 339:3 98:3 770:3 771:3 341:3 342:3 15:3 23:3 113:3 153:3 195:3 43:3 182:3
+343:3 418:3 716:3 112:3 128:3 115:3 417:3
+235:1 424:1 560:1 298:1 588:1 157:1 198:2 360:2 737:2 505:2 661:2 131:2 653:2 552:2 712:2 706:2 696:2 464:2 660:2 437:2 329:2
+340:3 662:3 663:3 655:3 223:3 229:3 734:3 715:3
+268:1 7:1 641:1 214:1 453:1 11:1 58:1 500:1 290:1 269:1 677:1 684:1 257:3 481:3 390:3 635:3 193:3 122:3
+382:2 702:2 785:1 772:3 773:3 774:4 775:4 776:4 788:3 789:3 793:3 565:3 568:4 697:4 91:3 179:3 160:3 405:3 416:3
+"""
+LEVEL_TITLES = {1: '기초 - 경제 뉴스의 기본 단어', 2: '중급 - 용어끼리 연결하기', 3: '고급 - 경제 메커니즘 설명하기', 4: '심화 - 모형과 제도 깊이 보기'}
+MERGE_BELOW = 5   # 레벨 안에서 이보다 작은 주제는 앞 코스에 붙인다
+
+
 def load_words():
     words = {}
     for f in sorted(glob.glob(str(HERE / '*_words_*.sql'))):
@@ -91,25 +133,46 @@ def main():
         assert wid not in assign, f'중복 {wid}'
         assert 1 <= t <= len(TOPICS), f'주제 범위 밖 {wid}:{t}'
         assign[wid] = t
-    assert set(assign) == set(words), f'누락 {sorted(set(words) - set(assign))} / 초과 {sorted(set(assign) - set(words))}'
 
-    by_topic = {i: sorted(w for w, t in assign.items() if t == i) for i in range(1, len(TOPICS) + 1)}
+    import new_words   # 순환 import 회피: new_words가 categories를 import한다
+    for n in new_words.NEW:
+        assign[n[0]] = n[4]
+    level = {w: TOPIC_LEVEL[t] for w, t in assign.items()}
+    for tok in LEVEL_OVERRIDES.split():
+        wid, lv = map(int, tok.split(':'))
+        assert wid in assign and 1 <= lv <= 4, f'레벨 오류 {tok}'
+        level[wid] = lv
+    for n in new_words.NEW:
+        level[n[0]] = n[5]
+    assert set(assign) == set(words), f'누락 {sorted(set(words) - set(assign))} / 초과 {sorted(set(assign) - set(words))}'
 
     courses, course_words = [], []
     order = 0
-    for ti, (cat, level) in enumerate(TOPICS, 1):
-        ids = by_topic[ti]
-        n_courses = -(-len(ids) // COURSE_MAX)
-        base, extra = divmod(len(ids), n_courses)   # 균등 분배
-        pos = 0
-        for ci in range(n_courses):
-            size = base + (1 if ci < extra else 0)
-            chunk = ids[pos:pos + size]; pos += size
-            order += 1
-            cid = f't{ti:02d}_{ci + 1}'
-            title = cat if n_courses == 1 else f'{cat} {ci + 1}'
-            courses.append((cid, level, title, f'{len(chunk)}개 용어', cat, order))
-            course_words += [(cid, w, p + 1) for p, w in enumerate(chunk)]
+    for lv in (1, 2, 3, 4):
+        groups = []   # [(cat, ti, ids)]
+        for ti, (cat, _) in enumerate(TOPICS, 1):
+            ids = sorted(w for w, t in assign.items() if t == ti and level[w] == lv)
+            if not ids:
+                continue
+            if len(ids) < MERGE_BELOW and groups:
+                groups[-1][2].extend(ids)   # 작은 주제는 앞 코스에 붙인다
+            else:
+                groups.append((cat, ti, ids))
+        if groups and len(groups[0][2]) < MERGE_BELOW and len(groups) > 1:   # 맨 앞이 작으면 다음에 붙인다
+            small = groups.pop(0); groups[0][2][:0] = small[2]
+        for cat, ti, ids in groups:
+            n_courses = -(-len(ids) // COURSE_MAX)
+            base, extra = divmod(len(ids), n_courses)
+            pos = 0
+            for ci in range(n_courses):
+                size = base + (1 if ci < extra else 0)
+                chunk = ids[pos:pos + size]; pos += size
+                order += 1
+                cid = f'l{lv}_t{ti:02d}_{ci + 1}'
+                title = cat if n_courses == 1 else f'{cat} {ci + 1}'
+                courses.append((cid, LEVEL_NAMES[lv], title, f'{len(chunk)}개 용어', cat, order))
+                course_words += [(cid, w, p + 1) for p, w in enumerate(chunk)]
+    by_topic = {i: sorted(w for w, t in assign.items() if t == i) for i in range(1, len(TOPICS) + 1)}
 
     q = lambda s: "'" + s.replace("'", "''") + "'"
     out = [
@@ -134,17 +197,17 @@ def main():
             '-- 확인:', f'-- SELECT count(*) FROM public.courses;       -- {len(courses)}',
             f'-- SELECT count(*) FROM public.course_words;  -- {len(course_words)}',
             "-- SELECT category, count(*) FROM public.courses c JOIN public.course_words cw ON cw.course_id = c.id GROUP BY 1 ORDER BY min(sort_order);"]
-    first, rest = stmts[:21], stmts[21:]
     for old in HERE.glob('17_courses*.sql'):
         old.unlink()
-    (HERE / '17_courses_1.sql').write_text('\n'.join(out + [''] + first) + '\n')
-    (HERE / '17_courses_2.sql').write_text('\n'.join(['-- ===== 코스 재분류 2/2 (categories.py 생성) — 17_courses_1.sql 다음에 실행 =====', ''] + rest + tail) + '\n')
+    parts = [stmts[:21]] + [stmts[i:i + 22] for i in range(21, len(stmts), 22)]
+    for k, part in enumerate(parts, 1):
+        head = out + [''] if k == 1 else ['-- ===== 코스 재분류 %d/%d (categories.py 생성) - 앞 번호 파일 다음에 실행 =====' % (k, len(parts)), '']
+        (HERE / f'17_courses_{k}.sql').write_text('\n'.join(head + part + (tail if k == len(parts) else [])) + '\n')
 
-    for ti, (cat, level) in enumerate(TOPICS, 1):
-        ids = by_topic[ti]
-        print(f'\n## {ti}. {cat} ({level}) — {len(ids)}개')
-        print(', '.join(words[w] for w in ids))
-    print(f'\n코스 {len(courses)}개 / 연결 {len(course_words)}행')
+    for c in courses:
+        print(f'{c[5]:>2} {c[0]:<11} {c[1]} {c[2]} ({c[3]})')
+    print(f'\n코스 {len(courses)}개 / 연결 {len(course_words)}행 / 파일 {len(parts)}개')
+    print({LEVEL_NAMES[lv]: sum(1 for v in level.values() if v == lv) for lv in (1, 2, 3, 4)})
 
 
 if __name__ == '__main__':

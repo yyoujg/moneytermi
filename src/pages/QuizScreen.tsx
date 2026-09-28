@@ -37,7 +37,10 @@ const QuizScreen = () => {
       setRandomQueue([...knownWords].sort(() => Math.random() - 0.5).slice(0, 10));
     }
   }, [knownWords]);
-  const quizQueue: Word[] = passedQueue.length > 0 ? passedQueue : randomQueue;
+  const baseQueue: Word[] = passedQueue.length > 0 ? passedQueue : randomQueue;
+  // 틀린 문제는 끝에 다시 붙인다 — 전부 맞힐 때까지 끝나지 않고, 그 전엔 노드도 완료되지 않는다
+  const [retryQueue, setRetryQueue] = useState<Word[]>([]);
+  const quizQueue: Word[] = [...baseQueue, ...retryQueue];
 
   const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
   // 티어는 XP 기준이다. 부스트로 배수가 붙을 수 있어 클라에서 계산하지 않고 시작 시점 값을 기억한다.
@@ -116,7 +119,7 @@ const QuizScreen = () => {
           <div className="text-6xl anim-pop-in">🎉</div>
           <div className="text-center anim-fade-up" style={{ '--i': 1 } as React.CSSProperties}>
             <h2 className="text-2xl font-bold text-[var(--color-ink)] mb-1!">퀴즈 완료!</h2>
-            <p className="text-sm text-[var(--color-ink-4)]">{quizQueue.length}문제 완료</p>
+            <p className="text-sm text-[var(--color-ink-4)]">{baseQueue.length}문제 완료{retryQueue.length > 0 && ` · 다시 푼 문제 ${retryQueue.length}개`}</p>
           </div>
 
           {/* 결과 카드 */}
@@ -173,7 +176,9 @@ const QuizScreen = () => {
     );
   }
 
-  const progressPercent = (currentQuizIndex / quizQueue.length) * 100;
+  // 진행률 = 맞힌 문제 / 원래 문제 수. 틀린 문제가 뒤에 붙어도 줄지 않는다(단어마다 정답은 한 번뿐이라 correctCount가 곧 끝낸 수)
+  const progressPercent = (correctCount / baseQueue.length) * 100;
+  const retrying = currentQuizIndex >= baseQueue.length;
 
   const handleSelect = async (option: QuizOption) => {
     if (status !== 'idle') return;
@@ -205,6 +210,7 @@ const QuizScreen = () => {
       setStatus('wrong');
       setShake(true);
       setTimeout(() => setShake(false), 500);
+      setRetryQueue(q => [...q, currentWord]);
       // 서버 콤보도 초기화 (오답 기록). 다음 정답 응답과 순서가 뒤바뀌지 않게 기다린다. 정답을 보여주고 계속하기로 다음 문제.
       await submitQuizAnswer(currentWord.id, option.answer, 'mc', false, currentQuizIndex === 0);
     }
@@ -227,7 +233,7 @@ const QuizScreen = () => {
       {/* 헤더 */}
       <div className="bg-brand-500 rounded-b-card pt-4 px-5 pb-4 flex flex-col">
       <div className="flex justify-between items-center">
-        <span className="text-xs font-bold text-white/80">{currentQuizIndex + 1} / {quizQueue.length}</span>
+        <span className="text-xs font-bold text-white/80">{retrying ? `다시 풀기 · 남은 ${quizQueue.length - currentQuizIndex}문제` : `${currentQuizIndex + 1} / ${baseQueue.length}`}</span>
         {/* 획득 포인트 팝업 (보유 포인트는 상단바에 있다) */}
         <div className="relative h-5 w-12">
           {showPointPop && (
@@ -250,7 +256,7 @@ const QuizScreen = () => {
           </span>
         ) : (
           <span className="relative text-xs font-bold text-brand-500">
-            {progressPercent < 34 ? '가볍게 시작해봐요' : progressPercent < 67 ? '벌써 절반 왔어요' : '거의 다 왔어요!'}
+            {retrying ? '틀린 문제를 다시 풀어봐요' : progressPercent < 34 ? '가볍게 시작해봐요' : progressPercent < 67 ? '벌써 절반 왔어요' : '거의 다 왔어요!'}
           </span>
         )}
         <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rotate-45 bg-[var(--color-card)]" />

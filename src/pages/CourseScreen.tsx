@@ -4,12 +4,15 @@ import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
 import { LESSON_COST } from '../constants';
-import { feedbackNodeTap, feedbackSpend } from '../lib/feedback';
+import { feedbackNodeTap } from '../lib/feedback';
 import { loadDoneNodes } from '../lib/pathProgress';
 import { buildPath, connectorD, NODE, nodeOffsetX, ROW, SPAN, sectionColor, type PathNode } from '../lib/path';
 
 // 노드 원. TDS 리셋이 <button>의 rounded-*를 먹으므로 borderRadius는 인라인 스타일로 준다
 // (인라인이 unlayered 리셋을 이긴다). button을 유지해야 포커스/Enter/disabled가 공짜로 따라온다.
+// 레벨 이름은 courses.level (words_bok/categories.py LEVEL_NAMES)
+const LEVEL_TITLES: Record<string, string> = { 기초: '경제 뉴스의 기본 단어', 중급: '용어끼리 연결하기', 고급: '경제 메커니즘 설명하기', 심화: '모형과 제도 깊이 보기' };
+
 const NodeCircle = ({ node, index, color, isFocus, onTap, nodeRef }: {
   node: PathNode;
   index: number;
@@ -35,6 +38,7 @@ const NodeCircle = ({ node, index, color, isFocus, onTap, nodeRef }: {
       ref={nodeRef}
       type="button"
       disabled={locked}
+      data-own-sfx
       onClick={onTap}
       aria-label={`${node.type === 'quiz' ? '퀴즈' : node.type === 'review' ? '누적 복습' : '학습'} ${index + 1}`}
       className={`absolute flex items-center justify-center active:translate-y-[3px] disabled:opacity-50 disabled:pointer-events-none ${isFocus ? 'animate-node-hop' : ''}`}
@@ -125,7 +129,7 @@ const CourseScreen = () => {
     try {
       if (!(await spendPoints(LESSON_COST, 'lesson'))) { openShop('lesson'); return; }
     } finally { spending.current = false; }
-    feedbackSpend();
+    feedbackNodeTap();
     navigate('/word-card', { state: { words: node.words, index: 0, backPath: '/course', autoAdvance: true } });
   };
 
@@ -138,6 +142,13 @@ const CourseScreen = () => {
         const color = sectionColor(si);
         return (
         <section key={sec.course.id} ref={sec.course.id === focus?.courseId ? focusSectionRef : undefined}>
+          {/* 레벨이 바뀌는 첫 코스 위에 레벨 제목 */}
+          {LEVEL_TITLES[sec.course.level] && sec.course.level !== sections[si - 1]?.course.level && (
+            <div className="mx-5 mt-8 flex items-center gap-2">
+              <span className="px-2.5 py-1 bg-brand-500 text-white text-2xs font-black" style={{ borderRadius: 9999 }}>{sec.course.level}</span>
+              <span className="text-sm font-bold text-[var(--color-ink-2)]">{LEVEL_TITLES[sec.course.level]}</span>
+            </div>
+          )}
           {/* 코스 배너 */}
           <div className="sticky top-4 z-10 mx-5 mt-5 mb-1 rounded-card px-5 py-4 shadow-md" style={{ background: color.face }}>
             <p className="text-2xs font-bold text-white/70">{sec.course.level} · 코스 {si + 1}/{sections.length}</p>

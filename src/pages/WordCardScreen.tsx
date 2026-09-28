@@ -18,6 +18,8 @@ import { WordVisuals } from '../components/WordVisuals';
 import { termPattern } from '../lib/quiz';
 
 
+const SOURCE_NAMES: Record<string, string> = { bok800: '한국은행 경제금융용어 800선', tesat: 'TESAT' };
+
 const stripHtml = (s: string) => {
   const tmp = document.createElement('div');
   tmp.innerHTML = s.replace(/<[^>]*>/g, '');
@@ -93,6 +95,9 @@ const WordCard = ({
       {/* 뜻 — 단어와 같은 카드 */}
       <div className="mt-3">
         <p className="text-sm text-[var(--color-ink-2)] font-normal break-keep leading-[1.7] tracking-[-0.01em]">{word.meaning}</p>
+        {word.sources && word.sources.length > 0 && (
+          <p className="mt-2 text-3xs text-[var(--color-ink-4)]">{word.sources.map(s => SOURCE_NAMES[s] ?? s).join(' · ')} 참고</p>
+        )}
       </div>
       {onDetail && (
         <button
