@@ -161,28 +161,29 @@ const QuizPage = () => {
   return (
     <div className="flex flex-col h-full bg-[var(--color-canvas)] pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
       {/* 헤더 */}
-      <div className="bg-[var(--color-card)] pt-4 px-5 pb-4 border-b border-[var(--color-line)]">
-        <div className="flex justify-between items-center mb-3">
-          <h2 className="text-xl font-bold text-[var(--color-ink)]">복습</h2>
+      <div className="bg-brand-500 rounded-b-card pt-4 px-5 pb-5">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-white">복습</h2>
           {/* 보유 포인트는 상단바에 있다 */}
           {combo >= 2 && (
-            <div className="flex items-center gap-0.5 bg-brand-500 text-white text-2xs font-bold px-2.5 py-1 rounded-full">
+            <div className="flex items-center gap-0.5 bg-white text-brand-500 text-2xs font-bold px-2.5 py-1 rounded-full">
               <Flame size={11} className="fill-current" />{combo}연속
             </div>
           )}
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex-1 bg-[var(--color-line)] rounded-full h-1.5 overflow-hidden">
-            <div className="bg-brand-400 h-full rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+          <div className="relative flex-1 bg-white/25 rounded-full h-1.5">
+            <div className="bg-white h-full rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+            <span className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 text-base leading-none transition-all duration-300" style={{ left: `${progress}%` }}>🙂</span>
           </div>
-          <span className="text-xs font-bold text-[var(--color-ink-3)] shrink-0">{index + 1} / {queue.length}</span>
+          <span className="text-xs font-bold text-white/80 shrink-0">{index + 1} / {queue.length}</span>
         </div>
       </div>
 
       <div className="flex-1 flex flex-col px-5 py-4">
         {/* 문제 카드 */}
         <Card key={word.id} pad="lg" className="mb-4 flex-1 anim-slide-in">
-          <p className="text-2xs font-medium text-[var(--color-ink-4)] mb-3! tracking-wide uppercase">뜻을 보고 용어를 맞혀보세요</p>
+          <p className="inline-block border border-[var(--color-line)] px-3 py-1 text-2xs font-bold text-brand-500 mb-3!" style={{ borderRadius: 9999 }}>뜻을 보고 용어를 맞혀보세요</p>
 
           <p className="text-lg font-bold text-[var(--color-ink)] leading-relaxed mb-6!">{maskTerm(word.meaning, word.word)}</p>
 

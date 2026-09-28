@@ -10,6 +10,8 @@ import { logClick } from '../lib/analytics';
 import { missionSlot, msUntilNextSlot, toDateStr } from '../lib/date';
 import { nextSrs, gradeFromResult, addDays } from '../lib/srs';
 import { DAILY_REVIEW_CAP, MISSION_XP } from '../constants';
+import { PointCelebration, type PointReward } from '../components/PointCelebration';
+import { feedbackClaim } from '../lib/feedback';
 
 type WpRow = { word_id: number; ease: number; interval_d: number; reps: number; due_date: string };
 
@@ -112,6 +114,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         newsExample: w.news_example,
         hint: w.hint,
         relatedWords: w.related_words ?? [],
+        visuals: w.visuals ?? undefined,
       } as Word]));
 
       const builtCourses: Course[] = coursesData.map((c: any) => ({
@@ -444,6 +447,23 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     return { xpGained };
   };
 
+  // ── 미션 자동 수령: 달성하는 순간 받는다 (받기 버튼 없음) ──────────
+  // 동시에 여러 개 달성하면 모달을 차례로 하나씩 띄운다
+  const [missionRewards, setMissionRewards] = useState<PointReward[]>([]);
+  // claimReward가 claimingRef로 중복을 막는다. 실패(서버가 아직 진행도를 반영 전 등)는 다음 미션 갱신 때 다시 시도된다.
+  useEffect(() => {
+    if (!ready || !profileIdRef.current) return;
+    Object.values(missions).forEach(m => {
+      if (m.current < m.target || m.isRewarded) return;
+      claimReward(m.id).then(res => {
+        if (!res) return;
+        feedbackClaim();
+        setMissionRewards(q => [...q, { points: m.reward, xp: res.xpGained, source: 'mission' }]);
+      });
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [missions, ready]);
+
   // ── claimReferralReward — 친구초대(contactsViral) 리워드, 서버가 상한 적용 후 적립 ──
   const claimReferralReward = async (amount: number, unit: string) => {
     const { data, error } = await dbRef.current.rpc('claim_referral_reward', {
@@ -601,6 +621,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       updateMyEmoji,
     }}>
       {children}
+      {missionRewards[0] && (
+        <PointCelebration key={missionRewards.length} reward={missionRewards[0]} onClose={() => setMissionRewards(q => q.slice(1))} />
+      )}
     </AppContext.Provider>
   );
 };
