@@ -114,10 +114,10 @@ export function feedbackCorrect(_sound?: boolean, _vib?: boolean, combo = 1) {
   if (!playFile(combo >= 5 ? 'combo_max' : combo >= 3 ? 'combo' : 'correct')) play(notes);
 }
 
-// 오답: 낮은 버저 + error
+// 오답: 부드럽게 내려가는 두 음 '뚜둥' (예전 낮은 버저에서 교체, 후보 5개 중 사용자가 고름) + error
 export function feedbackWrong() {
   hapticSeq([['error', 0], ['error', 160], ['error', 320]]);
-  if (!playFile('wrong')) play([{ f: 180, dur: 0.26, type: 'sawtooth', vol: 0.16 }]);
+  if (!playFile('wrong')) play([{ f: 392, dur: 0.12, vol: 0.2 }, { f: 311, at: 0.12, dur: 0.22, vol: 0.2 }]);
 }
 
 // 단어 하나 학습 완료 ("좋아요!" 패널): 부드러운 딩

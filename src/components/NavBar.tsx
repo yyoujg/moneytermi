@@ -46,7 +46,7 @@ const NavBar = () => {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className="flex flex-col items-center justify-center gap-0.5 px-1.5 py-0.5 transition-all duration-200"
+              className="flex flex-col items-center justify-center gap-1.5 px-1.5 py-0.5 transition-all duration-200"
             >
               <div className={`w-12 h-8 flex items-center justify-center rounded-full transition-all duration-200 ${isActive ? 'bg-brand-500 text-white' : 'text-[var(--color-ink-4)]'}`}>
                 <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />

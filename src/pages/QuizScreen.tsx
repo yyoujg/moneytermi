@@ -248,22 +248,26 @@ const QuizScreen = () => {
         </div>
       </div>
 
-      {/* 말풍선: 연속 정답이면 스트릭, 아니면 진행 격려 */}
-      <div className="relative self-center mt-2 bg-[var(--color-card)] rounded-chip px-4 py-2">
+      {/* 말풍선: 연속 정답이면 스트릭, 아니면 진행 격려. 문구가 바뀔 때마다 톡 튀어나오고 평소엔 살짝 둥실거린다.
+          TDS 리셋이 여백 유틸을 덮어써서 ! 로 고정 */}
+      <div className="self-center mt-3!" style={{ animation: 'bubbleBob 2.4s ease-in-out infinite' }}>
+      <div key={streakMessage?.text ?? (retrying ? 'r' : progressPercent < 34 ? 'a' : progressPercent < 67 ? 'b' : 'c')}
+        className="relative bg-[var(--color-card)] rounded-chip px-4! py-2! shadow-sm anim-pop-in">
         {streakMessage ? (
-          <span className={`relative flex items-center gap-1 text-xs font-bold ${streakMessage.color}`}>
+          <span className={`relative flex items-center gap-1 text-xs leading-[1.4]! font-bold ${streakMessage.color}`}>
             <streakMessage.Icon size={13} className="fill-current" />{streakMessage.text}
           </span>
         ) : (
-          <span className="relative text-xs font-bold text-brand-500">
+          <span className="relative block text-xs leading-[1.4]! font-bold text-brand-500">
             {retrying ? '틀린 문제를 다시 풀어봐요' : progressPercent < 34 ? '가볍게 시작해봐요' : progressPercent < 67 ? '벌써 절반 왔어요' : '거의 다 왔어요!'}
           </span>
         )}
         <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rotate-45 bg-[var(--color-card)]" />
       </div>
+      </div>
 
       {/* 진행 바: 이모지 thumb + % */}
-      <div className="flex items-center gap-3 mt-4">
+      <div className="flex items-center gap-3 mt-5!">
         <div className="relative flex-1 bg-white/25 rounded-full h-1.5">
           <div className="bg-white h-full rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
           <span className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 text-lg leading-none transition-all duration-500" style={{ left: `${progressPercent}%` }}>🙂</span>
@@ -274,6 +278,10 @@ const QuizScreen = () => {
 
       {/* 애니메이션 */}
       <style>{`
+        @keyframes bubbleBob {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-3px); }
+        }
         @keyframes fadeUp {
           0% { opacity: 1; transform: translateY(0); }
           100% { opacity: 0; transform: translateY(-16px); }
@@ -301,7 +309,8 @@ const QuizScreen = () => {
           ${status === 'correct' ? 'flash-correct' : 'bg-[var(--color-card)]'}
           ${shake ? 'shake' : ''}
         `}>
-          <span className="border border-[var(--color-line)] px-3 py-1 text-2xs font-bold text-brand-500" style={{ borderRadius: 9999 }}>{quizItem?.promptLabel}</span>
+          {/* 질문 문구는 알약 모양 말풍선(격려 문구)과 헷갈리지 않게 테두리 없는 회색 글자로 */}
+          <span className="text-sm font-semibold text-[var(--color-ink-3)]">{quizItem?.promptLabel}</span>
 
           <p className="text-xl font-bold text-[var(--color-ink)] leading-snug break-keep">{quizItem?.promptMain}</p>
 

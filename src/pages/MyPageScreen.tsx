@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { BookOpen, Settings, ChevronRight, Zap, Flame, Sparkles, Pencil, CircleHelp } from 'lucide-react';
+import { Settings, ChevronRight, Pencil, CircleHelp } from 'lucide-react';
+import { StreakIcon, XpIcon, PointIcon, WordsIcon } from '../components/StatIcons';
 import { useAppContext } from '../context/AppContext';
 import { DEFAULT_NICKNAME, getGrowthStage } from '../constants';
 import { calcStreak } from '../lib/streak';
@@ -88,17 +89,17 @@ const MyPageScreen = () => {
         <Card tone="surface" pad="md" className="anim-fade-up">
           <div className="flex items-stretch">
             {[
-              { icon: <Flame size={14} className="text-brand-500 fill-current" />, label: '연속 학습', value: streak, unit: '일' },
-              { icon: <Sparkles size={14} className="text-brand-500" />, label: 'XP', value: xp.toLocaleString(), unit: '' },
-              { icon: <Zap size={14} className="text-brand-500 fill-current" />, label: '포인트', value: points.toLocaleString(), unit: 'P' },
-              { icon: <BookOpen size={14} className="text-brand-500" />, label: '학습한 단어', value: knownWords.length, unit: '개' },
+              { icon: <StreakIcon size={14} />, label: '연속 학습', value: streak, unit: '일' },
+              { icon: <XpIcon size={14} />, label: 'XP', value: xp.toLocaleString(), unit: '' },
+              { icon: <PointIcon size={14} />, label: '포인트', value: points.toLocaleString(), unit: 'P' },
+              { icon: <WordsIcon size={15} />, label: '학습한 단어', value: knownWords.length, unit: '개' },
             ].map((it, i, arr) => (
               <div key={it.label} className={`flex-1 flex flex-col items-center gap-1 ${i < arr.length - 1 ? 'border-r border-[var(--color-line)]' : ''}`}>
                 <div className="flex items-center gap-1">
                   {it.icon}
                   <span className="text-3xs font-medium text-[var(--color-ink-4)] whitespace-nowrap">{it.label}</span>
                 </div>
-                <p className="text-base font-bold text-[var(--color-ink)] leading-tight">
+                <p className="text-base font-medium text-brand-500 leading-tight">
                   {it.value}<span className="text-2xs font-medium text-[var(--color-ink-4)] ml-0.5">{it.unit}</span>
                 </p>
               </div>
@@ -154,7 +155,7 @@ const MyPageScreen = () => {
                       <Icon size={16} className="text-[var(--color-ink-2)]" />
                     </IconBox>
                   }
-                  contents={<ListRow.Texts type="2RowTypeA" top={label} bottom={<span className="text-2xs">{sub}</span>} />}
+                  contents={<ListRow.Texts type="2RowTypeA" top={<span className="text-sm font-semibold">{label}</span>} bottom={<span className="block mt-1! text-3xs">{sub}</span>} />}
                   right={<ChevronRight size={16} className="text-[var(--color-ink-4)]" />}
                 />
               ))}
