@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { BottomSheet } from '@toss/tds-mobile';
 import { Flame, Sparkles, Zap, BookOpen, Tv } from 'lucide-react';
 import { showModal } from './AlertModal';
@@ -16,7 +15,6 @@ import { PointCelebration, type PointReward } from './PointCelebration';
 // 아이콘은 마이페이지 요약 카드와 같은 lucide 세트를 쓴다.
 // 포인트를 누르면 구매 시트가 열린다(광고 충전 / XP 2배 부스트).
 export const TopBar = () => {
-  const navigate = useNavigate();
   const { points, xp, boostUntil, knownWords, attendanceDates, claimAdReward, buyBoost, shopOpen, shopReason, openShop, closeShop } = useAppContext();
   const [now, setNow] = useState(() => Date.now());
   const [celebration, setCelebration] = useState<PointReward | null>(null);
@@ -53,8 +51,8 @@ export const TopBar = () => {
 
   return (
     <>
-      <div className="shrink-0 h-12 flex items-center justify-between px-5 bg-[var(--color-card)] border-b border-[var(--color-line)]">
-        <button type="button" onClick={() => navigate('/course')} className="text-base font-black tracking-tight text-brand-500 active:opacity-70">머니터미</button>
+      {/* 앱 이름·홈 이동은 토스 내비게이션 바가 맡는다. 자체 로고 헤더를 두면 검수에서 '자체 헤더 중복'으로 반려된다(2026-09-29) */}
+      <div className="shrink-0 h-12 flex items-center justify-end px-5 bg-[var(--color-card)] border-b border-[var(--color-line)]">
 
         <div className="flex items-center gap-3 text-sm font-bold text-[var(--color-ink-2)]">
           <span className="flex items-center gap-1"><Flame size={15} className="text-brand-500 fill-current" /><span key={streak} className="anim-bump">{streak}</span></span>
