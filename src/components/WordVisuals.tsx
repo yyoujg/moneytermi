@@ -146,29 +146,53 @@ const Flow = ({ steps, caption }: { steps: string[]; caption?: string }) => {
 type Point = { time: string; value: number };
 
 // 한국은행 ECOS 통계. 키는 서버(ecos-series 함수)에만 있다.
-const EcosChart = ({ v, onFail }: { v: Extract<WordVisual, { type: 'ecos' }>; onFail: () => void }) => {
-  const [points, setPoints] = useState<Point[] | null>(null);
+// fail(true)면 인증키 문제 같은 서버 오류(모든 통계 카드를 숨김), fail(false)면 이 통계만 없음
+const fetchSeries = async (stat: string, item: string, cycle: string, months: number): Promise<Point[] | 'down'> => {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+  const r = await fetch(`${supabaseUrl}/functions/v1/ecos-series`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${anonKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ stat, item, cycle, months }),
+  });
+  const d = await r.json();
+  return Array.isArray(d) ? d : 'down';
+};
+
+const EcosChart = ({ v, onFail }: { v: Extract<WordVisual, { type: 'ecos' }>; onFail: (down: boolean) => void }) => {
+  const defs = v.series ?? [{ name: '', stat: v.stat, item: v.item }];
+  const key = defs.map(d => `${d.stat}/${d.item}`).join(',');
+  const [data, setData] = useState<Point[][] | null>(null);
   useEffect(() => {
     let cancelled = false;
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-    fetch(`${supabaseUrl}/functions/v1/ecos-series`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${anonKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ stat: v.stat, item: v.item, cycle: v.cycle, months: v.months ?? 60 }),
-    })
-      .then(r => r.json())
-      .then(d => { if (cancelled) return; const p = Array.isArray(d) ? d : []; setPoints(p); if (p.length < 2) onFail(); })
-      .catch(() => { if (!cancelled) { setPoints([]); onFail(); } });
+    Promise.all(defs.map(d => fetchSeries(d.stat, d.item, v.cycle, v.months ?? 60)))
+      .then(res => {
+        if (cancelled) return;
+        if (res.includes('down')) { setData([]); onFail(true); return; }
+        const lists = res as Point[][];
+        if (lists.some(l => l.length < 2)) { setData([]); onFail(false); return; }
+        setData(lists);
+      })
+      .catch(() => { if (!cancelled) { setData([]); onFail(true); } });
     return () => { cancelled = true; };
-  }, [v.stat, v.item, v.cycle, v.months]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, v.cycle, v.months]);
 
-  if (points === null) return <div className="h-40 bg-[var(--color-surface)] rounded-chip animate-pulse" />;
-  if (points.length < 2) return null;
+  if (data === null) return <div className="h-40 bg-[var(--color-surface)] rounded-chip animate-pulse" />;
+  if (data.length === 0) return null;
   const label = (t: string) => `${t.slice(2, 4)}.${t.slice(4, 6)}`;
+  // 여러 통계는 모두 값이 있는 달만 맞춰 그린다
+  const times = data.map(l => new Set(l.map(p => p.time)));
+  const common = data[0].map(p => p.time).filter(t => times.every(s => s.has(t)));
+  const k = v.scale ?? 1;
+  const last = label(common[common.length - 1]);
+  const series = data.map((l, i) => {
+    const byTime = new Map(l.map(p => [p.time, p.value * k]));
+    return { name: defs[i].name ? `${defs[i].name}(${last})` : `최근(${last})`, values: common.map(t => byTime.get(t)!) };
+  });
   return (
     <div className="flex flex-col gap-1">
-      <LineChart x={points.map(p => label(p.time))} series={[{ name: `최근(${label(points[points.length - 1].time)})`, values: points.map(p => p.value) }]} unit={v.unit} />
+      <LineChart x={common.map(label)} series={series} unit={v.unit} />
       <p className="text-3xs text-[var(--color-ink-4)]">출처: 한국은행 경제통계시스템(ECOS)</p>
     </div>
   );
@@ -184,13 +208,13 @@ const EcosCard = ({ v }: { v: Extract<WordVisual, { type: 'ecos' }> }) => {
         <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><BarChart3 size={13} />실제 통계</p>
         <p className="text-sm font-bold text-[var(--color-ink)] break-keep">{v.title}</p>
       </div>
-      <EcosChart v={v} onFail={() => { ecosDown = true; setFailed(true); }} />
+      <EcosChart v={v} onFail={down => { if (down) ecosDown = true; setFailed(true); }} />
       {v.caption && <p className="text-xs text-[var(--color-ink-3)] break-keep leading-[1.6] whitespace-pre-line">{v.caption}</p>}
     </Card>
   );
 };
 
-// ponytail: 모듈 플래그. 한 번 실패하면(인증키 미발급 등) 이 세션에서는 통계 카드를 아예 숨긴다. 키가 생기면 새로 열 때 다시 뜬다.
+// ponytail: 모듈 플래그. 서버 오류(인증키 없음 등)가 한 번 나면 이 세션에서는 통계 카드를 아예 숨긴다. 통계 하나가 비는 건 그 카드만 숨긴다.
 let ecosDown = false;
 
 // 설명 글 속 다른 용어를 연한 주황 알약으로 강조한다. 누르면 글 아래에 뜻 말풍선이 뜨고, '카드 보기'로 그 용어 카드로 간다.

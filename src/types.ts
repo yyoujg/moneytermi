@@ -31,7 +31,9 @@ export type Word = {
 export type WordVisual =
   | { type: 'line'; title: string; caption?: string; unit?: string; x: string[]; series: { name: string; values: number[] }[] }
   | { type: 'table'; title: string; caption?: string; columns: string[]; rows: string[][] }
-  | { type: 'ecos'; title: string; caption?: string; stat: string; item: string; cycle: 'M'; unit: string; months?: number }
+  // series가 있으면 여러 통계를 한 그래프에 겹친다(stat·item은 무시). scale은 표시 단위 환산(예: 십억 원 -> 조 원이면 0.001)
+  | { type: 'ecos'; title: string; caption?: string; stat: string; item: string; cycle: 'M'; unit: string; months?: number; scale?: number;
+      series?: { name: string; stat: string; item: string }[] }
   | { type: 'flow'; title: string; caption?: string; steps: string[] }
   | { type: 'text'; title: string; caption?: string; body: string };
 

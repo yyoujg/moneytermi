@@ -14,8 +14,8 @@ Deno.serve(async (req) => {
 
   try {
     const { stat, item, cycle, months } = await req.json();
-    // 코드는 URL 경로에 그대로 들어가므로 영숫자만 받는다. 항목 코드는 '0000001/0000100'처럼 여러 단계일 수 있다.
-    if (!/^[0-9A-Z]{7}$/.test(stat) || !/^[0-9A-Z]+(\/[0-9A-Z]+){0,3}$/.test(item) || cycle !== 'M') return json([]);
+    // 코드는 URL 경로에 그대로 들어가므로 영숫자(항목 코드는 '*' 포함, 예: 생산자물가 '*AA')만 받는다. 항목 코드는 '0000001/0000100'처럼 여러 단계일 수 있다.
+    if (!/^[0-9A-Z]{7}$/.test(stat) || !/^[0-9A-Z*]+(\/[0-9A-Z*]+){0,3}$/.test(item) || cycle !== 'M') return json([]);
     const n = Math.min(Math.max(Number(months) || 60, 2), 120);
 
     const key = Deno.env.get('ECOS_API_KEY');
