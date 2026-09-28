@@ -85,16 +85,16 @@ const N = { C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99, A5: 880,
 
 // ── 이벤트별 조합 ──────────────────────────────────────────────────
 // 순서는 항상 진동 → 소리. 진동이 네이티브 브리지를 타는 만큼 소리 준비(오디오 컨텍스트·버퍼)보다 먼저 보낸다.
-// 버튼 누름: 가장 강한 단발(success) + 아주 짧은 '톡'
+// 버튼 누름: 가장 강한 단발(success) + 위로 쓱 올라가는 소리 (후보 5개 중 사용자가 고름)
 export function feedbackTick() {
   haptic('success');
-  if (!playFile('tick')) play([{ f: 1400, to: 900, dur: 0.04, type: 'triangle', vol: 0.08 }]);
+  if (!playFile('tick')) play([{ f: 400, to: 800, dur: 0.12, type: 'triangle', vol: 0.1 }]);
 }
 
-// 패스 노드 탭 (레슨 시작·퀴즈 진입): 톡 하는 팝
+// 패스 노드 탭 (레슨 시작·퀴즈 진입): 게임 아이템 줍는 두 음 (후보 5개 중 사용자가 고름)
 export function feedbackNodeTap() {
   hapticSeq([['success', 0], ['confetti', 80]]);
-  if (!playFile('node')) play([{ f: 620, to: 880, dur: 0.08, vol: 0.14 }]);
+  if (!playFile('node')) play([{ f: 988, dur: 0.05, type: 'square', vol: 0.05 }, { f: 1319, at: 0.05, dur: 0.1, type: 'square', vol: 0.05 }]);
 }
 
 // 포인트 소모 (레슨 시작 -10P): 낮게 쓱

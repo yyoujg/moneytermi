@@ -98,7 +98,7 @@ const Flow = ({ steps }: { steps: string[] }) => (
 type Point = { time: string; value: number };
 
 // 한국은행 ECOS 통계. 키는 서버(ecos-series 함수)에만 있다.
-const EcosChart = ({ v }: { v: Extract<WordVisual, { type: 'ecos' }> }) => {
+const EcosChart = ({ v, onFail }: { v: Extract<WordVisual, { type: 'ecos' }>; onFail: () => void }) => {
   const [points, setPoints] = useState<Point[] | null>(null);
   useEffect(() => {
     let cancelled = false;
@@ -110,13 +110,13 @@ const EcosChart = ({ v }: { v: Extract<WordVisual, { type: 'ecos' }> }) => {
       body: JSON.stringify({ stat: v.stat, item: v.item, cycle: v.cycle, months: v.months ?? 60 }),
     })
       .then(r => r.json())
-      .then(d => { if (!cancelled) setPoints(Array.isArray(d) ? d : []); })
-      .catch(() => { if (!cancelled) setPoints([]); });
+      .then(d => { if (cancelled) return; const p = Array.isArray(d) ? d : []; setPoints(p); if (p.length < 2) onFail(); })
+      .catch(() => { if (!cancelled) { setPoints([]); onFail(); } });
     return () => { cancelled = true; };
   }, [v.stat, v.item, v.cycle, v.months]);
 
   if (points === null) return <div className="h-40 bg-[var(--color-surface)] rounded-chip animate-pulse" />;
-  if (points.length < 2) return <p className="text-[13px] text-[var(--color-ink-4)]">통계를 불러오지 못했어요</p>;
+  if (points.length < 2) return null;
   const label = (t: string) => `${t.slice(2, 4)}.${t.slice(4, 6)}`;
   return (
     <div className="flex flex-col gap-1">
@@ -126,18 +126,44 @@ const EcosChart = ({ v }: { v: Extract<WordVisual, { type: 'ecos' }> }) => {
   );
 };
 
+// 통계를 못 받으면 카드 자체를 숨긴다(빈 카드·에러 문구를 보이지 않게)
+const EcosCard = ({ v }: { v: Extract<WordVisual, { type: 'ecos' }> }) => {
+  const [failed, setFailed] = useState(false);
+  if (failed || ecosDown) return null;
+  return (
+    <Card pad="none" className="px-5 pt-4 pb-5 flex flex-col gap-3">
+      <div className="flex flex-col gap-1">
+        <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><BarChart3 size={13} />실제 통계</p>
+        <p className="text-sm font-bold text-[var(--color-ink)] break-keep">{v.title}</p>
+      </div>
+      <EcosChart v={v} onFail={() => { ecosDown = true; setFailed(true); }} />
+      {v.caption && <p className="text-xs text-[var(--color-ink-3)] break-keep leading-[1.6] whitespace-pre-line">{v.caption}</p>}
+    </Card>
+  );
+};
+
+// ponytail: 모듈 플래그. 한 번 실패하면(인증키 미발급 등) 이 세션에서는 통계 카드를 아예 숨긴다. 키가 생기면 새로 열 때 다시 뜬다.
+let ecosDown = false;
+
 export const WordVisuals = ({ visuals }: { visuals: WordVisual[] }) => (
   <>
-    {visuals.map((v, i) => (
+    {visuals.filter(v => v.type !== 'ecos' || !ecosDown).map((v, i) => (
+      v.type === 'ecos' ? <EcosCard key={i} v={v} /> :
       <Card key={i} pad="none" className="px-5 pt-4 pb-5 flex flex-col gap-3">
+        {v.type === 'text' ? (
+          <>
+            <p className="text-sm font-bold text-[var(--color-ink)] break-keep">{v.title}</p>
+            <p className="text-sm text-[var(--color-ink-2)] break-keep leading-[1.7] whitespace-pre-line">{v.body}</p>
+          </>
+        ) : <>
         <div className="flex flex-col gap-1">
-          <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><BarChart3 size={13} />{v.type === 'ecos' ? '실제 통계' : v.type === 'table' ? '한눈에 비교' : v.type === 'flow' ? '이해하기' : '그래프로 보기'}</p>
+          <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><BarChart3 size={13} />{v.type === 'table' ? '한눈에 비교' : v.type === 'flow' ? '이해하기' : '그래프로 보기'}</p>
           <p className="text-sm font-bold text-[var(--color-ink)] break-keep">{v.title}</p>
         </div>
         {v.type === 'line' && <LineChart x={v.x} series={v.series} unit={v.unit} />}
         {v.type === 'table' && <Table columns={v.columns} rows={v.rows} />}
-        {v.type === 'ecos' && <EcosChart v={v} />}
         {v.type === 'flow' && <Flow steps={v.steps} />}
+        </>}
         {v.caption && <p className="text-xs text-[var(--color-ink-3)] break-keep leading-[1.6] whitespace-pre-line">{v.caption}</p>}
       </Card>
     ))}

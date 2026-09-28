@@ -115,6 +115,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         hint: w.hint,
         relatedWords: w.related_words ?? [],
         visuals: w.visuals ?? undefined,
+        sources: w.sources ?? [],
       } as Word]));
 
       const builtCourses: Course[] = coursesData.map((c: any) => ({

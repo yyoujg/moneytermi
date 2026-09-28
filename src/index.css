@@ -24,11 +24,11 @@
   --color-brand-500: #f97316;
   --color-brand-600: #ea580c;
   --color-brand-deep: #fa4809;
-  --color-success-400: #4ade80;
-  --color-success-500: #22c55e;
-  --color-danger-300: #fca5a5;
-  --color-danger-400: #f87171;
-  --color-danger-500: #ef4444;
+  --color-success-400: #38d9a9;
+  --color-success-500: #12b886;
+  --color-danger-300: #f7a1ad;
+  --color-danger-400: #f06a7e;
+  --color-danger-500: #e8475f;
   --color-warning-400: #facc15;
   --text-2xs: 11px;
   --text-3xs: 10px;
@@ -151,8 +151,8 @@ body,
   --color-line: #E5E5E5;
   --color-brand-cream: #fff3e0;
   --color-brand-soft: rgba(249, 115, 22, 0.08);
-  --color-success-soft: rgba(34, 197, 94, 0.08);
-  --color-danger-soft: rgba(239, 68, 68, 0.08);
+  --color-success-soft: rgba(18, 184, 134, 0.08);
+  --color-danger-soft: rgba(232, 71, 95, 0.08);
 }
 
 .dark {
@@ -167,8 +167,8 @@ body,
   --color-line: #333333;
   --color-brand-cream: rgba(249, 115, 22, 0.18);
   --color-brand-soft: rgba(249, 115, 22, 0.16);
-  --color-success-soft: rgba(34, 197, 94, 0.16);
-  --color-danger-soft: rgba(239, 68, 68, 0.16);
+  --color-success-soft: rgba(18, 184, 134, 0.16);
+  --color-danger-soft: rgba(232, 71, 95, 0.16);
 
   /* TDS(adaptive) 표면 색을 앱 다크에 맞춤 — 바텀시트/카드 패널 */
   --adaptiveBackground: var(--color-card) !important;

@@ -46,12 +46,12 @@ const NavBar = () => {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              aria-label={item.label}
-              className="flex items-center justify-center px-2 py-1 transition-all duration-200"
+              className="flex flex-col items-center justify-center gap-0.5 px-1.5 py-0.5 transition-all duration-200"
             >
-              <div className={`w-11 h-11 flex items-center justify-center rounded-full transition-all duration-200 ${isActive ? 'bg-brand-500 text-white' : 'text-[var(--color-ink-4)]'}`}>
-                <Icon size={22} strokeWidth={isActive ? 2.5 : 1.8} />
+              <div className={`w-12 h-8 flex items-center justify-center rounded-full transition-all duration-200 ${isActive ? 'bg-brand-500 text-white' : 'text-[var(--color-ink-4)]'}`}>
+                <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />
               </div>
+              <span className={`text-[10px] leading-none font-bold ${isActive ? 'text-brand-500' : 'text-[var(--color-ink-4)]'}`}>{item.label}</span>
             </button>
           );
         })}

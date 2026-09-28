@@ -24,6 +24,7 @@ export type Word = {
   difficulty: 1 | 2 | 3;
   relatedWords?: string[];
   visuals?: WordVisual[];
+  sources?: string[];
 };
 
 // 단어 설명용 그래프·표 (words.visuals jsonb). ecos는 한국은행 통계를 ecos-series 함수로 불러온다.
@@ -31,7 +32,8 @@ export type WordVisual =
   | { type: 'line'; title: string; caption?: string; unit?: string; x: string[]; series: { name: string; values: number[] }[] }
   | { type: 'table'; title: string; caption?: string; columns: string[]; rows: string[][] }
   | { type: 'ecos'; title: string; caption?: string; stat: string; item: string; cycle: 'M'; unit: string; months?: number }
-  | { type: 'flow'; title: string; caption?: string; steps: string[] };
+  | { type: 'flow'; title: string; caption?: string; steps: string[] }
+  | { type: 'text'; title: string; caption?: string; body: string };
 
 export type Course = {
   id: string;
