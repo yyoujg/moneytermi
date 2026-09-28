@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { Toaster } from 'sonner';
+import { AlertModal } from './components/AlertModal';
 import { Component, type ReactNode, type ErrorInfo } from 'react';
 import * as Sentry from '@sentry/react';
 import { closeView, graniteEvent, getSchemeUri } from '@apps-in-toss/web-framework';
@@ -12,6 +12,7 @@ import { parseLandingPath, parseReferrer } from './lib/landing';
 import { logScreen, logClick } from './lib/analytics';
 import NavBar from './components/NavBar';
 import { TopBar } from './components/TopBar';
+import { BadgeCelebration } from './components/mypage/BadgeCelebration';
 import { useTapHaptics } from './hooks/useTapHaptics';
 
 const HomeScreen = React.lazy(() => import('./pages/HomeScreen'));
@@ -162,6 +163,7 @@ const Layout = () => {
   return (
     <div className="flex-1 w-full h-full flex flex-col relative">
       <NicknameGate />
+      <BadgeCelebration />
       <TopBar />
       <React.Suspense fallback={<LoadingScreen />}>
       {/* 경로가 바뀌면 래퍼가 다시 마운트되며 페이드인. (transform 전환은 기기에서 무거워 opacity만) */}
@@ -194,7 +196,7 @@ export default function App() {
         <BrowserRouter>
           <BackEventHandler />
           <ScreenLogger />
-          <Toaster position="top-center" duration={1800} richColors />
+          <AlertModal />
           {/* 상단 인셋은 더하지 않는다 — 토스 웹뷰는 네이티브 내비게이션 바 아래에서 시작해 상태바와 겹치지 않는다.
               하단 인셋은 NavBar가 직접 처리한다. */}
           <div className="w-full max-w-md mx-auto bg-[var(--color-canvas)] h-[100dvh] overflow-hidden relative font-sans text-[var(--color-ink)] flex flex-col">

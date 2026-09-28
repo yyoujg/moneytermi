@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import type { Badge } from '../../lib/badges';
+import { buildBadges, type Badge } from '../../lib/badges';
+import { useAppContext } from '../../context/AppContext';
+import { calcStreak } from '../../lib/streak';
 import { Storage } from '../../lib/storage';
 import { logClick } from '../../lib/analytics';
 import { feedbackBadge } from '../../lib/feedback';
@@ -9,12 +11,16 @@ import { feedbackBadge } from '../../lib/feedback';
 const KEY = 'badges_seen';
 const CONFETTI = ['#f97316', '#fde68a', '#fecaca', '#bfdbfe', '#bbf7d0', '#c7d2fe', '#fbcfe8', '#f97316', '#fde68a', '#bfdbfe', '#bbf7d0', '#fecaca'];
 
-export const BadgeCelebration = ({ badges }: { badges: Badge[] }) => {
+// 앱 전역(Layout)에 붙어 있어 어느 화면에서든 달성 즉시 뜬다.
+export const BadgeCelebration = () => {
+  const { hydrated, knownWords, attendanceDates, xp } = useAppContext();
+  const badges = buildBadges({ words: knownWords.length, streak: calcStreak(attendanceDates), xp });
   const [fresh, setFresh] = useState<Badge[] | null>(null);
   const earnedIds = badges.filter(b => b.earned).map(b => b.id).join(',');
 
   useEffect(() => {
-    if (!earnedIds) return;
+    // 로딩 중 일부 통계만 채워진 상태로 판정하면 나머지 배지가 새로 딴 것처럼 뜬다
+    if (!hydrated || !earnedIds) return;
     Storage.getItem(KEY).catch(() => null).then(raw => {
       const seen = new Set<string>(raw ? JSON.parse(raw) : []);
       const earned = badges.filter(b => b.earned);
@@ -26,7 +32,7 @@ export const BadgeCelebration = ({ badges }: { badges: Badge[] }) => {
       logClick('badge_earned_view', { ids: news.map(b => b.id).join(','), count: news.length });
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [earnedIds]);
+  }, [hydrated, earnedIds]);
 
   if (!fresh) return null;
 

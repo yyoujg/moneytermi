@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronRight, RotateCcw, Flame, ArrowRight } from 'lucide-react';
 import { Badge } from '@toss/tds-mobile';
-import { toast } from 'sonner';
+import { showModal } from '../components/AlertModal';
 import { feedbackClaim, feedbackError } from '../lib/feedback';
 import { useNavigate } from 'react-router-dom';
 import { DEFAULT_NICKNAME, MISSION_XP, getGrowthStage } from '../constants';
@@ -40,7 +40,7 @@ const HomeScreen = () => {
       setCelebration({ points: reward, xp: res.xpGained, source: 'mission' });   // 부스트 중이면 10
     } else {
       feedbackError();
-      toast.error('보상을 받지 못했어요. 잠시 후 다시 시도해주세요');
+      showModal('보상을 받지 못했어요. 잠시 후 다시 시도해주세요', 'error');
     }
   };
   const resetLabel = `${Math.ceil(msUntilNextSlot() / 3600000)}시간 뒤 초기화`;

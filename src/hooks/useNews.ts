@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { Word } from '../types';
 
-export type NaverNewsItem = { title: string; link: string; description: string; pubDate: string };
+export type NaverNewsItem = { title: string; link: string; description: string; pubDate: string; image?: string };
 
 const fetchNews = (word: string): Promise<NaverNewsItem[]> => {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;

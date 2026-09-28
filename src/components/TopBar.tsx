@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { BottomSheet } from '@toss/tds-mobile';
 import { Flame, Sparkles, Zap, BookOpen, Tv } from 'lucide-react';
-import { toast } from 'sonner';
+import { showModal } from './AlertModal';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
 import { calcStreak } from '../lib/streak';
@@ -15,6 +16,7 @@ import { PointCelebration, type PointReward } from './PointCelebration';
 // 아이콘은 마이페이지 요약 카드와 같은 lucide 세트를 쓴다.
 // 포인트를 누르면 구매 시트가 열린다(광고 충전 / XP 2배 부스트).
 export const TopBar = () => {
+  const navigate = useNavigate();
   const { points, xp, boostUntil, knownWords, attendanceDates, claimAdReward, buyBoost, shopOpen, shopReason, openShop, closeShop } = useAppContext();
   const [now, setNow] = useState(() => Date.now());
   const [celebration, setCelebration] = useState<PointReward | null>(null);
@@ -32,7 +34,7 @@ export const TopBar = () => {
   }, [boostUntil]);
 
   const handleAd = () => {
-    if (!isRewardedAdEnabled()) { toast.error('지금은 광고를 볼 수 없어요'); return; }
+    if (!isRewardedAdEnabled()) { showModal('지금은 광고를 볼 수 없어요', 'error'); return; }
     logClick('rewarded_ad_start', { from: 'topbar_shop' });
     showRewardedAd((amount, unit) => {
       claimAdReward(amount, unit).then(credited => {
@@ -44,15 +46,15 @@ export const TopBar = () => {
 
   const handleBoost = async () => {
     const r = await buyBoost();
-    if (r === 'ok') { feedbackBoost(); toast.success('30분간 XP 2배! ⚡'); closeShop(); }
-    else if (r === 'active') { toast.error('이미 부스트 중이에요'); closeShop(); }
-    else toast.error('포인트가 부족해요');
+    if (r === 'ok') { feedbackBoost(); showModal('30분간 XP 2배! ⚡'); closeShop(); }
+    else if (r === 'active') { showModal('이미 부스트 중이에요', 'error'); closeShop(); }
+    else showModal('포인트가 부족해요', 'error');
   };
 
   return (
     <>
       <div className="shrink-0 h-12 flex items-center justify-between px-5 bg-[var(--color-card)] border-b border-[var(--color-line)]">
-        <span className="text-base font-black tracking-tight text-brand-500">머니터미</span>
+        <button type="button" onClick={() => navigate('/course')} className="text-base font-black tracking-tight text-brand-500 active:opacity-70">머니터미</button>
 
         <div className="flex items-center gap-3 text-sm font-bold text-[var(--color-ink-2)]">
           <span className="flex items-center gap-1"><Flame size={15} className="text-brand-500 fill-current" /><span key={streak} className="anim-bump">{streak}</span></span>

@@ -24,21 +24,25 @@ export const PointCelebration = ({ reward, onClose }: { reward: PointReward; onC
         role="dialog"
         aria-label="포인트 획득"
         onClick={e => e.stopPropagation()}
-        className="w-full max-w-xs rounded-card bg-[var(--color-card)] px-6 pt-8 pb-5 flex flex-col items-center gap-3 shadow-lg anim-pop-in"
+        className="w-full max-w-xs rounded-card bg-[var(--color-card)] overflow-hidden flex flex-col items-center shadow-lg anim-pop-in"
       >
-        <div
-          className="w-20 h-20 flex items-center justify-center"
-          style={{ borderRadius: 9999, background: 'var(--color-brand-soft)', boxShadow: '0 0 0 6px rgba(249,115,22,0.18)' }}
-        >
-          <Zap size={40} className="text-brand-500 fill-current" />
+        {/* 컬러 헤더 블록 (퀴즈·학습 화면 헤더와 같은 패턴) */}
+        <div className="w-full bg-brand-500 px-6 pt-7 pb-6 flex flex-col items-center gap-2">
+          <div
+            className="w-20 h-20 flex items-center justify-center bg-white"
+            style={{ borderRadius: 9999, boxShadow: '0 0 0 6px rgba(255,255,255,0.25)' }}
+          >
+            <Zap size={40} className="text-brand-500 fill-current" />
+          </div>
+          <p className="text-4xl font-black text-white anim-pop-in" style={{ '--i': 2 } as React.CSSProperties}>+{reward.points}P</p>
+          {reward.xp ? (
+            <p className="flex items-center gap-1 text-sm font-bold text-white/90 anim-fade-up" style={{ '--i': 3 } as React.CSSProperties}>
+              <Sparkles size={14} />+{reward.xp} XP
+            </p>
+          ) : null}
         </div>
 
-        <p className="text-4xl font-black text-[var(--color-ink)] anim-pop-in" style={{ '--i': 2 } as React.CSSProperties}>+{reward.points}P</p>
-        {reward.xp ? (
-          <p className="flex items-center gap-1 text-sm font-bold text-brand-500 anim-fade-up" style={{ '--i': 3 } as React.CSSProperties}>
-            <Sparkles size={14} />+{reward.xp} XP
-          </p>
-        ) : null}
+        <div className="w-full px-6 pt-5 pb-5 flex flex-col items-center gap-3">
         <p className="text-sm text-[var(--color-ink-3)] text-center break-keep anim-fade-up" style={{ '--i': 4 } as React.CSSProperties}>
           {reward.source === 'mission' ? '미션 보상을 받았어요! 다음 레슨에 써 보세요.' : '광고를 끝까지 봐 주셔서 고마워요!'}
         </p>
@@ -50,6 +54,7 @@ export const PointCelebration = ({ reward, onClose }: { reward: PointReward; onC
         >
           확인
         </button>
+        </div>
       </div>
     </div>
   );

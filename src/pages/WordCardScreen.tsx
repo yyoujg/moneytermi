@@ -1,7 +1,8 @@
 import React, { useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Check, ExternalLink, BookOpen, Newspaper, Link2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { ChevronRight, ExternalLink, BookOpen, Newspaper, Link2 } from 'lucide-react';
+import { BottomSheet } from '@toss/tds-mobile';
+import { showModal } from '../components/AlertModal';
 import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
@@ -13,9 +14,9 @@ import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
 import { feedbackLearned, feedbackLessonComplete } from '../lib/feedback';
 import { StreakCelebration } from '../components/StreakCelebration';
 import { Card } from '../components/ui/Card';
+import { WordVisuals } from '../components/WordVisuals';
 import { termPattern } from '../lib/quiz';
 
-const ACCENT = 'var(--color-brand-500)';
 
 const stripHtml = (s: string) => {
   const tmp = document.createElement('div');
@@ -40,9 +41,7 @@ const Highlight = ({ text, keyword, pattern }: { text: string; keyword: string; 
 };
 
 // ── 단어 카드 본문 ────────────────────────────────────────────────
-// 단어 하나를 4단계로 나눠 본다: 뜻 → 자세히 알아보기 → 뉴스 → 관련 용어 (내용이 없는 단계는 건너뛴다)
-type WordStep = 'meaning' | 'detail' | 'news' | 'related';
-const STEP_LABEL: Record<WordStep, string> = { meaning: '뜻', detail: '자세히', news: '뉴스', related: '관련 용어' };
+// 한 페이지에 단어+뜻 → 그래프·표 → 뉴스 → 관련 용어를 보여주고, 자세히 알아보기는 시트로 연다
 
 // 자세히 알아보기 본문(요약과 겹치는 첫 문장 제외)과 유효한 관련 용어
 const wordExtras = (word: Word, allWords: Word[]) => {
@@ -67,22 +66,16 @@ const toParagraphs = (text: string) => {
 
 const WordCard = ({
   word,
-  step,
-  detail,
+  onDetail,
   validRelated,
-  isKnown,
-  onToggleKnown,
   onRelatedClick,
   newsItems,
   newsLoading,
   keyword,
 }: {
   word: Word;
-  step: WordStep;
-  detail: string;
+  onDetail?: () => void;
   validRelated: string[];
-  isKnown: boolean;
-  onToggleKnown?: () => void;
   onRelatedClick: (name: string) => void;
   newsItems: NaverNewsItem[];
   newsLoading: boolean;
@@ -91,69 +84,69 @@ const WordCard = ({
   return (
   <div className="flex flex-col gap-3 px-5 pb-6">
 
-    {/* 단어 헤더 — 뜻 단계에서는 뜻까지, 나머지 단계에서는 제목만 작게 */}
-    <Card pad={step === 'meaning' ? 'lg' : 'md'}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1">
-          <h1 className={`font-black text-[var(--color-ink)] tracking-[-0.03em] break-keep ${step === 'meaning' ? 'text-[28px] leading-[1.2] mb-2!' : 'text-lg leading-tight'}`}>
-            {word.word}
-          </h1>
-          {step === 'meaning' && (
-            <p className="text-sm text-[var(--color-ink-2)] font-medium break-keep leading-[1.7] tracking-[-0.01em]">{word.meaning}</p>
-          )}
-        </div>
-        {onToggleKnown && (
-          <button
-            onClick={onToggleKnown}
-            aria-label={isKnown ? '알고 있어요 해제' : '알고 있어요'}
-            aria-pressed={isKnown}
-            style={{ borderRadius: 9999 }}
-            className={`shrink-0 mt-1 w-8 h-8 flex items-center justify-center transition-colors
-              ${isKnown ? 'bg-brand-500 text-white' : 'bg-[var(--color-surface)] text-[var(--color-ink-4)]'}`}
-          >
-            <Check size={16} strokeWidth={2.5} />
-          </button>
-        )}
+    {/* 단어 + 뜻 */}
+    <Card pad="lg">
+      <h1 className="font-black text-[var(--color-ink)] tracking-[-0.03em] break-keep text-[22px] leading-[1.3]">
+        {word.word}
+      </h1>
+
+      {/* 뜻 — 단어와 같은 카드 */}
+      <div className="mt-3">
+        <p className="text-sm text-[var(--color-ink-2)] font-normal break-keep leading-[1.7] tracking-[-0.01em]">{word.meaning}</p>
       </div>
+      {onDetail && (
+        <button
+          type="button"
+          onClick={onDetail}
+          className="mt-4! w-full py-3 rounded-button bg-brand-500/10 text-sm font-bold text-brand-500 active:opacity-70 flex items-center justify-center gap-1"
+        >
+          <BookOpen size={15} />자세히 보기
+        </button>
+      )}
     </Card>
 
-    {/* 자세히 알아보기 — 요약은 본문 첫 문장이라 그 부분은 빼고 이어지는 내용만 */}
-    {step === 'detail' && detail && (
-      <Card pad="none" className="px-5 pt-4 pb-5 flex flex-col gap-2.5">
-        <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><BookOpen size={13} />자세히 알아보기</p>
-        <div className="flex flex-col gap-3">
-          {toParagraphs(detail).map((para, i) => (
-            <p key={i} className="text-sm leading-[1.8] text-[var(--color-ink-2)] font-medium break-keep tracking-[-0.01em]">
-              <Highlight text={para} keyword={word.word} pattern={termPattern(word.word) ?? undefined} />
-            </p>
-          ))}
-        </div>
-      </Card>
-    )}
+    {/* 순서: 단어+뜻 → 그래프·표 → 뉴스 → 관련 용어. 자세히 알아보기는 단어 카드의 버튼으로 여는 시트 */}
+    {/* 그래프·표 — 뜻 바로 아래에서 그림으로 이해시킨다 */}
+    {word.visuals && word.visuals.length > 0 && <WordVisuals visuals={word.visuals} />}
 
-    {/* 실시간 뉴스 */}
-    {step === 'news' && (
-    <Card pad="none" className="px-5 pt-4 pb-5 flex flex-col gap-2.5">
-      <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><Newspaper size={13} />실시간 뉴스 (출처: 네이버 뉴스)</p>
+    {/* 뉴스 — 기사마다 카드 하나 */}
+    <div className="flex flex-col gap-3">
+      <p className="flex items-center gap-1.5 px-1 pt-1 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><Newspaper size={13} />뉴스 속 {word.word}</p>
       {newsLoading ? (
-        <div className="flex flex-col gap-3.5">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="flex flex-col gap-1.5">
-              <div className="h-3.5 bg-[var(--color-surface)] rounded animate-pulse" style={{ width: '90%' }} />
-              <div className="h-3.5 bg-[var(--color-surface)] rounded animate-pulse" style={{ width: '70%' }} />
-              <div className="h-2.5 bg-[var(--color-surface)] rounded animate-pulse" style={{ width: '30%' }} />
-            </div>
-          ))}
+        <div className="-mx-5 px-5 flex gap-3 overflow-hidden">
+        {[1, 2, 3].map(i => (
+          <Card key={i} pad="none" className="w-[85%] shrink-0 px-5 py-4 flex flex-col gap-1.5">
+            <div className="h-3.5 bg-[var(--color-surface)] rounded animate-pulse" style={{ width: '90%' }} />
+            <div className="h-3.5 bg-[var(--color-surface)] rounded animate-pulse" style={{ width: '70%' }} />
+            <div className="h-2.5 bg-[var(--color-surface)] rounded animate-pulse" style={{ width: '30%' }} />
+          </Card>
+        ))}
         </div>
       ) : newsItems.length > 0 ? (
-        <div className="flex flex-col gap-3.5">
-          {newsItems.map((item, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => { logClick('news_link_click', { word: word.word }); openExternalUrl(item.link); }}
-              className="flex items-start gap-2 active:opacity-60 text-left w-full"
-            >
+        // 가로로 넘기는 뉴스. 여기서 민 것은 단어 넘기기(화면 전체 슬라이드)로 가지 않게 막는다
+        <div
+          className="-mx-5 px-5 scroll-px-5 flex gap-3 overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden"
+          style={{ touchAction: 'pan-x pan-y' }}
+          onPointerDown={e => e.stopPropagation()}
+        >
+        {newsItems.map((item, i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={() => { logClick('news_link_click', { word: word.word }); openExternalUrl(item.link); }}
+            className="w-[85%] shrink-0 snap-start rounded-card bg-[var(--color-card)] overflow-hidden flex flex-col active:opacity-60 text-left"
+          >
+            {item.image && (
+              // 카드 폭을 꽉 채운 대표 이미지. 불러오지 못하면 이 자리만 숨긴다
+              <img
+                src={item.image}
+                alt=""
+                referrerPolicy="no-referrer"
+                onError={e => { e.currentTarget.style.display = 'none'; }}
+                className="w-full aspect-video object-cover bg-[var(--color-surface)]"
+              />
+            )}
+            <div className="flex items-start gap-2 w-full px-5 py-4">
               <div className="flex-1">
                 <p className="text-[13px] font-semibold text-[var(--color-ink)] break-keep leading-[1.55] tracking-[-0.01em] line-clamp-2">
                   <Highlight text={stripHtml(item.title)} keyword={keyword} />
@@ -164,21 +157,23 @@ const WordCard = ({
                   </p>
                 )}
                 <p className="text-2xs text-[var(--color-ink-4)] mt-1!">
-                  {new Date(item.pubDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
+                  {new Date(item.pubDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })} · 네이버 뉴스
                 </p>
               </div>
-              <ExternalLink size={13} className="text-[var(--color-line)] shrink-0 mt-0.5" />
-            </button>
-          ))}
+              {!item.image && <ExternalLink size={13} className="text-[var(--color-line)] shrink-0 mt-0.5" />}
+            </div>
+          </button>
+        ))}
         </div>
       ) : (
-        <p className="text-[13px] text-[var(--color-ink-4)]">관련 뉴스를 찾을 수 없어요</p>
+        <Card pad="none" className="px-5 py-4">
+          <p className="text-[13px] text-[var(--color-ink-4)]">관련 뉴스를 찾을 수 없어요</p>
+        </Card>
       )}
-    </Card>
-    )}
+    </div>
 
     {/* 관련 용어 */}
-    {step === 'related' && validRelated.length > 0 && (
+    {validRelated.length > 0 && (
       <Card pad="none" className="px-5 py-4 flex flex-col gap-2.5">
         <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><Link2 size={13} />관련 용어</p>
         <div className="flex flex-col">
@@ -204,7 +199,7 @@ const WordCard = ({
 const WordCardScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { courses, allWords, knownWords, knownIds, hydrated, toggleKnown, setKnownWords, claimPromotionReward } = useAppContext();
+  const { courses, allWords, knownWords, knownIds, hydrated, setKnownWords, claimPromotionReward } = useAppContext();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const state = location.state as {
@@ -234,9 +229,10 @@ const WordCardScreen = () => {
 
   const [wordIndex, setWordIndex] = React.useState(state?.index ?? 0);
 
-  // 단어 안의 단계 (뜻 → 자세히 → 뉴스 → 관련 용어). 단어가 바뀌면 처음부터.
-  const [stepIdx, setStepIdx] = React.useState(0);
-  useEffect(() => { setStepIdx(0); }, [wordIndex]);
+  // 자세히 알아보기 시트. 단어가 바뀌면 닫는다.
+  const [detailOpen, setDetailOpen] = React.useState(false);
+  useEffect(() => { setDetailOpen(false); }, [wordIndex]);
+
 
   // 로딩이 끝났는데도 보여줄 단어가 없으면 돌아간다. 렌더 중 navigate는 안 된다.
   const noWords = words.length === 0 && !(isDeepLink && (courses.length === 0 || !hydrated));
@@ -245,7 +241,7 @@ const WordCardScreen = () => {
   // 단어 변경 시 스크롤 맨 위로
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [wordIndex, stepIdx]);
+  }, [wordIndex]);
 
   // 뉴스 (현재 단어 로드 + 다음 단어 prefetch)
   const { newsItems, newsLoading } = useNews(words, wordIndex);
@@ -253,13 +249,17 @@ const WordCardScreen = () => {
   // autoAdvance 완료 토스트. 잔고·XP 갱신은 word_progress 저장(2초 디바운스)이 끝난 뒤 AppContext가 한다.
   // 같은 완료에 effect가 다시 돌아도(단어 목록 참조 변경, dev StrictMode) 토스트는 한 번만
   const completedRef = useRef(false);
+  // 좌우 슬라이드: 손가락을 따라 움직이고, 놓으면 넘기거나 제자리로 돌아온다
+  const drag = useRef<{ x: number; y: number; axis: 'x' | 'y' | null } | null>(null);
+  const draggedRef = useRef(false);   // 가로로 끈 직후의 click(뉴스 링크 등)은 무시
+  const [dragX, setDragX] = React.useState(0);
+  const [sliding, setSliding] = React.useState(false);
   useEffect(() => {
     const done = autoAdvance && words.length > 0 && wordIndex >= words.length;
     if (!done) { completedRef.current = false; return; }
     if (completedRef.current) return;
     completedRef.current = true;
     feedbackLessonComplete();
-    toast.success('학습 완료!');
   }, [wordIndex, words.length, autoAdvance]);
 
   // autoAdvance 완료 화면
@@ -328,14 +328,10 @@ const WordCardScreen = () => {
   if (!words.length) return null;
 
   const word = words[wordIndex];
-  const isKnown = knownWords.some(w => w.id === word.id);
   const { detail, related } = wordExtras(word, allWords);
-  const steps: WordStep[] = (['meaning', detail ? 'detail' : null, 'news', related.length ? 'related' : null] as (WordStep | null)[]).filter((x): x is WordStep => !!x);
-  const step = steps[Math.min(stepIdx, steps.length - 1)];
-  const lastStep = stepIdx >= steps.length - 1;
+  const lastWord = wordIndex === words.length - 1;
 
   const goNext = () => {
-    if (stepIdx < steps.length - 1) { setStepIdx(i => i + 1); return; }
     if (autoAdvance) {
       if (knownWords.length === 0) {
         logClick('activation_first_card');
@@ -351,8 +347,60 @@ const WordCardScreen = () => {
   };
 
   const goPrev = () => {
-    if (stepIdx > 0) { setStepIdx(i => i - 1); return; }
     if (wordIndex > 0) setWordIndex(i => i - 1);
+  };
+
+  // 왼쪽으로 밀면 다음, 오른쪽이면 이전. 넘길 수 없는 쪽은 저항감 있게 조금만 움직이고 돌아온다.
+  const SLIDE_MS = 220;
+  const canNext = autoAdvance || !lastWord;
+  const canPrev = wordIndex > 0;
+  const width = () => scrollRef.current?.offsetWidth ?? 375;
+  const settle = (x: number, then?: () => void) => {
+    setSliding(true);
+    setDragX(x);
+    setTimeout(() => { setSliding(false); then?.(); }, SLIDE_MS);
+  };
+  const slide = (dir: 1 | -1) => {
+    if (sliding) return;
+    if (dir === 1 ? !canNext : !canPrev) { settle(0); return; }
+    const w = width();
+    settle(-dir * w, () => {
+      setDragX(dir * w);   // 새 단어는 반대편에서 들어온다
+      if (dir === 1) goNext(); else goPrev();
+      requestAnimationFrame(() => requestAnimationFrame(() => settle(0)));
+    });
+  };
+
+  const onDragStart = (e: React.PointerEvent) => {
+    if (sliding) return;
+    drag.current = { x: e.clientX, y: e.clientY, axis: null };
+    draggedRef.current = false;
+  };
+  const onDragMove = (e: React.PointerEvent) => {
+    const d = drag.current;
+    if (!d) return;
+    const dx = e.clientX - d.x;
+    const dy = e.clientY - d.y;
+    if (!d.axis) {
+      if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) d.axis = 'x';
+      else if (Math.abs(dy) > 8) d.axis = 'y';
+      else return;
+    }
+    if (d.axis !== 'x') return;
+    draggedRef.current = true;
+    setDragX((dx < 0 ? canNext : canPrev) ? dx : dx * 0.25);
+  };
+  const onDragEnd = (e: React.PointerEvent) => {
+    const d = drag.current;
+    drag.current = null;
+    if (!d || d.axis !== 'x') return;
+    const dx = e.clientX - d.x;
+    if (Math.abs(dx) > Math.min(80, width() * 0.2)) slide(dx < 0 ? 1 : -1);
+    else settle(0);
+  };
+  const onDragCancel = () => {
+    if (drag.current?.axis === 'x') settle(0);
+    drag.current = null;
   };
 
   const handleRelatedWordClick = (rawName: string) => {
@@ -364,7 +412,7 @@ const WordCardScreen = () => {
     // 다른 코스에서 검색 (word id 기반으로 매칭)
     const targetWord = allWords.find(w => w.word === wordName);
     if (!targetWord) {
-      toast.error('아직 등록되지 않은 용어예요');
+      showModal('아직 등록되지 않은 용어예요', 'error');
       return;
     }
 
@@ -377,74 +425,48 @@ const WordCardScreen = () => {
     }
   };
 
-  const firstLocked = words.findIndex(w => !knownWords.some(kw => kw.id === w.id));
-
   return (
-    <div className="flex flex-col h-full bg-[var(--color-canvas)]">
+    <>
+    {/* 슬라이드 제스처는 화면 전체에서 받는다 */}
+    <div
+      className="flex flex-col h-full bg-[var(--color-canvas)] overflow-hidden"
+      style={{ touchAction: 'pan-y' }}
+      onPointerDown={onDragStart}
+      onPointerMove={onDragMove}
+      onPointerUp={onDragEnd}
+      onPointerCancel={onDragCancel}
+      onClickCapture={e => { if (draggedRef.current) { e.stopPropagation(); e.preventDefault(); draggedRef.current = false; } }}
+    >
 
-      {/* 상단 바 */}
-      <div className="pt-4 px-4 pb-2 bg-[var(--color-card)] flex items-center gap-3">
-        {/* 단어 dots */}
-        <div className="flex-1 flex items-center gap-1.5 overflow-x-auto [&::-webkit-scrollbar]:hidden py-1">
-          {words.map((w, i) => {
-            const accessible = firstLocked === -1 || i <= firstLocked;
-            const known = knownWords.some(kw => kw.id === w.id);
-            return (
-              <button
-                key={w.id}
-                disabled={!accessible}
-                aria-label={`${i + 1}번째 단어 ${w.word}`}
-                onClick={() => accessible && setWordIndex(i)}
-                style={{ borderRadius: 9999 }}
-                className={`shrink-0 transition-all
-                  ${i === wordIndex
-                    ? 'w-5 h-2 bg-brand-500'
-                    : known
-                      ? 'w-2 h-2 bg-brand-300'
-                      : accessible
-                        ? 'w-2 h-2 bg-[var(--color-line)]'
-                        : 'w-2 h-2 bg-[var(--color-line)]'
-                  }`}
-              />
-            );
-          })}
+      {/* 상단: 레슨 안의 단어 위치 */}
+      <div className="px-5 pt-4 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-1.5 overflow-hidden">
+          {words.map((w, i) => (
+            <span
+              key={w.id}
+              style={{ borderRadius: 9999 }}
+              className={`shrink-0 h-2 transition-all ${i === wordIndex ? 'w-5 bg-brand-500' : 'w-2 bg-[var(--color-line)]'}`}
+            />
+          ))}
         </div>
-
-        <span className="text-xs font-bold text-[var(--color-ink-4)] shrink-0">{wordIndex + 1}/{words.length}</span>
-      </div>
-
-      {/* 단계 표시: 뜻 · 자세히 · 뉴스 · 관련 용어 */}
-      <div className="px-4 pb-2.5 bg-[var(--color-card)] border-b border-[var(--color-line)] flex gap-1.5">
-        {steps.map((st, i) => (
-          <button
-            key={st}
-            type="button"
-            onClick={() => setStepIdx(i)}
-            aria-current={i === stepIdx ? 'step' : undefined}
-            className={`flex-1 py-1.5 rounded-chip text-2xs font-bold transition-colors ${i === stepIdx ? 'bg-brand-500 text-white' : i < stepIdx ? 'bg-brand-500/15 text-brand-500' : 'bg-[var(--color-surface)] text-[var(--color-ink-4)]'}`}
-          >
-            {STEP_LABEL[st]}
-          </button>
-        ))}
+        <span className="shrink-0 text-xs font-bold text-[var(--color-ink-4)]">{wordIndex + 1}/{words.length}</span>
       </div>
 
       {/* 스크롤 영역 */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden pt-2">
-        <div key={`${word.id}-${step}`} className="anim-slide-in">
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden pt-4"
+        style={{
+          touchAction: 'pan-y',
+          transform: `translateX(${dragX}px)`,
+          transition: sliding ? `transform ${SLIDE_MS}ms cubic-bezier(0.25, 0.8, 0.25, 1)` : 'none',
+        }}
+      >
+        <div key={word.id}>
         <WordCard
           word={word}
-          step={step}
-          detail={detail}
+          onDetail={detail ? () => setDetailOpen(true) : undefined}
           validRelated={related}
-          isKnown={isKnown}
-          onToggleKnown={autoAdvance ? undefined : () => {
-            toggleKnown(word);
-            if (!isKnown) {
-              feedbackLearned();
-              toast.success('알고 있어요!');
-              if (wordIndex < words.length - 1) setWordIndex(i => i + 1);
-            }
-          }}
           onRelatedClick={handleRelatedWordClick}
           newsItems={newsItems}
           newsLoading={newsLoading}
@@ -453,31 +475,36 @@ const WordCardScreen = () => {
         </div>
       </div>
 
-      {/* 하단 네비게이션 */}
-      <div className="px-5 pb-8 pt-3 bg-[var(--color-card)] flex gap-3">
-        <button
-          onClick={goPrev}
-          disabled={wordIndex === 0 && stepIdx === 0}
-          className="flex-1 py-3.5 rounded-button bg-[var(--color-surface)] text-sm font-bold text-[var(--color-ink-2)] disabled:opacity-30 active:opacity-70 flex items-center justify-center gap-1"
-        >
-          <ChevronLeft size={16} /> 이전
-        </button>
-        <button
-          onClick={goNext}
-          disabled={!autoAdvance && lastStep && wordIndex === words.length - 1}
-          className="flex-[2] py-3.5 rounded-button text-sm font-bold text-white active:opacity-80 flex items-center justify-center gap-1 disabled:opacity-30"
-          style={{ backgroundColor: ACCENT }}
-        >
-          {!lastStep
-            ? STEP_LABEL[steps[stepIdx + 1]]
-            : autoAdvance
-              ? wordIndex === words.length - 1 ? '완료 🎉' : '다음 단어'
-              : '다음 단어'
-          }
-          {!lastStep || !autoAdvance || wordIndex < words.length - 1 ? <ChevronRight size={16} /> : null}
-        </button>
+      {/* 하단: 다음. 스와이프로도 넘긴다 */}
+      <div className="px-5 pb-8 pt-3">
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => slide(1)}
+            disabled={lastWord && !autoAdvance}
+            className="flex-1 py-3.5 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-80 disabled:opacity-30 flex items-center justify-center gap-1"
+          >
+            {lastWord && autoAdvance ? '완료 🎉' : <>다음 <ChevronRight size={16} /></>}
+          </button>
+        </div>
       </div>
     </div>
+
+    {/* 자세히 알아보기 — 스와이프 영역 밖(형제)에 둬서 시트 안을 밀어도 단어가 넘어가지 않는다 */}
+    <BottomSheet
+      open={detailOpen}
+      onDimmerClick={() => setDetailOpen(false)}
+      header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>{word.word} 자세히 알아보기</span>}
+    >
+      <div className="px-5 pb-8 flex flex-col gap-3 max-h-[60vh] overflow-y-auto">
+        {toParagraphs(detail).map((para, i) => (
+          <p key={i} className="text-sm leading-[1.6] text-[var(--color-ink-2)] font-medium break-keep tracking-[-0.01em]">
+            <Highlight text={para} keyword={word.word} pattern={termPattern(word.word) ?? undefined} />
+          </p>
+        ))}
+      </div>
+    </BottomSheet>
+    </>
   );
 };
 

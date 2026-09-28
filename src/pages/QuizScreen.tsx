@@ -223,22 +223,47 @@ const QuizScreen = () => {
     : null;
 
   return (
-    <div className="flex flex-col h-full bg-[var(--color-canvas)]">
+    <div className="flex flex-col h-full bg-[var(--color-card)]">
       {/* 헤더 */}
-      <div className="pt-4 px-5 pb-3 flex justify-between items-center bg-[var(--color-card)]">
-        <span className="text-xs font-medium text-[var(--color-ink-4)]">{currentQuizIndex + 1} / {quizQueue.length}</span>
+      <div className="bg-brand-500 rounded-b-card pt-4 px-5 pb-4 flex flex-col">
+      <div className="flex justify-between items-center">
+        <span className="text-xs font-bold text-white/80">{currentQuizIndex + 1} / {quizQueue.length}</span>
         {/* 획득 포인트 팝업 (보유 포인트는 상단바에 있다) */}
         <div className="relative h-5 w-12">
           {showPointPop && (
             <span
               key={totalEarned}
-              className="absolute -top-5 right-0 text-xs font-bold text-success-400 whitespace-nowrap"
+              className="absolute -top-5 right-0 text-xs font-bold text-white whitespace-nowrap"
               style={{ animation: 'fadeUp 0.7s ease forwards' }}
             >
               +{lastEarned}P
             </span>
           )}
         </div>
+      </div>
+
+      {/* 말풍선: 연속 정답이면 스트릭, 아니면 진행 격려 */}
+      <div className="relative self-center mt-2 bg-[var(--color-card)] rounded-chip px-4 py-2">
+        {streakMessage ? (
+          <span className={`relative flex items-center gap-1 text-xs font-bold ${streakMessage.color}`}>
+            <streakMessage.Icon size={13} className="fill-current" />{streakMessage.text}
+          </span>
+        ) : (
+          <span className="relative text-xs font-bold text-brand-500">
+            {progressPercent < 34 ? '가볍게 시작해봐요' : progressPercent < 67 ? '벌써 절반 왔어요' : '거의 다 왔어요!'}
+          </span>
+        )}
+        <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rotate-45 bg-[var(--color-card)]" />
+      </div>
+
+      {/* 진행 바: 이모지 thumb + % */}
+      <div className="flex items-center gap-3 mt-4">
+        <div className="relative flex-1 bg-white/25 rounded-full h-1.5">
+          <div className="bg-white h-full rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
+          <span className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 text-lg leading-none transition-all duration-500" style={{ left: `${progressPercent}%` }}>🙂</span>
+        </div>
+        <span className="text-xs font-bold text-white/80 w-8 text-right">{Math.round(progressPercent)}%</span>
+      </div>
       </div>
 
       {/* 애니메이션 */}
@@ -263,32 +288,16 @@ const QuizScreen = () => {
         .flash-correct { animation: flashGreen 0.4s ease; }
       `}</style>
 
-      {/* 진행 바 */}
-      <div className="w-full bg-[var(--color-line)] h-1">
-        <div
-          className="bg-brand-500 h-1 transition-all duration-500"
-          style={{ width: `${progressPercent}%` }}
-        />
-      </div>
-
       {/* 콘텐츠 — 뜻 보기 4개가 길면 작은 화면에서 넘치므로 이 영역만 스크롤 */}
       <div className="flex-1 min-h-0 overflow-y-auto flex flex-col px-5 py-5 gap-4 [&::-webkit-scrollbar]:hidden">
-        {/* 스트릭 배너 */}
-        {streakMessage && status === 'idle' && (
-          <div className={`flex items-center justify-center gap-1 py-2 rounded-chip bg-[var(--color-card)] ${streakMessage.color} text-xs font-bold`}>
-            <streakMessage.Icon size={13} className="fill-current" />{streakMessage.text}
-          </div>
-        )}
-
         {/* 문제 카드 */}
-        <div key={currentQuizIndex} className={`anim-slide-in rounded-card p-5 flex-1 flex flex-col justify-center gap-4
-          ${status === 'correct' ? 'flash-correct ring-2 ring-success-500/40' : 'bg-[var(--color-card)]'}
-          ${status === 'wrong' ? 'bg-[var(--color-card)] ring-2 ring-danger-500/30' : ''}
+        <div key={currentQuizIndex} className={`anim-slide-in rounded-card px-5 py-4 flex flex-col items-center text-center gap-3
+          ${status === 'correct' ? 'flash-correct' : 'bg-[var(--color-card)]'}
           ${shake ? 'shake' : ''}
         `}>
-          <span className="text-2xs font-medium text-[var(--color-ink-4)] tracking-widest uppercase">{quizItem?.promptLabel}</span>
+          <span className="border border-[var(--color-line)] px-3 py-1 text-2xs font-bold text-brand-500" style={{ borderRadius: 9999 }}>{quizItem?.promptLabel}</span>
 
-          <p className="text-xl font-bold text-[var(--color-ink)] leading-snug mb-2! break-keep">{quizItem?.promptMain}</p>
+          <p className="text-xl font-bold text-[var(--color-ink)] leading-snug break-keep">{quizItem?.promptMain}</p>
 
           {quizItem?.promptSub && (
             <div className="bg-[var(--color-canvas)] rounded-chip px-4 py-3">
@@ -303,7 +312,7 @@ const QuizScreen = () => {
           {quizItem?.options.map((opt, i) => {
             const isSelected = selected === opt.answer;
             const isCorrectOption = opt.isCorrect;
-            let optionStyle = 'bg-[var(--color-card)] text-[var(--color-ink)] active:bg-[var(--color-line)]';
+            let optionStyle = 'bg-[var(--color-surface)] text-[var(--color-ink-2)] active:bg-[var(--color-line)]';
 
             if (status !== 'idle') {
               if (isCorrectOption) {
@@ -311,7 +320,7 @@ const QuizScreen = () => {
               } else if (isSelected && !isCorrectOption) {
                 optionStyle = 'bg-danger-500/15 text-danger-400 ring-1 ring-danger-500/40';
               } else {
-                optionStyle = 'bg-[var(--color-card)] text-[var(--color-line)]';
+                optionStyle = 'bg-[var(--color-surface)] text-[var(--color-ink-4)] opacity-60';
               }
             }
 
@@ -319,16 +328,17 @@ const QuizScreen = () => {
               <button
                 key={`${i}-${opt.answer}`}
                 onClick={() => handleSelect(opt)}
-                className={`anim-fade-up relative py-4 px-4 pr-9 rounded-card text-sm font-bold text-left break-keep transition-all duration-150 ${optionStyle}`}
+                className={`anim-fade-up flex items-center gap-3 py-4 px-4 rounded-chip text-sm font-semibold text-left break-keep transition-all duration-150 ${optionStyle}`}
                 style={{ '--i': i + 1 } as React.CSSProperties}
               >
+                {status !== 'idle' && isCorrectOption ? (
+                  <span className="w-5 h-5 shrink-0 flex items-center justify-center bg-success-500 text-white" style={{ borderRadius: 9999 }}><Check size={12} strokeWidth={3} /></span>
+                ) : status !== 'idle' && isSelected ? (
+                  <span className="w-5 h-5 shrink-0 flex items-center justify-center bg-danger-500 text-white" style={{ borderRadius: 9999 }}><X size={12} strokeWidth={3} /></span>
+                ) : (
+                  <span className="w-5 h-5 shrink-0 flex items-center justify-center bg-[var(--color-line)] text-[var(--color-card)]" style={{ borderRadius: 9999 }}><Check size={12} strokeWidth={3} /></span>
+                )}
                 {opt.label}
-                {status !== 'idle' && isCorrectOption && (
-                  <Check size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-success-400" />
-                )}
-                {status !== 'idle' && isSelected && !isCorrectOption && (
-                  <X size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-danger-400" />
-                )}
               </button>
             );
           })}
