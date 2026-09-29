@@ -136,7 +136,7 @@ const HomeScreen = () => {
                   </div>
                   <div className="flex gap-1">
                     {Array.from({ length: mission.target }).map((_, i) => (
-                      <div key={i} className={`flex-1 h-1.5 rounded-full transition-all duration-300 ${i < mission.current ? 'bg-brand-500' : 'bg-[var(--color-line)]'}`} />
+                      <div key={i} className={`flex-1 h-1.5 rounded-full transition-all duration-[var(--dur-slow)] ease-soft ${i < mission.current ? 'bg-brand-500' : 'bg-[var(--color-line)]'}`} />
                     ))}
                   </div>
                 </div>

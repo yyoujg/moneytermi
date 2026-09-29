@@ -75,7 +75,7 @@ const LeagueScreen = () => {
           <p className="text-2xs font-medium text-brand-500 mb-3!">이번 주 {mine?.points?.toLocaleString() ?? 0}XP · {daysUntilReset()}일 남음</p>
           <div className="w-full bg-[var(--color-card)] rounded-full h-1.5 overflow-hidden mb-1.5">
             <div
-              className="bg-brand-500 h-full rounded-full transition-all duration-700"
+              className="bg-brand-500 h-full rounded-full transition-all duration-[var(--dur-emph)] ease-soft"
               style={{ width: barReady ? `${next === null ? 100 : Math.min(100, Math.round(((xp - stage.minPoints) / (next - stage.minPoints)) * 100))}%` : '0%' }}
             />
           </div>
@@ -88,7 +88,7 @@ const LeagueScreen = () => {
         <div className="flex justify-between items-start relative mt-5">
           <div className="absolute top-4 left-4 right-4 h-[2px] bg-[var(--color-line)] z-0 rounded-full">
             <div
-              className="h-full bg-brand-500 rounded-full transition-all duration-1000"
+              className="h-full bg-brand-500 rounded-full transition-all duration-[var(--dur-draw)] ease-soft"
               style={{ width: `${((stage.id - 1) / (GROWTH_STAGES.length - 1)) * 100}%` }}
             />
           </div>
