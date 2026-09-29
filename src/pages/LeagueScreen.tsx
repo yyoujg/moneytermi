@@ -7,7 +7,12 @@ import { useAuth } from '../hooks/useAuth';
 import { supabase, getGuestClient } from '../lib/supabase';
 import { logClick } from '../lib/analytics';
 import { shareTossLink } from '../lib/share';
-import { daysUntilReset } from '../lib/league';
+import { daysUntilReset, weekStart } from '../lib/league';
+import { Storage } from '../lib/storage';
+import { RollingNumber } from '../components/RollingNumber';
+import { WeeklyRecap, type WeekSnapshot } from '../components/WeeklyRecap';
+
+const SNAP_KEY = 'league_snapshot';   // 지난번 본 내 순위(이번 주 변동 표시·지난주 결과 스토리용)
 import { Card } from '../components/ui/Card';
 import { LeagueRules } from '../components/LeagueRules';
 
@@ -30,6 +35,21 @@ const LeagueScreen = () => {
   const [mine, setMine] = useState<MyRank | null>(null);
   const [failed, setFailed] = useState(false);
   const [sheet, setSheet] = useState<'share' | 'rules' | null>(null);
+  const [rankDelta, setRankDelta] = useState(0);            // +면 순위 상승
+  const [recap, setRecap] = useState<WeekSnapshot | null>(null);
+
+  // 순위를 받으면 지난 기록과 비교: 같은 주면 순위 변동, 지난주 기록이면 결과 스토리. 그리고 지금 값을 기록
+  useEffect(() => {
+    if (!mine) return;
+    const week = weekStart();
+    Storage.getItem(SNAP_KEY).catch(() => null).then(raw => {
+      const prev: WeekSnapshot | null = raw ? JSON.parse(raw) : null;
+      // 변동이 있을 때만 바꾼다(개발 모드 이중 실행에서 두 번째 호출이 방금 쓴 기록과 비교해 0으로 덮지 않게)
+      if (prev?.week === week && prev.rank && mine.rank && prev.rank !== mine.rank) setRankDelta(prev.rank - mine.rank);
+      if (prev && prev.week < week && prev.points > 0) setRecap(prev);
+      Storage.setItem(SNAP_KEY, JSON.stringify({ week, rank: mine.rank, total: mine.total, points: mine.points })).catch(() => {});
+    });
+  }, [mine]);
   // 진행 바를 0에서 실제 값까지 차오르게: 마운트 다음 프레임에 값을 넣는다
   const [barReady, setBarReady] = useState(false);
   useEffect(() => { const t = setTimeout(() => setBarReady(true), 80); return () => clearTimeout(t); }, []);
@@ -69,10 +89,18 @@ const LeagueScreen = () => {
         <Card tone="surface" pad="lg" className="flex flex-col items-center text-center anim-fade-up">
           <div className="text-6xl mb-2 anim-pop-in">{stage.emoji}</div>
           <p className="text-lg font-bold text-[var(--color-ink)] mb-1!">{stage.name}</p>
-          <p className="text-xs text-[var(--color-ink-3)] mb-1!">
-            {mine?.rank ? `${mine.total}명 중 ${mine.rank}위` : '이번 주 XP를 모으면 순위에 올라요'}
+          <p className="flex items-center justify-center gap-1.5 text-xs text-[var(--color-ink-3)] mb-1!">
+            {mine?.rank
+              ? <>{mine.total.toLocaleString()}명 중 <span className="text-sm font-bold text-[var(--color-ink)]"><RollingNumber value={mine.rank} /></span>위</>
+              : '이번 주 XP를 모으면 순위에 올라요'}
+            {rankDelta !== 0 && (
+              <span className={`anim-pop-in px-1.5 py-px rounded-md text-2xs font-bold ${rankDelta > 0 ? 'bg-success-500/10 text-success-500' : 'bg-danger-500/10 text-danger-500'}`}
+                style={{ '--i': 8 } as React.CSSProperties}>
+                {rankDelta > 0 ? `▲${rankDelta}` : `▼${-rankDelta}`}
+              </span>
+            )}
           </p>
-          <p className="text-2xs font-medium text-brand-500 mb-3!">이번 주 {mine?.points?.toLocaleString() ?? 0}XP · {daysUntilReset()}일 남음</p>
+          <p className="text-2xs font-medium text-brand-500 mb-3!">이번 주 <RollingNumber value={mine?.points ?? 0} />XP · {daysUntilReset()}일 남음</p>
           <div className="w-full bg-[var(--color-card)] rounded-full h-1.5 overflow-hidden mb-1.5">
             <div
               className="bg-brand-500 h-full rounded-full transition-all duration-[var(--dur-emph)] ease-soft"
@@ -172,6 +200,8 @@ const LeagueScreen = () => {
 
         <Spacing size={8} />
       </div>
+
+      {recap && <WeeklyRecap snap={recap} onClose={() => setRecap(null)} />}
 
       <BottomSheet
         open={sheet === 'rules'}

@@ -6,6 +6,68 @@ import { logClick } from '../lib/analytics';
 import { LESSON_COST } from '../constants';
 import { feedbackNodeTap } from '../lib/feedback';
 import { loadDoneNodes } from '../lib/pathProgress';
+import { Storage } from '../lib/storage';
+
+const SEEN_KEY = 'path_seen_done';   // 코스 화면에서 마지막으로 본 완료 노드들(도장 연출용)
+const GATE_KEY = 'path_seen_levels';  // 열린 것을 본 레벨들(관문 연출용)
+
+// 노드를 누르면 노드 색 원이 화면 가득 퍼진 뒤 다음 화면으로 넘어가고, 새 화면 위에서 그 색이 걷힌다.
+// 오버레이를 body에 붙여 화면 전환 뒤에도 남게 한다. 동작 줄이기·WAAPI 미지원이면 바로 넘어간다.
+const expandFromNode = (nodeId: string) => new Promise<void>(resolve => {
+  const el = document.querySelector<HTMLElement>(`[data-node-id="${nodeId}"]`);
+  if (!el || typeof el.animate !== 'function' || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { resolve(); return; }
+  const root = getComputedStyle(document.documentElement);
+  const token = (k: string, fallback: string) => root.getPropertyValue(k).trim() || fallback;
+  const r = el.getBoundingClientRect();
+  const at = `${r.left + r.width / 2}px ${r.top + r.height / 2}px`;
+  const ov = document.createElement('div');
+  Object.assign(ov.style, { position: 'fixed', inset: '0', zIndex: '2000', pointerEvents: 'none', background: el.dataset.color ?? '#f97316' });
+  document.body.appendChild(ov);
+  const grow = ov.animate(
+    [{ clipPath: `circle(${r.width / 2}px at ${at})` }, { clipPath: `circle(150vmax at ${at})` }],
+    { duration: parseFloat(token('--dur-base', '320ms')), easing: token('--ease-soft', 'ease-out'), fill: 'forwards' },
+  );
+  const fadeOut = () => {
+    const f = ov.animate([{ opacity: 1 }, { opacity: 0 }], { duration: parseFloat(token('--dur-slow', '500ms')), easing: 'ease-out', fill: 'forwards' });
+    f.onfinish = () => ov.remove();
+  };
+  grow.onfinish = () => { resolve(); requestAnimationFrame(() => requestAnimationFrame(fadeOut)); };
+  setTimeout(() => ov.remove(), 3000);   // 어떤 이유로든 남지 않게
+});
+
+// 레벨 관문: 레벨 이름·설명·레벨 전체 진행. 잠긴 레벨은 흐리게, 새로 열린 레벨은 주황 문짝이 좌우로 열리며 드러난다
+const LevelGate = ({ level, title, stat, locked, opening }: {
+  level: string; title: string; stat: { known: number; total: number }; locked: boolean; opening: boolean;
+}) => {
+  const pct = stat.total ? Math.round((stat.known / stat.total) * 100) : 0;
+  return (
+    <div className={`relative mx-5 mt-10 overflow-hidden rounded-card border border-[var(--color-line)] bg-[var(--color-card)] px-5 py-4 ${locked ? 'opacity-60' : ''}`}>
+      <div className="flex items-center gap-2">
+        <span className={`px-2.5 py-1 text-white text-2xs font-black ${locked ? 'bg-[var(--color-ink-4)]' : 'bg-brand-500'} ${opening ? 'anim-pop-in' : ''}`}
+          style={{ borderRadius: 9999, '--i': 10 } as React.CSSProperties}>{level}</span>
+        <span className="text-sm font-bold text-[var(--color-ink)] break-keep">{title}</span>
+        {locked && <Lock size={14} className="ml-auto text-[var(--color-ink-4)]" />}
+      </div>
+      <div className="mt-3 flex items-center gap-3">
+        <div className="flex-1 h-1.5 rounded-full bg-[var(--color-surface)] overflow-hidden">
+          <div className="h-full rounded-full bg-brand-500 transition-all duration-[var(--dur-draw)] ease-soft" style={{ width: `${pct}%` }} />
+        </div>
+        <span className="text-2xs font-bold text-[var(--color-ink-4)] tabular-nums">{stat.known}/{stat.total}</span>
+      </div>
+      {locked && <p className="mt-2 text-2xs text-[var(--color-ink-4)]">앞 레벨을 마치면 열려요</p>}
+      {opening && (
+        <div aria-hidden className="absolute inset-0 flex pointer-events-none">
+          <div className="flex-1 bg-brand-500 anim-gate-l flex items-center justify-end pr-1" style={{ '--d': '0.35s' } as React.CSSProperties}>
+            <span className="text-white text-sm font-black">{level}</span>
+          </div>
+          <div className="flex-1 bg-brand-500 anim-gate-r flex items-center pl-1" style={{ '--d': '0.35s' } as React.CSSProperties}>
+            <span className="text-white text-sm font-black">열림</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 import { buildPath, connectorD, NODE, nodeOffsetX, ROW, SPAN, sectionColor, type PathNode } from '../lib/path';
 
 // 노드 원. TDS 리셋이 <button>의 rounded-*를 먹으므로 borderRadius는 인라인 스타일로 준다
@@ -13,13 +75,14 @@ import { buildPath, connectorD, NODE, nodeOffsetX, ROW, SPAN, sectionColor, type
 // 레벨 이름은 courses.level (words_bok/categories.py LEVEL_NAMES)
 const LEVEL_TITLES: Record<string, string> = { 기초: '경제 뉴스의 기본 단어', 중급: '용어끼리 연결하기', 고급: '경제 메커니즘 설명하기', 심화: '모형과 제도 깊이 보기' };
 
-const NodeCircle = ({ node, index, color, isFocus, onTap, nodeRef }: {
+const NodeCircle = ({ node, index, color, isFocus, onTap, nodeRef, stamp }: {
   node: PathNode;
   index: number;
   color: { face: string; shadow: string };
   isFocus: boolean;
   onTap: () => void;
   nodeRef?: React.Ref<HTMLButtonElement>;
+  stamp?: number;   // 지난번 이후 새로 끝낸 노드면 도장 순번(0부터). 순서대로 찍힌다
 }) => {
   const locked = node.state === 'locked';
   const done = node.state === 'done';
@@ -39,9 +102,11 @@ const NodeCircle = ({ node, index, color, isFocus, onTap, nodeRef }: {
       type="button"
       disabled={locked}
       data-own-sfx
+      data-node-id={node.id}
+      data-color={color.face}
       onClick={onTap}
       aria-label={`${node.type === 'quiz' ? '퀴즈' : node.type === 'review' ? '누적 복습' : '학습'} ${index + 1}`}
-      className={`absolute flex items-center justify-center active:translate-y-[3px] disabled:opacity-50 disabled:pointer-events-none ${isFocus ? 'animate-node-hop' : ''}`}
+      className={`absolute flex items-center justify-center active:translate-y-[3px] disabled:opacity-50 disabled:pointer-events-none ${isFocus ? 'animate-node-hop' : stamp != null ? 'anim-stamp' : ''}`}
       style={{
         top: (ROW - NODE) / 2,
         left: `calc(50% + ${nodeOffsetX(index)}px)`,
@@ -52,7 +117,8 @@ const NodeCircle = ({ node, index, color, isFocus, onTap, nodeRef }: {
         background: face,
         boxShadow: `0 5px 0 ${shadow}${isFocus ? `, 0 0 0 6px ${color.face}33` : ''}`,
         border: outlined && !locked && !done ? `2px solid ${color.face}` : 'none',
-      }}
+        ...(stamp != null ? { '--d': `${0.2 + stamp * 0.15}s` } : {}),
+      } as React.CSSProperties}
     >
       {locked
         ? <Lock size={22} style={{ color: color.shadow, opacity: 0.55 }} />
@@ -75,6 +141,63 @@ const CourseScreen = () => {
   useEffect(() => { loadDoneNodes().then(setDoneNodes); }, []);
 
   const sections = useMemo(() => buildPath(courses, knownIds), [courses, knownIds]);
+  // 레벨별 배운 단어 수 / 전체
+  const levelStats = useMemo(() => {
+    const m = new Map<string, { known: number; total: number }>();
+    for (const sec of sections) {
+      const s = m.get(sec.course.level) ?? { known: 0, total: 0 };
+      s.known += sec.knownCount; s.total += sec.course.words.length;
+      m.set(sec.course.level, s);
+    }
+    return m;
+  }, [sections]);
+
+  // 새로 열린 레벨: 관문 문이 좌우로 열리는 연출을 한 번. 첫 방문(기록 없음)은 연출 없이 기록만
+  const [openingLevels, setOpeningLevels] = useState<Set<string>>(new Set());
+  const gateRef = useRef(false);
+  useEffect(() => {
+    if (gateRef.current || !hydrated || sections.length === 0) return;
+    gateRef.current = true;
+    const open = [...new Set(sections.filter(sec => sec.nodes[0]?.state !== 'locked').map(sec => sec.course.level))];
+    Storage.getItem(GATE_KEY).catch(() => null).then(raw => {
+      if (raw) {
+        const seen = new Set<string>(JSON.parse(raw));
+        setOpeningLevels(new Set(open.filter(l => !seen.has(l))));
+      }
+      Storage.setItem(GATE_KEY, JSON.stringify(open)).catch(() => {});
+    });
+  }, [hydrated, sections]);
+
+  const isDone = (node: PathNode) => node.state === 'done' || (doneNodes.has(node.id) && node.state === 'available');
+
+  // 지난번에 본 뒤 새로 끝낸 노드: 도장 연출 + 들어오는 경로가 색으로 그려진다. 첫 방문(기록 없음)은 연출 없이 기록만.
+  const [newlyDone, setNewlyDone] = useState<Map<string, number>>(new Map());
+  const stampedRef = useRef(false);
+  useEffect(() => {
+    if (stampedRef.current || !hydrated || sections.length === 0) return;
+    stampedRef.current = true;
+    const now = sections.flatMap(sec => sec.nodes.filter(isDone).map(n => n.id));
+    Storage.getItem(SEEN_KEY).catch(() => null).then(raw => {
+      if (raw) {
+        const seen = new Set<string>(JSON.parse(raw));
+        const fresh = now.filter(id => !seen.has(id)).slice(-8);   // 한 번에 너무 많이 찍히지 않게 최근 8개만
+        setNewlyDone(new Map(fresh.map((id, i) => [id, i])));
+      }
+      Storage.setItem(SEEN_KEY, JSON.stringify(now)).catch(() => {});
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated, sections, doneNodes]);
+
+  // 도장 연출이 있으면 첫 도장 노드를 먼저 보여주고, 마지막 도장·경로가 끝나면 지금 할 노드로 부드럽게 내려간다
+  useEffect(() => {
+    if (newlyDone.size === 0) return;
+    const first = [...newlyDone.entries()].find(([, i]) => i === 0)?.[0];
+    document.querySelector(`[data-node-id="${first}"]`)?.scrollIntoView({ block: 'center' });
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const t = setTimeout(() => focusRef.current?.scrollIntoView({ block: 'center', behavior: 'smooth' }),
+      reduce ? 0 : 400 + newlyDone.size * 150 + 900);
+    return () => clearTimeout(t);
+  }, [newlyDone]);
 
   // current 노드는 코스마다 하나씩 생긴다. 장식(링·"시작" 말풍선)은 패스 순서상 첫 번째에만 붙인다.
   // 진행 중인 노드와 그 노드가 섹션 안에서 몇 번째인지 (계산이 가벼워 memo 없이)
@@ -114,6 +237,7 @@ const CourseScreen = () => {
       const size = node.type === 'review' ? 10 : 5;
       const queue = [...pool].sort(() => Math.random() - 0.5).slice(0, size);
       feedbackNodeTap();
+      await expandFromNode(node.id);
       navigate('/quiz', { state: { quizQueue: queue, backPath: '/course', nodeId: node.id } });
       return;
     }
@@ -130,6 +254,7 @@ const CourseScreen = () => {
       if (!(await spendPoints(LESSON_COST, 'lesson'))) { openShop('lesson'); return; }
     } finally { spending.current = false; }
     feedbackNodeTap();
+    await expandFromNode(node.id);
     navigate('/word-card', { state: { words: node.words, index: 0, backPath: '/course', autoAdvance: true } });
   };
 
@@ -142,12 +267,15 @@ const CourseScreen = () => {
         const color = sectionColor(si);
         return (
         <section key={sec.course.id} ref={sec.course.id === focus?.courseId ? focusSectionRef : undefined}>
-          {/* 레벨이 바뀌는 첫 코스 위에 레벨 제목 */}
+          {/* 레벨이 바뀌는 첫 코스 위에 레벨 관문 */}
           {LEVEL_TITLES[sec.course.level] && sec.course.level !== sections[si - 1]?.course.level && (
-            <div className="mx-5 mt-8 flex items-center gap-2">
-              <span className="px-2.5 py-1 bg-brand-500 text-white text-2xs font-black" style={{ borderRadius: 9999 }}>{sec.course.level}</span>
-              <span className="text-sm font-bold text-[var(--color-ink-2)]">{LEVEL_TITLES[sec.course.level]}</span>
-            </div>
+            <LevelGate
+              level={sec.course.level}
+              title={LEVEL_TITLES[sec.course.level]}
+              stat={levelStats.get(sec.course.level)!}
+              locked={sec.nodes[0]?.state === 'locked'}
+              opening={openingLevels.has(sec.course.level)}
+            />
           )}
           {/* 코스 배너 */}
           <div className="sticky top-4 z-10 mx-5 mt-5 mb-1 rounded-card px-5 py-4 shadow-md" style={{ background: color.face }}>
@@ -174,8 +302,20 @@ const CourseScreen = () => {
                       strokeWidth={6}
                       strokeLinecap="round"
                       strokeDasharray="1 14"
-                      stroke={node.state === 'done' ? color.face : 'var(--color-ink-4)'}
+                      stroke={node.state === 'done' && !newlyDone.has(node.id) ? color.face : 'var(--color-ink-4)'}
                     />
+                    {/* 새로 끝낸 노드와 지금 할 노드로 들어오는 길: 회색 점 위로 색 점이 앞에서부터 그려진다(마스크가 선처럼 자란다) */}
+                    {(newlyDone.has(node.id) || (isFocus && isDone(sec.nodes[k - 1]))) && (
+                      <>
+                        <mask id={`trail-${node.id}`}>
+                          <path d={connectorD(nodeOffsetX(k - 1), nodeOffsetX(k))} fill="none" stroke="#fff" strokeWidth={10} strokeLinecap="round"
+                            pathLength={1} className="anim-draw"
+                            style={{ animationDelay: `${newlyDone.has(node.id) ? 0.1 + newlyDone.get(node.id)! * 0.15 : 0.3}s` }} />
+                        </mask>
+                        <path d={connectorD(nodeOffsetX(k - 1), nodeOffsetX(k))} fill="none" strokeWidth={6} strokeLinecap="round"
+                          strokeDasharray="1 14" stroke={color.face} mask={`url(#trail-${node.id})`} />
+                      </>
+                    )}
                   </svg>
                 )}
 
@@ -198,6 +338,7 @@ const CourseScreen = () => {
                   color={color}
                   isFocus={isFocus}
                   nodeRef={isFocus ? focusRef : undefined}
+                  stamp={newlyDone.get(node.id)}
                   onTap={() => handleNodeTap(node, k, sec.knownCount)}
                 />
               </div>

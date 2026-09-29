@@ -14,8 +14,9 @@ const HL = { fill: '#fff', fillOpacity: 0.4, stroke: 'none' } as const;
 
 export const StreakIcon = (p: Props) => (
   <Svg {...p} color={STAT_COLOR.streak}>
-    <path d="M12 2.5c.7 3.3 6 5.6 6 11a6 6 0 0 1-12 0c0-2.4 1.2-4 2.5-5.1.2 1.6 1 2.7 2.1 3.2C10.3 8.6 11 5.4 12 2.5z" />
-    <path {...HL} d="M12 13.2c1.3 1 2.2 2.1 2.2 3.4a2.2 2.2 0 0 1-4.4 0c0-1.3.9-2.4 2.2-3.4z" />
+    {/* 불꽃은 바닥을 축으로 살랑이고, 안쪽 불꽃은 반 박자 늦게 따라간다 */}
+    <path className="anim-flicker" d="M12 2.5c.7 3.3 6 5.6 6 11a6 6 0 0 1-12 0c0-2.4 1.2-4 2.5-5.1.2 1.6 1 2.7 2.1 3.2C10.3 8.6 11 5.4 12 2.5z" />
+    <path {...HL} className="anim-flicker" style={{ animationDelay: '-0.9s' }} d="M12 13.2c1.3 1 2.2 2.1 2.2 3.4a2.2 2.2 0 0 1-4.4 0c0-1.3.9-2.4 2.2-3.4z" />
   </Svg>
 );
 
