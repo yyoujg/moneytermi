@@ -18,7 +18,7 @@ import { WordVisuals } from '../components/WordVisuals';
 import { termPattern } from '../lib/quiz';
 
 
-const SOURCE_NAMES: Record<string, string> = { bok800: '한국은행 경제금융용어 800선', tesat: 'TESAT' };
+const SOURCE_NAMES: Record<string, string> = { bok800: '한국은행 경제금융용어 800선', tesat: 'TESAT', sgsg: '한경 생글생글 경제 퀴즈' };
 
 const stripHtml = (s: string) => {
   const tmp = document.createElement('div');
