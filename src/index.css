@@ -81,6 +81,11 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
    .anim-draw     : SVG 선이 처음부터 끝까지 그려짐(pathLength="1"과 함께). --i 로 선마다 지연(--stagger x 2.5)
    .anim-drop     : 위에서 떨어져 살짝 튕기며 자리 잡음. --d 로 지연
    .anim-glow-ok / .anim-shake : 정답 초록 빛 한 번 / 오답 좌우 흔들림. --d 로 지연
+   .anim-stamp    : 완료 도장. 크게 떨어져 찍히듯 자리 잡음. --d 로 지연
+   .anim-gate-l / .anim-gate-r : 레벨 관문 문짝이 좌우로 열림. --d 로 지연
+   .anim-shine    : 흰 빛줄기가 한 번 훑고 지나감(배지). --i 로 순차
+   .anim-flip     : 세로축으로 한 바퀴(배지 탭)
+   .anim-flicker  : 불꽃이 바닥을 축으로 살랑임(무한, 연속 학습 아이콘)
    .anim-sweep    : 테두리 빛이 한 번 지나감. 화살표·칸이 자리 잡은 뒤(--dur-draw) --i 로 순차(--stagger x 1.5) */
 @keyframes fade-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 @keyframes pop-in { 0% { opacity: 0; transform: scale(0.6); } 70% { transform: scale(1.08); } 100% { opacity: 1; transform: scale(1); } }
@@ -92,6 +97,12 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
 @keyframes glow-ok { 0%, 100% { box-shadow: 0 0 0 0 rgba(18, 184, 134, 0); } 40% { box-shadow: 0 0 0 4px rgba(18, 184, 134, 0.35); } }
 @keyframes shake { 0%, 100% { transform: none; } 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
 @keyframes sweep { 0%, 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); } 45% { box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.45); } }
+@keyframes stamp { 0% { opacity: 0; transform: scale(1.6) rotate(-12deg); } 55% { opacity: 1; transform: scale(0.9) rotate(3deg); } 100% { opacity: 1; transform: none; } }
+@keyframes gate-l { from { transform: none; } to { transform: translateX(-102%); } }
+@keyframes gate-r { from { transform: none; } to { transform: translateX(102%); } }
+@keyframes shine { from { background-position: 150% 0; } to { background-position: -50% 0; } }
+@keyframes flip { from { transform: perspective(300px) rotateY(0); } to { transform: perspective(300px) rotateY(360deg); } }
+@keyframes flicker { 0%, 100% { transform: scale(1, 1) rotate(0); } 30% { transform: scale(0.96, 1.07) rotate(-2deg); } 60% { transform: scale(1.03, 0.96) rotate(1.5deg); } }
 @keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.3); } 100% { transform: scale(1); } }
 @keyframes attn { 0%, 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.55); } 70% { box-shadow: 0 0 0 9px rgba(249, 115, 22, 0); } }
 .anim-fade-up  { animation: fade-up var(--dur-base) var(--ease-soft) both; animation-delay: calc(var(--i, 0) * var(--stagger)); }
@@ -107,6 +118,12 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
 .anim-drop     { animation: drop var(--dur-slow) var(--ease-soft) both; animation-delay: var(--d, 0s); }
 .anim-glow-ok  { animation: glow-ok var(--dur-emph) ease-out both; animation-delay: var(--d, 0s); }
 .anim-shake    { animation: shake var(--dur-base) ease-in-out both; animation-delay: var(--d, 0s); }
+.anim-stamp    { animation: stamp var(--dur-slow) var(--ease-spring) both; animation-delay: var(--d, 0s); }
+.anim-gate-l   { animation: gate-l var(--dur-emph) var(--ease-soft) both; animation-delay: var(--d, 0s); }
+.anim-gate-r   { animation: gate-r var(--dur-emph) var(--ease-soft) both; animation-delay: var(--d, 0s); }
+.anim-shine    { background-image: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.75) 50%, transparent 65%); background-size: 250% 100%; background-repeat: no-repeat; animation: shine var(--dur-draw) var(--ease-soft) both; animation-delay: calc(400ms + var(--i, 0) * var(--stagger)); }
+.anim-flip     { animation: flip var(--dur-emph) var(--ease-soft); }
+.anim-flicker  { transform-box: fill-box; transform-origin: 50% 100%; animation: flicker 1.8s ease-in-out infinite; }
 .anim-sweep    { animation: sweep var(--dur-emph) ease-out both; animation-delay: calc(var(--dur-draw) + var(--i, 0) * var(--stagger) * 1.5); }
 .anim-draw     { stroke-dasharray: 1; animation: draw var(--dur-draw) var(--ease-soft) both; animation-delay: calc(var(--i, 0) * var(--stagger) * 2.5); }
 /* 마일스톤 축하 색종이: 위에서 흔들리며 떨어진다. --x(가로 위치 %), --d(지연), --r(회전 방향)은 인라인 */
@@ -126,7 +143,7 @@ button:not(:disabled):active { transform: scale(0.97); }
 /* TDS 리셋의 button:focus 포커스 링이 터치/클릭 뒤에도 남는다. 키보드 포커스(:focus-visible)만 링을 유지 */
 button:focus:not(:focus-visible) { outline: none !important; }
 @media (prefers-reduced-motion: reduce) {
-  .anim-fade, .anim-fade-up, .anim-pop-in, .anim-slide-in, .anim-slide-up, .anim-bump, .anim-attn, .anim-confetti, .anim-draw, .anim-drop, .anim-glow-ok, .anim-shake, .anim-sweep,
+  .anim-fade, .anim-fade-up, .anim-pop-in, .anim-slide-in, .anim-slide-up, .anim-bump, .anim-attn, .anim-confetti, .anim-draw, .anim-drop, .anim-glow-ok, .anim-shake, .anim-sweep, .anim-stamp, .anim-gate-l, .anim-gate-r, .anim-shine, .anim-flip, .anim-flicker,
   .animate-node-hop, .animate-node-ground { animation: none !important; }
 }
 

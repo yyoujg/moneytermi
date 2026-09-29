@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Settings, ChevronRight, Pencil, CircleHelp } from 'lucide-react';
 import { StreakIcon, XpIcon, PointIcon, WordsIcon, STAT_COLOR } from '../components/StatIcons';
 import { useAppContext } from '../context/AppContext';
@@ -19,6 +19,28 @@ const MyPageScreen = () => {
   const stage = getGrowthStage(xp);
   const streak = calcStreak(attendanceDates);
   const badges = buildBadges({ words: knownWords.length, streak, xp });
+  // 배지 기울이기: 격자 위 손가락 위치(또는 기기 기울기)를 -1~1로 바꿔 CSS 변수로만 넘긴다(다시 그리지 않음)
+  const [spin, setSpin] = useState<Record<string, number>>({});
+  const tiltRef = useRef<HTMLDivElement>(null);
+  const setTilt = (tx: number, ty: number, on: boolean) => {
+    const el = tiltRef.current; if (!el) return;
+    el.style.setProperty('--tx', tx.toFixed(3)); el.style.setProperty('--ty', ty.toFixed(3)); el.style.setProperty('--tilt', on ? '1' : '0');
+  };
+  const onTiltMove = (e: React.PointerEvent) => {
+    const r = tiltRef.current?.getBoundingClientRect(); if (!r) return;
+    setTilt(((e.clientX - r.left) / r.width) * 2 - 1, ((e.clientY - r.top) / r.height) * 2 - 1, true);
+  };
+  const onTiltReset = () => setTilt(0, 0, false);
+  useEffect(() => {
+    // 안드로이드는 권한 없이 기울기 이벤트가 온다. iOS는 권한 창이 필요해 여기선 쓰지 않는다(손가락으로만)
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    const onTilt = (e: DeviceOrientationEvent) => {
+      if (e.gamma == null || e.beta == null) return;
+      setTilt(Math.max(-1, Math.min(1, e.gamma / 30)), Math.max(-1, Math.min(1, (e.beta - 45) / 30)), true);
+    };
+    window.addEventListener('deviceorientation', onTilt);
+    return () => window.removeEventListener('deviceorientation', onTilt);
+  }, []);
 
   const earned = badges.filter(b => b.earned).length;
   const { user, updateNickname } = useAuth();
@@ -117,20 +139,43 @@ const MyPageScreen = () => {
             <span className="text-2xs font-medium text-[var(--color-ink-4)]">{earned} / {badges.length}</span>
           </div>
           <Card pad="md">
-            <div className="grid grid-cols-5 gap-y-4">
+            {/* 손가락을 대고 움직이거나(또는 기기를 기울이면) 받은 배지들이 그쪽으로 기울고 빛이 흐른다. 받은 배지를 누르면 한 바퀴 돈다 */}
+            <div ref={tiltRef} className="grid grid-cols-5 gap-y-4 touch-pan-y" onPointerMove={onTiltMove} onPointerLeave={onTiltReset} onPointerUp={onTiltReset} onPointerCancel={onTiltReset}>
               {badges.map((b, i) => (
                 <div key={b.id} className="flex flex-col items-center gap-1 anim-pop-in" style={{ '--i': i } as React.CSSProperties}>
-                  <div
-                    className="w-11 h-11 flex items-center justify-center text-xl"
+                  <button
+                    type="button"
+                    disabled={!b.earned}
+                    aria-label={b.title}
+                    onClick={() => setSpin(s => ({ ...s, [b.id]: (s[b.id] ?? 0) + 1 }))}
+                    className="relative w-11 h-11 flex items-center justify-center text-xl overflow-hidden disabled:pointer-events-none"
                     style={{
                       borderRadius: 9999,
                       background: b.earned ? 'var(--color-brand-soft)' : 'var(--color-surface)',
                       filter: b.earned ? 'none' : 'grayscale(1)',
                       opacity: b.earned ? 1 : 0.45,
+                      ...(b.earned ? {
+                        transform: 'perspective(300px) rotateX(calc(var(--ty, 0) * -18deg)) rotateY(calc(var(--tx, 0) * 18deg))',
+                        transition: 'transform var(--dur-base) var(--ease-soft)',
+                      } : {}),
                     }}
                   >
-                    {b.icon}
-                  </div>
+                    <span key={spin[b.id] ?? 0} className={spin[b.id] ? 'anim-flip inline-block' : 'inline-block'}>{b.icon}</span>
+                    {b.earned && (
+                      <>
+                        {/* 처음 한 번 훑는 빛 + 기울기를 따라 움직이는 빛 */}
+                        <span aria-hidden className="absolute inset-0 anim-shine pointer-events-none" style={{ '--i': i } as React.CSSProperties} />
+                        <span aria-hidden className="absolute inset-0 pointer-events-none"
+                          style={{
+                            background: 'linear-gradient(115deg, transparent 38%, rgba(255,255,255,0.55) 50%, transparent 62%)',
+                            backgroundSize: '250% 100%',
+                            backgroundPosition: 'calc(50% - var(--tx, 0) * 60%) 0',
+                            opacity: 'calc(var(--tilt, 0))',
+                            transition: 'opacity var(--dur-base) ease-out, background-position var(--dur-base) var(--ease-soft)',
+                          }} />
+                      </>
+                    )}
+                  </button>
                   <span className={`text-3xs text-center leading-tight ${b.earned ? 'font-bold text-[var(--color-ink-2)]' : 'text-[var(--color-ink-4)]'}`}>
                     {b.title}
                   </span>

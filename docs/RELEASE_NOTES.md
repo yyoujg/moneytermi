@@ -6,6 +6,7 @@
 
 | 번들 | 콘솔 출시일시 (KST) | 기능 도달일(D0 기준) | 주요 기능 |
 |------|--------------------|--------------------|-----------|
+| (콘솔 확인 후 기입) (deploymentId `01a0eb25`) | **검토 중** (PR #59) | — (출시 후 기입) | PR #55~#58 전부 + 모션 1단계(그래프 그리기, 맞혀 보기 연출, 숫자 굴림, 모션 토큰). **검토 요청은 이 번들로** |
 | (콘솔 확인 후 기입) (deploymentId `01a0eaee`) | **검토 중** (PR #58) | — (출시 후 기입) | PR #55~#57 전부 + 출처 이름 "한경 생글생글 경제 퀴즈". 단어 1,000개(TESAT·생글생글 기반 199개 추가)는 DB로 이미 라이브. **검토 요청은 이 번들로** |
 | (콘솔 확인 후 기입) (deploymentId `01a0ea6e`) | **검토 중** (PR #57) | — (출시 후 기입) | PR #55·#56 전부 + 한국은행 통계 두 선 그래프·단위 환산. **검토 요청은 이 번들로**. 출시 후 `migration_ecos_more.sql` 실행 |
 | (콘솔 확인 후 기입) (deploymentId `01a0e8f4`) | 생성 2026-09-29 02:00 · **검토 중** (PR #56) | — (출시 후 기입) | PR #55 전부 + 마이페이지 요약 숫자 색을 아이콘과 맞춤. **검토 요청은 이 번들로** |
@@ -74,6 +75,23 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
 
 > **TODO**: 06-20 / 06-17 / 06-16 항목의 실제 출시일은 미확인이다.
 > 앱인토스 콘솔 → 버전 내역 2~8페이지에서 확인해 채울 것.
+
+---
+
+## 2026-09-29 머지 · 검토 중 (PR #59) — 모션 1단계
+
+CI run 36516022893. **검수용 deploymentId `01a0eb25-6636-7d54-842a-1d02b9db9ae3`**,
+실기기 테스트 링크 `intoss-private://moneytermi?_deploymentId=01a0eb25-6636-7d54-842a-1d02b9db9ae3&host=appsInTossHost`.
+PR #55~#58 내용 전부 포함 — 검토 요청은 이 번들 하나로. 60fps.design 참고 모션 개선 1단계.
+
+| 항목 | 내용 | 파일 |
+|---|---|---|
+| 그래프 그리기 | `pathLength=1` + stroke-dashoffset. 화면에 60% 보일 때 1회(IntersectionObserver), 끝점 pop-in | `WordVisuals.tsx` |
+| 맞혀 보기 | 직접 그린 화살표 draw → 칸 drop → 정답 glow / 오답 shake, 완료 시 sweep 순차 | `WordVisuals.tsx`, `index.css` |
+| 숫자 굴림 | `RollingNumber` 자릿수별 0~9 띠, 일의 자리부터 40ms 순차, sr-only로 실제 값 낭독 | `RollingNumber.tsx`, `TopBar.tsx` |
+| 모션 토큰 | `--dur-fast/base/slow/emph/draw`, `--ease-soft/spring`(Tailwind `ease-*` 유틸), `--stagger`. 공용 anim 12종·진행 바·네비 통일 | `index.css` 외 |
+
+모든 새 효과는 `prefers-reduced-motion`에서 정지. 콘솔 출시노트는 PR #55·#57·#58 문구 그대로.
 
 ---
 
