@@ -10,9 +10,9 @@ import { logClick } from '../lib/analytics';
 import { calcStreak } from '../lib/streak';
 import { isRewardedAdEnabled, showRewardedAd } from '../lib/ads';
 import { LESSON_COST, XP_BONUS_POINTS, XP_BONUS_STEP } from '../constants';
-import { useCountUp } from '../hooks/useCountUp';
 import { feedbackClaim, feedbackBoost } from '../lib/feedback';
 import { PointCelebration, type PointReward } from './PointCelebration';
+import { RollingNumber } from './RollingNumber';
 
 // 모든 화면 상단 고정 바. 아이콘 + 숫자만 나열한다(티어는 마이페이지에만).
 // 연속 학습·XP·배운 단어는 누르면 아래에 짧은 설명 말풍선, 포인트는 구매 시트(광고 충전 / XP 2배 부스트)가 열린다.
@@ -45,8 +45,6 @@ export const TopBar = () => {
 
   const streak = calcStreak(attendanceDates);
   const boostLeft = boostUntil ? boostUntil - now : 0;
-  const xpShown = useCountUp(xp);
-  const pointsShown = useCountUp(points);
 
   // 부스트가 켜져 있는 동안만 1초 타이머. TopBar만 리렌더된다.
   useEffect(() => {
@@ -80,16 +78,16 @@ export const TopBar = () => {
 
         <div className="flex items-center gap-3 text-sm font-bold text-brand-500">
           <button onClick={e => toggleTip('streak', e)} aria-label="연속 학습" className="flex items-center gap-1 active:opacity-60">
-            <StreakIcon size={15} /><span key={streak} className="anim-bump" style={{ color: STAT_COLOR.streak }}>{streak}</span>
+            <StreakIcon size={15} /><span style={{ color: STAT_COLOR.streak }}><RollingNumber value={streak} /></span>
           </button>
           <button onClick={e => toggleTip('xp', e)} aria-label="경험치" className="flex items-center gap-1 active:opacity-60">
-            <XpIcon size={15} /><span key={xp} className="anim-bump" style={{ color: STAT_COLOR.xp }}>{xpShown.toLocaleString()}</span>
+            <XpIcon size={15} /><span style={{ color: STAT_COLOR.xp }}><RollingNumber value={xp} /></span>
           </button>
           <button onClick={() => { setTip(null); openShop(); }} aria-label="포인트 상점" className="flex items-center gap-1 active:opacity-60">
-            <PointIcon size={15} /><span key={points} className="anim-bump" style={{ color: STAT_COLOR.points }}>{pointsShown.toLocaleString()}</span>
+            <PointIcon size={15} /><span style={{ color: STAT_COLOR.points }}><RollingNumber value={points} /></span>
           </button>
           <button onClick={e => toggleTip('words', e)} aria-label="배운 단어" className="flex items-center gap-1 active:opacity-60">
-            <WordsIcon size={16} /><span key={knownWords.length} className="anim-bump" style={{ color: STAT_COLOR.words }}>{knownWords.length}</span>
+            <WordsIcon size={16} /><span style={{ color: STAT_COLOR.words }}><RollingNumber value={knownWords.length} /></span>
           </button>
           {boostLeft > 0 && (
             <span className="text-xs font-bold text-brand-500">

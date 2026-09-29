@@ -269,8 +269,8 @@ const QuizScreen = () => {
       {/* 진행 바: 이모지 thumb + % */}
       <div className="flex items-center gap-3 mt-5!">
         <div className="relative flex-1 bg-white/25 rounded-full h-1.5">
-          <div className="bg-white h-full rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
-          <span className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 text-lg leading-none transition-all duration-500" style={{ left: `${progressPercent}%` }}>🙂</span>
+          <div className="bg-white h-full rounded-full transition-all duration-[var(--dur-slow)] ease-soft" style={{ width: `${progressPercent}%` }} />
+          <span className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 text-lg leading-none transition-all duration-[var(--dur-slow)] ease-soft" style={{ left: `${progressPercent}%` }}>🙂</span>
         </div>
         <span className="text-xs font-bold text-white/80 w-8 text-right">{Math.round(progressPercent)}%</span>
       </div>

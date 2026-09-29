@@ -432,7 +432,7 @@ const WordCardScreen = () => {
         className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden pt-4"
         style={{
           transform: `translateX(${dragX}px)`,
-          transition: sliding ? `transform ${SLIDE_MS}ms cubic-bezier(0.25, 0.8, 0.25, 1)` : 'none',
+          transition: sliding ? `transform ${SLIDE_MS}ms var(--ease-soft)` : 'none',
         }}
       >
         <div key={word.id}>

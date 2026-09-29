@@ -16,8 +16,24 @@
   }
 }
 
+/* ── 모션 토큰 ── 모든 애니메이션·전환은 이 값만 쓴다(화면마다 리듬이 같게).
+   속도: fast 탭 반응·페이드 / base 등장·전환 / slow 떨어짐·진행 바 / emph 강조(빛·숫자 굴림) / draw 선 그리기
+   곡선: soft 빠르게 나가 부드럽게 멈춤(기본) / spring 살짝 넘쳤다 돌아옴(튀어나옴) / std·inout 반복·흔들림
+   순차: stagger 한 칸씩 지연 */
+:root {
+  --dur-fast: 180ms;
+  --dur-base: 320ms;
+  --dur-slow: 500ms;
+  --dur-emph: 700ms;
+  --dur-draw: 900ms;
+  --stagger: 60ms;
+}
+
 /* 브랜드/시맨틱 색 토큰 — 라이트/다크 공통(브랜드 색은 양 테마 유지) */
 @theme {
+  /* 곡선은 @theme에 둬 Tailwind ease-soft / ease-spring 유틸도 함께 생긴다 */
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --color-brand-200: #fed7aa;
   --color-brand-300: #fdba74;
   --color-brand-400: #fb923c;
@@ -57,28 +73,42 @@ button.text-lg, input.text-lg, select.text-lg, textarea.text-lg { font-size: var
 button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var(--text-xl) !important; line-height: var(--text-xl--line-height) !important; }
 
 /* ── 공용 모션 ──
-   .anim-fade-up  : 아래에서 떠오르며 등장. --i 로 순차 지연(60ms 단위)
-   .anim-pop-in   : 튀어나오듯 등장. --i 로 순차 지연(50ms 단위)
+   .anim-fade-up  : 아래에서 떠오르며 등장. --i 로 순차 지연(--stagger 단위)
+   .anim-pop-in   : 튀어나오듯 등장. --i 로 순차 지연(--stagger 단위)
    .anim-slide-in : 오른쪽에서 밀려 들어옴(화면 전환·카드 교체)
    .anim-bump     : 값이 바뀔 때 한 번 커졌다 돌아옴(key를 바꿔 재생)
-   .anim-attn     : 눌러야 할 버튼의 잔잔한 파동 */
+   .anim-attn     : 눌러야 할 버튼의 잔잔한 파동
+   .anim-draw     : SVG 선이 처음부터 끝까지 그려짐(pathLength="1"과 함께). --i 로 선마다 지연(--stagger x 2.5)
+   .anim-drop     : 위에서 떨어져 살짝 튕기며 자리 잡음. --d 로 지연
+   .anim-glow-ok / .anim-shake : 정답 초록 빛 한 번 / 오답 좌우 흔들림. --d 로 지연
+   .anim-sweep    : 테두리 빛이 한 번 지나감. 화살표·칸이 자리 잡은 뒤(--dur-draw) --i 로 순차(--stagger x 1.5) */
 @keyframes fade-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 @keyframes pop-in { 0% { opacity: 0; transform: scale(0.6); } 70% { transform: scale(1.08); } 100% { opacity: 1; transform: scale(1); } }
 @keyframes slide-in { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: none; } }
 @keyframes slide-up { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes drop { 0% { opacity: 0; transform: translateY(-14px) scale(0.96); } 60% { opacity: 1; transform: translateY(3px) scale(1.01); } 100% { opacity: 1; transform: none; } }
+@keyframes glow-ok { 0%, 100% { box-shadow: 0 0 0 0 rgba(18, 184, 134, 0); } 40% { box-shadow: 0 0 0 4px rgba(18, 184, 134, 0.35); } }
+@keyframes shake { 0%, 100% { transform: none; } 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
+@keyframes sweep { 0%, 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); } 45% { box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.45); } }
 @keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.3); } 100% { transform: scale(1); } }
 @keyframes attn { 0%, 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.55); } 70% { box-shadow: 0 0 0 9px rgba(249, 115, 22, 0); } }
-.anim-fade-up  { animation: fade-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: calc(var(--i, 0) * 60ms); }
-.anim-pop-in   { animation: pop-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both; animation-delay: calc(var(--i, 0) * 50ms); }
-.anim-slide-in { animation: slide-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.anim-slide-up { animation: slide-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.anim-fade-up  { animation: fade-up var(--dur-base) var(--ease-soft) both; animation-delay: calc(var(--i, 0) * var(--stagger)); }
+.anim-pop-in   { animation: pop-in var(--dur-slow) var(--ease-spring) both; animation-delay: calc(var(--i, 0) * var(--stagger)); }
+.anim-slide-in { animation: slide-in var(--dur-base) var(--ease-soft) both; }
+.anim-slide-up { animation: slide-up var(--dur-base) var(--ease-soft) both; }
 /* 화면 전환: opacity만. transform을 걸면 화면 전체(패스 노드 수백 개 포함)가 레이어로 올라가 기기에서 버벅인다.
    fill-mode를 두지 않는다 — 끝난 뒤에도 애니메이션이 "적용 중"이면 스택 컨텍스트가 남아
    안쪽의 fixed 오버레이(축하 화면)가 바깥 NavBar/TopBar에 가려진다. */
-.anim-fade { animation: fade 0.18s ease-out; }
-.anim-bump     { display: inline-block; animation: bump 0.35s ease-out; }
+.anim-fade { animation: fade var(--dur-fast) ease-out; }
+.anim-bump     { display: inline-block; animation: bump var(--dur-base) ease-out; }
 .anim-attn     { animation: attn 1.4s ease-out infinite; }
+.anim-drop     { animation: drop var(--dur-slow) var(--ease-soft) both; animation-delay: var(--d, 0s); }
+.anim-glow-ok  { animation: glow-ok var(--dur-emph) ease-out both; animation-delay: var(--d, 0s); }
+.anim-shake    { animation: shake var(--dur-base) ease-in-out both; animation-delay: var(--d, 0s); }
+.anim-sweep    { animation: sweep var(--dur-emph) ease-out both; animation-delay: calc(var(--dur-draw) + var(--i, 0) * var(--stagger) * 1.5); }
+.anim-draw     { stroke-dasharray: 1; animation: draw var(--dur-draw) var(--ease-soft) both; animation-delay: calc(var(--i, 0) * var(--stagger) * 2.5); }
 /* 마일스톤 축하 색종이: 위에서 흔들리며 떨어진다. --x(가로 위치 %), --d(지연), --r(회전 방향)은 인라인 */
 @keyframes confetti-fall {
   0%   { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 0; }
@@ -96,7 +126,7 @@ button:not(:disabled):active { transform: scale(0.97); }
 /* TDS 리셋의 button:focus 포커스 링이 터치/클릭 뒤에도 남는다. 키보드 포커스(:focus-visible)만 링을 유지 */
 button:focus:not(:focus-visible) { outline: none !important; }
 @media (prefers-reduced-motion: reduce) {
-  .anim-fade, .anim-fade-up, .anim-pop-in, .anim-slide-in, .anim-slide-up, .anim-bump, .anim-attn, .anim-confetti,
+  .anim-fade, .anim-fade-up, .anim-pop-in, .anim-slide-in, .anim-slide-up, .anim-bump, .anim-attn, .anim-confetti, .anim-draw, .anim-drop, .anim-glow-ok, .anim-shake, .anim-sweep,
   .animate-node-hop, .animate-node-ground { animation: none !important; }
 }
 
