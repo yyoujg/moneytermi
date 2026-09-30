@@ -54,7 +54,7 @@ export const BadgeCelebration = () => {
           <div key={b.id} className="flex flex-col items-center gap-2 anim-pop-in" style={{ '--i': i + 2 } as React.CSSProperties}>
             <div
               className={`${fresh.length === 1 ? 'w-28 h-28 text-6xl' : 'w-20 h-20 text-4xl'} flex items-center justify-center shadow-lg`}
-              style={{ borderRadius: 9999, background: 'var(--color-brand-soft)', boxShadow: '0 0 0 6px rgba(249,115,22,0.18)' }}
+              style={{ borderRadius: 9999, background: 'var(--color-brand-soft)', boxShadow: '0 0 0 6px rgba(196,81,26,0.18)' }}
             >
               {b.icon}
             </div>

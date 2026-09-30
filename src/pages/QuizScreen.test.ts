@@ -196,3 +196,20 @@ describe('maskTerm', () => {
     expect(maskTerm('한국은행이 구축한 전산망을 국고 전산망이라고 말하며', '국고전산망')).toBe('한국은행이 구축한 전산망을 ____이라고 말하며');
   });
 });
+
+const w = (id: number, word: string, extra: Partial<Word> = {}) => ({ id, word, meaning: `${word} 뜻`, ...extra }) as Word;
+
+describe('custom quiz', () => {
+  it('정답 보기만 단어로 제출되고, 나머지는 오답', () => {
+    const word = w(1, '기회비용', { visuals: [{ type: 'quiz', q: '옳은 것은?', options: ['A', 'B', 'C', 'D'], answer: 2 }] });
+    expect(pickQuizType(word)).toBe('custom');
+    const item = buildQuizItem('custom', word, [], [word, w(2, '매몰비용')]);
+    expect(item.promptMain).toBe('옳은 것은?');
+    const right = item.options.filter(o => o.isCorrect);
+    expect(right).toEqual([{ label: 'C', answer: '기회비용', isCorrect: true }]);
+    expect(item.options.filter(o => o.answer === '기회비용')).toHaveLength(1);
+  });
+  it('객관식이 없으면 기존 유형', () => {
+    expect(pickQuizType(w(3, '금리'))).not.toBe('custom');
+  });
+});

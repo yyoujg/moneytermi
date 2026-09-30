@@ -18,7 +18,7 @@ const NavBar = () => {
   const insets = useSafeAreaInsets();
   const wrapRef = useRef<HTMLDivElement>(null);
 
-  const HIDDEN_PATHS = ['/quiz', '/word-card', '/league/rules'];
+  const HIDDEN_PATHS = ['/quiz', '/lesson-check', '/word-card', '/league/rules'];
   const hidden = HIDDEN_PATHS.some(p => pathname.startsWith(p));
 
   // NavBar가 화면 하단에서 차지하는 높이(알약 + 하단 여백 + safe area)를 --nav-height로 공개.
@@ -51,7 +51,7 @@ const NavBar = () => {
               <div className={`w-12 h-8 flex items-center justify-center rounded-full transition-all duration-[var(--dur-fast)] ease-soft ${isActive ? 'bg-brand-500 text-white' : 'text-[var(--color-ink-4)]'}`}>
                 <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />
               </div>
-              <span className={`text-[10px] leading-none font-bold ${isActive ? 'text-brand-500' : 'text-[var(--color-ink-4)]'}`}>{item.label}</span>
+              <span className={`text-[10px] leading-none font-bold ${isActive ? 'text-brand-ink' : 'text-[var(--color-ink-4)]'}`}>{item.label}</span>
             </button>
           );
         })}

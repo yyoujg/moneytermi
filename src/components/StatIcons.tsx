@@ -1,8 +1,8 @@
 // 상단바·마이페이지 요약 전용 채워진 아이콘(연속 학습·XP·포인트·배운 단어). lucide는 선 아이콘이라 채우면 안쪽 선이 묻혀서 직접 그렸다.
-// 아이콘마다 어울리는 색을 기본으로 갖는다(불꽃 주황, 다이아 보라, 번개 노랑, 책갈피 파랑). 안쪽 하이라이트는 흰색 반투명.
+// 아이콘은 차분한 강조색으로 구분하고, 숫자는 중립 잉크색으로 읽기 쉽게 둔다.
 type Props = { size?: number; className?: string };
 // 숫자도 아이콘과 같은 색으로 칠할 수 있게 밖으로 꺼내 둔다
-export const STAT_COLOR = { streak: '#ff6b2c', xp: '#8b5cf6', points: '#fab005', words: '#3b82f6' } as const;
+export const STAT_COLOR = { streak: 'var(--color-stat-streak)', xp: 'var(--color-stat-xp)', points: 'var(--color-stat-points)', words: 'var(--color-stat-words)' } as const;
 
 const Svg = ({ size = 16, className, color, children }: Props & { color: string; children: React.ReactNode }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" className={className} style={{ color }} aria-hidden="true"

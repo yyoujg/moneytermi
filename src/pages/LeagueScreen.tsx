@@ -100,7 +100,7 @@ const LeagueScreen = () => {
               </span>
             )}
           </p>
-          <p className="text-2xs font-medium text-brand-500 mb-3!">이번 주 <RollingNumber value={mine?.points ?? 0} />XP · {daysUntilReset()}일 남음</p>
+          <p className="text-2xs font-medium text-brand-ink mb-3!">이번 주 <RollingNumber value={mine?.points ?? 0} />XP · {daysUntilReset()}일 남음</p>
           <div className="w-full bg-[var(--color-card)] rounded-full h-1.5 overflow-hidden mb-1.5">
             <div
               className="bg-brand-500 h-full rounded-full transition-all duration-[var(--dur-emph)] ease-soft"
@@ -128,7 +128,7 @@ const LeagueScreen = () => {
                   ${isCurrent ? 'bg-brand-500 scale-110' : s.id < stage.id ? 'bg-[var(--color-line)]' : 'bg-[var(--color-surface)]'}`}>
                   {s.emoji}
                 </div>
-                <span className={`text-3xs font-medium text-center mt-1.5 ${isCurrent ? 'text-brand-500' : 'text-[var(--color-ink-4)]'}`}>
+                <span className={`text-3xs font-medium text-center mt-1.5 ${isCurrent ? 'text-brand-ink' : 'text-[var(--color-ink-4)]'}`}>
                   {s.name}
                 </span>
               </div>
@@ -176,7 +176,7 @@ const LeagueScreen = () => {
                   {r.rank <= 3 ? MEDAL[r.rank - 1] : r.rank}
                 </span>
                 <span className="text-lg shrink-0">{r.is_me ? myEmoji : r.emoji}</span>
-                <span className={`flex-1 text-sm truncate ${r.is_me ? 'font-bold text-brand-500' : 'font-medium text-[var(--color-ink)]'}`}>
+                <span className={`flex-1 text-sm truncate ${r.is_me ? 'font-bold text-brand-ink' : 'font-medium text-[var(--color-ink)]'}`}>
                   {r.is_me ? (user?.nickname ?? r.nickname) : r.nickname}
                 </span>
                 <span className="text-sm font-bold text-[var(--color-ink-2)] shrink-0">{r.points.toLocaleString()}XP</span>
@@ -189,9 +189,9 @@ const LeagueScreen = () => {
                 className="flex items-center gap-3 px-4 py-3 border-t-2 border-dashed border-[var(--color-line)]"
                 style={{ backgroundColor: 'var(--color-brand-soft)' }}
               >
-                <span className="w-7 text-center text-sm font-bold text-brand-500 shrink-0">{mine.rank}</span>
+                <span className="w-7 text-center text-sm font-bold text-brand-ink shrink-0">{mine.rank}</span>
                 <span className="text-lg shrink-0">{myEmoji}</span>
-                <span className="flex-1 text-sm font-bold text-brand-500 truncate">{user?.nickname ?? '나'}</span>
+                <span className="flex-1 text-sm font-bold text-brand-ink truncate">{user?.nickname ?? '나'}</span>
                 <span className="text-sm font-bold text-[var(--color-ink-2)] shrink-0">{mine.points.toLocaleString()}XP</span>
               </div>
             )}

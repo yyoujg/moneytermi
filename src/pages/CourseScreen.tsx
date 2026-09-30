@@ -21,7 +21,7 @@ const expandFromNode = (nodeId: string) => new Promise<void>(resolve => {
   const r = el.getBoundingClientRect();
   const at = `${r.left + r.width / 2}px ${r.top + r.height / 2}px`;
   const ov = document.createElement('div');
-  Object.assign(ov.style, { position: 'fixed', inset: '0', zIndex: '2000', pointerEvents: 'none', background: el.dataset.color ?? '#f97316' });
+  Object.assign(ov.style, { position: 'fixed', inset: '0', zIndex: '2000', pointerEvents: 'none', background: el.dataset.color ?? '#c4511a' });
   document.body.appendChild(ov);
   const grow = ov.animate(
     [{ clipPath: `circle(${r.width / 2}px at ${at})` }, { clipPath: `circle(150vmax at ${at})` }],

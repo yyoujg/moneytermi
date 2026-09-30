@@ -34,7 +34,7 @@ export const AlertModal = () => {
           <div className="w-14 h-14 flex items-center justify-center bg-white" style={{ borderRadius: 9999, boxShadow: '0 0 0 6px rgba(255,255,255,0.25)' }}>
             {error
               ? <AlertCircle size={28} className="text-danger-500" />
-              : <Check size={28} strokeWidth={3} className="text-brand-500" />}
+              : <Check size={28} strokeWidth={3} className="text-brand-ink" />}
           </div>
         </div>
         <div className="w-full px-6 pt-5 pb-5 flex flex-col items-center gap-4">

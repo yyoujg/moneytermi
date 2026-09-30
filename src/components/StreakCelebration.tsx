@@ -43,7 +43,7 @@ export const StreakCelebration = () => {
   return (
     <div
       className={`fixed inset-0 z-[60] flex flex-col items-center justify-center gap-6 px-6 overflow-hidden ${milestone ? '' : 'bg-[var(--color-canvas)]'}`}
-      style={milestone ? { background: 'linear-gradient(160deg, #f97316 0%, #fb923c 60%, #fdba74 100%)' } : undefined}
+      style={milestone ? { background: 'linear-gradient(160deg, #8f3715 0%, #ad451c 60%, #c4511a 100%)' } : undefined}
     >
       {milestone && CONFETTI.map((c, i) => (
         <span
@@ -59,7 +59,7 @@ export const StreakCelebration = () => {
 
       {/* 불꽃 + 일수 */}
       <div className="flex flex-col items-center">
-        <Flame size={milestone ? 88 : 72} className={`${milestone ? 'text-white' : 'text-brand-500'} fill-current anim-pop-in`} />
+        <Flame size={milestone ? 88 : 72} className={`${milestone ? 'text-white' : 'text-brand-ink'} fill-current anim-pop-in`} />
         <p className={`text-5xl font-black ${ink} mt-1! anim-pop-in`} style={{ '--i': 2 } as React.CSSProperties}>{streak}</p>
         <p className={`text-sm font-medium ${sub} mt-2! anim-fade-up`} style={{ '--i': 3 } as React.CSSProperties}>일 연속 학습 중이에요</p>
       </div>
@@ -79,7 +79,7 @@ export const StreakCelebration = () => {
             >
               {d.attended && <Check size={18} strokeWidth={3} className={milestone ? 'text-brand-500' : 'text-white'} />}
             </div>
-            <span className={`text-2xs font-medium ${d.isToday ? (milestone ? 'text-white font-bold' : 'text-brand-500 font-bold') : (milestone ? 'text-white/70' : 'text-[var(--color-ink-4)]')}`}>
+            <span className={`text-2xs font-medium ${d.isToday ? (milestone ? 'text-white font-bold' : 'text-brand-ink font-bold') : (milestone ? 'text-white/70' : 'text-[var(--color-ink-4)]')}`}>
               {d.label}
             </span>
           </div>

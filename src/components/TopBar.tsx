@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import type React from 'react';
 import { BottomSheet } from '@toss/tds-mobile';
 import { Zap, Tv } from 'lucide-react';
-import { StreakIcon, XpIcon, PointIcon, WordsIcon, STAT_COLOR } from './StatIcons';
+import { StreakIcon, XpIcon, PointIcon, WordsIcon } from './StatIcons';
 import { showModal } from './AlertModal';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
@@ -76,21 +76,21 @@ export const TopBar = () => {
       {/* 앱 이름·홈 이동은 토스 내비게이션 바가 맡는다. 자체 로고 헤더를 두면 검수에서 '자체 헤더 중복'으로 반려된다(2026-09-29) */}
       {!hideBar && <div data-topbar className="relative z-40 shrink-0 h-12 flex items-center justify-end px-5 bg-[var(--color-card)] border-b border-[var(--color-line)]">
 
-        <div className="flex items-center gap-3 text-sm font-bold text-brand-500">
+        <div className="flex items-center gap-3 text-sm font-bold text-brand-ink">
           <button onClick={e => toggleTip('streak', e)} aria-label="연속 학습" className="flex items-center gap-1 active:opacity-60">
-            <StreakIcon size={15} /><span style={{ color: STAT_COLOR.streak }}><RollingNumber value={streak} /></span>
+            <StreakIcon size={15} /><span className="text-[var(--color-ink-2)]"><RollingNumber value={streak} /></span>
           </button>
           <button onClick={e => toggleTip('xp', e)} aria-label="경험치" className="flex items-center gap-1 active:opacity-60">
-            <XpIcon size={15} /><span style={{ color: STAT_COLOR.xp }}><RollingNumber value={xp} /></span>
+            <XpIcon size={15} /><span className="text-[var(--color-ink-2)]"><RollingNumber value={xp} /></span>
           </button>
           <button onClick={() => { setTip(null); openShop(); }} aria-label="포인트 상점" className="flex items-center gap-1 active:opacity-60">
-            <PointIcon size={15} /><span style={{ color: STAT_COLOR.points }}><RollingNumber value={points} /></span>
+            <PointIcon size={15} /><span className="text-[var(--color-ink-2)]"><RollingNumber value={points} /></span>
           </button>
           <button onClick={e => toggleTip('words', e)} aria-label="배운 단어" className="flex items-center gap-1 active:opacity-60">
-            <WordsIcon size={16} /><span style={{ color: STAT_COLOR.words }}><RollingNumber value={knownWords.length} /></span>
+            <WordsIcon size={16} /><span className="text-[var(--color-ink-2)]"><RollingNumber value={knownWords.length} /></span>
           </button>
           {boostLeft > 0 && (
-            <span className="text-xs font-bold text-brand-500">
+            <span className="text-xs font-bold text-brand-ink">
               ×2 {Math.floor(boostLeft / 60000)}:{String(Math.floor((boostLeft % 60000) / 1000)).padStart(2, '0')}
             </span>
           )}
@@ -125,7 +125,7 @@ export const TopBar = () => {
           {/* 레슨이 막혀서 열렸을 땐 광고가 주행동이라 채운 버튼으로 */}
           <button
             onClick={handleAd}
-            className={`w-full flex items-center justify-between rounded-chip px-4 py-4 text-sm font-bold active:opacity-70 ${shopReason === 'lesson' ? 'text-white bg-brand-500 anim-attn' : 'text-brand-500'}`}
+            className={`w-full flex items-center justify-between rounded-chip px-4 py-4 text-sm font-bold active:opacity-70 ${shopReason === 'lesson' ? 'text-white bg-brand-500 anim-attn' : 'text-brand-ink'}`}
             style={shopReason === 'lesson' ? undefined : { backgroundColor: 'var(--color-brand-soft)' }}
           >
             <span className="flex items-center gap-2"><Tv size={16} />광고 보고 포인트 받기</span>
@@ -135,7 +135,7 @@ export const TopBar = () => {
           <button
             onClick={handleBoost}
             disabled={points < 300 || boostLeft > 0}
-            className="w-full flex items-center justify-between rounded-chip px-4 py-4 text-sm font-bold text-brand-500 active:opacity-70 disabled:opacity-40"
+            className="w-full flex items-center justify-between rounded-chip px-4 py-4 text-sm font-bold text-brand-ink active:opacity-70 disabled:opacity-40"
             style={{ backgroundColor: 'var(--color-brand-soft)' }}
           >
             <span className="flex items-center gap-2"><Zap size={16} className="fill-current" />{boostLeft > 0 ? '부스트 사용 중' : 'XP 2배 부스트'}</span>

@@ -53,7 +53,7 @@ const HomeScreen = () => {
       <div className="pt-4 px-5 pb-4">
         <div
           className="rounded-card px-5 pt-5 pb-4 text-white shadow-lg anim-fade-up"
-          style={{ background: 'linear-gradient(135deg, #f97316 0%, #fb923c 100%)' }}
+          style={{ background: 'linear-gradient(135deg, #263b49 0%, #37646a 100%)' }}
         >
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 flex items-center justify-center text-2xl shrink-0" style={{ borderRadius: 9999, background: 'rgba(255,255,255,0.22)' }}>
@@ -95,7 +95,7 @@ const HomeScreen = () => {
           >
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-full bg-brand-500/10 flex items-center justify-center shrink-0">
-                <RotateCcw size={16} className="text-brand-500" />
+                <RotateCcw size={16} className="text-brand-ink" />
               </div>
               <div className="text-left">
                 <p className="text-sm font-bold text-[var(--color-ink)]">오늘 복습할 단어 {dueQueue.length}개</p>

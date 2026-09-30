@@ -88,7 +88,7 @@ const Table = ({ columns, rows }: { columns: string[]; rows: string[][] }) => (
       <thead>
         <tr>
           {columns.map((c, i) => (
-            <th key={i} className={`py-2 px-2 text-left font-bold break-keep ${i === 0 ? 'text-[var(--color-ink-4)]' : 'text-brand-500'} bg-[var(--color-surface)] first:rounded-l-md last:rounded-r-md`}>{c}</th>
+            <th key={i} className={`py-2 px-2 text-left font-bold break-keep ${i === 0 ? 'text-[var(--color-ink-4)]' : 'text-brand-ink'} bg-[var(--color-surface)] first:rounded-l-md last:rounded-r-md`}>{c}</th>
           ))}
         </tr>
       </thead>
@@ -111,7 +111,7 @@ const Table = ({ columns, rows }: { columns: string[]; rows: string[][] }) => (
 const ARROW = /[↑↓]/g;
 // 칸 사이 화살표. 새로 펼쳐질 때 세로선 → 화살촉 순서로 그려진다
 const FlowArrow = ({ draw }: { draw: boolean }) => (
-  <svg width="14" height="18" viewBox="0 0 14 18" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-brand-500" aria-hidden="true">
+  <svg width="14" height="18" viewBox="0 0 14 18" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-brand-ink" aria-hidden="true">
     <path d="M7 1.5v13" pathLength={1} className={draw ? 'anim-draw' : ''} />
     <path d="M2.5 10.5 7 15l4.5-4.5" pathLength={1} className={draw ? 'anim-draw' : ''} style={{ '--i': 1 } as React.CSSProperties} />
   </svg>
@@ -160,12 +160,12 @@ const Flow = ({ steps, caption }: { steps: string[]; caption?: string }) => {
                 {next.replace(ARROW, '?')}
               </p>
               <div className="w-full grid grid-cols-2 gap-2 mt-1">
-                <button type="button" onClick={() => pick('↑')} className="py-2.5 rounded-button bg-brand-500/10 text-sm font-bold text-brand-500 active:opacity-70">↑ 오른다</button>
-                <button type="button" onClick={() => pick('↓')} className="py-2.5 rounded-button bg-brand-500/10 text-sm font-bold text-brand-500 active:opacity-70">↓ 내린다</button>
+                <button type="button" onClick={() => pick('↑')} className="py-2.5 rounded-button bg-brand-500/10 text-sm font-bold text-brand-ink active:opacity-70">↑ 오른다</button>
+                <button type="button" onClick={() => pick('↓')} className="py-2.5 rounded-button bg-brand-500/10 text-sm font-bold text-brand-ink active:opacity-70">↓ 내린다</button>
               </div>
             </>
           ) : (
-            <button type="button" onClick={() => setShown(n => n + 1)} className="w-full py-2.5 rounded-chip border border-dashed border-brand-500/50 text-[13px] font-bold text-brand-500 active:opacity-70">
+            <button type="button" onClick={() => setShown(n => n + 1)} className="w-full py-2.5 rounded-chip border border-dashed border-brand-500/50 text-[13px] font-bold text-brand-ink active:opacity-70">
               다음은 무엇일까요? 눌러서 보기
             </button>
           )}
@@ -281,7 +281,7 @@ const LinkedText = ({ text, terms }: { text: string; terms?: Terms }) => {
         seen.add(name);
         return (
           <button key={i} type="button" onClick={() => setOpen(o => (o === name ? null : name))}
-            className={`inline px-1! py-0.5! rounded-md text-[#c2410c] font-medium active:opacity-60 ${open === name ? 'bg-brand-200' : 'bg-[var(--color-brand-cream)]'}`}>
+            className={`inline px-1! py-0.5! rounded-md text-brand-ink font-medium active:opacity-60 ${open === name ? 'bg-brand-500/20' : 'bg-[var(--color-brand-cream)]'}`}>
             {part}
           </button>
         );
@@ -297,7 +297,7 @@ const LinkedText = ({ text, terms }: { text: string; terms?: Terms }) => {
   );
 };
 
-const VisualCard = ({ v, className = '', terms }: { v: Exclude<WordVisual, { type: 'ecos' }>; className?: string; terms?: Terms }) => (
+const VisualCard = ({ v, className = '', terms }: { v: Exclude<WordVisual, { type: 'ecos' | 'quiz' }>; className?: string; terms?: Terms }) => (
   <Card pad="none" className={`px-5 pt-4 pb-5 flex flex-col gap-3 ${className}`}>
     {v.type === 'text' ? (
       <>
@@ -338,7 +338,7 @@ const FlowCarousel = ({ flows }: { flows: Extract<WordVisual, { type: 'flow' }>[
 };
 
 export const WordVisuals = ({ visuals, terms }: { visuals: WordVisual[]; terms?: Terms }) => {
-  const list = visuals.filter(v => v.type !== 'ecos' || !ecosDown);
+  const list = visuals.filter((v): v is Exclude<WordVisual, { type: 'quiz' }> => v.type !== 'quiz' && (v.type !== 'ecos' || !ecosDown));
   const flows = list.filter((v): v is Extract<WordVisual, { type: 'flow' }> => v.type === 'flow');
   const firstFlow = list.findIndex(v => v.type === 'flow');
   return (

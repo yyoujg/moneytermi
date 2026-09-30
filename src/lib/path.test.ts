@@ -154,15 +154,15 @@ describe('커넥터가 노드를 침범하지 않는다', () => {
 });
 
 describe('sectionColor', () => {
-  it('6주기로 반복하고 이웃한 코스는 색이 다르다', () => {
+  it('4주기로 반복하고 이웃한 코스는 색이 다르다', () => {
     for (let i = 0; i < 24; i++) {
-      expect(sectionColor(i)).toEqual(sectionColor(i + 6));
+      expect(sectionColor(i)).toEqual(sectionColor(i + 4));
       expect(sectionColor(i).face).not.toBe(sectionColor(i + 1).face);
     }
   });
 
   it('첫 코스는 브랜드 색', () => {
-    expect(sectionColor(0).face).toBe('#f97316');
+    expect(sectionColor(0).face).toBe('#c4511a');
   });
 });
 

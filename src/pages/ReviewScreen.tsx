@@ -136,7 +136,7 @@ const QuizPage = () => {
         <h2 className="text-xl font-bold text-[var(--color-ink)] mb-1!">오늘 복습 완료!</h2>
         <p className="text-sm text-[var(--color-ink-3)] mb-6!">{queue.length}문제 중 {totalCorrect}개 정답</p>
         <div className="flex items-center gap-2 bg-brand-500/10 border border-brand-500/20 rounded-card px-5 py-3 mb-8">
-          <Zap size={16} className="text-brand-500 fill-current" />
+          <Zap size={16} className="text-brand-ink fill-current" />
           <span className="text-sm font-bold text-[var(--color-ink)]">누적 포인트 {points} P</span>
         </div>
         <div className="w-full max-w-sm mb-8">
@@ -215,7 +215,7 @@ const QuizPage = () => {
                   status === 'wrong' ? 'bg-danger-500/10 border-danger-500/40 text-danger-400' :
                   'bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink)] focus:border-brand-500/50'}
               `}
-              style={{ caretColor: 'var(--color-brand-500)' }}
+            style={{ caretColor: 'var(--color-brand-ink)' }}
             />
             {status === 'correct' && (
               <p className="text-xs font-bold text-success-400 mt-1.5! px-1">정답!{capped ? ' 오늘 보상 한도에 도달했어요' : lastEarned > 0 ? ` +${lastEarned}P` : ''}</p>

@@ -35,7 +35,9 @@ export type WordVisual =
   | { type: 'ecos'; title: string; caption?: string; stat: string; item: string; cycle: 'M'; unit: string; months?: number; scale?: number;
       series?: { name: string; stat: string; item: string }[] }
   | { type: 'flow'; title: string; caption?: string; steps: string[] }
-  | { type: 'text'; title: string; caption?: string; body: string };
+  | { type: 'text'; title: string; caption?: string; body: string }
+  // 단어 카드에는 안 보이고 퀴즈에서만 쓰는 객관식 문제. answer는 options의 정답 번호(0부터)
+  | { type: 'quiz'; q: string; options: string[]; answer: number; explanation?: string; lessonCheck?: true };
 
 export type Course = {
   id: string;

@@ -127,15 +127,15 @@ const QuizScreen = () => {
             <div className="flex justify-between items-center">
               <span className="text-sm text-[var(--color-ink-4)]">획득 포인트</span>
               <div className="flex items-center gap-1.5">
-                <Zap size={14} className="text-brand-500 fill-current" />
-                <span className="text-xl font-bold text-brand-500">+{earnedShown}P</span>
+                <Zap size={14} className="text-brand-ink fill-current" />
+                <span className="text-xl font-bold text-brand-ink">+{earnedShown}P</span>
               </div>
             </div>
             <div className="h-px bg-[var(--color-line)]" />
             <div className="flex justify-between items-center">
               <span className="text-sm text-[var(--color-ink-4)]">획득 XP</span>
               <div className="flex items-center gap-1.5">
-                <Sparkles size={14} className="text-brand-500" />
+                <Sparkles size={14} className="text-brand-ink" />
                 <span className="text-xl font-bold text-[var(--color-ink)]">+{Math.max(0, xp - xpAtStart.current)}</span>
               </div>
             </div>
@@ -147,7 +147,7 @@ const QuizScreen = () => {
             <div className="h-px bg-[var(--color-line)]" />
             <div className="flex justify-between items-center">
               <span className="text-sm text-[var(--color-ink-4)]">최고 연속 정답</span>
-              <span className="flex items-center gap-1 text-xl font-bold text-[var(--color-ink)]">{maxCombo}연속<Flame size={18} className="text-brand-500 fill-current" /></span>
+              <span className="flex items-center gap-1 text-xl font-bold text-[var(--color-ink)]">{maxCombo}연속<Flame size={18} className="text-brand-ink fill-current" /></span>
             </div>
             {stageUp && (
               <>
@@ -225,7 +225,7 @@ const QuizScreen = () => {
 
   // 스트릭 메시지
   const streakMessage = combo >= 5 ? { Icon: Zap, text: `${combo}연속! x2 보너스`, color: 'text-warning-400' }
-    : combo >= 3 ? { Icon: Flame, text: `${combo}연속! +5P 보너스`, color: 'text-brand-400' }
+    : combo >= 3 ? { Icon: Flame, text: `${combo}연속! +5P 보너스`, color: 'text-brand-ink' }
     : null;
 
   return (
@@ -258,7 +258,7 @@ const QuizScreen = () => {
             <streakMessage.Icon size={13} className="fill-current" />{streakMessage.text}
           </span>
         ) : (
-          <span className="relative block text-xs leading-[1.4]! font-bold text-brand-500">
+          <span className="relative block text-xs leading-[1.4]! font-bold text-brand-ink">
             {retrying ? '틀린 문제를 다시 풀어봐요' : progressPercent < 34 ? '가볍게 시작해봐요' : progressPercent < 67 ? '벌써 절반 왔어요' : '거의 다 왔어요!'}
           </span>
         )}
@@ -378,15 +378,15 @@ const QuizScreen = () => {
             {status === 'correct' && (
               <span className="flex items-center gap-1.5 text-xs font-bold text-success-400">
                 {capped ? <span className="text-[var(--color-ink-4)]">오늘 보상 한도 도달</span> : lastEarned > 0 ? `+${lastEarned}P` : null}
-                {combo >= 3 && <span className="flex items-center gap-0.5 text-brand-400"><Flame size={12} className="fill-current" />{combo}연속</span>}
+                {combo >= 3 && <span className="flex items-center gap-0.5 text-brand-ink"><Flame size={12} className="fill-current" />{combo}연속</span>}
               </span>
             )}
           </div>
           <div>
             <p className={`text-xs font-bold mb-1! ${status === 'correct' ? 'text-success-400' : 'text-danger-400'}`}>
-              {status === 'correct' ? '의미' : `정답: ${currentWord.word}`}
+              {status === 'correct' ? (quizItem?.explanation ? '해설' : '의미') : `정답: ${quizItem?.type === 'custom' ? quizItem.options.find(opt => opt.isCorrect)?.label : currentWord.word}`}
             </p>
-            <p className="text-sm font-medium text-[var(--color-ink)] leading-relaxed break-keep">{currentWord.meaning}</p>
+            <p className="text-sm font-medium text-[var(--color-ink)] leading-relaxed break-keep">{quizItem?.explanation ?? currentWord.meaning}</p>
           </div>
           <button
             onClick={goNextQuestion}

@@ -19,6 +19,7 @@ const HomeScreen = React.lazy(() => import('./pages/HomeScreen'));
 const CourseScreen = React.lazy(() => import('./pages/CourseScreen'));
 const ReviewScreen = React.lazy(() => import('./pages/ReviewScreen'));
 const QuizScreen = React.lazy(() => import('./pages/QuizScreen'));
+const LessonCheckScreen = React.lazy(() => import('./pages/LessonCheckScreen'));
 const WordCardScreen = React.lazy(() => import('./pages/WordCardScreen'));
 const LeagueScreen = React.lazy(() => import('./pages/LeagueScreen'));
 const LeagueRulesScreen = React.lazy(() => import('./pages/LeagueRulesScreen'));
@@ -179,6 +180,7 @@ const Layout = () => {
         <Route path="/word-card" element={<WordCardScreen key={location.key} />} />
         <Route path="/league/rules" element={<LeagueRulesScreen />} />
         <Route path="/quiz" element={<QuizScreen />} />
+        <Route path="/lesson-check" element={<LessonCheckScreen />} />
       </Routes>
       </div>
       </React.Suspense>

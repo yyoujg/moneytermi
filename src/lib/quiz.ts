@@ -50,13 +50,14 @@ export const getOptions = (correctWord: Word, knownWords: Word[], allWords: Word
 
 // ── 퀴즈 유형 ──────────────────────────────────────────────────
 // 채점은 서버가 mc 모드로 p_answer == word 비교 → 어떤 유형이든 제출값은 항상 정답 단어의 word.
-export type QuizType = 'meaning_to_word' | 'word_to_meaning' | 'cloze';
+export type QuizType = 'meaning_to_word' | 'word_to_meaning' | 'cloze' | 'custom';
 export type QuizOption = { label: string; answer: string; isCorrect: boolean };
 export type QuizItem = {
   type: QuizType;
   promptLabel: string;   // 상단 소제목
   promptMain: string;    // 문제 본문
   promptSub?: string;    // 보조 설명 박스 (있으면)
+  explanation?: string;
   options: QuizOption[];
 };
 
@@ -88,7 +89,28 @@ export const clozeText = (word: Word): string | null => {
   return ex.split(word.word).join(BLANK);
 };
 
+export type CustomQuiz = Extract<NonNullable<Word['visuals']>[number], { type: 'quiz' }>;
+
+const customQuizzes = (word: Word) =>
+  (word.visuals ?? []).filter((v): v is Extract<NonNullable<Word['visuals']>[number], { type: 'quiz' }> => v.type === 'quiz');
+
+export const lessonChecks = (words: Word[]) => words.flatMap(word =>
+  customQuizzes(word).filter(quiz => quiz.lessonCheck && quiz.explanation?.trim()).slice(0, 1).map(quiz => ({ word, quiz }))
+);
+
+export const buildCustomQuizItem = (quiz: CustomQuiz): QuizItem => {
+  const options = quiz.options.map((label, i) => ({ label, answer: label, isCorrect: i === quiz.answer }));
+  return {
+    type: 'custom',
+    promptLabel: '알맞은 것을 고르세요',
+    promptMain: quiz.q,
+    explanation: quiz.explanation,
+    options: [...options].sort(() => Math.random() - 0.5),
+  };
+};
+
 export const pickQuizType = (word: Word, rand: () => number = Math.random): QuizType => {
+  if (customQuizzes(word).length) return 'custom';   // 직접 만든 객관식이 있으면 그 문제를 낸다
   const types: QuizType[] = ['meaning_to_word', 'word_to_meaning'];
   if (clozeText(word)) types.push('cloze');
   return types[Math.floor(rand() * types.length)];
@@ -101,8 +123,17 @@ export const buildQuizItem = (
   allWords: Word[],
   categoryOf?: CategoryOf,
 ): QuizItem => {
-  const distractors = getDistractors(correctWord, knownWords, allWords, categoryOf);
   const shuffle = <T,>(a: T[]): T[] => [...a].sort(() => Math.random() - 0.5);
+
+  // 직접 만든 객관식: 정답 보기만 제출값이 단어(서버가 정답 처리), 오답 보기는 보기 글자 자체
+  const quizzes = customQuizzes(correctWord);
+  if (type === 'custom' && quizzes.length) {
+    const cq = quizzes[Math.floor(Math.random() * quizzes.length)];
+    const item = buildCustomQuizItem(cq);
+    return { ...item, options: item.options.map(opt => opt.isCorrect ? { ...opt, answer: correctWord.word } : opt) };
+  }
+
+  const distractors = getDistractors(correctWord, knownWords, allWords, categoryOf);
 
   if (type === 'word_to_meaning') {
     const opts: QuizOption[] = shuffle([

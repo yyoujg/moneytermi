@@ -32,7 +32,7 @@ export const PointCelebration = ({ reward, onClose }: { reward: PointReward; onC
             className="w-20 h-20 flex items-center justify-center bg-white"
             style={{ borderRadius: 9999, boxShadow: '0 0 0 6px rgba(255,255,255,0.25)' }}
           >
-            <Zap size={40} className="text-brand-500 fill-current" />
+            <Zap size={40} className="text-brand-ink fill-current" />
           </div>
           <p className="text-4xl font-black text-white anim-pop-in" style={{ '--i': 2 } as React.CSSProperties}>+{reward.points}P</p>
           {reward.xp ? (

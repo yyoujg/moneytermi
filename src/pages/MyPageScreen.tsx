@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Settings, ChevronRight, Pencil, CircleHelp } from 'lucide-react';
-import { StreakIcon, XpIcon, PointIcon, WordsIcon, STAT_COLOR } from '../components/StatIcons';
+import { StreakIcon, XpIcon, PointIcon, WordsIcon } from '../components/StatIcons';
 import { useAppContext } from '../context/AppContext';
 import { DEFAULT_NICKNAME, getGrowthStage } from '../constants';
 import { calcStreak } from '../lib/streak';
@@ -98,7 +98,7 @@ const MyPageScreen = () => {
               className="flex items-center gap-1.5 group active:opacity-70"
             >
               <p className="font-bold text-[var(--color-ink)] text-base">{user?.nickname ?? DEFAULT_NICKNAME}</p>
-              <Pencil size={13} className="text-[var(--color-ink-4)] group-active:text-brand-400" />
+              <Pencil size={13} className="text-[var(--color-ink-4)] group-active:text-brand-ink" />
             </button>
             <div className="flex items-center gap-1 mt-1">
               <span className="text-sm">{stage.emoji}</span>
@@ -111,17 +111,17 @@ const MyPageScreen = () => {
         <Card tone="surface" pad="md" className="anim-fade-up">
           <div className="flex items-stretch">
             {[
-              { icon: <StreakIcon size={14} />, label: '연속 학습', value: streak, unit: '일', color: STAT_COLOR.streak },
-              { icon: <XpIcon size={14} />, label: 'XP', value: xp.toLocaleString(), unit: '', color: STAT_COLOR.xp },
-              { icon: <PointIcon size={14} />, label: '포인트', value: points.toLocaleString(), unit: 'P', color: STAT_COLOR.points },
-              { icon: <WordsIcon size={15} />, label: '학습한 단어', value: knownWords.length, unit: '개', color: STAT_COLOR.words },
+              { icon: <StreakIcon size={14} />, label: '연속 학습', value: streak, unit: '일' },
+              { icon: <XpIcon size={14} />, label: 'XP', value: xp.toLocaleString(), unit: '' },
+              { icon: <PointIcon size={14} />, label: '포인트', value: points.toLocaleString(), unit: 'P' },
+              { icon: <WordsIcon size={15} />, label: '학습한 단어', value: knownWords.length, unit: '개' },
             ].map((it, i, arr) => (
               <div key={it.label} className={`flex-1 flex flex-col items-center gap-1 ${i < arr.length - 1 ? 'border-r border-[var(--color-line)]' : ''}`}>
                 <div className="flex items-center gap-1">
                   {it.icon}
                   <span className="text-3xs font-medium text-[var(--color-ink-4)] whitespace-nowrap">{it.label}</span>
                 </div>
-                <p className="text-base font-medium leading-tight" style={{ color: it.color }}>
+                <p className="text-base font-semibold leading-tight text-[var(--color-ink)]">
                   {it.value}<span className="text-2xs font-medium text-[var(--color-ink-4)] ml-0.5">{it.unit}</span>
                 </p>
               </div>

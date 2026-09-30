@@ -36,12 +36,10 @@ export const nodeOffsetX = (i: number) => OFFSETS[i % OFFSETS.length];
 // 레슨(코스 섹션)마다 다른 색. 한 코스 안의 노드는 같은 색을 공유하고, 다음 코스에서 색이 바뀐다.
 // 라이트/다크 양쪽에서 흰 아이콘이 읽히는 채도로 고르고, 입체 그림자는 같은 계열의 진한 색.
 const SECTION_COLORS = [
-  { face: '#f97316', shadow: '#c2410c' }, // 브랜드 오렌지
-  { face: '#22c55e', shadow: '#15803d' }, // 초록
-  { face: '#3b82f6', shadow: '#1d4ed8' }, // 파랑
-  { face: '#a855f7', shadow: '#7e22ce' }, // 보라
-  { face: '#ec4899', shadow: '#be185d' }, // 핑크
-  { face: '#14b8a6', shadow: '#0f766e' }, // 청록
+  { face: '#c4511a', shadow: '#a94013' },
+  { face: '#2b6d71', shadow: '#1c5358' },
+  { face: '#52647f', shadow: '#384965' },
+  { face: '#93602d', shadow: '#70451f' },
 ];
 export const sectionColor = (i: number) => SECTION_COLORS[i % SECTION_COLORS.length];
 

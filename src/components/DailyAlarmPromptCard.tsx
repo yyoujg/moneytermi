@@ -34,7 +34,7 @@ export const DailyAlarmPromptCard = () => {
     <Card pad="lg" className="w-full flex flex-col gap-3 anim-fade-up">
       <div className="flex items-center gap-3">
         <IconBox className="rounded-chip bg-brand-500/10">
-          <Bell size={16} className="text-brand-500" />
+          <Bell size={16} className="text-brand-ink" />
         </IconBox>
         <div>
           <p className="text-sm font-semibold text-[var(--color-ink)]">매일 오늘의 용어 받기</p>

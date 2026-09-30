@@ -15,7 +15,7 @@ import { feedbackLearned, feedbackLessonComplete } from '../lib/feedback';
 import { StreakCelebration } from '../components/StreakCelebration';
 import { Card } from '../components/ui/Card';
 import { WordVisuals } from '../components/WordVisuals';
-import { termPattern } from '../lib/quiz';
+import { lessonChecks, termPattern } from '../lib/quiz';
 
 
 const SOURCE_NAMES: Record<string, string> = { bok800: '한국은행 경제금융용어 800선', tesat: 'TESAT', sgsg: '한경 생글생글 경제 퀴즈' };
@@ -109,7 +109,7 @@ const WordCard = ({
         <button
           type="button"
           onClick={onDetail}
-          className="mt-4! w-full py-3 rounded-button bg-brand-500/10 text-sm font-bold text-brand-500 active:opacity-70 flex items-center justify-center gap-1"
+          className="mt-4! w-full py-3 rounded-button bg-brand-500/10 text-sm font-bold text-brand-ink active:opacity-70 flex items-center justify-center gap-1"
         >
           <BookOpen size={15} />자세히 보기
         </button>
@@ -279,6 +279,7 @@ const WordCardScreen = () => {
 
   // autoAdvance 완료 화면
   if (autoAdvance && words.length > 0 && wordIndex >= words.length) {
+    const checks = lessonChecks(words);
     const quizWords = knownWords
       .filter(kw => words.some(w => w.id === kw.id))
       .sort(() => Math.random() - 0.5)
@@ -320,6 +321,14 @@ const WordCardScreen = () => {
                 </button>
               );
             }
+            if (checks.length > 0) return (
+              <button
+                onClick={() => navigate('/lesson-check', { state: { words, backPath } })}
+                className="w-full py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90"
+              >
+                이해 확인하기 →
+              </button>
+            );
             return (
               <button
                 onClick={() => navigate('/quiz', { state: { quizQueue: quizWords, backPath } })}
