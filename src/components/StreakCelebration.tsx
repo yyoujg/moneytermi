@@ -42,7 +42,7 @@ export const StreakCelebration = () => {
 
   return (
     <div
-      className={`fixed inset-0 z-[60] flex flex-col items-center justify-center gap-6 px-6 overflow-hidden ${milestone ? '' : 'bg-[var(--color-canvas)]'}`}
+      className={`original-modal fixed inset-0 z-[60] flex flex-col items-center justify-center gap-6 px-6 overflow-hidden ${milestone ? '' : 'bg-[var(--color-canvas)]'}`}
       style={milestone ? { background: 'linear-gradient(160deg, #8f3715 0%, #ad451c 60%, #c4511a 100%)' } : undefined}
     >
       {milestone && CONFETTI.map((c, i) => (
@@ -79,7 +79,7 @@ export const StreakCelebration = () => {
             >
               {d.attended && <Check size={18} strokeWidth={3} className={milestone ? 'text-brand-500' : 'text-white'} />}
             </div>
-            <span className={`text-2xs font-medium ${d.isToday ? (milestone ? 'text-white font-bold' : 'text-brand-ink font-bold') : (milestone ? 'text-white/70' : 'text-[var(--color-ink-4)]')}`}>
+            <span className={`text-2xs font-medium ${d.isToday ? (milestone ? 'text-white font-bold' : 'text-brand-ink font-bold') : (milestone ? 'text-white' : 'text-[var(--color-ink-4)]')}`}>
               {d.label}
             </span>
           </div>
@@ -98,7 +98,7 @@ export const StreakCelebration = () => {
 
       <button
         onClick={() => { logClick('streak_close', { streak }); setShow(false); }}
-        className={`w-full max-w-xs py-4 rounded-button text-sm font-bold active:opacity-90 anim-fade-up ${milestone ? 'bg-white text-brand-500' : 'bg-brand-500 text-white'}`}
+        className={`w-full max-w-xs py-4 rounded-button text-sm font-bold active:opacity-90 anim-fade-up ${milestone ? 'bg-white text-[var(--color-brand-deep)]' : 'bg-brand-500'}`}
         style={{ '--i': 9 } as React.CSSProperties}
       >
         {milestone ? '계속 이어가기' : '돌아가기'}

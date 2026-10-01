@@ -23,8 +23,10 @@ export const TopBar = () => {
   const [now, setNow] = useState(() => Date.now());
   const [celebration, setCelebration] = useState<PointReward | null>(null);
   const [tip, setTip] = useState<Tip | null>(null);
-  // 마이페이지는 같은 지표를 요약 카드로 보여주므로 바는 숨긴다(상점 시트는 다른 곳에서도 열리니 그대로 둔다)
-  const hideBar = useLocation().pathname === '/my';
+  // 학습 중에는 각 화면의 레슨명과 진행 단계에 집중한다. 상점 시트는 계속 마운트한다.
+  const pathname = useLocation().pathname;
+  const hideBar = ['/home', '/league', '/league/rules', '/my', '/welcome', '/word-card', '/quiz', '/lesson-check', '/review'].includes(pathname);
+  const compactBar = pathname === '/course';
   const [tipPos, setTipPos] = useState({ left: 16, tail: 0 });   // 말풍선 위치: 아이콘 아래 가운데, 화면 밖으로 안 나가게 16px 안쪽에서 멈춘다
 
   // 설명 말풍선은 3초 뒤 저절로 닫힌다. 같은 아이콘을 다시 누르면 바로 닫힌다
@@ -74,30 +76,30 @@ export const TopBar = () => {
   return (
     <>
       {/* 앱 이름·홈 이동은 토스 내비게이션 바가 맡는다. 자체 로고 헤더를 두면 검수에서 '자체 헤더 중복'으로 반려된다(2026-09-29) */}
-      {!hideBar && <div data-topbar className="relative z-40 shrink-0 h-12 flex items-center justify-end px-5 bg-[var(--color-card)] border-b border-[var(--color-line)]">
+      {!hideBar && <div data-topbar className="relative z-40 shrink-0 h-12 flex items-center px-4 min-[390px]:px-5 bg-[var(--color-card)]">
 
-        <div className="flex items-center gap-3 text-sm font-bold text-brand-ink">
-          <button onClick={e => toggleTip('streak', e)} aria-label="연속 학습" className="flex items-center gap-1 active:opacity-60">
-            <StreakIcon size={15} /><span className="text-[var(--color-ink-2)]"><RollingNumber value={streak} /></span>
+        <div className="ml-auto flex max-w-full items-center justify-end gap-3 overflow-x-auto text-[13px] font-bold whitespace-nowrap text-[var(--color-ink)] min-[390px]:gap-4 min-[390px]:text-sm [&::-webkit-scrollbar]:hidden">
+          <button onClick={e => toggleTip('streak', e)} aria-label="연속 학습" className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 active:opacity-60">
+            <StreakIcon size={19} /><span><RollingNumber value={streak} /></span>
           </button>
-          <button onClick={e => toggleTip('xp', e)} aria-label="경험치" className="flex items-center gap-1 active:opacity-60">
-            <XpIcon size={15} /><span className="text-[var(--color-ink-2)]"><RollingNumber value={xp} /></span>
+          {!compactBar && <button onClick={e => toggleTip('xp', e)} aria-label="경험치" className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 active:opacity-60">
+            <XpIcon size={19} /><span><RollingNumber value={xp} /></span>
+          </button>}
+          <button onClick={() => { setTip(null); openShop(); }} aria-label="포인트 상점" className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 active:opacity-60">
+            <PointIcon size={19} /><span><RollingNumber value={points} /></span>
           </button>
-          <button onClick={() => { setTip(null); openShop(); }} aria-label="포인트 상점" className="flex items-center gap-1 active:opacity-60">
-            <PointIcon size={15} /><span className="text-[var(--color-ink-2)]"><RollingNumber value={points} /></span>
-          </button>
-          <button onClick={e => toggleTip('words', e)} aria-label="배운 단어" className="flex items-center gap-1 active:opacity-60">
-            <WordsIcon size={16} /><span className="text-[var(--color-ink-2)]"><RollingNumber value={knownWords.length} /></span>
-          </button>
+          {!compactBar && <button onClick={e => toggleTip('words', e)} aria-label="배운 단어" className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 active:opacity-60">
+            <WordsIcon size={19} /><span><RollingNumber value={knownWords.length} /></span>
+          </button>}
           {boostLeft > 0 && (
-            <span className="text-xs font-bold text-brand-ink">
+            <span className="text-xs font-bold text-[var(--color-ink)]">
               ×2 {Math.floor(boostLeft / 60000)}:{String(Math.floor((boostLeft % 60000) / 1000)).padStart(2, '0')}
             </span>
           )}
         </div>
 
         {tip && (
-          <div role="status" onClick={() => setTip(null)} style={{ left: tipPos.left, width: TIP_W }} className="absolute top-full mt-2 rounded-chip bg-[#222] px-4 py-3 shadow-lg anim-pop-in">
+          <div role="status" onClick={() => setTip(null)} style={{ left: tipPos.left, width: TIP_W }} className="absolute top-full mt-2 rounded-chip bg-[#222] px-4 py-3 anim-pop-in">
             <span className="absolute -top-1 w-2.5 h-2.5 rotate-45 bg-[#222]" style={{ left: tipPos.tail - 5 }} />
             <p className="relative text-xs font-bold text-white">
               {tip === 'streak' ? `연속 학습 ${streak}일` : tip === 'xp' ? `경험치(XP) ${xp.toLocaleString()}` : `배운 단어 ${knownWords.length}개`}
@@ -113,6 +115,7 @@ export const TopBar = () => {
 
       <BottomSheet
         open={shopOpen}
+        className="original-modal"
         onDimmerClick={closeShop}
         header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>{shopReason === 'lesson' ? '포인트가 부족해요' : '포인트 상점'}</span>}
       >
@@ -125,21 +128,19 @@ export const TopBar = () => {
           {/* 레슨이 막혀서 열렸을 땐 광고가 주행동이라 채운 버튼으로 */}
           <button
             onClick={handleAd}
-            className={`w-full flex items-center justify-between rounded-chip px-4 py-4 text-sm font-bold active:opacity-70 ${shopReason === 'lesson' ? 'text-white bg-brand-500 anim-attn' : 'text-brand-ink'}`}
-            style={shopReason === 'lesson' ? undefined : { backgroundColor: 'var(--color-brand-soft)' }}
+            className={`grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-chip px-4 py-4 text-sm font-bold active:opacity-70 ${shopReason === 'lesson' ? 'bg-brand-500 anim-attn' : 'bg-[var(--color-button-secondary)] text-[var(--color-ink-2)]'}`}
           >
-            <span className="flex items-center gap-2"><Tv size={16} />광고 보고 포인트 받기</span>
-            <span className="text-2xs font-medium opacity-80">시청하고 받기</span>
+            <span className="flex min-w-0 items-center gap-2 text-left leading-5"><Tv size={18} className="shrink-0" />광고 보고 포인트 받기</span>
+            <span className="shrink-0 text-right text-2xs font-medium leading-4 opacity-80">시청하고 받기</span>
           </button>
 
           <button
             onClick={handleBoost}
             disabled={points < 300 || boostLeft > 0}
-            className="w-full flex items-center justify-between rounded-chip px-4 py-4 text-sm font-bold text-brand-ink active:opacity-70 disabled:opacity-40"
-            style={{ backgroundColor: 'var(--color-brand-soft)' }}
+            className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-chip bg-[var(--color-button-secondary)] px-4 py-4 text-sm font-bold text-[var(--color-ink-2)] active:opacity-70 disabled:opacity-60"
           >
-            <span className="flex items-center gap-2"><Zap size={16} className="fill-current" />{boostLeft > 0 ? '부스트 사용 중' : 'XP 2배 부스트'}</span>
-            <span className="text-2xs font-medium">
+            <span className="flex min-w-0 items-center gap-2 text-left leading-5"><Zap size={18} className="shrink-0 fill-current" />{boostLeft > 0 ? '부스트 사용 중' : 'XP 2배 부스트'}</span>
+            <span className="shrink-0 text-right text-2xs font-medium leading-4">
               {boostLeft > 0
                 ? `${Math.floor(boostLeft / 60000)}:${String(Math.floor((boostLeft % 60000) / 1000)).padStart(2, '0')} 남음`
                 : points < 300 ? `${(300 - points).toLocaleString()}P 더 필요` : '300P · 30분'}
@@ -153,7 +154,7 @@ export const TopBar = () => {
             </p>
           </div>
           <p className="text-2xs text-[var(--color-ink-4)] mt-1 leading-relaxed">
-            레슨 시작에 {LESSON_COST}P가 들어요. 퀴즈·복습은 무료. 포인트는 순위에 반영되지 않아요.
+            첫 레슨은 무료예요. 이후 레슨 시작에 {LESSON_COST}P가 들어요. 퀴즈·복습은 무료. 포인트는 순위에 반영되지 않아요.
           </p>
         </div>
       </BottomSheet>

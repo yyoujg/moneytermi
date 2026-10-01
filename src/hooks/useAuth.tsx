@@ -34,6 +34,7 @@ type StoredProfile = {
 // 토스 익명 키(getAnonymousKey hash) 조회. undefined(구 앱버전) / 'ERROR' / 예외 전부 null 폴백.
 // 브라우저(localhost)엔 브리지가 없어 null → 기존 게스트 생성 경로로 흐른다.
 const fetchTossKey = async (): Promise<string | null> => {
+  if (!(window as Window & { ReactNativeWebView?: unknown }).ReactNativeWebView) return null;
   try {
     const r = await getAnonymousKey();
     if (!r || typeof r === 'string') return null;
@@ -152,11 +153,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // 2. 첫 방문: Supabase에 게스트 프로필 생성
     try {
       const newGuestToken = uuid();
-      // RLS SELECT 정책이 본인 행만 허용하므로, INSERT...RETURNING이 방금 만든 행을
-      // "본인 행"으로 인식하도록 x-guest-token 헤더가 실린 게스트 클라이언트로 요청한다.
-      const { data: profile, error } = await getGuestClient(newGuestToken)
+      const guestClient = getGuestClient(newGuestToken);
+      const { error: insertError } = await guestClient
         .from('profiles')
-        .insert({ guest_token: newGuestToken })
+        .insert({ guest_token: newGuestToken });
+      if (insertError) throw insertError;
+
+      const { data: profile, error } = await guestClient
+        .from('profiles')
         .select('id, nickname, league_tier')
         .single();
 
@@ -177,6 +181,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         });
         return;
       }
+      if (error) console.error('[Auth] 게스트 프로필 생성 실패:', error);
     } catch (err) {
       console.warn('Supabase 게스트 생성 실패, 오프라인 모드로 전환:', err);
     }

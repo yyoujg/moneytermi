@@ -170,8 +170,12 @@ export type Database = {
           meaning: string;
           detailed_meaning: string;
           news_example: string;
+          learning_example: string | null;
           hint: string;
+          difficulty: number;
           related_words: string[] | null;
+          visuals: Json | null;
+          sources: string[] | null;
         };
         Insert: {
           id: number;
@@ -179,8 +183,12 @@ export type Database = {
           meaning: string;
           detailed_meaning: string;
           news_example: string;
+          learning_example?: string | null;
           hint: string;
+          difficulty?: number;
           related_words?: string[] | null;
+          visuals?: Json | null;
+          sources?: string[] | null;
         };
         Update: {
           id?: number;
@@ -188,8 +196,12 @@ export type Database = {
           meaning?: string;
           detailed_meaning?: string;
           news_example?: string;
+          learning_example?: string | null;
           hint?: string;
+          difficulty?: number;
           related_words?: string[] | null;
+          visuals?: Json | null;
+          sources?: string[] | null;
         };
         Relationships: [];
       };
@@ -317,6 +329,10 @@ export type Database = {
           points: number;
           reason: string;
         };
+      };
+      claim_first_lesson: {
+        Args: { p_course_id: string };
+        Returns: boolean;
       };
       buy_boost: {
         Args: Record<string, never>;

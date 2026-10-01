@@ -28,11 +28,11 @@ export const XP_BONUS_POINTS = 50;
 export const MISSION_XP = 5;
 
 export const GROWTH_STAGES: Omit<GrowthStage, 'nextMinPoints'>[] = [
-  { id: 1, name: '브론즈',   emoji: '🥉', minPoints: 0 },
-  { id: 2, name: '실버',     emoji: '🥈', minPoints: 20 },
-  { id: 3, name: '골드',     emoji: '🥇', minPoints: 100 },
-  { id: 4, name: '플래티넘', emoji: '💠', minPoints: 300 },
-  { id: 5, name: '다이아',   emoji: '💎', minPoints: 800 },
+  { id: 1, name: '루키',     emoji: '🌱', minPoints: 0 },
+  { id: 2, name: '챌린저',   emoji: '🚀', minPoints: 20 },
+  { id: 3, name: '프로',     emoji: '🎯', minPoints: 100 },
+  { id: 4, name: '엘리트',   emoji: '🌟', minPoints: 300 },
+  { id: 5, name: '레전드',   emoji: '🏆', minPoints: 800 },
 ];
 
 export const getGrowthStage = (points: number): GrowthStage => {
@@ -43,4 +43,3 @@ export const getGrowthStage = (points: number): GrowthStage => {
 
 // 하루 복습 큐 상한 (홈 "오늘 복습할 단어 N개")
 export const DAILY_REVIEW_CAP = 10;
-

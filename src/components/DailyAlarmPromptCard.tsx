@@ -44,7 +44,7 @@ export const DailyAlarmPromptCard = () => {
       <div className="flex gap-2">
         <button
           onClick={() => { logClick('notification_prompt_later'); setShow(false); }}
-          className="flex-1 py-3 rounded-button text-sm font-bold text-[var(--color-ink-2)] bg-[var(--color-surface)] active:opacity-90"
+          className="flex-1 py-3 rounded-button text-sm font-bold text-[var(--color-ink-2)] bg-[var(--color-button-secondary)] active:opacity-90"
         >
           나중에
         </button>

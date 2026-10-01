@@ -4,7 +4,7 @@ type Pad = 'none' | 'sm' | 'md' | 'lg';
 
 const PAD: Record<Pad, string> = { none: '', sm: 'p-3', md: 'p-4', lg: 'p-5' };
 const TONE = {
-  card: 'bg-[var(--color-card)]',
+  card: 'bg-[var(--color-card)] border border-[var(--color-line)]',
   surface: 'bg-[var(--color-surface)]',
 } as const;
 

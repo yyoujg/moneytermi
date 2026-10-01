@@ -18,12 +18,15 @@ type WpRow = { word_id: number; ease: number; interval_d: number; reps: number; 
 type AppContextValue = {
   ready: boolean;
   hydrated: boolean;
+  contentStatus: 'loading' | 'ready' | 'error';
+  retryContent: () => void;
   points: number;
   setPoints: React.Dispatch<React.SetStateAction<number>>;
   xp: number;
   boostUntil: number | null;
   buyBoost: () => Promise<'ok' | 'active' | 'fail'>;
   spendPoints: (amount: number, reason: string) => Promise<boolean>;
+  claimFirstLesson: (courseId: string) => Promise<'free' | 'ineligible' | 'error'>;
   refreshWallet: () => Promise<void>;
   shopReason: 'lesson' | null;
   shopOpen: boolean;
@@ -50,6 +53,7 @@ type AppContextValue = {
   courses: Course[];
   allWords: Word[];
   dueQueue: Word[];
+  nextReviewDate: string | null;
   recordReview: (wordId: number, correct: boolean, usedHint: boolean) => Promise<void>;
   myEmoji: string;
   updateMyEmoji: (emoji: string) => Promise<void>;
@@ -76,9 +80,11 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [courses, setCourses]             = useState<Course[]>([]);
   const [allWords, setAllWords]           = useState<Word[]>([]);
   const [wpRows, setWpRows]               = useState<WpRow[]>([]);
-  const [myEmoji, setMyEmoji]             = useState<string>('😊');
+  const [myEmoji, setMyEmoji]             = useState<string>('🍊');
   const [ready, setReady]                 = useState(false);
   const [hydrated, setHydrated]           = useState(false);
+  const [contentStatus, setContentStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [contentRetryKey, setContentRetryKey] = useState(0);
   const pendingKnownIds   = useRef<Set<number> | null>(null);
   const pendingUnknownIds = useRef<Set<number> | null>(null);
 
@@ -104,36 +110,39 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         supabase.from('course_words').select('course_id, word_id, position').order('position'),
         supabase.from('courses').select('*').order('sort_order', { ascending: true }),
       ]);
-      if (!wordsData || !coursesData || !cwData) return;
+      if (!wordsData || !coursesData || !cwData) throw new Error('학습 콘텐츠 응답 누락');
 
-      const wordMap = new Map(wordsData.map((w: any) => [w.id, {
+      const wordMap = new Map(wordsData.map(w => [w.id, {
         id: w.id,
         word: w.word,
         meaning: w.meaning,
         detailedMeaning: w.detailed_meaning,
         newsExample: w.news_example,
+        learningExample: w.learning_example ?? undefined,
         hint: w.hint,
+        difficulty: w.difficulty as Word['difficulty'],
         relatedWords: w.related_words ?? [],
-        visuals: w.visuals ?? undefined,
+        visuals: (w.visuals as Word['visuals']) ?? undefined,
         sources: w.sources ?? [],
       } as Word]));
 
-      const builtCourses: Course[] = coursesData.map((c: any) => ({
+      const builtCourses: Course[] = coursesData.map(c => ({
         id: c.id,
         level: c.level,
         title: c.title,
         description: c.description,
         category: c.category,
         words: cwData
-          .filter((cw: any) => cw.course_id === c.id)
-          .sort((a: any, b: any) => a.position - b.position)
-          .map((cw: any) => wordMap.get(cw.word_id))
+          .filter(cw => cw.course_id === c.id)
+          .sort((a, b) => a.position - b.position)
+          .map(cw => wordMap.get(cw.word_id))
           .filter(Boolean)
-          .sort((a: any, b: any) => (a.difficulty ?? 0) - (b.difficulty ?? 0)) as Word[],
+          .sort((a, b) => (a?.difficulty ?? 0) - (b?.difficulty ?? 0)) as Word[],
       }));
 
       setCourses(builtCourses);
       setAllWords(Array.from(wordMap.values()));
+      setContentStatus('ready');
 
       // 미션 정의는 공개 데이터라 프로필이 없어도 받을 수 있다.
       const { data: defs } = await supabase
@@ -159,10 +168,11 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       }
       } catch (e) {
         console.error('[AppContext] 콘텐츠 로드 실패:', e);
+        setContentStatus('error');
       }
     };
     loadContent();
-  }, []);
+  }, [contentRetryKey]);
 
   // ── 미션 진행도 다시 읽기 ─────────────────────────────────────
   // m2/m4/m5는 서버 트리거·RPC가 올리므로 클라가 스스로 알 수 없다. 시작·슬롯 리셋·단어 저장 뒤·퀴즈 끝에 부른다.
@@ -544,6 +554,14 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     return true;
   };
 
+  const claimFirstLesson = async (courseId: string): Promise<'free' | 'ineligible' | 'error'> => {
+    if (!profileIdRef.current) return 'error';
+    const { data, error } = await dbRef.current.rpc('claim_first_lesson', { p_course_id: courseId });
+    if (error) { console.error('[claimFirstLesson] 실패:', error); return 'error'; }
+    if (data) logClick('first_lesson_free_start', { course_id: courseId });
+    return data === true ? 'free' : 'ineligible';
+  };
+
   // 서버에서만 생기는 변화(새 단어 XP, 50XP 보너스, 출석 XP, 미션 진행도)를 한 번에 다시 읽는다.
   const refreshWallet = async () => {
     const profileId = profileIdRef.current;
@@ -571,6 +589,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       .map(r => byId.get(r.word_id))
       .filter(Boolean) as Word[];
   }, [wpRows, allWords]);
+  const nextReviewDate = useMemo(() => {
+    const todayStr = toDateStr(new Date());
+    return wpRows.map(row => row.due_date).filter(date => date > todayStr).sort()[0] ?? null;
+  }, [wpRows]);
 
   // ── recordReview — SRS 일정만 갱신 (포인트는 submitQuizAnswer가 담당) ─
   const recordReview = async (wordId: number, correct: boolean, usedHint: boolean) => {
@@ -600,11 +622,12 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     <AppContext.Provider value={{
       ready,
       hydrated,
+      contentStatus, retryContent: () => { setContentStatus('loading'); setContentRetryKey(key => key + 1); },
       points, setPoints,
       knownWords, knownIds, setKnownWords,
       unknownWords, setUnknownWords,
       xp, boostUntil, buyBoost,
-      spendPoints, refreshWallet, shopReason, shopOpen, openShop, closeShop,
+      spendPoints, claimFirstLesson, refreshWallet, shopReason, shopOpen, openShop, closeShop,
       missions, setMissions,
       claimReward,
       claimReferralReward,
@@ -617,6 +640,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       courses,
       allWords,
       dueQueue,
+      nextReviewDate,
       recordReview,
       myEmoji,
       updateMyEmoji,

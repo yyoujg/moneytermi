@@ -10,7 +10,7 @@ export type PointReward = { points: number; xp?: number; source: 'mission' | 'ad
 export const PointCelebration = ({ reward, onClose }: { reward: PointReward; onClose: () => void }) => {
   const close = () => { logClick('point_celebration_close', { source: reward.source, points: reward.points }); onClose(); };
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center px-6 overflow-hidden" style={{ background: 'rgba(0,0,0,0.55)' }} onClick={close}>
+    <div className="original-modal fixed inset-0 z-[60] flex items-center justify-center px-6 overflow-hidden" style={{ background: 'rgba(0,0,0,0.55)' }} onClick={close}>
       {CONFETTI.map((c, i) => (
         <span
           key={i}
@@ -20,41 +20,34 @@ export const PointCelebration = ({ reward, onClose }: { reward: PointReward; onC
         />
       ))}
 
-      <div
-        role="dialog"
-        aria-label="포인트 획득"
-        onClick={e => e.stopPropagation()}
-        className="w-full max-w-xs rounded-card bg-[var(--color-card)] overflow-hidden flex flex-col items-center shadow-lg anim-pop-in"
-      >
-        {/* 컬러 헤더 블록 (퀴즈·학습 화면 헤더와 같은 패턴) */}
-        <div className="w-full bg-brand-500 px-6 pt-7 pb-6 flex flex-col items-center gap-2">
-          <div
-            className="w-20 h-20 flex items-center justify-center bg-white"
-            style={{ borderRadius: 9999, boxShadow: '0 0 0 6px rgba(255,255,255,0.25)' }}
-          >
-            <Zap size={40} className="text-brand-ink fill-current" />
-          </div>
-          <p className="text-4xl font-black text-white anim-pop-in" style={{ '--i': 2 } as React.CSSProperties}>+{reward.points}P</p>
-          {reward.xp ? (
-            <p className="flex items-center gap-1 text-sm font-bold text-white/90 anim-fade-up" style={{ '--i': 3 } as React.CSSProperties}>
-              <Sparkles size={14} />+{reward.xp} XP
-            </p>
-          ) : null}
+      <div role="dialog" aria-label="포인트 획득" onClick={e => e.stopPropagation()}
+        className="flex w-full max-w-xs flex-col items-center rounded-card bg-[var(--color-card)] px-6 pb-6 pt-8 text-center anim-pop-in">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[var(--color-brand-soft)] text-brand-500">
+          <Zap size={38} fill="currentColor" />
         </div>
-
-        <div className="w-full px-6 pt-5 pb-5 flex flex-col items-center gap-3">
-        <p className="text-sm text-[var(--color-ink-3)] text-center break-keep anim-fade-up" style={{ '--i': 4 } as React.CSSProperties}>
-          {reward.source === 'mission' ? '미션 보상을 받았어요! 다음 레슨에 써 보세요.' : '광고를 끝까지 봐 주셔서 고마워요!'}
+        <h2 className="mt-5! text-xl font-bold text-[var(--color-ink)]">
+          {reward.source === 'mission' ? '오늘의 미션 완료!' : '포인트를 받았어요!'}
+        </h2>
+        <p className="mt-2! text-sm text-[var(--color-ink-3)] break-keep">
+          {reward.source === 'mission' ? '수고했어요. 내일도 함께해요.' : '광고를 끝까지 봐 주셔서 고마워요.'}
         </p>
-
-        <button
-          onClick={close}
-          className="w-full mt-2 py-4 rounded-button text-sm font-bold text-white bg-brand-500 active:opacity-90 anim-fade-up"
-          style={{ '--i': 5 } as React.CSSProperties}
-        >
+        <div className={`mt-6 grid w-full gap-2 ${reward.xp ? 'grid-cols-2' : 'grid-cols-1'}`}>
+          {reward.xp ? (
+            <div className="flex flex-col items-center rounded-card bg-[var(--color-surface)] px-3 py-4">
+              <Sparkles size={22} className="text-brand-500" />
+              <span className="mt-2 text-lg font-bold text-[var(--color-ink)]">+{reward.xp} XP</span>
+              <span className="text-xs text-[var(--color-ink-3)]">경험치</span>
+            </div>
+          ) : null}
+          <div className="flex flex-col items-center rounded-card bg-[var(--color-brand-soft)] px-3 py-4">
+            <Zap size={22} className="text-brand-500" />
+            <span className="mt-2 text-lg font-bold text-[var(--color-ink)]">+{reward.points}P</span>
+            <span className="text-xs text-[var(--color-ink-3)]">포인트</span>
+          </div>
+        </div>
+        <button onClick={close} className="mt-6 w-full rounded-button bg-brand-500 py-4 text-sm font-bold text-white active:opacity-90">
           확인
         </button>
-        </div>
       </div>
     </div>
   );

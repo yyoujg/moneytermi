@@ -20,6 +20,7 @@ export type Word = {
   meaning: string;
   detailedMeaning: string;
   newsExample: string;
+  learningExample?: string;
   hint: string;
   difficulty: 1 | 2 | 3;
   relatedWords?: string[];

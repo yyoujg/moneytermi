@@ -19,7 +19,10 @@ const useInView = <T extends Element>() => {
   useEffect(() => {
     const el = ref.current;
     if (!el || seen) return;
-    if (!('IntersectionObserver' in window)) { setSeen(true); return; }
+    if (!('IntersectionObserver' in window)) {
+      const frame = requestAnimationFrame(() => setSeen(true));
+      return () => cancelAnimationFrame(frame);
+    }
     const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setSeen(true); io.disconnect(); } }, { threshold: 0.6 });
     io.observe(el);
     return () => io.disconnect();
@@ -29,6 +32,7 @@ const useInView = <T extends Element>() => {
 
 const LineChart = ({ x, series, unit }: { x: string[]; series: { name: string; values: number[] }[]; unit?: string }) => {
   const [ref, seen] = useInView<SVGSVGElement>();
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const all = series.flatMap(s => s.values);
   const min = Math.min(...all);
   const max = Math.max(...all);
@@ -38,10 +42,21 @@ const LineChart = ({ x, series, unit }: { x: string[]; series: { name: string; v
   const px = (i: number) => PAD.l + (x.length === 1 ? 0 : (i / (x.length - 1)) * (W - PAD.l - PAD.r));
   const py = (v: number) => PAD.t + (1 - (v - lo) / (hi - lo)) * (H - PAD.t - PAD.b);
   const ticks = [0, Math.floor((x.length - 1) / 2), x.length - 1].filter((v, i, a) => a.indexOf(v) === i);
+  const selectedIndex = Math.min(activeIndex ?? x.length - 1, x.length - 1);
+  const selectAt = (clientX: number) => {
+    const bounds = ref.current?.getBoundingClientRect();
+    if (!bounds || x.length < 2) return;
+    const ratio = (clientX - bounds.left) / bounds.width;
+    const chartRatio = (ratio * W - PAD.l) / (W - PAD.l - PAD.r);
+    setActiveIndex(Math.max(0, Math.min(x.length - 1, Math.round(chartRatio * (x.length - 1)))));
+  };
 
   return (
     <div className="flex flex-col gap-2">
-      <svg ref={ref} viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img">
+      <svg ref={ref} viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img"
+        aria-label={`${x[selectedIndex]} ${series.map(s => `${s.name} ${fmt(s.values[selectedIndex])}${unit ?? ''}`).join(', ')}`}
+        onPointerDown={e => selectAt(e.clientX)} onPointerMove={e => { if (e.buttons || e.pointerType === 'mouse') selectAt(e.clientX); }}
+        style={{ touchAction: 'pan-y' }}>
         {[max, (max + min) / 2, min].map((v, i) => (
           <g key={i}>
             <line x1={PAD.l} x2={W - PAD.r} y1={py(v)} y2={py(v)} stroke="var(--color-line)" strokeDasharray="3 3" />
@@ -69,12 +84,28 @@ const LineChart = ({ x, series, unit }: { x: string[]; series: { name: string; v
               className={seen ? 'anim-pop-in' : 'opacity-0'} style={{ '--i': 14 + si * 3, transformBox: 'fill-box', transformOrigin: 'center' } as React.CSSProperties} />
           </g>
         ))}
+        {seen && x.length > 1 && (
+          <g aria-hidden="true" className="chart-cursor">
+            <line x1={px(selectedIndex)} x2={px(selectedIndex)} y1={PAD.t} y2={H - PAD.b}
+              stroke="var(--color-ink-3)" strokeWidth="1" strokeDasharray="3 4" opacity="0.65" />
+            {series.map((s, si) => (
+              <circle key={s.name} cx={px(selectedIndex)} cy={py(s.values[selectedIndex])} r="5"
+                fill={COLORS[si % COLORS.length]} stroke="var(--color-card)" strokeWidth="2" />
+            ))}
+          </g>
+        )}
       </svg>
+      {x.length > 1 && (
+        <input type="range" min={0} max={x.length - 1} value={selectedIndex}
+          onChange={e => setActiveIndex(Number(e.target.value))}
+          aria-label="그래프 시점 선택" className="chart-scrubber w-full" />
+      )}
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-2xs text-[var(--color-ink-3)]">
+        <span className="font-bold text-[var(--color-ink-2)]">{x[selectedIndex]}</span>
         {series.map((s, si) => (
           <span key={s.name} className="flex items-center gap-1">
             <span className="w-2.5 h-2.5" style={{ borderRadius: 9999, background: COLORS[si % COLORS.length] }} />
-            {s.name} {fmt(s.values[s.values.length - 1])}{unit ?? ''}
+            {s.name} {fmt(s.values[selectedIndex])}{unit ?? ''}
           </span>
         ))}
       </div>
@@ -160,8 +191,8 @@ const Flow = ({ steps, caption }: { steps: string[]; caption?: string }) => {
                 {next.replace(ARROW, '?')}
               </p>
               <div className="w-full grid grid-cols-2 gap-2 mt-1">
-                <button type="button" onClick={() => pick('↑')} className="py-2.5 rounded-button bg-brand-500/10 text-sm font-bold text-brand-ink active:opacity-70">↑ 오른다</button>
-                <button type="button" onClick={() => pick('↓')} className="py-2.5 rounded-button bg-brand-500/10 text-sm font-bold text-brand-ink active:opacity-70">↓ 내린다</button>
+                <button type="button" data-own-sfx onClick={() => pick('↑')} className="py-2.5 rounded-button bg-brand-500/10 text-sm font-bold text-brand-ink active:opacity-70">↑ 오른다</button>
+                <button type="button" data-own-sfx onClick={() => pick('↓')} className="py-2.5 rounded-button bg-brand-500/10 text-sm font-bold text-brand-ink active:opacity-70">↓ 내린다</button>
               </div>
             </>
           ) : (
@@ -219,10 +250,9 @@ const EcosChart = ({ v, onFail }: { v: Extract<WordVisual, { type: 'ecos' }>; on
   const times = data.map(l => new Set(l.map(p => p.time)));
   const common = data[0].map(p => p.time).filter(t => times.every(s => s.has(t)));
   const k = v.scale ?? 1;
-  const last = label(common[common.length - 1]);
   const series = data.map((l, i) => {
     const byTime = new Map(l.map(p => [p.time, p.value * k]));
-    return { name: defs[i].name ? `${defs[i].name}(${last})` : `최근(${last})`, values: common.map(t => byTime.get(t)!) };
+    return { name: defs[i].name || '수치', values: common.map(t => byTime.get(t)!) };
   });
   return (
     <div className="flex flex-col gap-1">
@@ -237,7 +267,7 @@ const EcosCard = ({ v }: { v: Extract<WordVisual, { type: 'ecos' }> }) => {
   const [failed, setFailed] = useState(false);
   if (failed || ecosDown) return null;
   return (
-    <Card pad="none" className="px-5 pt-4 pb-5 flex flex-col gap-3">
+    <Card pad="none" className="px-5 pt-4 pb-5 flex flex-col gap-3" style={{ border: 0 }}>
       <div className="flex flex-col gap-1">
         <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><BarChart3 size={13} />실제 통계</p>
         <p className="text-sm font-bold text-[var(--color-ink)] break-keep">{v.title}</p>
@@ -298,7 +328,7 @@ const LinkedText = ({ text, terms }: { text: string; terms?: Terms }) => {
 };
 
 const VisualCard = ({ v, className = '', terms }: { v: Exclude<WordVisual, { type: 'ecos' | 'quiz' }>; className?: string; terms?: Terms }) => (
-  <Card pad="none" className={`px-5 pt-4 pb-5 flex flex-col gap-3 ${className}`}>
+  <Card pad="none" className={`px-5 pt-4 pb-5 flex flex-col gap-3 ${className}`} style={{ border: 0 }}>
     {v.type === 'text' ? (
       <>
         <p className="text-sm font-bold text-[var(--color-ink)] break-keep">{v.title}</p>
