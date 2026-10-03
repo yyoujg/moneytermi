@@ -54,14 +54,7 @@ export const BadgeCelebration = () => {
       <div className={`flex flex-wrap justify-center gap-5 ${fresh.length === 1 ? '' : 'max-w-xs'}`}>
         {fresh.map((b, i) => (
           <div key={b.id} className="flex flex-col items-center gap-2 anim-pop-in" style={{ '--i': i + 2 } as React.CSSProperties}>
-            <div
-              className={`badge-tone badge-tone--celebration ${fresh.length === 1 ? 'w-28 h-28' : 'w-20 h-20'} flex items-center justify-center`}
-              data-badge-stat={b.stat}
-              data-earned
-              style={{ borderRadius: 9999 }}
-            >
-              <BadgeGlyph id={b.id} size={fresh.length === 1 ? 50 : 36} />
-            </div>
+            <BadgeGlyph id={b.id} size={fresh.length === 1 ? 140 : 96} />
             <p className="text-sm font-bold text-[var(--color-ink)]">{b.title}</p>
           </div>
         ))}

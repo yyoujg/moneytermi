@@ -13,8 +13,10 @@ import { logScreen, logClick } from './lib/analytics';
 import NavBar from './components/NavBar';
 import { TopBar } from './components/TopBar';
 import { BadgeCelebration } from './components/mypage/BadgeCelebration';
+import { PointCelebration } from './components/PointCelebration';
 import { useTapHaptics } from './hooks/useTapHaptics';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, BookOpen, CircleHelp, Trophy } from 'lucide-react';
+import { Mascot } from './components/Mascot';
 import { Storage } from './lib/storage';
 
 const HomeScreen = React.lazy(() => import('./pages/HomeScreen'));
@@ -43,9 +45,9 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
     if (this.state.error) {
       return (
         <div className="flex flex-col items-center justify-center h-full gap-4 px-6 text-center">
-          <p className="text-2xl">⚠️</p>
-          <p className="text-sm font-semibold text-[var(--color-ink)]">앗, 문제가 발생했어요</p>
-          <p className="text-xs text-[var(--color-ink-3)]">앱을 다시 시작해 주세요.</p>
+          <Mascot name="error" size={120} />
+          <p className="text-lg font-bold text-[var(--color-ink)]">앗, 문제가 생겼어요</p>
+          <p className="text-sm text-[var(--color-ink-3)]">앱을 다시 시작해 주세요.</p>
           <button
             onClick={() => closeView()}
             className="mt-2 px-5 py-2.5 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-80"
@@ -60,17 +62,17 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
 }
 
 const LoadingScreen = () => (
-  <div className="flex-1 flex flex-col items-center justify-center" style={{ backgroundColor: '#c4511a' }}>
+  <div className="flex-1 flex flex-col items-center justify-center bg-white">
     <img
       src="/logo.png"
       alt="머니터미"
       style={{ width: 'min(72vw, 300px)', marginBottom: '24px' }}
     />
-    <div style={{ width: '140px', height: '3px', borderRadius: '999px', backgroundColor: 'rgba(255,255,255,0.3)', overflow: 'hidden' }}>
+    <div style={{ width: '140px', height: '3px', borderRadius: '999px', backgroundColor: 'var(--color-brand-200)', overflow: 'hidden' }}>
       <div style={{
         height: '100%',
         borderRadius: '999px',
-        backgroundColor: 'white',
+        backgroundColor: 'var(--color-brand-500)',
         animation: 'splash-gauge 1.4s ease-in-out infinite',
       }} />
     </div>
@@ -85,9 +87,14 @@ const LoadingScreen = () => (
 );
 
 const WELCOME_KEY = 'welcome_seen_v1';
+const WELCOME_STEPS = [
+  { icon: BookOpen, title: '쉬운 설명으로 배워요', desc: '뉴스에 자주 나오는 용어를 한 줄 뜻과 예시로 익혀요' },
+  { icon: CircleHelp, title: '짧은 퀴즈로 확인해요', desc: '배운 단어를 바로 퀴즈로 풀며 기억에 남겨요' },
+  { icon: Trophy, title: '복습하고 리그에 도전해요', desc: '잊을 때쯤 다시 복습하고, 매주 리그 순위를 겨뤄요' },
+];
+
 const WelcomeScreen = () => {
   const navigate = useNavigate();
-  const [previewAnswer, setPreviewAnswer] = React.useState<number | null>(null);
   const start = async () => {
     await Storage.setItem(WELCOME_KEY, '1').catch(() => {});
     logClick('welcome_start');
@@ -95,44 +102,38 @@ const WelcomeScreen = () => {
   };
 
   return (
-    <div className="flex h-full flex-col overflow-y-auto bg-[var(--color-card)] px-6 pb-10 pt-12 text-center [&::-webkit-scrollbar]:hidden">
-      <div className="mx-auto max-w-xs">
-        <h1 className="text-2xl font-extrabold leading-snug tracking-tight text-[var(--color-ink)] break-keep">
-          뉴스 속 낯선 경제 용어,<br />이제 어렵지 않아요!
-        </h1>
-        <p className="mt-4! text-sm leading-relaxed text-[var(--color-ink-2)] break-keep">
-          쉬운 설명으로 배우고<br />짧은 퀴즈로 확인해요.
-        </p>
-      </div>
+    <div className="flex h-full flex-col bg-[var(--color-canvas)]">
+      <div className="flex flex-1 flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden">
+        <div className="flex shrink-0 flex-col items-center rounded-b-[32px] bg-[var(--color-card)] px-6 pb-8 pt-8 text-center">
+          <Mascot name="hello" size={150} />
+          <h1 className="mt-4 text-2xl font-extrabold leading-snug tracking-tight text-[var(--color-ink)] break-keep">
+            뉴스 속 낯선 경제 용어,<br />이제 어렵지 않아요!
+          </h1>
+          <p className="mt-3 text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">하루 몇 분이면 경제 뉴스가 읽혀요</p>
+        </div>
 
-      <div className="relative mx-auto my-5 flex h-36 w-36 shrink-0 items-center justify-center">
-        <span aria-hidden="true" className="absolute inset-3 rounded-full bg-[var(--color-brand-soft)]" />
-        <div className="relative h-32 w-32 overflow-hidden rounded-full bg-brand-500">
-          <img src="/logo.png" alt="머니터미 캐릭터" className="absolute -left-4 -top-[58px] w-[160px] max-w-none" />
+        {/* 남는 높이의 가운데에 단계 카드를 둔다. 화면이 작으면 그대로 스크롤된다 */}
+        <div className="flex flex-1 flex-col justify-center px-5 pt-7 pb-4">
+          <p className="mb-3 px-1 text-sm font-bold text-[var(--color-ink-2)]">이렇게 배워요</p>
+          <ol className="flex flex-col gap-3">
+            {WELCOME_STEPS.map(({ icon: Icon, title, desc }) => (
+              <li key={title} className="flex items-center gap-4 rounded-card bg-[var(--color-card)] px-4 py-4">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-soft)] text-brand-500">
+                  <Icon size={21} />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[15px] font-bold text-[var(--color-ink)]">{title}</span>
+                  <span className="mt-0.5 block text-xs leading-relaxed text-[var(--color-ink-3)] break-keep">{desc}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
         </div>
       </div>
 
-      <div className="rounded-card bg-[var(--color-surface)] px-5 py-4 text-left">
-        <p className="text-xs font-bold text-[var(--color-ink-2)]">이렇게 배워요</p>
-        <p className="mt-2 text-lg font-bold text-[var(--color-ink)]">규모의 경제</p>
-        <p className="mt-1 text-sm leading-relaxed text-[var(--color-ink-2)]">많이 만들수록 제품 하나당 평균 비용이 낮아지는 현상이에요.</p>
-        <p className="mt-3 text-xs font-bold text-brand-ink">짧은 퀴즈로 확인해요</p>
-        <p className="mt-2 text-sm font-semibold text-[var(--color-ink)]">많이 만들면 개당 비용은 어떻게 될까요?</p>
-        <div className="mt-2 grid grid-cols-2 gap-2">
-          {['낮아져요', '높아져요'].map((answer, index) => (
-            <button key={answer} type="button" onClick={() => setPreviewAnswer(index)}
-              aria-pressed={previewAnswer === index}
-              className={`min-h-11 rounded-button px-2 text-sm font-bold ${previewAnswer === index ? 'bg-brand-500' : 'bg-[var(--color-button-secondary)] text-[var(--color-ink)]'}`}>
-              {answer}
-            </button>
-          ))}
-        </div>
-        {previewAnswer !== null && <p role="status" className="mt-2 text-xs font-semibold text-[var(--color-ink-2)]">{previewAnswer === 0 ? '맞았어요! 개당 평균 비용이 낮아져요.' : '다시 생각해 보세요. 비용을 더 많은 제품에 나눠요.'}</p>}
-      </div>
-
-      <div className="mt-auto pt-8">
+      <div className="shrink-0 px-5 pb-8 pt-3 text-center">
         <button type="button" onClick={start}
-          className="flex w-full items-center justify-center gap-2 rounded-button bg-brand-500 py-4 text-sm font-bold active:opacity-90">
+          className="flex w-full items-center justify-center gap-2 rounded-button bg-brand-500 py-4 text-base font-bold active:opacity-90">
           첫 레슨 시작하기<ArrowRight size={18} />
         </button>
         <p className="mt-3! text-xs text-[var(--color-ink-4)]">별도 가입 없이 시작할 수 있어요</p>
@@ -242,7 +243,9 @@ const NicknameGate = () => {
 const Layout = () => {
   const location = useLocation();
   const { pathname } = location;
-  const { ready } = useAppContext();
+  const { ready, missionRewards, dismissMissionReward } = useAppContext();
+  // 문제를 풀거나 읽는 중엔 미션 축하로 흐름을 끊지 않는다. 학습 화면을 나가면 대기열을 보여준다
+  const learning = ['/quiz', '/word-card', '/review', '/lesson-check'].some(p => pathname.startsWith(p));
 
   if (!ready) return <LoadingScreen />;
 
@@ -271,6 +274,9 @@ const Layout = () => {
       </div>
       </React.Suspense>
       <NavBar />
+      {!learning && missionRewards[0] && (
+        <PointCelebration key={missionRewards.length} reward={missionRewards[0]} onClose={dismissMissionReward} />
+      )}
     </div>
   );
 };

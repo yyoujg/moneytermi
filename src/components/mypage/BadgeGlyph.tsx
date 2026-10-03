@@ -1,19 +1,4 @@
-import { BookMarked, BookOpen, Crown, Flame, LibraryBig, Medal, Sparkles, Sprout, Trophy, Zap, type LucideIcon } from 'lucide-react';
-
-const GLYPHS: Record<string, LucideIcon> = {
-  w1: Sprout,
-  w10: BookOpen,
-  w50: BookMarked,
-  w100: LibraryBig,
-  s3: Flame,
-  s7: Zap,
-  s30: Medal,
-  x100: Sparkles,
-  x500: Trophy,
-  x1000: Crown,
-} as const;
-
-export const BadgeGlyph = ({ id, size = 22 }: { id: string; size?: number }) => {
-  const Icon = GLYPHS[id] ?? Sparkles;
-  return <Icon size={size} strokeWidth={2.2} aria-hidden="true" />;
-};
+// 배지 그림은 public/badges/{id}.png (수달 배지 시트에서 잘라냄)
+export const BadgeGlyph = ({ id, size = 22, className }: { id: string; size?: number; className?: string }) => (
+  <img src={`/badges/${id}.png`} alt="" aria-hidden="true" width={size} height={size} className={`shrink-0 ${className ?? ''}`} />
+);

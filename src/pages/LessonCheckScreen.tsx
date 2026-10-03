@@ -6,6 +6,7 @@ import { buildCustomQuizItem, lessonChecks } from '../lib/quiz';
 import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
 import { logClick } from '../lib/analytics';
 import { Card } from '../components/ui/Card';
+import { Mascot } from '../components/Mascot';
 
 const LessonCheckScreen = () => {
   const navigate = useNavigate();
@@ -22,9 +23,10 @@ const LessonCheckScreen = () => {
     const hasLesson = Boolean(state?.words?.length);
     return (
       <div className="lesson-check-screen flex h-full flex-col items-center justify-center gap-4 px-5 text-center bg-[var(--color-canvas)]">
-        <h1 className="text-lg font-bold text-[var(--color-ink)]">{hasLesson ? '이번 레슨에는 이해 확인 문제가 없어요' : '단어를 먼저 배워보세요'}</h1>
-        <p className="text-sm text-[var(--color-ink-2)]">{hasLesson ? '다음 학습을 선택할 수 있어요.' : '단어를 배우면 이해 확인 문제를 풀 수 있어요.'}</p>
-        <button onClick={() => navigate('/course', { replace: true })} className="mt-3 w-full py-4 rounded-button bg-brand-500 text-sm font-bold">
+        <Mascot name="empty" size={110} />
+        <h1 className="mt-1 text-xl font-bold text-[var(--color-ink)]">{hasLesson ? '이번 레슨에는 이해 확인 문제가 없어요' : '단어를 먼저 배워보세요'}</h1>
+        <p className="text-[15px] text-[var(--color-ink-2)] break-keep">{hasLesson ? '다음 학습을 선택할 수 있어요.' : '단어를 배우면 이해 확인 문제를 풀 수 있어요.'}</p>
+        <button onClick={() => navigate('/course', { replace: true })} className="mt-3 w-full min-h-[52px] rounded-button bg-brand-500 text-base font-bold text-white">
           {hasLesson ? '다음 학습 선택하기' : '학습 시작하기'}
         </button>
       </div>

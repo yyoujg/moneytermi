@@ -1,4 +1,5 @@
-import { Zap, Sparkles } from 'lucide-react';
+import { PointIcon, XpIcon } from './StatIcons';
+import { Mascot } from './Mascot';
 import { logClick } from '../lib/analytics';
 
 // 포인트를 받았을 때 토스트 대신 띄우는 축하 모달. 미션 보상(포인트+XP)과 광고 보상(포인트)이 함께 쓴다.
@@ -22,9 +23,7 @@ export const PointCelebration = ({ reward, onClose }: { reward: PointReward; onC
 
       <div role="dialog" aria-label="포인트 획득" onClick={e => e.stopPropagation()}
         className="flex w-full max-w-xs flex-col items-center rounded-card bg-[var(--color-card)] px-6 pb-6 pt-8 text-center anim-pop-in">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[var(--color-brand-soft)] text-brand-500">
-          <Zap size={38} fill="currentColor" />
-        </div>
+        <Mascot name={reward.source === 'mission' ? 'mission' : 'reward'} size={120} />
         <h2 className="mt-5! text-xl font-bold text-[var(--color-ink)]">
           {reward.source === 'mission' ? '오늘의 미션 완료!' : '포인트를 받았어요!'}
         </h2>
@@ -34,13 +33,13 @@ export const PointCelebration = ({ reward, onClose }: { reward: PointReward; onC
         <div className={`mt-6 grid w-full gap-2 ${reward.xp ? 'grid-cols-2' : 'grid-cols-1'}`}>
           {reward.xp ? (
             <div className="flex flex-col items-center rounded-card bg-[var(--color-surface)] px-3 py-4">
-              <Sparkles size={22} className="text-brand-500" />
+              <XpIcon size={22} />
               <span className="mt-2 text-lg font-bold text-[var(--color-ink)]">+{reward.xp} XP</span>
               <span className="text-xs text-[var(--color-ink-3)]">경험치</span>
             </div>
           ) : null}
           <div className="flex flex-col items-center rounded-card bg-[var(--color-brand-soft)] px-3 py-4">
-            <Zap size={22} className="text-brand-500" />
+            <PointIcon size={22} />
             <span className="mt-2 text-lg font-bold text-[var(--color-ink)]">+{reward.points}P</span>
             <span className="text-xs text-[var(--color-ink-3)]">포인트</span>
           </div>

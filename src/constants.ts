@@ -43,3 +43,6 @@ export const getGrowthStage = (points: number): GrowthStage => {
 
 // 하루 복습 큐 상한 (홈 "오늘 복습할 단어 N개")
 export const DAILY_REVIEW_CAP = 10;
+
+// 프로필 아바타 값(서버 저장값). 고르기 시트에 이 순서로 나온다. 그림 매핑은 ProfileAvatar.
+export const AVATAR_OPTIONS = ['🍊','🥰','🐼','🐻','🦉','🌟','🎯','🎮','🚀','🍀'];

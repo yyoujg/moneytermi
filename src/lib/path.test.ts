@@ -156,9 +156,9 @@ describe('커넥터가 노드를 침범하지 않는다', () => {
 describe('sectionColor', () => {
   it('코스마다 브랜드 팔레트 색을 순환한다', () => {
     expect([0, 1, 2].map((index) => sectionColor(index).face)).toEqual([
-      '#c4511a',
-      '#2b6d71',
-      '#52647f',
+      '#f97316',
+      '#099268',
+      '#6d4aff',
     ]);
     expect(sectionColor(4)).toEqual(sectionColor(0));
   });

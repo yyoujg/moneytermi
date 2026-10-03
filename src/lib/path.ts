@@ -34,10 +34,10 @@ const OFFSETS = [-112, 80, -64, 112, -88, 96];
 export const nodeOffsetX = (i: number) => OFFSETS[i % OFFSETS.length];
 
 const SECTION_COLORS = [
-  { face: '#c4511a', shadow: '#a94013', ink: '#ffffff' },
-  { face: '#2b6d71', shadow: '#1c5358', ink: '#ffffff' },
-  { face: '#52647f', shadow: '#384965', ink: '#ffffff' },
-  { face: '#93602d', shadow: '#70451f', ink: '#ffffff' },
+  { face: '#f97316', shadow: '#ea580c', ink: '#ffffff' },
+  { face: '#099268', shadow: '#077a56', ink: '#ffffff' },
+  { face: '#6d4aff', shadow: '#5634e0', ink: '#ffffff' },
+  { face: '#3182f6', shadow: '#1b64da', ink: '#ffffff' },
 ];
 export const sectionColor = (index: number) => SECTION_COLORS[index % SECTION_COLORS.length];
 

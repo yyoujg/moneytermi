@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import type React from 'react';
 import { BottomSheet } from '@toss/tds-mobile';
-import { Zap, Tv } from 'lucide-react';
+import { ChevronsUp, Tv } from 'lucide-react';
 import { StreakIcon, XpIcon, PointIcon, WordsIcon } from './StatIcons';
 import { showModal } from './AlertModal';
 import { useAppContext } from '../context/AppContext';
@@ -68,7 +68,7 @@ export const TopBar = () => {
 
   const handleBoost = async () => {
     const r = await buyBoost();
-    if (r === 'ok') { feedbackBoost(); showModal('30분간 XP 2배! ⚡'); closeShop(); }
+    if (r === 'ok') { feedbackBoost(); showModal('30분간 XP 2배!'); closeShop(); }
     else if (r === 'active') { showModal('이미 부스트 중이에요', 'error'); closeShop(); }
     else showModal('포인트가 부족해요', 'error');
   };
@@ -128,7 +128,7 @@ export const TopBar = () => {
           {/* 레슨이 막혀서 열렸을 땐 광고가 주행동이라 채운 버튼으로 */}
           <button
             onClick={handleAd}
-            className={`grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-chip px-4 py-4 text-sm font-bold active:opacity-70 ${shopReason === 'lesson' ? 'bg-brand-500 anim-attn' : 'bg-[var(--color-button-secondary)] text-[var(--color-ink-2)]'}`}
+            className={`grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-chip px-4 py-4 text-sm font-bold active:opacity-70 ${shopReason === 'lesson' ? 'bg-brand-500' : 'bg-[var(--color-button-secondary)] text-[var(--color-ink-2)]'}`}
           >
             <span className="flex min-w-0 items-center gap-2 text-left leading-5"><Tv size={18} className="shrink-0" />광고 보고 포인트 받기</span>
             <span className="shrink-0 text-right text-2xs font-medium leading-4 opacity-80">시청하고 받기</span>
@@ -139,7 +139,7 @@ export const TopBar = () => {
             disabled={points < 300 || boostLeft > 0}
             className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-chip bg-[var(--color-button-secondary)] px-4 py-4 text-sm font-bold text-[var(--color-ink-2)] active:opacity-70 disabled:opacity-60"
           >
-            <span className="flex min-w-0 items-center gap-2 text-left leading-5"><Zap size={18} className="shrink-0 fill-current" />{boostLeft > 0 ? '부스트 사용 중' : 'XP 2배 부스트'}</span>
+            <span className="flex min-w-0 items-center gap-2 text-left leading-5"><ChevronsUp size={18} className="shrink-0" />{boostLeft > 0 ? '부스트 사용 중' : 'XP 2배 부스트'}</span>
             <span className="shrink-0 text-right text-2xs font-medium leading-4">
               {boostLeft > 0
                 ? `${Math.floor(boostLeft / 60000)}:${String(Math.floor((boostLeft % 60000) / 1000)).padStart(2, '0')} 남음`

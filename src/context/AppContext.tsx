@@ -10,7 +10,7 @@ import { logClick } from '../lib/analytics';
 import { missionSlot, msUntilNextSlot, toDateStr } from '../lib/date';
 import { nextSrs, gradeFromResult, addDays } from '../lib/srs';
 import { DAILY_REVIEW_CAP, MISSION_XP } from '../constants';
-import { PointCelebration, type PointReward } from '../components/PointCelebration';
+import type { PointReward } from '../components/PointCelebration';
 import { feedbackClaim } from '../lib/feedback';
 
 type WpRow = { word_id: number; ease: number; interval_d: number; reps: number; due_date: string };
@@ -57,6 +57,9 @@ type AppContextValue = {
   recordReview: (wordId: number, correct: boolean, usedHint: boolean) => Promise<void>;
   myEmoji: string;
   updateMyEmoji: (emoji: string) => Promise<void>;
+  // 자동 수령한 미션 보상 축하 대기열. 학습 화면 중엔 Layout이 보류했다가 나가면 보여준다
+  missionRewards: PointReward[];
+  dismissMissionReward: () => void;
 };
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -644,11 +647,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       recordReview,
       myEmoji,
       updateMyEmoji,
+      missionRewards,
+      dismissMissionReward: () => setMissionRewards(q => q.slice(1)),
     }}>
       {children}
-      {missionRewards[0] && (
-        <PointCelebration key={missionRewards.length} reward={missionRewards[0]} onClose={() => setMissionRewards(q => q.slice(1))} />
-      )}
     </AppContext.Provider>
   );
 };

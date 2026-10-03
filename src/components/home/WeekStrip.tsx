@@ -2,6 +2,7 @@ import { Check } from 'lucide-react';
 import { toDateStr } from '../../lib/date';
 
 // 이번 주 월~일 출석 스트립. 출석은 있음/없음뿐이라 막대 높이 대신 체크 원으로 보여준다.
+// 밝은(브랜드색) 배경 위에 올리는 용도라 흰색 계열로만 그린다.
 export const WeekStrip = ({ attendanceDates }: { attendanceDates: string[] }) => {
   const labels = ['월', '화', '수', '목', '금', '토', '일'];
   const today = new Date();
@@ -19,13 +20,13 @@ export const WeekStrip = ({ attendanceDates }: { attendanceDates: string[] }) =>
         const done = attended.has(toDateStr(d));
         return (
           <div key={label} className="flex-1 flex flex-col items-center gap-1.5 anim-pop-in" style={{ '--i': i } as React.CSSProperties}>
-            <span className="text-3xs font-bold text-white">{label}</span>
+            <span className={`text-3xs font-bold ${isToday ? 'text-white' : 'text-white/60'}`}>{label}</span>
             <div
               className={`w-7 h-7 flex items-center justify-center ${isToday && !done ? 'anim-attn' : ''}`}
               style={{
                 borderRadius: 9999,
-                background: done ? '#fff' : 'rgba(255,255,255,0.22)',
-                border: isToday && !done ? '2px solid var(--color-on-brand)' : '2px solid transparent',
+                background: done ? '#fff' : 'rgba(255,255,255,0.18)',
+                border: isToday && !done ? '2px solid #fff' : '2px solid transparent',
                 opacity: isFuture ? 0.4 : 1,
               }}
             >
