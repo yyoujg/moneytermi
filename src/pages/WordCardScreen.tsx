@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, ExternalLink, BookOpen, Newspaper, Link2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ExternalLink, BookOpen, Newspaper, Link2, X } from 'lucide-react';
 import { BottomSheet } from '@toss/tds-mobile';
 import { showModal } from '../components/AlertModal';
 import type { Word } from '../types';
@@ -15,7 +15,7 @@ import { feedbackLearned, feedbackLessonComplete } from '../lib/feedback';
 import { StreakCelebration } from '../components/StreakCelebration';
 import { Card } from '../components/ui/Card';
 import { WordVisuals } from '../components/WordVisuals';
-import { lessonChecks, termPattern } from '../lib/quiz';
+import { termPattern } from '../lib/quiz';
 
 
 const SOURCE_NAMES: Record<string, string> = { bok800: '한국은행 경제금융용어 800선', tesat: 'TESAT', sgsg: '한경 생글생글 경제 퀴즈' };
@@ -87,8 +87,8 @@ const WordCard = ({
   termNames: string[];
   meaningOf: (name: string) => string | undefined;
 }) => {
-  // 뉴스 가로 스와이프 중 손을 떼면 그 자리 카드의 click이 같이 불린다. 8px 넘게 움직였으면 그 click은 버린다
-  const newsDrag = useRef<{ x: number; y: number; moved: boolean } | null>(null);
+  // 쉬운 예시(데이터 앞의 '학습용 가정:' 표시는 뺀다)
+  const example = word.learningExample?.replace(/^학습용 가정:\s*/, '');
   return (
   <div className="flex flex-col gap-3 px-5 pb-6">
 
@@ -100,16 +100,24 @@ const WordCard = ({
 
       {/* 뜻 — 단어와 같은 카드 */}
       <div className="mt-3">
-        <p className="text-sm text-[var(--color-ink-2)] font-normal break-keep leading-[1.7] tracking-[-0.01em]">{word.meaning}</p>
-        {word.sources && word.sources.length > 0 && (
-          <p className="mt-2 text-3xs text-[var(--color-ink-4)]">{word.sources.map(s => SOURCE_NAMES[s] ?? s).join(' · ')} 참고</p>
+        <p className="text-[17px] text-[var(--color-ink)] font-medium break-keep leading-[1.65] tracking-[-0.01em]">{word.meaning}</p>
+        {/* 출처는 자세히 보기 시트 맨 아래로. 시트가 없는 단어만 여기 둔다 */}
+        {!onDetail && word.sources && word.sources.length > 0 && (
+          <p className="mt-2 text-2xs text-[var(--color-ink-3)]">{word.sources.map(s => SOURCE_NAMES[s] ?? s).join(' · ')} 참고</p>
         )}
       </div>
+      {/* 읽었더니 이해됐다고 느낄 예시 하나는 자세히 보기 밖에 둔다 */}
+      {example && (
+        <div className="mt-4 border-t border-[var(--color-line)] pt-4">
+          <p className="text-xs font-bold text-brand-500">예를 들어볼게요</p>
+          <p className="mt-1.5 text-[15px] text-[var(--color-ink-2)] break-keep leading-[1.7]">{example}</p>
+        </div>
+      )}
       {onDetail && (
         <button
           type="button"
           onClick={onDetail}
-          className="mt-4! w-full py-3 rounded-button bg-brand-500/10 text-sm font-bold text-brand-ink active:opacity-70 flex items-center justify-center gap-1"
+          className="mt-4! w-full py-3 rounded-button bg-brand-500/10 text-sm font-bold text-brand-500 active:opacity-70 flex items-center justify-center gap-1"
         >
           <BookOpen size={15} />자세히 보기
         </button>
@@ -120,68 +128,53 @@ const WordCard = ({
     {/* 그래프·표 — 뜻 바로 아래에서 그림으로 이해시킨다 */}
     {word.visuals && word.visuals.length > 0 && <WordVisuals visuals={word.visuals} terms={{ names: termNames, meaningOf, onClick: onRelatedClick }} />}
 
-    {/* 뉴스 — 기사마다 카드 하나. 불러온 뒤 기사가 없으면 섹션째 숨긴다 */}
+    {/* 뉴스 — 사진보다 '이 용어가 기사에서 어떻게 쓰였는지'가 보이게 작은 썸네일 목록. 불러온 뒤 기사가 없으면 섹션째 숨긴다 */}
     {(newsLoading || newsItems.length > 0) && (
-    <div className="flex flex-col gap-3">
-      <p className="flex items-center gap-1.5 px-1 pt-1 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><Newspaper size={13} />뉴스 속 {word.word}</p>
+    <Card pad="none" className="px-5 py-4 flex flex-col">
+      <p className="flex items-center gap-1.5 pb-1 text-xs font-bold text-[var(--color-ink-3)] tracking-[0.02em]"><Newspaper size={13} />실제 뉴스에서는 이렇게 나와요</p>
       {newsLoading ? (
-        <div className="-mx-5 px-5 flex gap-3 overflow-hidden">
-        {[1, 2, 3].map(i => (
-          <Card key={i} pad="none" className="w-[85%] shrink-0 px-5 py-4 flex flex-col gap-1.5">
-            <div className="h-3.5 bg-[var(--color-surface)] rounded animate-pulse" style={{ width: '90%' }} />
-            <div className="h-3.5 bg-[var(--color-surface)] rounded animate-pulse" style={{ width: '70%' }} />
-            <div className="h-2.5 bg-[var(--color-surface)] rounded animate-pulse" style={{ width: '30%' }} />
-          </Card>
-        ))}
-        </div>
-      ) : (
-        // 가로로 넘기는 뉴스
-        <div
-          className="-mx-5 px-5 scroll-px-5 flex gap-3 overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden"
-          style={{ touchAction: 'pan-x pan-y' }}
-          onPointerDown={e => { newsDrag.current = { x: e.clientX, y: e.clientY, moved: false }; }}
-          onPointerMove={e => { const d = newsDrag.current; if (d && Math.hypot(e.clientX - d.x, e.clientY - d.y) > 8) d.moved = true; }}
-          onScroll={() => { if (newsDrag.current) newsDrag.current.moved = true; }}
-          onClickCapture={e => { if (newsDrag.current?.moved) { e.preventDefault(); e.stopPropagation(); } newsDrag.current = null; }}
-        >
-        {newsItems.map((item, i) => (
-          <button
-            key={i}
-            type="button"
-            onClick={() => { logClick('news_link_click', { word: word.word }); openExternalUrl(item.link); }}
-            className="w-[85%] shrink-0 snap-start rounded-card bg-[var(--color-card)] overflow-hidden flex flex-col active:opacity-60 text-left"
-          >
-            {item.image && (
-              // 카드 폭을 꽉 채운 대표 이미지. 불러오지 못하면 이 자리만 숨긴다
-              <img
-                src={item.image}
-                alt=""
-                referrerPolicy="no-referrer"
-                onError={e => { e.currentTarget.style.display = 'none'; }}
-                className="w-full aspect-video object-cover bg-[var(--color-surface)]"
-              />
-            )}
-            <div className="flex items-start gap-2 w-full px-5 py-4">
-              <div className="flex-1">
-                <p className="text-[13px] font-semibold text-[var(--color-ink)] break-keep leading-[1.55] tracking-[-0.01em] line-clamp-2">
-                  <Highlight text={stripHtml(item.title)} keyword={keyword} />
-                </p>
-                {item.description && (
-                  <p className="text-xs text-[var(--color-ink-3)] break-keep leading-[1.6] tracking-[-0.01em] line-clamp-2 mt-1!">
-                    <Highlight text={stripHtml(item.description)} keyword={keyword} />
-                  </p>
-                )}
-                <p className="text-2xs text-[var(--color-ink-4)] mt-1!">
-                  {new Date(item.pubDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })} · 네이버 뉴스
-                </p>
-              </div>
-              {!item.image && <ExternalLink size={13} className="text-[var(--color-line)] shrink-0 mt-0.5" />}
+        [1, 2, 3].map(i => (
+          <div key={i} className="flex gap-3 py-3">
+            <div className="flex-1 flex flex-col gap-1.5">
+              <div className="h-3.5 bg-[var(--color-surface)] rounded animate-pulse" style={{ width: '90%' }} />
+              <div className="h-3.5 bg-[var(--color-surface)] rounded animate-pulse" style={{ width: '60%' }} />
             </div>
-          </button>
-        ))}
-        </div>
-      )}
-    </div>
+            <div className="h-[72px] w-[72px] shrink-0 rounded-chip bg-[var(--color-surface)] animate-pulse" />
+          </div>
+        ))
+      ) : newsItems.map((item, i) => (
+        <button
+          key={i}
+          type="button"
+          onClick={() => { logClick('news_link_click', { word: word.word }); openExternalUrl(item.link); }}
+          className="flex items-start gap-3 py-3 border-b border-[var(--color-line)] last:border-0 active:opacity-60 text-left"
+        >
+          <div className="min-w-0 flex-1">
+            <p className="text-[15px] font-semibold text-[var(--color-ink)] break-keep leading-[1.5] tracking-[-0.01em] line-clamp-2">
+              <Highlight text={stripHtml(item.title)} keyword={keyword} />
+            </p>
+            {item.description && (
+              <p className="text-[13px] text-[var(--color-ink-3)] break-keep leading-[1.6] line-clamp-2 mt-1!">
+                <Highlight text={stripHtml(item.description)} keyword={keyword} />
+              </p>
+            )}
+            <p className="text-xs text-[var(--color-ink-3)] mt-1!">
+              {new Date(item.pubDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })} · 네이버 뉴스
+            </p>
+          </div>
+          {item.image ? (
+            // 불러오지 못하면 썸네일 자리만 숨긴다
+            <img
+              src={item.image}
+              alt=""
+              referrerPolicy="no-referrer"
+              onError={e => { e.currentTarget.style.display = 'none'; }}
+              className="h-[72px] w-[72px] shrink-0 rounded-chip object-cover bg-[var(--color-surface)]"
+            />
+          ) : <ExternalLink size={14} className="text-[var(--color-ink-3)] shrink-0 mt-1" />}
+        </button>
+      ))}
+    </Card>
     )}
 
     {/* 관련 용어 */}
@@ -256,7 +249,8 @@ const WordCardScreen = () => {
   }, [wordIndex]);
 
   // 뉴스 (현재 단어 로드 + 다음 단어 prefetch)
-  const { newsItems, newsLoading } = useNews(words, wordIndex);
+  const { newsItems, newsStatus } = useNews(words, wordIndex);
+  const newsLoading = newsStatus === 'loading';
 
   // autoAdvance 완료 토스트. 잔고·XP 갱신은 word_progress 저장(2초 디바운스)이 끝난 뒤 AppContext가 한다.
   // 같은 완료에 effect가 다시 돌아도(단어 목록 참조 변경, dev StrictMode) 토스트는 한 번만
@@ -279,7 +273,6 @@ const WordCardScreen = () => {
 
   // autoAdvance 완료 화면
   if (autoAdvance && words.length > 0 && wordIndex >= words.length) {
-    const checks = lessonChecks(words);
     const quizWords = knownWords
       .filter(kw => words.some(w => w.id === kw.id))
       .sort(() => Math.random() - 0.5)
@@ -321,14 +314,6 @@ const WordCardScreen = () => {
                 </button>
               );
             }
-            if (checks.length > 0) return (
-              <button
-                onClick={() => navigate('/lesson-check', { state: { words, backPath } })}
-                className="w-full py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90"
-              >
-                이해 확인하기 →
-              </button>
-            );
             return (
               <button
                 onClick={() => navigate('/quiz', { state: { quizQueue: quizWords, backPath } })}
@@ -423,7 +408,9 @@ const WordCardScreen = () => {
 
       {/* 상단: 레슨 안의 단어 위치 */}
       <div className="px-5 pt-4 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5 overflow-hidden">
+        <button type="button" onClick={() => navigate(backPath, { replace: true, state: backState })} aria-label="학습 나가기"
+          className="-ml-3 -my-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[var(--color-ink-2)]"><X size={21} /></button>
+        <div className="flex flex-1 items-center gap-1.5 overflow-hidden">
           {words.map((w, i) => (
             <span
               key={w.id}
@@ -441,7 +428,7 @@ const WordCardScreen = () => {
         className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden pt-4"
         style={{
           transform: `translateX(${dragX}px)`,
-          transition: sliding ? `transform ${SLIDE_MS}ms var(--ease-soft)` : 'none',
+          transition: sliding ? `transform ${SLIDE_MS}ms cubic-bezier(0.25, 0.8, 0.25, 1)` : 'none',
         }}
       >
         <div key={word.id}>
@@ -488,12 +475,16 @@ const WordCardScreen = () => {
       onDimmerClick={() => setDetailOpen(false)}
       header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>{word.word} 자세히 알아보기</span>}
     >
-      <div className="px-5 pb-8 flex flex-col gap-3 max-h-[60vh] overflow-y-auto">
+      <div className="px-5 pb-8 flex flex-col gap-4 max-h-[60vh] overflow-y-auto">
+        {/* 첫 문단이 핵심이라 진하게, 나머지는 본문 */}
         {toParagraphs(detail).map((para, i) => (
-          <p key={i} className="text-sm leading-[1.6] text-[var(--color-ink-2)] font-medium break-keep tracking-[-0.01em]">
+          <p key={i} className={`text-base leading-[1.75] break-keep tracking-[-0.01em] ${i === 0 ? 'font-semibold text-[var(--color-ink)]' : 'text-[var(--color-ink-2)]'}`}>
             <Highlight text={para} keyword={word.word} pattern={termPattern(word.word) ?? undefined} />
           </p>
         ))}
+        {word.sources && word.sources.length > 0 && (
+          <p className="mt-2 border-t border-[var(--color-line)] pt-3 text-xs text-[var(--color-ink-3)]">출처: {word.sources.map(s => SOURCE_NAMES[s] ?? s).join(' · ')}</p>
+        )}
       </div>
     </BottomSheet>
     </>

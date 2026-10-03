@@ -42,25 +42,28 @@ const isArticlePhoto = async (url: string) => {
 };
 
 // ponytail: 요청마다 기사 페이지를 읽는다(캐시 없음, 앱이 세션 캐시). 호출량이 늘면 검색어별 캐시 테이블을 둔다.
-const ogImage = async (url: string): Promise<string | undefined> => {
+const articleMeta = async (url: string): Promise<{ image?: string; source?: string }> => {
   try {
     const res = await fetch(url, {
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; moneytermi)' },
       signal: AbortSignal.timeout(2500),
     });
-    if (!res.ok) return undefined;
+    if (!res.ok) return {};
     const html = (await res.text()).slice(0, 300_000);
+    const site = html.match(/<meta[^>]+property=["']og:site_name["'][^>]*content=["']([^"']+)/i)
+      ?? html.match(/<meta[^>]+content=["']([^"']+)["'][^>]*property=["']og:site_name/i);
+    const source = site?.[1]?.replace(/&amp;/g, '&').trim();
     const m = html.match(/<meta[^>]+property=["']og:image["'][^>]*content=["']([^"']+)/i)
       ?? html.match(/<meta[^>]+content=["']([^"']+)["'][^>]*property=["']og:image/i);
-    if (!m) return undefined;
+    if (!m) return { source };
     const img = m[1].replace(/&#x3D;/gi, '=').replace(/&amp;/g, '&')
       // 한국 언론사 CMS 다수가 og:image에 300px 썸네일(/thumbnail/..._v150)을 준다. 같은 이름의 /photo/ 원본이 크다
       .replace(/\/thumbnail\/(.+)_v\d+(\.\w+)$/, '/photo/$1$2');
     // 기사 사진 대신 언론사 로고·공용 기본 이미지(네이버 뉴스 ogtag 등)를 주는 곳이 있다 - 기사와 무관해 깨진 것처럼 보인다
-    if (!img.startsWith('https://') || /logo|ogtag|default|no_?image|blank/i.test(img)) return undefined;
-    return (await isArticlePhoto(img)) ? img : undefined;
+    if (!img.startsWith('https://') || /logo|ogtag|default|no_?image|blank/i.test(img)) return { source };
+    return { source, image: (await isArticlePhoto(img)) ? img : undefined };
   } catch {
-    return undefined;
+    return {};
   }
 };
 
@@ -107,12 +110,14 @@ Deno.serve(async (req) => {
     });
 
     if (!res.ok) {
-      return new Response(JSON.stringify([]), { headers: { ...CORS, 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ error: 'News provider unavailable' }), {
+        status: 502, headers: { ...CORS, 'Content-Type': 'application/json' },
+      });
     }
 
     const data = await res.json();
     const keys = keysOf(query);
-    type Item = { title: string; description: string; link: string; pubDate: string; image?: string };
+    type Item = { title: string; description: string; link: string; pubDate: string; image?: string; source?: string };
     const inTitle = (i: Item) => keys.some(k => plain(i.title).includes(k));
     // 같은 사건을 여러 언론사가 쓴 기사는 제목이 거의 같다. 제목 글자쌍(bigram)이 40% 넘게 겹치면(실측: 같은 사건 0.48~, 다른 기사 0.2 이하) 같은 기사로 보고 앞의 것만 남긴다.
     const grams = (t: string) => { const p = plain(t).replace(/[^0-9a-z가-힣]/g, ''); const g = new Set<string>(); for (let i = 0; i < p.length - 1; i++) g.add(p.slice(i, i + 2)); return g; };
@@ -127,7 +132,7 @@ Deno.serve(async (req) => {
       .filter((i: Item) => keys.some(k => plain(i.title + i.description).includes(k)))
       .sort((a: Item, b: Item) => Number(inTitle(b)) - Number(inTitle(a))))
       .slice(0, 10);
-    const withImages: Item[] = await Promise.all(candidates.map(async item => ({ ...item, image: await ogImage(item.link) })));
+    const withImages: Item[] = await Promise.all(candidates.map(async item => ({ ...item, ...await articleMeta(item.link) })));
     const seenImg = new Set<string>();
     const top = withImages
       .sort((a, b) => Number(!!b.image) - Number(!!a.image) || Number(inTitle(b)) - Number(inTitle(a)) || Date.parse(b.pubDate) - Date.parse(a.pubDate))
@@ -137,8 +142,8 @@ Deno.serve(async (req) => {
       headers: { ...CORS, 'Content-Type': 'application/json' },
     });
   } catch {
-    return new Response(JSON.stringify([]), {
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+    return new Response(JSON.stringify({ error: 'News request failed' }), {
+      status: 500, headers: { ...CORS, 'Content-Type': 'application/json' },
     });
   }
 });

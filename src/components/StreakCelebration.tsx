@@ -6,13 +6,14 @@ import { toDateStr } from '../lib/date';
 import { calcStreak, streakMessage, streakMilestone, weekDays } from '../lib/streak';
 import { feedbackCelebrate, feedbackStreak } from '../lib/feedback';
 import { Storage } from '../lib/storage';
+import { OTTER_FACE } from './ProfileAvatar';
 
 // 학습을 끝낸 뒤 하루 1회 뜨는 연속학습 축하 화면.
 // DailyAlarmPromptCard와 같은 자기완결 패턴 — 완료 화면에 그냥 놓으면 알아서 판단한다.
 const KEY = 'streak_celebrated_date';
 
 export const StreakCelebration = () => {
-  const { attendanceDates, myEmoji, hydrated } = useAppContext();
+  const { attendanceDates, hydrated } = useAppContext();
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -42,8 +43,8 @@ export const StreakCelebration = () => {
 
   return (
     <div
-      className={`fixed inset-0 z-[60] flex flex-col items-center justify-center gap-6 px-6 overflow-hidden ${milestone ? '' : 'bg-[var(--color-canvas)]'}`}
-      style={milestone ? { background: 'linear-gradient(160deg, #8f3715 0%, #ad451c 60%, #c4511a 100%)' } : undefined}
+      className={`original-modal fixed inset-0 z-[60] flex flex-col items-center justify-center gap-6 px-6 overflow-hidden ${milestone ? '' : 'bg-[var(--color-canvas)]'}`}
+      style={milestone ? { background: 'linear-gradient(160deg, #f97316 0%, #fb923c 60%, #fdba74 100%)' } : undefined}
     >
       {milestone && CONFETTI.map((c, i) => (
         <span
@@ -79,16 +80,16 @@ export const StreakCelebration = () => {
             >
               {d.attended && <Check size={18} strokeWidth={3} className={milestone ? 'text-brand-500' : 'text-white'} />}
             </div>
-            <span className={`text-2xs font-medium ${d.isToday ? (milestone ? 'text-white font-bold' : 'text-brand-ink font-bold') : (milestone ? 'text-white/70' : 'text-[var(--color-ink-4)]')}`}>
+            <span className={`text-2xs font-medium ${d.isToday ? (milestone ? 'text-white font-bold' : 'text-brand-ink font-bold') : (milestone ? 'text-white' : 'text-[var(--color-ink-4)]')}`}>
               {d.label}
             </span>
           </div>
         ))}
       </div>
 
-      {/* 내 아바타 말풍선 */}
+      {/* 캐릭터(수달)가 건네는 말풍선 */}
       <div className="flex items-center gap-3 anim-fade-up" style={{ '--i': 8 } as React.CSSProperties}>
-        <span className="text-4xl shrink-0">{myEmoji}</span>
+        <img src={OTTER_FACE} alt="" aria-hidden="true" className="h-12 w-12 shrink-0 rounded-full bg-white object-cover" />
         <div className={`rounded-card px-4 py-3 max-w-[220px] ${milestone ? 'bg-white/95' : 'bg-[var(--color-card)]'}`}>
           <p className={`text-sm font-medium break-keep leading-relaxed ${milestone ? 'text-[#7c2d12]' : 'text-[var(--color-ink-2)]'}`}>
             {streakMessage(streak)}
@@ -98,7 +99,7 @@ export const StreakCelebration = () => {
 
       <button
         onClick={() => { logClick('streak_close', { streak }); setShow(false); }}
-        className={`w-full max-w-xs py-4 rounded-button text-sm font-bold active:opacity-90 anim-fade-up ${milestone ? 'bg-white text-brand-500' : 'bg-brand-500 text-white'}`}
+        className={`w-full max-w-xs py-4 rounded-button text-sm font-bold active:opacity-90 anim-fade-up ${milestone ? 'bg-white text-[var(--color-brand-deep)]' : 'bg-brand-500'}`}
         style={{ '--i': 9 } as React.CSSProperties}
       >
         {milestone ? '계속 이어가기' : '돌아가기'}

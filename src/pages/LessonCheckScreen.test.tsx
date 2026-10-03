@@ -70,8 +70,15 @@ describe('레슨 이해 확인', () => {
 
   it('직접 진입해 문제가 없으면 코스로 돌아간다', () => {
     const { container, click } = mount('/lesson-check');
-    expect(container.textContent).toContain('확인할 문제가 없어요');
-    click('코스로 돌아가기');
+    expect(container.textContent).toContain('단어를 먼저 배워보세요');
+    click('학습 시작하기');
+    expect(container.textContent).toContain('코스 화면');
+  });
+
+  it('레슨에 이해 확인 문제가 없으면 다음 학습을 안내한다', () => {
+    const { container, click } = mount({ pathname: '/lesson-check', state: { words: [word(1)] } });
+    expect(container.textContent).toContain('이번 레슨에는 이해 확인 문제가 없어요');
+    click('다음 학습 선택하기');
     expect(container.textContent).toContain('코스 화면');
   });
 });

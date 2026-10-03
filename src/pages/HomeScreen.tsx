@@ -10,9 +10,12 @@ import { logClick } from '../lib/analytics';
 import { msUntilNextSlot } from '../lib/date';
 import { useAuth } from '../hooks/useAuth';
 import { WeekStrip } from '../components/home/WeekStrip';
+import { StageGlyph } from '../components/StageGlyph';
+import { ProfileAvatar } from '../components/ProfileAvatar';
 import { calcStreak } from '../lib/streak';
 import { Card } from '../components/ui/Card';
 import { PointCelebration, type PointReward } from '../components/PointCelebration';
+import type { Mission } from '../types';
 
 const HomeScreen = () => {
   const navigate = useNavigate();
@@ -28,7 +31,9 @@ const HomeScreen = () => {
     logClick('review_prompt_view', { count: dueQueue.length });
   }, [hydrated, dueQueue.length]);
 
-  const missionList = Object.values(missions).sort((a, b) => a.sortOrder - b.sortOrder);
+  // 지금 할 미션이 먼저: 진행 중 → 받기 대기 → 완료(보상 받음). 같은 그룹 안에서는 서버 순서
+  const missionRank = (m: Mission) => (m.isRewarded ? 2 : m.current >= m.target ? 1 : 0);
+  const missionList = Object.values(missions).sort((a, b) => missionRank(a) - missionRank(b) || a.sortOrder - b.sortOrder);
   const streak = calcStreak(attendanceDates);
 
   // 보상 수령: 성공하면 축하 모달 + 정답과 같은 햅틱, 실패(슬롯이 바뀌었거나 네트워크)면 이유를 알려준다
@@ -53,17 +58,17 @@ const HomeScreen = () => {
       <div className="pt-4 px-5 pb-4">
         <div
           className="rounded-card px-5 pt-5 pb-4 text-white shadow-lg anim-fade-up"
-          style={{ background: 'linear-gradient(135deg, #263b49 0%, #37646a 100%)' }}
+          style={{ background: 'linear-gradient(135deg, #f97316 0%, #fb923c 100%)' }}
         >
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 flex items-center justify-center text-2xl shrink-0" style={{ borderRadius: 9999, background: 'rgba(255,255,255,0.22)' }}>
-              {myEmoji}
+              <ProfileAvatar emoji={myEmoji} size={48} />
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-base font-bold truncate">안녕하세요, {user?.nickname ?? DEFAULT_NICKNAME}님</p>
               <div className="flex items-center gap-2 mt-1">
-                <span className="inline-flex items-center gap-1 text-2xs font-bold px-2 py-0.5" style={{ borderRadius: 9999, background: 'rgba(255,255,255,0.22)' }}>
-                  {stage.emoji} {stage.name}
+                <span className="inline-flex items-center gap-1 text-2xs font-bold pl-0.5 pr-2 py-0.5" style={{ borderRadius: 9999, background: 'rgba(255,255,255,0.22)' }}>
+                  <StageGlyph id={stage.id} size={18} />{stage.name}
                 </span>
                 <span className="inline-flex items-center gap-0.5 text-2xs font-bold">
                   <Flame size={12} className="fill-current" />{streak}일 연속
@@ -95,7 +100,7 @@ const HomeScreen = () => {
           >
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-full bg-brand-500/10 flex items-center justify-center shrink-0">
-                <RotateCcw size={16} className="text-brand-ink" />
+                <RotateCcw size={16} className="text-brand-500" />
               </div>
               <div className="text-left">
                 <p className="text-sm font-bold text-[var(--color-ink)]">오늘 복습할 단어 {dueQueue.length}개</p>
@@ -125,7 +130,7 @@ const HomeScreen = () => {
                       <p className={`text-sm font-bold truncate ${mission.isRewarded ? 'text-[var(--color-ink-4)] line-through' : 'text-[var(--color-ink)]'}`}>
                         {mission.title}
                       </p>
-                      <p className="text-2xs text-[var(--color-ink-4)] mt-0.5!">+{mission.reward}P · +{MISSION_XP} XP</p>
+                      <p className="text-xs text-[var(--color-ink-3)] mt-0.5!">+{mission.reward}P · +{MISSION_XP} XP</p>
                     </div>
                     {mission.isRewarded
                       ? <span className="anim-pop-in inline-flex"><Badge color="elephant" size="small" variant="fill">완료</Badge></span>
@@ -136,7 +141,7 @@ const HomeScreen = () => {
                   </div>
                   <div className="flex gap-1">
                     {Array.from({ length: mission.target }).map((_, i) => (
-                      <div key={i} className={`flex-1 h-1.5 rounded-full transition-all duration-[var(--dur-slow)] ease-soft ${i < mission.current ? 'bg-brand-500' : 'bg-[var(--color-line)]'}`} />
+                      <div key={i} className={`flex-1 h-1.5 rounded-full transition-all duration-300 ${i >= mission.current ? 'bg-[var(--color-line)]' : mission.isRewarded ? 'bg-[var(--color-line-strong)]' : 'bg-brand-500'}`} />
                     ))}
                   </div>
                 </div>

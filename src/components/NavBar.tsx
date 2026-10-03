@@ -1,15 +1,14 @@
 import { useLayoutEffect, useRef } from 'react';
-import { Home, ListChecks, Trophy, User } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSafeAreaInsets } from '../hooks/useSafeAreaInsets';
 
 // 코스(패스)가 메인. /home은 경로를 그대로 두고 라벨만 퀘스트로 바꾼다 —
 // 딥링크 allowlist와 푸시 랜딩이 /home을 쓰고 있어 경로를 바꾸면 같이 깨진다.
 const NAV_ITEMS = [
-  { path: '/course', icon: Home, label: '홈' },
-  { path: '/home', icon: ListChecks, label: '퀘스트' },
-  { path: '/league', icon: Trophy, label: '리그' },
-  { path: '/my', icon: User, label: '마이' },
+  { path: '/course', icon: '/icons/home.png', label: '홈' },
+  { path: '/home', icon: '/icons/quest.png', label: '퀘스트' },
+  { path: '/league', icon: '/icons/league.png', label: '리그' },
+  { path: '/my', icon: '/icons/my.png', label: '마이' },
 ];
 
 const NavBar = () => {
@@ -18,7 +17,7 @@ const NavBar = () => {
   const insets = useSafeAreaInsets();
   const wrapRef = useRef<HTMLDivElement>(null);
 
-  const HIDDEN_PATHS = ['/quiz', '/lesson-check', '/word-card', '/league/rules'];
+  const HIDDEN_PATHS = ['/quiz', '/lesson-check', '/word-card', '/review', '/league/rules', '/welcome'];
   const hidden = HIDDEN_PATHS.some(p => pathname.startsWith(p));
 
   // NavBar가 화면 하단에서 차지하는 높이(알약 + 하단 여백 + safe area)를 --nav-height로 공개.
@@ -40,18 +39,17 @@ const NavBar = () => {
         style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.12)' }}
       >
         {NAV_ITEMS.map((item) => {
-          const Icon = item.icon;
           const isActive = pathname === item.path;
           return (
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className="flex flex-col items-center justify-center gap-1.5 px-1.5 py-0.5 transition-all duration-[var(--dur-fast)] ease-soft"
+              className="flex flex-col items-center justify-center gap-1.5 px-1.5 py-0.5 transition-all duration-200"
             >
-              <div className={`w-12 h-8 flex items-center justify-center rounded-full transition-all duration-[var(--dur-fast)] ease-soft ${isActive ? 'bg-brand-500 text-white' : 'text-[var(--color-ink-4)]'}`}>
-                <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />
+              <div className={`w-12 h-8 flex items-center justify-center rounded-full transition-all duration-200 ${isActive ? 'bg-[var(--color-brand-soft)]' : ''}`}>
+                <img src={item.icon} alt="" aria-hidden="true" width={26} height={26} className={isActive ? '' : 'grayscale opacity-50'} />
               </div>
-              <span className={`text-[10px] leading-none font-bold ${isActive ? 'text-brand-ink' : 'text-[var(--color-ink-4)]'}`}>{item.label}</span>
+              <span className={`text-[10px] leading-none font-bold ${isActive ? 'text-brand-500' : 'text-[var(--color-ink-4)]'}`}>{item.label}</span>
             </button>
           );
         })}

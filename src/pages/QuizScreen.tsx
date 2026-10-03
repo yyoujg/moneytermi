@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Zap, Check, X, Flame, Sparkles } from 'lucide-react';
+import { Check, X, Flame } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
@@ -13,6 +13,8 @@ import { logClick } from '../lib/analytics';
 import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
 import { StreakCelebration } from '../components/StreakCelebration';
 import { Card } from '../components/ui/Card';
+import { PointIcon, XpIcon } from '../components/StatIcons';
+import { Mascot } from '../components/Mascot';
 import { buildQuizItem, pickQuizType, type QuizOption } from '../lib/quiz';
 
 const QuizScreen = () => {
@@ -116,7 +118,7 @@ const QuizScreen = () => {
       <div className="flex h-full flex-col bg-[var(--color-canvas)]">
         {/* 결과 카드 + 알림 카드 + 축하가 작은 화면에서 넘칠 수 있어 이 영역만 스크롤 */}
         <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden flex flex-col items-center justify-center-safe px-8 py-6 gap-5">
-          <div className="text-6xl anim-pop-in">🎉</div>
+          <Mascot name="great" size={130} />
           <div className="text-center anim-fade-up" style={{ '--i': 1 } as React.CSSProperties}>
             <h2 className="text-2xl font-bold text-[var(--color-ink)] mb-1!">퀴즈 완료!</h2>
             <p className="text-sm text-[var(--color-ink-4)]">{baseQueue.length}문제 완료{retryQueue.length > 0 && ` · 다시 푼 문제 ${retryQueue.length}개`}</p>
@@ -127,15 +129,15 @@ const QuizScreen = () => {
             <div className="flex justify-between items-center">
               <span className="text-sm text-[var(--color-ink-4)]">획득 포인트</span>
               <div className="flex items-center gap-1.5">
-                <Zap size={14} className="text-brand-ink fill-current" />
-                <span className="text-xl font-bold text-brand-ink">+{earnedShown}P</span>
+                <PointIcon size={16} />
+                <span className="text-xl font-bold text-brand-500">+{earnedShown}P</span>
               </div>
             </div>
             <div className="h-px bg-[var(--color-line)]" />
             <div className="flex justify-between items-center">
               <span className="text-sm text-[var(--color-ink-4)]">획득 XP</span>
               <div className="flex items-center gap-1.5">
-                <Sparkles size={14} className="text-brand-ink" />
+                <XpIcon size={16} />
                 <span className="text-xl font-bold text-[var(--color-ink)]">+{Math.max(0, xp - xpAtStart.current)}</span>
               </div>
             </div>
@@ -147,7 +149,7 @@ const QuizScreen = () => {
             <div className="h-px bg-[var(--color-line)]" />
             <div className="flex justify-between items-center">
               <span className="text-sm text-[var(--color-ink-4)]">최고 연속 정답</span>
-              <span className="flex items-center gap-1 text-xl font-bold text-[var(--color-ink)]">{maxCombo}연속<Flame size={18} className="text-brand-ink fill-current" /></span>
+              <span className="flex items-center gap-1 text-xl font-bold text-[var(--color-ink)]">{maxCombo}연속<Flame size={18} className="text-brand-500 fill-current" /></span>
             </div>
             {stageUp && (
               <>
@@ -224,64 +226,41 @@ const QuizScreen = () => {
   };
 
   // 스트릭 메시지
-  const streakMessage = combo >= 5 ? { Icon: Zap, text: `${combo}연속! x2 보너스`, color: 'text-warning-400' }
-    : combo >= 3 ? { Icon: Flame, text: `${combo}연속! +5P 보너스`, color: 'text-brand-ink' }
-    : null;
+  const streakMessage = combo >= 5 ? `${combo}연속! x2 보너스` : combo >= 3 ? `${combo}연속! +5P 보너스` : null;
+  // 쉬운 예시(데이터 앞의 '학습용 가정:' 표시는 뺀다). 없으면 뜻
+  const example = currentWord?.learningExample?.replace(/^학습용 가정:\s*/, '') || currentWord?.meaning;
+  // 오답: 고른 보기가 어떤 용어(의 뜻)인지 한 줄로 짚어 준다. 직접 만든 문제(custom)는 보기가 용어가 아니라 없음
+  const picked = status === 'wrong' && selected ? allWords.find(w => w.word === selected) : undefined;
 
   return (
     <div className="flex flex-col h-full bg-[var(--color-card)]">
-      {/* 헤더 */}
-      <div className="bg-brand-500 rounded-b-card pt-4 px-5 pb-4 flex flex-col">
-      <div className="flex justify-between items-center">
-        <span className="text-xs font-bold text-white/80">{retrying ? `다시 풀기 · 남은 ${quizQueue.length - currentQuizIndex}문제` : `${currentQuizIndex + 1} / ${baseQueue.length}`}</span>
-        {/* 획득 포인트 팝업 (보유 포인트는 상단바에 있다) */}
-        <div className="relative h-5 w-12">
-          {showPointPop && (
-            <span
-              key={totalEarned}
-              className="absolute -top-5 right-0 text-xs font-bold text-white whitespace-nowrap"
-              style={{ animation: 'fadeUp 0.7s ease forwards' }}
-            >
-              +{lastEarned}P
-            </span>
-          )}
+      {/* 헤더: 닫기 + 문제 번호 + 얇은 진행바만. 질문이 화면의 주인공이 되게 */}
+      <div className="px-5 pt-2 pb-3 flex flex-col gap-2">
+        <div className="flex items-center gap-1">
+          <button type="button" onClick={() => navigate(backPath, { replace: true })} aria-label="퀴즈 나가기"
+            className="-ml-3 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[var(--color-ink-2)]"><X size={22} /></button>
+          <span className="text-sm font-bold text-[var(--color-ink-2)]">{retrying ? `다시 풀기 · 남은 ${quizQueue.length - currentQuizIndex}문제` : `${currentQuizIndex + 1} / ${baseQueue.length}`}</span>
+          {streakMessage && <span className="ml-2 flex items-center gap-0.5 text-xs font-bold text-brand-500"><Flame size={13} className="fill-current" />{streakMessage}</span>}
+          {/* 획득 포인트 팝업 (보유 포인트는 상단바에 있다) */}
+          <div className="relative ml-auto h-5 w-12">
+            {showPointPop && (
+              <span
+                key={totalEarned}
+                className="absolute -top-1 right-0 text-xs font-bold text-brand-500 whitespace-nowrap"
+                style={{ animation: 'fadeUp 0.7s ease forwards' }}
+              >
+                +{lastEarned}P
+              </span>
+            )}
+          </div>
         </div>
-      </div>
-
-      {/* 말풍선: 연속 정답이면 스트릭, 아니면 진행 격려. 문구가 바뀔 때마다 톡 튀어나오고 평소엔 살짝 둥실거린다.
-          TDS 리셋이 여백 유틸을 덮어써서 ! 로 고정 */}
-      <div className="self-center mt-3!" style={{ animation: 'bubbleBob 2.4s ease-in-out infinite' }}>
-      <div key={streakMessage?.text ?? (retrying ? 'r' : progressPercent < 34 ? 'a' : progressPercent < 67 ? 'b' : 'c')}
-        className="relative bg-[var(--color-card)] rounded-chip px-4! py-2! shadow-sm anim-pop-in">
-        {streakMessage ? (
-          <span className={`relative flex items-center gap-1 text-xs leading-[1.4]! font-bold ${streakMessage.color}`}>
-            <streakMessage.Icon size={13} className="fill-current" />{streakMessage.text}
-          </span>
-        ) : (
-          <span className="relative block text-xs leading-[1.4]! font-bold text-brand-ink">
-            {retrying ? '틀린 문제를 다시 풀어봐요' : progressPercent < 34 ? '가볍게 시작해봐요' : progressPercent < 67 ? '벌써 절반 왔어요' : '거의 다 왔어요!'}
-          </span>
-        )}
-        <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rotate-45 bg-[var(--color-card)]" />
-      </div>
-      </div>
-
-      {/* 진행 바: 이모지 thumb + % */}
-      <div className="flex items-center gap-3 mt-5!">
-        <div className="relative flex-1 bg-white/25 rounded-full h-1.5">
-          <div className="bg-white h-full rounded-full transition-all duration-[var(--dur-slow)] ease-soft" style={{ width: `${progressPercent}%` }} />
-          <span className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 text-lg leading-none transition-all duration-[var(--dur-slow)] ease-soft" style={{ left: `${progressPercent}%` }}>🙂</span>
+        <div className="h-1.5 rounded-full bg-[var(--color-line)] overflow-hidden">
+          <div className="h-full rounded-full bg-brand-500 transition-all duration-500" style={{ width: `${progressPercent}%` }} />
         </div>
-        <span className="text-xs font-bold text-white/80 w-8 text-right">{Math.round(progressPercent)}%</span>
-      </div>
       </div>
 
       {/* 애니메이션 */}
       <style>{`
-        @keyframes bubbleBob {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-3px); }
-        }
         @keyframes fadeUp {
           0% { opacity: 1; transform: translateY(0); }
           100% { opacity: 0; transform: translateY(-16px); }
@@ -309,10 +288,9 @@ const QuizScreen = () => {
           ${status === 'correct' ? 'flash-correct' : 'bg-[var(--color-card)]'}
           ${shake ? 'shake' : ''}
         `}>
-          {/* 질문 문구는 알약 모양 말풍선(격려 문구)과 헷갈리지 않게 테두리 없는 회색 글자로 */}
           <span className="text-sm font-semibold text-[var(--color-ink-3)]">{quizItem?.promptLabel}</span>
 
-          <p className="text-xl font-bold text-[var(--color-ink)] leading-snug break-keep">{quizItem?.promptMain}</p>
+          <p className="text-[22px] font-bold text-[var(--color-ink)] leading-snug break-keep">{quizItem?.promptMain}</p>
 
           {quizItem?.promptSub && (
             <div className="bg-[var(--color-canvas)] rounded-chip px-4 py-3">
@@ -327,72 +305,72 @@ const QuizScreen = () => {
           {quizItem?.options.map((opt, i) => {
             const isSelected = selected === opt.answer;
             const isCorrectOption = opt.isCorrect;
-            let optionStyle = 'bg-[var(--color-surface)] text-[var(--color-ink-2)] active:bg-[var(--color-line)]';
-
+            // 색은 배경·테두리·아이콘에만. 보기 글자는 어떤 상태에서도 진하게 둔다
+            let optionStyle = 'bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink)] active:bg-[var(--color-surface)]';
             if (status !== 'idle') {
-              if (isCorrectOption) {
-                optionStyle = 'bg-success-500/15 text-success-400 ring-1 ring-success-500/50';
-              } else if (isSelected && !isCorrectOption) {
-                optionStyle = 'bg-danger-500/15 text-danger-400 ring-1 ring-danger-500/40';
-              } else {
-                optionStyle = 'bg-[var(--color-surface)] text-[var(--color-ink-4)] opacity-60';
-              }
+              optionStyle = isCorrectOption ? 'bg-success-500/10 border-success-500 text-[var(--color-ink)]'
+                : isSelected ? 'bg-danger-500/10 border-danger-500 text-[var(--color-ink)]'
+                : 'bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink-3)]';
             }
+            const tag = status === 'idle' ? null : isCorrectOption ? '정답' : isSelected ? '내가 고른 답' : null;
 
             return (
               <button
                 key={`${i}-${opt.answer}`}
                 onClick={() => handleSelect(opt)}
-                className={`anim-fade-up flex items-center gap-3 py-4 px-4 rounded-chip text-sm font-semibold text-left break-keep transition-all duration-150 ${optionStyle}`}
+                className={`anim-fade-up flex items-center gap-3 min-h-14 py-3.5 px-4 rounded-chip border text-base font-semibold text-left break-keep transition-colors duration-150 ${optionStyle}`}
                 style={{ '--i': i + 1 } as React.CSSProperties}
               >
                 {status !== 'idle' && isCorrectOption ? (
-                  <span className="w-5 h-5 shrink-0 flex items-center justify-center bg-success-500 text-white" style={{ borderRadius: 9999 }}><Check size={12} strokeWidth={3} /></span>
+                  <span className="w-6 h-6 shrink-0 flex items-center justify-center bg-success-500 text-white" style={{ borderRadius: 9999 }}><Check size={14} strokeWidth={3} /></span>
                 ) : status !== 'idle' && isSelected ? (
-                  <span className="w-5 h-5 shrink-0 flex items-center justify-center bg-danger-500 text-white" style={{ borderRadius: 9999 }}><X size={12} strokeWidth={3} /></span>
+                  <span className="w-6 h-6 shrink-0 flex items-center justify-center bg-danger-500 text-white" style={{ borderRadius: 9999 }}><X size={14} strokeWidth={3} /></span>
                 ) : (
-                  <span className="w-5 h-5 shrink-0 flex items-center justify-center bg-[var(--color-line)] text-[var(--color-card)]" style={{ borderRadius: 9999 }}><Check size={12} strokeWidth={3} /></span>
+                  <span className="w-6 h-6 shrink-0 flex items-center justify-center border border-[var(--color-line-strong)] text-xs font-bold text-[var(--color-ink-3)]" style={{ borderRadius: 9999 }}>{i + 1}</span>
                 )}
-                {opt.label}
+                <span className="min-w-0 flex-1">{opt.label}</span>
+                {tag && <span className={`shrink-0 text-xs font-bold ${isCorrectOption ? 'text-success-500' : 'text-danger-500'}`}>{tag}</span>}
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* 답을 고른 뒤: 결과 + 단어 뜻 + 계속하기 (듀오링고식) */}
+      {/* 답을 고른 뒤: 판정은 아이콘·제목 색으로만, 공간은 이해(예시·헷갈린 지점)에. 다음 버튼은 판정과 무관하게 같은 모양 */}
       {status !== 'idle' && (
-        <div
-          key={currentQuizIndex}
-          className={`anim-slide-up px-5 pt-4 pb-8 flex flex-col gap-3 border-t ${status === 'correct' ? 'bg-success-500/15 border-success-500/20' : 'bg-danger-500/15 border-danger-500/20'}`}
-        >
+        <div key={currentQuizIndex} className="anim-slide-up px-5 pt-4 pb-8 flex flex-col gap-3 border-t border-[var(--color-line)] bg-[var(--color-card)]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className={`w-7 h-7 flex items-center justify-center text-white ${status === 'correct' ? 'bg-success-500' : 'bg-danger-500'}`} style={{ borderRadius: 9999 }}>
                 {status === 'correct' ? <Check size={16} strokeWidth={3} /> : <X size={16} strokeWidth={3} />}
               </span>
-              <p className={`text-lg font-black ${status === 'correct' ? 'text-success-400' : 'text-danger-400'}`}>
-                {status === 'correct' ? '좋아요!' : '아쉬워요'}
+              <p className={`text-lg font-black ${status === 'correct' ? 'text-success-500' : 'text-danger-500'}`}>
+                {status === 'correct' ? '좋아요!' : `정답은 ${currentWord.word}`}
               </p>
             </div>
             {status === 'correct' && (
-              <span className="flex items-center gap-1.5 text-xs font-bold text-success-400">
-                {capped ? <span className="text-[var(--color-ink-4)]">오늘 보상 한도 도달</span> : lastEarned > 0 ? `+${lastEarned}P` : null}
-                {combo >= 3 && <span className="flex items-center gap-0.5 text-brand-ink"><Flame size={12} className="fill-current" />{combo}연속</span>}
+              <span className="flex items-center gap-1.5 text-xs font-bold text-brand-500">
+                {capped ? <span className="text-[var(--color-ink-3)]">오늘 보상 한도 도달</span> : lastEarned > 0 ? `+${lastEarned}P` : null}
+                {combo >= 3 && <span className="flex items-center gap-0.5"><Flame size={12} className="fill-current" />{combo}연속</span>}
               </span>
             )}
           </div>
-          <div>
-            <p className={`text-xs font-bold mb-1! ${status === 'correct' ? 'text-success-400' : 'text-danger-400'}`}>
-              {status === 'correct' ? (quizItem?.explanation ? '해설' : '의미') : `정답: ${quizItem?.type === 'custom' ? quizItem.options.find(opt => opt.isCorrect)?.label : currentWord.word}`}
-            </p>
-            <p className="text-sm font-medium text-[var(--color-ink)] leading-relaxed break-keep">{quizItem?.explanation ?? currentWord.meaning}</p>
-          </div>
+          {status === 'correct' ? (
+            <div>
+              <p className="text-xs font-bold text-[var(--color-ink-3)] mb-1!">예를 들면</p>
+              <p className="text-[15px] text-[var(--color-ink)] leading-relaxed break-keep">{example}</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <p className="text-[15px] text-[var(--color-ink)] leading-relaxed break-keep"><span className="font-bold">{currentWord.word}</span>: {currentWord.meaning}</p>
+              {picked && <p className="text-sm text-[var(--color-ink-3)] leading-relaxed break-keep">고른 답 <span className="font-semibold text-[var(--color-ink-2)]">{picked.word}</span>: {picked.meaning}</p>}
+            </div>
+          )}
           <button
             onClick={goNextQuestion}
-            className={`w-full py-4 rounded-button text-sm font-bold text-white active:opacity-90 ${status === 'correct' ? 'bg-success-500' : 'bg-danger-500'}`}
+            className="w-full min-h-[52px] rounded-button text-base font-bold text-white bg-brand-500 active:opacity-90"
           >
-            {currentQuizIndex === quizQueue.length - 1 ? '결과 보기' : '계속하기'}
+            {currentQuizIndex === quizQueue.length - 1 ? '결과 보기' : '다음 문제'}
           </button>
         </div>
       )}

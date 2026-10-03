@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronRight, Lightbulb, Zap, Flame } from 'lucide-react';
+import { ChevronRight, Lightbulb, Flame, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Spacing } from '@toss/tds-mobile';
 import type { Word } from '../types';
@@ -13,6 +13,8 @@ import { useSettings } from '../hooks/useSettings';
 import { Card } from '../components/ui/Card';
 import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
 import { StreakCelebration } from '../components/StreakCelebration';
+import { PointIcon } from '../components/StatIcons';
+import { Mascot } from '../components/Mascot';
 
 type Status = 'idle' | 'correct' | 'wrong';
 
@@ -113,10 +115,10 @@ const QuizPage = () => {
     // 아직 배운 단어가 없으면 '완료'가 아니라 '시작 전'이다
     const nothingLearned = knownWords.length === 0;
     return (
-      <div className="flex flex-col h-full bg-[var(--color-canvas)] items-center justify-center p-6 pb-nav">
-        <div className="w-20 h-20 bg-brand-500/10 rounded-full flex items-center justify-center text-4xl mb-4">{nothingLearned ? '📖' : '✅'}</div>
+      <div className="flex flex-col h-full bg-[var(--color-canvas)] items-center justify-center p-6">
+        <div className="mb-5"><Mascot name="empty" size={110} /></div>
         <h2 className="text-xl font-bold text-[var(--color-ink)] mb-2!">{nothingLearned ? '복습할 단어가 아직 없어요' : '오늘 복습 완료'}</h2>
-        <p className="text-sm text-[var(--color-ink-3)] mb-16! text-center break-keep">
+        <p className="text-[15px] text-[var(--color-ink-3)] mb-16! text-center break-keep">
           {nothingLearned ? '단어를 배우면 다음 날부터 복습이 열려요' : '지금 복습할 단어가 없어요'}
         </p>
         <button
@@ -131,12 +133,12 @@ const QuizPage = () => {
 
   if (isFinished) {
     return (
-      <div className="flex flex-col h-full bg-[var(--color-canvas)] items-center justify-center-safe p-6 pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
-        <div className="w-20 h-20 bg-brand-500/10 rounded-full flex items-center justify-center text-4xl mb-4">🏆</div>
+      <div className="flex flex-col h-full bg-[var(--color-canvas)] items-center justify-center-safe p-6 overflow-y-auto [&::-webkit-scrollbar]:hidden">
+        <div className="mb-5"><Mascot name="crown" size={130} /></div>
         <h2 className="text-xl font-bold text-[var(--color-ink)] mb-1!">오늘 복습 완료!</h2>
         <p className="text-sm text-[var(--color-ink-3)] mb-6!">{queue.length}문제 중 {totalCorrect}개 정답</p>
         <div className="flex items-center gap-2 bg-brand-500/10 border border-brand-500/20 rounded-card px-5 py-3 mb-8">
-          <Zap size={16} className="text-brand-ink fill-current" />
+          <PointIcon size={16} />
           <span className="text-sm font-bold text-[var(--color-ink)]">누적 포인트 {points} P</span>
         </div>
         <div className="w-full max-w-sm mb-8">
@@ -159,24 +161,17 @@ const QuizPage = () => {
   const progress = (index / queue.length) * 100;
 
   return (
-    <div className="flex flex-col h-full bg-[var(--color-canvas)] pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
-      {/* 헤더 */}
-      <div className="bg-brand-500 rounded-b-card pt-4 px-5 pb-5">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-white">복습</h2>
-          {/* 보유 포인트는 상단바에 있다 */}
-          {combo >= 2 && (
-            <div className="flex items-center gap-0.5 bg-white text-brand-500 text-2xs font-bold px-2.5 py-1 rounded-full">
-              <Flame size={11} className="fill-current" />{combo}연속
-            </div>
-          )}
+    <div className="flex flex-col h-full bg-[var(--color-canvas)] overflow-y-auto [&::-webkit-scrollbar]:hidden">
+      {/* 헤더: 퀴즈와 같은 학습 화면 규칙(닫기 + 문제 번호 + 얇은 진행바) */}
+      <div className="px-5 pt-2 pb-3 flex flex-col gap-2">
+        <div className="flex items-center gap-1">
+          <button type="button" onClick={() => navigate('/home', { replace: true })} aria-label="복습 나가기"
+            className="-ml-3 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[var(--color-ink-2)]"><X size={22} /></button>
+          <span className="text-sm font-bold text-[var(--color-ink-2)]">복습 {index + 1} / {queue.length}</span>
+          {combo >= 2 && <span className="ml-2 flex items-center gap-0.5 text-xs font-bold text-brand-500"><Flame size={13} className="fill-current" />{combo}연속</span>}
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative flex-1 bg-white/25 rounded-full h-1.5">
-            <div className="bg-white h-full rounded-full transition-all duration-[var(--dur-slow)] ease-soft" style={{ width: `${progress}%` }} />
-            <span className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 text-base leading-none transition-all duration-[var(--dur-slow)] ease-soft" style={{ left: `${progress}%` }}>🙂</span>
-          </div>
-          <span className="text-xs font-bold text-white/80 shrink-0">{index + 1} / {queue.length}</span>
+        <div className="h-1.5 rounded-full bg-[var(--color-line)] overflow-hidden">
+          <div className="h-full rounded-full bg-brand-500 transition-all duration-300" style={{ width: `${progress}%` }} />
         </div>
       </div>
 
@@ -215,7 +210,7 @@ const QuizPage = () => {
                   status === 'wrong' ? 'bg-danger-500/10 border-danger-500/40 text-danger-400' :
                   'bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink)] focus:border-brand-500/50'}
               `}
-            style={{ caretColor: 'var(--color-brand-ink)' }}
+              style={{ caretColor: 'var(--color-brand-500)' }}
             />
             {status === 'correct' && (
               <p className="text-xs font-bold text-success-400 mt-1.5! px-1">정답!{capped ? ' 오늘 보상 한도에 도달했어요' : lastEarned > 0 ? ` +${lastEarned}P` : ''}</p>

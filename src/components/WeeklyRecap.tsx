@@ -22,7 +22,7 @@ export const WeeklyRecap = ({ snap, onClose }: { snap: WeekSnapshot; onClose: ()
 
   const s = slides[i];
   return (
-    <div className="fixed inset-0 z-[1500] flex flex-col bg-brand-500 text-white anim-fade" onClick={() => !last && setI(n => n + 1)}>
+    <div className="original-modal fixed inset-0 z-[1500] flex flex-col bg-brand-500 text-[var(--color-on-brand)] anim-fade" onClick={() => !last && setI(n => n + 1)}>
       {/* 장 진행 막대 */}
       <div className="flex gap-1 px-4 pt-4">
         {[...slides, null].map((_, k) => (
@@ -38,25 +38,25 @@ export const WeeklyRecap = ({ snap, onClose }: { snap: WeekSnapshot; onClose: ()
         ))}
       </div>
       {/* 앱 자체 닫기·뒤로 아이콘은 검수 반려 사유라 글자 버튼으로 둔다 */}
-      <button type="button" onClick={e => { e.stopPropagation(); onClose(); }} className="self-end m-3 px-2 py-1 text-xs font-bold text-white/80 active:opacity-60">
+      <button type="button" onClick={e => { e.stopPropagation(); onClose(); }} className="self-end m-3 px-2 py-1 text-xs font-bold text-[var(--color-on-brand)] active:opacity-60">
         건너뛰기
       </button>
 
       <div key={i} className="flex-1 flex flex-col items-center justify-center px-8 text-center">
         {!last ? (
           <>
-            <p className="text-base font-bold text-white/80 anim-fade-up">{s.label}</p>
+            <p className="text-base font-bold anim-fade-up">{s.label}</p>
             <p className="mt-3! text-6xl font-black anim-pop-in" style={{ '--i': 2 } as React.CSSProperties}>
               <RollingNumber value={s.value} /><span className="text-3xl ml-1">{s.unit}</span>
             </p>
-            <p className="mt-5! text-sm font-semibold text-white/90 anim-fade-up" style={{ '--i': 6 } as React.CSSProperties}>{s.note}</p>
+            <p className="mt-5! text-sm font-semibold anim-fade-up" style={{ '--i': 6 } as React.CSSProperties}>{s.note}</p>
           </>
         ) : (
           <>
             <p className="text-2xl font-black anim-pop-in">새로운 한 주가 시작됐어요</p>
-            <p className="mt-3! text-sm text-white/85 anim-fade-up" style={{ '--i': 3 } as React.CSSProperties}>리그가 초기화됐어요. 이번 주도 함께 올라가 봐요.</p>
+            <p className="mt-3! text-sm anim-fade-up" style={{ '--i': 3 } as React.CSSProperties}>리그가 초기화됐어요. 이번 주도 함께 올라가 봐요.</p>
             <button type="button" onClick={e => { e.stopPropagation(); onClose(); }}
-              className="mt-8! w-full py-4 rounded-button bg-white text-brand-500 text-sm font-bold active:opacity-90 anim-fade-up" style={{ '--i': 6 } as React.CSSProperties}>
+              className="mt-8! w-full py-4 rounded-button bg-white text-[var(--color-brand-deep)] text-sm font-bold active:opacity-90 anim-fade-up" style={{ '--i': 6 } as React.CSSProperties}>
               이번 주 시작하기
             </button>
           </>

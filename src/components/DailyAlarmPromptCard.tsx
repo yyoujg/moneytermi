@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Bell } from 'lucide-react';
 import { Storage } from '../lib/storage';
 import { logClick } from '../lib/analytics';
 import { useNotificationAgreement } from '../hooks/useNotificationAgreement';
@@ -34,7 +33,7 @@ export const DailyAlarmPromptCard = () => {
     <Card pad="lg" className="w-full flex flex-col gap-3 anim-fade-up">
       <div className="flex items-center gap-3">
         <IconBox className="rounded-chip bg-brand-500/10">
-          <Bell size={16} className="text-brand-ink" />
+          <img src="/icons/bell.png" alt="" aria-hidden="true" width={20} height={20} />
         </IconBox>
         <div>
           <p className="text-sm font-semibold text-[var(--color-ink)]">매일 오늘의 용어 받기</p>
@@ -44,7 +43,7 @@ export const DailyAlarmPromptCard = () => {
       <div className="flex gap-2">
         <button
           onClick={() => { logClick('notification_prompt_later'); setShow(false); }}
-          className="flex-1 py-3 rounded-button text-sm font-bold text-[var(--color-ink-2)] bg-[var(--color-surface)] active:opacity-90"
+          className="flex-1 py-3 rounded-button text-sm font-bold text-[var(--color-ink-2)] bg-[var(--color-button-secondary)] active:opacity-90"
         >
           나중에
         </button>

@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { GROWTH_STAGES, getGrowthStage } from './constants';
 
 describe('getGrowthStage', () => {
-  it('0XP는 브론즈(1단계)', () => {
-    expect(getGrowthStage(0).name).toBe('브론즈');
+  it('0XP는 루키(1단계)', () => {
+    expect(getGrowthStage(0).name).toBe('루키');
   });
 
   it('경계값은 다음 단계 포함', () => {
@@ -12,7 +12,7 @@ describe('getGrowthStage', () => {
   });
 
   it('최고 단계는 nextMinPoints가 null', () => {
-    expect(getGrowthStage(800).name).toBe('다이아');
+    expect(getGrowthStage(800).name).toBe('레전드');
     expect(getGrowthStage(800).nextMinPoints).toBeNull();
     expect(getGrowthStage(999999).nextMinPoints).toBeNull();
   });

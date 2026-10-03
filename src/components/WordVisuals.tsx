@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { BarChart3 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { BarChart3, ArrowDown } from 'lucide-react';
 import type { WordVisual } from '../types';
 import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
 import { Card } from './ui/Card';
@@ -12,23 +12,7 @@ const PAD = { l: 34, r: 8, t: 10, b: 22 };
 
 const fmt = (v: number) => (Math.abs(v) >= 100 ? Math.round(v).toLocaleString('ko-KR') : String(Math.round(v * 100) / 100));
 
-// 화면에 60% 이상 들어왔을 때 한 번 true(하단 버튼 뒤에 걸친 상태는 제외). 아래쪽 그래프가 스크롤해 보일 때 그려지게 한다
-const useInView = <T extends Element>() => {
-  const ref = useRef<T>(null);
-  const [seen, setSeen] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || seen) return;
-    if (!('IntersectionObserver' in window)) { setSeen(true); return; }
-    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setSeen(true); io.disconnect(); } }, { threshold: 0.6 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, [seen]);
-  return [ref, seen] as const;
-};
-
 const LineChart = ({ x, series, unit }: { x: string[]; series: { name: string; values: number[] }[]; unit?: string }) => {
-  const [ref, seen] = useInView<SVGSVGElement>();
   const all = series.flatMap(s => s.values);
   const min = Math.min(...all);
   const max = Math.max(...all);
@@ -41,7 +25,7 @@ const LineChart = ({ x, series, unit }: { x: string[]; series: { name: string; v
 
   return (
     <div className="flex flex-col gap-2">
-      <svg ref={ref} viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img">
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img">
         {[max, (max + min) / 2, min].map((v, i) => (
           <g key={i}>
             <line x1={PAD.l} x2={W - PAD.r} y1={py(v)} y2={py(v)} stroke="var(--color-line)" strokeDasharray="3 3" />
@@ -53,20 +37,15 @@ const LineChart = ({ x, series, unit }: { x: string[]; series: { name: string; v
         ))}
         {series.map((s, si) => (
           <g key={s.name}>
-            {/* 선이 왼쪽부터 그려지고, 다 그려질 즈음 끝점이 톡 튀어나온다 */}
             <polyline
               points={s.values.map((v, i) => `${px(i)},${py(v)}`).join(' ')}
-              pathLength={1}
-              className={seen ? 'anim-draw' : 'opacity-0'}
-              style={{ '--i': si } as React.CSSProperties}
               fill="none"
               stroke={COLORS[si % COLORS.length]}
               strokeWidth="2.5"
               strokeLinejoin="round"
               strokeLinecap="round"
             />
-            <circle cx={px(s.values.length - 1)} cy={py(s.values[s.values.length - 1])} r="3.5" fill={COLORS[si % COLORS.length]}
-              className={seen ? 'anim-pop-in' : 'opacity-0'} style={{ '--i': 14 + si * 3, transformBox: 'fill-box', transformOrigin: 'center' } as React.CSSProperties} />
+            <circle cx={px(s.values.length - 1)} cy={py(s.values[s.values.length - 1])} r="3.5" fill={COLORS[si % COLORS.length]} />
           </g>
         ))}
       </svg>
@@ -88,7 +67,7 @@ const Table = ({ columns, rows }: { columns: string[]; rows: string[][] }) => (
       <thead>
         <tr>
           {columns.map((c, i) => (
-            <th key={i} className={`py-2 px-2 text-left font-bold break-keep ${i === 0 ? 'text-[var(--color-ink-4)]' : 'text-brand-ink'} bg-[var(--color-surface)] first:rounded-l-md last:rounded-r-md`}>{c}</th>
+            <th key={i} className={`py-2 px-2 text-left font-bold break-keep ${i === 0 ? 'text-[var(--color-ink-4)]' : 'text-brand-500'} bg-[var(--color-surface)] first:rounded-l-md last:rounded-r-md`}>{c}</th>
           ))}
         </tr>
       </thead>
@@ -109,14 +88,6 @@ const Table = ({ columns, rows }: { columns: string[]; rows: string[][] }) => (
 // 원인 -> 결과 사슬을 직접 맞혀 보며 배운다. 첫 칸(원인)만 보여 주고, 다음 칸이 오를지(↑) 내릴지(↓) 고르면 정답을 펼친다.
 // 화살표가 하나뿐인 칸만 문제로 내고, 화살표가 없거나 여러 개인 칸은 '다음 보기'로 펼친다. 다 펼치면 설명(caption)이 나온다.
 const ARROW = /[↑↓]/g;
-// 칸 사이 화살표. 새로 펼쳐질 때 세로선 → 화살촉 순서로 그려진다
-const FlowArrow = ({ draw }: { draw: boolean }) => (
-  <svg width="14" height="18" viewBox="0 0 14 18" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="text-brand-ink" aria-hidden="true">
-    <path d="M7 1.5v13" pathLength={1} className={draw ? 'anim-draw' : ''} />
-    <path d="M2.5 10.5 7 15l4.5-4.5" pathLength={1} className={draw ? 'anim-draw' : ''} style={{ '--i': 1 } as React.CSSProperties} />
-  </svg>
-);
-
 const Flow = ({ steps, caption }: { steps: string[]; caption?: string }) => {
   const [shown, setShown] = useState(1);   // 펼쳐진 칸 수
   const [picked, setPicked] = useState<Record<number, '↑' | '↓'>>({});
@@ -137,35 +108,30 @@ const Flow = ({ steps, caption }: { steps: string[]; caption?: string }) => {
         const mine = picked[i];
         const right = mine == null || s.includes(mine);
         return (
-          <div key={i} className="w-full flex flex-col items-center gap-1">
-            {i > 0 && <FlowArrow draw />}
-            {/* 화살표가 그려진 뒤 칸이 떨어지고, 답을 골랐던 칸이면 이어서 정답 빛 / 오답 흔들림. 다 풀면 사슬 전체에 빛이 한 번 흐른다 */}
-            <div className={`w-full rounded-chip ${i === 0 ? '' : 'anim-drop'}`} style={{ '--d': i === 0 ? '0s' : '0.25s' } as React.CSSProperties}>
-              <p key={done ? 'done' : 'run'}
-                className={`w-full py-2.5 px-3 rounded-chip text-center text-[13px] font-semibold break-keep ${mine == null ? 'bg-[var(--color-surface)] text-[var(--color-ink-2)]' : right ? 'bg-success-500/10 text-success-500' : 'bg-danger-500/10 text-danger-500'} ${done ? 'anim-sweep' : mine == null ? '' : right ? 'anim-glow-ok' : 'anim-shake'}`}
-                style={{ '--d': '0.6s', '--i': i } as React.CSSProperties}>
-                {s}{mine != null && (right ? ' · 정답' : ` · 내 답 ${mine}`)}
-              </p>
-            </div>
+          <div key={i} className="w-full flex flex-col items-center gap-1 anim-fade-up">
+            {i > 0 && <ArrowDown size={14} className="text-brand-500" />}
+            <p className={`w-full py-2.5 px-3 rounded-chip text-center text-[13px] font-semibold break-keep ${mine == null ? 'bg-[var(--color-surface)] text-[var(--color-ink-2)]' : right ? 'bg-success-500/10 text-success-500' : 'bg-danger-500/10 text-danger-500'}`}>
+              {s}{mine != null && (right ? ' · 정답' : ` · 내 답 ${mine}`)}
+            </p>
           </div>
         );
       })}
 
       {!done && (
-        <div key={shown} className="w-full flex flex-col items-center gap-1 anim-fade">
-          <FlowArrow draw={false} />
+        <div className="w-full flex flex-col items-center gap-1">
+          <ArrowDown size={14} className="text-brand-500" />
           {quiz ? (
             <>
               <p className="w-full py-2.5 px-3 rounded-chip border border-dashed border-brand-500/50 text-center text-[13px] font-semibold text-[var(--color-ink-2)] break-keep">
                 {next.replace(ARROW, '?')}
               </p>
               <div className="w-full grid grid-cols-2 gap-2 mt-1">
-                <button type="button" onClick={() => pick('↑')} className="py-2.5 rounded-button bg-brand-500/10 text-sm font-bold text-brand-ink active:opacity-70">↑ 오른다</button>
-                <button type="button" onClick={() => pick('↓')} className="py-2.5 rounded-button bg-brand-500/10 text-sm font-bold text-brand-ink active:opacity-70">↓ 내린다</button>
+                <button type="button" onClick={() => pick('↑')} className="py-2.5 rounded-button bg-brand-500/10 text-sm font-bold text-brand-500 active:opacity-70">↑ 오른다</button>
+                <button type="button" onClick={() => pick('↓')} className="py-2.5 rounded-button bg-brand-500/10 text-sm font-bold text-brand-500 active:opacity-70">↓ 내린다</button>
               </div>
             </>
           ) : (
-            <button type="button" onClick={() => setShown(n => n + 1)} className="w-full py-2.5 rounded-chip border border-dashed border-brand-500/50 text-[13px] font-bold text-brand-ink active:opacity-70">
+            <button type="button" onClick={() => setShown(n => n + 1)} className="w-full py-2.5 rounded-chip border border-dashed border-brand-500/50 text-[13px] font-bold text-brand-500 active:opacity-70">
               다음은 무엇일까요? 눌러서 보기
             </button>
           )}
@@ -281,7 +247,7 @@ const LinkedText = ({ text, terms }: { text: string; terms?: Terms }) => {
         seen.add(name);
         return (
           <button key={i} type="button" onClick={() => setOpen(o => (o === name ? null : name))}
-            className={`inline px-1! py-0.5! rounded-md text-brand-ink font-medium active:opacity-60 ${open === name ? 'bg-brand-500/20' : 'bg-[var(--color-brand-cream)]'}`}>
+            className={`inline px-1! py-0.5! rounded-md text-brand-500 font-medium active:opacity-60 ${open === name ? 'bg-brand-200' : 'bg-[var(--color-brand-cream)]'}`}>
             {part}
           </button>
         );
@@ -338,6 +304,7 @@ const FlowCarousel = ({ flows }: { flows: Extract<WordVisual, { type: 'flow' }>[
 };
 
 export const WordVisuals = ({ visuals, terms }: { visuals: WordVisual[]; terms?: Terms }) => {
+  // quiz는 출시 이후 생긴 이해 확인 문제라 카드로 그리지 않는다
   const list = visuals.filter((v): v is Exclude<WordVisual, { type: 'quiz' }> => v.type !== 'quiz' && (v.type !== 'ecos' || !ecosDown));
   const flows = list.filter((v): v is Extract<WordVisual, { type: 'flow' }> => v.type === 'flow');
   const firstFlow = list.findIndex(v => v.type === 'flow');

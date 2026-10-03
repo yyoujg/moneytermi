@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+:where(*, *::before, *::after) {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+}
+
 /* 하단 NavBar에 가려지지 않도록 화면 최하단 스크롤 컨테이너에 주는 여백.
    --nav-height는 NavBar가 실측해 주입(알약 + 24px 여백 + safe area bottom).
    +15px는 기존 홈 화면 기준선(pb-32 = 128px = 113 + 15)을 그대로 유지하기 위한 값.
@@ -22,11 +32,11 @@
    순차: stagger 한 칸씩 지연 */
 :root {
   --dur-fast: 180ms;
-  --dur-base: 320ms;
-  --dur-slow: 500ms;
+  --dur-base: 240ms;
+  --dur-slow: 360ms;
   --dur-emph: 700ms;
   --dur-draw: 900ms;
-  --stagger: 60ms;
+  --stagger: 30ms;
 }
 
 /* 브랜드/시맨틱 색 토큰 — 라이트/다크 공통(브랜드 색은 양 테마 유지) */
@@ -34,24 +44,24 @@
   /* 곡선은 @theme에 둬 Tailwind ease-soft / ease-spring 유틸도 함께 생긴다 */
   --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --color-brand-200: #f8d5bd;
-  --color-brand-300: #f3b58f;
-  --color-brand-400: #dc7540;
-  --color-brand-500: #c4511a;
-  --color-brand-600: #a94013;
-  --color-brand-deep: #a94013;
-  --color-brand-ink: #b14414;
-  --color-success-400: #146c55;
-  --color-success-500: #147a5b;
-  --color-danger-300: #e9a9b0;
-  --color-danger-400: #b9374b;
-  --color-danger-500: #bf4151;
+  --color-brand-200: #fed7aa;
+  --color-brand-300: #fdba74;
+  --color-brand-400: #fb923c;
+  --color-brand-500: #f97316;
+  --color-brand-600: #ea580c;
+  --color-brand-deep: #fa4809;
+  --color-brand-ink: #f97316;
+  --color-success-400: #38d9a9;
+  --color-success-500: #12b886;
+  --color-danger-300: #f7a1ad;
+  --color-danger-400: #f06a7e;
+  --color-danger-500: #e8475f;
   --color-warning-400: #926116;
   --text-2xs: 11px;
   --text-3xs: 10px;
   --text-4xs: 9px;
-  --radius-card: 16px;
-  --radius-button: 16px;
+  --radius-card: 20px;
+  --radius-button: 14px;
   --radius-chip: 12px;
 }
 
@@ -61,6 +71,19 @@
 button.rounded-button { border-radius: var(--radius-button) !important; }
 button.rounded-chip { border-radius: var(--radius-chip) !important; }
 button.rounded-card { border-radius: var(--radius-card) !important; }
+
+/* 같은 TDS 리셋(unlayered)이 margin(button/input/p/h1~h6/ul/ol/label), button의 radius·overflow,
+   label의 display를 덮어 Tailwind 유틸(mt-*, rounded-full, overflow-hidden 등)이 무시된다.
+   revert-layer로 Tailwind 레이어 값(유틸 또는 preflight)으로 돌린다. body 접두는 TDS 선택자보다 높은 우선순위용.
+   ponytail: revert-layer 미지원 WebView(iOS 16.4 미만)에선 선언이 무시돼 지금처럼 TDS 값이 남는다 */
+body :is(button, input, select, textarea, p, h1, h2, h3, h4, h5, h6, ul, ol, label) { margin: revert-layer; }
+body button { border-radius: revert-layer; overflow: revert-layer; }
+body label { display: revert-layer; }
+/* TDS Switch는 켜진 색을 #3182f6(파랑)으로 인라인 고정하고 색 옵션이 없다. 켜진 상태만 브랜드색으로.
+   배경은 모션이 파랑에서 출발해 끌 때 파랗게 번지므로, 모션 대신 변수값으로 바로 칠한다(손잡이 이동은 그대로) */
+.tds-mobile-switch { background-color: var(--switch-background-color) !important; }
+.tds-mobile-switch[style*="#3182f6"] { --switch-background-color: var(--color-brand-500) !important; --switch-pressed-background-color: var(--color-brand-600) !important; }
+button.bg-brand-500 { color: #fff; }
 
 /* 같은 리셋이 button/input/select/textarea의 font-size·line-height도
    inherit로 강제한다. 실제 쓰는 text-* 사이즈 토큰마다 되돌린다. */
@@ -75,39 +98,35 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
 
 /* ── 공용 모션 ──
    .anim-fade-up  : 아래에서 떠오르며 등장. --i 로 순차 지연(--stagger 단위)
-   .anim-pop-in   : 튀어나오듯 등장. --i 로 순차 지연(--stagger 단위)
+   .anim-pop-in   : 살짝 커지며 등장. --i 로 순차 지연(--stagger 단위)
    .anim-slide-in : 오른쪽에서 밀려 들어옴(화면 전환·카드 교체)
    .anim-bump     : 값이 바뀔 때 한 번 커졌다 돌아옴(key를 바꿔 재생)
-   .anim-attn     : 눌러야 할 버튼의 잔잔한 파동
    .anim-draw     : SVG 선이 처음부터 끝까지 그려짐(pathLength="1"과 함께). --i 로 선마다 지연(--stagger x 2.5)
    .anim-drop     : 위에서 떨어져 살짝 튕기며 자리 잡음. --d 로 지연
    .anim-glow-ok / .anim-shake : 정답 초록 빛 한 번 / 오답 좌우 흔들림. --d 로 지연
    .anim-stamp    : 완료 도장. 크게 떨어져 찍히듯 자리 잡음. --d 로 지연
    .anim-gate-l / .anim-gate-r : 레벨 관문 문짝이 좌우로 열림. --d 로 지연
-   .anim-shine    : 흰 빛줄기가 한 번 훑고 지나감(배지). --i 로 순차
    .anim-flip     : 세로축으로 한 바퀴(배지 탭)
    .anim-flicker  : 불꽃이 바닥을 축으로 살랑임(무한, 연속 학습 아이콘)
    .anim-sweep    : 테두리 빛이 한 번 지나감. 화살표·칸이 자리 잡은 뒤(--dur-draw) --i 로 순차(--stagger x 1.5) */
-@keyframes fade-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
-@keyframes pop-in { 0% { opacity: 0; transform: scale(0.6); } 70% { transform: scale(1.08); } 100% { opacity: 1; transform: scale(1); } }
-@keyframes slide-in { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: none; } }
-@keyframes slide-up { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+@keyframes fade-up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes pop-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes slide-in { from { opacity: 0; transform: translateX(8px); } to { opacity: 1; transform: none; } }
+@keyframes slide-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 @keyframes drop { 0% { opacity: 0; transform: translateY(-14px) scale(0.96); } 60% { opacity: 1; transform: translateY(3px) scale(1.01); } 100% { opacity: 1; transform: none; } }
-@keyframes glow-ok { 0%, 100% { box-shadow: 0 0 0 0 rgba(20, 122, 91, 0); } 40% { box-shadow: 0 0 0 4px rgba(20, 122, 91, 0.35); } }
+@keyframes glow-ok { 0%, 100% { opacity: 1; } 40% { opacity: 0.7; } }
 @keyframes shake { 0%, 100% { transform: none; } 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
-@keyframes sweep { 0%, 100% { box-shadow: 0 0 0 0 rgba(196, 81, 26, 0); } 45% { box-shadow: 0 0 0 3px rgba(196, 81, 26, 0.45); } }
+@keyframes sweep { 0%, 100% { transform: scale(1); } 45% { transform: scale(1.02); } }
 @keyframes stamp { 0% { opacity: 0; transform: scale(1.6) rotate(-12deg); } 55% { opacity: 1; transform: scale(0.9) rotate(3deg); } 100% { opacity: 1; transform: none; } }
 @keyframes gate-l { from { transform: none; } to { transform: translateX(-102%); } }
 @keyframes gate-r { from { transform: none; } to { transform: translateX(102%); } }
-@keyframes shine { from { background-position: 150% 0; } to { background-position: -50% 0; } }
 @keyframes flip { from { transform: perspective(300px) rotateY(0); } to { transform: perspective(300px) rotateY(360deg); } }
 @keyframes flicker { 0%, 100% { transform: scale(1, 1) rotate(0); } 30% { transform: scale(0.96, 1.07) rotate(-2deg); } 60% { transform: scale(1.03, 0.96) rotate(1.5deg); } }
 @keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.3); } 100% { transform: scale(1); } }
-@keyframes attn { 0%, 100% { box-shadow: 0 0 0 0 rgba(196, 81, 26, 0.55); } 70% { box-shadow: 0 0 0 9px rgba(196, 81, 26, 0); } }
 .anim-fade-up  { animation: fade-up var(--dur-base) var(--ease-soft) both; animation-delay: calc(var(--i, 0) * var(--stagger)); }
-.anim-pop-in   { animation: pop-in var(--dur-slow) var(--ease-spring) both; animation-delay: calc(var(--i, 0) * var(--stagger)); }
+.anim-pop-in   { animation: pop-in var(--dur-base) var(--ease-soft) both; animation-delay: calc(var(--i, 0) * var(--stagger)); }
 .anim-slide-in { animation: slide-in var(--dur-base) var(--ease-soft) both; }
 .anim-slide-up { animation: slide-up var(--dur-base) var(--ease-soft) both; }
 /* 화면 전환: opacity만. transform을 걸면 화면 전체(패스 노드 수백 개 포함)가 레이어로 올라가 기기에서 버벅인다.
@@ -115,18 +134,23 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
    안쪽의 fixed 오버레이(축하 화면)가 바깥 NavBar/TopBar에 가려진다. */
 .anim-fade { animation: fade var(--dur-fast) ease-out; }
 .anim-bump     { display: inline-block; animation: bump var(--dur-base) ease-out; }
-.anim-attn     { animation: attn 1.4s ease-out infinite; }
 .anim-drop     { animation: drop var(--dur-slow) var(--ease-soft) both; animation-delay: var(--d, 0s); }
 .anim-glow-ok  { animation: glow-ok var(--dur-emph) ease-out both; animation-delay: var(--d, 0s); }
 .anim-shake    { animation: shake var(--dur-base) ease-in-out both; animation-delay: var(--d, 0s); }
 .anim-stamp    { animation: stamp var(--dur-slow) var(--ease-spring) both; animation-delay: var(--d, 0s); }
 .anim-gate-l   { animation: gate-l var(--dur-emph) var(--ease-soft) both; animation-delay: var(--d, 0s); }
 .anim-gate-r   { animation: gate-r var(--dur-emph) var(--ease-soft) both; animation-delay: var(--d, 0s); }
-.anim-shine    { background-image: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.75) 50%, transparent 65%); background-size: 250% 100%; background-repeat: no-repeat; animation: shine var(--dur-draw) var(--ease-soft) both; animation-delay: calc(400ms + var(--i, 0) * var(--stagger)); }
 .anim-flip     { animation: flip var(--dur-emph) var(--ease-soft); }
 .anim-flicker  { transform-box: fill-box; transform-origin: 50% 100%; animation: flicker 1.8s ease-in-out infinite; }
 .anim-sweep    { animation: sweep var(--dur-emph) ease-out both; animation-delay: calc(var(--dur-draw) + var(--i, 0) * var(--stagger) * 1.5); }
 .anim-draw     { stroke-dasharray: 1; animation: draw var(--dur-draw) var(--ease-soft) both; animation-delay: calc(var(--i, 0) * var(--stagger) * 2.5); }
+@keyframes course-progress-reveal { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.course-focus-tip { animation: fade var(--dur-slow) ease-out 250ms both; }
+.course-progress-reveal { transform-origin: left center; animation: course-progress-reveal var(--dur-draw) var(--ease-soft) both; }
+.chart-scrubber { height: 18px; accent-color: var(--color-brand-500); cursor: pointer; }
+.chart-cursor { transition: opacity var(--dur-fast) ease-out; pointer-events: none; }
+@keyframes quiz-choice-reveal { from { opacity: 0.65; transform: scale(0.985); } to { opacity: 1; transform: scale(1); } }
+.quiz-choice-reveal { animation: quiz-choice-reveal var(--dur-base) var(--ease-soft) both; }
 /* 마일스톤 축하 색종이: 위에서 흔들리며 떨어진다. --x(가로 위치 %), --d(지연), --r(회전 방향)은 인라인 */
 @keyframes confetti-fall {
   0%   { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 0; }
@@ -135,7 +159,7 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
 }
 .anim-confetti {
   position: absolute; top: 0; left: var(--x, 50%); width: 8px; height: 14px; border-radius: 2px;
-  animation: confetti-fall 2.8s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+  animation: confetti-fall 2.8s cubic-bezier(0.2, 0.6, 0.4, 1) both;
   animation-delay: var(--d, 0s);
   pointer-events: none;
 }
@@ -144,8 +168,8 @@ button:not(:disabled):active { transform: scale(0.97); }
 /* TDS 리셋의 button:focus 포커스 링이 터치/클릭 뒤에도 남는다. 키보드 포커스(:focus-visible)만 링을 유지 */
 button:focus:not(:focus-visible) { outline: none !important; }
 @media (prefers-reduced-motion: reduce) {
-  .anim-fade, .anim-fade-up, .anim-pop-in, .anim-slide-in, .anim-slide-up, .anim-bump, .anim-attn, .anim-confetti, .anim-draw, .anim-drop, .anim-glow-ok, .anim-shake, .anim-sweep, .anim-stamp, .anim-gate-l, .anim-gate-r, .anim-shine, .anim-flip, .anim-flicker,
-  .animate-node-hop, .animate-node-ground { animation: none !important; }
+  .anim-fade, .anim-fade-up, .anim-pop-in, .anim-slide-in, .anim-slide-up, .anim-bump, .anim-confetti, .anim-draw, .anim-drop, .anim-glow-ok, .anim-shake, .anim-sweep, .anim-stamp, .anim-gate-l, .anim-gate-r, .anim-flip, .anim-flicker,
+  .animate-node-hop, .animate-node-ground, .course-focus-tip, .course-progress-reveal, .quiz-choice-reveal { animation: none !important; }
 }
 
 @keyframes bounce-up {
@@ -189,47 +213,55 @@ body,
 /* 색 토큰 — 라이트 기본값. .dark에서 값만 교체 */
 :root {
   color-scheme: light;
-  --color-canvas: #f7f6f2;
-  --color-surface: #eeede8;
-  --color-card: #FFFFFF;
-  --color-ink: #24313b;
-  --color-ink-2: #3f4e59;
-  --color-ink-3: #53616e;
-  --color-ink-4: #5f6b75;
-  --color-line: #dfe2df;
-  --color-brand-cream: #fcece0;
-  --color-brand-soft: rgba(196, 81, 26, 0.1);
-  --color-success-soft: rgba(20, 122, 91, 0.1);
-  --color-danger-soft: rgba(191, 65, 81, 0.1);
-  --color-stat-streak: #c4511a;
-  --color-stat-xp: #6a5d88;
-  --color-stat-points: #93602d;
-  --color-stat-words: #2b6d71;
+  --color-canvas: #f3f4f6;
+  --color-surface: #eaedf0;
+  --color-card: #ffffff;
+  --color-ink: #191f28;
+  --color-ink-2: #333d4b;
+  --color-ink-3: #4e5968;
+  --color-ink-4: #6b7684;
+  --color-line: #e5e8eb;
+  --color-line-strong: #c9ced4;
+  --color-on-brand: #ffffff;
+  --color-button-secondary: #eaedf0;
+  --color-brand-cream: #fff3e0;
+  --color-brand-soft: #fff3e0;
+  --color-stat-ink: #191f28;
+  --color-stat-streak: var(--color-brand-500);
+  --color-stat-xp: var(--color-brand-500);
+  --color-stat-points: var(--color-brand-500);
+  --color-stat-words: var(--color-brand-500);
+  --color-success-soft: rgba(18, 184, 134, 0.1);
+  --color-success-mark: #ffffff;
+  --color-danger-soft: rgba(232, 71, 95, 0.1);
 }
 
 .dark {
   color-scheme: dark;
-  --color-canvas: #10191e;
-  --color-surface: #1c2a30;
-  --color-card: #24343b;
-  --color-ink: #f7f5ef;
-  --color-ink-2: #d8dddb;
-  --color-ink-3: #bec7c3;
-  --color-ink-4: #a8b3b0;
-  --color-line: #3a4b50;
-  --color-brand-400: #f29a69;
-  --color-brand-ink: #f29a69;
-  --color-success-400: #70d3aa;
-  --color-danger-400: #ff929e;
+  --color-canvas: #17171c;
+  --color-surface: #26262e;
+  --color-card: #202027;
+  --color-ink: #f9fafb;
+  --color-ink-2: #d1d6db;
+  --color-ink-3: #b0b8c1;
+  --color-ink-4: #8b95a1;
+  --color-line: #2e2e38;
+  --color-line-strong: #4d4d59;
+  --color-button-secondary: #2c2c35;
+  --color-brand-400: #fb923c;
+  --color-brand-ink: #fb923c;
+  --color-success-400: #38d9a9;
+  --color-danger-400: #f06a7e;
   --color-warning-400: #f2c666;
-  --color-brand-cream: rgba(196, 81, 26, 0.24);
-  --color-brand-soft: rgba(196, 81, 26, 0.2);
-  --color-success-soft: rgba(20, 122, 91, 0.2);
-  --color-danger-soft: rgba(191, 65, 81, 0.2);
-  --color-stat-streak: #f29a69;
-  --color-stat-xp: #b8a4e2;
-  --color-stat-points: #e8bd72;
-  --color-stat-words: #7dc3c1;
+  --color-brand-cream: rgba(249, 115, 22, 0.18);
+  --color-brand-soft: rgba(249, 115, 22, 0.16);
+  --color-stat-ink: #f9fafb;
+  --color-stat-streak: var(--color-brand-400);
+  --color-stat-xp: var(--color-brand-400);
+  --color-stat-points: var(--color-brand-400);
+  --color-stat-words: var(--color-brand-400);
+  --color-success-soft: rgba(18, 184, 134, 0.2);
+  --color-danger-soft: rgba(232, 71, 95, 0.2);
 
   /* TDS(adaptive) 표면 색을 앱 다크에 맞춤 — 바텀시트/카드 패널 */
   --adaptiveBackground: var(--color-card) !important;
@@ -241,6 +273,88 @@ body,
   --adaptiveGreyBackground: var(--color-surface) !important;
   --adaptiveCardBgWhite: var(--color-card) !important;
   --adaptiveCardBgGrey: var(--color-surface) !important;
+}
+
+.original-modal {
+  --adaptiveBackground: var(--color-card);
+  --adaptiveFloatBackground: var(--color-card);
+  --adaptiveLayeredBackground: var(--color-card);
+  --adaptiveBackgroundLevel01: var(--color-surface);
+  --adaptiveBackgroundLevel02: var(--color-card);
+  --adaptiveGreyBackground: var(--color-surface);
+  --adaptiveCardBgWhite: var(--color-card);
+  --adaptiveCardBgGrey: var(--color-surface);
+}
+.original-modal .badge-tone--celebration {
+  background: var(--color-brand-soft);
+  color: var(--color-brand-500);
+  border: 0;
+}
+
+.course-screen,
+.league-screen {
+  --radius-card: 16px;
+}
+.league-screen {
+  --color-league-hero: #fff3e0;
+  --color-league-first: #fff6e0;
+  --color-league-second: #eef1f5;
+  --color-league-third: #e9f8f2;
+}
+.dark .league-screen {
+  --color-league-hero: #3a2218;
+  --color-league-first: #3a3220;
+  --color-league-second: #26262e;
+  --color-league-third: #163a30;
+}
+
+.badge-tone {
+  background: var(--badge-bg);
+  color: var(--badge-ink);
+  border: 1px solid var(--badge-line);
+}
+.badge-tone[data-badge-stat='words'] {
+  --badge-bg: #e6f8f1;
+  --badge-ink: #08875f;
+  --badge-line: #a8e6cf;
+  --badge-ring: rgba(12, 166, 120, 0.16);
+}
+.badge-tone[data-badge-stat='streak'] {
+  --badge-bg: #fff3e0;
+  --badge-ink: #f97316;
+  --badge-line: #fdba74;
+  --badge-ring: rgba(249, 115, 22, 0.2);
+}
+.badge-tone[data-badge-stat='xp'] {
+  --badge-bg: #f0ecff;
+  --badge-ink: #5b3ce6;
+  --badge-line: #cfc4ff;
+  --badge-ring: rgba(109, 74, 255, 0.18);
+}
+.dark .badge-tone[data-badge-stat='words'] {
+  --badge-bg: #163a30;
+  --badge-ink: #38d9a9;
+  --badge-line: #245c4b;
+}
+.dark .badge-tone[data-badge-stat='streak'] {
+  --badge-bg: #3a2218;
+  --badge-ink: #fb923c;
+  --badge-line: #6e3a22;
+}
+.dark .badge-tone[data-badge-stat='xp'] {
+  --badge-bg: #2a2447;
+  --badge-ink: #9d87ff;
+  --badge-line: #4a3f80;
+}
+.badge-tone[data-earned='false'] {
+  --badge-bg: #eef0f3;
+  --badge-ink: #6b7684;
+  --badge-line: #e5e8eb;
+}
+.dark .badge-tone[data-earned='false'] {
+  --badge-bg: #202027;
+  --badge-ink: #8b95a1;
+  --badge-line: #2e2e38;
 }
 
 body {

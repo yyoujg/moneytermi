@@ -7,14 +7,11 @@ import { useAuth } from '../hooks/useAuth';
 import { supabase, getGuestClient } from '../lib/supabase';
 import { logClick } from '../lib/analytics';
 import { shareTossLink } from '../lib/share';
-import { daysUntilReset, weekStart } from '../lib/league';
-import { Storage } from '../lib/storage';
-import { RollingNumber } from '../components/RollingNumber';
-import { WeeklyRecap, type WeekSnapshot } from '../components/WeeklyRecap';
-
-const SNAP_KEY = 'league_snapshot';   // 지난번 본 내 순위(이번 주 변동 표시·지난주 결과 스토리용)
+import { daysUntilReset } from '../lib/league';
 import { Card } from '../components/ui/Card';
 import { LeagueRules } from '../components/LeagueRules';
+import { StageGlyph } from '../components/StageGlyph';
+import { ProfileAvatar } from '../components/ProfileAvatar';
 
 type Row = { rank: number; nickname: string; emoji: string; points: number; is_me: boolean };
 type MyRank = { rank: number | null; total: number; points: number };
@@ -35,21 +32,6 @@ const LeagueScreen = () => {
   const [mine, setMine] = useState<MyRank | null>(null);
   const [failed, setFailed] = useState(false);
   const [sheet, setSheet] = useState<'share' | 'rules' | null>(null);
-  const [rankDelta, setRankDelta] = useState(0);            // +면 순위 상승
-  const [recap, setRecap] = useState<WeekSnapshot | null>(null);
-
-  // 순위를 받으면 지난 기록과 비교: 같은 주면 순위 변동, 지난주 기록이면 결과 스토리. 그리고 지금 값을 기록
-  useEffect(() => {
-    if (!mine) return;
-    const week = weekStart();
-    Storage.getItem(SNAP_KEY).catch(() => null).then(raw => {
-      const prev: WeekSnapshot | null = raw ? JSON.parse(raw) : null;
-      // 변동이 있을 때만 바꾼다(개발 모드 이중 실행에서 두 번째 호출이 방금 쓴 기록과 비교해 0으로 덮지 않게)
-      if (prev?.week === week && prev.rank && mine.rank && prev.rank !== mine.rank) setRankDelta(prev.rank - mine.rank);
-      if (prev && prev.week < week && prev.points > 0) setRecap(prev);
-      Storage.setItem(SNAP_KEY, JSON.stringify({ week, rank: mine.rank, total: mine.total, points: mine.points })).catch(() => {});
-    });
-  }, [mine]);
   // 진행 바를 0에서 실제 값까지 차오르게: 마운트 다음 프레임에 값을 넣는다
   const [barReady, setBarReady] = useState(false);
   useEffect(() => { const t = setTimeout(() => setBarReady(true), 80); return () => clearTimeout(t); }, []);
@@ -85,38 +67,41 @@ const LeagueScreen = () => {
           </div>
         </div>
 
-        {/* 내 티어 */}
-        <Card tone="surface" pad="lg" className="flex flex-col items-center text-center anim-fade-up">
-          <div className="text-6xl mb-2 anim-pop-in">{stage.emoji}</div>
-          <p className="text-lg font-bold text-[var(--color-ink)] mb-1!">{stage.name}</p>
-          <p className="flex items-center justify-center gap-1.5 text-xs text-[var(--color-ink-3)] mb-1!">
-            {mine?.rank
-              ? <>{mine.total.toLocaleString()}명 중 <span className="text-sm font-bold text-[var(--color-ink)]"><RollingNumber value={mine.rank} /></span>위</>
-              : '이번 주 XP를 모으면 순위에 올라요'}
-            {rankDelta !== 0 && (
-              <span className={`anim-pop-in px-1.5 py-px rounded-md text-2xs font-bold ${rankDelta > 0 ? 'bg-success-500/10 text-success-500' : 'bg-danger-500/10 text-danger-500'}`}
-                style={{ '--i': 8 } as React.CSSProperties}>
-                {rankDelta > 0 ? `▲${rankDelta}` : `▼${-rankDelta}`}
-              </span>
-            )}
-          </p>
-          <p className="text-2xs font-medium text-brand-ink mb-3!">이번 주 <RollingNumber value={mine?.points ?? 0} />XP · {daysUntilReset()}일 남음</p>
-          <div className="w-full bg-[var(--color-card)] rounded-full h-1.5 overflow-hidden mb-1.5">
-            <div
-              className="bg-brand-500 h-full rounded-full transition-all duration-[var(--dur-emph)] ease-soft"
-              style={{ width: barReady ? `${next === null ? 100 : Math.min(100, Math.round(((xp - stage.minPoints) / (next - stage.minPoints)) * 100))}%` : '0%' }}
-            />
-          </div>
-          <p className="text-xs text-[var(--color-ink-4)]">
-            {next === null ? '최고 티어예요 🎉' : `다음 티어까지 ${next - xp}XP`}
-          </p>
-        </Card>
+        {/* 이번 주 순위(이번 주 참여)와 내 등급(누적)을 나눠 보여준다 */}
+        <div className="grid grid-cols-2 gap-3 anim-fade-up">
+          <Card tone="surface" pad="lg" className="flex flex-col">
+            <p className="text-xs font-bold text-[var(--color-ink-3)]">이번 주 순위</p>
+            <p className="mt-2! text-3xl font-black text-brand-500 tabular-nums">{mine?.rank ? `${mine.rank}위` : '-'}</p>
+            <p className="mt-1! text-xs text-[var(--color-ink-3)] break-keep">
+              {mine?.rank ? `${mine.total}명 중 · ${mine.points?.toLocaleString() ?? 0}XP` : 'XP를 모으면 순위에 올라요'}
+            </p>
+            <p className="mt-auto! pt-3 text-xs font-semibold text-[var(--color-ink-2)]">초기화까지 {daysUntilReset()}일</p>
+          </Card>
+          <Card tone="surface" pad="lg" className="flex flex-col">
+            <p className="text-xs font-bold text-[var(--color-ink-3)]">내 등급</p>
+            <div className="mt-2 flex items-center gap-2">
+              <StageGlyph id={stage.id} size={40} />
+              <span className="text-lg font-bold text-[var(--color-ink)]">{stage.name}</span>
+            </div>
+            <div className="mt-auto pt-3">
+              <div className="w-full bg-[var(--color-card)] rounded-full h-1.5 overflow-hidden mb-1.5">
+                <div
+                  className="bg-brand-500 h-full rounded-full transition-all duration-700"
+                  style={{ width: barReady ? `${next === null ? 100 : Math.min(100, Math.round(((xp - stage.minPoints) / (next - stage.minPoints)) * 100))}%` : '0%' }}
+                />
+              </div>
+              <p className="text-xs text-[var(--color-ink-3)]">
+                {next === null ? '최고 등급이에요' : `다음 등급까지 ${next - xp}XP`}
+              </p>
+            </div>
+          </Card>
+        </div>
 
         {/* 티어 로드맵 */}
         <div className="flex justify-between items-start relative mt-5">
-          <div className="absolute top-4 left-4 right-4 h-[2px] bg-[var(--color-line)] z-0 rounded-full">
+          <div className="absolute top-5 left-5 right-5 h-[2px] bg-[var(--color-line)] z-0 rounded-full">
             <div
-              className="h-full bg-brand-500 rounded-full transition-all duration-[var(--dur-draw)] ease-soft"
+              className="h-full bg-brand-500 rounded-full transition-all duration-1000"
               style={{ width: `${((stage.id - 1) / (GROWTH_STAGES.length - 1)) * 100}%` }}
             />
           </div>
@@ -124,11 +109,8 @@ const LeagueScreen = () => {
             const isCurrent = s.id === stage.id;
             return (
               <div key={s.id} className="flex flex-col items-center relative z-10 w-14">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm transition-all
-                  ${isCurrent ? 'bg-brand-500 scale-110' : s.id < stage.id ? 'bg-[var(--color-line)]' : 'bg-[var(--color-surface)]'}`}>
-                  {s.emoji}
-                </div>
-                <span className={`text-3xs font-medium text-center mt-1.5 ${isCurrent ? 'text-brand-ink' : 'text-[var(--color-ink-4)]'}`}>
+                <StageGlyph id={s.id} size={40} className={`transition-all ${isCurrent ? 'scale-125' : s.id > stage.id ? 'grayscale opacity-40' : ''}`} />
+                <span className={`text-2xs font-medium text-center mt-1.5 ${isCurrent ? 'text-brand-500' : 'text-[var(--color-ink-3)]'}`}>
                   {s.name}
                 </span>
               </div>
@@ -165,18 +147,18 @@ const LeagueScreen = () => {
         )}
 
         {!failed && rows && rows.length > 0 && (
-          <Card pad="none" className="overflow-hidden">
+          <Card pad="none" className="overflow-hidden" style={{ border: 0 }}>
             {rows.map((r, i) => (
               <div
                 key={`${r.rank}-${i}`}
-                className={`anim-fade-up flex items-center gap-3 px-4 py-3 ${i < rows.length - 1 ? 'border-b border-[var(--color-line)]' : ''}`}
+                className="anim-fade-up flex items-center gap-3 px-4 py-3"
                 style={{ '--i': i, ...(r.is_me ? { backgroundColor: 'var(--color-brand-soft)' } : {}) } as React.CSSProperties}
               >
                 <span className="w-7 text-center text-sm font-bold text-[var(--color-ink-3)] shrink-0">
                   {r.rank <= 3 ? MEDAL[r.rank - 1] : r.rank}
                 </span>
-                <span className="text-lg shrink-0">{r.is_me ? myEmoji : r.emoji}</span>
-                <span className={`flex-1 text-sm truncate ${r.is_me ? 'font-bold text-brand-ink' : 'font-medium text-[var(--color-ink)]'}`}>
+                <ProfileAvatar emoji={r.is_me ? myEmoji : r.emoji} size={32} />
+                <span className={`flex-1 text-sm truncate ${r.is_me ? 'font-bold text-brand-500' : 'font-medium text-[var(--color-ink)]'}`}>
                   {r.is_me ? (user?.nickname ?? r.nickname) : r.nickname}
                 </span>
                 <span className="text-sm font-bold text-[var(--color-ink-2)] shrink-0">{r.points.toLocaleString()}XP</span>
@@ -189,9 +171,9 @@ const LeagueScreen = () => {
                 className="flex items-center gap-3 px-4 py-3 border-t-2 border-dashed border-[var(--color-line)]"
                 style={{ backgroundColor: 'var(--color-brand-soft)' }}
               >
-                <span className="w-7 text-center text-sm font-bold text-brand-ink shrink-0">{mine.rank}</span>
-                <span className="text-lg shrink-0">{myEmoji}</span>
-                <span className="flex-1 text-sm font-bold text-brand-ink truncate">{user?.nickname ?? '나'}</span>
+                <span className="w-7 text-center text-sm font-bold text-brand-500 shrink-0">{mine.rank}</span>
+                <ProfileAvatar emoji={myEmoji} size={32} />
+                <span className="flex-1 text-sm font-bold text-brand-500 truncate">{user?.nickname ?? '나'}</span>
                 <span className="text-sm font-bold text-[var(--color-ink-2)] shrink-0">{mine.points.toLocaleString()}XP</span>
               </div>
             )}
@@ -200,8 +182,6 @@ const LeagueScreen = () => {
 
         <Spacing size={8} />
       </div>
-
-      {recap && <WeeklyRecap snap={recap} onClose={() => setRecap(null)} />}
 
       <BottomSheet
         open={sheet === 'rules'}
@@ -220,10 +200,10 @@ const LeagueScreen = () => {
           {/* 받는 사람이 보게 될 내용 미리보기: 내 카드 + 문구. 내부 스킴 주소는 보여주지 않는다 */}
           <Card tone="surface" pad="md" className="flex flex-col gap-3 anim-fade-up">
             <div className="flex items-center gap-3">
-              <span className="w-11 h-11 flex items-center justify-center text-2xl shrink-0" style={{ borderRadius: 9999, background: 'var(--color-card)' }}>{myEmoji}</span>
+              <span className="w-11 h-11 flex items-center justify-center text-2xl shrink-0" style={{ borderRadius: 9999, background: 'var(--color-card)' }}><ProfileAvatar emoji={myEmoji} size={44} /></span>
               <div className="min-w-0">
                 <p className="text-sm font-bold text-[var(--color-ink)] truncate">{user?.nickname ?? '나'}</p>
-                <p className="text-2xs text-[var(--color-ink-4)]">{stage.emoji} {stage.name} · 이번 주 {(mine?.points ?? 0).toLocaleString()}XP{mine?.rank ? ` · ${mine.rank}위` : ''}</p>
+                <p className="text-2xs text-[var(--color-ink-4)]">{stage.name} · 이번 주 {(mine?.points ?? 0).toLocaleString()}XP{mine?.rank ? ` · ${mine.rank}위` : ''}</p>
               </div>
             </div>
             <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep">{shareMessage(stage.name, mine?.points ?? 0, mine?.rank)}</p>

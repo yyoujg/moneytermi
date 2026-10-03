@@ -5,6 +5,8 @@ import { calcStreak } from '../../lib/streak';
 import { Storage } from '../../lib/storage';
 import { logClick } from '../../lib/analytics';
 import { feedbackBadge } from '../../lib/feedback';
+import { BadgeGlyph } from './BadgeGlyph';
+import { Sparkles } from 'lucide-react';
 
 // 새로 획득한 배지 축하. 배지는 서버 기록 없이 통계에서 파생되므로, "이미 보여준 배지" 목록을 기기에 남겨 차이만 축하한다.
 // 여러 개를 한 번에 얻었으면 한 화면에 같이 보여준다. 유실돼도 축하가 한 번 더 뜰 뿐이다.
@@ -37,7 +39,7 @@ export const BadgeCelebration = () => {
   if (!fresh) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-6 px-6 overflow-hidden bg-[var(--color-canvas)]">
+    <div className="original-modal fixed inset-0 z-[60] flex flex-col items-center justify-center gap-6 px-6 overflow-hidden bg-[var(--color-canvas)]">
       {CONFETTI.map((c, i) => (
         <span
           key={i}
@@ -47,17 +49,12 @@ export const BadgeCelebration = () => {
         />
       ))}
 
-      <p className="text-2xl font-black text-[var(--color-ink)] anim-pop-in">🎉 새 배지 획득!</p>
+      <p className="flex items-center gap-2 text-2xl font-black text-[var(--color-ink)] anim-pop-in"><Sparkles size={24} className="text-brand-ink" />새 배지 획득!</p>
 
       <div className={`flex flex-wrap justify-center gap-5 ${fresh.length === 1 ? '' : 'max-w-xs'}`}>
         {fresh.map((b, i) => (
           <div key={b.id} className="flex flex-col items-center gap-2 anim-pop-in" style={{ '--i': i + 2 } as React.CSSProperties}>
-            <div
-              className={`${fresh.length === 1 ? 'w-28 h-28 text-6xl' : 'w-20 h-20 text-4xl'} flex items-center justify-center shadow-lg`}
-              style={{ borderRadius: 9999, background: 'var(--color-brand-soft)', boxShadow: '0 0 0 6px rgba(196,81,26,0.18)' }}
-            >
-              {b.icon}
-            </div>
+            <BadgeGlyph id={b.id} size={fresh.length === 1 ? 140 : 96} />
             <p className="text-sm font-bold text-[var(--color-ink)]">{b.title}</p>
           </div>
         ))}

@@ -88,7 +88,7 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
               <p className="text-xs text-[var(--color-ink-4)]">복습/학습 리마인더 받기</p>
             </div>
           </div>
-          <span className={`text-sm font-semibold ${agreed ? 'text-[var(--color-ink-4)]' : 'text-brand-ink'}`}>
+          <span className={`text-sm font-semibold ${agreed ? 'text-[var(--color-ink-4)]' : 'text-brand-500'}`}>
             {agreed ? '동의됨' : '받기'}
           </span>
         </button>
