@@ -234,11 +234,9 @@ const QuizScreen = () => {
 
   return (
     <div className="flex flex-col h-full bg-[var(--color-card)]">
-      {/* 헤더: 닫기 + 문제 번호 + 얇은 진행바만. 질문이 화면의 주인공이 되게 */}
+      {/* 헤더: 문제 번호 + 얇은 진행바만(뒤로가기는 토스 내비게이션 바가 맡는다). 질문이 화면의 주인공이 되게 */}
       <div className="px-5 pt-2 pb-3 flex flex-col gap-2">
         <div className="flex items-center gap-1">
-          <button type="button" onClick={() => navigate(backPath, { replace: true })} aria-label="퀴즈 나가기"
-            className="-ml-3 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[var(--color-ink-2)]"><X size={22} /></button>
           <span className="text-sm font-bold text-[var(--color-ink-2)]">{retrying ? `다시 풀기 · 남은 ${quizQueue.length - currentQuizIndex}문제` : `${currentQuizIndex + 1} / ${baseQueue.length}`}</span>
           {streakMessage && <span className="ml-2 flex items-center gap-0.5 text-xs font-bold text-brand-500"><Flame size={13} className="fill-current" />{streakMessage}</span>}
           {/* 획득 포인트 팝업 (보유 포인트는 상단바에 있다) */}

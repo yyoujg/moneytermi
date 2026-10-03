@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, ExternalLink, BookOpen, Newspaper, Link2, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ExternalLink, BookOpen, Newspaper, Link2 } from 'lucide-react';
 import { BottomSheet } from '@toss/tds-mobile';
 import { showModal } from '../components/AlertModal';
 import type { Word } from '../types';
@@ -408,8 +408,6 @@ const WordCardScreen = () => {
 
       {/* 상단: 레슨 안의 단어 위치 */}
       <div className="px-5 pt-4 flex items-center justify-between gap-3">
-        <button type="button" onClick={() => navigate(backPath, { replace: true, state: backState })} aria-label="학습 나가기"
-          className="-ml-3 -my-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[var(--color-ink-2)]"><X size={21} /></button>
         <div className="flex flex-1 items-center gap-1.5 overflow-hidden">
           {words.map((w, i) => (
             <span

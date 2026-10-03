@@ -268,10 +268,7 @@ const CourseScreen = () => {
       <div className="px-5 pt-5 pb-4">
         {activeTopic ? (
           <div className="flex items-center gap-3">
-            <button type="button" onClick={() => setSearchParams({}, { replace: true })} aria-label="전체 주제로 돌아가기"
-              className="flex h-11 w-11 shrink-0 items-center justify-center bg-[var(--color-card)] text-[var(--color-ink)]" style={{ borderRadius: 9999 }}>
-              <ChevronRight size={20} className="rotate-180" />
-            </button>
+            {/* 뒤로가기는 토스 내비게이션 바가 맡는다(자체 뒤로가기 중복은 검수 반려 사유) */}
             <div className="min-w-0">
               <h1 className="truncate text-xl font-bold tracking-tight text-[var(--color-ink)]">{activeTopic.category}</h1>
               <p className="mt-1! text-xs text-[var(--color-ink-3)]">{activeTopic.level} · {activeTopic.parts.length}개 코스 · {activeTopic.known}/{activeTopic.total}개 단어 학습</p>

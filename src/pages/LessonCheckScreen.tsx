@@ -75,8 +75,6 @@ const LessonCheckScreen = () => {
     <div className="lesson-check-screen flex h-full flex-col bg-[var(--color-canvas)]">
       <div className="bg-[var(--color-card)] px-5 pb-4 pt-4">
         <div className="flex items-center gap-3">
-          <button type="button" onClick={() => navigate(backPath, { replace: true })} aria-label="이해 확인 나가기"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[var(--color-ink-2)]"><X size={21} /></button>
           <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--color-button-secondary)]">
             <div className="h-full rounded-full bg-brand-500" style={{ width: `${((index + 1) / questions.length) * 100}%` }} />
           </div>
