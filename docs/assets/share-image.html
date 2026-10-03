@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<style>
+  * { margin: 0; box-sizing: border-box; }
+  html, body { width: 600px; height: 315px; overflow: hidden; }
+  body {
+    font-family: 'Pretendard Variable', Pretendard, sans-serif;
+    background: #fff3e0;
+    display: flex; align-items: center; gap: 8px; padding: 0 40px 0 24px;
+    position: relative;
+  }
+  body::before {
+    content: ''; position: absolute; left: -60px; top: -40px; width: 380px; height: 380px;
+    border-radius: 50%; background: #ffe2bf;
+  }
+  .logo { position: relative; width: 250px; height: 250px; flex-shrink: 0; }
+  .text { position: relative; display: flex; flex-direction: column; gap: 14px; }
+  h1 { white-space: nowrap; font-size: 32px; font-weight: 800; line-height: 1.25; color: #191f28; letter-spacing: -0.5px; }
+  h1 b { color: #f97316; }
+  p { font-size: 16px; font-weight: 500; color: #6b5a4a; line-height: 1.5; }
+  .chips { display: flex; gap: 6px; }
+  .chips span { font-size: 13px; font-weight: 700; color: #ea580c; background: #fff; border-radius: 999px; padding: 6px 11px; }
+</style>
+</head>
+<body>
+  <img class="logo" src="../../public/logo.png" alt="" />
+  <div class="text">
+    <h1>경제 용어 <b>1,000개</b><br />하루 5분이면 충분해요</h1>
+    <p>뉴스 속 낯선 용어, 쉬운 예시와 퀴즈로<br />수달이랑 같이 배워요</p>
+    <div class="chips"><span>기초</span><span>중급</span><span>고급</span><span>심화</span></div>
+  </div>
+</body>
+</html>
