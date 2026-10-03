@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronRight, Lightbulb, Flame, X } from 'lucide-react';
+import { ChevronRight, Lightbulb, Flame } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Spacing } from '@toss/tds-mobile';
 import type { Word } from '../types';
@@ -162,11 +162,9 @@ const QuizPage = () => {
 
   return (
     <div className="flex flex-col h-full bg-[var(--color-canvas)] overflow-y-auto [&::-webkit-scrollbar]:hidden">
-      {/* 헤더: 퀴즈와 같은 학습 화면 규칙(닫기 + 문제 번호 + 얇은 진행바) */}
+      {/* 헤더: 퀴즈와 같은 학습 화면 규칙(문제 번호 + 얇은 진행바, 뒤로가기는 토스 내비게이션 바) */}
       <div className="px-5 pt-2 pb-3 flex flex-col gap-2">
         <div className="flex items-center gap-1">
-          <button type="button" onClick={() => navigate('/home', { replace: true })} aria-label="복습 나가기"
-            className="-ml-3 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[var(--color-ink-2)]"><X size={22} /></button>
           <span className="text-sm font-bold text-[var(--color-ink-2)]">복습 {index + 1} / {queue.length}</span>
           {combo >= 2 && <span className="ml-2 flex items-center gap-0.5 text-xs font-bold text-brand-500"><Flame size={13} className="fill-current" />{combo}연속</span>}
         </div>
