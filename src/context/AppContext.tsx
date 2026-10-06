@@ -40,7 +40,6 @@ type AppContextValue = {
   missions: Missions;
   setMissions: React.Dispatch<React.SetStateAction<Missions>>;
   claimReward: (missionId: keyof Missions) => Promise<{ xpGained: number } | null>;
-  claimReferralReward: (amount: number, unit: string) => Promise<number | null>;
   claimAdReward: (amount: number, unit: string) => Promise<number | null>;
   claimPromotionReward: (amount: number) => Promise<number | null>;
   submitQuizAnswer: (
@@ -478,17 +477,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [missions, ready]);
 
-  // ── claimReferralReward — 친구초대(contactsViral) 리워드, 서버가 상한 적용 후 적립 ──
-  const claimReferralReward = async (amount: number, unit: string) => {
-    const { data, error } = await dbRef.current.rpc('claim_referral_reward', {
-      p_reward_amount: amount, p_reward_unit: unit,
-    });
-    if (error || !data) { console.error('[claimReferralReward] 실패:', error); return null; }
-    setPoints(data.points);
-    logClick('referral_reward_claim', { amount: data.credited });
-    return data.credited as number;
-  };
-
   // ── claimPromotionReward — 프로모션(grantPromotionReward), 유저당 1회만 서버가 적립 ──
   const claimPromotionReward = async (amount: number) => {
     const { data, error } = await dbRef.current.rpc('claim_promotion_reward', {
@@ -633,7 +621,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       spendPoints, claimFirstLesson, refreshWallet, shopReason, shopOpen, openShop, closeShop,
       missions, setMissions,
       claimReward,
-      claimReferralReward,
       claimAdReward,
       claimPromotionReward,
       submitQuizAnswer,
