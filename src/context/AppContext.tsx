@@ -12,6 +12,7 @@ import { nextSrs, gradeFromResult, addDays } from '../lib/srs';
 import { DAILY_REVIEW_CAP, MISSION_XP } from '../constants';
 import type { PointReward } from '../components/PointCelebration';
 import { feedbackClaim } from '../lib/feedback';
+import { fetchAll, PAGE } from '../lib/fetchAll';
 
 type WpRow = { word_id: number; ease: number; interval_d: number; reps: number; due_date: string };
 
@@ -40,7 +41,6 @@ type AppContextValue = {
   missions: Missions;
   setMissions: React.Dispatch<React.SetStateAction<Missions>>;
   claimReward: (missionId: keyof Missions) => Promise<{ xpGained: number } | null>;
-  claimReferralReward: (amount: number, unit: string) => Promise<number | null>;
   claimAdReward: (amount: number, unit: string) => Promise<number | null>;
   claimPromotionReward: (amount: number) => Promise<number | null>;
   submitQuizAnswer: (
@@ -109,8 +109,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     const loadContent = async () => {
       try {
       const [{ data: wordsData }, { data: cwData }, { data: coursesData }] = await Promise.all([
-        supabase.from('words').select('*').order('id'),
-        supabase.from('course_words').select('course_id, word_id, position').order('position'),
+        fetchAll(from => supabase.from('words').select('*').order('id').range(from, from + PAGE - 1)),
+        fetchAll(from => supabase.from('course_words').select('course_id, word_id, position').order('position').order('course_id').range(from, from + PAGE - 1)),
         supabase.from('courses').select('*').order('sort_order', { ascending: true }),
       ]);
       if (!wordsData || !coursesData || !cwData) throw new Error('학습 콘텐츠 응답 누락');
@@ -478,17 +478,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [missions, ready]);
 
-  // ── claimReferralReward — 친구초대(contactsViral) 리워드, 서버가 상한 적용 후 적립 ──
-  const claimReferralReward = async (amount: number, unit: string) => {
-    const { data, error } = await dbRef.current.rpc('claim_referral_reward', {
-      p_reward_amount: amount, p_reward_unit: unit,
-    });
-    if (error || !data) { console.error('[claimReferralReward] 실패:', error); return null; }
-    setPoints(data.points);
-    logClick('referral_reward_claim', { amount: data.credited });
-    return data.credited as number;
-  };
-
   // ── claimPromotionReward — 프로모션(grantPromotionReward), 유저당 1회만 서버가 적립 ──
   const claimPromotionReward = async (amount: number) => {
     const { data, error } = await dbRef.current.rpc('claim_promotion_reward', {
@@ -633,7 +622,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       spendPoints, claimFirstLesson, refreshWallet, shopReason, shopOpen, openShop, closeShop,
       missions, setMissions,
       claimReward,
-      claimReferralReward,
       claimAdReward,
       claimPromotionReward,
       submitQuizAnswer,
