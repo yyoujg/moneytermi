@@ -13,7 +13,19 @@ import { DAILY_REVIEW_CAP, MISSION_XP } from '../constants';
 import type { PointReward } from '../components/PointCelebration';
 import { feedbackClaim } from '../lib/feedback';
 
-type WpRow = { word_id: number; ease: number; interval_d: number; reps: number; due_date: string };
+// PostgREST는 한 번에 1000행까지만 돌려준다. 짧은 페이지가 올 때까지 이어 받는다.
+const PAGE = 1000;
+export const fetchAll = async <T,>(page: (from: number) => PromiseLike<{ data: T[] | null }>): Promise<{ data: T[] | null }> => {
+  const all: T[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data } = await page(from);
+    if (!data) return { data: null };
+    all.push(...data);
+    if (data.length < PAGE) return { data: all };
+  }
+};
+
+type WpRow ={ word_id: number; ease: number; interval_d: number; reps: number; due_date: string };
 
 type AppContextValue = {
   ready: boolean;
@@ -108,8 +120,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     const loadContent = async () => {
       try {
       const [{ data: wordsData }, { data: cwData }, { data: coursesData }] = await Promise.all([
-        supabase.from('words').select('*').order('id'),
-        supabase.from('course_words').select('course_id, word_id, position').order('position'),
+        fetchAll(from => supabase.from('words').select('*').order('id').range(from, from + PAGE - 1)),
+        fetchAll(from => supabase.from('course_words').select('course_id, word_id, position').order('position').order('course_id').range(from, from + PAGE - 1)),
         supabase.from('courses').select('*').order('sort_order', { ascending: true }),
       ]);
       if (!wordsData || !coursesData || !cwData) throw new Error('학습 콘텐츠 응답 누락');
