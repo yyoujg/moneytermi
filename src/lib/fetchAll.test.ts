@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { fetchAll } from './AppContext';
+import { fetchAll } from './fetchAll';
 
 describe('fetchAll', () => {
   it('1000행 경계를 넘어 이어 받는다', async () => {

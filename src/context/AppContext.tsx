@@ -12,20 +12,9 @@ import { nextSrs, gradeFromResult, addDays } from '../lib/srs';
 import { DAILY_REVIEW_CAP, MISSION_XP } from '../constants';
 import type { PointReward } from '../components/PointCelebration';
 import { feedbackClaim } from '../lib/feedback';
+import { fetchAll, PAGE } from '../lib/fetchAll';
 
-// PostgREST는 한 번에 1000행까지만 돌려준다. 짧은 페이지가 올 때까지 이어 받는다.
-const PAGE = 1000;
-export const fetchAll = async <T,>(page: (from: number) => PromiseLike<{ data: T[] | null }>): Promise<{ data: T[] | null }> => {
-  const all: T[] = [];
-  for (let from = 0; ; from += PAGE) {
-    const { data } = await page(from);
-    if (!data) return { data: null };
-    all.push(...data);
-    if (data.length < PAGE) return { data: all };
-  }
-};
-
-type WpRow ={ word_id: number; ease: number; interval_d: number; reps: number; due_date: string };
+type WpRow = { word_id: number; ease: number; interval_d: number; reps: number; due_date: string };
 
 type AppContextValue = {
   ready: boolean;
