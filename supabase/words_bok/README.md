@@ -22,6 +22,36 @@ SQL Editor에 45줄 넘게 붙여넣으면 앞부분만 실행되는 일이 있�
 
 뜻·단어명을 고칠 때는 `meanings.py`를 고치고 `python3 refine.py` → `python3 categories.py`를 다시 돌린다(16·17을 통째로 다시 만든다). 실행 후 반드시 `SELECT count(*) FROM public.course_words;`로 747인지 확인한다.
 
+## 테셋 단어·레슨·예문 추가 (2026-10-07)
+
+테셋 블로그(경제이론 02~68편)를 바탕으로 단어 213개(id 1001~1213, `sources = ['tesat']`), 기존 단어 53개의 레슨 카드·퀴즈, 전 단어 `news_example`(빈칸 퀴즈용 기사체 예문, 실제 기사 인용 아님)을 넣었다. **이 순서대로** 실행한다.
+
+| 순서 | 파일 | 내용 |
+|---|---|---|
+| 1 | `../migration_rename_taylor_rule.sql` | 607 단어명에서 영문 괄호를 빼 `테일러 준칙`으로, related_words도 치환 |
+| 2 | `19_words_tesat_1.sql` ~ `19_words_tesat_4.sql` | 새 단어 213개 upsert. `new_words.py`가 `tesat_words.py`를 읽어 생성 |
+| 3 | `17_courses_1.sql` ~ `17_courses_4.sql` | 코스 재생성 — **78개 / 연결 1213행**. 새 id를 참조하므로 2번 뒤에. `word_progress` 보존 |
+| 4 | `../migration_lesson_tesat_micro_1.sql` ~ `_2`, `../migration_lesson_tesat_macro_1.sql` ~ `_2` | 기존 단어 53개에 text/table/flow 카드와 퀴즈 2개(lessonCheck 1개). 다시 실행해도 중복 없음 |
+| 5 | `../migration_news_examples_1.sql` ~ `_13.sql` | 단어 1213개 `news_example`. 2번 뒤에 |
+
+```sql
+SELECT count(*) FROM public.words;                          -- 1213
+SELECT count(*) FROM public.courses;                        -- 78
+SELECT count(*) FROM public.course_words;                   -- 1213
+SELECT count(*) FROM public.words WHERE news_example <> ''; -- 1213
+NOTIFY pgrst, 'reload schema';
+```
+
+앱은 `words`·`course_words`를 1000행씩 이어 받는다(`AppContext.tsx` `fetchAll`).
+
+**생성기 다시 돌리기.** `categories.py`·`new_words.py`는 적용 후 지운 기준 SQL(`02~10_words_*`, `14~16_*`, `18_words_new.sql`)에서 기존 단어 id·이름을 읽는다. 돌리기 전에 커밋 `72bef94^`에서 임시로 되살리고, 끝나면 지운다(커밋하지 않는다).
+
+```bash
+for f in $(git show 72bef94 --name-only --format= | grep -E 'words_bok/((0[2-9]|10|1[456])_words|18_words_new)'); do git show 72bef94^:$f > $f; done
+```
+
+`18_words_new.sql`(748~1000)은 다시 적용하지 않는다 — `visuals`를 덮어써 레슨 파일이 붙인 카드가 사라진다. 새 단어는 `tesat_words.py`에 id를 이어 붙이고 `19_*`만 적용한다.
+
 ## 확인
 
 `00_backup.sql` 직후:
@@ -59,8 +89,6 @@ ALTER TABLE public.word_progress ENABLE TRIGGER trg_word_progress_mission;
 
 ## 알려진 제약
 
-- `news_example`이 비어 있어 빈칸 채우기 퀴즈 유형이 비활성화된다
 - 분리된 자식 단어의 `detailed_meaning`은 부모 원문을 그대로 복사한 것이라 두 개념을 함께 설명한다
 - 본문 줄이음 자국은 말뭉치 빈도로 잡히는 것만 고쳤다(`간접금융에 서는`처럼 두 글자 이상 조각은 남음)
-- 앱은 `select('*')`로 단어를 한 번에 읽는다 — PostgREST 기본 상한 1000행
 - 800개 중 716개 — 색인과 본문을 맞추지 못한 37개와 길이가 비정상인 12개를 제외했다
