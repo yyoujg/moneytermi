@@ -19,13 +19,13 @@
 
 ## 기술적으로 신경 쓴 부분
 
-- **서버 권위 채점**: 포인트/콤보/미션 진행도를 클라이언트가 아니라 Postgres RPC(`submit_quiz_answer`, `claim_mission_reward`, `checkin`, `supabase/migration_points_integrity.sql`)가 계산·기록한다. 같은 마이그레이션에서 `profiles` 테이블의 `UPDATE` 권한을 회수한 뒤 `emoji`, `nickname` 컬럼만 다시 부여해(`REVOKE UPDATE ... GRANT UPDATE (emoji, nickname)`) 클라이언트가 포인트를 직접 조작할 수 없게 막는다.
+- **서버 권위 채점**: 포인트/콤보/미션 진행도를 클라이언트가 아니라 Postgres RPC(`submit_quiz_answer`, `claim_mission_reward`, `checkin`)가 계산·기록한다. `profiles` 테이블은 anon에 `UPDATE (nickname, emoji)`만 부여해(`supabase/schema.sql`) 클라이언트가 포인트를 직접 조작할 수 없게 막는다. RPC 정의 SQL(`migration_points_integrity.sql`)은 DB 적용 후 저장소에서 제거됐다(72bef94).
 - **게스트 인증 + 재설치 복구**: `guest_token`을 요청 헤더(`x-guest-token`)로 실어 RLS를 통과시키는 게스트 클라이언트(`getGuestClient`, `src/lib/supabase.ts`)와, 토스 익명 키로 같은 프로필을 복구하는 `resolve_profile_by_toss_key` RPC(`useAuth.tsx`)를 함께 쓴다. 브라우저 dev 환경처럼 토스 브릿지가 없으면 기존 게스트 생성 경로로 자동 폴백한다.
 - **상태관리**: 별도 상태관리 라이브러리 없이 React Context 2개(`AppContext`, `AuthProvider`)로 구성했다. `profileIdRef`, `dbRef`를 `useRef`에 캐싱해 재렌더 없이 최신 프로필/DB 클라이언트를 참조하고, `word_progress` 저장은 `useDebouncedEffect`로 2초 디바운스한다.
-- **iOS WebView 대응**: iOS WKWebView(토스 앱)에서 Web Locks API가 `Lock was stolen` AbortError를 던지는 문제를 no-op lock으로 우회한다(`src/lib/supabase.ts:11-16`).
-- **뉴스 API 프록시 + 프리페치**: 네이버 뉴스 API 키를 클라이언트에 노출하지 않도록 Supabase Edge Function(`naver-news`)을 경유하고, `useNews.ts`가 현재 단어는 세션 캐시 우선 조회, 다음 단어는 미리 fetch해둔다.
-- **딥링크 랜딩 분기**: `App.tsx`의 `resolveLandingTarget`이 `getSchemeUri()`를 파싱해 초기 라우트를 정하면서, 기기가 스킴을 어떤 형태로 주는지 확정하기 위해 Sentry로 진단 로그(`schemeUri`, `pathname`, `hash`)를 남기는 임시 코드가 포함돼 있다.
-- **순수 로직 단위 테스트**: `vitest`로 퀴즈 포인트 계산(`calcEarned`)과 보기 생성 로직(`getOptions`)을 검증한다(`src/pages/QuizScreen.test.ts`).
+- **iOS WebView 대응**: iOS WKWebView(토스 앱)에서 Web Locks API가 `Lock was stolen` AbortError를 던지는 문제를 no-op lock으로 우회한다(`src/lib/supabase.ts:11-17`).
+- **외부 API 프록시 + 프리페치**: 네이버 뉴스·한국은행 ECOS API 키를 클라이언트에 노출하지 않도록 Supabase Edge Function(`naver-news`, `ecos-series`)을 경유한다. `useNews.ts`는 현재 단어를 세션 캐시 우선 조회하고 다음 단어는 미리 fetch해둔다. `ecos-series`는 단어 설명 그래프(`WordVisuals.tsx`)에 쓰이며, 통계 하나가 실패하면 해당 카드만 숨긴다.
+- **딥링크 랜딩 분기**: `App.tsx`의 `resolveLandingTarget`이 `getSchemeUri()`를 `parseLandingPath`(`src/lib/landing.ts`)로 파싱해 초기 라우트를 정하고, 유입 경로를 `logClick('entry', { referrer, target })`로 기록한다.
+- **단위 테스트**: `vitest`로 퀴즈 포인트·보기 생성(`src/pages/QuizScreen.test.ts`), 정답 판정·배지·리그·스트릭·닉네임·코스 경로(`src/lib/*.test.ts`), 이해 확인 화면(`LessonCheckScreen.test.tsx`), 뉴스·알림 동의 훅(`src/hooks/*.test.*`)을 검증한다.
 
 ## 스택
 
@@ -57,15 +57,18 @@ npm run dev
 | `VITE_SUPABASE_URL` | 필수 | 없으면 `src/lib/supabase.ts`에서 즉시 예외 발생 |
 | `VITE_SUPABASE_ANON_KEY` | 필수 | 위와 동일 |
 | `VITE_SENTRY_DSN` | 선택 | `src/main.tsx`에서 `PROD` 빌드일 때만 Sentry 활성화 |
+| `VITE_REWARDED_AD_GROUP_ID` | 선택 | 리워드 광고 그룹 ID(`src/lib/ads.ts`). 없으면 광고 기능 숨김 |
+| `VITE_PROMOTION_CODE` | 선택 | 토스 프로모션 코드(`src/lib/promotion.ts`). 없으면 첫 학습 보상 숨김 |
+| `VITE_SHARE_REWARD_MODULE_ID` | 미사용 | 공유 리워드 연동 제거(a762db6) 후 코드에서 참조하지 않음 |
 
 값 출처: TODO: 확인 필요 (Supabase 프로젝트 발급 방식/대상은 코드에 없음).
-
-`AIT_DEV_HOST`(선택, 기본 `0.0.0.0`)는 `.env.example`에는 없고 `apps-in-toss.config.ts`가 `process.env`에서 직접 읽는 값으로, 실기기 QR 테스트 시 LAN IP를 지정할 때 쓴다.
 
 기타 스크립트:
 
 ```bash
-npm run build     # ait build
+npm run build      # vite build && ait build
+npm run preview    # vite preview
+npm run deploy     # ait deploy
 npm run lint       # eslint .
 npm run test       # vitest run
 npm run test:watch # vitest
