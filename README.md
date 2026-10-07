@@ -25,7 +25,7 @@
 - **iOS WebView 대응**: iOS WKWebView(토스 앱)에서 Web Locks API가 `Lock was stolen` AbortError를 던지는 문제를 no-op lock으로 우회한다(`src/lib/supabase.ts:11-17`).
 - **외부 API 프록시 + 프리페치**: 네이버 뉴스·한국은행 ECOS API 키를 클라이언트에 노출하지 않도록 Supabase Edge Function(`naver-news`, `ecos-series`)을 경유한다. `useNews.ts`는 현재 단어를 세션 캐시 우선 조회하고 다음 단어는 미리 fetch해둔다. `ecos-series`는 단어 설명 그래프(`WordVisuals.tsx`)에 쓰이며, 통계 하나가 실패하면 해당 카드만 숨긴다.
 - **딥링크 랜딩 분기**: `App.tsx`의 `resolveLandingTarget`이 `getSchemeUri()`를 `parseLandingPath`(`src/lib/landing.ts`)로 파싱해 초기 라우트를 정하고, 유입 경로를 `logClick('entry', { referrer, target })`로 기록한다.
-- **단위 테스트**: `vitest`로 퀴즈 포인트·보기 생성(`src/pages/QuizScreen.test.ts`), 정답 판정·배지·리그·스트릭·닉네임·코스 경로(`src/lib/*.test.ts`), 이해 확인 화면(`LessonCheckScreen.test.tsx`), 뉴스·알림 동의 훅(`src/hooks/*.test.*`)을 검증한다.
+- **단위 테스트**: `vitest`로 퀴즈 포인트·보기 생성(`src/pages/QuizScreen.test.ts`), 정답 판정·배지·리그·스트릭·닉네임·코스 경로·1000행 넘는 콘텐츠 페이지 조회(`src/lib/*.test.ts`), 이해 확인 화면(`LessonCheckScreen.test.tsx`), 뉴스·알림 동의 훅(`src/hooks/*.test.*`)을 검증한다.
 
 ## 스택
 
