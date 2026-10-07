@@ -126,7 +126,7 @@ NEW = [
      '중립금리는 물가가 안정되고 경제가 잠재 수준으로 성장할 때의 실질금리다. 직접 관측할 수 없어 추정한다. '
      '생산성과 잠재성장률이 높으면 올라가고, 고령화와 저축 증가로 내려간다. '
      '실제 실질금리가 중립금리보다 높으면 긴축적, 낮으면 완화적인 통화정책으로 본다.',
-     6, 3, ['기준금리', '실질금리', '잠재GDP성장률', '테일러 준칙(Taylor’s Rule)'],
+     6, 3, ['기준금리', '실질금리', '잠재GDP성장률', '테일러 준칙'],
      [F('경제의 체력이 금리와 물가로 이어지는 길', ['생산성·인구구조', '잠재성장률', '중립금리(R*)', '중앙은행의 기준금리 결정', '실질금리', '소비·투자', '총수요', '물가·고용'],
         '핵심은 기준금리가 몇 %인지가 아니라, 실질금리가 중립금리보다 높은지 낮은지예요.')]),
     (763, 'NAIRU', '물가 상승률을 높이지 않고 유지할 수 있는 가장 낮은 실업률',
@@ -931,6 +931,9 @@ NEW = [
      9, 1, ['국민연금', '스튜어드십 코드'], None, ['sgsg']),
 ]
 
+from tesat_words import TESAT  # noqa: E402  1001~ 테셋 블로그 기반 단어
+NEW += TESAT
+
 
 def main():
     words = {k: v for k, v in categories.load_words().items() if k < 748}   # load_words는 18_words_new.sql(이 스크립트 출력)도 읽는다
@@ -950,22 +953,37 @@ def main():
 
     q = lambda s: "'" + s.replace("'", "''") + "'"
     arr = lambda xs: "ARRAY[" + ','.join(q(x) for x in xs) + "]::text[]"
-    rows = []
+    rows, tesat_rows = [], []
     for n in NEW:
         wid, word, meaning, detail, _t, _l, related, visuals = n[:8]
         srcs = n[8] if len(n) > 8 else []
         v = q(json.dumps(visuals, ensure_ascii=False)) + '::jsonb' if visuals else 'NULL'
-        rows.append(f"({wid},{q(word)},{q(meaning)},{q(detail)},'',{q(refine.hint_of(word))},{arr(related)},{v},{arr(srcs)})")
-    out = ['-- ===== 800선에 없는 로드맵 핵심어 %d개 (new_words.py 생성 - 손으로 고치지 말 것) =====' % len(NEW),
+        (rows if wid < 1001 else tesat_rows).append(f"({wid},{q(word)},{q(meaning)},{q(detail)},'',{q(refine.hint_of(word))},{arr(related)},{v},{arr(srcs)})")
+    out = ['-- ===== 800선에 없는 로드맵 핵심어 %d개 (new_words.py 생성 - 손으로 고치지 말 것) =====' % len(rows),
            '-- 먼저 migration_word_source.sql, migration_word_visuals.sql 적용. 코스 배정은 categories.py(17_courses)가 한다.',
            'INSERT INTO public.words (id, word, meaning, detailed_meaning, news_example, hint, related_words, visuals, sources) VALUES',
            ',\n'.join(rows),
            'ON CONFLICT (id) DO UPDATE SET word = EXCLUDED.word, meaning = EXCLUDED.meaning, detailed_meaning = EXCLUDED.detailed_meaning,',
            '  hint = EXCLUDED.hint, related_words = EXCLUDED.related_words, visuals = EXCLUDED.visuals, sources = EXCLUDED.sources;',
            '', "NOTIFY pgrst, 'reload schema';", '',
-           f'SELECT count(*) FROM public.words WHERE id >= 748;  -- {len(NEW)}']
+           f'SELECT count(*) FROM public.words WHERE id BETWEEN 748 AND 1000;  -- {len(rows)}']
     (HERE / '18_words_new.sql').write_text('\n'.join(out) + '\n')
-    print(f'18_words_new.sql: {len(NEW)}개')
+    print(f'18_words_new.sql: {len(rows)}개')
+
+    # 1001~은 따로 낸다. 18을 다시 실행하면 748~1000의 visuals(레슨 파일이 덧붙인 카드)를 덮어쓰기 때문
+    upsert = ['INSERT INTO public.words (id, word, meaning, detailed_meaning, news_example, hint, related_words, visuals, sources) VALUES',
+              'ON CONFLICT (id) DO UPDATE SET word = EXCLUDED.word, meaning = EXCLUDED.meaning, detailed_meaning = EXCLUDED.detailed_meaning,',
+              '  hint = EXCLUDED.hint, related_words = EXCLUDED.related_words, visuals = EXCLUDED.visuals, sources = EXCLUDED.sources;']
+    for old_f in HERE.glob('19_words_tesat_*.sql'):
+        old_f.unlink()
+    chunks = [tesat_rows[i:i + 60] for i in range(0, len(tesat_rows), 60)]
+    for k, chunk in enumerate(chunks, 1):
+        body = ['-- ===== 테셋 블로그 기반 단어 %d/%d (new_words.py + tesat_words.py 생성 - 손으로 고치지 말 것) =====' % (k, len(chunks)),
+                upsert[0], ',\n'.join(chunk), upsert[1], upsert[2]]
+        if k == len(chunks):
+            body += ['', "NOTIFY pgrst, 'reload schema';", '', f'-- SELECT count(*) FROM public.words WHERE id >= 1001;  -- {len(tesat_rows)}']
+        (HERE / f'19_words_tesat_{k}.sql').write_text('\n'.join(body) + '\n')
+    print(f'19_words_tesat_*.sql: {len(tesat_rows)}개 / 파일 {len(chunks)}개')
 
 
 if __name__ == '__main__':
