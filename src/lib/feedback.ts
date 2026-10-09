@@ -57,6 +57,16 @@ export const SFX_NAMES: Sfx[] = ['tick', 'node', 'spend', 'correct', 'combo', 'c
   'tierup', 'claim', 'boost', 'streak', 'celebrate', 'badge', 'error'];
 const buffers = new Map<Sfx, AudioBuffer | null>();   // null = 없음(합성음 사용)
 const loading = new Set<Sfx>();
+const lastPlayedAt = new Map<Sfx, number>();
+const FILE_GAIN = 0.55;
+const MIN_FILE_GAP_MS: Partial<Record<Sfx, number>> = {
+  tick: 65,
+  correct: 120,
+  combo: 120,
+  combo_max: 140,
+  wrong: 180,
+  lesson: 360,
+};
 const loadSfx = async (name: Sfx) => {
   if (buffers.has(name) || loading.has(name)) return;
   loading.add(name);
@@ -69,15 +79,39 @@ const loadSfx = async (name: Sfx) => {
   finally { loading.delete(name); }
 };
 // 첫 제스처에서 한 번 전부 받아 둔다 (useTapHaptics가 호출)
-export const preloadSfx = () => { SFX_NAMES.forEach(n => { void loadSfx(n); }); };
+export const preloadSfx = () => {
+  if (!soundPrefs.enabled) return;
+  SFX_NAMES.forEach(n => { void loadSfx(n); });
+};
 const playFile = (name: Sfx): boolean => {
   if (!soundPrefs.enabled) return true;   // 꺼져 있으면 합성음도 내지 않는다
+  const nowMs = performance.now();
+  const minGap = MIN_FILE_GAP_MS[name] ?? 90;
+  if (nowMs - (lastPlayedAt.get(name) ?? -Infinity) < minGap) return true;
   const buf = buffers.get(name);
   if (!buf) { if (!buffers.has(name)) void loadSfx(name); return false; }
   const c = audio(); if (!c || c.state !== 'running') return true;
   if (import.meta.env.DEV) (window as unknown as { __lastSfxFile?: string }).__lastSfxFile = name;
-  try { const src = c.createBufferSource(); src.buffer = buf; src.connect(c.destination); src.start(); } catch { return false; }
+  try {
+    const src = c.createBufferSource();
+    const gain = c.createGain();
+    src.buffer = buf;
+    gain.gain.setValueAtTime(FILE_GAIN, c.currentTime);
+    src.connect(gain);
+    gain.connect(c.destination);
+    src.start();
+    lastPlayedAt.set(name, nowMs);
+  } catch { return false; }
   return true;
+};
+
+export const __resetFeedbackForTest = () => {
+  ctx = null;
+  buffers.clear();
+  loading.clear();
+  lastPlayedAt.clear();
+  hapticPrefs.enabled = true;
+  soundPrefs.enabled = true;
 };
 
 // 음이름 → Hz

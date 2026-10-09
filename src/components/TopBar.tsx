@@ -2,28 +2,23 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import type React from 'react';
 import { BottomSheet } from '@toss/tds-mobile';
-import { ChevronsUp, Lock, Tv, Zap } from 'lucide-react';
+import { ChevronsUp, Tv, Zap } from 'lucide-react';
 import { StreakIcon, XpIcon, PointIcon, WordsIcon } from './StatIcons';
 import { showModal } from './AlertModal';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
 import { calcStreak } from '../lib/streak';
 import { isRewardedAdEnabled, showRewardedAd } from '../lib/ads';
-import { ENERGY_AD_REWARD, ENERGY_REFILL_COST, LESSON_COST, XP_BONUS_POINTS, XP_BONUS_STEP } from '../constants';
+import { ENERGY_REFILL_COST, LESSON_COST, XP_BONUS_POINTS, XP_BONUS_STEP } from '../constants';
 import { feedbackClaim, feedbackBoost } from '../lib/feedback';
 import { PointCelebration, type PointReward } from './PointCelebration';
 import { RollingNumber } from './RollingNumber';
+import { EnergyShopContent, type EnergyRefillNotice } from './EnergyShopContent';
 
 // 모든 화면 상단 고정 바. 아이콘 + 숫자만 나열한다(티어는 마이페이지에만).
 // 연속 학습·XP·배운 단어는 누르면 아래에 짧은 설명 말풍선, 포인트는 구매 시트(광고 충전 / XP 2배 부스트)가 열린다.
 type Tip = 'streak' | 'xp' | 'words';
 const TIP_W = 256;
-const formatEnergyLeft = (ms: number) => {
-  const total = Math.max(1, Math.ceil(ms / 60000));
-  const h = Math.floor(total / 60);
-  const m = total % 60;
-  return h > 0 ? `${h}시간 ${m}분` : `${m}분`;
-};
 
 export const TopBar = () => {
   const { points, xp, boostUntil, energy, energyMax, nextEnergyAt, knownWords, attendanceDates, claimAdReward, claimEnergyAd, buyEnergyRefill, buyBoost, shopOpen, shopReason, openShop, closeShop } = useAppContext();
@@ -32,6 +27,8 @@ export const TopBar = () => {
   const [tip, setTip] = useState<Tip | null>(null);
   const energyAdLockRef = useRef<number | null>(null);
   const energyRefillLockRef = useRef(false);
+  const [energyRefillPending, setEnergyRefillPending] = useState(false);
+  const [energyRefillNotice, setEnergyRefillNotice] = useState<EnergyRefillNotice>(null);
   // 학습 중에는 각 화면의 레슨명과 진행 단계에 집중한다. 상점 시트는 계속 마운트한다.
   const pathname = useLocation().pathname;
   const hideBar = ['/home', '/league', '/league/rules', '/my', '/welcome', '/word-card', '/quiz', '/lesson-check', '/review'].includes(pathname);
@@ -41,6 +38,12 @@ export const TopBar = () => {
   useEffect(() => () => {
     if (energyAdLockRef.current !== null) window.clearTimeout(energyAdLockRef.current);
   }, []);
+
+  const visibleEnergyRefillNotice = energyRefillNotice?.tone === 'points' && points >= ENERGY_REFILL_COST ? null : energyRefillNotice;
+  const closeShopAndReset = () => {
+    setEnergyRefillNotice(null);
+    closeShop();
+  };
 
   // 설명 말풍선은 3초 뒤 저절로 닫힌다. 같은 아이콘을 다시 누르면 바로 닫힌다
   useEffect(() => {
@@ -77,7 +80,7 @@ export const TopBar = () => {
         if (credited) { feedbackClaim(); setCelebration({ points: credited, source: 'ad' }); }
       });
     });
-    closeShop();
+    closeShopAndReset();
   };
 
   const handleEnergyAd = () => {
@@ -94,27 +97,43 @@ export const TopBar = () => {
         if (credited) { feedbackClaim(); showModal(`에너지 +${credited}`); }
       });
     });
-    closeShop();
+    closeShopAndReset();
   };
 
   const handleEnergyRefill = async () => {
-    if (energyRefillLockRef.current) return;
-    if (energy >= energyMax) { showModal('에너지가 이미 가득 찼어요'); return; }
-    if (points < ENERGY_REFILL_COST) { closeShop(); showModal('포인트가 부족해요', 'error'); return; }
+    if (energyRefillLockRef.current || energyRefillPending) return;
+    if (energy >= energyMax) {
+      setEnergyRefillNotice({ tone: 'info', text: '에너지가 이미 가득 찼어요.' });
+      return;
+    }
+    if (points < ENERGY_REFILL_COST) {
+      setEnergyRefillNotice({
+        tone: 'points',
+        text: `${(ENERGY_REFILL_COST - points).toLocaleString()}P 부족해요. 포인트를 더 모으면 충전할 수 있어요.`,
+      });
+      logClick('energy_refill_blocked_points', { points, shortfall: ENERGY_REFILL_COST - points });
+      return;
+    }
     energyRefillLockRef.current = true;
+    setEnergyRefillPending(true);
+    setEnergyRefillNotice(null);
     const result = await buyEnergyRefill();
     energyRefillLockRef.current = false;
-    if (result === 'ok') { feedbackClaim(); showModal('에너지를 모두 충전했어요'); closeShop(); }
-    else if (result === 'pending') { showModal('충전했어요. 저장 상태는 자동으로 다시 확인해요'); closeShop(); }
-    else if (result === 'full') { showModal('에너지가 이미 가득 찼어요'); closeShop(); }
-    else if (result === 'points') { closeShop(); showModal('포인트가 부족해요', 'error'); }
-    else showModal('충전하지 못했어요. 잠시 후 다시 시도해 주세요', 'error');
+    setEnergyRefillPending(false);
+    if (result === 'ok') { feedbackClaim(); showModal('에너지를 모두 충전했어요'); closeShopAndReset(); }
+    else if (result === 'pending') { showModal('충전했어요. 저장 상태는 자동으로 다시 확인해요'); closeShopAndReset(); }
+    else if (result === 'full') { setEnergyRefillNotice({ tone: 'info', text: '에너지가 이미 가득 찼어요.' }); }
+    else if (result === 'points') {
+      setEnergyRefillNotice({ tone: 'points', text: '잔액이 바뀌어 충전할 수 없어요. 포인트를 더 모아 주세요.' });
+    } else {
+      setEnergyRefillNotice({ tone: 'network', text: '네트워크가 불안정해 충전하지 못했어요. 포인트는 차감되지 않았어요.' });
+    }
   };
 
   const handleBoost = async () => {
     const r = await buyBoost();
-    if (r === 'ok') { feedbackBoost(); showModal('30분간 XP 2배!'); closeShop(); }
-    else if (r === 'active') { showModal('이미 부스트 중이에요', 'error'); closeShop(); }
+    if (r === 'ok') { feedbackBoost(); showModal('30분간 XP 2배!'); closeShopAndReset(); }
+    else if (r === 'active') { showModal('이미 부스트 중이에요', 'error'); closeShopAndReset(); }
     else showModal('포인트가 부족해요', 'error');
   };
 
@@ -130,13 +149,13 @@ export const TopBar = () => {
           {!compactBar && <button onClick={e => toggleTip('xp', e)} aria-label="경험치" className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 active:opacity-60">
             <XpIcon size={19} /><span><RollingNumber value={xp} /></span>
           </button>}
-          <button onClick={() => { setTip(null); openShop(); }} aria-label="포인트 상점" className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 active:opacity-60">
+          <button onClick={() => { setTip(null); setEnergyRefillNotice(null); openShop(); }} aria-label="포인트 상점" className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 active:opacity-60">
             <PointIcon size={19} /><span><RollingNumber value={points} /></span>
           </button>
           <button onClick={e => toggleTip('words', e)} aria-label="배운 단어" className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 active:opacity-60">
             <WordsIcon size={19} /><span><RollingNumber value={knownWords.length} /></span>
           </button>
-          <button onClick={() => { setTip(null); openShop('energy'); }} aria-label="에너지" className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 active:opacity-60">
+          <button onClick={() => { setTip(null); setEnergyRefillNotice(null); openShop('energy'); }} aria-label="에너지" className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 active:opacity-60">
             <Zap size={19} className="shrink-0 fill-pink-400 text-pink-400" /><span><RollingNumber value={energy} /></span>
           </button>
           {boostLeft > 0 && (
@@ -164,82 +183,62 @@ export const TopBar = () => {
       <BottomSheet
         open={shopOpen}
         className="original-modal"
-        onDimmerClick={closeShop}
+        onDimmerClick={closeShopAndReset}
         header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>{shopReason === 'lesson' ? '포인트가 부족해요' : shopReason === 'energy' ? '에너지' : '포인트 상점'}</span>}
       >
-        <div className="px-5 pb-6 flex flex-col gap-2">
-          {shopReason === 'energy' && (
-            <div className="mb-2 rounded-card bg-[var(--color-surface)] px-4 py-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-bold text-[var(--color-ink)]">충전 중</p>
-                <p className="flex items-center gap-1 text-sm font-black text-pink-400"><Zap size={16} className="fill-current" />{energy}/{energyMax}</p>
-              </div>
-              <div className="mt-3 h-3 overflow-hidden rounded-full bg-[var(--color-card)]">
-                <div className="h-full rounded-full bg-pink-400 transition-all duration-500" style={{ width: `${(energy / energyMax) * 100}%` }} />
-              </div>
-              <p className="mt-2! text-2xs font-semibold text-[var(--color-ink-4)]">
-                {energy >= energyMax ? '가득 찼어요' : `다음 충전: ${formatEnergyLeft(energyLeft)} 후`}
+        {shopReason === 'energy' ? (
+          <EnergyShopContent
+            points={points}
+            energy={energy}
+            energyMax={energyMax}
+            energyLeft={energyLeft}
+            boostLeft={boostLeft}
+            refillPending={energyRefillPending}
+            refillNotice={visibleEnergyRefillNotice}
+            onEnergyAd={handleEnergyAd}
+            onEnergyRefill={handleEnergyRefill}
+            onBoost={handleBoost}
+          />
+        ) : (
+          <div className="px-5 pb-6 flex flex-col gap-2">
+            {shopReason === 'lesson' && (
+              <p className="text-sm font-bold text-[var(--color-ink)] mb-1 break-keep">레슨을 시작하려면 {LESSON_COST}P가 필요해요</p>
+            )}
+            <p className="flex items-center gap-1 text-xs text-[var(--color-ink-3)] mb-1">보유 <PointIcon size={12} />{points.toLocaleString()}P</p>
+
+            {/* 레슨이 막혀서 열렸을 땐 광고가 주행동이라 채운 버튼으로 */}
+            <button
+              onClick={handleAd}
+              className={`grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-chip px-4 py-4 text-sm font-bold active:opacity-70 ${shopReason === 'lesson' ? 'bg-brand-500' : 'bg-[var(--color-button-secondary)] text-[var(--color-ink-2)]'}`}
+            >
+              <span className="flex min-w-0 items-center gap-2 text-left leading-5"><Tv size={18} className="shrink-0" />광고 보고 포인트 받기</span>
+              <span className="shrink-0 text-right text-2xs font-medium leading-4 opacity-80">시청하고 받기</span>
+            </button>
+
+            <button
+              onClick={handleBoost}
+              disabled={points < 300 || boostLeft > 0}
+              className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-chip bg-[var(--color-button-secondary)] px-4 py-4 text-sm font-bold text-[var(--color-ink-2)] active:opacity-70 disabled:opacity-60"
+            >
+              <span className="flex min-w-0 items-center gap-2 text-left leading-5"><ChevronsUp size={18} className="shrink-0" />XP 2배 부스트</span>
+              <span className="shrink-0 text-right text-2xs font-medium leading-4">
+                {boostLeft > 0
+                  ? `${Math.floor(boostLeft / 60000)}:${String(Math.floor((boostLeft % 60000) / 1000)).padStart(2, '0')} 남음`
+                  : points < 300 ? `${(300 - points).toLocaleString()}P 더 필요` : '300P · 30분'}
+              </span>
+            </button>
+
+            <div className="rounded-chip px-4 py-3 mt-1" style={{ backgroundColor: 'var(--color-surface)' }}>
+              <p className="text-2xs font-bold text-[var(--color-ink-3)] mb-1!">학습으로 모으기</p>
+              <p className="text-2xs text-[var(--color-ink-4)] leading-relaxed break-keep">
+                퀴즈 정답 +10~20P · 미션 보상 +10~50P · XP {XP_BONUS_STEP}마다 +{XP_BONUS_POINTS}P
               </p>
             </div>
-          )}
-          {shopReason === 'lesson' && (
-            <p className="text-sm font-bold text-[var(--color-ink)] mb-1 break-keep">레슨을 시작하려면 {LESSON_COST}P가 필요해요</p>
-          )}
-          <p className="flex items-center gap-1 text-xs text-[var(--color-ink-3)] mb-1">보유 <PointIcon size={12} />{points.toLocaleString()}P</p>
-
-          {shopReason === 'energy' && (
-            <>
-              <button
-                onClick={handleEnergyAd}
-                disabled={energy >= energyMax}
-                className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-chip bg-brand-500 px-4 py-4 text-sm font-bold active:opacity-70 disabled:opacity-60"
-              >
-                <span className="flex min-w-0 items-center gap-2 text-left leading-5"><Tv size={18} className="shrink-0" />광고 보고 에너지 받기</span>
-                <span className="shrink-0 text-right text-2xs font-medium leading-4">+{ENERGY_AD_REWARD}</span>
-              </button>
-              <button
-                onClick={handleEnergyRefill}
-                disabled={energy >= energyMax}
-                className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-chip bg-[var(--color-button-secondary)] px-4 py-4 text-sm font-bold text-[var(--color-ink-2)] active:opacity-70 disabled:opacity-60"
-              >
-                <span className="flex min-w-0 items-center gap-2 text-left leading-5"><Lock size={18} className="shrink-0" />에너지 모두 충전</span>
-                <span className="shrink-0 text-right text-2xs font-medium leading-4"><PointIcon size={12} /> {ENERGY_REFILL_COST}</span>
-              </button>
-            </>
-          )}
-
-          {/* 레슨이 막혀서 열렸을 땐 광고가 주행동이라 채운 버튼으로 */}
-          {shopReason !== 'energy' && <button
-            onClick={handleAd}
-            className={`grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-chip px-4 py-4 text-sm font-bold active:opacity-70 ${shopReason === 'lesson' ? 'bg-brand-500' : 'bg-[var(--color-button-secondary)] text-[var(--color-ink-2)]'}`}
-          >
-            <span className="flex min-w-0 items-center gap-2 text-left leading-5"><Tv size={18} className="shrink-0" />광고 보고 포인트 받기</span>
-            <span className="shrink-0 text-right text-2xs font-medium leading-4 opacity-80">시청하고 받기</span>
-          </button>}
-
-          <button
-            onClick={handleBoost}
-            disabled={points < 300 || boostLeft > 0}
-            className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-chip bg-[var(--color-button-secondary)] px-4 py-4 text-sm font-bold text-[var(--color-ink-2)] active:opacity-70 disabled:opacity-60"
-          >
-            <span className="flex min-w-0 items-center gap-2 text-left leading-5"><ChevronsUp size={18} className="shrink-0" />{boostLeft > 0 ? '부스트 사용 중' : 'XP 2배 부스트'}</span>
-            <span className="shrink-0 text-right text-2xs font-medium leading-4">
-              {boostLeft > 0
-                ? `${Math.floor(boostLeft / 60000)}:${String(Math.floor((boostLeft % 60000) / 1000)).padStart(2, '0')} 남음`
-                : points < 300 ? `${(300 - points).toLocaleString()}P 더 필요` : '300P · 30분'}
-            </span>
-          </button>
-
-          <div className="rounded-chip px-4 py-3 mt-1" style={{ backgroundColor: 'var(--color-surface)' }}>
-            <p className="text-2xs font-bold text-[var(--color-ink-3)] mb-1!">학습으로 모으기</p>
-            <p className="text-2xs text-[var(--color-ink-4)] leading-relaxed break-keep">
-              퀴즈 정답 +10~20P · 미션 보상 +10~50P · XP {XP_BONUS_STEP}마다 +{XP_BONUS_POINTS}P
+            <p className="text-2xs text-[var(--color-ink-4)] mt-1 leading-relaxed">
+              첫 레슨은 무료예요. 이후 레슨 시작에 {LESSON_COST}P가 들어요. 학습·퀴즈 시작에는 에너지 1이 들고, 복습은 무료예요. 포인트는 순위에 반영되지 않아요.
             </p>
           </div>
-          <p className="text-2xs text-[var(--color-ink-4)] mt-1 leading-relaxed">
-            첫 레슨은 무료예요. 이후 레슨 시작에 {LESSON_COST}P가 들어요. 학습·퀴즈 시작에는 에너지 1이 들고, 복습은 무료예요. 포인트는 순위에 반영되지 않아요.
-          </p>
-        </div>
+        )}
       </BottomSheet>
       {celebration && <PointCelebration reward={celebration} onClose={() => setCelebration(null)} />}
     </>
