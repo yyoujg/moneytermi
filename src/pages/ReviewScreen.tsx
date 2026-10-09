@@ -15,6 +15,7 @@ import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
 import { StreakCelebration } from '../components/StreakCelebration';
 import { PointIcon } from '../components/StatIcons';
 import { Mascot } from '../components/Mascot';
+import { shouldScheduleRetry } from '../lib/review';
 
 type Status = 'idle' | 'correct' | 'wrong';
 
@@ -49,7 +50,7 @@ const QuizPage = () => {
   const [totalCorrect, setTotalCorrect] = useState(0);
   const [lastEarned, setLastEarned] = useState(0);   // 서버가 채점한 금액. 응답 전엔 0
   const [capped, setCapped] = useState(false);
-  const graded = useRef(false);
+  const reviewRecordedIds = useRef<Set<number>>(new Set());
   const inputRef = useRef<HTMLInputElement>(null);
 
   const word = queue[index];
@@ -76,7 +77,6 @@ const QuizPage = () => {
     setInput('');
     setStatus('idle');
     setShowHint(false);
-    graded.current = false;
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -87,9 +87,10 @@ const QuizPage = () => {
     // 괄호 약어·슬래시 항목도 정답 인정 (서버 answer_matches와 동일 규칙)
     const isCorrect = answerMatches(input, word.word);
 
-    // SRS 일정은 단어별 첫 제출 결과로 한 번만 기록
-    if (!graded.current) {
-      graded.current = true;
+    // SRS 일정은 같은 세션의 단어별 첫 제출 결과로 한 번만 기록한다.
+    // 첫 오답 뒤 재정답을 별도 완전 성공으로 기록하면 간격이 과하게 늘 수 있다.
+    if (!reviewRecordedIds.current.has(word.id)) {
+      reviewRecordedIds.current.add(word.id);
       void recordReview(word.id, isCorrect, showHint);
     }
 
@@ -106,7 +107,10 @@ const QuizPage = () => {
       feedbackWrong();
       setCombo(0);
       setStatus('wrong');
-      setTimeout(() => { setStatus('idle'); setInput(''); }, 1000);
+      if (shouldScheduleRetry(queue, index, word.id)) {
+        setQueue(q => [...q, word]);
+      }
+      setTimeout(goNext, 1000);
       await submitQuizAnswer(word.id, input, 'typed', showHint, index === 0);   // 다음 정답 응답과 순서 보장
     }
   };

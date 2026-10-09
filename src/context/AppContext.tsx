@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import type { Word, Course, Missions } from '../types';
 import { supabase, getGuestClient } from '../lib/supabase';
 import { loadStoredProfile } from '../hooks/useAuth';
@@ -9,12 +9,16 @@ import { claimPromotion } from '../lib/promotion';
 import { logClick } from '../lib/analytics';
 import { missionSlot, msUntilNextSlot, toDateStr } from '../lib/date';
 import { nextSrs, gradeFromResult, addDays } from '../lib/srs';
-import { DAILY_REVIEW_CAP, MISSION_XP } from '../constants';
+import { DAILY_REVIEW_CAP, ENERGY_AD_REWARD, ENERGY_MAX, ENERGY_REFILL_COST, MISSION_XP } from '../constants';
 import type { PointReward } from '../components/PointCelebration';
 import { feedbackClaim } from '../lib/feedback';
 import { fetchAll, PAGE } from '../lib/fetchAll';
+import { addEnergyState, fillEnergyState, nextEnergyAt as calcNextEnergyAt, normalizeEnergy, spendEnergyState, type EnergyState } from '../lib/energy';
+import { runEnergyRefill, type EnergyRefillResult } from '../lib/energyRefill';
+import { selectRecallWords, type ReviewProgressRow } from '../lib/review';
 
-type WpRow = { word_id: number; ease: number; interval_d: number; reps: number; due_date: string };
+type WpRow = ReviewProgressRow & { ease: number; interval_d: number; reps: number; due_date: string };
+type ShopReason = 'lesson' | 'energy';
 
 type AppContextValue = {
   ready: boolean;
@@ -26,12 +30,18 @@ type AppContextValue = {
   xp: number;
   boostUntil: number | null;
   buyBoost: () => Promise<'ok' | 'active' | 'fail'>;
+  energy: number;
+  energyMax: number;
+  nextEnergyAt: number | null;
+  spendEnergy: (amount: number, reason: string) => Promise<boolean>;
+  claimEnergyAd: (amount?: number) => Promise<number | null>;
+  buyEnergyRefill: () => Promise<EnergyRefillResult | 'full'>;
   spendPoints: (amount: number, reason: string) => Promise<boolean>;
   claimFirstLesson: (courseId: string) => Promise<'free' | 'ineligible' | 'error'>;
   refreshWallet: () => Promise<void>;
-  shopReason: 'lesson' | null;
+  shopReason: ShopReason | null;
   shopOpen: boolean;
-  openShop: (reason?: 'lesson') => void;
+  openShop: (reason?: ShopReason) => void;
   closeShop: () => void;
   knownWords: Word[];
   knownIds: Set<number>;
@@ -54,6 +64,7 @@ type AppContextValue = {
   allWords: Word[];
   dueQueue: Word[];
   nextReviewDate: string | null;
+  pickRecallWords: (options?: { candidates?: Word[]; excludeIds?: Iterable<number>; count?: number }) => Word[];
   recordReview: (wordId: number, correct: boolean, usedHint: boolean) => Promise<void>;
   myEmoji: string;
   updateMyEmoji: (emoji: string) => Promise<void>;
@@ -69,13 +80,18 @@ const DEFAULT_MISSIONS: Missions = {
   m1: { id: 'm1', title: '앱 출석하기',         reward: 10, current: 0, target: 1, isRewarded: false, sortOrder: 10 },
   m3: { id: 'm3', title: '퀴즈 정답 3회 맞히기', reward: 30, current: 0, target: 3, isRewarded: false, sortOrder: 30 },
 };
+const ENERGY_KEY = 'moneytermi_energy_v1';
+const energyKeyFor = (profileId: string | null) => `${ENERGY_KEY}:${profileId ?? 'anonymous'}`;
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [points, setPoints]               = useState(0);
   const [xp, setXp]                       = useState(0);
   const [boostUntil, setBoostUntil]       = useState<number | null>(null);
+  const [energyState, setEnergyState]     = useState<EnergyState>(() => ({ current: ENERGY_MAX, updatedAt: Date.now() }));
+  const energyStateRef                    = useRef(energyState);
+  const energyKeyRef                      = useRef(energyKeyFor(null));
   const [shopOpen, setShopOpen]           = useState(false);
-  const [shopReason, setShopReason]       = useState<'lesson' | null>(null);
+  const [shopReason, setShopReason]       = useState<ShopReason | null>(null);
   const [knownWords, setKnownWords]       = useState<Word[]>([]);
   const [unknownWords, setUnknownWords]   = useState<Word[]>([]);
   const [missions, setMissions]           = useState<Missions>(DEFAULT_MISSIONS);
@@ -92,6 +108,49 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const pendingUnknownIds = useRef<Set<number> | null>(null);
 
   const knownIds = useMemo(() => new Set(knownWords.map(w => w.id)), [knownWords]);
+  const normalizedEnergy = useMemo(() => normalizeEnergy(energyState), [energyState]);
+  const energy = normalizedEnergy.current;
+  const nextEnergyAt = calcNextEnergyAt(energyState);
+  const saveEnergy = useCallback(async (state: EnergyState, key = energyKeyRef.current) => {
+    try {
+      await Storage.setItem(key, JSON.stringify(state));
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+  const persistEnergy = useCallback(async (state: EnergyState) => {
+    for (let i = 0; i < 3; i++) {
+      if (await saveEnergy(state)) return true;
+    }
+    return false;
+  }, [saveEnergy]);
+  const loadEnergyForProfile = useCallback(async (profileId: string) => {
+    const key = energyKeyFor(profileId);
+    energyKeyRef.current = key;
+    let raw = await Storage.getItem(key).catch(() => null);
+    let usedLegacyKey = false;
+    if (!raw) {
+      raw = await Storage.getItem(ENERGY_KEY).catch(() => null);
+      usedLegacyKey = raw !== null;
+    }
+    let next: EnergyState = { current: ENERGY_MAX, updatedAt: Date.now() };
+    if (raw) {
+      try {
+        next = normalizeEnergy(JSON.parse(raw) as EnergyState);
+      } catch {
+        await Storage.removeItem(key).catch(() => {});
+      }
+    }
+    energyStateRef.current = next;
+    setEnergyState(next);
+    void saveEnergy(next, key);
+    if (usedLegacyKey) void Storage.removeItem(ENERGY_KEY).catch(() => {});
+  }, [saveEnergy]);
+
+  useEffect(() => {
+    energyStateRef.current = energyState;
+  }, [energyState]);
 
   // ── Storage는 초기 로드 시 한 번만 읽고 ref에 캐싱 ────────────
   const profileIdRef    = useRef<string | null>(null);
@@ -103,6 +162,38 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const missionRowsRef  = useRef<{ mission_id: string; current: number; is_rewarded: boolean }[]>([]);
   const claimingRef     = useRef<Set<string>>(new Set());
   const boostingRef     = useRef(false);
+  const energyRefillingRef = useRef(false);
+
+  const persistFilledEnergy = useCallback(async () => {
+    const next = fillEnergyState(energyStateRef.current);
+    energyStateRef.current = next;
+    setEnergyState(next);
+    return persistEnergy(next);
+  }, [persistEnergy]);
+
+  const recoverEnergyRefill = useCallback(async (profileId: string) => runEnergyRefill({
+    profileId,
+    storage: Storage,
+    rpc: async idempotencyKey => {
+      const { data, error } = await dbRef.current.rpc('buy_energy_refill_once', { p_idempotency_key: idempotencyKey });
+      return { data: data ?? null, error };
+    },
+    persistFilledEnergy,
+    applyPoints: setPoints,
+  }), [persistFilledEnergy]);
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setEnergyState(prev => {
+        const next = normalizeEnergy(prev);
+        const changed = next.current !== prev.current || (next.current < ENERGY_MAX && next.updatedAt !== prev.updatedAt);
+        if (changed) void persistEnergy(next);
+        if (changed) energyStateRef.current = next;
+        return changed ? next : prev;
+      });
+    }, 30_000);
+    return () => clearInterval(t);
+  }, [persistEnergy]);
 
   // ── 콘텐츠 로드 (courses + words) ─────────────────────────────
   useEffect(() => {
@@ -236,6 +327,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       profileIdRef.current = profileId;
       dbRef.current = p?.guestToken ? getGuestClient(p.guestToken) : supabase;
       const db = dbRef.current;
+      await loadEnergyForProfile(profileId);
+      await recoverEnergyRefill(profileId);
 
       try {
       // 1. points — DB값과 로컬값 중 큰 값 유지 (로딩 중 적립 포인트 보존)
@@ -269,7 +362,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       // 2. word_progress → 실제 Word 객체 복원
       const { data: progress } = await db
         .from('word_progress')
-        .select('word_id, status, ease, interval_d, reps, due_date')
+        .select('word_id, status, ease, interval_d, reps, due_date, last_grade')
         .eq('user_id', profileId);
 
       if (progress && progress.length > 0) {
@@ -279,7 +372,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         pendingUnknownIds.current = unknownIdSet;
         setWpRows(progress.map(p => ({
           word_id: p.word_id, ease: p.ease, interval_d: p.interval_d,
-          reps: p.reps, due_date: p.due_date,
+          reps: p.reps, due_date: p.due_date, status: p.status, last_grade: p.last_grade,
         })));
       }
 
@@ -315,7 +408,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
     load();
     return () => { cancelled = true; };
-  }, []);
+  }, [loadEnergyForProfile, recoverEnergyRefill]);
 
   // ── allWords 로드 후 pending word IDs 해소 ────────────────────
   useEffect(() => {
@@ -339,7 +432,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     const seed = fresh.map(w => ({ user_id: profileId, word_id: w.id, status, ease: 2.5, interval_d: 1, reps: 0, due_date: due }));
     const { error } = await dbRef.current.from('word_progress').upsert(seed, { onConflict: 'user_id,word_id' });
     if (error) { console.error('[sync] 초기 SRS 시드 실패:', error); return; }
-    setWpRows(prev => [...prev, ...fresh.map(w => ({ word_id: w.id, ease: 2.5, interval_d: 1, reps: 0, due_date: due }))]);
+    setWpRows(prev => [...prev, ...fresh.map(w => ({ word_id: w.id, ease: 2.5, interval_d: 1, reps: 0, due_date: due, status, last_grade: null }))]);
   };
 
   // ── knownWords → word_progress upsert (2초 디바운스) ──────────
@@ -347,9 +440,12 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     if (!ready || knownWords.length === 0) return;
     const profileId = profileIdRef.current;
     if (!profileId) return;
-    const rows = knownWords.map(w => ({ user_id: profileId, word_id: w.id, status: 'known' as const }));
-    const { error } = await dbRef.current.from('word_progress').upsert(rows, { onConflict: 'user_id,word_id' });
-    if (error) console.error('[sync] word_progress(known) 저장 실패:', error);
+    const fresh = knownWords.filter(w => !wpRows.some(r => r.word_id === w.id));
+    if (fresh.length > 0) {
+      const rows = fresh.map(w => ({ user_id: profileId, word_id: w.id, status: 'known' as const }));
+      const { error } = await dbRef.current.from('word_progress').upsert(rows, { onConflict: 'user_id,word_id' });
+      if (error) console.error('[sync] word_progress(known) 저장 실패:', error);
+    }
     await seedInitialSrs(knownWords, 'known', profileId);
     await refreshWallet();   // 새 단어 XP(트리거)·50XP 보너스·m2/m5는 이 저장이 끝나야 서버에 생긴다
   }, [knownWords, ready], 2000);
@@ -500,6 +596,54 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     return data.credited as number;
   };
 
+  // ── claimEnergyAd — 광고 보상으로 이 기기 에너지를 충전한다 ──
+  const claimEnergyAd = async (amount = ENERGY_AD_REWARD) => {
+    const normalized = normalizeEnergy(energyStateRef.current);
+    const next = addEnergyState(normalized, amount);
+    const credited = Math.max(0, next.current - normalized.current);
+    energyStateRef.current = credited > 0 ? next : normalized;
+    setEnergyState(energyStateRef.current);
+    if (credited > 0) void persistEnergy(next);
+    if (credited > 0) logClick('energy_ad_claim', { amount: credited });
+    return credited > 0 ? credited : null;
+  };
+
+  // ── buyEnergyRefill — 서버가 고정 600P를 한 번만 차감하고 이 기기 에너지를 완충한다 ──
+  const buyEnergyRefill = async (): Promise<EnergyRefillResult | 'full'> => {
+    if (energyRefillingRef.current) return 'fail';
+    if (normalizeEnergy(energyStateRef.current).current >= ENERGY_MAX) return 'full';
+    if (points < ENERGY_REFILL_COST) return 'points';
+    const profileId = profileIdRef.current;
+    if (!profileId) return 'fail';
+
+    energyRefillingRef.current = true;
+    try {
+      const result = await recoverEnergyRefill(profileId);
+      if (result === 'ok' || result === 'pending') logClick('energy_refill_buy', { result });
+      return result;
+    } finally {
+      energyRefillingRef.current = false;
+    }
+  };
+
+  // ── spendEnergy — 학습/퀴즈/복습 시작 1회당 에너지를 쓴다 ───────
+  const spendEnergy = async (amount: number, reason: string) => {
+    const prev = energyStateRef.current;
+    const next = spendEnergyState(prev, amount);
+    if (!next) {
+      const normalized = normalizeEnergy(prev);
+      energyStateRef.current = normalized;
+      setEnergyState(normalized);
+      if (normalized.current !== prev.current || normalized.updatedAt !== prev.updatedAt) void persistEnergy(normalized);
+      return false;
+    }
+    energyStateRef.current = next;
+    setEnergyState(next);
+    void persistEnergy(next);
+    logClick('energy_spend', { reason, amount, energy: next.current });
+    return true;
+  };
+
   // ── submitQuizAnswer — 서버 채점 (포인트·콤보·m3 서버 소유) ────
   const submitQuizAnswer = async (
     wordId: number, answer: string, mode: 'mc' | 'typed',
@@ -567,7 +711,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     await refreshMissions();
   };
 
-  const openShop = (reason?: 'lesson') => { setShopReason(reason ?? null); setShopOpen(true); };
+  const openShop = (reason?: ShopReason) => { setShopReason(reason ?? null); setShopOpen(true); };
   const closeShop = () => setShopOpen(false);
 
   // ── 오늘 복습 큐 (due_date <= 오늘) ────────────────────────────
@@ -585,6 +729,15 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     const todayStr = toDateStr(new Date());
     return wpRows.map(row => row.due_date).filter(date => date > todayStr).sort()[0] ?? null;
   }, [wpRows]);
+  const pickRecallWords = ({ candidates, excludeIds, count = 3 }: { candidates?: Word[]; excludeIds?: Iterable<number>; count?: number } = {}) =>
+    selectRecallWords({
+      candidates: candidates ?? knownWords,
+      knownIds,
+      progressRows: wpRows,
+      courses,
+      excludeIds,
+      count,
+    });
 
   // ── recordReview — SRS 일정만 갱신 (포인트는 submitQuizAnswer가 담당) ─
   const recordReview = async (wordId: number, correct: boolean, usedHint: boolean) => {
@@ -596,7 +749,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
     setWpRows(prev => [
       ...prev.filter(r => r.word_id !== wordId),
-      { word_id: wordId, ease: ns.ease, interval_d: ns.interval_d, reps: ns.reps, due_date: due },
+      { word_id: wordId, ease: ns.ease, interval_d: ns.interval_d, reps: ns.reps, due_date: due, status: correct ? 'known' : 'unknown', last_grade: grade },
     ]);
 
     const profileId = profileIdRef.current;
@@ -619,6 +772,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       knownWords, knownIds, setKnownWords,
       unknownWords, setUnknownWords,
       xp, boostUntil, buyBoost,
+      energy, energyMax: ENERGY_MAX, nextEnergyAt, spendEnergy, claimEnergyAd, buyEnergyRefill,
       spendPoints, claimFirstLesson, refreshWallet, shopReason, shopOpen, openShop, closeShop,
       missions, setMissions,
       claimReward,
@@ -632,6 +786,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       allWords,
       dueQueue,
       nextReviewDate,
+      pickRecallWords,
       recordReview,
       myEmoji,
       updateMyEmoji,

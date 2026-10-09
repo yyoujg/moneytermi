@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 // 상단바·마이페이지 요약 전용 아이콘(연속 학습·XP·포인트·배운 단어). 그림은 public/icons/*.png
 type Props = { size?: number; className?: string };
 // 숫자도 아이콘과 같은 색으로 칠할 수 있게 밖으로 꺼내 둔다

@@ -16,11 +16,12 @@ import { Card } from '../components/ui/Card';
 import { PointIcon, XpIcon } from '../components/StatIcons';
 import { Mascot } from '../components/Mascot';
 import { buildQuizItem, pickQuizType, type QuizOption } from '../lib/quiz';
+import { shouldScheduleRetry } from '../lib/review';
 
 const QuizScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { xp, allWords, knownWords, courses, submitQuizAnswer, refreshWallet } = useAppContext();
+  const { xp, allWords, knownWords, courses, submitQuizAnswer, recordReview, refreshWallet } = useAppContext();
 
   // 단어 id → 코스 카테고리 (오답 보기를 같은 주제로 뽑기 위함)
   const categoryOf = useMemo(() => {
@@ -29,9 +30,17 @@ const QuizScreen = () => {
     return (id: number) => map.get(id);
   }, [courses]);
 
-  const navState = location.state as { quizQueue?: Word[]; backPath?: string; nodeId?: string } | null;
+  const navState = location.state as {
+    quizQueue?: Word[];
+    backPath?: string;
+    nodeId?: string;
+    reviewMode?: boolean;
+    mode?: 'lesson_recall' | 'lesson_warmup' | 'course_review';
+    nextRoute?: { pathname: string; state?: unknown; label?: string };
+  } | null;
   const passedQueue: Word[] = navState?.quizQueue ?? [];
   const backPath = navState?.backPath ?? '/home';
+  const reviewMode = navState?.reviewMode === true || navState?.mode === 'lesson_recall' || navState?.mode === 'lesson_warmup' || navState?.mode === 'course_review';
   // state 없이 진입하면 아는 단어 10개를 한 번만 섞는다. 렌더마다 섞으면 문제가 바뀐다.
   const [randomQueue, setRandomQueue] = useState<Word[]>([]);
   useEffect(() => {
@@ -58,6 +67,7 @@ const QuizScreen = () => {
   const [correctCount, setCorrectCount] = useState(0);
   const [shake, setShake] = useState(false);
   const { soundOn, vibrationOn } = useSettings();
+  const reviewRecordedIds = useRef<Set<number>>(new Set());
 
   const currentWord = quizQueue[currentQuizIndex];
   const earnedShown = useCountUp(totalEarned);
@@ -168,10 +178,12 @@ const QuizScreen = () => {
 
         <div className="px-5 pb-12 flex flex-col gap-3">
           <button
-            onClick={() => navigate(backPath)}
+            onClick={() => navState?.nextRoute
+              ? navigate(navState.nextRoute.pathname, navState.nextRoute.state === undefined ? undefined : { state: navState.nextRoute.state })
+              : navigate(backPath)}
             className="w-full py-4 rounded-button text-sm font-bold text-white bg-brand-500 active:opacity-90"
           >
-            {backPath === '/course' ? '코스로' : '홈으로'}
+            {navState?.nextRoute?.label ?? (backPath === '/course' ? '코스로' : '홈으로')}
           </button>
         </div>
       </div>
@@ -179,7 +191,7 @@ const QuizScreen = () => {
   }
 
   // 진행률 = 맞힌 문제 / 원래 문제 수. 틀린 문제가 뒤에 붙어도 줄지 않는다(단어마다 정답은 한 번뿐이라 correctCount가 곧 끝낸 수)
-  const progressPercent = (correctCount / baseQueue.length) * 100;
+  const progressPercent = Math.min(100, (correctCount / baseQueue.length) * 100);
   const retrying = currentQuizIndex >= baseQueue.length;
 
   const handleSelect = async (option: QuizOption) => {
@@ -187,6 +199,10 @@ const QuizScreen = () => {
     setSelected(option.answer);
     // 즉시 피드백은 낙관적 (정답 단어는 클라가 이미 앎). 포인트·콤보는 서버가 채점.
     const isCorrect = option.isCorrect;
+    if (reviewMode && !reviewRecordedIds.current.has(currentWord.id)) {
+      reviewRecordedIds.current.add(currentWord.id);
+      void recordReview(currentWord.id, isCorrect, false);
+    }
 
     if (isCorrect) {
       feedbackCorrect(soundOn, vibrationOn, combo + 1);
@@ -212,7 +228,9 @@ const QuizScreen = () => {
       setStatus('wrong');
       setShake(true);
       setTimeout(() => setShake(false), 500);
-      setRetryQueue(q => [...q, currentWord]);
+      if (shouldScheduleRetry(quizQueue, currentQuizIndex, currentWord.id)) {
+        setRetryQueue(q => [...q, currentWord]);
+      }
       // 서버 콤보도 초기화 (오답 기록). 다음 정답 응답과 순서가 뒤바뀌지 않게 기다린다. 정답을 보여주고 계속하기로 다음 문제.
       await submitQuizAnswer(currentWord.id, option.answer, 'mc', false, currentQuizIndex === 0);
     }
