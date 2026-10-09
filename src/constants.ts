@@ -23,6 +23,12 @@ export type GrowthStage = {
 export const LESSON_COST = 10;
 export const XP_BONUS_STEP = 50;
 export const XP_BONUS_POINTS = 50;
+export const ENERGY_MAX = 25;
+// 참고 이미지의 3/25, 완충까지 21시간 53분 표기를 기준으로 1칸당 약 1시간 회복.
+export const ENERGY_REGEN_MS = 60 * 60 * 1000;
+export const ENERGY_ACTION_COST = 1;
+export const ENERGY_AD_REWARD = 5;
+export const ENERGY_REFILL_COST = 600;
 
 // 미션 보상 수령 시 서버가 함께 주는 XP (migration_xp.sql STEP 7 claim_mission_reward → add_xp 5)
 export const MISSION_XP = 5;

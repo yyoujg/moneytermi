@@ -219,15 +219,14 @@ const WordCardScreen = () => {
   // 콜드 딥링크(state 없음) 진입 시: 미완료 코스 우선으로 기본 단어 로드
   const isDeepLink = !state?.words?.length;
   // 딥링크 코스는 한 번 정하면 고정한다. knownIds를 따라가면 마지막 단어를 체크한 순간 코스가 바뀌어 index가 어긋난다.
-  const deepWordsRef = useRef<Word[] | null>(null);
-  const words = React.useMemo<Word[]>(() => {
-    if (state?.words?.length) return state.words;
-    if (deepWordsRef.current) return deepWordsRef.current;
-    if (!hydrated) return [];
+  const [deepWords, setDeepWords] = React.useState<Word[] | null>(null);
+  useEffect(() => {
+    if (state?.words?.length || deepWords || !hydrated) return;
     const course = courses.find(c => c.words.some(w => !knownIds.has(w.id))) ?? courses[0];
-    if (course) deepWordsRef.current = course.words;
-    return course?.words ?? [];
-  }, [state, courses, knownIds, hydrated]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (course) setDeepWords(course.words);
+  }, [state?.words?.length, deepWords, hydrated, courses, knownIds]);
+  const words = state?.words?.length ? state.words : deepWords ?? [];
   const backPath = state?.backPath ?? (isDeepLink ? '/home' : '/course');
   const backState = state?.backState;
   const autoAdvance = state?.autoAdvance ?? false;
@@ -236,6 +235,7 @@ const WordCardScreen = () => {
 
   // 자세히 알아보기 시트. 단어가 바뀌면 닫는다.
   const [detailOpen, setDetailOpen] = React.useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setDetailOpen(false); }, [wordIndex]);
 
 
@@ -270,13 +270,13 @@ const WordCardScreen = () => {
   const curName = words[wordIndex]?.word;
   const termNames = React.useMemo(() => allWords.map(w => w.word).filter(n => n !== curName), [allWords, curName]);
   const meaningOf = React.useCallback((name: string) => allWords.find(w => w.word === name)?.meaning, [allWords]);
+  const lessonQuizWords = React.useMemo(() => {
+    const lessonIds = new Set(words.map(w => w.id));
+    return knownWords.filter(kw => lessonIds.has(kw.id)).slice(0, Math.min(5, lessonIds.size));
+  }, [knownWords, words]);
 
   // autoAdvance 완료 화면
   if (autoAdvance && words.length > 0 && wordIndex >= words.length) {
-    const quizWords = knownWords
-      .filter(kw => words.some(w => w.id === kw.id))
-      .sort(() => Math.random() - 0.5)
-      .slice(0, Math.min(5, knownWords.length));
     return (
       <div className="flex h-full flex-col bg-[var(--color-canvas)]">
         {/* 카드 + 알림 카드 + 축하가 작은 화면에서 넘칠 수 있어 이 영역만 스크롤 */}
@@ -316,7 +316,7 @@ const WordCardScreen = () => {
             }
             return (
               <button
-                onClick={() => navigate('/quiz', { state: { quizQueue: quizWords, backPath } })}
+                onClick={() => navigate('/quiz', { state: { quizQueue: lessonQuizWords, backPath, reviewMode: true, mode: 'lesson_recall' } })}
                 className="w-full py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90"
               >
                 바로 퀴즈 풀기 →

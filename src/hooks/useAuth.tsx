@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { useState, useEffect, useContext, createContext } from 'react';
 import { closeView, getAnonymousKey, getSchemeUri } from '@apps-in-toss/web-framework';
 import type { AuthState, AuthUser } from '../types';

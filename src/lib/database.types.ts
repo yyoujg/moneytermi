@@ -330,6 +330,17 @@ export type Database = {
           reason: string;
         };
       };
+      buy_energy_refill_once: {
+        Args: {
+          p_idempotency_key: string;
+        };
+        Returns: {
+          points: number;
+          cost: number;
+          reason: 'energy_refill';
+          idempotent: boolean;
+        };
+      };
       claim_first_lesson: {
         Args: { p_course_id: string };
         Returns: boolean;

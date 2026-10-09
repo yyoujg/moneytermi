@@ -3,7 +3,7 @@ import { BookOpenText, Brain, Check, ChevronRight, CircleHelp, Clock3, House, La
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
-import { LESSON_COST } from '../constants';
+import { ENERGY_ACTION_COST, LESSON_COST } from '../constants';
 import { feedbackNodeTap } from '../lib/feedback';
 import { loadDoneNodes } from '../lib/pathProgress';
 import { Storage } from '../lib/storage';
@@ -97,7 +97,7 @@ const COURSE_ART = [BookOpenText, House, TrendingUp, Landmark];
 const CourseScreen = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { hydrated, contentStatus, retryContent, knownIds, courses, points, spendPoints, claimFirstLesson, openShop } = useAppContext();
+  const { hydrated, contentStatus, retryContent, knownIds, courses, points, energy, spendEnergy, spendPoints, claimFirstLesson, pickRecallWords, openShop } = useAppContext();
   // 이 기기에서 끝낸 퀴즈·복습 노드. 화면에 돌아올 때마다 다시 읽는다(퀴즈 끝내고 돌아온 직후 반영).
   const [doneNodes, setDoneNodes] = useState<Set<string>>(new Set());
   useEffect(() => { loadDoneNodes().then(setDoneNodes); }, []);
@@ -211,29 +211,43 @@ const CourseScreen = () => {
   const handleNodeTap = async (node: PathNode, index: number, courseKnown: number, courseTitle: string) => {
     // disabled 버튼은 click이 안 오지만, 웹뷰/리셋 CSS에 따라 새는 경우가 있어 한 번 더 막는다.
     if (node.state === 'locked') return;
+    if (spending.current) return;
+    spending.current = true;
     logClick('path_node_click', { course_id: node.courseId, type: node.type, index, state: node.state });
 
-    if (node.type === 'quiz' || node.type === 'review') {
-      // 복습은 지금까지 배운 것 중에서만 낸다. 아직 아무것도 안 배웠으면 그냥 앞에서 자른다.
-      const learned = node.words.filter(w => knownIds.has(w.id));
-      const pool = learned.length > 0 ? learned : node.words;
-      const size = node.type === 'review' ? 10 : 5;
-      const queue = [...pool].sort(() => Math.random() - 0.5).slice(0, size);
-      feedbackNodeTap();
-      await expandFromNode(node.id, courseTitle);
-      navigate('/quiz', { state: { quizQueue: queue, backPath, nodeId: node.id, courseTitle } });
-      return;
-    }
+    try {
+      const needsEnergy = !isDone(node) && node.type !== 'review';
+      if (node.type === 'quiz' || node.type === 'review') {
+        if (needsEnergy && !(await spendEnergy(ENERGY_ACTION_COST, node.type))) {
+          logClick('energy_blocked', { type: node.type, energy });
+          openShop('energy');
+          return;
+        }
+        // 복습은 지금까지 배운 것 중에서만 낸다. 아직 아무것도 안 배웠으면 그냥 앞에서 자른다.
+        const learned = node.words.filter(w => knownIds.has(w.id));
+        const pool = learned.length > 0 ? learned : node.words;
+        const size = node.type === 'review' ? 10 : 5;
+        const queue = node.type === 'review'
+          ? pickRecallWords({ candidates: pool, count: size })
+          : [...pool].sort(() => Math.random() - 0.5).slice(0, size);
+        feedbackNodeTap();
+        await expandFromNode(node.id, courseTitle);
+        navigate('/quiz', { state: { quizQueue: queue, backPath, nodeId: node.id, courseTitle, reviewMode: node.type === 'review', mode: node.type === 'review' ? 'course_review' : undefined } });
+        return;
+      }
 
-    if (node.state !== 'done' && courseKnown === 0) {
-      logClick('course_start', { course_id: node.courseId, title: node.courseId });
-    }
+      if (node.state !== 'done' && courseKnown === 0) {
+        logClick('course_start', { course_id: node.courseId, title: node.courseId });
+      }
 
-    // 로컬 개발 서버에서는 포인트 없이 학습 화면을 확인할 수 있다.
-    if (!import.meta.env.DEV) {
-      if (spending.current) return;
-      spending.current = true;
-      try {
+      if (needsEnergy && energy < ENERGY_ACTION_COST) {
+        logClick('energy_blocked', { type: node.type, energy });
+        openShop('energy');
+        return;
+      }
+
+      // 로컬 개발 서버에서는 포인트 없이 학습 화면을 확인할 수 있다.
+      if (!import.meta.env.DEV) {
         const firstLesson = node.id === sections[0]?.nodes[0]?.id;
         const firstLessonAccess = firstLesson ? await claimFirstLesson(node.courseId) : 'ineligible';
         if (firstLessonAccess === 'error') {
@@ -244,11 +258,32 @@ const CourseScreen = () => {
           if (points < LESSON_COST) { logClick('lesson_blocked_points', { points }); openShop('lesson'); return; }
           if (!(await spendPoints(LESSON_COST, 'lesson'))) { openShop('lesson'); return; }
         }
-      } finally { spending.current = false; }
+      }
+      if (needsEnergy && !(await spendEnergy(ENERGY_ACTION_COST, node.type))) {
+        logClick('energy_blocked', { type: node.type, energy });
+        openShop('energy');
+        return;
+      }
+      feedbackNodeTap();
+      await expandFromNode(node.id, courseTitle);
+      const lessonState = { words: node.words, index: Math.max(0, node.words.findIndex(word => !knownIds.has(word.id))), backPath, autoAdvance: true, courseTitle };
+      const recallWords = needsEnergy ? pickRecallWords({ excludeIds: node.words.map(word => word.id), count: 3 }) : [];
+      if (recallWords.length > 0) {
+        navigate('/quiz', {
+          state: {
+            quizQueue: recallWords,
+            backPath,
+            reviewMode: true,
+            mode: 'lesson_warmup',
+            nextRoute: { pathname: '/word-card', state: lessonState, label: '새 단어 배우기' },
+          },
+        });
+      } else {
+        navigate('/word-card', { state: lessonState });
+      }
+    } finally {
+      spending.current = false;
     }
-    feedbackNodeTap();
-    await expandFromNode(node.id, courseTitle);
-    navigate('/word-card', { state: { words: node.words, index: Math.max(0, node.words.findIndex(word => !knownIds.has(word.id))), backPath, autoAdvance: true, courseTitle } });
   };
 
   if (contentStatus === 'error' || (contentStatus === 'ready' && courses.length === 0)) return (
