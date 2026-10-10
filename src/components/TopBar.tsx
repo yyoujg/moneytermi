@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import type React from 'react';
 import { BottomSheet } from '@toss/tds-mobile';
@@ -8,7 +8,7 @@ import { showModal } from './AlertModal';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
 import { calcStreak } from '../lib/streak';
-import { isRewardedAdEnabled, showRewardedAd } from '../lib/ads';
+import { isRewardedAdEnabled, preloadRewardedAd, showRewardedAd } from '../lib/ads';
 import { ENERGY_REFILL_COST, LESSON_COST, XP_BONUS_POINTS, XP_BONUS_STEP } from '../constants';
 import { feedbackClaim, feedbackBoost } from '../lib/feedback';
 import { PointCelebration, type PointReward } from './PointCelebration';
@@ -25,20 +25,45 @@ export const TopBar = () => {
   const [now, setNow] = useState(() => Date.now());
   const [celebration, setCelebration] = useState<PointReward | null>(null);
   const [tip, setTip] = useState<Tip | null>(null);
-  const energyAdLockRef = useRef<number | null>(null);
+  const rewardedAdLockRef = useRef(false);
   const energyRefillLockRef = useRef(false);
   const [energyRefillPending, setEnergyRefillPending] = useState(false);
   const [energyRefillNotice, setEnergyRefillNotice] = useState<EnergyRefillNotice>(null);
+  const [rewardedAdReady, setRewardedAdReady] = useState(false);
+  const [rewardedAdPreparing, setRewardedAdPreparing] = useState(false);
+  const [rewardedAdPending, setRewardedAdPending] = useState<'points' | 'energy' | null>(null);
   // 학습 중에는 각 화면의 레슨명과 진행 단계에 집중한다. 상점 시트는 계속 마운트한다.
   const pathname = useLocation().pathname;
   const hideBar = ['/home', '/league', '/league/rules', '/my', '/welcome', '/word-card', '/quiz', '/lesson-check', '/review'].includes(pathname);
   const compactBar = pathname === '/course';
   const [tipPos, setTipPos] = useState({ left: 16, tail: 0 });   // 말풍선 위치: 아이콘 아래 가운데, 화면 밖으로 안 나가게 16px 안쪽에서 멈춘다
 
-  useEffect(() => () => {
-    if (energyAdLockRef.current !== null) window.clearTimeout(energyAdLockRef.current);
+  const prepareRewardedAd = useCallback(() => {
+    let active = true;
+    const setAdLoadState = (ready: boolean, preparing: boolean) => {
+      if (!active) return;
+      setRewardedAdReady(ready);
+      setRewardedAdPreparing(preparing);
+    };
+    if (!isRewardedAdEnabled()) {
+      Promise.resolve().then(() => setAdLoadState(false, false));
+      return () => { active = false; };
+    }
+    Promise.resolve().then(() => {
+      if (active) setRewardedAdPreparing(true);
+    });
+    preloadRewardedAd()
+      .then(ready => setAdLoadState(ready, false))
+      .catch(() => setAdLoadState(false, false));
+    return () => { active = false; };
   }, []);
 
+  useEffect(() => {
+    if (!shopOpen) return;
+    return prepareRewardedAd();
+  }, [shopOpen, prepareRewardedAd]);
+
+  const rewardedAdAvailable = isRewardedAdEnabled();
   const visibleEnergyRefillNotice = energyRefillNotice?.tone === 'points' && points >= ENERGY_REFILL_COST ? null : energyRefillNotice;
   const closeShopAndReset = () => {
     setEnergyRefillNotice(null);
@@ -72,32 +97,61 @@ export const TopBar = () => {
     return () => clearInterval(t);
   }, [boostUntil, nextEnergyAt]);
 
+  const startRewardedAd = (from: 'points' | 'energy', onReward: (amount: number, unit: string) => void) => {
+    if (rewardedAdLockRef.current || rewardedAdPending) return false;
+    if (!isRewardedAdEnabled()) { showModal('지금은 광고를 볼 수 없어요', 'error'); return false; }
+    if (!rewardedAdReady) {
+      showModal('광고를 준비 중이에요. 잠시 후 다시 시도해 주세요', 'error');
+      prepareRewardedAd();
+      return false;
+    }
+
+    rewardedAdLockRef.current = true;
+    setRewardedAdPending(from);
+    setRewardedAdReady(false);
+    let rewarded = false;
+    const accepted = showRewardedAd((amount, unit) => {
+      if (rewarded) return;
+      rewarded = true;
+      onReward(amount, unit);
+    }, {
+      onShow: closeShopAndReset,
+      onFinish: (result) => {
+        if (result === 'dismissed') closeShopAndReset();
+        rewardedAdLockRef.current = false;
+        setRewardedAdPending(null);
+        if (result !== 'dismissed') showModal('광고를 열지 못했어요. 잠시 후 다시 시도해 주세요', 'error');
+        prepareRewardedAd();
+      },
+    });
+    if (!accepted) {
+      rewardedAdLockRef.current = false;
+      setRewardedAdPending(null);
+      setRewardedAdReady(false);
+      showModal('광고를 준비 중이에요. 잠시 후 다시 시도해 주세요', 'error');
+      prepareRewardedAd();
+      return false;
+    }
+    return true;
+  };
+
   const handleAd = () => {
-    if (!isRewardedAdEnabled()) { showModal('지금은 광고를 볼 수 없어요', 'error'); return; }
-    logClick('rewarded_ad_start', { from: 'topbar_shop' });
-    showRewardedAd((amount, unit) => {
+    if (!startRewardedAd('points', (amount, unit) => {
       claimAdReward(amount, unit).then(credited => {
         if (credited) { feedbackClaim(); setCelebration({ points: credited, source: 'ad' }); }
       });
-    });
-    closeShopAndReset();
+    })) return;
+    logClick('rewarded_ad_start', { from: 'topbar_shop' });
   };
 
   const handleEnergyAd = () => {
-    if (energyAdLockRef.current !== null) return;
     if (energy >= energyMax) { showModal('에너지가 이미 가득 찼어요'); return; }
-    if (!isRewardedAdEnabled()) { showModal('지금은 광고를 볼 수 없어요', 'error'); return; }
-    logClick('rewarded_ad_start', { from: 'energy_shop' });
-    energyAdLockRef.current = window.setTimeout(() => { energyAdLockRef.current = null; }, 120_000);
-    showRewardedAd(() => {
-      if (energyAdLockRef.current === null) return;
-      window.clearTimeout(energyAdLockRef.current);
-      energyAdLockRef.current = null;
+    if (!startRewardedAd('energy', () => {
       claimEnergyAd().then(credited => {
         if (credited) { feedbackClaim(); showModal(`에너지 +${credited}`); }
       });
-    });
-    closeShopAndReset();
+    })) return;
+    logClick('rewarded_ad_start', { from: 'energy_shop' });
   };
 
   const handleEnergyRefill = async () => {
@@ -183,7 +237,7 @@ export const TopBar = () => {
       <BottomSheet
         open={shopOpen}
         className="original-modal"
-        onDimmerClick={closeShopAndReset}
+        onDimmerClick={rewardedAdPending ? () => {} : closeShopAndReset}
         header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>{shopReason === 'lesson' ? '포인트가 부족해요' : shopReason === 'energy' ? '에너지' : '포인트 상점'}</span>}
       >
         {shopReason === 'energy' ? (
@@ -195,6 +249,10 @@ export const TopBar = () => {
             boostLeft={boostLeft}
             refillPending={energyRefillPending}
             refillNotice={visibleEnergyRefillNotice}
+            rewardedAdAvailable={rewardedAdAvailable}
+            rewardedAdReady={rewardedAdReady}
+            rewardedAdPreparing={rewardedAdPreparing}
+            rewardedAdPending={rewardedAdPending === 'energy'}
             onEnergyAd={handleEnergyAd}
             onEnergyRefill={handleEnergyRefill}
             onBoost={handleBoost}
@@ -209,11 +267,19 @@ export const TopBar = () => {
             {/* 레슨이 막혀서 열렸을 땐 광고가 주행동이라 채운 버튼으로 */}
             <button
               onClick={handleAd}
+              disabled={rewardedAdAvailable && (!rewardedAdReady || rewardedAdPending !== null)}
               className={`grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-chip px-4 py-4 text-sm font-bold active:opacity-70 ${shopReason === 'lesson' ? 'bg-brand-500' : 'bg-[var(--color-button-secondary)] text-[var(--color-ink-2)]'}`}
             >
               <span className="flex min-w-0 items-center gap-2 text-left leading-5"><Tv size={18} className="shrink-0" />광고 보고 포인트 받기</span>
-              <span className="shrink-0 text-right text-2xs font-medium leading-4 opacity-80">시청하고 받기</span>
+              <span className="shrink-0 text-right text-2xs font-medium leading-4 opacity-80">
+                {rewardedAdPending === 'points' ? '여는 중' : rewardedAdPreparing ? '준비 중' : rewardedAdReady ? '시청 후 받기' : '잠시 후'}
+              </span>
             </button>
+            {rewardedAdAvailable && !rewardedAdReady && (
+              <p role="status" className="text-2xs font-semibold text-[var(--color-ink-4)] leading-relaxed break-keep">
+                광고를 미리 준비하고 있어요. 버튼이 활성화되면 시청 후 포인트를 받을 수 있어요.
+              </p>
+            )}
 
             <button
               onClick={handleBoost}

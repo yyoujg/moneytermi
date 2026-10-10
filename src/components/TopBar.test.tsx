@@ -11,6 +11,12 @@ const state = vi.hoisted(() => ({
   buyBoost: vi.fn(),
   closeShop: vi.fn(),
   showModal: vi.fn(),
+  ads: {
+    enabled: false,
+    preload: vi.fn(),
+    show: vi.fn(),
+    finish: undefined as undefined | ((result: 'dismissed' | 'failed' | 'error') => void),
+  },
 }));
 
 vi.mock('@toss/tds-mobile', () => ({
@@ -21,7 +27,11 @@ vi.mock('@toss/tds-mobile', () => ({
 vi.mock('../context/AppContext', () => ({ useAppContext: () => state.ctx }));
 vi.mock('../components/AlertModal', () => ({ showModal: (...args: unknown[]) => state.showModal(...args) }));
 vi.mock('../lib/analytics', () => ({ logClick: vi.fn() }));
-vi.mock('../lib/ads', () => ({ isRewardedAdEnabled: vi.fn(() => false), showRewardedAd: vi.fn() }));
+vi.mock('../lib/ads', () => ({
+  isRewardedAdEnabled: vi.fn(() => state.ads.enabled),
+  preloadRewardedAd: vi.fn(() => state.ads.preload()),
+  showRewardedAd: vi.fn((...args: unknown[]) => state.ads.show(...args)),
+}));
 vi.mock('../lib/feedback', () => ({ feedbackClaim: vi.fn(), feedbackBoost: vi.fn() }));
 
 Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { value: true, configurable: true });
@@ -34,6 +44,12 @@ const baseContext = (overrides: Record<string, unknown> = {}) => {
   state.buyBoost = vi.fn(() => Promise.resolve('fail'));
   state.closeShop = vi.fn();
   state.showModal = vi.fn();
+  state.ads = {
+    enabled: false,
+    preload: vi.fn(() => Promise.resolve(false)),
+    show: vi.fn(),
+    finish: undefined,
+  };
   state.ctx = {
     points: 110,
     xp: 0,
@@ -123,5 +139,69 @@ describe('TopBar energy shop', () => {
 
     expect(container.textContent).toContain('네트워크가 불안정해 충전하지 못했어요');
     expect(container.textContent).not.toContain('잔액이 바뀌어 충전할 수 없어요');
+  });
+
+  it('광고가 준비되기 전에는 에너지 광고 버튼을 비활성화하고 표시 요청을 보내지 않는다', async () => {
+    state.ads.enabled = true;
+    state.ads.preload = vi.fn(() => new Promise(() => {}));
+    const { container } = await mount();
+    const adButton = [...container.querySelectorAll('button')].find(el => el.textContent?.includes('광고 보고 에너지 받기')) as HTMLButtonElement | undefined;
+
+    expect(adButton).toBeDefined();
+    expect(adButton!.disabled).toBe(true);
+    expect(container.textContent).toContain('광고를 미리 준비하고 있어요');
+
+    await act(async () => { adButton!.click(); });
+
+    expect(state.ads.show).not.toHaveBeenCalled();
+  });
+
+  it('에너지 광고 버튼 연속 클릭은 한 번만 광고를 열고 보상은 dismiss 뒤에도 한 번만 반영한다', async () => {
+    const claimEnergyAd = vi.fn(() => Promise.resolve(3));
+    baseContext({ claimEnergyAd, energy: 20 });
+    state.ads.enabled = true;
+    state.ads.preload = vi.fn(() => Promise.resolve(true));
+    state.ads.show = vi.fn((_onReward: unknown, callbacks: { onShow?: () => void; onFinish?: (result: 'dismissed' | 'failed' | 'error') => void }) => {
+      state.ads.finish = callbacks.onFinish;
+      callbacks.onShow?.();
+      return true;
+    });
+    const { container } = await mount();
+    await act(async () => { await Promise.resolve(); });
+    const adButton = [...container.querySelectorAll('button')].find(el => el.textContent?.includes('광고 보고 에너지 받기')) as HTMLButtonElement;
+
+    act(() => {
+      adButton.click();
+      adButton.click();
+    });
+
+    expect(state.ads.show).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      const onReward = state.ads.show.mock.calls[0][0] as () => void;
+      onReward();
+      onReward();
+      state.ads.finish?.('dismissed');
+    });
+
+    expect(claimEnergyAd).toHaveBeenCalledTimes(1);
+  });
+
+  it('광고 표시 실패 시 상점을 닫지 않고 실패 안내를 보여준다', async () => {
+    baseContext({ energy: 20 });
+    state.ads.enabled = true;
+    state.ads.preload = vi.fn(() => Promise.resolve(true));
+    state.ads.show = vi.fn((_onReward: unknown, callbacks: { onFinish?: (result: 'dismissed' | 'failed' | 'error') => void }) => {
+      callbacks.onFinish?.('failed');
+      return true;
+    });
+    const { container } = await mount();
+    await act(async () => { await Promise.resolve(); });
+    const adButton = [...container.querySelectorAll('button')].find(el => el.textContent?.includes('광고 보고 에너지 받기')) as HTMLButtonElement;
+
+    await act(async () => { adButton.click(); });
+
+    expect(state.closeShop).not.toHaveBeenCalled();
+    expect(state.showModal).toHaveBeenCalledWith('광고를 열지 못했어요. 잠시 후 다시 시도해 주세요', 'error');
   });
 });

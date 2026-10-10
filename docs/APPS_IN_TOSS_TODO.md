@@ -28,6 +28,21 @@
   [로그인 개발](https://developers-apps-in-toss.toss.im/login/develop.md),
   [사용자 식별키 발급](https://developers-apps-in-toss.toss.im/user-hash-key/develop.md)
 
+### A-2. 검수 반려 재발 방지 체크 — 뒤로가기 / 광고 CTA
+- **반려 이력**: 20261010-161(`01a1217d-78fe-798a-9ecd-7eb44dfb2266`) 반려.
+  1) 최초 화면에서 토스 내비게이션 바 뒤로가기 클릭 시 미니앱이 종료되지 않음.
+  2) 사용자가 예상하기 어려운 시점에 광고가 노출됨.
+- **출시 전 필수 확인**:
+  - 최초 진입 화면(`/welcome`, `/course`, 딥링크 첫 화면 모두)에서 토스 내비게이션 바/안드로이드 시스템 뒤로가기가 `closeView()`로 미니앱을 종료한다.
+  - 내부 화면(history idx > 0: 주제 상세, 학습, 기억 점검, 오답 복습, 리뷰 워밍업)은 앱 내부 뒤로가기로 이전 화면에 돌아간다.
+  - 자체 상단 닫기·뒤로가기 아이콘을 추가하지 않는다.
+  - 광고는 자동 노출하지 않는다. 상점/부족 안내에서 "광고 보고..." CTA를 사용자가 누른 뒤에만 표시한다.
+  - 광고는 `loadFullScreenAd` 완료 후 활성화하고, CTA에는 "시청 후 받기/에너지"처럼 보상과 광고 시청을 함께 표시한다.
+  - 광고 취소·표시 실패·반복 클릭·백그라운드 복귀에서 중복 보상이 없는지 회귀 테스트한다.
+- **근거**: [화면 닫기 `closeView`](https://developers-apps-in-toss.toss.im/documentation/common/screen/close),
+  [전면형/보상형 광고](https://developers-apps-in-toss.toss.im/documentation/common/monetization/iaa/interstitial-rewarded-ad),
+  [비게임 출시 가이드](https://developers-apps-in-toss.toss.im/landing-page/landing-page-en/checklist/app-nongame)
+
 ---
 
 ## C. 선택 (성장 / 마케팅 / 수익화)

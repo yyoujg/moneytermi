@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { parseLandingPath } from './lib/landing';
+import { resolveBackEventAction } from './lib/backEvent';
 
 describe('parseLandingPath', () => {
   it('null/undefined/빈 문자열 → null', () => {
@@ -70,5 +71,21 @@ describe('parseLandingPath', () => {
 
   it('테스트 스킴 path 없이 home만 (appsintoss 단독) → null (home 폴백)', () => {
     expect(parseLandingPath('intoss-private://appsintoss?_deploymentId=0198c000-68c3-7d2b-0000-2c00000005ec')).toBeNull();
+  });
+});
+
+describe('resolveBackEventAction', () => {
+  it.each([
+    ['온보딩 첫 진입', 0],
+    ['온보딩 시작 후 /course replace', 0],
+    ['딥링크 첫 화면 replace', undefined],
+  ])('%s 화면에서는 미니앱 종료로 처리한다', (_label, idx) => {
+    expect(resolveBackEventAction(idx)).toBe('close');
+    expect(resolveBackEventAction(null)).toBe('close');
+  });
+
+  it('내부 화면(history idx > 0)에서는 앱 내부 뒤로가기로 처리한다', () => {
+    expect(resolveBackEventAction(1)).toBe('back');
+    expect(resolveBackEventAction(4)).toBe('back');
   });
 });

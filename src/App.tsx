@@ -10,6 +10,7 @@ import { isDefaultNickname } from './constants';
 import { NicknameSheet } from './components/mypage/NicknameSheet';
 import { parseLandingPath, parseReferrer } from './lib/landing';
 import { logScreen, logClick } from './lib/analytics';
+import { resolveBackEventAction } from './lib/backEvent';
 import NavBar from './components/NavBar';
 import { TopBar } from './components/TopBar';
 import { BadgeCelebration } from './components/mypage/BadgeCelebration';
@@ -184,22 +185,15 @@ const LandingRoute = () => {
 
 const BackEventHandler = () => {
   const navigate = useNavigate();
-  const location = useLocation();
 
   React.useEffect(() => {
     let unsubscription: (() => void) | undefined;
     try {
       unsubscription = graniteEvent.addEventListener('backEvent', {
         onEvent: () => {
-          const idx = typeof window !== 'undefined' ? (window.history.state?.idx ?? 0) : 0;
-
-          if (idx > 0) {
+          const action = resolveBackEventAction(typeof window !== 'undefined' ? window.history.state?.idx : 0);
+          if (action === 'back') {
             navigate(-1);
-            return;
-          }
-
-          if (location.pathname !== '/course') {
-            navigate('/course', { replace: true });
             return;
           }
 
@@ -211,7 +205,7 @@ const BackEventHandler = () => {
     }
 
     return () => unsubscription?.();
-  }, [navigate, location.pathname]);
+  }, [navigate]);
 
   return null;
 };

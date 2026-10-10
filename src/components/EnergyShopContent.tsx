@@ -15,6 +15,10 @@ type Props = {
   boostLeft: number;
   refillPending: boolean;
   refillNotice: EnergyRefillNotice;
+  rewardedAdAvailable: boolean;
+  rewardedAdReady: boolean;
+  rewardedAdPreparing: boolean;
+  rewardedAdPending: boolean;
   onEnergyAd: () => void;
   onEnergyRefill: () => void;
   onBoost: () => void;
@@ -46,6 +50,10 @@ export const EnergyShopContent = ({
   boostLeft,
   refillPending,
   refillNotice,
+  rewardedAdAvailable,
+  rewardedAdReady,
+  rewardedAdPreparing,
+  rewardedAdPending,
   onEnergyAd,
   onEnergyRefill,
   onBoost,
@@ -68,6 +76,8 @@ export const EnergyShopContent = ({
     : refillNotice?.tone === 'points'
       ? 'border-brand-200 bg-[var(--color-brand-soft)] text-[var(--color-brand-ink)]'
       : 'border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-ink-3)]';
+  const adDisabled = rewardedAdAvailable && (!rewardedAdReady || rewardedAdPending);
+  const adHint = rewardedAdPending ? '여는 중' : rewardedAdPreparing ? '준비 중' : rewardedAdReady ? `시청 후 +${ENERGY_AD_REWARD}` : '잠시 후';
 
   return (
     <div className="px-5 pb-6 flex flex-col gap-2">
@@ -116,12 +126,17 @@ export const EnergyShopContent = ({
 
       <button
         onClick={onEnergyAd}
-        disabled={refill.full}
+        disabled={refill.full || adDisabled}
         className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-chip bg-brand-500 px-4 py-4 text-sm font-bold active:opacity-70 disabled:opacity-60"
       >
         <span className="flex min-w-0 items-center gap-2 text-left leading-5"><Tv size={18} className="shrink-0" />광고 보고 에너지 받기</span>
-        <span className="shrink-0 text-right text-2xs font-medium leading-4">+{ENERGY_AD_REWARD}</span>
+        <span className="shrink-0 text-right text-2xs font-medium leading-4">{adHint}</span>
       </button>
+      {rewardedAdAvailable && !rewardedAdReady && (
+        <p role="status" className="text-2xs font-semibold text-[var(--color-ink-4)] leading-relaxed break-keep">
+          광고를 미리 준비하고 있어요. 버튼이 활성화되면 시청 후 에너지를 받을 수 있어요.
+        </p>
+      )}
       <button
         onClick={onEnergyRefill}
         disabled={!refill.canRefill}
