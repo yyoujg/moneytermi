@@ -34,7 +34,7 @@ export const TopBar = () => {
   const [rewardedAdPending, setRewardedAdPending] = useState<'points' | 'energy' | null>(null);
   // 학습 중에는 각 화면의 레슨명과 진행 단계에 집중한다. 상점 시트는 계속 마운트한다.
   const pathname = useLocation().pathname;
-  const hideBar = ['/home', '/league', '/league/rules', '/my', '/welcome', '/word-card', '/quiz', '/lesson-check', '/review'].includes(pathname);
+  const hideBar = ['/', '/course', '/home', '/league', '/league/rules', '/my', '/welcome', '/word-card', '/quiz', '/lesson-check', '/review'].includes(pathname);
   const compactBar = pathname === '/course';
   const [tipPos, setTipPos] = useState({ left: 16, tail: 0 });   // 말풍선 위치: 아이콘 아래 가운데, 화면 밖으로 안 나가게 16px 안쪽에서 멈춘다
 

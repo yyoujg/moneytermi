@@ -96,6 +96,13 @@ beforeEach(() => {
 });
 
 describe('TopBar energy shop', () => {
+  it('hides the inline status bar on course while keeping the shop mounted', async () => {
+    const { container } = await mount();
+
+    expect(container.querySelector('[data-topbar]')).toBeNull();
+    expect(container.querySelector('[role="dialog"]')).toBeInTheDocument();
+  });
+
   it('포인트가 부족하면 상점 내부 안내를 보여주고 충전 RPC를 호출하지 않는다', async () => {
     const { container, refillButton } = await mount();
     const button = refillButton();
