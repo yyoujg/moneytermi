@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronRight, Lightbulb, Flame } from 'lucide-react';
+import { ChevronRight, Lightbulb } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Spacing } from '@toss/tds-mobile';
 import type { Word } from '../types';
@@ -11,22 +11,14 @@ import { maskTerm } from '../lib/quiz';
 import { feedbackCorrect, feedbackWrong, feedbackQuizComplete } from '../lib/feedback';
 import { useSettings } from '../hooks/useSettings';
 import { Card } from '../components/ui/Card';
-import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
-import { StreakCelebration } from '../components/StreakCelebration';
 import { PointIcon } from '../components/StatIcons';
-import { Mascot } from '../components/Mascot';
 import { shouldScheduleRetry } from '../lib/review';
+import { shuffle } from '../lib/random';
+import { LearningCompletionScreen } from '../components/learning/LearningCompletionScreen';
+import { LearningEmptyState } from '../components/learning/LearningEmptyState';
+import { QuizProgressHeader } from '../components/learning/QuizProgressHeader';
 
 type Status = 'idle' | 'correct' | 'wrong';
-
-const shuffle = <T,>(arr: T[]): T[] => {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-};
 
 const QuizPage = () => {
   const navigate = useNavigate();
@@ -37,10 +29,10 @@ const QuizPage = () => {
   const [started, setStarted] = useState(false);
   useEffect(() => {
     if (!started && dueQueue.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setQueue(shuffle(dueQueue));
       setStarted(true);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dueQueue, started]);
   const [index, setIndex] = useState(0);
   const [input, setInput] = useState('');
@@ -51,6 +43,7 @@ const QuizPage = () => {
   const [lastEarned, setLastEarned] = useState(0);   // 서버가 채점한 금액. 응답 전엔 0
   const [capped, setCapped] = useState(false);
   const reviewRecordedIds = useRef<Set<number>>(new Set());
+  const completedRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const word = queue[index];
@@ -64,13 +57,13 @@ const QuizPage = () => {
   // 퀴즈 완료 시 앱 리뷰 요청 (플랫폼이 노출 제어)
   const completed = started && index >= queue.length;
   useEffect(() => {
-    if (completed) {
-      feedbackQuizComplete(totalCorrect === queue.length);
-      logClick('quiz_complete', { mode: 'review', total: queue.length, correct: totalCorrect });
-      requestAppReview();
-      void refreshWallet();   // m4·50XP 보너스 반영
-    }
-  }, [completed]);
+    if (!completed || completedRef.current) return;
+    completedRef.current = true;
+    feedbackQuizComplete(totalCorrect === queue.length);
+    logClick('quiz_complete', { mode: 'review', total: queue.length, correct: totalCorrect });
+    requestAppReview();
+    void refreshWallet();   // m4·50XP 보너스 반영
+  }, [completed, queue.length, refreshWallet, totalCorrect]);
 
   const goNext = () => {
     setIndex((i) => i + 1);
@@ -119,43 +112,33 @@ const QuizPage = () => {
     // 아직 배운 단어가 없으면 '완료'가 아니라 '시작 전'이다
     const nothingLearned = knownWords.length === 0;
     return (
-      <div className="flex flex-col h-full bg-[var(--color-canvas)] items-center justify-center p-6">
-        <div className="mb-5"><Mascot name="empty" size={110} /></div>
-        <h2 className="text-xl font-bold text-[var(--color-ink)] mb-2!">{nothingLearned ? '복습할 단어가 아직 없어요' : '오늘 복습 완료'}</h2>
-        <p className="text-[15px] text-[var(--color-ink-3)] mb-16! text-center break-keep">
-          {nothingLearned ? '단어를 배우면 다음 날부터 복습이 열려요' : '지금 복습할 단어가 없어요'}
-        </p>
-        <button
-          onClick={() => navigate(nothingLearned ? '/course' : '/home')}
-          className="w-full max-w-sm py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90"
-        >
-          {nothingLearned ? '학습하러 가기' : '퀘스트로'}
-        </button>
-      </div>
+      <LearningEmptyState
+        mascot="empty"
+        title={nothingLearned ? '복습할 단어가 아직 없어요' : '오늘 복습 완료'}
+        description={nothingLearned ? '단어를 배우면 다음 날부터 복습이 열려요' : '지금 복습할 단어가 없어요'}
+        actionLabel={nothingLearned ? '학습하러 가기' : '퀘스트로'}
+        onAction={() => navigate(nothingLearned ? '/course' : '/home')}
+        actionPlacement="inline"
+      />
     );
   }
 
   if (isFinished) {
     return (
-      <div className="flex flex-col h-full bg-[var(--color-canvas)] items-center justify-center-safe p-6 overflow-y-auto [&::-webkit-scrollbar]:hidden">
-        <div className="mb-5"><Mascot name="crown" size={130} /></div>
-        <h2 className="text-xl font-bold text-[var(--color-ink)] mb-1!">오늘 복습 완료!</h2>
-        <p className="text-sm text-[var(--color-ink-3)] mb-6!">{queue.length}문제 중 {totalCorrect}개 정답</p>
+      <LearningCompletionScreen
+        mascot="crown"
+        title="오늘 복습 완료!"
+        subtitle={`${queue.length}문제 중 ${totalCorrect}개 정답`}
+        actionLabel="퀘스트로"
+        onAction={() => navigate('/home')}
+        actionPlacement="inline"
+        titleSize="xl"
+      >
         <div className="flex items-center gap-2 bg-brand-500/10 border border-brand-500/20 rounded-card px-5 py-3 mb-8">
           <PointIcon size={16} />
           <span className="text-sm font-bold text-[var(--color-ink)]">누적 포인트 {points} P</span>
         </div>
-        <div className="w-full max-w-sm mb-8">
-          <DailyAlarmPromptCard />
-          <StreakCelebration />
-        </div>
-        <button
-          onClick={() => navigate('/home')}
-          className="w-full max-w-sm py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90"
-        >
-          퀘스트로
-        </button>
-      </div>
+      </LearningCompletionScreen>
     );
   }
 
@@ -166,16 +149,11 @@ const QuizPage = () => {
 
   return (
     <div className="flex flex-col h-full bg-[var(--color-canvas)] overflow-y-auto [&::-webkit-scrollbar]:hidden">
-      {/* 헤더: 퀴즈와 같은 학습 화면 규칙(문제 번호 + 얇은 진행바, 뒤로가기는 토스 내비게이션 바) */}
-      <div className="px-5 pt-2 pb-3 flex flex-col gap-2">
-        <div className="flex items-center gap-1">
-          <span className="text-sm font-bold text-[var(--color-ink-2)]">복습 {index + 1} / {queue.length}</span>
-          {combo >= 2 && <span className="ml-2 flex items-center gap-0.5 text-xs font-bold text-brand-500"><Flame size={13} className="fill-current" />{combo}연속</span>}
-        </div>
-        <div className="h-1.5 rounded-full bg-[var(--color-line)] overflow-hidden">
-          <div className="h-full rounded-full bg-brand-500 transition-all duration-300" style={{ width: `${progress}%` }} />
-        </div>
-      </div>
+      <QuizProgressHeader
+        label={`복습 ${index + 1} / ${queue.length}`}
+        progress={progress}
+        streakText={combo >= 2 ? `${combo}연속` : null}
+      />
 
       <div className="flex-1 flex flex-col px-5 py-4">
         {/* 문제 카드 */}

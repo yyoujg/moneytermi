@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Course, Word } from '../types';
-import { selectRecallWords, shouldScheduleRetry } from './review';
+import { nextReviewDateFromRows, selectDueReviewWords, selectRecallWords, shouldScheduleRetry } from './review';
 
 const word = (id: number): Word => ({
   id,
@@ -85,5 +85,29 @@ describe('shouldScheduleRetry', () => {
 
   it('이미 뒤에 같은 문제가 있으면 중복으로 붙이지 않는다', () => {
     expect(shouldScheduleRetry([word(1), word(2), word(1)], 0, 1)).toBe(false);
+  });
+});
+
+describe('selectDueReviewWords', () => {
+  const words = [1, 2, 3, 4].map(word);
+
+  it('selects due words by due date, reps, and id', () => {
+    const picked = selectDueReviewWords([
+      { word_id: 3, due_date: '2026-10-09', reps: 5 },
+      { word_id: 2, due_date: '2026-10-08', reps: 3 },
+      { word_id: 1, due_date: '2026-10-08', reps: 1 },
+      { word_id: 4, due_date: '2026-10-10', reps: 0 },
+      { word_id: 999, due_date: '2026-10-07', reps: 0 },
+    ], words, 3, '2026-10-09');
+
+    expect(picked.map(item => item.id)).toEqual([1, 2, 3]);
+  });
+
+  it('finds the next future review date without sorting the whole list', () => {
+    expect(nextReviewDateFromRows([
+      { word_id: 1, due_date: '2026-10-12' },
+      { word_id: 2, due_date: '2026-10-10' },
+      { word_id: 3, due_date: '2026-10-08' },
+    ], '2026-10-09')).toBe('2026-10-10');
   });
 });

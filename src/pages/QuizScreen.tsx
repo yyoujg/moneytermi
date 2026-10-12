@@ -10,13 +10,15 @@ import { getGrowthStage } from '../constants';
 import { feedbackCorrect, feedbackWrong, feedbackQuizComplete, feedbackTierUp } from '../lib/feedback';
 import { requestAppReview } from '../lib/review';
 import { logClick } from '../lib/analytics';
-import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
-import { StreakCelebration } from '../components/StreakCelebration';
 import { Card } from '../components/ui/Card';
 import { PointIcon, XpIcon } from '../components/StatIcons';
-import { Mascot } from '../components/Mascot';
 import { buildQuizItem, pickQuizType, type QuizOption } from '../lib/quiz';
 import { shouldScheduleRetry } from '../lib/review';
+import { takeShuffled } from '../lib/random';
+import { LearningCompletionScreen } from '../components/learning/LearningCompletionScreen';
+import { LearningEmptyState } from '../components/learning/LearningEmptyState';
+import { LearningStatRow } from '../components/learning/LearningStatRow';
+import { QuizProgressHeader } from '../components/learning/QuizProgressHeader';
 
 const QuizScreen = () => {
   const navigate = useNavigate();
@@ -44,10 +46,9 @@ const QuizScreen = () => {
   // state 없이 진입하면 아는 단어 10개를 한 번만 섞는다. 렌더마다 섞으면 문제가 바뀐다.
   const [randomQueue, setRandomQueue] = useState<Word[]>([]);
   useEffect(() => {
-    if (passedQueue.length === 0 && randomQueue.length === 0 && knownWords.length > 0) {
-      setRandomQueue([...knownWords].sort(() => Math.random() - 0.5).slice(0, 10));
-    }
-  }, [knownWords]);
+    if (passedQueue.length > 0 || knownWords.length === 0) return;
+    setRandomQueue(current => current.length > 0 ? current : takeShuffled(knownWords, 10));
+  }, [passedQueue.length, knownWords]);
   const baseQueue: Word[] = passedQueue.length > 0 ? passedQueue : randomQueue;
   // 틀린 문제는 끝에 다시 붙인다 — 전부 맞힐 때까지 끝나지 않고, 그 전엔 노드도 완료되지 않는다
   const [retryQueue, setRetryQueue] = useState<Word[]>([]);
@@ -68,9 +69,15 @@ const QuizScreen = () => {
   const [shake, setShake] = useState(false);
   const { soundOn, vibrationOn } = useSettings();
   const reviewRecordedIds = useRef<Set<number>>(new Set());
+  const completedRef = useRef(false);
 
   const currentWord = quizQueue[currentQuizIndex];
   const earnedShown = useCountUp(totalEarned);
+  const wordByName = useMemo(() => {
+    const map = new Map<string, Word>();
+    for (const word of allWords) map.set(word.word, word);
+    return map;
+  }, [allWords]);
 
   const quizItem = useMemo(() => {
     if (!currentWord) return null;
@@ -89,31 +96,26 @@ const QuizScreen = () => {
   // 퀴즈 완료 시 앱 리뷰 요청 (플랫폼이 노출 제어)
   const finished = quizQueue.length > 0 && currentQuizIndex >= quizQueue.length;
   useEffect(() => {
-    if (finished) {
-      // 승급이면 웅장하게, 아니면 정답률에 따라
-      if (getGrowthStage(xp).id > getGrowthStage(xpAtStart.current).id) feedbackTierUp();
-      else feedbackQuizComplete(correctCount === quizQueue.length);
-      logClick('quiz_complete', { mode: 'quiz', total: quizQueue.length, correct: correctCount, node_id: navState?.nodeId });
-      if (navState?.nodeId) markNodeDone(navState.nodeId);   // 패스의 퀴즈·복습 노드를 완료 표시
-      requestAppReview();
-      void refreshWallet();   // m4(퀴즈 N문제)·50XP 보너스는 서버가 올린다 — 세션 끝에 한 번 읽는다
-    }
-  }, [finished]);
+    if (!finished || completedRef.current) return;
+    completedRef.current = true;
+    // 승급이면 웅장하게, 아니면 정답률에 따라
+    if (getGrowthStage(xp).id > getGrowthStage(xpAtStart.current).id) feedbackTierUp();
+    else feedbackQuizComplete(correctCount === quizQueue.length);
+    logClick('quiz_complete', { mode: 'quiz', total: quizQueue.length, correct: correctCount, node_id: navState?.nodeId });
+    if (navState?.nodeId) markNodeDone(navState.nodeId);   // 패스의 퀴즈·복습 노드를 완료 표시
+    requestAppReview();
+    void refreshWallet();   // m4(퀴즈 N문제)·50XP 보너스는 서버가 올린다 — 세션 끝에 한 번 읽는다
+  }, [correctCount, finished, navState?.nodeId, quizQueue.length, refreshWallet, xp]);
 
   // 풀 문제가 없을 때(아는 단어 0개로 딥링크 진입 등). 완료 화면으로 보내면 "0문제 완료 🎉"가 뜬다.
   if (quizQueue.length === 0) {
     return (
-      <div className="flex h-full flex-col bg-[var(--color-canvas)]">
-        <div className="flex-1 flex flex-col items-center justify-center px-8 gap-3 text-center">
-          <h2 className="text-xl font-bold text-[var(--color-ink)]">아직 풀 문제가 없어요</h2>
-          <p className="text-sm text-[var(--color-ink-4)] break-keep">단어를 먼저 배우면 배운 단어로 퀴즈를 낼 수 있어요.</p>
-        </div>
-        <div className="px-5 pb-12">
-          <button onClick={() => navigate('/course')} className="w-full py-4 rounded-button text-sm font-bold text-white bg-brand-500 active:opacity-90">
-            학습하러 가기
-          </button>
-        </div>
-      </div>
+      <LearningEmptyState
+        title="아직 풀 문제가 없어요"
+        description="단어를 먼저 배우면 배운 단어로 퀴즈를 낼 수 있어요."
+        actionLabel="학습하러 가기"
+        onAction={() => navigate('/course')}
+      />
     );
   }
 
@@ -125,68 +127,41 @@ const QuizScreen = () => {
     const stageUp = stageAfter.id > stageBefore.id;
 
     return (
-      <div className="flex h-full flex-col bg-[var(--color-canvas)]">
-        {/* 결과 카드 + 알림 카드 + 축하가 작은 화면에서 넘칠 수 있어 이 영역만 스크롤 */}
-        <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden flex flex-col items-center justify-center-safe px-8 py-6 gap-5">
-          <Mascot name="great" size={130} />
-          <div className="text-center anim-fade-up" style={{ '--i': 1 } as React.CSSProperties}>
-            <h2 className="text-2xl font-bold text-[var(--color-ink)] mb-1!">퀴즈 완료!</h2>
-            <p className="text-sm text-[var(--color-ink-4)]">{baseQueue.length}문제 완료{retryQueue.length > 0 && ` · 다시 푼 문제 ${retryQueue.length}개`}</p>
-          </div>
-
-          {/* 결과 카드 */}
-          <Card pad="lg" className="w-full flex flex-col gap-4 anim-fade-up" style={{ '--i': 2 } as React.CSSProperties}>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-[var(--color-ink-4)]">획득 포인트</span>
-              <div className="flex items-center gap-1.5">
-                <PointIcon size={16} />
-                <span className="text-xl font-bold text-brand-500">+{earnedShown}P</span>
-              </div>
+      <LearningCompletionScreen
+        mascot="great"
+        title="퀴즈 완료!"
+        subtitle={`${baseQueue.length}문제 완료${retryQueue.length > 0 ? ` · 다시 푼 문제 ${retryQueue.length}개` : ''}`}
+        actionLabel={navState?.nextRoute?.label ?? (backPath === '/course' ? '코스로' : '홈으로')}
+        onAction={() => navState?.nextRoute
+          ? navigate(navState.nextRoute.pathname, navState.nextRoute.state === undefined ? undefined : { state: navState.nextRoute.state })
+          : navigate(backPath)}
+      >
+        <Card pad="lg" className="w-full flex flex-col gap-4 anim-fade-up" style={{ '--i': 2 } as React.CSSProperties}>
+          <LearningStatRow label="획득 포인트" withDivider={false}>
+            <div className="flex items-center gap-1.5">
+              <PointIcon size={16} />
+              <span className="text-xl font-bold text-brand-500">+{earnedShown}P</span>
             </div>
-            <div className="h-px bg-[var(--color-line)]" />
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-[var(--color-ink-4)]">획득 XP</span>
-              <div className="flex items-center gap-1.5">
-                <XpIcon size={16} />
-                <span className="text-xl font-bold text-[var(--color-ink)]">+{Math.max(0, xp - xpAtStart.current)}</span>
-              </div>
+          </LearningStatRow>
+          <LearningStatRow label="획득 XP">
+            <div className="flex items-center gap-1.5">
+              <XpIcon size={16} />
+              <span className="text-xl font-bold text-[var(--color-ink)]">+{Math.max(0, xp - xpAtStart.current)}</span>
             </div>
-            <div className="h-px bg-[var(--color-line)]" />
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-[var(--color-ink-4)]">정답률</span>
-              <span className="text-xl font-bold text-[var(--color-ink)]">{accuracy}%</span>
-            </div>
-            <div className="h-px bg-[var(--color-line)]" />
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-[var(--color-ink-4)]">최고 연속 정답</span>
-              <span className="flex items-center gap-1 text-xl font-bold text-[var(--color-ink)]">{maxCombo}연속<Flame size={18} className="text-brand-500 fill-current" /></span>
-            </div>
-            {stageUp && (
-              <>
-                <div className="h-px bg-[var(--color-line)]" />
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-[var(--color-ink-4)]">단계 변화</span>
-                  <span className="text-sm font-bold text-success-400">🎉 {stageBefore.name} → {stageAfter.name} 승급!</span>
-                </div>
-              </>
-            )}
-          </Card>
-
-          <DailyAlarmPromptCard />
-          <StreakCelebration />
-        </div>
-
-        <div className="px-5 pb-12 flex flex-col gap-3">
-          <button
-            onClick={() => navState?.nextRoute
-              ? navigate(navState.nextRoute.pathname, navState.nextRoute.state === undefined ? undefined : { state: navState.nextRoute.state })
-              : navigate(backPath)}
-            className="w-full py-4 rounded-button text-sm font-bold text-white bg-brand-500 active:opacity-90"
-          >
-            {navState?.nextRoute?.label ?? (backPath === '/course' ? '코스로' : '홈으로')}
-          </button>
-        </div>
-      </div>
+          </LearningStatRow>
+          <LearningStatRow label="정답률">
+            <span className="text-xl font-bold text-[var(--color-ink)]">{accuracy}%</span>
+          </LearningStatRow>
+          <LearningStatRow label="최고 연속 정답">
+            <span className="flex items-center gap-1 text-xl font-bold text-[var(--color-ink)]">{maxCombo}연속<Flame size={18} className="text-brand-500 fill-current" /></span>
+          </LearningStatRow>
+          {stageUp && (
+            <LearningStatRow label="단계 변화">
+              <span className="text-sm font-bold text-success-400">🎉 {stageBefore.name} → {stageAfter.name} 승급!</span>
+            </LearningStatRow>
+          )}
+        </Card>
+      </LearningCompletionScreen>
     );
   }
 
@@ -248,16 +223,16 @@ const QuizScreen = () => {
   // 쉬운 예시(데이터 앞의 '학습용 가정:' 표시는 뺀다). 없으면 뜻
   const example = currentWord?.learningExample?.replace(/^학습용 가정:\s*/, '') || currentWord?.meaning;
   // 오답: 고른 보기가 어떤 용어(의 뜻)인지 한 줄로 짚어 준다. 직접 만든 문제(custom)는 보기가 용어가 아니라 없음
-  const picked = status === 'wrong' && selected ? allWords.find(w => w.word === selected) : undefined;
+  const picked = status === 'wrong' && selected ? wordByName.get(selected) : undefined;
 
   return (
     <div className="flex flex-col h-full bg-[var(--color-card)]">
-      {/* 헤더: 문제 번호 + 얇은 진행바만(뒤로가기는 토스 내비게이션 바가 맡는다). 질문이 화면의 주인공이 되게 */}
-      <div className="px-5 pt-2 pb-3 flex flex-col gap-2">
-        <div className="flex items-center gap-1">
-          <span className="text-sm font-bold text-[var(--color-ink-2)]">{retrying ? `다시 풀기 · 남은 ${quizQueue.length - currentQuizIndex}문제` : `${currentQuizIndex + 1} / ${baseQueue.length}`}</span>
-          {streakMessage && <span className="ml-2 flex items-center gap-0.5 text-xs font-bold text-brand-500"><Flame size={13} className="fill-current" />{streakMessage}</span>}
-          {/* 획득 포인트 팝업 (보유 포인트는 상단바에 있다) */}
+      <QuizProgressHeader
+        label={retrying ? `다시 풀기 · 남은 ${quizQueue.length - currentQuizIndex}문제` : `${currentQuizIndex + 1} / ${baseQueue.length}`}
+        progress={progressPercent}
+        streakText={streakMessage}
+        durationClass="duration-500"
+        right={(
           <div className="relative ml-auto h-5 w-12">
             {showPointPop && (
               <span
@@ -269,11 +244,8 @@ const QuizScreen = () => {
               </span>
             )}
           </div>
-        </div>
-        <div className="h-1.5 rounded-full bg-[var(--color-line)] overflow-hidden">
-          <div className="h-full rounded-full bg-brand-500 transition-all duration-500" style={{ width: `${progressPercent}%` }} />
-        </div>
-      </div>
+        )}
+      />
 
       {/* 애니메이션 */}
       <style>{`

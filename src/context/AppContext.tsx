@@ -15,7 +15,8 @@ import { feedbackClaim } from '../lib/feedback';
 import { fetchAll, PAGE } from '../lib/fetchAll';
 import { addEnergyState, fillEnergyState, nextEnergyAt as calcNextEnergyAt, normalizeEnergy, spendEnergyState, type EnergyState } from '../lib/energy';
 import { runEnergyRefill, type EnergyRefillResult } from '../lib/energyRefill';
-import { selectRecallWords, type ReviewProgressRow } from '../lib/review';
+import { nextReviewDateFromRows, selectDueReviewWords, selectRecallWords, type ReviewProgressRow } from '../lib/review';
+import { buildCourseContent } from '../lib/courseContent';
 
 type WpRow = ReviewProgressRow & { ease: number; interval_d: number; reps: number; due_date: string };
 type ShopReason = 'lesson' | 'energy';
@@ -206,36 +207,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       ]);
       if (!wordsData || !coursesData || !cwData) throw new Error('학습 콘텐츠 응답 누락');
 
-      const wordMap = new Map(wordsData.map(w => [w.id, {
-        id: w.id,
-        word: w.word,
-        meaning: w.meaning,
-        detailedMeaning: w.detailed_meaning,
-        newsExample: w.news_example,
-        learningExample: w.learning_example ?? undefined,
-        hint: w.hint,
-        difficulty: w.difficulty as Word['difficulty'],
-        relatedWords: w.related_words ?? [],
-        visuals: (w.visuals as Word['visuals']) ?? undefined,
-        sources: w.sources ?? [],
-      } as Word]));
+      const content = buildCourseContent(wordsData, cwData, coursesData);
 
-      const builtCourses: Course[] = coursesData.map(c => ({
-        id: c.id,
-        level: c.level,
-        title: c.title,
-        description: c.description,
-        category: c.category,
-        words: cwData
-          .filter(cw => cw.course_id === c.id)
-          .sort((a, b) => a.position - b.position)
-          .map(cw => wordMap.get(cw.word_id))
-          .filter(Boolean)
-          .sort((a, b) => (a?.difficulty ?? 0) - (b?.difficulty ?? 0)) as Word[],
-      }));
-
-      setCourses(builtCourses);
-      setAllWords(Array.from(wordMap.values()));
+      setCourses(content.courses);
+      setAllWords(content.allWords);
       setContentStatus('ready');
 
       // 미션 정의는 공개 데이터라 프로필이 없어도 받을 수 있다.
@@ -716,20 +691,12 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   // ── 오늘 복습 큐 (due_date <= 오늘) ────────────────────────────
   const dueQueue = useMemo(() => {
-    const todayStr = toDateStr(new Date());
-    const byId = new Map(allWords.map(w => [w.id, w]));
-    return wpRows
-      .filter(r => r.due_date <= todayStr)
-      .sort((a, b) => a.due_date.localeCompare(b.due_date))
-      .slice(0, DAILY_REVIEW_CAP)
-      .map(r => byId.get(r.word_id))
-      .filter(Boolean) as Word[];
+    return selectDueReviewWords(wpRows, allWords, DAILY_REVIEW_CAP);
   }, [wpRows, allWords]);
   const nextReviewDate = useMemo(() => {
-    const todayStr = toDateStr(new Date());
-    return wpRows.map(row => row.due_date).filter(date => date > todayStr).sort()[0] ?? null;
+    return nextReviewDateFromRows(wpRows);
   }, [wpRows]);
-  const pickRecallWords = ({ candidates, excludeIds, count = 3 }: { candidates?: Word[]; excludeIds?: Iterable<number>; count?: number } = {}) =>
+  const pickRecallWords = useCallback(({ candidates, excludeIds, count = 3 }: { candidates?: Word[]; excludeIds?: Iterable<number>; count?: number } = {}) =>
     selectRecallWords({
       candidates: candidates ?? knownWords,
       knownIds,
@@ -737,7 +704,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       courses,
       excludeIds,
       count,
-    });
+    }), [knownWords, knownIds, wpRows, courses]);
 
   // ── recordReview — SRS 일정만 갱신 (포인트는 submitQuizAnswer가 담당) ─
   const recordReview = async (wordId: number, correct: boolean, usedHint: boolean) => {

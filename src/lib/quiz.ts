@@ -1,4 +1,5 @@
 import type { Word } from '../types';
+import { shuffle } from './random';
 
 // 단어 id → 코스 카테고리. buildQuizItem/getDistractors에 주입해 같은 주제 오답을 우선.
 export type CategoryOf = (wordId: number) => string | undefined;
@@ -13,7 +14,6 @@ export const getDistractors = (
 ): Word[] => {
   const pool = knownWords.length >= 4 ? knownWords : allWords;
   const others = pool.filter(w => w.id !== correctWord.id);
-  const shuffle = (a: Word[]): Word[] => [...a].sort(() => Math.random() - 0.5);
 
   // 이름이 비슷한 용어(통화정책수단 vs 통화정책체계)는 오답으로 두지 않는다. 기본형 앞 3글자 비교.
   const head = (w: string) => w.split(/[(/;]/)[0].replace(/\s+/g, '').slice(0, 3);
@@ -45,7 +45,7 @@ export const getDistractors = (
 
 export const getOptions = (correctWord: Word, knownWords: Word[], allWords: Word[]): string[] => {
   const wrong = getDistractors(correctWord, knownWords, allWords).map(w => w.word);
-  return [...wrong, correctWord.word].sort(() => Math.random() - 0.5);
+  return shuffle([...wrong, correctWord.word]);
 };
 
 // ── 퀴즈 유형 ──────────────────────────────────────────────────
@@ -105,7 +105,7 @@ export const buildCustomQuizItem = (quiz: CustomQuiz): QuizItem => {
     promptLabel: '알맞은 것을 고르세요',
     promptMain: quiz.q,
     explanation: quiz.explanation,
-    options: [...options].sort(() => Math.random() - 0.5),
+    options: shuffle(options),
   };
 };
 
@@ -123,8 +123,6 @@ export const buildQuizItem = (
   allWords: Word[],
   categoryOf?: CategoryOf,
 ): QuizItem => {
-  const shuffle = <T,>(a: T[]): T[] => [...a].sort(() => Math.random() - 0.5);
-
   // 직접 만든 객관식: 정답 보기만 제출값이 단어(서버가 정답 처리), 오답 보기는 보기 글자 자체
   const quizzes = customQuizzes(correctWord);
   if (type === 'custom' && quizzes.length) {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { BarChart3, ArrowDown } from 'lucide-react';
 import type { WordVisual } from '../types';
 import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
@@ -303,7 +303,7 @@ const FlowCarousel = ({ flows }: { flows: Extract<WordVisual, { type: 'flow' }>[
   );
 };
 
-export const WordVisuals = ({ visuals, terms }: { visuals: WordVisual[]; terms?: Terms }) => {
+export const WordVisuals = memo(({ visuals, terms }: { visuals: WordVisual[]; terms?: Terms }) => {
   // quiz는 출시 이후 생긴 이해 확인 문제라 카드로 그리지 않는다
   const list = visuals.filter((v): v is Exclude<WordVisual, { type: 'quiz' }> => v.type !== 'quiz' && (v.type !== 'ecos' || !ecosDown));
   const flows = list.filter((v): v is Extract<WordVisual, { type: 'flow' }> => v.type === 'flow');
@@ -317,4 +317,4 @@ export const WordVisuals = ({ visuals, terms }: { visuals: WordVisual[]; terms?:
       )}
     </>
   );
-};
+});

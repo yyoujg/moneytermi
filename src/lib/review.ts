@@ -48,6 +48,8 @@ const rankCourseOrder = (courses: Course[]) => {
   return order;
 };
 
+const byWordId = (words: Word[]) => new Map(words.map(word => [word.id, word]));
+
 const priorityTier = (row: ReviewProgressRow | undefined, today: string) => {
   const due = !!row?.due_date && row.due_date <= today;
   const wrong = row?.status === 'unknown' || row?.last_grade === 0;
@@ -92,6 +94,39 @@ export const selectRecallWords = ({
       return a.id - b.id;
     })
     .slice(0, count);
+};
+
+export const selectDueReviewWords = (
+  progressRows: ReviewProgressRow[],
+  words: Word[],
+  count: number,
+  today = toDateStr(new Date()),
+): Word[] => {
+  const wordsById = byWordId(words);
+  return progressRows
+    .filter(row => !!row.due_date && row.due_date <= today)
+    .sort((a, b) => {
+      const due = (a.due_date ?? '').localeCompare(b.due_date ?? '');
+      if (due !== 0) return due;
+      const reps = (a.reps ?? Number.MAX_SAFE_INTEGER) - (b.reps ?? Number.MAX_SAFE_INTEGER);
+      if (reps !== 0) return reps;
+      return a.word_id - b.word_id;
+    })
+    .map(row => wordsById.get(row.word_id))
+    .filter((word): word is Word => Boolean(word))
+    .slice(0, count);
+};
+
+export const nextReviewDateFromRows = (
+  progressRows: ReviewProgressRow[],
+  today = toDateStr(new Date()),
+): string | null => {
+  let next: string | null = null;
+  for (const row of progressRows) {
+    if (!row.due_date || row.due_date <= today) continue;
+    if (next === null || row.due_date < next) next = row.due_date;
+  }
+  return next;
 };
 
 export const shouldScheduleRetry = (queue: Word[], index: number, wordId: number): boolean => {

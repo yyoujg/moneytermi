@@ -16,9 +16,12 @@ import { StreakCelebration } from '../components/StreakCelebration';
 import { Card } from '../components/ui/Card';
 import { WordVisuals } from '../components/WordVisuals';
 import { termPattern } from '../lib/quiz';
+import { selectLessonQuizWords } from '../lib/lessonQuiz';
+import { buildWordLookup, relatedWordNames, type WordLookup } from '../lib/wordLookup';
 
 
 const SOURCE_NAMES: Record<string, string> = { bok800: '한국은행 경제금융용어 800선', tesat: 'TESAT', sgsg: '한경 생글생글 경제 퀴즈' };
+const EMPTY_WORDS: Word[] = [];
 
 const stripHtml = (s: string) => {
   const tmp = document.createElement('div');
@@ -46,15 +49,11 @@ const Highlight = ({ text, keyword, pattern }: { text: string; keyword: string; 
 // 한 페이지에 단어+뜻 → 그래프·표 → 뉴스 → 관련 용어를 보여주고, 자세히 알아보기는 시트로 연다
 
 // 자세히 알아보기 본문(요약과 겹치는 첫 문장 제외)과 유효한 관련 용어
-const wordExtras = (word: Word, allWords: Word[]) => {
-  // 연관검색어는 '주가지수' 같은 기본형으로 적혀 있고 단어는 '주가지수선물거래(…)'처럼 긴 경우가 있어 기본형으로도 맞춘다.
-  const baseOf = (w: string) => w.split(/[(/;]/)[0].trim();
+const wordExtras = (word: Word, lookup: WordLookup) => {
   const detail = word.detailedMeaning.startsWith(word.meaning)
     ? word.detailedMeaning.slice(word.meaning.length).trim()
     : word.detailedMeaning;
-  const related = (word.relatedWords ?? [])
-    .map(rw => allWords.find(w => w.word === rw)?.word ?? allWords.find(w => baseOf(w.word) === baseOf(rw))?.word)
-    .filter((w, i, arr): w is string => !!w && w !== word.word && arr.indexOf(w) === i);
+  const related = relatedWordNames(word, lookup);
   return { detail, related };
 };
 
@@ -74,8 +73,7 @@ const WordCard = ({
   newsItems,
   newsLoading,
   keyword,
-  termNames,
-  meaningOf,
+  visualTerms,
 }: {
   word: Word;
   onDetail?: () => void;
@@ -84,8 +82,7 @@ const WordCard = ({
   newsItems: NaverNewsItem[];
   newsLoading: boolean;
   keyword: string;
-  termNames: string[];
-  meaningOf: (name: string) => string | undefined;
+  visualTerms: { names: string[]; meaningOf: (name: string) => string | undefined; onClick: (name: string) => void };
 }) => {
   // 쉬운 예시(데이터 앞의 '학습용 가정:' 표시는 뺀다)
   const example = word.learningExample?.replace(/^학습용 가정:\s*/, '');
@@ -126,7 +123,7 @@ const WordCard = ({
 
     {/* 순서: 단어+뜻 → 그래프·표 → 뉴스 → 관련 용어. 자세히 알아보기는 단어 카드의 버튼으로 여는 시트 */}
     {/* 그래프·표 — 뜻 바로 아래에서 그림으로 이해시킨다 */}
-    {word.visuals && word.visuals.length > 0 && <WordVisuals visuals={word.visuals} terms={{ names: termNames, meaningOf, onClick: onRelatedClick }} />}
+    {word.visuals && word.visuals.length > 0 && <WordVisuals visuals={word.visuals} terms={visualTerms} />}
 
     {/* 뉴스 — 사진보다 '이 용어가 기사에서 어떻게 쓰였는지'가 보이게 작은 썸네일 목록. 불러온 뒤 기사가 없으면 섹션째 숨긴다 */}
     {(newsLoading || newsItems.length > 0) && (
@@ -205,6 +202,7 @@ const WordCardScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { courses, allWords, knownWords, knownIds, hydrated, setKnownWords, claimPromotionReward } = useAppContext();
+  const wordLookup = React.useMemo(() => buildWordLookup(allWords, courses), [allWords, courses]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const state = location.state as {
@@ -226,7 +224,7 @@ const WordCardScreen = () => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (course) setDeepWords(course.words);
   }, [state?.words?.length, deepWords, hydrated, courses, knownIds]);
-  const words = state?.words?.length ? state.words : deepWords ?? [];
+  const words = state?.words?.length ? state.words : deepWords ?? EMPTY_WORDS;
   const backPath = state?.backPath ?? (isDeepLink ? '/home' : '/course');
   const backState = state?.backState;
   const autoAdvance = state?.autoAdvance ?? false;
@@ -241,7 +239,7 @@ const WordCardScreen = () => {
 
   // 로딩이 끝났는데도 보여줄 단어가 없으면 돌아간다. 렌더 중 navigate는 안 된다.
   const noWords = words.length === 0 && !(isDeepLink && (courses.length === 0 || !hydrated));
-  useEffect(() => { if (noWords) navigate(backPath, { replace: true }); }, [noWords]);
+  useEffect(() => { if (noWords) navigate(backPath, { replace: true }); }, [backPath, navigate, noWords]);
 
   // 단어 변경 시 스크롤 맨 위로
   useEffect(() => {
@@ -268,12 +266,40 @@ const WordCardScreen = () => {
 
   // 설명 글에서 강조할 다른 용어들(지금 단어는 빼고)
   const curName = words[wordIndex]?.word;
-  const termNames = React.useMemo(() => allWords.map(w => w.word).filter(n => n !== curName), [allWords, curName]);
-  const meaningOf = React.useCallback((name: string) => allWords.find(w => w.word === name)?.meaning, [allWords]);
-  const lessonQuizWords = React.useMemo(() => {
-    const lessonIds = new Set(words.map(w => w.id));
-    return knownWords.filter(kw => lessonIds.has(kw.id)).slice(0, Math.min(5, lessonIds.size));
-  }, [knownWords, words]);
+  const allTermNames = React.useMemo(() => allWords.map(w => w.word), [allWords]);
+  const termNames = React.useMemo(() => allTermNames.filter(n => n !== curName), [allTermNames, curName]);
+  const wordIndexByName = React.useMemo(() => {
+    const map = new Map<string, number>();
+    words.forEach((w, i) => map.set(w.word, i));
+    return map;
+  }, [words]);
+  const meaningOf = React.useCallback((name: string) => wordLookup.byName.get(name)?.meaning, [wordLookup]);
+  const lessonQuizWords = React.useMemo(() => selectLessonQuizWords(words, knownIds), [knownIds, words]);
+  const handleRelatedWordClick = React.useCallback((rawName: string) => {
+    const wordName = rawName.replace(/["""'']/g, '').trim();
+    // 현재 코스 내에 있으면 바로 이동
+    const idx = wordIndexByName.get(wordName);
+    if (idx !== undefined) { setWordIndex(idx); return; }
+
+    // 다른 코스에서 검색 (word id 기반으로 매칭)
+    const targetWord = wordLookup.byName.get(wordName);
+    if (!targetWord) {
+      showModal('아직 등록되지 않은 용어예요', 'error');
+      return;
+    }
+
+    const targetCourse = wordLookup.courseByWordId.get(targetWord.id);
+    if (targetCourse) {
+      const targetIdx = targetCourse.words.findIndex(w => w.id === targetWord.id);
+      navigate('/word-card', { state: { words: targetCourse.words, index: targetIdx, backPath, autoAdvance } });
+    } else {
+      navigate('/word-card', { state: { words: [targetWord], index: 0, backPath, autoAdvance } });
+    }
+  }, [autoAdvance, backPath, navigate, wordIndexByName, wordLookup]);
+  const visualTerms = React.useMemo(
+    () => ({ names: termNames, meaningOf, onClick: handleRelatedWordClick }),
+    [handleRelatedWordClick, meaningOf, termNames],
+  );
 
   // autoAdvance 완료 화면
   if (autoAdvance && words.length > 0 && wordIndex >= words.length) {
@@ -337,7 +363,7 @@ const WordCardScreen = () => {
   if (!words.length) return null;
 
   const word = words[wordIndex];
-  const { detail, related } = wordExtras(word, allWords);
+  const { detail, related } = wordExtras(word, wordLookup);
   const lastWord = wordIndex === words.length - 1;
 
   const goNext = () => {
@@ -380,28 +406,6 @@ const WordCardScreen = () => {
     });
   };
 
-  const handleRelatedWordClick = (rawName: string) => {
-    const wordName = rawName.replace(/["""'']/g, '').trim();
-    // 현재 코스 내에 있으면 바로 이동
-    const idx = words.findIndex(w => w.word === wordName);
-    if (idx >= 0) { setWordIndex(idx); return; }
-
-    // 다른 코스에서 검색 (word id 기반으로 매칭)
-    const targetWord = allWords.find(w => w.word === wordName);
-    if (!targetWord) {
-      showModal('아직 등록되지 않은 용어예요', 'error');
-      return;
-    }
-
-    const targetCourse = courses.find(c => c.words.some(w => w.id === targetWord.id));
-    if (targetCourse) {
-      const targetIdx = targetCourse.words.findIndex(w => w.id === targetWord.id);
-      navigate('/word-card', { state: { words: targetCourse.words, index: targetIdx, backPath, autoAdvance } });
-    } else {
-      navigate('/word-card', { state: { words: [targetWord], index: 0, backPath, autoAdvance } });
-    }
-  };
-
   return (
     <>
     <div className="flex flex-col h-full bg-[var(--color-canvas)] overflow-hidden">
@@ -438,8 +442,7 @@ const WordCardScreen = () => {
           newsItems={newsItems}
           newsLoading={newsLoading}
           keyword={word.word}
-          termNames={termNames}
-          meaningOf={meaningOf}
+          visualTerms={visualTerms}
         />
         </div>
       </div>

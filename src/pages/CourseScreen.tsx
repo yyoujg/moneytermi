@@ -8,6 +8,7 @@ import { feedbackNodeTap } from '../lib/feedback';
 import { loadDoneNodes } from '../lib/pathProgress';
 import { Storage } from '../lib/storage';
 import { showModal } from '../components/AlertModal';
+import { COURSE_REVIEW_COUNT, LESSON_WARMUP_COUNT, firstUnknownWordIndex, learnedOrFallbackWords, selectCourseQuizWords } from '../lib/coursePractice';
 
 const SEEN_KEY = 'path_seen_done';   // 코스 화면에서 마지막으로 본 완료 노드들(도장 연출용)
 const GATE_KEY = 'path_seen_levels';  // 열린 것을 본 레벨들(관문 연출용)
@@ -223,13 +224,10 @@ const CourseScreen = () => {
           openShop('energy');
           return;
         }
-        // 복습은 지금까지 배운 것 중에서만 낸다. 아직 아무것도 안 배웠으면 그냥 앞에서 자른다.
-        const learned = node.words.filter(w => knownIds.has(w.id));
-        const pool = learned.length > 0 ? learned : node.words;
-        const size = node.type === 'review' ? 10 : 5;
+        const pool = learnedOrFallbackWords(node.words, knownIds);
         const queue = node.type === 'review'
-          ? pickRecallWords({ candidates: pool, count: size })
-          : [...pool].sort(() => Math.random() - 0.5).slice(0, size);
+          ? pickRecallWords({ candidates: pool, count: COURSE_REVIEW_COUNT })
+          : selectCourseQuizWords(node.words, knownIds);
         feedbackNodeTap();
         await expandFromNode(node.id, courseTitle);
         navigate('/quiz', { state: { quizQueue: queue, backPath, nodeId: node.id, courseTitle, reviewMode: node.type === 'review', mode: node.type === 'review' ? 'course_review' : undefined } });
@@ -266,8 +264,8 @@ const CourseScreen = () => {
       }
       feedbackNodeTap();
       await expandFromNode(node.id, courseTitle);
-      const lessonState = { words: node.words, index: Math.max(0, node.words.findIndex(word => !knownIds.has(word.id))), backPath, autoAdvance: true, courseTitle };
-      const recallWords = needsEnergy ? pickRecallWords({ excludeIds: node.words.map(word => word.id), count: 3 }) : [];
+      const lessonState = { words: node.words, index: firstUnknownWordIndex(node.words, knownIds), backPath, autoAdvance: true, courseTitle };
+      const recallWords = needsEnergy ? pickRecallWords({ excludeIds: node.words.map(word => word.id), count: LESSON_WARMUP_COUNT }) : [];
       if (recallWords.length > 0) {
         navigate('/quiz', {
           state: {
