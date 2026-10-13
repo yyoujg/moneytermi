@@ -6,6 +6,8 @@
 
 | 번들 | 콘솔 출시일시 (KST) | 기능 도달일(D0 기준) | 주요 기능 |
 |------|--------------------|--------------------|-----------|
+| 콘솔 확인 후 기입 (deploymentId `01a13309`) | 생성 2026-10-13 · **검토 필요** (main 직접 푸시 `d5ce7cd`) | — (출시 후 기입) | 학습 화면 모션·효과음 polish, 배경음악 추가, 코스 노드 간격·잠김 상태·현재 학습 위치 자동 스크롤 개선 |
+| 콘솔 확인 후 기입 (deploymentId `01a132ec`) | 생성 2026-10-13 · **검토 필요** (main 직접 푸시 `125bbef`) | — (출시 후 기입. 데이터 보강 SQL은 2026-10-13 적용 완료) | 복습 노드를 2레슨마다 배치, 상황형 퀴즈 추가, 코스별 학습 결과 문구 추가, 단어/퀴즈 데이터 품질 보강. words 1233 / courses 78 / lessonCheck 127 / customQuiz 180 |
 | 20261010-161 (deploymentId `01a1217d`) | 생성 2026-10-10 · **반려** | — (제외) | 반려 사유: 최초 화면 토스 네비게이션 바 뒤로가기 시 미니앱 미종료, 예상하기 어려운 시점의 광고 노출. 같은 사유 재발 방지 체크는 `docs/APPS_IN_TOSS_TODO.md` A-2 |
 | 콘솔 확인 후 기입 (deploymentId 머지 후 기입) | 생성 머지 후 기입 · 문서만 (PR #65) | — (제외) | PR #64 출시노트 문서 반영 재배포. `01a114c9`와 같은 코드 - 검토 요청은 `01a114c9` 번들로 |
 | 콘솔 확인 후 기입 (deploymentId `01a114c9`) | 생성 2026-10-07 14:15 · **검토 필요** (PR #64) | — (출시 후 기입. 새 단어·레슨·예문은 출시 후 SQL 적용일이 도달일) | 콘텐츠 1000행 넘게 이어 받기, 공유 리워드(contactsViral) 연동 제거(10/23 종료 대응). 테셋 기반 단어 213개·레슨 53개·빈칸 퀴즈 예문 1213개는 **출시 후 DB 적용**. **검토 요청은 이 번들로** |
@@ -86,6 +88,84 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
 
 > **TODO**: 06-20 / 06-17 / 06-16 항목의 실제 출시일은 미확인이다.
 > 앱인토스 콘솔 → 버전 내역 2~8페이지에서 확인해 채울 것.
+
+---
+
+## 2026-10-13 커밋 · 검토 필요 (main `d5ce7cd`) — 학습 패스 모션·오디오 polish
+
+로컬 빌드 deploymentId `01a13309-31cc-7bc1-ba22-842211de43df`.
+번들 번호·콘솔 생성일시·출시일시는 콘솔 확인 후 대장에 기입.
+
+| 항목 | 내용 | 파일 |
+|---|---|---|
+| 공통 모션 | 퀴즈 정답/오답, 포인트 획득, 완료 화면, 선택지 판정 모션을 공통 CSS로 정리하고 과한 흔들림을 낮춤 | `src/index.css`, `QuizScreen.tsx`, `LearningCompletionScreen.tsx` |
+| 효과음·배경음악 | 효과음 볼륨을 낮추고 짧은 합성 루프 배경음악을 추가. 설정에서 배경음악을 별도로 켜고 끌 수 있게 함 | `src/lib/feedback.ts`, `useTapHaptics.ts`, `useSettings.ts`, `SettingsSheet.tsx` |
+| 코스 화면 가독성 | 주제 카드 간격을 넓히고, 잠긴 주제/노드의 배경·텍스트·아이콘·진행바를 disabled 상태처럼 보이게 조정 | `CourseScreen.tsx` |
+| 현재 위치 스크롤 | 전체 주제 화면은 현재 진행 중인 주제로, 주제 상세 화면은 현재 학습 노드로 자동 이동. 완료 도장 연출과 스크롤 순서 충돌 방지 | `CourseScreen.tsx`, `CourseScreen.test.tsx` |
+
+### 검증
+
+- `npm test -- --run` — 28 files / 189 tests passed.
+- `npx tsc --noEmit` — 통과.
+- `npm run lint` — 에러 없음. 기존 `AppContext.tsx` react-hooks/exhaustive-deps 경고 2건 유지.
+- `npm run build` — 성공, deploymentId `01a13309-31cc-7bc1-ba22-842211de43df`.
+
+### 토스 콘솔 출시노트 (사용자 노출용)
+
+```
+- 학습 화면의 움직임과 효과음을 더 부드럽게 다듬었어요.
+- 조용한 배경음악을 추가하고 설정에서 켜고 끌 수 있게 했어요.
+- 코스 화면에서 잠긴 노드가 더 명확히 보이고, 노드 간 간격도 보기 좋게 조정했어요.
+- 코스에 들어가면 현재 학습 중인 위치로 더 자연스럽게 이동해요.
+```
+
+### 미해결
+
+- 콘솔 번들 번호·생성일시·검수 결과 확인 후 대장 표와 이 섹션 헤더를 갱신.
+- 출시 승인 시 기능 도달일을 실제 출시일로 기입.
+
+---
+
+## 2026-10-13 커밋 · 검토 필요 (main `125bbef`) — 복습 빈도·상황형 퀴즈·단어 데이터 품질 보강
+
+로컬 빌드 deploymentId `01a132ec-2fe1-7b54-9d27-fb1396f3c35f`.
+번들 번호·콘솔 생성일시·출시일시는 콘솔 확인 후 대장에 기입.
+
+| 항목 | 내용 | 파일 |
+|---|---|---|
+| 복습 빈도 | 기존 최종 복습은 유지하면서 코스 중간 복습 노드를 2레슨마다 추가. 완료 id는 기존 `${course.id}-r` 유지 | `src/lib/path.ts`, `src/lib/path.test.ts` |
+| 상황형 퀴즈 | `learning_example`을 문제로 쓰는 `scenario_to_word` 유형 추가. 문제 안의 정답 용어는 `maskTerm`으로 가림 | `src/lib/quiz.ts`, `src/pages/QuizScreen.tsx` |
+| 학습 결과 문구 | 코스·퀴즈·단어 완료 화면에 "이제 할 수 있어요" 성격의 결과 문구 추가 | `src/lib/learningOutcome.ts`, `CourseScreen.tsx`, `QuizScreen.tsx`, `WordCardScreen.tsx` |
+| 데이터 품질 보강 | 빈칸 퀴즈 2건 수정, learning_example 누락 213건 채움, 레슨 체크 없는 코스 52개에 퀴즈 추가, related_words를 실제 단어 기준으로 정리 | `migration_learning_data_quality_20261013.sql` |
+| 통계 단위 | ECOS 지수형 통계 9건의 빈 단위를 `p`로 보정 | `migration_ecos_units_20261013.sql` |
+
+### 운영 DB 적용 결과
+
+- `migration_learning_data_quality_20261013.sql`, `migration_ecos_units_20261013.sql` 적용 완료(2026-10-13).
+- words 1233 / courses 78 / course_words 1234.
+- customQuiz 128 → 180, lessonCheck 75 → 127.
+- 누락 점검 결과: missingLearningExamples 0, clozeNotReady 0, coursesWithoutLessonChecks 0, relatedMissing 0, badQuiz 0, visualIssueCount 0.
+
+### 검증
+
+- `npm test -- --run` — 28 files / 186 tests passed.
+- `npx tsc --noEmit` — 통과.
+- `npm run lint` — 에러 없음. 기존 `AppContext.tsx` react-hooks/exhaustive-deps 경고 2건 유지.
+- `npm run build` — 성공, deploymentId `01a132ec-2fe1-7b54-9d27-fb1396f3c35f`.
+
+### 토스 콘솔 출시노트 (사용자 노출용)
+
+```
+- 복습 코스가 더 자주 나와요. 배운 단어를 중간중간 다시 확인해 보세요.
+- 실제 상황을 보고 알맞은 경제 용어를 고르는 퀴즈가 추가됐어요.
+- 모든 코스에 이해 확인 퀴즈가 들어가도록 단어와 퀴즈 데이터를 정리했어요.
+- 어려운 단어도 예시와 함께 더 쉽게 이해할 수 있도록 설명 데이터를 보강했어요.
+```
+
+### 미해결
+
+- 콘솔 번들 번호·생성일시·검수 결과 확인 후 대장 표와 이 섹션 헤더를 갱신.
+- 출시 승인 시 기능 도달일을 실제 출시일로 기입. 데이터 보강 SQL은 2026-10-13에 이미 운영 DB 적용 완료.
 
 ---
 
