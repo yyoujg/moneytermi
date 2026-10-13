@@ -14,14 +14,17 @@ const state = vi.hoisted(() => ({
   spendPoints: vi.fn(),
   claimFirstLesson: vi.fn(),
   pickRecallWords: vi.fn(),
+  storage: new Map<string, string>(),
+  getItem: vi.fn(),
+  setItem: vi.fn(),
 }));
 
 vi.mock('../context/AppContext', () => ({ useAppContext: () => state.ctx }));
 vi.mock('../lib/pathProgress', () => ({ loadDoneNodes: vi.fn(() => Promise.resolve(state.doneNodes)) }));
 vi.mock('../lib/storage', () => ({
   Storage: {
-    getItem: vi.fn(() => Promise.resolve(null)),
-    setItem: vi.fn(() => Promise.resolve()),
+    getItem: (key: string) => state.getItem(key),
+    setItem: (key: string, value: string) => state.setItem(key, value),
   },
 }));
 vi.mock('../lib/feedback', () => ({ feedbackNodeTap: vi.fn() }));
@@ -121,6 +124,11 @@ beforeEach(() => {
   HTMLElement.prototype.scrollTo = vi.fn();
   HTMLElement.prototype.scrollIntoView = vi.fn();
   window.matchMedia = vi.fn(() => ({ matches: true } as unknown as MediaQueryList));
+  state.storage.clear();
+  state.getItem.mockImplementation(async (key: string) => state.storage.get(key) ?? null);
+  state.setItem.mockImplementation(async (key: string, value: string) => {
+    state.storage.set(key, value);
+  });
   baseContext();
 });
 
@@ -139,6 +147,18 @@ describe('CourseScreen energy gates', () => {
     const scrollIntoView = vi.mocked(HTMLElement.prototype.scrollIntoView);
     const target = scrollIntoView.mock.contexts.find(el => (el as HTMLElement).textContent?.includes('금융'));
     expect(target).toBeDefined();
+  });
+
+  it('확인한 말이 늘었으면 성장 모달을 자동으로 보여준다', async () => {
+    state.storage.set('course_seen_growth_known_count_v1', '1');
+    baseContext({ knownIds: new Set([1, 2]) });
+    const { container } = await mount('/course');
+    await flushScrollEffects();
+
+    expect(container.textContent).not.toContain('눌러서 지금까지 쌓은 기록 보기');
+    expect(container.querySelector('[role="dialog"]')?.textContent).toContain('잘했어요');
+    expect(container.querySelector('[role="dialog"]')?.textContent).toContain('확인한 말');
+    expect(container.querySelector('[role="dialog"]')?.textContent).toContain('2개');
   });
 
   it('주제 화면에서 현재 학습 노드로 스크롤한다', async () => {

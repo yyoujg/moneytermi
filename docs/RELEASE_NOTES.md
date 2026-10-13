@@ -6,6 +6,7 @@
 
 | 번들 | 콘솔 출시일시 (KST) | 기능 도달일(D0 기준) | 주요 기능 |
 |------|--------------------|--------------------|-----------|
+| 콘솔 확인 후 기입 (deploymentId `01a133eb`) | 생성 2026-10-13 · **검토 필요** (main 직접 푸시 `f7b0f51`) | — (출시 후 기입) | 학습 성과·칭찬 피드백 확대, 전체 성장 기록 모달, 퀴즈 정답/오답 피드백 UI 개선, 표·그래프 가독성 점검, 홍보 문구·공유 이미지·앱 아이콘 자산 정리 |
 | 콘솔 확인 후 기입 (deploymentId `01a13309`) | 생성 2026-10-13 · **검토 필요** (main 직접 푸시 `d5ce7cd`) | — (출시 후 기입) | 학습 화면 모션·효과음 polish, 배경음악 추가, 코스 노드 간격·잠김 상태·현재 학습 위치 자동 스크롤 개선 |
 | 콘솔 확인 후 기입 (deploymentId `01a132ec`) | 생성 2026-10-13 · **검토 필요** (main 직접 푸시 `125bbef`) | — (출시 후 기입. 데이터 보강 SQL은 2026-10-13 적용 완료) | 복습 노드를 2레슨마다 배치, 상황형 퀴즈 추가, 코스별 학습 결과 문구 추가, 단어/퀴즈 데이터 품질 보강. words 1233 / courses 78 / lessonCheck 127 / customQuiz 180 |
 | 20261010-161 (deploymentId `01a1217d`) | 생성 2026-10-10 · **반려** | — (제외) | 반려 사유: 최초 화면 토스 네비게이션 바 뒤로가기 시 미니앱 미종료, 예상하기 어려운 시점의 광고 노출. 같은 사유 재발 방지 체크는 `docs/APPS_IN_TOSS_TODO.md` A-2 |
@@ -88,6 +89,42 @@ moneytermi 개발자용 변경 이력. 사용자 노출 문구가 아닌 기술 
 
 > **TODO**: 06-20 / 06-17 / 06-16 항목의 실제 출시일은 미확인이다.
 > 앱인토스 콘솔 → 버전 내역 2~8페이지에서 확인해 채울 것.
+
+---
+
+## 2026-10-13 커밋 · 검토 필요 (main `f7b0f51`) — 학습 칭찬·퀴즈 피드백·홍보 자산 polish
+
+로컬 빌드 deploymentId `01a133eb-a972-7cd5-a118-2b1352ec37c7`.
+번들 번호·콘솔 생성일시·출시일시는 콘솔 확인 후 대장에 기입.
+`478dfeb`부터 `f7b0f51`까지의 main 직접 푸시 변경을 포함한다.
+
+| 항목 | 내용 | 파일 |
+|---|---|---|
+| 학습 칭찬 피드백 | 홈, 코스, 단어 카드, 퀴즈, 복습, 이해 확인, 마이페이지, 미션 보상에 진행 성과·칭찬 문구를 추가. 코스의 전체 성장 기록은 버튼을 눌렀을 때 모달로 표시 | `src/lib/praise.ts`, `src/components/PraiseNote.tsx`, `HomeScreen.tsx`, `CourseScreen.tsx`, `QuizScreen.tsx`, `ReviewScreen.tsx`, `LessonCheckScreen.tsx`, `MyPageScreen.tsx`, `WordCardScreen.tsx`, `PointCelebration.tsx` |
+| 퀴즈 피드백 UI | 정답/오답 하단 패널 배경을 상태별로 분리, 예시 문장 크기·행간 조정, 내가 고른 답을 별도 작은 카드로 표시, 다음 버튼도 상태 색을 따르게 변경 | `src/pages/QuizScreen.tsx` |
+| 표·그래프 가독성 | 단어 카드 안의 표 줄바꿈·열 너비·차트 표시를 점검하고 긴 텍스트가 겹치지 않도록 보강 | `src/components/WordVisuals.tsx`, `src/components/WordVisuals.test.tsx` |
+| 홍보 문구·자산 | 앱 소개 문구를 "경제 공부, 쉬운 상황부터" 톤으로 정리하고, 공유 이미지·앱 아이콘·로고·콘솔 문구 자료를 갱신 | `docs/MARKETING_KIT.md`, `docs/APP_STORE_LISTING.md`, `docs/HOME_FEED_EXPOSURE.md`, `docs/assets/share-image.html`, `docs/assets/share-1200x630.png`, `docs/assets/app-icon-*.png`, `public/logo.png`, `index.html` |
+| 앱 문구 polish | "돈 단어"처럼 어색한 표현을 줄이고, 생활 속 상황·쉬운 학습 시작점 중심의 문구로 조정 | `src/App.tsx`, `src/components/DailyAlarmPromptCard.tsx`, `src/components/LeagueRules.tsx`, `src/components/TopBar.tsx`, `src/components/mypage/GuideSheet.tsx`, `src/lib/share.ts`, `src/lib/learningOutcome.ts` |
+
+### 검증
+
+- `npm test` — 30 files / 198 tests passed.
+- `npm test -- src/pages/QuizScreen.review.test.tsx` — 1 file / 2 tests passed.
+- `npm run build` — 성공, deploymentId `01a133eb-a972-7cd5-a118-2b1352ec37c7`.
+
+### 토스 콘솔 출시노트 (사용자 노출용)
+
+```
+- 학습 중간중간 잘하고 있는 부분을 더 자주 알려주고, 전체 성장 기록은 모달로 확인할 수 있어요.
+- 퀴즈를 맞히거나 틀렸을 때 정답, 내가 고른 답, 예시가 더 보기 쉽게 정리돼요.
+- 단어 카드의 표와 그래프가 더 안정적으로 보이도록 다듬었어요.
+- 앱 소개 문구와 공유 이미지가 더 쉽고 자연스럽게 바뀌었어요.
+```
+
+### 미해결
+
+- 콘솔 번들 번호·생성일시·검수 결과 확인 후 대장 표와 이 섹션 헤더를 갱신.
+- 출시 승인 시 기능 도달일을 실제 출시일로 기입.
 
 ---
 

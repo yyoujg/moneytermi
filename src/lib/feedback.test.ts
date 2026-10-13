@@ -6,8 +6,9 @@ vi.mock('@apps-in-toss/web-framework', () => ({
 
 class FakeAudioContext {
   static instances: FakeAudioContext[] = [];
+  static nextState = 'running';
 
-  state = 'running';
+  state = FakeAudioContext.nextState;
   currentTime = 1;
   destination = {};
   starts = 0;
@@ -17,7 +18,7 @@ class FakeAudioContext {
     FakeAudioContext.instances.push(this);
   }
 
-  resume = vi.fn(() => Promise.resolve());
+  resume = vi.fn(() => Promise.resolve().then(() => { this.state = 'running'; }));
   decodeAudioData = vi.fn(() => Promise.resolve({}));
 
   createBufferSource = vi.fn(() => ({
@@ -50,6 +51,7 @@ const flush = () => new Promise(resolve => setTimeout(resolve, 0));
 beforeEach(() => {
   vi.resetModules();
   FakeAudioContext.instances = [];
+  FakeAudioContext.nextState = 'running';
   vi.stubGlobal('AudioContext', FakeAudioContext);
   vi.stubGlobal('fetch', vi.fn(() => Promise.resolve({
     ok: true,
@@ -116,7 +118,28 @@ describe('feedback file playback', () => {
 
     const audio = FakeAudioContext.instances[0];
     expect(audio.createOscillator).toHaveBeenCalledTimes(3);
-    expect(audio.gains).toContain(0.026);
+    expect(audio.gains).toContain(0.055);
+
+    setBgmEnabled(false);
+  });
+
+  it('starts background music after a suspended audio context resumes', async () => {
+    FakeAudioContext.nextState = 'suspended';
+    const { startBgm, setBgmEnabled, __resetFeedbackForTest } = await import('./feedback');
+    __resetFeedbackForTest();
+    FakeAudioContext.nextState = 'suspended';
+
+    startBgm();
+    const audio = FakeAudioContext.instances[0];
+
+    expect(audio.resume).toHaveBeenCalled();
+    expect(audio.createOscillator).not.toHaveBeenCalled();
+
+    await flush();
+    await flush();
+
+    expect(audio.createOscillator).toHaveBeenCalledTimes(3);
+    expect(audio.gains).toContain(0.055);
 
     setBgmEnabled(false);
   });

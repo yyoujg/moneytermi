@@ -61,7 +61,7 @@ const buffers = new Map<Sfx, AudioBuffer | null>();   // null = 없음(합성음
 const loading = new Set<Sfx>();
 const lastPlayedAt = new Map<Sfx, number>();
 const FILE_GAIN = 0.42;
-const BGM_MASTER_GAIN = 0.026;
+const BGM_MASTER_GAIN = 0.055;
 const BGM_LOOP_MS = 6400;
 const MIN_FILE_GAP_MS: Partial<Record<Sfx, number>> = {
   tick: 65,
@@ -116,6 +116,7 @@ type BgmState = {
   interval: number;
 };
 let bgmState: BgmState | null = null;
+let bgmStarting = false;
 let bgmPhraseIndex = 0;
 let bgmVisibilityBound = false;
 
@@ -175,9 +176,20 @@ const unbindBgmVisibility = () => {
 };
 
 export function startBgm() {
-  if (!bgmPrefs.enabled || bgmState) return;
+  if (!bgmPrefs.enabled || bgmState || bgmStarting) return;
   const c = audio();
-  if (!c || c.state !== 'running') return;
+  if (!c) return;
+  if (c.state === 'suspended') {
+    bgmStarting = true;
+    c.resume()
+      .then(() => {
+        bgmStarting = false;
+        startBgm();
+      })
+      .catch(() => { bgmStarting = false; });
+    return;
+  }
+  if (c.state !== 'running') return;
   try {
     const master = c.createGain();
     master.gain.setValueAtTime(BGM_MASTER_GAIN, c.currentTime);
@@ -190,6 +202,7 @@ export function startBgm() {
     if (import.meta.env.DEV) (window as unknown as { __bgmStarted?: boolean }).__bgmStarted = true;
   } catch {
     bgmState = null;
+    bgmStarting = false;
   }
 }
 
@@ -201,6 +214,7 @@ export function stopBgm() {
   state.voices.forEach(osc => { try { osc.stop(); } catch { /* already stopped */ } });
   try { state.master.disconnect(); } catch { /* ignore */ }
   bgmState = null;
+  bgmStarting = false;
 }
 
 export function setBgmEnabled(enabled: boolean) {
@@ -219,6 +233,7 @@ export const __resetFeedbackForTest = () => {
   hapticPrefs.enabled = true;
   soundPrefs.enabled = true;
   bgmPrefs.enabled = true;
+  bgmStarting = false;
   bgmPhraseIndex = 0;
 };
 

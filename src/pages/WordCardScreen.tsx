@@ -309,7 +309,7 @@ const WordCardScreen = () => {
   if (autoAdvance && words.length > 0 && wordIndex >= words.length) {
     const completionOutcome = learningOutcomeFor({ title: state?.courseTitle, words });
     return (
-      <div className="flex h-full flex-col bg-[var(--color-canvas)]">
+      <div className="app-soft-screen flex h-full flex-col">
         {/* 카드 + 알림 카드 + 축하가 작은 화면에서 넘칠 수 있어 이 영역만 스크롤 */}
         <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden flex flex-col items-center justify-center-safe gap-5 p-8">
           <div className="w-20 h-20 bg-[var(--color-card)] rounded-full flex items-center justify-center text-4xl anim-pop-in">🎉</div>
@@ -417,7 +417,7 @@ const WordCardScreen = () => {
 
   return (
     <>
-    <div className="flex flex-col h-full bg-[var(--color-canvas)] overflow-hidden">
+    <div className="app-soft-screen flex flex-col h-full overflow-hidden">
 
       {/* 상단: 레슨 안의 단어 위치 */}
       <div className="px-5 pt-4 flex items-center justify-between gap-3">

@@ -15,8 +15,7 @@ import { ProfileAvatar } from '../components/ProfileAvatar';
 import { calcStreak } from '../lib/streak';
 import { Card } from '../components/ui/Card';
 import { PointCelebration, type PointReward } from '../components/PointCelebration';
-import { PraiseNote } from '../components/PraiseNote';
-import { praiseForHome, praiseForMission } from '../lib/praise';
+import { praiseForMission } from '../lib/praise';
 import type { Mission } from '../types';
 
 const HomeScreen = () => {
@@ -37,7 +36,6 @@ const HomeScreen = () => {
   const missionRank = (m: Mission) => (m.isRewarded ? 2 : m.current >= m.target ? 1 : 0);
   const missionList = Object.values(missions).sort((a, b) => missionRank(a) - missionRank(b) || a.sortOrder - b.sortOrder);
   const streak = calcStreak(attendanceDates);
-  const homePraise = praiseForHome({ knownCount: knownWords.length, streak, dueCount: dueQueue.length });
   const readyMissions = missionList.filter(m => !m.isRewarded && m.current >= m.target).length;
   const completedMissions = missionList.filter(m => m.isRewarded).length;
 
@@ -57,7 +55,7 @@ const HomeScreen = () => {
   const stage = getGrowthStage(xp);
 
   return (
-    <div className="flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden" style={{ backgroundColor: 'var(--color-canvas)' }}>
+    <div className="app-soft-screen flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
 
       {/* 히어로: 인사 · 티어 · 이번 주 출석 스트립 */}
       <div className="pt-4 px-5 pb-4">
@@ -93,13 +91,6 @@ const HomeScreen = () => {
             <WeekStrip attendanceDates={attendanceDates} />
           )}
         </div>
-
-        <PraiseNote
-          title={homePraise.title}
-          body={homePraise.body}
-          className="mt-4 anim-fade-up"
-          style={{ '--i': 1 } as React.CSSProperties}
-        />
 
         {/* 오늘 복습 카드 */}
         {dueQueue.length > 0 && (

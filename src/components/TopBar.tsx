@@ -194,7 +194,7 @@ export const TopBar = () => {
   return (
     <>
       {/* 앱 이름·홈 이동은 토스 내비게이션 바가 맡는다. 자체 로고 헤더를 두면 검수에서 '자체 헤더 중복'으로 반려된다(2026-09-29) */}
-      {!hideBar && <div data-topbar className="relative z-40 shrink-0 h-12 flex items-center px-4 min-[390px]:px-5 bg-[var(--color-card)]">
+      {!hideBar && <div data-topbar className="app-soft-header relative z-40 shrink-0 h-12 flex items-center px-4 min-[390px]:px-5">
 
         <div className="ml-auto flex max-w-full items-center justify-end gap-2 overflow-x-auto text-[13px] font-bold whitespace-nowrap text-[var(--color-ink)] min-[390px]:gap-3 min-[390px]:text-sm [&::-webkit-scrollbar]:hidden">
           <button onClick={e => toggleTip('streak', e)} aria-label="연속 학습" className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 active:opacity-60">

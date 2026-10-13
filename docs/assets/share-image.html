@@ -7,311 +7,405 @@
   html, body { width: 1200px; height: 630px; overflow: hidden; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", sans-serif;
-    background: #f3f4f6;
-    color: #191f28;
+    color: #ffffff;
+    background: #f97316;
   }
 
   .canvas {
+    position: relative;
     width: 1200px;
     height: 630px;
-    padding: 54px 72px;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 75% 18%, rgba(255, 237, 173, 0.58) 0, rgba(255, 237, 173, 0) 260px),
+      radial-gradient(circle at 18% 88%, rgba(255, 255, 255, 0.18) 0, rgba(255, 255, 255, 0) 260px),
+      linear-gradient(180deg, #c2410c 0%, #f97316 52%, #ffb238 100%);
   }
 
-  .panel {
-    height: 522px;
-    display: grid;
-    grid-template-columns: 462px 1fr;
-    overflow: hidden;
-    border: 1px solid #e5e8eb;
-    border-radius: 34px;
-    background: #ffffff;
+  .header {
+    position: absolute;
+    z-index: 5;
+    top: 54px;
+    left: 72px;
+    right: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 30px;
+    font-weight: 900;
+    letter-spacing: 0;
+  }
+
+  .label {
+    font-size: 24px;
+    font-weight: 850;
+    opacity: 0.9;
   }
 
   .copy {
-    display: flex;
-    flex-direction: column;
-    padding: 44px 28px 44px 62px;
-  }
-
-  .brand {
-    display: flex;
-    align-items: center;
-    font-size: 23px;
-    font-weight: 800;
-  }
-
-  h1 {
-    margin-top: 28px;
-    font-size: 56px;
-    line-height: 1.08;
-    font-weight: 900;
-    letter-spacing: 0;
-  }
-
-  h1 strong { color: #f97316; }
-
-  .description {
-    margin-top: 16px;
-    font-size: 22px;
-    line-height: 1.48;
-    font-weight: 650;
-    color: #4e5968;
-  }
-
-  .topics {
-    margin-top: 14px;
-    color: #f97316;
-    font-size: 20px;
-    font-weight: 900;
-  }
-
-  .cta {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: fit-content;
-    min-width: 208px;
-    height: 58px;
-    margin-top: 20px;
-    border-radius: 18px;
-    background: #f97316;
-    color: #ffffff;
-    font-size: 23px;
-    font-weight: 900;
-  }
-
-  .preview-area {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 58px 10px 20px;
-  }
-
-  .preview {
-    width: 498px;
-    height: 502px;
-    position: relative;
-    overflow: hidden;
-    border: 1px solid #e5e8eb;
-    border-radius: 30px;
-    background: #f3f4f6;
-    padding: 28px;
-  }
-
-  .status {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: #4e5968;
-    font-size: 17px;
-    font-weight: 800;
-  }
-
-  .status strong {
-    display: inline-flex;
-    align-items: center;
-    height: 34px;
-    padding: 0 13px;
-    border-radius: 999px;
-    background: #ffffff;
-    color: #191f28;
-  }
-
-  .lesson {
-    margin-top: 16px;
-    border-radius: 24px;
-    background: #ffffff;
-    border: 1px solid #e5e8eb;
-    padding: 18px 22px;
+    position: absolute;
+    z-index: 5;
+    left: 78px;
+    top: 150px;
+    width: 470px;
   }
 
   .eyebrow {
-    color: #ea580c;
-    font-size: 16px;
-    font-weight: 900;
+    display: inline-flex;
+    align-items: center;
+    height: 48px;
+    padding: 0 22px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.28);
+    color: #fff7ed;
+    font-size: 24px;
+    font-weight: 950;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
   }
 
-  .lesson h2 {
-    margin-top: 8px;
-    font-size: 28px;
-    line-height: 1.22;
-    font-weight: 900;
+  h1 {
+    margin-top: 22px;
+    font-size: 66px;
+    font-weight: 950;
+    line-height: 1.08;
+    letter-spacing: 0;
+    text-shadow: 0 8px 26px rgba(92, 33, 5, 0.24);
+  }
+
+  h1 strong {
+    color: #fff1b8;
+  }
+
+  .caption {
+    margin-top: 20px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.38;
     letter-spacing: 0;
   }
 
-  .lesson p {
-    margin-top: 9px;
-    color: #4e5968;
-    font-size: 15px;
-    line-height: 1.45;
-    font-weight: 650;
-  }
-
-  .answer-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 14px;
-  }
-
-  .answer {
-    min-height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 17px;
-    background: #f3f4f6;
-    color: #333d4b;
-    font-size: 16px;
-    font-weight: 900;
-  }
-
-  .answer.primary {
-    background: #191f28;
-    color: #ffffff;
-  }
-
-  .mini-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-top: 12px;
-  }
-
-  .review {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    border: 1px solid #e5e8eb;
-    border-radius: 22px;
-    background: #ffffff;
-    padding: 15px;
-    min-height: 102px;
-  }
-
-  .review-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    border-radius: 16px;
-    background: #fff3e0;
-    color: #f97316;
-    font-size: 22px;
-    font-weight: 900;
-  }
-
-  .review-title {
-    margin-top: 10px;
-    font-size: 18px;
-    font-weight: 900;
-  }
-
-  .review-sub {
-    margin-top: 4px;
-    color: #6b7684;
-    font-size: 13px;
-    font-weight: 650;
-  }
-
-  .review-count {
-    color: #f97316;
-    font-size: 28px;
-    font-weight: 900;
+  .score {
     position: absolute;
-    right: 15px;
-    top: 15px;
-  }
-
-  .quiz {
-    border-radius: 23px;
-    background: #ffffff;
-    padding: 15px;
-    min-height: 102px;
-  }
-
-  .quiz-label {
-    color: #6b7684;
-    font-size: 13px;
-    font-weight: 900;
-  }
-
-  .quiz-text {
-    margin-top: 7px;
-    font-size: 16px;
-    line-height: 1.32;
-    font-weight: 900;
-  }
-
-  .options {
+    z-index: 6;
+    right: 136px;
+    top: 282px;
     display: flex;
-    flex-wrap: wrap;
-    gap: 9px;
-    margin-top: 9px;
+    align-items: center;
+    gap: 25px;
+    filter: drop-shadow(0 18px 30px rgba(92, 33, 5, 0.24));
   }
 
-  .options span {
-    border-radius: 14px;
-    background: #f3f4f6;
-    padding: 8px 9px;
+  .score-badge {
+    display: grid;
+    place-items: center;
+    width: 86px;
+    height: 62px;
+    border-radius: 16px;
+    background: #ffffff;
+    color: #ff7a18;
+    font-size: 31px;
+    font-weight: 950;
+    letter-spacing: 0;
+  }
+
+  .score-number {
+    font-size: 128px;
+    font-weight: 950;
+    line-height: 1;
+    letter-spacing: 0;
+  }
+
+  .score-caption {
+    position: absolute;
+    z-index: 6;
+    right: 112px;
+    top: 430px;
+    width: 440px;
     text-align: center;
-    color: #4e5968;
-    font-size: 12px;
-    font-weight: 800;
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 34px;
+    font-weight: 950;
+    letter-spacing: 0;
+    text-shadow: 0 8px 22px rgba(92, 33, 5, 0.22);
   }
 
-  .options span:first-child {
-    background: #191f28;
-    color: #ffffff;
+  .progress {
+    position: absolute;
+    z-index: 6;
+    right: 126px;
+    bottom: 74px;
+    width: 430px;
+    height: 34px;
+    padding: 6px;
+    border-radius: 999px;
+    background: #ffffff;
+    box-shadow: 0 14px 30px rgba(92, 33, 5, 0.18);
   }
 
+  .progress::before {
+    content: "4";
+    position: absolute;
+    left: -36px;
+    top: -5px;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 26px;
+    font-weight: 950;
+  }
+
+  .progress::after {
+    content: "5";
+    position: absolute;
+    right: -36px;
+    top: -5px;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 26px;
+    font-weight: 950;
+  }
+
+  .progress-fill {
+    width: 94%;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #ea580c 0%, #ffb238 100%);
+    box-shadow: 0 0 22px rgba(255, 178, 56, 0.75);
+  }
+
+  .progress-tip {
+    position: absolute;
+    right: 12px;
+    top: 6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background: #ffffff;
+    box-shadow: 0 0 18px rgba(255, 255, 255, 0.85);
+  }
+
+  .hero {
+    position: absolute;
+    z-index: 4;
+    right: 390px;
+    top: 124px;
+    width: 186px;
+    height: 186px;
+    transform: rotate(-10deg);
+  }
+
+  .hero-glow {
+    position: absolute;
+    inset: -34px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(255, 241, 184, 0.56) 0, rgba(255, 241, 184, 0) 72%);
+  }
+
+  .hero-ring {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border: 12px solid #fff1b8;
+    border-radius: 42px 90px 90px 90px;
+    background: #fff7e9;
+    box-shadow: 0 20px 42px rgba(92, 33, 5, 0.26);
+  }
+
+  .hero-ring img {
+    width: 138px;
+    height: 138px;
+    object-fit: contain;
+    transform: rotate(10deg);
+  }
+
+  .orb {
+    position: absolute;
+    z-index: 3;
+    right: 176px;
+    top: 86px;
+    display: grid;
+    place-items: center;
+    width: 178px;
+    height: 178px;
+    border: 14px solid #fff1b8;
+    border-radius: 999px 999px 999px 42px;
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 44%),
+      #ffb238;
+    box-shadow: 0 18px 45px rgba(92, 33, 5, 0.22), 0 0 52px rgba(255, 241, 184, 0.42);
+    transform: rotate(14deg);
+  }
+
+  .orb-star {
+    width: 74px;
+    height: 74px;
+    background: #ffffff;
+    clip-path: polygon(50% 0, 62% 34%, 98% 34%, 69% 55%, 80% 91%, 50% 70%, 20% 91%, 31% 55%, 2% 34%, 38% 34%);
+  }
+
+  .cloud {
+    position: absolute;
+    z-index: 1;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.78);
+  }
+
+  .cloud::before,
+  .cloud::after {
+    content: "";
+    position: absolute;
+    border-radius: 999px;
+    background: inherit;
+  }
+
+  .cloud.c1 {
+    left: -82px;
+    top: 122px;
+    width: 240px;
+    height: 72px;
+    opacity: 0.48;
+  }
+
+  .cloud.c1::before {
+    left: 42px;
+    top: -44px;
+    width: 104px;
+    height: 104px;
+  }
+
+  .cloud.c1::after {
+    right: 26px;
+    top: -24px;
+    width: 86px;
+    height: 86px;
+  }
+
+  .cloud.c2 {
+    right: -74px;
+    bottom: 136px;
+    width: 270px;
+    height: 78px;
+    opacity: 0.64;
+  }
+
+  .cloud.c2::before {
+    left: 56px;
+    top: -42px;
+    width: 108px;
+    height: 108px;
+  }
+
+  .cloud.c2::after {
+    right: 38px;
+    top: -24px;
+    width: 88px;
+    height: 88px;
+  }
+
+  .cloud.c3 {
+    left: 330px;
+    bottom: 72px;
+    width: 210px;
+    height: 58px;
+    opacity: 0.44;
+  }
+
+  .cloud.c3::before {
+    left: 42px;
+    top: -28px;
+    width: 78px;
+    height: 78px;
+  }
+
+  .cloud.c3::after {
+    right: 36px;
+    top: -18px;
+    width: 66px;
+    height: 66px;
+  }
+
+  .shine {
+    position: absolute;
+    z-index: 4;
+    width: 28px;
+    height: 28px;
+    transform: rotate(45deg);
+    border-radius: 7px;
+    background: #fff1b8;
+    box-shadow: 0 0 24px rgba(255, 241, 184, 0.7);
+  }
+
+  .shine.s1 { right: 560px; top: 118px; }
+  .shine.s2 { right: 352px; top: 96px; width: 20px; height: 20px; }
+  .shine.s3 { right: 610px; bottom: 156px; width: 18px; height: 18px; }
+
+  .trail {
+    position: absolute;
+    z-index: 2;
+    right: 520px;
+    top: 294px;
+    width: 360px;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.28);
+    transform: rotate(-13deg);
+  }
+
+  .trail::before {
+    content: "";
+    position: absolute;
+    right: 38px;
+    top: 26px;
+    width: 250px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+  }
 </style>
 </head>
 <body>
-  <main class="canvas">
-    <section class="panel">
-      <div class="copy">
-        <div class="brand">머니터미</div>
-        <h1>뉴스 보다가<br /><strong>막혔다면</strong><br />3분만 봐요</h1>
-        <p class="description">전세·대출·금리 이야기를<br />쉬운 예시와 퀴즈로 알려줘요</p>
-        <p class="topics">어려운 말은 앱 안에서 쉽게</p>
-        <div class="cta">하나만 풀어보기</div>
-      </div>
-      <div class="preview-area">
-        <div class="preview">
-          <div class="status"><span>오늘의 쉬운 문제</span><strong>3분</strong></div>
-          <section class="lesson">
-            <div class="eyebrow">예시로 보기</div>
-            <h2>집값 3억,<br />전세 2억이면?</h2>
-            <p>숫자로 보면 어려운 말도 금방 감이 와요.</p>
-            <div class="answer-grid">
-              <div class="answer primary">전세금이 큰 편인지</div>
-              <div class="answer">월세가 얼마인지</div>
-            </div>
-          </section>
-          <div class="mini-grid">
-            <section class="review">
-              <div class="review-icon">R</div>
-              <div class="review-count">3</div>
-              <div>
-                <div class="review-title">다시 볼 말</div>
-                <div class="review-sub">헷갈린 것만 모아줘요</div>
-              </div>
-            </section>
-            <section class="quiz">
-              <div class="quiz-label">다음에 볼 말</div>
-              <div class="quiz-text">대출 상담 때 자주 나와요</div>
-              <div class="options">
-                <span>갚을 수 있는지</span>
-                <span>집값이 올랐는지</span>
-              </div>
-            </section>
-          </div>
-        </div>
-      </div>
+  <main class="canvas" aria-label="머니터미 공유 이미지">
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+    <div class="cloud c3"></div>
+    <div class="trail"></div>
+    <div class="shine s1"></div>
+    <div class="shine s2"></div>
+    <div class="shine s3"></div>
+
+    <header class="header">
+      <div>머니터미</div>
+      <div class="label">오늘의 성장 기록</div>
+    </header>
+
+    <section class="copy">
+      <div class="eyebrow">4에서 5로 레벨업</div>
+      <h1>경제 공부,<br /><strong>오늘도 한 칸</strong><br />올렸어요</h1>
+      <p class="caption">쉬운 예시와 퀴즈로<br />돈 이야기가 조금씩 보여요.</p>
     </section>
+
+    <div class="orb" aria-hidden="true">
+      <div class="orb-star"></div>
+    </div>
+
+    <div class="hero" aria-hidden="true">
+      <div class="hero-glow"></div>
+      <div class="hero-ring">
+        <img src="../../public/logo.png" alt="" />
+      </div>
+    </div>
+
+    <div class="score" aria-hidden="true">
+      <div class="score-badge">Lv</div>
+      <div class="score-number">5</div>
+    </div>
+    <div class="score-caption">경제 이해력을 올렸어요</div>
+
+    <div class="progress" aria-hidden="true">
+      <div class="progress-fill"></div>
+      <div class="progress-tip"></div>
+    </div>
   </main>
 </body>
 </html>

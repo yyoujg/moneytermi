@@ -1,5 +1,5 @@
 import type { HTMLAttributes } from 'react';
-import { Sparkles } from 'lucide-react';
+import { BadgeCheck } from 'lucide-react';
 
 export const PraiseNote = ({
   title,
@@ -13,7 +13,7 @@ export const PraiseNote = ({
   >
     <div className="flex gap-2.5">
       <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--color-card)] text-brand-500">
-        <Sparkles size={15} />
+        <BadgeCheck size={16} strokeWidth={2.4} />
       </span>
       <div className="min-w-0">
         <p className="text-xs font-black text-brand-600 break-keep">{title}</p>

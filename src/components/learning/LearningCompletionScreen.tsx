@@ -36,7 +36,7 @@ export const LearningCompletionScreen = ({
   );
 
   return (
-    <div className="flex h-full flex-col bg-[var(--color-canvas)]">
+    <div className="app-soft-screen flex h-full flex-col">
       <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden flex flex-col items-center justify-center-safe px-8 py-6 gap-5">
         <div className="anim-reward-pop">
           <Mascot name={mascot} size={mascotSize} />

@@ -16,8 +16,6 @@ import { SettingsSheet } from '../components/mypage/SettingsSheet';
 import { NicknameSheet } from '../components/mypage/NicknameSheet';
 import { Card } from '../components/ui/Card';
 import { IconBox } from '../components/ui/IconBox';
-import { PraiseNote } from '../components/PraiseNote';
-import { praiseForProfile } from '../lib/praise';
 
 const MyPageScreen = () => {
   const { points, xp, knownWords, attendanceDates, myEmoji, updateMyEmoji } = useAppContext();
@@ -43,7 +41,7 @@ const MyPageScreen = () => {
   ];
 
   return (
-    <div className="flex flex-col h-full bg-[var(--color-canvas)] pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
+    <div className="my-page-screen flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
       <GuideSheet open={showGuide} onClose={() => setShowGuide(false)} />
       <EmojiPickerSheet
         open={showEmojiPicker}
@@ -60,7 +58,7 @@ const MyPageScreen = () => {
       />
 
       {/* 프로필 헤더 */}
-      <div className="bg-[var(--color-card)] pt-4 px-5 pb-5">
+      <div className="my-page-hero pt-4 px-5 pb-5">
         <h2 className="text-xl font-bold mb-4! text-[var(--color-ink)]">마이페이지</h2>
         <div className="flex items-center gap-4 mb-4">
           <button
@@ -90,7 +88,7 @@ const MyPageScreen = () => {
           </div>
         </div>
 
-        <Card tone="surface" pad="md" className="anim-fade-up">
+        <Card pad="md" className="my-page-stats anim-fade-up">
           <div className="flex items-stretch">
             {[
               { icon: <WordsIcon size={28} />, label: '익힌 말', value: knownWords.length.toLocaleString(), unit: '개', color: STAT_COLOR.words },
@@ -108,12 +106,6 @@ const MyPageScreen = () => {
             ))}
           </div>
         </Card>
-
-        <PraiseNote
-          title="여기까지 쌓였어요"
-          body={praiseForProfile({ knownCount: knownWords.length, streak, earnedBadges: earned })}
-          className="mt-4 anim-fade-up"
-        />
 
       </div>
 

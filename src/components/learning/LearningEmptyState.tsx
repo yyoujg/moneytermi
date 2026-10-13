@@ -30,7 +30,7 @@ export const LearningEmptyState = ({
   );
 
   return (
-    <div className="flex h-full flex-col bg-[var(--color-canvas)]">
+    <div className="app-soft-screen flex h-full flex-col">
       <div className="flex-1 flex flex-col items-center justify-center px-8 gap-3 text-center">
         {mascot && <div className="mb-2"><Mascot name={mascot} size={mascotSize} /></div>}
         <h2 className="text-xl font-bold text-[var(--color-ink)]">{title}</h2>

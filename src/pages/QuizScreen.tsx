@@ -286,7 +286,7 @@ const QuizScreen = () => {
   const nextButtonClass = status === 'correct' ? 'bg-success-500' : 'bg-danger-500';
 
   return (
-    <div className="flex flex-col h-full bg-[var(--color-card)]">
+    <div className="app-soft-screen flex flex-col h-full">
       <QuizProgressHeader
         label={retrying ? `다시 풀기 · 남은 ${quizQueue.length - currentQuizIndex}문제` : `${sessionLabel} · ${currentQuizIndex + 1} / ${baseQueue.length}`}
         progress={progressPercent}

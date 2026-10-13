@@ -14,7 +14,10 @@ import { resolveBackEventAction } from './lib/backEvent';
 import NavBar from './components/NavBar';
 import { TopBar } from './components/TopBar';
 import { BadgeCelebration } from './components/mypage/BadgeCelebration';
+import { LeaguePromotionCelebration } from './components/league/LeaguePromotionCelebration';
+import { LeagueRankCelebration } from './components/league/LeagueRankCelebration';
 import { PointCelebration } from './components/PointCelebration';
+import { SplashScreen } from './components/SplashScreen';
 import { useTapHaptics } from './hooks/useTapHaptics';
 import { ArrowRight, BookOpen, CircleHelp, Trophy } from 'lucide-react';
 import { Mascot } from './components/Mascot';
@@ -62,30 +65,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
   }
 }
 
-const LoadingScreen = () => (
-  <div className="flex-1 flex flex-col items-center justify-center bg-white">
-    <img
-      src="/logo.png"
-      alt="머니터미"
-      style={{ width: 'min(72vw, 300px)', marginBottom: '24px' }}
-    />
-    <div style={{ width: '140px', height: '3px', borderRadius: '999px', backgroundColor: 'var(--color-brand-200)', overflow: 'hidden' }}>
-      <div style={{
-        height: '100%',
-        borderRadius: '999px',
-        backgroundColor: 'var(--color-brand-500)',
-        animation: 'splash-gauge 1.4s ease-in-out infinite',
-      }} />
-    </div>
-    <style>{`
-      @keyframes splash-gauge {
-        0% { width: 0%; }
-        60% { width: 100%; }
-        100% { width: 100%; opacity: 0; }
-      }
-    `}</style>
-  </div>
-);
+const LoadingScreen = SplashScreen;
 
 const WELCOME_KEY = 'welcome_seen_v1';
 const WELCOME_STEPS = [
@@ -103,9 +83,9 @@ const WelcomeScreen = () => {
   };
 
   return (
-    <div className="flex h-full flex-col bg-[var(--color-canvas)]">
+    <div className="app-soft-screen flex h-full flex-col">
       <div className="flex flex-1 flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden">
-        <div className="flex shrink-0 flex-col items-center rounded-b-[32px] bg-[var(--color-card)] px-6 pb-8 pt-8 text-center">
+        <div className="app-soft-header flex shrink-0 flex-col items-center rounded-b-[32px] px-6 pb-8 pt-8 text-center">
           <Mascot name="hello" size={150} />
           <h1 className="mt-4 text-2xl font-extrabold leading-snug tracking-tight text-[var(--color-ink)] break-keep">
             경제 공부,<br />쉬운 상황부터 시작해요
@@ -247,6 +227,8 @@ const Layout = () => {
     <div className="flex-1 w-full h-full flex flex-col relative">
       <NicknameGate />
       <BadgeCelebration />
+      <LeaguePromotionCelebration />
+      <LeagueRankCelebration />
       <TopBar />
       <React.Suspense fallback={<LoadingScreen />}>
       {/* 경로가 바뀌면 래퍼가 다시 마운트되며 페이드인. (transform 전환은 기기에서 무거워 opacity만) */}

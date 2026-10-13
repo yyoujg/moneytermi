@@ -9,17 +9,24 @@ const TAPPABLE = 'button, [role="button"], [role="switch"], [role="tab"], a[href
 export const useTapHaptics = () => {
   useEffect(() => {
     let prefsReady = false;
+    let touched = false;
     Promise.all([
       Storage.getItem('setting_sound').then(v => { if (v !== null) soundPrefs.enabled = v !== 'off'; }).catch(() => {}),
       Storage.getItem('setting_bgm').then(v => { if (v !== null) bgmPrefs.enabled = v !== 'off'; }).catch(() => {}),
       Storage.getItem('setting_vibration').then(v => { if (v !== null) hapticPrefs.enabled = v !== 'off'; }).catch(() => {}),
-    ]).finally(() => { prefsReady = true; });
+    ]).finally(() => {
+      prefsReady = true;
+      if (touched) {
+        preloadSfx();
+        startBgm();
+      }
+    });
 
     const onDown = (e: PointerEvent) => {
-      if (!prefsReady) return;
+      touched = true;
       const el = (e.target as Element | null)?.closest?.(TAPPABLE) as HTMLElement | null;
       // data-own-sfx: 자기 소리를 따로 내는 버튼(패스 노드)은 공통 탭 소리를 겹쳐 내지 않는다
-      if (el && !(el as HTMLButtonElement).disabled && el.getAttribute('aria-disabled') !== 'true' && !el.hasAttribute('data-own-sfx')) feedbackTick();   // 진동 먼저
+      if (prefsReady && el && !(el as HTMLButtonElement).disabled && el.getAttribute('aria-disabled') !== 'true' && !el.hasAttribute('data-own-sfx')) feedbackTick();   // 진동 먼저
       preloadSfx();   // 첫 제스처에서 효과음 파일 로드 (이미 받았으면 no-op)
       startBgm();     // 브라우저 자동재생 정책 때문에 첫 제스처 이후에만 배경음악 시작
     };

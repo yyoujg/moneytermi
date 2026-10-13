@@ -53,8 +53,8 @@ const LeagueScreen = () => {
   const next = stage.nextMinPoints;
 
   return (
-    <div className="flex flex-col h-full bg-[var(--color-canvas)] pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
-      <div className="bg-[var(--color-card)] pt-4 px-5 pb-5">
+    <div className="league-screen app-soft-screen flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
+      <div className="pt-4 px-5 pb-4">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-[var(--color-ink)]">리그</h2>
           <div className="flex items-center gap-1">
@@ -69,7 +69,7 @@ const LeagueScreen = () => {
 
         {/* 이번 주 순위(이번 주 참여)와 내 등급(누적)을 나눠 보여준다 */}
         <div className="grid grid-cols-2 gap-3 anim-fade-up">
-          <Card tone="surface" pad="lg" className="flex flex-col">
+          <Card pad="lg" className="flex flex-col">
             <p className="text-xs font-bold text-[var(--color-ink-3)]">이번 주 순위</p>
             <p className="mt-2! text-3xl font-black text-brand-500 tabular-nums">{mine?.rank ? `${mine.rank}위` : '-'}</p>
             <p className="mt-1! text-xs text-[var(--color-ink-3)] break-keep">
@@ -77,14 +77,14 @@ const LeagueScreen = () => {
             </p>
             <p className="mt-auto! pt-3 text-xs font-semibold text-[var(--color-ink-2)]">초기화까지 {daysUntilReset()}일</p>
           </Card>
-          <Card tone="surface" pad="lg" className="flex flex-col">
+          <Card pad="lg" className="flex flex-col">
             <p className="text-xs font-bold text-[var(--color-ink-3)]">내 등급</p>
             <div className="mt-2 flex items-center gap-2">
               <StageGlyph id={stage.id} size={40} />
               <span className="text-lg font-bold text-[var(--color-ink)]">{stage.name}</span>
             </div>
             <div className="mt-auto pt-3">
-              <div className="w-full bg-[var(--color-card)] rounded-full h-1.5 overflow-hidden mb-1.5">
+              <div className="w-full bg-[var(--color-surface)] rounded-full h-1.5 overflow-hidden mb-1.5">
                 <div
                   className="bg-brand-500 h-full rounded-full transition-all duration-700"
                   style={{ width: barReady ? `${next === null ? 100 : Math.min(100, Math.round(((xp - stage.minPoints) / (next - stage.minPoints)) * 100))}%` : '0%' }}
@@ -98,29 +98,31 @@ const LeagueScreen = () => {
         </div>
 
         {/* 티어 로드맵 */}
-        <div className="flex justify-between items-start relative mt-5">
-          <div className="absolute top-5 left-5 right-5 h-[2px] bg-[var(--color-line)] z-0 rounded-full">
-            <div
-              className="h-full bg-brand-500 rounded-full transition-all duration-1000"
-              style={{ width: `${((stage.id - 1) / (GROWTH_STAGES.length - 1)) * 100}%` }}
-            />
+        <Card pad="md" className="mt-4 anim-fade-up" style={{ '--i': 1 } as React.CSSProperties}>
+          <div className="flex justify-between items-start relative">
+            <div className="absolute top-5 left-5 right-5 h-[2px] bg-[var(--color-line)] z-0 rounded-full">
+              <div
+                className="h-full bg-brand-500 rounded-full transition-all duration-1000"
+                style={{ width: `${((stage.id - 1) / (GROWTH_STAGES.length - 1)) * 100}%` }}
+              />
+            </div>
+            {GROWTH_STAGES.map(s => {
+              const isCurrent = s.id === stage.id;
+              return (
+                <div key={s.id} className="flex flex-col items-center relative z-10 w-14">
+                  <StageGlyph id={s.id} size={40} className={`transition-all ${isCurrent ? 'scale-125' : s.id > stage.id ? 'grayscale opacity-40' : ''}`} />
+                  <span className={`text-2xs font-medium text-center mt-1.5 ${isCurrent ? 'text-brand-500' : 'text-[var(--color-ink-3)]'}`}>
+                    {s.name}
+                  </span>
+                </div>
+              );
+            })}
           </div>
-          {GROWTH_STAGES.map(s => {
-            const isCurrent = s.id === stage.id;
-            return (
-              <div key={s.id} className="flex flex-col items-center relative z-10 w-14">
-                <StageGlyph id={s.id} size={40} className={`transition-all ${isCurrent ? 'scale-125' : s.id > stage.id ? 'grayscale opacity-40' : ''}`} />
-                <span className={`text-2xs font-medium text-center mt-1.5 ${isCurrent ? 'text-brand-500' : 'text-[var(--color-ink-3)]'}`}>
-                  {s.name}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+        </Card>
       </div>
 
       {/* 랭킹 */}
-      <div className="px-5 pt-5">
+      <div className="px-5 pt-2">
         <div className="flex items-baseline justify-between mb-3">
           <p className="text-sm font-bold text-[var(--color-ink-2)]">이번 주 TOP 10</p>
           <span className="text-2xs text-[var(--color-ink-4)]">매주 월요일 초기화</span>

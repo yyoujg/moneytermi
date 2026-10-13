@@ -39,7 +39,7 @@ export const BadgeCelebration = () => {
   if (!fresh) return null;
 
   return (
-    <div className="original-modal fixed inset-0 z-[60] flex flex-col items-center justify-center gap-6 px-6 overflow-hidden bg-[var(--color-canvas)]">
+    <div className="original-modal app-soft-screen fixed inset-0 z-[60] flex flex-col items-center justify-center gap-6 px-6 overflow-hidden">
       {CONFETTI.map((c, i) => (
         <span
           key={i}

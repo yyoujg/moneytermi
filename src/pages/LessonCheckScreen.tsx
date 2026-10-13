@@ -24,7 +24,7 @@ const LessonCheckScreen = () => {
   if (questions.length === 0) {
     const hasLesson = Boolean(state?.words?.length);
     return (
-      <div className="lesson-check-screen flex h-full flex-col items-center justify-center gap-4 px-5 text-center bg-[var(--color-canvas)]">
+      <div className="lesson-check-screen app-soft-screen flex h-full flex-col items-center justify-center gap-4 px-5 text-center">
         <Mascot name="empty" size={110} />
         <h1 className="mt-1 text-xl font-bold text-[var(--color-ink)]">{hasLesson ? '이번 레슨에는 이해 확인 문제가 없어요' : '자주 마주치는 말부터 시작해요'}</h1>
         <p className="text-[15px] text-[var(--color-ink-2)] break-keep">{hasLesson ? '다음 학습을 선택할 수 있어요.' : '말을 하나 익히면 이해 확인 문제를 풀 수 있어요.'}</p>
@@ -39,7 +39,7 @@ const LessonCheckScreen = () => {
     const correctCount = questions.length - mistakes.length;
     const accuracy = questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0;
     return (
-      <div className="lesson-check-screen flex h-full flex-col items-center justify-center gap-5 px-5 bg-[var(--color-canvas)]">
+      <div className="lesson-check-screen app-soft-screen flex h-full flex-col items-center justify-center gap-5 px-5">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-success-soft)] text-success-400">
           <Check size={32} strokeWidth={2.5} />
         </div>
@@ -81,8 +81,8 @@ const LessonCheckScreen = () => {
   };
 
   return (
-    <div className="lesson-check-screen flex h-full flex-col bg-[var(--color-canvas)]">
-      <div className="bg-[var(--color-card)] px-5 pb-4 pt-4">
+    <div className="lesson-check-screen app-soft-screen flex h-full flex-col">
+      <div className="app-soft-header px-5 pb-4 pt-4">
         <div className="flex items-center gap-3">
           <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--color-button-secondary)]">
             <div className="h-full rounded-full bg-brand-500" style={{ width: `${((index + 1) / questions.length) * 100}%` }} />
@@ -132,7 +132,7 @@ const LessonCheckScreen = () => {
         )}
       </div>
       {selected !== null && (
-        <div className="border-t border-[var(--color-line)] bg-[var(--color-card)] px-5 pt-3 pb-8">
+        <div className="app-soft-footer border-t border-[var(--color-line)] px-5 pt-3 pb-8">
           <button onClick={goNext} className="w-full py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90">
             {index === questions.length - 1 ? '결과 보기' : '다음 문제'}
           </button>

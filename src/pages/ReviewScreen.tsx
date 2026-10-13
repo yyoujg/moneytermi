@@ -150,12 +150,12 @@ const QuizPage = () => {
   }
 
   // dueQueue 로드~큐 스냅샷 사이 한 프레임 가드 (흰 깜빡임 방지)
-  if (!word) return <div className="flex h-full items-center justify-center" style={{ backgroundColor: 'var(--color-canvas)' }} />;
+  if (!word) return <div className="app-soft-screen flex h-full items-center justify-center" />;
 
   const progress = (index / queue.length) * 100;
 
   return (
-    <div className="flex flex-col h-full bg-[var(--color-canvas)] overflow-y-auto [&::-webkit-scrollbar]:hidden">
+    <div className="app-soft-screen flex flex-col h-full overflow-y-auto [&::-webkit-scrollbar]:hidden">
       <QuizProgressHeader
         label={`복습 ${index + 1} / ${queue.length}`}
         progress={progress}

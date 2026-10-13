@@ -43,7 +43,7 @@ export const StreakCelebration = () => {
 
   return (
     <div
-      className={`original-modal fixed inset-0 z-[60] flex flex-col items-center justify-center gap-6 px-6 overflow-hidden ${milestone ? '' : 'bg-[var(--color-canvas)]'}`}
+      className={`original-modal fixed inset-0 z-[60] flex flex-col items-center justify-center gap-6 px-6 overflow-hidden ${milestone ? '' : 'app-soft-screen'}`}
       style={milestone ? { background: 'linear-gradient(160deg, #f97316 0%, #fb923c 60%, #fdba74 100%)' } : undefined}
     >
       {milestone && CONFETTI.map((c, i) => (
