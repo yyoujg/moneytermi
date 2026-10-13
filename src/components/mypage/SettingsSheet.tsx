@@ -1,4 +1,4 @@
-import { Volume2, VolumeX, Bell, Moon, Vibrate } from 'lucide-react';
+import { Volume2, VolumeX, Bell, Moon, Vibrate, Music2 } from 'lucide-react';
 import { Switch, BottomSheet } from '@toss/tds-mobile';
 import { useSettings } from '../../hooks/useSettings';
 import { useNotificationAgreement } from '../../hooks/useNotificationAgreement';
@@ -8,7 +8,7 @@ import { Card } from '../ui/Card';
 const THEME_OPTIONS: [Theme, string][] = [['system', '시스템'], ['light', '라이트'], ['dark', '다크']];
 
 export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
-  const { soundOn, vibrationOn, toggleSound, toggleVibration } = useSettings();
+  const { soundOn, bgmOn, vibrationOn, toggleSound, toggleBgm, toggleVibration } = useSettings();
   const { agreed, requestAgreement } = useNotificationAgreement();
   const { theme, setTheme } = useTheme();
 
@@ -56,6 +56,20 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
             </div>
           </div>
           <Switch checked={soundOn} onChange={toggleSound} />
+        </Card>
+
+        {/* 배경음악 */}
+        <Card tone="surface" pad="md" className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-chip bg-[var(--color-line)] flex items-center justify-center">
+              <Music2 size={16} className={bgmOn ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-4)]'} />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-[var(--color-ink)]">배경음악</p>
+              <p className="text-xs text-[var(--color-ink-4)]">조용한 학습 루프</p>
+            </div>
+          </div>
+          <Switch checked={bgmOn} onChange={toggleBgm} />
         </Card>
 
         {/* 진동 */}

@@ -255,8 +255,7 @@ const QuizScreen = () => {
             {showPointPop && (
               <span
                 key={totalEarned}
-                className="absolute -top-1 right-0 text-xs font-bold text-brand-500 whitespace-nowrap"
-                style={{ animation: 'fadeUp 0.7s ease forwards' }}
+                className="anim-reward-rise absolute -top-1 right-0 text-xs font-bold text-brand-500 whitespace-nowrap"
               >
                 +{lastEarned}P
               </span>
@@ -265,34 +264,12 @@ const QuizScreen = () => {
         )}
       />
 
-      {/* 애니메이션 */}
-      <style>{`
-        @keyframes fadeUp {
-          0% { opacity: 1; transform: translateY(0); }
-          100% { opacity: 0; transform: translateY(-16px); }
-        }
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          20% { transform: translateX(-6px); }
-          40% { transform: translateX(6px); }
-          60% { transform: translateX(-4px); }
-          80% { transform: translateX(4px); }
-        }
-        @keyframes flashGreen {
-          0% { background-color: var(--color-card); }
-          30% { background-color: rgba(34,197,94,0.12); }
-          100% { background-color: var(--color-card); }
-        }
-        .shake { animation: shake 0.5s ease; }
-        .flash-correct { animation: flashGreen 0.4s ease; }
-      `}</style>
-
       {/* 콘텐츠 — 뜻 보기 4개가 길면 작은 화면에서 넘치므로 이 영역만 스크롤 */}
       <div className="flex-1 min-h-0 overflow-y-auto flex flex-col px-5 py-5 gap-4 [&::-webkit-scrollbar]:hidden">
         {/* 문제 카드 */}
         <div key={currentQuizIndex} className={`anim-slide-in rounded-card px-5 py-4 flex flex-col items-center text-center gap-3
-          ${status === 'correct' ? 'flash-correct' : 'bg-[var(--color-card)]'}
-          ${shake ? 'shake' : ''}
+          ${status === 'correct' ? 'anim-answer-wash bg-[var(--color-card)]' : 'bg-[var(--color-card)]'}
+          ${shake ? 'anim-soft-nudge' : ''}
         `}>
           <span className="text-sm font-semibold text-[var(--color-ink-3)]">{quizItem?.promptLabel}</span>
 
@@ -319,12 +296,13 @@ const QuizScreen = () => {
                 : 'bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink-3)]';
             }
             const tag = status === 'idle' ? null : isCorrectOption ? '정답' : isSelected ? '내가 고른 답' : null;
+            const feedbackMotion = status !== 'idle' && (isCorrectOption || isSelected) ? 'anim-choice-lock' : '';
 
             return (
               <button
                 key={`${i}-${opt.answer}`}
                 onClick={() => handleSelect(opt)}
-                className={`anim-fade-up flex items-center gap-3 min-h-14 py-3.5 px-4 rounded-chip border text-base font-semibold text-left break-keep transition-colors duration-150 ${optionStyle}`}
+                className={`anim-fade-up ${feedbackMotion} flex items-center gap-3 min-h-14 py-3.5 px-4 rounded-chip border text-base font-semibold text-left break-keep transition-colors duration-150 ${optionStyle}`}
                 style={{ '--i': i + 1 } as React.CSSProperties}
               >
                 {status !== 'idle' && isCorrectOption ? (
@@ -344,7 +322,7 @@ const QuizScreen = () => {
 
       {/* 답을 고른 뒤: 판정은 아이콘·제목 색으로만, 공간은 이해(예시·헷갈린 지점)에. 다음 버튼은 판정과 무관하게 같은 모양 */}
       {status !== 'idle' && (
-        <div key={currentQuizIndex} className="anim-slide-up px-5 pt-4 pb-8 flex flex-col gap-3 border-t border-[var(--color-line)] bg-[var(--color-card)]">
+        <div key={currentQuizIndex} className="anim-feedback-panel px-5 pt-4 pb-8 flex flex-col gap-3 border-t border-[var(--color-line)] bg-[var(--color-card)]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className={`w-7 h-7 flex items-center justify-center text-white ${status === 'correct' ? 'bg-success-500' : 'bg-danger-500'}`} style={{ borderRadius: 9999 }}>

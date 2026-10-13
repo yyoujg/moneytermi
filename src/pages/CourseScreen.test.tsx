@@ -40,13 +40,18 @@ const word = (id: number): Word => ({
   difficulty: 1,
 });
 
-const course = (): Course => ({
-  id: 'c1',
+const course = ({ id = 'c1', category = '경제', wordCount = 4, startId = 1 }: {
+  id?: string;
+  category?: string;
+  wordCount?: number;
+  startId?: number;
+} = {}): Course => ({
+  id,
   level: '기초',
   title: '경제 기초',
   description: '',
-  category: '경제',
-  words: [1, 2, 3, 4].map(word),
+  category,
+  words: Array.from({ length: wordCount }, (_, i) => word(startId + i)),
 });
 
 let cleanup = () => {};
@@ -103,6 +108,15 @@ const mount = async (entry = '/course?topic=0') => {
   return { container, clickButtonContaining };
 };
 
+const flushScrollEffects = async () => {
+  await act(async () => {
+    await Promise.resolve();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    await Promise.resolve();
+    await new Promise(resolve => setTimeout(resolve, 0));
+  });
+};
+
 beforeEach(() => {
   HTMLElement.prototype.scrollTo = vi.fn();
   HTMLElement.prototype.scrollIntoView = vi.fn();
@@ -111,6 +125,32 @@ beforeEach(() => {
 });
 
 describe('CourseScreen energy gates', () => {
+  it('전체 주제 화면에서 진행 중인 주제 카드로 스크롤한다', async () => {
+    baseContext({
+      courses: [
+        course({ id: 'c1', category: '경제', wordCount: 4, startId: 1 }),
+        course({ id: 'c2', category: '금융', wordCount: 8, startId: 5 }),
+      ],
+      knownIds: new Set([1, 2, 3, 4]),
+    });
+    await mount('/course');
+    await flushScrollEffects();
+
+    const scrollIntoView = vi.mocked(HTMLElement.prototype.scrollIntoView);
+    const target = scrollIntoView.mock.contexts.find(el => (el as HTMLElement).textContent?.includes('금융'));
+    expect(target).toBeDefined();
+  });
+
+  it('주제 화면에서 현재 학습 노드로 스크롤한다', async () => {
+    baseContext({ courses: [course({ wordCount: 12 })], knownIds: new Set([1, 2, 3, 4]) });
+    await mount('/course?topic=0');
+    await flushScrollEffects();
+
+    const scrollIntoView = vi.mocked(HTMLElement.prototype.scrollIntoView);
+    const target = scrollIntoView.mock.contexts.find(el => (el as HTMLElement).textContent?.includes('용어5부터 익히기'));
+    expect(target).toBeDefined();
+  });
+
   it('레슨 콘텐츠 로드 실패 화면에서 다시 시도를 호출한다', async () => {
     baseContext({ contentStatus: 'error', courses: [] });
     const { container, clickButtonContaining } = await mount('/course');

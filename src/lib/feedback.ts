@@ -4,6 +4,7 @@ import { generateHapticFeedback } from '@apps-in-toss/web-framework';
 // useSettings는 화면마다 독립 상태라, 설정 시트에서 바꾼 값을 다른 화면이 바로 따르게 하려면 모듈 플래그가 필요하다.
 export const hapticPrefs = { enabled: true };
 export const soundPrefs = { enabled: true };
+export const bgmPrefs = { enabled: true };
 
 // ── 햅틱 ─────────────────────────────────────────────────────────
 type Haptic = 'tickWeak' | 'tap' | 'tickMedium' | 'softMedium' | 'basicWeak' | 'basicMedium' | 'success' | 'error' | 'wiggle' | 'confetti';
@@ -28,6 +29,7 @@ const audio = (): AudioContext | null => {
   } catch { return null; }
 };
 type Note = { f: number; at?: number; dur?: number; type?: OscillatorType; vol?: number; to?: number };
+const DEFAULT_SYNTH_VOL = 0.1;
 // 음 하나: f(Hz)에서 시작해 to가 있으면 그 주파수로 미끄러진다. at(초) 뒤에 dur(초) 동안.
 const play = (notes: Note[]) => {
   if (!soundPrefs.enabled) return;
@@ -39,7 +41,7 @@ const play = (notes: Note[]) => {
       const osc = c.createOscillator(); const gain = c.createGain();
       osc.connect(gain); gain.connect(c.destination);
       osc.type = n.type ?? 'sine';
-      const t0 = now + (n.at ?? 0); const dur = n.dur ?? 0.12; const vol = n.vol ?? 0.22;
+      const t0 = now + (n.at ?? 0); const dur = n.dur ?? 0.12; const vol = n.vol ?? DEFAULT_SYNTH_VOL;
       osc.frequency.setValueAtTime(n.f, t0);
       if (n.to) osc.frequency.exponentialRampToValueAtTime(n.to, t0 + dur);
       gain.gain.setValueAtTime(0.0001, t0);
@@ -58,7 +60,9 @@ export const SFX_NAMES: Sfx[] = ['tick', 'node', 'spend', 'correct', 'combo', 'c
 const buffers = new Map<Sfx, AudioBuffer | null>();   // null = 없음(합성음 사용)
 const loading = new Set<Sfx>();
 const lastPlayedAt = new Map<Sfx, number>();
-const FILE_GAIN = 0.55;
+const FILE_GAIN = 0.42;
+const BGM_MASTER_GAIN = 0.026;
+const BGM_LOOP_MS = 6400;
 const MIN_FILE_GAP_MS: Partial<Record<Sfx, number>> = {
   tick: 65,
   correct: 120,
@@ -105,43 +109,144 @@ const playFile = (name: Sfx): boolean => {
   return true;
 };
 
+type BgmState = {
+  master: GainNode;
+  timers: number[];
+  voices: Set<OscillatorNode>;
+  interval: number;
+};
+let bgmState: BgmState | null = null;
+let bgmPhraseIndex = 0;
+let bgmVisibilityBound = false;
+
+// 음이름 → Hz
+const N = { C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99, A5: 880, B5: 987.77, C6: 1046.5, E6: 1318.5, G6: 1568 };
+
+const BGM_PHRASES: Note[][] = [
+  [{ f: 261.63, dur: 2.5, vol: 0.2 }, { f: 392, at: 0.08, dur: 2.2, vol: 0.11 }, { f: N.E5, at: 0.18, dur: 1.8, vol: 0.08 }],
+  [{ f: 293.66, dur: 2.4, vol: 0.18 }, { f: 440, at: 0.08, dur: 2.0, vol: 0.1 }, { f: N.F5, at: 0.18, dur: 1.7, vol: 0.075 }],
+  [{ f: 349.23, dur: 2.5, vol: 0.17 }, { f: 523.25, at: 0.08, dur: 2.1, vol: 0.09 }, { f: N.A5, at: 0.18, dur: 1.6, vol: 0.065 }],
+  [{ f: 329.63, dur: 2.6, vol: 0.18 }, { f: 493.88, at: 0.08, dur: 2.1, vol: 0.1 }, { f: N.G5, at: 0.18, dur: 1.8, vol: 0.07 }],
+];
+
+const scheduleBgmPhrase = (c: AudioContext, state: BgmState) => {
+  if (!bgmPrefs.enabled || c.state !== 'running') return;
+  const now = c.currentTime;
+  const phrase = BGM_PHRASES[bgmPhraseIndex % BGM_PHRASES.length];
+  bgmPhraseIndex += 1;
+  for (const n of phrase) {
+    try {
+      const osc = c.createOscillator();
+      const gain = c.createGain();
+      const t0 = now + (n.at ?? 0);
+      const dur = n.dur ?? 1.6;
+      const vol = n.vol ?? DEFAULT_SYNTH_VOL;
+      osc.type = n.type ?? 'sine';
+      osc.frequency.setValueAtTime(n.f, t0);
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(vol, t0 + 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      osc.connect(gain);
+      gain.connect(state.master);
+      osc.start(t0);
+      osc.stop(t0 + dur + 0.05);
+      state.voices.add(osc);
+      const timer = window.setTimeout(() => state.voices.delete(osc), (dur + (n.at ?? 0) + 0.1) * 1000);
+      state.timers.push(timer);
+    } catch { /* ignore */ }
+  }
+};
+
+const onBgmVisibilityChange = () => {
+  if (document.visibilityState === 'hidden') stopBgm();
+  else startBgm();
+};
+
+const bindBgmVisibility = () => {
+  if (bgmVisibilityBound) return;
+  document.addEventListener('visibilitychange', onBgmVisibilityChange);
+  bgmVisibilityBound = true;
+};
+
+const unbindBgmVisibility = () => {
+  if (!bgmVisibilityBound) return;
+  document.removeEventListener('visibilitychange', onBgmVisibilityChange);
+  bgmVisibilityBound = false;
+};
+
+export function startBgm() {
+  if (!bgmPrefs.enabled || bgmState) return;
+  const c = audio();
+  if (!c || c.state !== 'running') return;
+  try {
+    const master = c.createGain();
+    master.gain.setValueAtTime(BGM_MASTER_GAIN, c.currentTime);
+    master.connect(c.destination);
+    const state: BgmState = { master, timers: [], voices: new Set(), interval: 0 };
+    bgmState = state;
+    scheduleBgmPhrase(c, state);
+    state.interval = window.setInterval(() => scheduleBgmPhrase(c, state), BGM_LOOP_MS);
+    bindBgmVisibility();
+    if (import.meta.env.DEV) (window as unknown as { __bgmStarted?: boolean }).__bgmStarted = true;
+  } catch {
+    bgmState = null;
+  }
+}
+
+export function stopBgm() {
+  const state = bgmState;
+  if (!state) return;
+  window.clearInterval(state.interval);
+  state.timers.forEach(timer => window.clearTimeout(timer));
+  state.voices.forEach(osc => { try { osc.stop(); } catch { /* already stopped */ } });
+  try { state.master.disconnect(); } catch { /* ignore */ }
+  bgmState = null;
+}
+
+export function setBgmEnabled(enabled: boolean) {
+  bgmPrefs.enabled = enabled;
+  if (enabled) startBgm();
+  else stopBgm();
+}
+
 export const __resetFeedbackForTest = () => {
+  stopBgm();
+  unbindBgmVisibility();
   ctx = null;
   buffers.clear();
   loading.clear();
   lastPlayedAt.clear();
   hapticPrefs.enabled = true;
   soundPrefs.enabled = true;
+  bgmPrefs.enabled = true;
+  bgmPhraseIndex = 0;
 };
-
-// 음이름 → Hz
-const N = { C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99, A5: 880, B5: 987.77, C6: 1046.5, E6: 1318.5, G6: 1568 };
 
 // ── 이벤트별 조합 ──────────────────────────────────────────────────
 // 순서는 항상 진동 → 소리. 진동이 네이티브 브리지를 타는 만큼 소리 준비(오디오 컨텍스트·버퍼)보다 먼저 보낸다.
 // 일반 탭은 짧고 가볍게, 성취 피드백과 강도를 구분한다.
 export function feedbackTick() {
   haptic('tickWeak');
-  if (!playFile('tick')) play([{ f: 620, to: 420, dur: 0.07, type: 'triangle', vol: 0.09 }, { f: 1050, dur: 0.035, vol: 0.035 }]);
+  if (!playFile('tick')) play([{ f: 620, to: 420, dur: 0.055, type: 'triangle', vol: 0.055 }, { f: 1050, dur: 0.03, vol: 0.022 }]);
 }
 
-// 패스 노드 탭: 위로 튀는 게임 시작음.
+// 패스 노드 탭: 짧게 올라가는 시작음.
 export function feedbackNodeTap() {
   hapticSeq([['tap', 0], ['success', 90]]);
-  if (!playFile('node')) play([{ f: N.E5, to: N.B5, dur: 0.11, type: 'triangle', vol: 0.13 }, { f: N.E6, at: 0.09, dur: 0.17, vol: 0.12 }, { f: N.G6, at: 0.13, dur: 0.1, vol: 0.045 }]);
+  if (!playFile('node')) play([{ f: N.E5, to: N.B5, dur: 0.1, type: 'triangle', vol: 0.09 }, { f: N.E6, at: 0.09, dur: 0.16, vol: 0.085 }, { f: N.G6, at: 0.13, dur: 0.09, vol: 0.03 }]);
 }
 
 // 포인트 소모 (레슨 시작 -10P): 낮게 쓱
 export function feedbackSpend() {
   haptic('tap');
-  if (!playFile('spend')) play([{ f: 560, to: 330, dur: 0.13, type: 'triangle', vol: 0.13 }, { f: 660, at: 0.035, dur: 0.07, vol: 0.06 }]);
+  if (!playFile('spend')) play([{ f: 560, to: 330, dur: 0.12, type: 'triangle', vol: 0.085 }, { f: 660, at: 0.035, dur: 0.06, vol: 0.04 }]);
 }
 
 // 정답은 밝은 세 음, 콤보는 상단 옥타브와 햅틱이 추가된다.
 export function feedbackCorrect(_sound?: boolean, _vib?: boolean, combo = 1) {
-  const notes: Note[] = [{ f: N.E5, dur: 0.09, type: 'triangle', vol: 0.14 }, { f: N.G5, at: 0.075, dur: 0.1, type: 'triangle', vol: 0.14 }, { f: N.C6, at: 0.16, dur: 0.2, vol: 0.15 }];
-  if (combo >= 3) notes.push({ f: N.E6, at: 0.27, dur: 0.19, type: 'triangle', vol: 0.11 });
-  if (combo >= 5) notes.push({ f: N.G6, at: 0.36, dur: 0.25, vol: 0.12 });
+  const notes: Note[] = [{ f: N.E5, dur: 0.08, type: 'triangle', vol: 0.095 }, { f: N.G5, at: 0.07, dur: 0.09, type: 'triangle', vol: 0.1 }, { f: N.C6, at: 0.15, dur: 0.18, vol: 0.105 }];
+  if (combo >= 3) notes.push({ f: N.E6, at: 0.25, dur: 0.17, type: 'triangle', vol: 0.08 });
+  if (combo >= 5) notes.push({ f: N.G6, at: 0.34, dur: 0.22, vol: 0.09 });
   if (combo >= 5) hapticSeq([['success', 0], ['confetti', 150], ['success', 330]]);
   else if (combo >= 3) hapticSeq([['success', 0], ['confetti', 170]]);
   else haptic('success');
@@ -151,25 +256,25 @@ export function feedbackCorrect(_sound?: boolean, _vib?: boolean, combo = 1) {
 // 오답은 짧고 부드럽게 내려가며, 반복 진동은 피한다.
 export function feedbackWrong() {
   haptic('error');
-  if (!playFile('wrong')) play([{ f: N.E5, to: N.D5, dur: 0.11, type: 'triangle', vol: 0.14 }, { f: 392, to: 330, at: 0.1, dur: 0.16, vol: 0.13 }]);
+  if (!playFile('wrong')) play([{ f: N.E5, to: N.D5, dur: 0.1, type: 'triangle', vol: 0.085 }, { f: 392, to: 330, at: 0.09, dur: 0.14, vol: 0.08 }]);
 }
 
 // 단어 하나 학습 완료: 작은 반짝임.
 export function feedbackLearned() {
   hapticSeq([['tap', 0], ['success', 110]]);
-  if (!playFile('learned')) play([{ f: N.G5, dur: 0.09, type: 'triangle', vol: 0.13 }, { f: N.C6, at: 0.085, dur: 0.22, vol: 0.15 }, { f: N.E6, at: 0.12, dur: 0.16, vol: 0.055 }]);
+  if (!playFile('learned')) play([{ f: N.G5, dur: 0.08, type: 'triangle', vol: 0.09 }, { f: N.C6, at: 0.08, dur: 0.19, vol: 0.105 }, { f: N.E6, at: 0.12, dur: 0.14, vol: 0.035 }]);
 }
 
 // 레슨(단어 묶음) 완료: 짧은 팡파르
 export function feedbackLessonComplete() {
   hapticSeq([['success', 0], ['success', 160], ['confetti', 360]]);
-  if (!playFile('lesson')) play([{ f: N.C5, dur: 0.11, type: 'triangle', vol: 0.14 }, { f: N.E5, at: 0.1, dur: 0.11, type: 'triangle', vol: 0.14 }, { f: N.G5, at: 0.2, dur: 0.12, type: 'triangle', vol: 0.14 }, { f: N.C6, at: 0.31, dur: 0.37, vol: 0.15 }, { f: N.E6, at: 0.34, dur: 0.3, vol: 0.07 }]);
+  if (!playFile('lesson')) play([{ f: N.C5, dur: 0.1, type: 'triangle', vol: 0.095 }, { f: N.E5, at: 0.09, dur: 0.1, type: 'triangle', vol: 0.095 }, { f: N.G5, at: 0.18, dur: 0.11, type: 'triangle', vol: 0.1 }, { f: N.C6, at: 0.29, dur: 0.32, vol: 0.11 }, { f: N.E6, at: 0.32, dur: 0.26, vol: 0.045 }]);
 }
 
 // 퀴즈/복습 완료: 정답률 100%면 한 음 더 높이 올라간다
 export function feedbackQuizComplete(perfect: boolean) {
-  const notes: Note[] = [{ f: N.G5, dur: 0.1, type: 'triangle', vol: 0.14 }, { f: N.C6, at: 0.1, dur: 0.13, type: 'triangle', vol: 0.14 }, { f: N.E6, at: 0.22, dur: 0.3, vol: 0.15 }, { f: N.C6, at: 0.22, dur: 0.3, vol: 0.065 }];
-  if (perfect) notes.push({ f: N.G6, at: 0.37, dur: 0.38, vol: 0.13 }, { f: N.E6, at: 0.4, dur: 0.31, vol: 0.07 });
+  const notes: Note[] = [{ f: N.G5, dur: 0.09, type: 'triangle', vol: 0.095 }, { f: N.C6, at: 0.09, dur: 0.12, type: 'triangle', vol: 0.1 }, { f: N.E6, at: 0.2, dur: 0.26, vol: 0.11 }, { f: N.C6, at: 0.2, dur: 0.26, vol: 0.04 }];
+  if (perfect) notes.push({ f: N.G6, at: 0.34, dur: 0.32, vol: 0.095 }, { f: N.E6, at: 0.37, dur: 0.26, vol: 0.045 });
   hapticSeq(perfect ? [['success', 0], ['confetti', 180], ['success', 360], ['confetti', 540]] : [['success', 0], ['success', 180], ['confetti', 360]]);
   if (!playFile(perfect ? 'perfect' : 'quiz')) play(notes);
 }
@@ -177,41 +282,41 @@ export function feedbackQuizComplete(perfect: boolean) {
 // 티어 승급: 웅장하게
 export function feedbackTierUp() {
   hapticSeq([['success', 0], ['success', 170], ['confetti', 350], ['confetti', 590]]);
-  if (!playFile('tierup')) play([{ f: N.C5, dur: 0.13, type: 'triangle', vol: 0.15 }, { f: N.E5, at: 0.12, dur: 0.13, type: 'triangle', vol: 0.15 }, { f: N.G5, at: 0.24, dur: 0.13, type: 'triangle', vol: 0.15 }, { f: N.C6, at: 0.36, dur: 0.45, vol: 0.16 }, { f: N.E6, at: 0.36, dur: 0.42, vol: 0.08 }, { f: N.G6, at: 0.52, dur: 0.3, vol: 0.09 }]);
+  if (!playFile('tierup')) play([{ f: N.C5, dur: 0.12, type: 'triangle', vol: 0.1 }, { f: N.E5, at: 0.11, dur: 0.12, type: 'triangle', vol: 0.1 }, { f: N.G5, at: 0.22, dur: 0.12, type: 'triangle', vol: 0.1 }, { f: N.C6, at: 0.34, dur: 0.4, vol: 0.12 }, { f: N.E6, at: 0.34, dur: 0.36, vol: 0.05 }, { f: N.G6, at: 0.5, dur: 0.26, vol: 0.055 }]);
 }
 
 // 보상 수령 (미션·광고): 동전 두 개
 export function feedbackClaim() {
   hapticSeq([['tap', 0], ['success', 130], ['confetti', 280]]);
-  if (!playFile('claim')) play([{ f: N.B5, dur: 0.07, type: 'triangle', vol: 0.13 }, { f: N.E6, at: 0.1, dur: 0.08, type: 'triangle', vol: 0.13 }, { f: N.G6, at: 0.19, dur: 0.24, vol: 0.13 }]);
+  if (!playFile('claim')) play([{ f: N.B5, dur: 0.06, type: 'triangle', vol: 0.09 }, { f: N.E6, at: 0.09, dur: 0.07, type: 'triangle', vol: 0.09 }, { f: N.G6, at: 0.18, dur: 0.21, vol: 0.1 }]);
 }
 
 // 부스트 구매: 위로 쓸어 올라가는 파워업
 export function feedbackBoost() {
   hapticSeq([['wiggle', 0], ['success', 250], ['confetti', 450]]);
-  if (!playFile('boost')) play([{ f: 320, to: 1200, dur: 0.4, type: 'triangle', vol: 0.15 }, { f: N.E6, at: 0.36, dur: 0.13, type: 'triangle', vol: 0.12 }, { f: N.G6, at: 0.46, dur: 0.26, vol: 0.13 }]);
+  if (!playFile('boost')) play([{ f: 320, to: 1200, dur: 0.34, type: 'triangle', vol: 0.1 }, { f: N.E6, at: 0.31, dur: 0.11, type: 'triangle', vol: 0.08 }, { f: N.G6, at: 0.41, dur: 0.22, vol: 0.09 }]);
 }
 
 // 연속 학습 축하 (평소): 차임
 export function feedbackStreak() {
   hapticSeq([['success', 0], ['confetti', 240]]);
-  if (!playFile('streak')) play([{ f: N.C5, dur: 0.22, type: 'triangle', vol: 0.12 }, { f: N.E5, at: 0.08, dur: 0.22, type: 'triangle', vol: 0.12 }, { f: N.G5, at: 0.16, dur: 0.28, type: 'triangle', vol: 0.12 }, { f: N.C6, at: 0.29, dur: 0.28, vol: 0.13 }]);
+  if (!playFile('streak')) play([{ f: N.C5, dur: 0.18, type: 'triangle', vol: 0.085 }, { f: N.E5, at: 0.08, dur: 0.18, type: 'triangle', vol: 0.085 }, { f: N.G5, at: 0.16, dur: 0.24, type: 'triangle', vol: 0.09 }, { f: N.C6, at: 0.28, dur: 0.24, vol: 0.1 }]);
 }
 
 // 마일스톤(7·14·30일…): 팡파르 + 축포 연타
 export function feedbackCelebrate() {
   hapticSeq([['confetti', 0], ['success', 170], ['success', 330], ['confetti', 500], ['confetti', 710]]);
-  if (!playFile('celebrate')) play([{ f: N.C5, dur: 0.11, type: 'triangle', vol: 0.14 }, { f: N.E5, at: 0.1, dur: 0.11, type: 'triangle', vol: 0.14 }, { f: N.G5, at: 0.2, dur: 0.11, type: 'triangle', vol: 0.14 }, { f: N.C6, at: 0.3, dur: 0.16, type: 'triangle', vol: 0.14 }, { f: N.E6, at: 0.44, dur: 0.38, vol: 0.15 }, { f: N.G6, at: 0.56, dur: 0.28, vol: 0.09 }]);
+  if (!playFile('celebrate')) play([{ f: N.C5, dur: 0.1, type: 'triangle', vol: 0.095 }, { f: N.E5, at: 0.09, dur: 0.1, type: 'triangle', vol: 0.095 }, { f: N.G5, at: 0.18, dur: 0.1, type: 'triangle', vol: 0.095 }, { f: N.C6, at: 0.28, dur: 0.14, type: 'triangle', vol: 0.1 }, { f: N.E6, at: 0.41, dur: 0.32, vol: 0.11 }, { f: N.G6, at: 0.53, dur: 0.24, vol: 0.05 }]);
 }
 
 // 배지 획득: 반짝이는 상승 아르페지오 + 축포
 export function feedbackBadge() {
   hapticSeq([['success', 0], ['confetti', 180], ['success', 350], ['confetti', 540]]);
-  if (!playFile('badge')) play([{ f: N.E5, dur: 0.09, type: 'triangle', vol: 0.13 }, { f: N.G5, at: 0.08, dur: 0.09, type: 'triangle', vol: 0.13 }, { f: N.C6, at: 0.16, dur: 0.09, type: 'triangle', vol: 0.13 }, { f: N.E6, at: 0.24, dur: 0.14, type: 'triangle', vol: 0.13 }, { f: N.G6, at: 0.36, dur: 0.37, vol: 0.14 }, { f: N.E6, at: 0.38, dur: 0.28, vol: 0.06 }]);
+  if (!playFile('badge')) play([{ f: N.E5, dur: 0.08, type: 'triangle', vol: 0.09 }, { f: N.G5, at: 0.075, dur: 0.08, type: 'triangle', vol: 0.09 }, { f: N.C6, at: 0.15, dur: 0.08, type: 'triangle', vol: 0.095 }, { f: N.E6, at: 0.23, dur: 0.12, type: 'triangle', vol: 0.1 }, { f: N.G6, at: 0.34, dur: 0.31, vol: 0.105 }, { f: N.E6, at: 0.36, dur: 0.24, vol: 0.04 }]);
 }
 
 // 실패 알림 (보상 수령 실패 등): 짧고 낮게
 export function feedbackError() {
   haptic('error');
-  if (!playFile('error')) play([{ f: 340, to: 240, dur: 0.15, type: 'triangle', vol: 0.14 }, { f: 200, at: 0.1, dur: 0.12, vol: 0.07 }]);
+  if (!playFile('error')) play([{ f: 340, to: 240, dur: 0.13, type: 'triangle', vol: 0.085 }, { f: 200, at: 0.09, dur: 0.1, vol: 0.04 }]);
 }

@@ -76,7 +76,7 @@ describe('feedback file playback', () => {
 
     const audio = FakeAudioContext.instances[0];
     expect(audio.starts).toBe(1);
-    expect(audio.gains).toContain(0.55);
+    expect(audio.gains).toContain(0.42);
     expect((globalThis.fetch as ReturnType<typeof vi.fn>)).toHaveBeenCalledWith('/sfx/correct.mp3');
   });
 
@@ -106,5 +106,18 @@ describe('feedback file playback', () => {
 
     expect(globalThis.fetch).not.toHaveBeenCalled();
     expect(FakeAudioContext.instances).toHaveLength(0);
+  });
+
+  it('starts generated background music after audio is available', async () => {
+    const { startBgm, setBgmEnabled, __resetFeedbackForTest } = await import('./feedback');
+    __resetFeedbackForTest();
+
+    startBgm();
+
+    const audio = FakeAudioContext.instances[0];
+    expect(audio.createOscillator).toHaveBeenCalledTimes(3);
+    expect(audio.gains).toContain(0.026);
+
+    setBgmEnabled(false);
   });
 });

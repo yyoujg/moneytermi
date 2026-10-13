@@ -91,8 +91,9 @@ const LevelGate = ({ level, title, stat, locked, opening }: {
 import { buildPath, type PathNode } from '../lib/path';
 
 const LEVEL_TITLES: Record<string, string> = { 기초: '경제 뉴스의 기본 단어', 중급: '용어끼리 연결하기', 고급: '경제 메커니즘 설명하기', 심화: '모형과 제도 깊이 보기' };
-const COURSE_ROW = 136;
+const COURSE_ROW = 164;
 const COURSE_NODE = 54;
+const COURSE_TOPIC_CARD_TOP = 14;
 const courseNodeX = (index: number) => [12, 22, 14, 24, 16, 20][index % 6];
 const COURSE_ART = [BookOpenText, House, TrendingUp, Landmark];
 
@@ -125,7 +126,14 @@ const CourseScreen = () => {
   const { hydrated, contentStatus, retryContent, knownIds, courses, points, energy, spendEnergy, spendPoints, claimFirstLesson, pickRecallWords, openShop } = useAppContext();
   // 이 기기에서 끝낸 퀴즈·복습 노드. 화면에 돌아올 때마다 다시 읽는다(퀴즈 끝내고 돌아온 직후 반영).
   const [doneNodes, setDoneNodes] = useState<Set<string>>(new Set());
-  useEffect(() => { loadDoneNodes().then(setDoneNodes); }, []);
+  const [doneNodesLoaded, setDoneNodesLoaded] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    loadDoneNodes()
+      .then(nodes => { if (!cancelled) setDoneNodes(nodes); })
+      .finally(() => { if (!cancelled) setDoneNodesLoaded(true); });
+    return () => { cancelled = true; };
+  }, []);
 
   const sections = useMemo(() => buildPath(courses, knownIds), [courses, knownIds]);
   // 레벨별 배운 단어 수 / 전체
@@ -156,6 +164,8 @@ const CourseScreen = () => {
   const topicIndex = requestedTopic !== null && /^\d+$/.test(requestedTopic) ? Number(requestedTopic) : -1;
   const activeTopic = topics[topicIndex] ?? null;
   const backPath = activeTopic ? `/course?topic=${topicIndex}` : '/course';
+  const focusRef = useRef<HTMLButtonElement>(null);
+  const focusTopicRef = useRef<HTMLElement | null>(null);
 
   // 새로 열린 레벨: 관문 문이 좌우로 열리는 연출을 한 번. 첫 방문(기록 없음)은 연출 없이 기록만
   const [openingLevels, setOpeningLevels] = useState<Set<string>>(new Set());
@@ -177,9 +187,10 @@ const CourseScreen = () => {
 
   // 지난번에 본 뒤 새로 끝낸 노드: 도장 연출 + 들어오는 경로가 색으로 그려진다. 첫 방문(기록 없음)은 연출 없이 기록만.
   const [newlyDone, setNewlyDone] = useState<Map<string, number>>(new Map());
+  const [stampCheckReady, setStampCheckReady] = useState(false);
   const stampedRef = useRef(false);
   useEffect(() => {
-    if (stampedRef.current || !hydrated || sections.length === 0) return;
+    if (stampedRef.current || !hydrated || !doneNodesLoaded || sections.length === 0) return;
     stampedRef.current = true;
     const now = sections.flatMap(sec => sec.nodes.filter(isDone).map(n => n.id));
     Storage.getItem(SEEN_KEY).catch(() => null).then(raw => {
@@ -189,9 +200,9 @@ const CourseScreen = () => {
         setNewlyDone(new Map(fresh.map((id, i) => [id, i])));
       }
       Storage.setItem(SEEN_KEY, JSON.stringify(now)).catch(() => {});
-    });
+    }).finally(() => setStampCheckReady(true));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hydrated, sections, doneNodes]);
+  }, [hydrated, doneNodesLoaded, sections, doneNodes]);
 
   // 도장 연출이 있으면 첫 도장 노드를 먼저 보여주고, 마지막 도장·경로가 끝나면 지금 할 노드로 부드럽게 내려간다
   useEffect(() => {
@@ -215,6 +226,7 @@ const CourseScreen = () => {
   };
   const focus = findFocus();
   const focusId = focus?.id ?? null;
+  const newlyDoneCount = newlyDone.size;
   const levelTabs = useMemo(() => ['전체', ...new Set(topics.map(topic => topic.level))], [topics]);
   const [selectedLevel, setSelectedLevel] = useState('전체');
   const jumpToLevel = (level: string) => {
@@ -227,10 +239,18 @@ const CourseScreen = () => {
     document.querySelector(`[data-topic-index="${index}"]`)?.scrollIntoView({ block: 'start', behavior: 'smooth' });
   };
 
-  const focusRef = useRef<HTMLButtonElement>(null);
   useLayoutEffect(() => {
     document.querySelector('.course-screen')?.scrollTo({ top: 0 });
   }, [requestedTopic]);
+
+  useEffect(() => {
+    if (!hydrated || !stampCheckReady || newlyDoneCount > 0) return;
+    const target = activeTopic ? focusRef.current : focusTopicRef.current;
+    if (!target) return;
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const t = setTimeout(() => target.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' }), reduce ? 0 : 80);
+    return () => clearTimeout(t);
+  }, [hydrated, stampCheckReady, newlyDoneCount, activeTopic, focusId, requestedTopic]);
 
   const spending = useRef(false);   // 연타로 spend_points가 두 번 나가지 않게
   const handleNodeTap = async (node: PathNode, index: number, courseKnown: number, courseTitle: string) => {
@@ -353,9 +373,15 @@ const CourseScreen = () => {
         const done = topic.total > 0 && topic.known >= topic.total;
         const Art = COURSE_ART[ti % COURSE_ART.length];
         const levelTopics = topics.filter(t => t.level === topic.level);
-        const pathD = ti > 0 ? `M ${courseNodeX(ti - 1) + COURSE_NODE / 2} 28 C ${courseNodeX(ti - 1) + COURSE_NODE / 2} 76, ${courseNodeX(ti) + COURSE_NODE / 2} 52, ${courseNodeX(ti) + COURSE_NODE / 2} 101` : '';
+        const isFocusTopic = focus ? topic.parts.some(part => part.section.course.id === focus.courseId) : false;
+        const pathStartY = Math.round(COURSE_ROW * 0.21);
+        const pathEndY = Math.round(COURSE_ROW * 0.74);
+        const pathD = ti > 0 ? `M ${courseNodeX(ti - 1) + COURSE_NODE / 2} ${pathStartY} C ${courseNodeX(ti - 1) + COURSE_NODE / 2} ${Math.round(COURSE_ROW * 0.56)}, ${courseNodeX(ti) + COURSE_NODE / 2} ${Math.round(COURSE_ROW * 0.38)}, ${courseNodeX(ti) + COURSE_NODE / 2} ${pathEndY}` : '';
+        const topicCardClass = locked
+          ? 'border-[var(--color-line)] bg-[var(--color-surface)] opacity-75'
+          : !done ? 'border-brand-500 bg-[var(--color-card)]' : 'border-transparent bg-[var(--color-card)]';
         return (
-          <section key={`${topic.level}-${topic.category}`} data-topic-index={ti} className="scroll-mt-14">
+          <section ref={isFocusTopic ? focusTopicRef : undefined} key={`${topic.level}-${topic.category}`} data-topic-index={ti} className="scroll-mt-14">
             {topic.level !== topics[ti - 1]?.level && LEVEL_TITLES[topic.level] && (
               <LevelGate level={topic.level} title={LEVEL_TITLES[topic.level]} stat={levelStats.get(topic.level)!}
                 locked={locked} opening={openingLevels.has(topic.level)} />
@@ -363,31 +389,31 @@ const CourseScreen = () => {
             <div className="relative" style={{ height: COURSE_ROW }}>
               {ti > 0 && topic.level === topics[ti - 1]?.level && (
                 <svg aria-hidden width={110} height={COURSE_ROW} className="absolute pointer-events-none" style={{ left: 0, top: -COURSE_ROW / 2 }}>
-                  <path d={pathD} fill="none" stroke="var(--color-line-strong)" strokeWidth={3} strokeLinecap="round" strokeDasharray="2 10" />
+                  <path d={pathD} fill="none" stroke={locked ? 'var(--color-line)' : 'var(--color-line-strong)'} strokeWidth={3} strokeLinecap="round" strokeDasharray="2 10" />
                 </svg>
               )}
               <button type="button" disabled={locked}
                 onClick={() => setSearchParams({ topic: String(ti) })} aria-label={`${topic.level} ${topic.category} 주제 열기`}
-                className={`absolute flex items-center justify-center disabled:cursor-default ${done ? 'bg-[var(--color-brand-soft)] text-brand-500' : locked ? 'bg-[var(--color-card)] text-[var(--color-ink-3)]' : 'bg-brand-500 text-white'}`}
+                className={`absolute flex items-center justify-center disabled:cursor-default ${done ? 'bg-[var(--color-brand-soft)] text-brand-500' : locked ? 'border border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-ink-4)] opacity-75' : 'bg-brand-500 text-white'}`}
                 style={{ top: (COURSE_ROW - COURSE_NODE) / 2, left: courseNodeX(ti), width: COURSE_NODE, height: COURSE_NODE, borderRadius: 9999 }}>
                 {locked ? <LockKeyhole size={23} /> : done ? <Check size={27} strokeWidth={3} /> : <Art size={25} strokeWidth={2.2} />}
               </button>
               <button type="button" disabled={locked} onClick={() => setSearchParams({ topic: String(ti) })}
-                className={`absolute left-[98px] right-5 top-3 flex min-h-28 flex-col justify-center border-2 bg-[var(--color-card)] px-4 py-3 text-left disabled:cursor-default ${!done && !locked ? 'border-brand-500' : 'border-transparent'}`}
-                style={{ borderRadius: 18 }}>
-                <span className="flex items-center justify-between gap-2 text-2xs text-[var(--color-ink-3)]">
+                className={`absolute left-[98px] right-5 flex min-h-28 flex-col justify-center border-2 px-4 py-3 text-left disabled:cursor-default ${topicCardClass}`}
+                style={{ top: COURSE_TOPIC_CARD_TOP, borderRadius: 18 }}>
+                <span className={`flex items-center justify-between gap-2 text-2xs ${locked ? 'text-[var(--color-ink-4)]' : 'text-[var(--color-ink-3)]'}`}>
                   <span>{topic.level} · 주제 {levelTopics.indexOf(topic) + 1}/{levelTopics.length}</span>
                   {/* 지금 할 주제만 선명하게, 완료는 조용하게 */}
                   {!done && !locked
                     ? <span className="rounded-full bg-brand-500 px-2 py-0.5 text-2xs font-bold text-white">이어하기</span>
-                    : <span className="font-semibold">{done ? '완료' : '잠김'}</span>}
+                    : <span className={`font-semibold ${locked ? 'rounded-full bg-[var(--color-card)] px-2 py-0.5 text-[var(--color-ink-4)]' : ''}`}>{done ? '완료' : '잠김'}</span>}
                 </span>
-                <span className="mt-1.5 block text-sm font-bold text-[var(--color-ink)] leading-snug break-keep">{topic.category}</span>
-                <span className="mt-1 block text-2xs text-[var(--color-ink-3)] leading-relaxed break-keep">{learningOutcomeFor({ category: topic.category })}</span>
-                {locked && <span className="mt-1 text-2xs text-[var(--color-ink-2)]">앞의 레슨을 마치면 시작할 수 있어요</span>}
-                <span className="mt-2 flex items-center gap-2 text-2xs text-[var(--color-ink-3)]">
+                <span className={`mt-1.5 block text-sm font-bold leading-snug break-keep ${locked ? 'text-[var(--color-ink-3)]' : 'text-[var(--color-ink)]'}`}>{topic.category}</span>
+                <span className={`mt-1 block text-2xs leading-relaxed break-keep ${locked ? 'text-[var(--color-ink-4)]' : 'text-[var(--color-ink-3)]'}`}>{learningOutcomeFor({ category: topic.category })}</span>
+                {locked && <span className="mt-1 text-2xs text-[var(--color-ink-4)]">앞의 레슨을 마치면 시작할 수 있어요</span>}
+                <span className={`mt-2 flex items-center gap-2 text-2xs ${locked ? 'text-[var(--color-ink-4)]' : 'text-[var(--color-ink-3)]'}`}>
                   <span className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-[var(--color-button-secondary)]">
-                    <span className={`block h-full rounded-full ${done ? 'bg-[var(--color-line-strong)]' : 'bg-brand-500'}`} style={{ width: `${topic.total ? (topic.known / topic.total) * 100 : 0}%` }} />
+                    <span className={`block h-full rounded-full ${locked || done ? 'bg-[var(--color-line-strong)]' : 'bg-brand-500'}`} style={{ width: `${topic.total ? (topic.known / topic.total) * 100 : 0}%` }} />
                   </span>
                   <span className="shrink-0 tabular-nums">{topic.known}/{topic.total}</span>
                 </span>
@@ -425,23 +451,26 @@ const CourseScreen = () => {
             const locked = node.state === 'locked';
             const copy = nodeCopy(node);
             const Icon = node.type === 'quiz' ? CircleHelp : node.type === 'review' ? Brain : Layers3;
+            const nodeCardClass = locked
+              ? 'border-[var(--color-line)] bg-[var(--color-surface)] opacity-75'
+              : isFocus ? 'course-node-focus border-brand-500 bg-[var(--color-brand-soft)]' : 'border-transparent bg-[var(--color-card)]';
             return (
-              <div key={node.id} className="mx-5 mb-2.5">
+              <div key={node.id} className="mx-5 mb-4">
                 <button ref={isFocus ? focusRef : undefined} type="button" disabled={locked} data-own-sfx data-node-id={node.id}
                   onClick={() => handleNodeTap(node, k, sec.knownCount, sec.course.title)}
-                  className={`flex w-full items-center gap-3 border-2 px-4 py-4 text-left disabled:cursor-default ${isFocus ? 'border-brand-500 bg-[var(--color-brand-soft)]' : 'border-transparent bg-[var(--color-card)]'} ${newlyDone.has(node.id) ? 'anim-stamp' : ''}`}
+                  className={`flex w-full items-center gap-3 border-2 px-4 py-4 text-left disabled:cursor-default ${nodeCardClass} ${newlyDone.has(node.id) ? 'anim-stamp' : ''}`}
                   style={{ borderRadius: 18, '--d': `${0.2 + (newlyDone.get(node.id) ?? 0) * 0.15}s` } as React.CSSProperties}>
-                  <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${done ? 'bg-[var(--color-brand-soft)] text-brand-500' : isFocus ? 'bg-brand-500 text-white' : 'bg-[var(--color-surface)] text-[var(--color-ink-3)]'}`}>
+                  <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${done ? 'bg-[var(--color-brand-soft)] text-brand-500' : locked ? 'border border-[var(--color-line)] bg-[var(--color-card)] text-[var(--color-ink-4)]' : isFocus ? 'bg-brand-500 text-white' : 'bg-[var(--color-surface)] text-[var(--color-ink-3)]'}`}>
                     {locked ? <LockKeyhole size={20} /> : done ? <Check size={22} strokeWidth={3} /> : <Icon size={21} />}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="flex items-center gap-2 text-2xs text-[var(--color-ink-3)]">
+                    <span className={`flex items-center gap-2 text-2xs ${locked ? 'text-[var(--color-ink-4)]' : 'text-[var(--color-ink-3)]'}`}>
                       {si + 1}-{k + 1} · {copy.kind}
-                      <span className={isFocus ? 'font-bold text-brand-600' : done ? 'font-bold text-brand-500' : ''}>{done ? '완료' : isFocus ? '진행 중' : locked ? '잠김' : '도전 가능'}</span>
+                      <span className={locked ? 'rounded-full bg-[var(--color-card)] px-2 py-0.5 font-bold text-[var(--color-ink-4)]' : isFocus ? 'font-bold text-brand-600' : done ? 'font-bold text-brand-500' : ''}>{done ? '완료' : isFocus ? '진행 중' : locked ? '잠김' : '도전 가능'}</span>
                     </span>
-                    <span className="mt-1 block text-sm font-bold text-[var(--color-ink)] break-keep">{copy.title}</span>
-                    {locked && <span className="mt-1 block text-2xs text-[var(--color-ink-2)]">앞의 레슨을 마치면 시작할 수 있어요</span>}
-                    <span className="mt-1 flex items-center gap-1 text-2xs text-[var(--color-ink-3)]"><Clock3 size={12} />{copy.meta}</span>
+                    <span className={`mt-1 block text-sm font-bold break-keep ${locked ? 'text-[var(--color-ink-3)]' : 'text-[var(--color-ink)]'}`}>{copy.title}</span>
+                    {locked && <span className="mt-1 block text-2xs text-[var(--color-ink-4)]">앞의 레슨을 마치면 시작할 수 있어요</span>}
+                    <span className={`mt-1 flex items-center gap-1 text-2xs ${locked ? 'text-[var(--color-ink-4)]' : 'text-[var(--color-ink-3)]'}`}><Clock3 size={12} />{copy.meta}</span>
                   </span>
                   {!locked && <ChevronRight size={17} className="shrink-0 text-[var(--color-ink-3)]" />}
                 </button>
