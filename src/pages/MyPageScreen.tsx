@@ -17,6 +17,11 @@ import { NicknameSheet } from '../components/mypage/NicknameSheet';
 import { Card } from '../components/ui/Card';
 import { IconBox } from '../components/ui/IconBox';
 
+const MENU_ITEMS = [
+  { icon: '/icons/guide.png',    label: '앱 사용법', sub: '사용법 및 자주 묻는 질문' },
+  { icon: '/icons/settings.png', label: '앱 설정',  sub: '알림, 테마 등' },
+];
+
 const MyPageScreen = () => {
   const { points, xp, knownWords, attendanceDates, myEmoji, updateMyEmoji } = useAppContext();
   const stage = getGrowthStage(xp);
@@ -34,11 +39,6 @@ const MyPageScreen = () => {
     if (label === '앱 사용법') setShowGuide(true);
     else if (label === '앱 설정') setShowSettings(true);
   };
-
-  const MENU_ITEMS = [
-    { icon: '/icons/guide.png',    label: '앱 사용법', sub: '사용법 및 자주 묻는 질문' },
-    { icon: '/icons/settings.png', label: '앱 설정',  sub: '알림, 테마 등' },
-  ];
 
   return (
     <div className="my-page-screen flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
@@ -91,10 +91,10 @@ const MyPageScreen = () => {
         <Card pad="md" className="my-page-stats anim-fade-up">
           <div className="flex items-stretch">
             {[
-              { icon: <WordsIcon size={28} />, label: '익힌 말', value: knownWords.length.toLocaleString(), unit: '개', color: STAT_COLOR.words },
-              { icon: <StreakIcon size={28} />, label: '연속 학습', value: streak.toLocaleString(), unit: '일', color: STAT_COLOR.streak },
-              { icon: <XpIcon size={28} />, label: 'XP', value: xp.toLocaleString(), unit: '', color: STAT_COLOR.xp },
-              { icon: <PointIcon size={28} />, label: '포인트', value: points.toLocaleString(), unit: 'P', color: STAT_COLOR.points },
+              { icon: <WordsIcon size={31} />, label: '익힌 용어', value: knownWords.length.toLocaleString(), unit: '개', color: STAT_COLOR.words },
+              { icon: <StreakIcon size={31} />, label: '연속 학습', value: streak.toLocaleString(), unit: '일', color: STAT_COLOR.streak },
+              { icon: <XpIcon size={31} />, label: 'XP', value: xp.toLocaleString(), unit: '', color: STAT_COLOR.xp },
+              { icon: <PointIcon size={31} />, label: '포인트', value: points.toLocaleString(), unit: 'P', color: STAT_COLOR.points },
             ].map((it, i) => (
               <div key={it.label} className={`flex-1 min-w-0 flex flex-col items-center gap-1 py-1 ${i < 3 ? 'border-r border-[var(--color-line)]' : ''}`}>
                 {it.icon}

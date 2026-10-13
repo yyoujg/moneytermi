@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useLayoutEffect, useEffect, useState } from 'react';
-import { BadgeCheck, BookOpenText, Brain, Check, ChevronRight, CircleHelp, Clock3, House, Landmark, Layers3, Lock, LockKeyhole, TrendingUp, X } from 'lucide-react';
+import { BookOpenText, Brain, Check, ChevronRight, CircleHelp, Clock3, House, Landmark, Layers3, Lock, LockKeyhole, TrendingUp } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
@@ -10,11 +10,9 @@ import { Storage } from '../lib/storage';
 import { showModal } from '../components/AlertModal';
 import { COURSE_REVIEW_COUNT, LESSON_WARMUP_COUNT, firstUnknownWordIndex, learnedOrFallbackWords, selectCourseQuizWords } from '../lib/coursePractice';
 import { learningOutcomeFor } from '../lib/learningOutcome';
-import { praiseForProgress } from '../lib/praise';
 
 const SEEN_KEY = 'path_seen_done';   // 코스 화면에서 마지막으로 본 완료 노드들(도장 연출용)
 const GATE_KEY = 'path_seen_levels';  // 열린 것을 본 레벨들(관문 연출용)
-const GROWTH_SEEN_KEY = 'course_seen_growth_known_count_v1';
 
 // 노드를 누르면 브랜드색 원이 화면 가득 퍼지고 로고를 보여준 뒤 다음 화면으로 넘어간다.
 // 오버레이를 body에 붙여 화면 전환 뒤에도 남게 한다. 동작 줄이기·WAAPI 미지원이면 바로 넘어간다.
@@ -103,22 +101,22 @@ const nodeCopy = (node: PathNode) => {
   if (node.type === 'lesson') {
     return {
       kind: '학습',
-      title: `${node.words[0]?.word ?? '새 말'}부터 시작하기`,
-      meta: `${node.words.length}개 말, 쉬운 예시로 확인`,
+      title: `${node.words[0]?.word ?? '새 용어'}부터 시작하기`,
+      meta: `${node.words.length}개 용어, 쉬운 예시로 확인`,
     };
   }
   if (node.type === 'quiz') {
     return {
       kind: '실전 퀴즈',
-      title: '내 상황에 맞는 말 고르기',
-      meta: `${node.words.length}개 말로 적용 연습`,
+      title: '내 상황에 맞는 용어 고르기',
+      meta: `${node.words.length}개 용어로 적용 연습`,
     };
   }
   const finalReview = node.id.endsWith('-r');
   return {
     kind: finalReview ? '누적 복습' : '중간 복습',
-    title: finalReview ? '배운 말 다시 연결하기' : '오늘 익힌 말 다시 보기',
-    meta: `${node.words.length}개 말 섞어서 복습`,
+    title: finalReview ? '배운 용어 다시 연결하기' : '오늘 익힌 용어 다시 보기',
+    meta: `${node.words.length}개 용어 섞어서 복습`,
   };
 };
 
@@ -126,7 +124,6 @@ const CourseScreen = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { hydrated, contentStatus, retryContent, knownIds, courses, points, energy, spendEnergy, spendPoints, claimFirstLesson, pickRecallWords, openShop } = useAppContext();
-  const [growthModal, setGrowthModal] = useState<{ added: number } | null>(null);
   // 이 기기에서 끝낸 퀴즈·복습 노드. 화면에 돌아올 때마다 다시 읽는다(퀴즈 끝내고 돌아온 직후 반영).
   const [doneNodes, setDoneNodes] = useState<Set<string>>(new Set());
   const [doneNodesLoaded, setDoneNodesLoaded] = useState(false);
@@ -166,10 +163,6 @@ const CourseScreen = () => {
   const requestedTopic = searchParams.get('topic');
   const topicIndex = requestedTopic !== null && /^\d+$/.test(requestedTopic) ? Number(requestedTopic) : -1;
   const activeTopic = topics[topicIndex] ?? null;
-  const totalKnown = topics.reduce((sum, topic) => sum + topic.known, 0);
-  const totalWords = topics.reduce((sum, topic) => sum + topic.total, 0);
-  const growthMessage = praiseForProgress(totalKnown, totalWords);
-  const growthTitle = growthModal?.added === 1 ? '잘했어요, 하나 더 쌓였어요' : `잘했어요, ${growthModal?.added ?? 0}개 더 익혔어요`;
   const backPath = activeTopic ? `/course?topic=${topicIndex}` : '/course';
   const focusRef = useRef<HTMLButtonElement>(null);
   const focusTopicRef = useRef<HTMLElement | null>(null);
@@ -259,20 +252,6 @@ const CourseScreen = () => {
     return () => clearTimeout(t);
   }, [hydrated, stampCheckReady, newlyDoneCount, activeTopic, focusId, requestedTopic]);
 
-  useEffect(() => {
-    if (!hydrated || contentStatus !== 'ready' || totalWords === 0) return;
-    let cancelled = false;
-    Storage.getItem(GROWTH_SEEN_KEY).catch(() => null).then(raw => {
-      if (cancelled) return;
-      const seen = raw === null ? null : Math.max(0, Number(raw) || 0);
-      void Storage.setItem(GROWTH_SEEN_KEY, String(totalKnown)).catch(() => {});
-      if (seen === null || totalKnown <= seen) return;
-      setGrowthModal({ added: totalKnown - seen });
-      logClick('course_growth_modal_view', { known: totalKnown, previous: seen, added: totalKnown - seen });
-    });
-    return () => { cancelled = true; };
-  }, [contentStatus, hydrated, totalKnown, totalWords]);
-
   const spending = useRef(false);   // 연타로 spend_points가 두 번 나가지 않게
   const handleNodeTap = async (node: PathNode, index: number, courseKnown: number, courseTitle: string) => {
     // disabled 버튼은 click이 안 오지만, 웹뷰/리셋 CSS에 따라 새는 경우가 있어 한 번 더 막는다.
@@ -338,7 +317,7 @@ const CourseScreen = () => {
             backPath,
             reviewMode: true,
             mode: 'lesson_warmup',
-            nextRoute: { pathname: '/word-card', state: lessonState, label: '새 말 보기' },
+            nextRoute: { pathname: '/word-card', state: lessonState, label: '새 용어 보기' },
           },
         });
       } else {
@@ -369,7 +348,7 @@ const CourseScreen = () => {
             {/* 뒤로가기는 토스 내비게이션 바가 맡는다(자체 뒤로가기 중복은 검수 반려 사유) */}
             <div className="min-w-0">
               <h1 className="truncate text-xl font-bold tracking-tight text-[var(--color-ink)]">{activeTopic.category}</h1>
-              <p className="mt-1! text-xs text-[var(--color-ink-3)]">{activeTopic.level} · {activeTopic.parts.length}개 코스 · {activeTopic.known}/{activeTopic.total}개 말 확인</p>
+              <p className="mt-1! text-xs text-[var(--color-ink-3)]">{activeTopic.level} · {activeTopic.parts.length}개 코스 · {activeTopic.known}/{activeTopic.total}개 용어 확인</p>
               <p className="mt-1! text-xs text-[var(--color-ink-3)] break-keep leading-relaxed">{learningOutcomeFor({ category: activeTopic.category })}</p>
             </div>
           </div>
@@ -380,54 +359,6 @@ const CourseScreen = () => {
           </>
         )}
       </div>
-      {growthModal && (
-        <div
-          className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/55 px-6"
-          role="presentation"
-          onClick={() => setGrowthModal(null)}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="growth-modal-title"
-            onClick={e => e.stopPropagation()}
-            className="w-full max-w-xs rounded-card bg-[var(--color-card)] px-5 pb-5 pt-5 anim-pop-in"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-soft)] text-brand-500">
-                <BadgeCheck size={26} strokeWidth={2.4} />
-              </span>
-              <button
-                type="button"
-                aria-label="닫기"
-                onClick={() => setGrowthModal(null)}
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-surface)] text-[var(--color-ink-3)] active:opacity-80"
-              >
-                <X size={16} strokeWidth={2.4} />
-              </button>
-            </div>
-            <h2 id="growth-modal-title" className="mt-4! text-xl font-black text-[var(--color-ink)]">{growthTitle}</h2>
-            <p className="mt-2! text-sm leading-snug text-[var(--color-ink-2)] break-keep">{growthMessage}</p>
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              <div className="rounded-chip bg-[var(--color-surface)] px-3 py-3">
-                <p className="text-2xs font-bold text-[var(--color-ink-4)]">확인한 말</p>
-                <p className="mt-1! text-lg font-black text-[var(--color-ink)] tabular-nums">{totalKnown}개</p>
-              </div>
-              <div className="rounded-chip bg-[var(--color-surface)] px-3 py-3">
-                <p className="text-2xs font-bold text-[var(--color-ink-4)]">전체 말</p>
-                <p className="mt-1! text-lg font-black text-[var(--color-ink)] tabular-nums">{totalWords}개</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setGrowthModal(null)}
-              className="mt-4 w-full rounded-button bg-brand-500 py-4 text-sm font-bold text-white active:opacity-90"
-            >
-              계속하기
-            </button>
-          </div>
-        </div>
-      )}
       {!activeTopic && <div className="app-soft-sticky sticky top-0 z-20 flex shrink-0 gap-2 overflow-x-auto px-5 py-3 [&::-webkit-scrollbar]:hidden">
         {levelTabs.map(level => (
           <button key={level} type="button" onClick={() => jumpToLevel(level)} aria-pressed={selectedLevel === level}
@@ -463,7 +394,7 @@ const CourseScreen = () => {
               )}
               <button type="button" disabled={locked}
                 onClick={() => setSearchParams({ topic: String(ti) })} aria-label={`${topic.level} ${topic.category} 주제 열기`}
-                className={`absolute flex items-center justify-center disabled:cursor-default ${done ? 'bg-[var(--color-brand-soft)] text-brand-500' : locked ? 'border border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-ink-4)] opacity-75' : 'bg-brand-500 text-white'}`}
+                className={`absolute flex items-center justify-center disabled:cursor-default ${done ? 'bg-[var(--color-brand-soft)] text-brand-500' : locked ? 'border border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-ink-4)] opacity-75' : 'border border-brand-200 bg-[var(--color-brand-soft)] text-brand-500'}`}
                 style={{ top: (COURSE_ROW - COURSE_NODE) / 2, left: courseNodeX(ti), width: COURSE_NODE, height: COURSE_NODE, borderRadius: 9999 }}>
                 {locked ? <LockKeyhole size={23} /> : done ? <Check size={27} strokeWidth={3} /> : <Art size={25} strokeWidth={2.2} />}
               </button>
@@ -493,26 +424,28 @@ const CourseScreen = () => {
       })}
       {activeTopic && activeTopic.parts.map(({ section: sec, si }) => {
         const Art = COURSE_ART[si % COURSE_ART.length];
+        const pct = sec.course.words.length ? Math.round((sec.knownCount / sec.course.words.length) * 100) : 0;
         return (
         <section key={sec.course.id} data-section-index={si} className="scroll-mt-4">
-          <div className={`sticky top-0 z-10 mx-5 mt-4 mb-3 overflow-hidden rounded-card bg-[var(--color-card)] px-5 py-5 ${sec.course.id === focus?.courseId ? 'anim-fade' : ''}`}>
+          <div className={`course-topic-summary sticky top-0 z-10 mx-5 mt-3 mb-4 overflow-hidden rounded-card border border-[var(--color-line)] bg-[var(--color-card)] px-4 py-4 ${sec.course.id === focus?.courseId ? 'anim-fade' : ''}`}>
             {/* 코스 제목이 화면 제목(주제명)과 같으면 반복하지 않고 진행 정도만 보여준다 */}
-            {sec.course.title !== activeTopic.category && <div className="relative mb-4 flex items-center gap-4">
-              <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-brand-soft)] text-brand-500"><Art size={30} strokeWidth={1.8} /></span>
+            {sec.course.title !== activeTopic.category && <div className="relative mb-4 flex items-start gap-3">
+              <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] bg-[var(--color-brand-soft)] text-brand-500"><Art size={30} strokeWidth={1.8} /></span>
               <div className="min-w-0">
-                <p className="text-2xs text-[var(--color-ink-3)]">{sec.course.level} · {si + 1}/{sections.length}</p>
-                <h3 className="mt-1! text-base font-bold text-[var(--color-ink)] break-keep tracking-[-0.025em]">{sec.course.title}</h3>
+                <p className="text-2xs font-bold text-brand-600">{sec.course.level} · 코스 {si + 1}/{activeTopic.parts.length}</p>
+                <h3 className="mt-1! text-[17px] font-black text-[var(--color-ink)] break-keep tracking-[-0.01em] leading-snug">{sec.course.title}</h3>
                 <p className="mt-1! text-xs text-[var(--color-ink-3)] break-keep leading-relaxed">{learningOutcomeFor({ category: sec.course.category, title: sec.course.title, words: sec.course.words })}</p>
               </div>
             </div>}
-            <p className="mb-2 text-xs font-semibold text-[var(--color-ink-2)]">{sec.course.words.length}개 말 중 {sec.knownCount}개 확인</p>
-            <div className="relative flex items-center gap-3">
-              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--color-button-secondary)]">
+            <div className="mb-2 flex items-center justify-between gap-3 text-xs font-bold">
+              <p className="text-[var(--color-ink-2)]"><span className="text-brand-600">{sec.knownCount}개</span> 확인 / {sec.course.words.length}개 용어</p>
+              <span className="tabular-nums text-[var(--color-ink-3)]">{pct}%</span>
+            </div>
+            <div className="relative flex items-center">
+              <div className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--color-button-secondary)]">
                 <div className={`h-full rounded-full bg-brand-500 ${sec.course.id === focus?.courseId ? 'course-progress-reveal' : ''}`} style={{ width: `${sec.course.words.length ? (sec.knownCount / sec.course.words.length) * 100 : 0}%` }} />
               </div>
-              <span className="min-w-10 text-right text-2xs font-semibold tabular-nums text-[var(--color-ink-3)]">{sec.course.words.length ? Math.round((sec.knownCount / sec.course.words.length) * 100) : 0}%</span>
             </div>
-            <p className="mt-2! text-2xs font-semibold text-brand-500 break-keep">{praiseForProgress(sec.knownCount, sec.course.words.length)}</p>
           </div>
 
           {sec.nodes.map((node, k) => {
@@ -523,26 +456,27 @@ const CourseScreen = () => {
             const Icon = node.type === 'quiz' ? CircleHelp : node.type === 'review' ? Brain : Layers3;
             const nodeCardClass = locked
               ? 'border-[var(--color-line)] bg-[var(--color-surface)] opacity-75'
-              : isFocus ? 'course-node-focus border-brand-500 bg-[var(--color-brand-soft)]' : 'border-transparent bg-[var(--color-card)]';
+              : isFocus ? 'course-node-current border-brand-200 bg-[var(--color-card)]' : 'border-transparent bg-[var(--color-card)]';
+            const nodeStatus = done ? '완료' : isFocus ? '지금 할 일' : locked ? '잠김' : '열림';
             return (
               <div key={node.id} className="mx-5 mb-4">
                 <button ref={isFocus ? focusRef : undefined} type="button" disabled={locked} data-own-sfx data-node-id={node.id}
                   onClick={() => handleNodeTap(node, k, sec.knownCount, sec.course.title)}
-                  className={`flex w-full items-center gap-3 border-2 px-4 py-4 text-left disabled:cursor-default ${nodeCardClass} ${newlyDone.has(node.id) ? 'anim-stamp' : ''}`}
-                  style={{ borderRadius: 18, '--d': `${0.2 + (newlyDone.get(node.id) ?? 0) * 0.15}s` } as React.CSSProperties}>
-                  <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${done ? 'bg-[var(--color-brand-soft)] text-brand-500' : locked ? 'border border-[var(--color-line)] bg-[var(--color-card)] text-[var(--color-ink-4)]' : isFocus ? 'bg-brand-500 text-white' : 'bg-[var(--color-surface)] text-[var(--color-ink-3)]'}`}>
+                  className={`course-node-card flex w-full items-center gap-3 border px-4 py-3.5 text-left disabled:cursor-default ${nodeCardClass} ${newlyDone.has(node.id) ? 'anim-stamp' : ''}`}
+                  style={{ borderRadius: 20, '--d': `${0.2 + (newlyDone.get(node.id) ?? 0) * 0.15}s` } as React.CSSProperties}>
+                  <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[17px] ${done ? 'bg-[var(--color-brand-soft)] text-brand-500' : locked ? 'border border-[var(--color-line)] bg-[var(--color-card)] text-[var(--color-ink-4)]' : isFocus ? 'border border-brand-200 bg-[var(--color-brand-soft)] text-brand-500' : 'bg-[var(--color-surface)] text-[var(--color-ink-3)]'}`}>
                     {locked ? <LockKeyhole size={20} /> : done ? <Check size={22} strokeWidth={3} /> : <Icon size={21} />}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className={`flex items-center gap-2 text-2xs ${locked ? 'text-[var(--color-ink-4)]' : 'text-[var(--color-ink-3)]'}`}>
                       {si + 1}-{k + 1} · {copy.kind}
-                      <span className={locked ? 'rounded-full bg-[var(--color-card)] px-2 py-0.5 font-bold text-[var(--color-ink-4)]' : isFocus ? 'font-bold text-brand-600' : done ? 'font-bold text-brand-500' : ''}>{done ? '완료' : isFocus ? '진행 중' : locked ? '잠김' : '도전 가능'}</span>
+                      <span className={locked ? 'rounded-full bg-[var(--color-card)] px-2 py-0.5 font-bold text-[var(--color-ink-4)]' : isFocus ? 'rounded-full bg-[var(--color-brand-soft)] px-2 py-0.5 font-black text-brand-600' : done ? 'font-bold text-brand-500' : ''}>{nodeStatus}</span>
                     </span>
                     <span className={`mt-1 block text-sm font-bold break-keep ${locked ? 'text-[var(--color-ink-3)]' : 'text-[var(--color-ink)]'}`}>{copy.title}</span>
                     {locked && <span className="mt-1 block text-2xs text-[var(--color-ink-4)]">앞의 레슨을 마치면 시작할 수 있어요</span>}
                     <span className={`mt-1 flex items-center gap-1 text-2xs ${locked ? 'text-[var(--color-ink-4)]' : 'text-[var(--color-ink-3)]'}`}><Clock3 size={12} />{copy.meta}</span>
                   </span>
-                  {!locked && <ChevronRight size={17} className="shrink-0 text-[var(--color-ink-3)]" />}
+                  {!locked && <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${isFocus ? 'bg-brand-500 text-white' : 'bg-[var(--color-surface)] text-[var(--color-ink-3)]'}`}><ChevronRight size={17} /></span>}
                 </button>
               </div>
             );

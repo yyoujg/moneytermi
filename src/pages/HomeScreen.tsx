@@ -106,7 +106,7 @@ const HomeScreen = () => {
                 <RotateCcw size={16} className="text-brand-500" />
               </div>
               <div className="text-left">
-                <p className="text-sm font-bold text-[var(--color-ink)]">오늘 다시 볼 말 {dueQueue.length}개</p>
+                <p className="text-sm font-bold text-[var(--color-ink)]">오늘 다시 볼 용어 {dueQueue.length}개</p>
                 <p className="text-2xs text-[var(--color-ink-4)]">다시 마주치면 바로 떠오르게요</p>
               </div>
             </div>

@@ -8,7 +8,7 @@ import { feedbackCelebrate, feedbackStreak } from '../lib/feedback';
 import { Storage } from '../lib/storage';
 import { OTTER_FACE } from './ProfileAvatar';
 
-// 학습을 끝낸 뒤 하루 1회 뜨는 연속학습 축하 화면.
+// 학습을 끝낸 뒤 하루 1회 뜨는 연속 출석 축하 모달.
 // DailyAlarmPromptCard와 같은 자기완결 패턴 — 완료 화면에 그냥 놓으면 알아서 판단한다.
 const KEY = 'streak_celebrated_date';
 
@@ -62,7 +62,7 @@ export const StreakCelebration = () => {
       <div className="flex flex-col items-center">
         <Flame size={milestone ? 88 : 72} className={`${milestone ? 'text-white' : 'text-brand-ink'} fill-current anim-pop-in`} />
         <p className={`text-5xl font-black ${ink} mt-1! anim-pop-in`} style={{ '--i': 2 } as React.CSSProperties}>{streak}</p>
-        <p className={`text-sm font-medium ${sub} mt-2! anim-fade-up`} style={{ '--i': 3 } as React.CSSProperties}>일 연속 학습 중이에요</p>
+        <p className={`text-sm font-medium ${sub} mt-2! anim-fade-up`} style={{ '--i': 3 } as React.CSSProperties}>일 연속 출석 성공</p>
       </div>
 
       {/* 이번 주 */}
@@ -92,7 +92,7 @@ export const StreakCelebration = () => {
         <img src={OTTER_FACE} alt="" aria-hidden="true" className="h-12 w-12 shrink-0 rounded-full bg-white object-cover" />
         <div className={`rounded-card px-4 py-3 max-w-[220px] ${milestone ? 'bg-white/95' : 'bg-[var(--color-card)]'}`}>
           <p className={`text-sm font-medium break-keep leading-relaxed ${milestone ? 'text-[#7c2d12]' : 'text-[var(--color-ink-2)]'}`}>
-            {streakMessage(streak)}
+            {streak === 1 ? '오늘 출석이 기록됐어요.' : streakMessage(streak)}
           </p>
         </div>
       </div>
@@ -102,7 +102,7 @@ export const StreakCelebration = () => {
         className={`w-full max-w-xs py-4 rounded-button text-sm font-bold active:opacity-90 anim-fade-up ${milestone ? 'bg-white text-[var(--color-brand-deep)]' : 'bg-brand-500'}`}
         style={{ '--i': 9 } as React.CSSProperties}
       >
-        {milestone ? '계속 이어가기' : '돌아가기'}
+        확인
       </button>
     </div>
   );

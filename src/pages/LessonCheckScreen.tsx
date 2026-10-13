@@ -9,6 +9,7 @@ import { Card } from '../components/ui/Card';
 import { Mascot } from '../components/Mascot';
 import { PraiseNote } from '../components/PraiseNote';
 import { praiseForQuiz } from '../lib/praise';
+import { keepShortUnitsTogether } from '../lib/formatText';
 
 const LessonCheckScreen = () => {
   const navigate = useNavigate();
@@ -26,8 +27,8 @@ const LessonCheckScreen = () => {
     return (
       <div className="lesson-check-screen app-soft-screen flex h-full flex-col items-center justify-center gap-4 px-5 text-center">
         <Mascot name="empty" size={110} />
-        <h1 className="mt-1 text-xl font-bold text-[var(--color-ink)]">{hasLesson ? '이번 레슨에는 이해 확인 문제가 없어요' : '자주 마주치는 말부터 시작해요'}</h1>
-        <p className="text-[15px] text-[var(--color-ink-2)] break-keep">{hasLesson ? '다음 학습을 선택할 수 있어요.' : '말을 하나 익히면 이해 확인 문제를 풀 수 있어요.'}</p>
+        <h1 className="mt-1 text-xl font-bold text-[var(--color-ink)]">{hasLesson ? '이번 레슨에는 이해 확인 문제가 없어요' : '자주 마주치는 용어부터 시작해요'}</h1>
+        <p className="text-[15px] text-[var(--color-ink-2)] break-keep">{hasLesson ? '다음 학습을 선택할 수 있어요.' : '용어를 하나 익히면 이해 확인 문제를 풀 수 있어요.'}</p>
         <button onClick={() => navigate('/course', { replace: true })} className="mt-3 w-full min-h-[52px] rounded-button bg-brand-500 text-base font-bold text-white">
           {hasLesson ? '다음 학습 선택하기' : '학습 시작하기'}
         </button>
@@ -94,7 +95,9 @@ const LessonCheckScreen = () => {
         <h1 className="mb-4! text-sm font-bold text-[var(--color-ink-2)]">이해 확인</h1>
         <Card pad="lg" className="mb-5 bg-[var(--color-surface)]" style={{ border: 0 }}>
           <p className="mb-2! text-xs font-bold text-[var(--color-ink-3)]">상황을 읽고 골라보세요</p>
-          <h2 className="text-lg font-bold text-[var(--color-ink)] leading-relaxed break-keep">{question.promptMain}</h2>
+          <h2 className="quiz-prompt-main text-lg font-bold text-[var(--color-ink)] leading-relaxed break-keep">
+            {keepShortUnitsTogether(question.promptMain)}
+          </h2>
         </Card>
         <div className="flex flex-col gap-2">
           {question.options.map((option, optionIndex) => {
@@ -119,15 +122,15 @@ const LessonCheckScreen = () => {
                 className={`w-full flex items-center gap-3 rounded-card border px-4 py-4 text-left text-sm font-semibold break-keep ${color} active:opacity-80`}
               >
                 {revealed && option.isCorrect ? <Check size={16} className="shrink-0" /> : revealed && isSelected ? <X size={16} className="shrink-0" /> : <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--color-surface)] text-xs text-[var(--color-ink-3)]">{optionIndex + 1}</span>}
-                {option.label}
+                {keepShortUnitsTogether(option.label)}
               </button>
             );
           })}
         </div>
         {selected !== null && (
           <Card pad="lg" className={`mt-4 border ${isCorrect ? 'border-success-500/30' : 'border-danger-500/30'}`} style={{ backgroundColor: isCorrect ? 'var(--color-success-soft)' : 'var(--color-danger-soft)' }}>
-            <p className={`text-sm font-bold mb-2! ${isCorrect ? 'text-success-400' : 'text-danger-400'}`}>{isCorrect ? '맞았어요. 바로 이해했어요' : `정답: ${answer.label}`}</p>
-            <p className="text-sm leading-relaxed text-[var(--color-ink-2)] break-keep">{question.explanation}</p>
+            <p className={`text-sm font-bold mb-2! ${isCorrect ? 'text-success-400' : 'text-danger-400'}`}>{isCorrect ? '맞았어요. 바로 이해했어요' : `정답: ${keepShortUnitsTogether(answer.label)}`}</p>
+            <p className="text-sm leading-relaxed text-[var(--color-ink-2)] break-keep">{keepShortUnitsTogether(question.explanation ?? '')}</p>
           </Card>
         )}
       </div>

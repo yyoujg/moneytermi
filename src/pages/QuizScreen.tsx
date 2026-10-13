@@ -23,11 +23,12 @@ import { LearningStatRow } from '../components/learning/LearningStatRow';
 import { QuizProgressHeader } from '../components/learning/QuizProgressHeader';
 import { PraiseNote } from '../components/PraiseNote';
 import { praiseForAnswer, praiseForQuiz } from '../lib/praise';
+import { keepShortUnitsTogether } from '../lib/formatText';
 
 const quizShareMessage = (modeLabel: string, total: number, accuracy: number, maxCombo: number, words: Word[]) => {
   const learned = words.slice(0, 3).map(word => word.word).join(' · ');
   const comboText = maxCombo >= 3 ? ` 최고 ${maxCombo}연속 정답.` : '';
-  const learnedText = learned ? ` 오늘 확인한 말: ${learned}.` : '';
+  const learnedText = learned ? ` 오늘 확인한 용어: ${learned}.` : '';
   return `머니터미에서 ${modeLabel} ${total}문제 ${accuracy}% 달성!${comboText}${learnedText} 경제 공부, 쉬운 상황부터 같이 시작해요`;
 };
 
@@ -55,9 +56,9 @@ const QuizScreen = () => {
   const backPath = navState?.backPath ?? '/home';
   const reviewMode = navState?.reviewMode === true || navState?.mode === 'lesson_recall' || navState?.mode === 'lesson_warmup' || navState?.mode === 'course_review';
   const sessionLabel = navState?.mode === 'lesson_warmup'
-    ? '기억 깨우기'
+    ? '가볍게 다시 보기'
     : navState?.mode === 'lesson_recall'
-      ? '방금 본 말'
+      ? '방금 본 용어'
       : navState?.mode === 'course_review'
         ? '누적 복습'
         : '퀴즈';
@@ -91,12 +92,6 @@ const QuizScreen = () => {
 
   const currentWord = quizQueue[currentQuizIndex];
   const earnedShown = useCountUp(totalEarned);
-  const wordByName = useMemo(() => {
-    const map = new Map<string, Word>();
-    for (const word of allWords) map.set(word.word, word);
-    return map;
-  }, [allWords]);
-
   const quizItem = useMemo(() => {
     if (!currentWord) return null;
     return buildQuizItem(pickQuizType(currentWord), currentWord, knownWords, allWords, categoryOf);
@@ -130,7 +125,7 @@ const QuizScreen = () => {
     return (
       <LearningEmptyState
         title="아직 풀 문제가 없어요"
-        description="자주 마주치는 말을 먼저 보면 퀴즈를 풀 수 있어요."
+        description="자주 마주치는 용어를 먼저 보면 퀴즈를 풀 수 있어요."
         actionLabel="시작하러 가기"
         onAction={() => navigate('/course')}
       />
@@ -186,7 +181,7 @@ const QuizScreen = () => {
           )}
         </Card>
         <PraiseNote
-          title="오늘 만든 성과"
+          title="오늘 확인한 내용"
           body={praiseForQuiz({ accuracy, maxCombo, total: baseQueue.length })}
           className="w-full anim-fade-up"
           style={{ '--i': 3 } as React.CSSProperties}
@@ -203,7 +198,7 @@ const QuizScreen = () => {
             <div className="min-w-0 flex-1">
               <p className="text-sm font-bold text-[var(--color-ink)]">오늘의 성과 공유하기</p>
               <p className="mt-1! text-xs text-[var(--color-ink-3)] leading-relaxed break-keep">
-                정답률과 오늘 확인한 말이 담긴 토스 링크를 보낼 수 있어요.
+                정답률과 오늘 확인한 용어가 담긴 토스 링크를 보낼 수 있어요.
               </p>
             </div>
           </div>
@@ -278,15 +273,31 @@ const QuizScreen = () => {
   const streakMessage = combo >= 5 ? `${combo}연속! x2 보너스` : combo >= 3 ? `${combo}연속! +5P 보너스` : null;
   // 쉬운 예시(데이터 앞의 '학습용 가정:' 표시는 뺀다). 없으면 뜻
   const example = currentWord?.learningExample?.replace(/^학습용 가정:\s*/, '') || currentWord?.meaning;
-  // 오답: 고른 보기가 어떤 용어(의 뜻)인지 한 줄로 짚어 준다. 직접 만든 문제(custom)는 보기가 용어가 아니라 없음
-  const picked = status === 'wrong' && selected ? wordByName.get(selected) : undefined;
-  const feedbackPanelClass = status === 'correct'
-    ? 'border-success-500/20 bg-[var(--color-success-soft)]'
-    : 'border-danger-500/20 bg-[var(--color-danger-soft)]';
-  const nextButtonClass = status === 'correct' ? 'bg-success-500' : 'bg-danger-500';
+  const answeredCorrectly = status === 'correct';
+  const feedbackTone = answeredCorrectly
+    ? {
+        icon: <Check size={16} strokeWidth={3} />,
+        title: praiseForAnswer(combo),
+        helper: '예시로 한 번 더 연결해요',
+        accentText: 'text-success-500',
+        accentBg: 'bg-[var(--color-success-soft)]',
+        accentBorder: 'border-success-500/30',
+      }
+    : {
+        icon: <X size={16} strokeWidth={3} />,
+        title: '정답을 확인했어요',
+        helper: '위의 내 답과 비교해요',
+        accentText: 'text-[var(--color-ink)]',
+        accentBg: 'bg-[var(--color-surface)]',
+        accentBorder: 'border-[var(--color-line)]',
+      };
+  const nextButtonClass = answeredCorrectly ? 'bg-success-500' : 'bg-[var(--color-ink)]';
+  const visibleOptions = (quizItem?.options ?? [])
+    .map((option, index) => ({ option, index }))
+    .filter(({ option }) => status === 'idle' || selected === null || selected === option.answer);
 
   return (
-    <div className="app-soft-screen flex flex-col h-full">
+    <div className="quiz-screen app-soft-screen flex flex-col h-full">
       <QuizProgressHeader
         label={retrying ? `다시 풀기 · 남은 ${quizQueue.length - currentQuizIndex}문제` : `${sessionLabel} · ${currentQuizIndex + 1} / ${baseQueue.length}`}
         progress={progressPercent}
@@ -307,103 +318,146 @@ const QuizScreen = () => {
       />
 
       {/* 콘텐츠 — 뜻 보기 4개가 길면 작은 화면에서 넘치므로 이 영역만 스크롤 */}
-      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col px-5 py-5 gap-4 [&::-webkit-scrollbar]:hidden">
+      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col px-5 pt-3 pb-5 gap-4 [&::-webkit-scrollbar]:hidden">
         {/* 문제 카드 */}
-        <div key={currentQuizIndex} className={`anim-slide-in rounded-card px-5 py-4 flex flex-col items-center text-center gap-3
+        <div key={currentQuizIndex} className={`quiz-question-card anim-slide-in rounded-card px-5 py-5 flex flex-col items-center text-center gap-3
           ${status === 'correct' ? 'anim-answer-wash bg-[var(--color-card)]' : 'bg-[var(--color-card)]'}
           ${shake ? 'anim-soft-nudge' : ''}
         `}>
-          <span className="text-sm font-semibold text-[var(--color-ink-3)]">{quizItem?.promptLabel}</span>
+          <span className="rounded-full bg-[var(--color-surface)] px-3 py-1 text-2xs font-black text-[var(--color-ink-3)]">{quizItem?.promptLabel}</span>
 
-          <p className="text-[22px] font-bold text-[var(--color-ink)] leading-snug break-keep">{quizItem?.promptMain}</p>
+          <p className="quiz-prompt-main mx-auto max-w-[18rem] text-[21px] font-black text-[var(--color-ink)] leading-[1.42] break-keep">
+            {keepShortUnitsTogether(quizItem?.promptMain ?? '')}
+          </p>
 
           {quizItem?.promptSub && (
-            <div className="bg-[var(--color-canvas)] rounded-chip px-4 py-3">
-              <p className="text-sm text-[var(--color-ink-3)] leading-relaxed break-keep">{quizItem.promptSub}</p>
+            <div className="w-full bg-[var(--color-canvas)] rounded-chip px-4 py-3">
+              <p className="text-sm text-[var(--color-ink-3)] leading-relaxed break-keep">{keepShortUnitsTogether(quizItem.promptSub)}</p>
             </div>
           )}
 
         </div>
 
         {/* 객관식 선택지: 유형과 무관하게 한 줄에 하나 */}
-        <div className="grid grid-cols-1 gap-2">
-          {quizItem?.options.map((opt, i) => {
+        <div className="grid grid-cols-1 gap-2.5">
+          {visibleOptions.map(({ option: opt, index: i }, rowIndex) => {
             const isSelected = selected === opt.answer;
             const isCorrectOption = opt.isCorrect;
             // 색은 배경·테두리·아이콘에만. 보기 글자는 어떤 상태에서도 진하게 둔다
-            let optionStyle = 'bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink)] active:bg-[var(--color-surface)]';
+            let optionStyle = 'bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink)] active:border-brand-300 active:bg-[var(--color-brand-soft)]';
             if (status !== 'idle') {
-              optionStyle = isCorrectOption ? 'bg-success-500/10 border-success-500 text-[var(--color-ink)]'
-                : isSelected ? 'bg-danger-500/10 border-danger-500 text-[var(--color-ink)]'
+              optionStyle = isCorrectOption ? 'bg-[var(--color-success-soft)] border-success-500/55 text-[var(--color-ink)]'
+                : isSelected ? 'bg-[var(--color-card)] border-danger-300/50 text-[var(--color-ink)]'
                 : 'bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink-3)]';
             }
-            const tag = status === 'idle' ? null : isCorrectOption ? '정답' : isSelected ? '내가 고른 답' : null;
+            const tag = status === 'idle' ? null : isCorrectOption ? '정답' : isSelected ? '내 답' : null;
             const feedbackMotion = status !== 'idle' && (isCorrectOption || isSelected) ? 'anim-choice-lock' : '';
+            const markerClass = status === 'idle'
+              ? 'border border-[var(--color-line-strong)] bg-[var(--color-surface)] text-[var(--color-ink-3)]'
+              : isCorrectOption
+                ? 'bg-success-500 text-white'
+                : isSelected
+                  ? 'border border-danger-300/70 bg-[var(--color-danger-soft)] text-danger-500'
+                  : 'border border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-ink-4)]';
 
             return (
               <button
                 key={`${i}-${opt.answer}`}
                 onClick={() => handleSelect(opt)}
-                className={`anim-fade-up ${feedbackMotion} flex items-center gap-3 min-h-14 py-3.5 px-4 rounded-chip border text-base font-semibold text-left break-keep transition-colors duration-150 ${optionStyle}`}
-                style={{ '--i': i + 1 } as React.CSSProperties}
+                className={`quiz-option anim-fade-up ${feedbackMotion} flex items-center gap-3 min-h-[62px] py-3.5 px-4 border text-[15px] font-bold text-left break-keep transition-colors duration-150 ${optionStyle}`}
+                style={{ '--i': rowIndex + 1, borderRadius: 18 } as React.CSSProperties}
               >
-                {status !== 'idle' && isCorrectOption ? (
-                  <span className="w-6 h-6 shrink-0 flex items-center justify-center bg-success-500 text-white" style={{ borderRadius: 9999 }}><Check size={14} strokeWidth={3} /></span>
-                ) : status !== 'idle' && isSelected ? (
-                  <span className="w-6 h-6 shrink-0 flex items-center justify-center bg-danger-500 text-white" style={{ borderRadius: 9999 }}><X size={14} strokeWidth={3} /></span>
-                ) : (
-                  <span className="w-6 h-6 shrink-0 flex items-center justify-center border border-[var(--color-line-strong)] text-xs font-bold text-[var(--color-ink-3)]" style={{ borderRadius: 9999 }}>{i + 1}</span>
+                <span className={`w-7 h-7 shrink-0 flex items-center justify-center text-xs font-black ${markerClass}`} style={{ borderRadius: 9999 }}>
+                  {status !== 'idle' && isCorrectOption ? <Check size={14} strokeWidth={3} /> : status !== 'idle' && isSelected ? <X size={14} strokeWidth={3} /> : i + 1}
+                </span>
+                <span className="min-w-0 flex-1">{keepShortUnitsTogether(opt.label)}</span>
+                {tag && (
+                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-2xs font-black ${isCorrectOption ? 'bg-[var(--color-card)] text-success-500' : 'bg-[var(--color-surface)] text-[var(--color-ink-4)]'}`}>
+                    {tag}
+                  </span>
                 )}
-                <span className="min-w-0 flex-1">{opt.label}</span>
-                {tag && <span className={`shrink-0 text-xs font-bold ${isCorrectOption ? 'text-success-500' : 'text-danger-500'}`}>{tag}</span>}
               </button>
             );
           })}
         </div>
+
+        {status === 'wrong' && (
+          <div key={`wrong-${currentQuizIndex}`} className="quiz-feedback-inline anim-feedback-panel rounded-card border border-[var(--color-line)] bg-[var(--color-card)] px-4 py-4">
+            <div className="flex flex-col gap-3">
+              <div className="flex min-w-0 items-start gap-3">
+                <span className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border ${feedbackTone.accentBg} ${feedbackTone.accentBorder} ${feedbackTone.accentText}`}>
+                  {feedbackTone.icon}
+                </span>
+                <div className="min-w-0">
+                  <p className={`text-lg font-black leading-snug ${feedbackTone.accentText}`}>
+                    {feedbackTone.title}
+                  </p>
+                  <p className="mt-0.5! text-xs font-semibold text-[var(--color-ink-4)]">{feedbackTone.helper}</p>
+                </div>
+              </div>
+              <div className="rounded-card border border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-3.5">
+                <p className="mb-1! text-2xs font-black text-[var(--color-ink-4)]">정답</p>
+                <p className="text-base font-black text-[var(--color-ink)]">{currentWord.word}</p>
+                <p className="mt-1! text-sm font-semibold text-[var(--color-ink-2)] leading-snug break-keep">{keepShortUnitsTogether(currentWord.meaning)}</p>
+              </div>
+              <button
+                onClick={goNextQuestion}
+                className={`w-full min-h-[54px] rounded-button text-base font-bold text-white active:opacity-90 ${nextButtonClass}`}
+              >
+                {currentQuizIndex === quizQueue.length - 1 ? '결과 보기' : '다음 문제'}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* 답을 고른 뒤: 판정은 아이콘·제목 색으로만, 공간은 이해(예시·헷갈린 지점)에. 다음 버튼은 판정과 무관하게 같은 모양 */}
-      {status !== 'idle' && (
-        <div key={currentQuizIndex} className={`anim-feedback-panel px-5 pt-4 pb-8 flex flex-col gap-3 border-t ${feedbackPanelClass}`}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className={`w-7 h-7 flex items-center justify-center text-white ${status === 'correct' ? 'bg-success-500' : 'bg-danger-500'}`} style={{ borderRadius: 9999 }}>
-                {status === 'correct' ? <Check size={16} strokeWidth={3} /> : <X size={16} strokeWidth={3} />}
-              </span>
-              <p className={`text-lg font-black ${status === 'correct' ? 'text-success-500' : 'text-danger-500'}`}>
-                {status === 'correct' ? praiseForAnswer(combo) : `정답은 ${currentWord.word}`}
-              </p>
-            </div>
-            {status === 'correct' && (
-              <span className="flex items-center gap-1.5 text-xs font-bold text-brand-500">
-                {capped ? <span className="text-[var(--color-ink-3)]">오늘 보상 한도 도달</span> : lastEarned > 0 ? `+${lastEarned}P` : null}
-                {combo >= 3 && <span className="flex items-center gap-0.5"><Flame size={12} className="fill-current" />{combo}연속</span>}
-              </span>
-            )}
-          </div>
-          {status === 'correct' ? (
-            <div>
-              <p className="text-xs font-bold text-[var(--color-ink-3)] mb-1!">예를 들면</p>
-              <p className="text-sm text-[var(--color-ink)] leading-snug break-keep">{example}</p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-2">
-              <p className="text-[15px] text-[var(--color-ink)] leading-snug break-keep"><span className="font-bold">{currentWord.word}</span>: {currentWord.meaning}</p>
-              {picked && (
-                <div className="rounded-chip border border-[var(--color-line)] bg-[var(--color-card)] px-3 py-2.5">
-                  <p className="mb-1! text-2xs font-bold text-[var(--color-ink-4)]">내가 고른 답</p>
-                  <p className="text-sm font-bold text-[var(--color-ink-2)]">{picked.word}</p>
-                  <p className="mt-0.5! text-xs text-[var(--color-ink-3)] leading-snug break-keep">{picked.meaning}</p>
+      {/* 답을 고른 뒤: 선택지는 채점 표시, 하단은 다음 행동과 해설에 집중한다. */}
+      {answeredCorrectly && (
+        <div key={currentQuizIndex} className="quiz-feedback-sheet anim-feedback-panel rounded-t-[28px] border-t border-[var(--color-line)] bg-[var(--color-card)] px-5 pt-3 pb-8">
+          <div aria-hidden className="mx-auto mb-3 h-1 w-10 rounded-full bg-[var(--color-line)]" />
+          <div className="flex flex-col gap-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex min-w-0 items-start gap-3">
+                <span className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border ${feedbackTone.accentBg} ${feedbackTone.accentBorder} ${feedbackTone.accentText}`}>
+                  {feedbackTone.icon}
+                </span>
+                <div className="min-w-0">
+                  <p className={`text-lg font-black leading-snug ${feedbackTone.accentText}`}>
+                    {feedbackTone.title}
+                  </p>
+                  <p className="mt-0.5! text-xs font-semibold text-[var(--color-ink-4)]">{feedbackTone.helper}</p>
                 </div>
+              </div>
+              {answeredCorrectly && (
+                <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-[var(--color-brand-soft)] px-2.5 py-1 text-2xs font-black text-brand-600">
+                  {capped ? <span className="text-[var(--color-ink-3)]">한도 도달</span> : lastEarned > 0 ? `+${lastEarned}P` : null}
+                  {combo >= 3 && <span className="flex items-center gap-0.5"><Flame size={12} className="fill-current" />{combo}연속</span>}
+                </span>
               )}
             </div>
-          )}
-          <button
-            onClick={goNextQuestion}
-            className={`w-full min-h-[52px] rounded-button text-base font-bold text-white active:opacity-90 ${nextButtonClass}`}
-          >
-            {currentQuizIndex === quizQueue.length - 1 ? '결과 보기' : '다음 문제'}
-          </button>
+
+            {answeredCorrectly ? (
+              <div className="rounded-card border border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-3.5">
+                <p className="text-2xs font-black text-[var(--color-ink-4)] mb-1.5!">이렇게 쓰여요</p>
+                <p className="text-sm font-semibold text-[var(--color-ink)] leading-snug break-keep">{keepShortUnitsTogether(example)}</p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                <div className="rounded-card border border-success-500/25 bg-[var(--color-success-soft)] px-4 py-3.5">
+                  <p className="mb-1! text-2xs font-black text-success-500">정답</p>
+                  <p className="text-base font-black text-[var(--color-ink)]">{currentWord.word}</p>
+                  <p className="mt-1! text-sm font-semibold text-[var(--color-ink-2)] leading-snug break-keep">{keepShortUnitsTogether(currentWord.meaning)}</p>
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={goNextQuestion}
+              className={`w-full min-h-[54px] rounded-button text-base font-bold text-white active:opacity-90 ${nextButtonClass}`}
+            >
+              {currentQuizIndex === quizQueue.length - 1 ? '결과 보기' : '다음 문제'}
+            </button>
+          </div>
         </div>
       )}
     </div>

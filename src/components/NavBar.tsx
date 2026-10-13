@@ -67,14 +67,24 @@ const NavBar = () => {
 
   useEffect(() => {
     if (seenLeagueWeek === null || !pathname.startsWith('/league') || seenLeagueWeek === currentLeagueWeek) return;
-    setSeenLeagueWeek(currentLeagueWeek);
-    void Storage.setItem(SEEN_LEAGUE_WEEK_KEY, currentLeagueWeek).catch(() => undefined);
+    let cancelled = false;
+    const markSeen = async () => {
+      await Storage.setItem(SEEN_LEAGUE_WEEK_KEY, currentLeagueWeek).catch(() => undefined);
+      if (!cancelled) setSeenLeagueWeek(currentLeagueWeek);
+    };
+    void markSeen();
+    return () => { cancelled = true; };
   }, [currentLeagueWeek, pathname, seenLeagueWeek]);
 
   useEffect(() => {
     if (seenBadgeCount === null || !pathname.startsWith('/my') || earnedBadgeCount <= seenBadgeCount) return;
-    setSeenBadgeCount(earnedBadgeCount);
-    void Storage.setItem(SEEN_BADGE_COUNT_KEY, String(earnedBadgeCount)).catch(() => undefined);
+    let cancelled = false;
+    const markSeen = async () => {
+      await Storage.setItem(SEEN_BADGE_COUNT_KEY, String(earnedBadgeCount)).catch(() => undefined);
+      if (!cancelled) setSeenBadgeCount(earnedBadgeCount);
+    };
+    void markSeen();
+    return () => { cancelled = true; };
   }, [earnedBadgeCount, pathname, seenBadgeCount]);
 
   // NavBar가 화면 하단에서 차지하는 높이(알약 + 하단 여백 + safe area)를 --nav-height로 공개.

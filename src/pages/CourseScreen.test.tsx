@@ -149,16 +149,14 @@ describe('CourseScreen energy gates', () => {
     expect(target).toBeDefined();
   });
 
-  it('확인한 말이 늘었으면 성장 모달을 자동으로 보여준다', async () => {
+  it('확인한 용어가 늘어도 일반 성장 모달은 띄우지 않는다', async () => {
     state.storage.set('course_seen_growth_known_count_v1', '1');
     baseContext({ knownIds: new Set([1, 2]) });
     const { container } = await mount('/course');
     await flushScrollEffects();
 
     expect(container.textContent).not.toContain('눌러서 지금까지 쌓은 기록 보기');
-    expect(container.querySelector('[role="dialog"]')?.textContent).toContain('잘했어요');
-    expect(container.querySelector('[role="dialog"]')?.textContent).toContain('확인한 말');
-    expect(container.querySelector('[role="dialog"]')?.textContent).toContain('2개');
+    expect(container.querySelector('[role="dialog"]')).not.toBeInTheDocument();
   });
 
   it('주제 화면에서 현재 학습 노드로 스크롤한다', async () => {
@@ -237,7 +235,7 @@ describe('CourseScreen energy gates', () => {
     baseContext({ knownIds: new Set([1, 2, 3, 4]) });
     const { container, clickButtonContaining } = await mount();
 
-    await clickButtonContaining('배운 말 다시 연결하기');
+    await clickButtonContaining('배운 용어 다시 연결하기');
 
     expect(state.spendEnergy).not.toHaveBeenCalled();
     expect(state.pickRecallWords).toHaveBeenCalledWith({ candidates: [1, 2, 3, 4].map(word), count: 10 });

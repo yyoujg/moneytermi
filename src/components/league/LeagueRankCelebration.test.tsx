@@ -2,7 +2,8 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { weekStart } from '../../lib/league';
-import { LeagueRankCelebration, __rankKeyForTest } from './LeagueRankCelebration';
+import { LeagueRankCelebration } from './LeagueRankCelebration';
+import { leagueRankSeenKey } from './leagueRankStorage';
 
 const state = vi.hoisted(() => ({
   ctx: {} as Record<string, unknown>,
@@ -35,7 +36,7 @@ Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { value: true, con
 let cleanup = () => {};
 afterEach(() => cleanup());
 
-const key = () => __rankKeyForTest('profile-1', weekStart());
+const key = () => leagueRankSeenKey('profile-1', weekStart());
 
 const baseContext = (xp = 0) => {
   state.ctx = { hydrated: true, xp, myEmoji: '🍊' };

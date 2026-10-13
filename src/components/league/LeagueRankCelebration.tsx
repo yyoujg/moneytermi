@@ -8,13 +8,10 @@ import { weekStart } from '../../lib/league';
 import { Storage } from '../../lib/storage';
 import { getGuestClient, supabase } from '../../lib/supabase';
 import { ProfileAvatar } from '../ProfileAvatar';
+import { leagueRankSeenKey } from './leagueRankStorage';
 
 type MyRank = { rank: number | null; total: number; points: number };
 type RankUp = { fromRank: number; toRank: number; total: number; points: number };
-
-const KEY_PREFIX = 'league_rank_seen_v1';
-
-const rankKey = (profileId: string, week: number) => `${KEY_PREFIX}:${profileId}:${week}`;
 
 const normalizeRank = (data: unknown): MyRank | null => {
   const row = Array.isArray(data) ? data[0] : data;
@@ -32,7 +29,7 @@ export const LeagueRankCelebration = () => {
   const { hydrated, xp, myEmoji } = useAppContext();
   const { user, guestToken } = useAuth();
   const [rankUp, setRankUp] = useState<RankUp | null>(null);
-  const storageKey = useMemo(() => user ? rankKey(user.id, weekStart()) : null, [user]);
+  const storageKey = useMemo(() => user ? leagueRankSeenKey(user.id, weekStart()) : null, [user]);
 
   useEffect(() => {
     if (!hydrated || !user || !storageKey) return;
@@ -139,5 +136,3 @@ export const LeagueRankCelebration = () => {
     </div>
   );
 };
-
-export const __rankKeyForTest = rankKey;

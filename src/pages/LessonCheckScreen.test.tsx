@@ -70,7 +70,7 @@ describe('레슨 이해 확인', () => {
 
   it('직접 진입해 문제가 없으면 코스로 돌아간다', () => {
     const { container, click } = mount('/lesson-check');
-    expect(container.textContent).toContain('자주 마주치는 말부터 시작해요');
+    expect(container.textContent).toContain('자주 마주치는 용어부터 시작해요');
     click('학습 시작하기');
     expect(container.textContent).toContain('코스 화면');
   });

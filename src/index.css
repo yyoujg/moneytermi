@@ -55,11 +55,11 @@
   --color-brand-600: #ea580c;
   --color-brand-deep: #fa4809;
   --color-brand-ink: #f97316;
-  --color-success-400: #38d9a9;
-  --color-success-500: #12b886;
-  --color-danger-300: #f7a1ad;
-  --color-danger-400: #f06a7e;
-  --color-danger-500: #e8475f;
+  --color-success-400: #22c55e;
+  --color-success-500: #16a34a;
+  --color-danger-300: #fca5a5;
+  --color-danger-400: #ef4444;
+  --color-danger-500: #dc2626;
   --color-warning-400: #926116;
   --text-2xs: 11px;
   --text-3xs: 10px;
@@ -123,7 +123,7 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
 @keyframes glow-ok { 0%, 100% { opacity: 1; } 40% { opacity: 0.7; } }
 @keyframes shake { 0%, 100% { transform: none; } 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
 @keyframes soft-nudge { 0%, 100% { transform: none; } 22% { transform: translateX(-3px); } 48% { transform: translateX(2px); } 72% { transform: translateX(-1px); } }
-@keyframes answer-wash { 0%, 100% { background-color: var(--color-card); } 30% { background-color: rgba(18, 184, 134, 0.12); } }
+@keyframes answer-wash { 0%, 100% { background-color: var(--color-card); } 30% { background-color: var(--color-success-soft); } }
 @keyframes reward-rise { 0% { opacity: 0; transform: translateY(6px) scale(0.94); } 24% { opacity: 1; } 100% { opacity: 0; transform: translateY(-18px) scale(1.04); } }
 @keyframes reward-pop { 0% { opacity: 0; transform: translateY(8px) scale(0.94); } 58% { opacity: 1; transform: translateY(-2px) scale(1.02); } 100% { opacity: 1; transform: none; } }
 @keyframes choice-lock { 0% { transform: scale(0.992); } 56% { transform: scale(1.012); } 100% { transform: none; } }
@@ -169,6 +169,65 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
 .chart-cursor { transition: opacity var(--dur-fast) ease-out; pointer-events: none; }
 @keyframes quiz-choice-reveal { from { opacity: 0.65; transform: scale(0.985); } to { opacity: 1; transform: scale(1); } }
 .quiz-choice-reveal { animation: quiz-choice-reveal var(--dur-base) var(--ease-soft) both; }
+.quiz-prompt-main {
+  text-wrap: balance;
+  word-break: keep-all;
+  overflow-wrap: normal;
+}
+.quiz-screen {
+  background:
+    linear-gradient(180deg, rgba(255, 247, 237, 0.72) 0, var(--color-canvas) 154px);
+}
+.quiz-question-card {
+  border: 1px solid rgba(249, 115, 22, 0.11);
+  background:
+    linear-gradient(180deg, var(--color-card) 0%, rgba(255, 250, 245, 0.9) 100%);
+}
+.quiz-option {
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--dur-tactile) ease-out, border-color var(--dur-fast) ease-out, background-color var(--dur-fast) ease-out;
+}
+.quiz-option:active {
+  transform: scale(0.99);
+}
+.quiz-feedback-sheet {
+  background:
+    linear-gradient(180deg, var(--color-card) 0%, rgba(255, 250, 245, 0.96) 100%);
+}
+.quiz-feedback-inline {
+  background:
+    linear-gradient(180deg, var(--color-card) 0%, rgba(255, 250, 245, 0.92) 100%);
+}
+.course-topic-summary {
+  border-color: rgba(249, 115, 22, 0.12);
+  background:
+    linear-gradient(180deg, var(--color-card) 0%, rgba(255, 250, 245, 0.9) 100%);
+  backdrop-filter: blur(14px);
+}
+.course-node-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--dur-tactile) ease-out, border-color var(--dur-fast) ease-out, background-color var(--dur-fast) ease-out;
+}
+.course-node-card:active:not(:disabled) {
+  transform: scale(0.99);
+}
+.course-node-current {
+  border-color: rgba(249, 115, 22, 0.28);
+  background:
+    linear-gradient(180deg, rgba(255, 247, 237, 0.72) 0%, var(--color-card) 100%);
+}
+.course-node-current::before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  bottom: 14px;
+  left: 0;
+  width: 3px;
+  border-radius: 9999px;
+  background: var(--color-brand-500);
+}
 @keyframes splash-float {
   0%, 100% { transform: translateY(0) rotate(-1deg); }
   50% { transform: translateY(-6px) rotate(1deg); }
@@ -427,9 +486,9 @@ body,
   --color-stat-xp: var(--color-brand-500);
   --color-stat-points: var(--color-brand-500);
   --color-stat-words: var(--color-brand-500);
-  --color-success-soft: rgba(18, 184, 134, 0.1);
+  --color-success-soft: rgba(22, 163, 74, 0.08);
   --color-success-mark: #ffffff;
-  --color-danger-soft: rgba(232, 71, 95, 0.1);
+  --color-danger-soft: rgba(220, 38, 38, 0.08);
 }
 
 .dark {
@@ -446,8 +505,10 @@ body,
   --color-button-secondary: #2c2c35;
   --color-brand-400: #fb923c;
   --color-brand-ink: #fb923c;
-  --color-success-400: #38d9a9;
-  --color-danger-400: #f06a7e;
+  --color-success-400: #4ade80;
+  --color-success-500: #22c55e;
+  --color-danger-400: #f87171;
+  --color-danger-500: #ef4444;
   --color-warning-400: #f2c666;
   --color-brand-cream: rgba(249, 115, 22, 0.18);
   --color-brand-soft: rgba(249, 115, 22, 0.16);
@@ -456,8 +517,8 @@ body,
   --color-stat-xp: var(--color-brand-400);
   --color-stat-points: var(--color-brand-400);
   --color-stat-words: var(--color-brand-400);
-  --color-success-soft: rgba(18, 184, 134, 0.2);
-  --color-danger-soft: rgba(232, 71, 95, 0.2);
+  --color-success-soft: rgba(34, 197, 94, 0.16);
+  --color-danger-soft: rgba(239, 68, 68, 0.16);
 
   /* TDS(adaptive) 표면 색을 앱 다크에 맞춤 — 바텀시트/카드 패널 */
   --adaptiveBackground: var(--color-card) !important;
@@ -523,6 +584,16 @@ body,
   background:
     linear-gradient(180deg, rgba(32, 32, 39, 0.92) 0%, rgba(58, 34, 24, 0.74) 100%);
   border-top-color: rgba(251, 146, 60, 0.12);
+}
+.dark .course-topic-summary {
+  border-color: rgba(251, 146, 60, 0.14);
+  background:
+    linear-gradient(180deg, var(--color-card) 0%, rgba(36, 29, 25, 0.86) 100%);
+}
+.dark .course-node-current {
+  border-color: rgba(251, 146, 60, 0.32);
+  background:
+    linear-gradient(180deg, rgba(58, 34, 24, 0.62) 0%, var(--color-card) 100%);
 }
 
 .my-page-screen {

@@ -19,6 +19,7 @@ import { LearningEmptyState } from '../components/learning/LearningEmptyState';
 import { QuizProgressHeader } from '../components/learning/QuizProgressHeader';
 import { PraiseNote } from '../components/PraiseNote';
 import { praiseForReview } from '../lib/praise';
+import { keepShortUnitsTogether } from '../lib/formatText';
 
 type Status = 'idle' | 'correct' | 'wrong';
 
@@ -116,8 +117,8 @@ const QuizPage = () => {
     return (
       <LearningEmptyState
         mascot="empty"
-        title={nothingLearned ? '다시 볼 말이 아직 없어요' : '오늘 다시 보기 완료'}
-        description={nothingLearned ? '자주 마주치는 말을 배우면 다음 날부터 다시 보기가 열려요' : '지금 다시 볼 말이 없어요'}
+        title={nothingLearned ? '다시 볼 용어가 아직 없어요' : '오늘 다시 보기 완료'}
+        description={nothingLearned ? '자주 마주치는 용어를 배우면 다음 날부터 다시 보기가 열려요' : '지금 다시 볼 용어가 없어요'}
         actionLabel={nothingLearned ? '시작하러 가기' : '퀘스트로'}
         onAction={() => navigate(nothingLearned ? '/course' : '/home')}
         actionPlacement="inline"
@@ -137,13 +138,13 @@ const QuizPage = () => {
         titleSize="xl"
       >
         <PraiseNote
-          title="기억이 더 단단해졌어요"
+          title="오늘 다시 본 용어"
           body={praiseForReview(totalCorrect, queue.length)}
           className="w-full max-w-sm"
         />
         <div className="flex items-center gap-2 bg-brand-500/10 border border-brand-500/20 rounded-card px-5 py-3 mb-8">
           <PointIcon size={16} />
-          <span className="text-sm font-bold text-[var(--color-ink)]">누적 포인트 {points} P</span>
+          <span className="text-sm font-bold text-[var(--color-ink)]">{keepShortUnitsTogether(`누적 포인트 ${points} P`)}</span>
         </div>
       </LearningCompletionScreen>
     );
@@ -165,9 +166,9 @@ const QuizPage = () => {
       <div className="flex-1 flex flex-col px-5 py-4">
         {/* 문제 카드 */}
         <Card key={word.id} pad="lg" className="mb-4 flex-1 anim-slide-in">
-          <p className="text-sm font-semibold text-[var(--color-ink-3)] mb-3!">뜻을 보고 어떤 말인지 맞혀보세요</p>
+          <p className="text-sm font-semibold text-[var(--color-ink-3)] mb-3!">뜻을 보고 어떤 용어인지 맞혀보세요</p>
 
-          <p className="text-lg font-bold text-[var(--color-ink)] leading-relaxed mb-6!">{maskTerm(word.meaning, word.word)}</p>
+          <p className="quiz-prompt-main text-lg font-bold text-[var(--color-ink)] leading-relaxed mb-6!">{keepShortUnitsTogether(maskTerm(word.meaning, word.word))}</p>
 
           {showHint && (
             <Card tone="surface" pad="none" className="px-4 py-3 flex items-center gap-2 mb-4">
@@ -178,7 +179,7 @@ const QuizPage = () => {
 
           <Card tone="surface" pad="md">
             <p className="text-xs font-bold text-[var(--color-ink-3)] mb-1.5!">상세 설명</p>
-            <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep">{maskTerm(word.detailedMeaning, word.word)}</p>
+            <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep">{keepShortUnitsTogether(maskTerm(word.detailedMeaning, word.word))}</p>
           </Card>
         </Card>
 
@@ -200,7 +201,7 @@ const QuizPage = () => {
               style={{ caretColor: 'var(--color-brand-500)' }}
             />
             {status === 'correct' && (
-              <p className="text-xs font-bold text-success-400 mt-1.5! px-1">정답! 기억이 잘 남아 있어요{capped ? ' 오늘 보상 한도에 도달했어요' : lastEarned > 0 ? ` +${lastEarned}P` : ''}</p>
+              <p className="text-xs font-bold text-success-400 mt-1.5! px-1">정답! 바로 맞혔어요{capped ? ' 오늘 보상 한도에 도달했어요' : lastEarned > 0 ? ` +${lastEarned}P` : ''}</p>
             )}
             {status === 'wrong' && (
               <p className="text-xs font-bold text-danger-400 mt-1.5! px-1">틀렸어요. 다시 시도해보세요!</p>

@@ -11,10 +11,10 @@ describe('learningOutcomeFor', () => {
   });
 
   it('주제 힌트가 없으면 첫 단어를 이용한다', () => {
-    expect(learningOutcomeFor({ words: [{ word: '희소성' }] })).toBe('희소성 같은 말을 실제 상황에서 알아볼 수 있어요');
+    expect(learningOutcomeFor({ words: [{ word: '희소성' }] })).toBe('희소성 같은 용어를 실제 상황에서 알아볼 수 있어요');
   });
 
   it('입력이 비어도 기본 문구를 반환한다', () => {
-    expect(learningOutcomeFor({})).toBe('어려운 경제 말을 생활 속 상황과 연결할 수 있어요');
+    expect(learningOutcomeFor({})).toBe('어려운 경제 용어를 생활 속 상황과 연결할 수 있어요');
   });
 });

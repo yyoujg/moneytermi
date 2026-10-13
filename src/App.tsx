@@ -69,9 +69,9 @@ const LoadingScreen = SplashScreen;
 
 const WELCOME_KEY = 'welcome_seen_v1';
 const WELCOME_STEPS = [
-  { icon: BookOpen, title: '쉬운 상황부터 시작해요', desc: '금리·대출·전월세처럼 자주 마주치는 말을 예시로 익혀요' },
+  { icon: BookOpen, title: '쉬운 상황부터 시작해요', desc: '금리·대출·전월세처럼 자주 마주치는 용어를 예시로 익혀요' },
   { icon: CircleHelp, title: '생활 속 상황으로 연결해요', desc: '월급, 소비, 대출, 계약서에서 어떻게 쓰이는지 짧게 확인해요' },
-  { icon: Trophy, title: '퀴즈와 다시 보기로 남겨요', desc: '오늘 들린 말을 잊기 전에 다시 꺼내보며 익혀요' },
+  { icon: Trophy, title: '퀴즈와 다시 보기로 남겨요', desc: '오늘 들린 용어를 잊기 전에 다시 꺼내보며 익혀요' },
 ];
 
 const WelcomeScreen = () => {
@@ -90,7 +90,7 @@ const WelcomeScreen = () => {
           <h1 className="mt-4 text-2xl font-extrabold leading-snug tracking-tight text-[var(--color-ink)] break-keep">
             경제 공부,<br />쉬운 상황부터 시작해요
           </h1>
-          <p className="mt-3 text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">월급·소비·대출·전월세에서 만나는 말을 쉽게 풀어요</p>
+          <p className="mt-3 text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">월급·소비·대출·전월세에서 만나는 용어를 쉽게 풀어요</p>
         </div>
 
         {/* 남는 높이의 가운데에 단계 카드를 둔다. 화면이 작으면 그대로 스크롤된다 */}
