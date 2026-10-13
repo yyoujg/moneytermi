@@ -1,6 +1,6 @@
 import type { Course, Word } from '../types';
 
-// 코스의 단어를 3~5개 묶음(레슨)으로 나누고, 레슨 3개마다 퀴즈 노드를 끼운 패스를 만든다.
+// 코스의 단어를 3~5개 묶음(레슨)으로 나누고, 중간 복습과 퀴즈 노드를 끼운 패스를 만든다.
 // 진도 판정은 기존 규칙 그대로 — 단어가 knownIds에 있으면 완료, 코스별로 첫 미완료 레슨이 현재 위치.
 export type PathNodeType = 'lesson' | 'quiz' | 'review';
 export type PathNodeState = 'done' | 'current' | 'available' | 'locked';
@@ -20,6 +20,7 @@ export type PathSection = {
 };
 
 const LESSONS_PER_QUIZ = 3;
+const LESSONS_PER_REVIEW = 2;
 
 // ── 패스 기하 ────────────────────────────────────────────────────
 // 노드 1개가 차지하는 세로 높이와 커넥터 svg 반폭.
@@ -73,7 +74,7 @@ export const chunkWords = (words: Word[], target = 4): Word[][] => {
   return out;
 };
 
-// 코스 끝 누적 복습 노드에 담을 단어. 앞 코스들 + 이 코스 전체.
+// 누적 복습 노드에 담을 단어. 앞 코스들 + 이 코스에서 지금까지 배운 단어.
 // gated: 앞 코스를 다 끝내지 않았으면 이 코스는 전부 잠근다. 패스는 순서대로만 진행한다.
 const buildSection = (course: Course, knownIds: Set<number>, carried: Word[], gated: boolean): PathSection => {
   const lessons = chunkWords(course.words);
@@ -92,6 +93,15 @@ const buildSection = (course: Course, knownIds: Set<number>, carried: Word[], ga
       state: !gated && doneFlags.slice(0, upto + 1).every(Boolean) ? 'available' : 'locked',
     });
   };
+  const pushReview = (upto: number, final = false) => {
+    nodes.push({
+      id: final ? `${course.id}-r` : `${course.id}-r${upto + 1}`,
+      type: 'review',
+      courseId: course.id,
+      words: [...carried, ...lessons.slice(0, upto + 1).flat()],
+      state: !gated && doneFlags.slice(0, upto + 1).every(Boolean) ? 'available' : 'locked',
+    });
+  };
 
   lessons.forEach((words, i) => {
     nodes.push({
@@ -101,20 +111,13 @@ const buildSection = (course: Course, knownIds: Set<number>, carried: Word[], ga
       words,
       state: !gated && doneFlags[i] ? 'done' : i === currentIdx ? 'current' : 'locked',
     });
+    if ((i + 1) % LESSONS_PER_REVIEW === 0 && i < lessons.length - 1) pushReview(i);
     if ((i + 1) % LESSONS_PER_QUIZ === 0 && i < lessons.length - 1) pushQuiz(i);
   });
   if (lessons.length > 0) pushQuiz(lessons.length - 1);
 
   // 코스를 끝내면 지금까지 배운 것 전체를 한 번 훑는다.
-  if (lessons.length > 0) {
-    nodes.push({
-      id: `${course.id}-r`,
-      type: 'review',
-      courseId: course.id,
-      words: [...carried, ...course.words],
-      state: !gated && doneFlags.every(Boolean) ? 'available' : 'locked',
-    });
-  }
+  if (lessons.length > 0) pushReview(lessons.length - 1, true);
 
   return {
     course,

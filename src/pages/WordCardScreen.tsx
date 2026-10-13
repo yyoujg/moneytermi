@@ -18,6 +18,7 @@ import { WordVisuals } from '../components/WordVisuals';
 import { termPattern } from '../lib/quiz';
 import { selectLessonQuizWords } from '../lib/lessonQuiz';
 import { buildWordLookup, relatedWordNames, type WordLookup } from '../lib/wordLookup';
+import { learningOutcomeFor } from '../lib/learningOutcome';
 
 
 const SOURCE_NAMES: Record<string, string> = { bok800: '한국은행 경제금융용어 800선', tesat: 'TESAT', sgsg: '한경 생글생글 경제 퀴즈' };
@@ -212,6 +213,7 @@ const WordCardScreen = () => {
     backState?: unknown;
     autoAdvance?: boolean;
     continueWords?: Word[];
+    courseTitle?: string;
   } | null;
 
   // 콜드 딥링크(state 없음) 진입 시: 미완료 코스 우선으로 기본 단어 로드
@@ -303,6 +305,7 @@ const WordCardScreen = () => {
 
   // autoAdvance 완료 화면
   if (autoAdvance && words.length > 0 && wordIndex >= words.length) {
+    const completionOutcome = learningOutcomeFor({ title: state?.courseTitle, words });
     return (
       <div className="flex h-full flex-col bg-[var(--color-canvas)]">
         {/* 카드 + 알림 카드 + 축하가 작은 화면에서 넘칠 수 있어 이 영역만 스크롤 */}
@@ -313,6 +316,10 @@ const WordCardScreen = () => {
             <p className="text-sm text-[var(--color-ink-4)]">{words.length}개 단어를 학습했어요</p>
           </div>
           <Card pad="md" className="w-full anim-fade-up" style={{ '--i': 2 } as React.CSSProperties}>
+            <p className="text-xs font-bold text-brand-500 mb-1.5!">이제 할 수 있어요</p>
+            <p className="text-sm font-semibold text-[var(--color-ink)] leading-relaxed break-keep">{completionOutcome}</p>
+          </Card>
+          <Card pad="md" className="w-full anim-fade-up" style={{ '--i': 3 } as React.CSSProperties}>
             <p className="text-xs text-[var(--color-ink-4)] mb-3!">방금 배운 단어, 바로 확인해볼까요?</p>
             <div className="flex flex-wrap gap-1.5">
               {words.slice(0, 5).map(w => (

@@ -15,6 +15,7 @@ import { PointIcon, XpIcon } from '../components/StatIcons';
 import { buildQuizItem, pickQuizType, type QuizOption } from '../lib/quiz';
 import { shouldScheduleRetry } from '../lib/review';
 import { takeShuffled } from '../lib/random';
+import { learningOutcomeFor } from '../lib/learningOutcome';
 import { LearningCompletionScreen } from '../components/learning/LearningCompletionScreen';
 import { LearningEmptyState } from '../components/learning/LearningEmptyState';
 import { LearningStatRow } from '../components/learning/LearningStatRow';
@@ -43,6 +44,13 @@ const QuizScreen = () => {
   const passedQueue: Word[] = navState?.quizQueue ?? [];
   const backPath = navState?.backPath ?? '/home';
   const reviewMode = navState?.reviewMode === true || navState?.mode === 'lesson_recall' || navState?.mode === 'lesson_warmup' || navState?.mode === 'course_review';
+  const sessionLabel = navState?.mode === 'lesson_warmup'
+    ? '기억 깨우기'
+    : navState?.mode === 'lesson_recall'
+      ? '방금 배운 단어'
+      : navState?.mode === 'course_review'
+        ? '누적 복습'
+        : '퀴즈';
   // state 없이 진입하면 아는 단어 10개를 한 번만 섞는다. 렌더마다 섞으면 문제가 바뀐다.
   const [randomQueue, setRandomQueue] = useState<Word[]>([]);
   useEffect(() => {
@@ -125,11 +133,17 @@ const QuizScreen = () => {
     const stageBefore = getGrowthStage(xpAtStart.current);
     const stageAfter = getGrowthStage(xp);
     const stageUp = stageAfter.id > stageBefore.id;
+    const completionTitle = navState?.mode === 'lesson_warmup'
+      ? '준비 완료!'
+      : navState?.mode === 'course_review'
+        ? '복습 완료!'
+        : '퀴즈 완료!';
+    const outcome = learningOutcomeFor({ words: baseQueue });
 
     return (
       <LearningCompletionScreen
         mascot="great"
-        title="퀴즈 완료!"
+        title={completionTitle}
         subtitle={`${baseQueue.length}문제 완료${retryQueue.length > 0 ? ` · 다시 푼 문제 ${retryQueue.length}개` : ''}`}
         actionLabel={navState?.nextRoute?.label ?? (backPath === '/course' ? '코스로' : '홈으로')}
         onAction={() => navState?.nextRoute
@@ -160,6 +174,10 @@ const QuizScreen = () => {
               <span className="text-sm font-bold text-success-400">🎉 {stageBefore.name} → {stageAfter.name} 승급!</span>
             </LearningStatRow>
           )}
+        </Card>
+        <Card pad="md" className="w-full anim-fade-up" style={{ '--i': 3 } as React.CSSProperties}>
+          <p className="text-xs font-bold text-brand-500 mb-1.5!">다음에 보이면</p>
+          <p className="text-sm font-semibold text-[var(--color-ink)] leading-relaxed break-keep">{outcome}</p>
         </Card>
       </LearningCompletionScreen>
     );
@@ -228,7 +246,7 @@ const QuizScreen = () => {
   return (
     <div className="flex flex-col h-full bg-[var(--color-card)]">
       <QuizProgressHeader
-        label={retrying ? `다시 풀기 · 남은 ${quizQueue.length - currentQuizIndex}문제` : `${currentQuizIndex + 1} / ${baseQueue.length}`}
+        label={retrying ? `다시 풀기 · 남은 ${quizQueue.length - currentQuizIndex}문제` : `${sessionLabel} · ${currentQuizIndex + 1} / ${baseQueue.length}`}
         progress={progressPercent}
         streakText={streakMessage}
         durationClass="duration-500"

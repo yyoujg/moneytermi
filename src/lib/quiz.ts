@@ -50,7 +50,7 @@ export const getOptions = (correctWord: Word, knownWords: Word[], allWords: Word
 
 // ── 퀴즈 유형 ──────────────────────────────────────────────────
 // 채점은 서버가 mc 모드로 p_answer == word 비교 → 어떤 유형이든 제출값은 항상 정답 단어의 word.
-export type QuizType = 'meaning_to_word' | 'word_to_meaning' | 'cloze' | 'custom';
+export type QuizType = 'meaning_to_word' | 'word_to_meaning' | 'scenario_to_word' | 'cloze' | 'custom';
 export type QuizOption = { label: string; answer: string; isCorrect: boolean };
 export type QuizItem = {
   type: QuizType;
@@ -80,6 +80,11 @@ export const termPattern = (word: string): RegExp | null => {
 export const maskTerm = (text: string, word: string): string => {
   const p = termPattern(word);
   return p ? text.replace(new RegExp(`(?:${p.source})(\\s*\\([^)]*\\))?`, 'g'), BLANK) : text;
+};
+
+export const scenarioText = (word: Word): string | null => {
+  const example = word.learningExample?.replace(/^학습용 가정:\s*/, '').trim();
+  return example ? maskTerm(example, word.word) : null;
 };
 
 // cloze는 예문에 단어가 그대로 들어있을 때만 가능
@@ -112,6 +117,7 @@ export const buildCustomQuizItem = (quiz: CustomQuiz): QuizItem => {
 export const pickQuizType = (word: Word, rand: () => number = Math.random): QuizType => {
   if (customQuizzes(word).length) return 'custom';   // 직접 만든 객관식이 있으면 그 문제를 낸다
   const types: QuizType[] = ['meaning_to_word', 'word_to_meaning'];
+  if (scenarioText(word)) types.push('scenario_to_word');
   if (clozeText(word)) types.push('cloze');
   return types[Math.floor(rand() * types.length)];
 };
@@ -150,6 +156,19 @@ export const buildQuizItem = (
   if (type === 'cloze') {
     const blanked = clozeText(correctWord) ?? maskTerm(correctWord.meaning, correctWord.word);
     return { type, promptLabel: '빈칸에 들어갈 용어는?', promptMain: blanked, options: opts };
+  }
+
+  if (type === 'scenario_to_word') {
+    const scenario = scenarioText(correctWord);
+    if (scenario) {
+      return {
+        type,
+        promptLabel: '상황에 맞는 용어는?',
+        promptMain: scenario,
+        promptSub: maskTerm(correctWord.meaning, correctWord.word),
+        options: opts,
+      };
+    }
   }
 
   return {

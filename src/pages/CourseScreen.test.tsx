@@ -177,7 +177,7 @@ describe('CourseScreen energy gates', () => {
     baseContext({ knownIds: new Set([1, 2, 3, 4]) });
     const { container, clickButtonContaining } = await mount();
 
-    await clickButtonContaining('핵심 단어 복습하기');
+    await clickButtonContaining('누적 단어 실전 점검');
 
     expect(state.spendEnergy).not.toHaveBeenCalled();
     expect(state.pickRecallWords).toHaveBeenCalledWith({ candidates: [1, 2, 3, 4].map(word), count: 10 });

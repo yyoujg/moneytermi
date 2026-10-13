@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { maskTerm } from '../lib/quiz';
-import { calcEarned, getOptions, getDistractors, buildQuizItem, pickQuizType, clozeText, termPattern } from '../lib/quiz';
+import { calcEarned, getOptions, getDistractors, buildQuizItem, pickQuizType, clozeText, scenarioText, termPattern } from '../lib/quiz';
 import type { Word } from '../types';
 
 // ── calcEarned ────────────────────────────────────────────────
@@ -92,6 +92,17 @@ describe('clozeText', () => {
   });
 });
 
+describe('scenarioText', () => {
+  it('쉬운 예시를 상황형 문제 본문으로 바꾼다', () => {
+    expect(scenarioText({ ...clozeWord, learningExample: '학습용 가정: 핀테크 앱으로 송금한다.' }))
+      .toBe('____ 앱으로 송금한다.');
+  });
+
+  it('쉬운 예시가 없으면 null', () => {
+    expect(scenarioText({ ...clozeWord, learningExample: '' })).toBeNull();
+  });
+});
+
 describe('pickQuizType', () => {
   it('cloze 불가 단어는 cloze를 고르지 않음', () => {
     const noCloze = { ...clozeWord, newsExample: '' };
@@ -101,6 +112,10 @@ describe('pickQuizType', () => {
   });
   it('rand 주입으로 유형 결정 가능', () => {
     expect(pickQuizType(clozeWord, () => 0)).toBe('meaning_to_word');
+  });
+  it('쉬운 예시가 있으면 상황형 문제도 고를 수 있음', () => {
+    const scenarioOnly = { ...clozeWord, newsExample: '', learningExample: '핀테크 앱으로 송금한다.' };
+    expect(pickQuizType(scenarioOnly, () => 0.99)).toBe('scenario_to_word');
   });
 });
 
@@ -124,6 +139,14 @@ describe('buildQuizItem', () => {
   it('meaning_to_word: 제출 answer가 모두 서로 다른 단어', () => {
     const item = buildQuizItem('meaning_to_word', clozeWord, allWords, allWords);
     expect(new Set(item.options.map(o => o.answer)).size).toBe(4);
+  });
+  it('scenario_to_word: 쉬운 예시를 상황 판단 문제로 낸다', () => {
+    const word = { ...clozeWord, learningExample: '학습용 가정: 핀테크 앱으로 송금한다.' };
+    const item = buildQuizItem('scenario_to_word', word, allWords, allWords);
+    expect(item.promptLabel).toBe('상황에 맞는 용어는?');
+    expect(item.promptMain).toBe('____ 앱으로 송금한다.');
+    expect(item.promptSub).toBe(word.meaning);
+    expect(item.options.filter(o => o.isCorrect)[0].answer).toBe(word.word);
   });
 });
 

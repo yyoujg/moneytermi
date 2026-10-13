@@ -60,21 +60,21 @@ describe('chunkWords', () => {
 describe('buildPath', () => {
   const course = makeCourse('c1', 16); // 4레슨
 
-  it('레슨 3개마다 + 끝에 퀴즈', () => {
+  it('레슨 2개마다 복습, 레슨 3개마다 + 끝에 퀴즈', () => {
     const [sec] = buildPath([course], new Set());
-    expect(sec.nodes.map(n => n.type)).toEqual(['lesson', 'lesson', 'lesson', 'quiz', 'lesson', 'quiz', 'review']);
+    expect(sec.nodes.map(n => n.type)).toEqual(['lesson', 'lesson', 'review', 'lesson', 'quiz', 'lesson', 'quiz', 'review']);
   });
 
-  it('레슨이 3개 이하면 끝에 퀴즈 1개만', () => {
+  it('레슨이 3개 이하면 중간 복습과 끝 퀴즈/복습만 둔다', () => {
     const [sec] = buildPath([makeCourse('c2', 12)], new Set());
-    expect(sec.nodes.map(n => n.type)).toEqual(['lesson', 'lesson', 'lesson', 'quiz', 'review']);
+    expect(sec.nodes.map(n => n.type)).toEqual(['lesson', 'lesson', 'review', 'lesson', 'quiz', 'review']);
   });
 
   it('진도 0: 첫 레슨이 current, 나머지 locked', () => {
     const [sec] = buildPath([course], new Set());
     const lessons = sec.nodes.filter(n => n.type === 'lesson');
     expect(lessons.map(n => n.state)).toEqual(['current', 'locked', 'locked', 'locked']);
-    expect(sec.nodes.filter(n => n.type === 'quiz').every(n => n.state === 'locked')).toBe(true);
+    expect(sec.nodes.filter(n => n.type !== 'lesson').every(n => n.state === 'locked')).toBe(true);
     expect(sec.knownCount).toBe(0);
   });
 
@@ -98,7 +98,7 @@ describe('buildPath', () => {
     const known = new Set(course.words.map(w => w.id));
     const [sec] = buildPath([course], known);
     expect(sec.nodes.some(n => n.state === 'current')).toBe(false);
-    expect(sec.nodes.filter(n => n.type === 'quiz').every(n => n.state === 'available')).toBe(true);
+    expect(sec.nodes.filter(n => n.type !== 'lesson').every(n => n.state === 'available')).toBe(true);
     expect(sec.knownCount).toBe(16);
   });
 
@@ -174,6 +174,24 @@ describe('누적 복습 노드', () => {
       expect(s.nodes.filter(n => n.type === 'review')).toHaveLength(1);
       expect(s.nodes[s.nodes.length - 1].type).toBe('review');
     }
+  });
+
+  it('긴 코스에는 중간 복습 노드가 더 자주 붙는다', () => {
+    const [s] = buildPath([makeCourse('long', 16)], new Set());
+    const reviews = s.nodes.filter(n => n.type === 'review');
+    expect(reviews).toHaveLength(2);
+    expect(reviews[0].words).toHaveLength(8);
+    expect(reviews[1].words).toHaveLength(16);
+    expect(s.nodes[s.nodes.length - 1]).toBe(reviews[1]);
+  });
+
+  it('중간 복습은 해당 지점까지 배운 뒤 열린다', () => {
+    const long = makeCourse('long', 16);
+    const firstTwoLessons = new Set(long.words.slice(0, 8).map(w => w.id));
+    const [s] = buildPath([long], firstTwoLessons);
+    const reviews = s.nodes.filter(n => n.type === 'review');
+    expect(reviews[0].state).toBe('available');
+    expect(reviews[1].state).toBe('locked');
   });
 
   it('앞 코스 단어까지 누적한다', () => {

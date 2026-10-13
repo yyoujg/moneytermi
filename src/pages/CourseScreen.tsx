@@ -9,6 +9,7 @@ import { loadDoneNodes } from '../lib/pathProgress';
 import { Storage } from '../lib/storage';
 import { showModal } from '../components/AlertModal';
 import { COURSE_REVIEW_COUNT, LESSON_WARMUP_COUNT, firstUnknownWordIndex, learnedOrFallbackWords, selectCourseQuizWords } from '../lib/coursePractice';
+import { learningOutcomeFor } from '../lib/learningOutcome';
 
 const SEEN_KEY = 'path_seen_done';   // 코스 화면에서 마지막으로 본 완료 노드들(도장 연출용)
 const GATE_KEY = 'path_seen_levels';  // 열린 것을 본 레벨들(관문 연출용)
@@ -94,6 +95,29 @@ const COURSE_ROW = 136;
 const COURSE_NODE = 54;
 const courseNodeX = (index: number) => [12, 22, 14, 24, 16, 20][index % 6];
 const COURSE_ART = [BookOpenText, House, TrendingUp, Landmark];
+
+const nodeCopy = (node: PathNode) => {
+  if (node.type === 'lesson') {
+    return {
+      kind: '학습',
+      title: `${node.words[0]?.word ?? '새 단어'}부터 익히기`,
+      meta: `${node.words.length}개 새 단어`,
+    };
+  }
+  if (node.type === 'quiz') {
+    return {
+      kind: '실전 퀴즈',
+      title: '상황으로 단어 맞히기',
+      meta: `${node.words.length}개 용어로 판단 연습`,
+    };
+  }
+  const finalReview = node.id.endsWith('-r');
+  return {
+    kind: finalReview ? '누적 복습' : '중간 복습',
+    title: finalReview ? '누적 단어 실전 점검' : '기억 깨우기',
+    meta: `${node.words.length}개 용어 섞어서 복습`,
+  };
+};
 
 const CourseScreen = () => {
   const navigate = useNavigate();
@@ -305,6 +329,7 @@ const CourseScreen = () => {
             <div className="min-w-0">
               <h1 className="truncate text-xl font-bold tracking-tight text-[var(--color-ink)]">{activeTopic.category}</h1>
               <p className="mt-1! text-xs text-[var(--color-ink-3)]">{activeTopic.level} · {activeTopic.parts.length}개 코스 · {activeTopic.known}/{activeTopic.total}개 단어 학습</p>
+              <p className="mt-1! text-xs text-[var(--color-ink-3)] break-keep leading-relaxed">{learningOutcomeFor({ category: activeTopic.category })}</p>
             </div>
           </div>
         ) : (
@@ -358,6 +383,7 @@ const CourseScreen = () => {
                     : <span className="font-semibold">{done ? '완료' : '잠김'}</span>}
                 </span>
                 <span className="mt-1.5 block text-sm font-bold text-[var(--color-ink)] leading-snug break-keep">{topic.category}</span>
+                <span className="mt-1 block text-2xs text-[var(--color-ink-3)] leading-relaxed break-keep">{learningOutcomeFor({ category: topic.category })}</span>
                 {locked && <span className="mt-1 text-2xs text-[var(--color-ink-2)]">앞의 레슨을 마치면 시작할 수 있어요</span>}
                 <span className="mt-2 flex items-center gap-2 text-2xs text-[var(--color-ink-3)]">
                   <span className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-[var(--color-button-secondary)]">
@@ -381,6 +407,7 @@ const CourseScreen = () => {
               <div className="min-w-0">
                 <p className="text-2xs text-[var(--color-ink-3)]">{sec.course.level} · {si + 1}/{sections.length}</p>
                 <h3 className="mt-1! text-base font-bold text-[var(--color-ink)] break-keep tracking-[-0.025em]">{sec.course.title}</h3>
+                <p className="mt-1! text-xs text-[var(--color-ink-3)] break-keep leading-relaxed">{learningOutcomeFor({ category: sec.course.category, title: sec.course.title, words: sec.course.words })}</p>
               </div>
             </div>}
             <p className="mb-2 text-xs font-semibold text-[var(--color-ink-2)]">{sec.course.words.length}개 단어 중 {sec.knownCount}개 학습</p>
@@ -396,9 +423,7 @@ const CourseScreen = () => {
             const isFocus = node.id === focusId;
             const done = isDone(node);
             const locked = node.state === 'locked';
-            const title = node.type === 'lesson'
-              ? `${node.words[0]?.word ?? '단어 학습'}${node.words.length > 1 ? ` 외 ${node.words.length - 1}개` : ''}`
-              : node.type === 'quiz' ? '배운 단어 확인하기' : '핵심 단어 복습하기';
+            const copy = nodeCopy(node);
             const Icon = node.type === 'quiz' ? CircleHelp : node.type === 'review' ? Brain : Layers3;
             return (
               <div key={node.id} className="mx-5 mb-2.5">
@@ -411,12 +436,12 @@ const CourseScreen = () => {
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-2 text-2xs text-[var(--color-ink-3)]">
-                      {si + 1}-{k + 1} · {node.type === 'lesson' ? '학습' : node.type === 'quiz' ? '퀴즈' : '복습'}
+                      {si + 1}-{k + 1} · {copy.kind}
                       <span className={isFocus ? 'font-bold text-brand-600' : done ? 'font-bold text-brand-500' : ''}>{done ? '완료' : isFocus ? '진행 중' : locked ? '잠김' : '도전 가능'}</span>
                     </span>
-                    <span className="mt-1 block text-sm font-bold text-[var(--color-ink)] break-keep">{title}</span>
+                    <span className="mt-1 block text-sm font-bold text-[var(--color-ink)] break-keep">{copy.title}</span>
                     {locked && <span className="mt-1 block text-2xs text-[var(--color-ink-2)]">앞의 레슨을 마치면 시작할 수 있어요</span>}
-                    <span className="mt-1 flex items-center gap-1 text-2xs text-[var(--color-ink-3)]"><Clock3 size={12} />{node.words.length}개 용어</span>
+                    <span className="mt-1 flex items-center gap-1 text-2xs text-[var(--color-ink-3)]"><Clock3 size={12} />{copy.meta}</span>
                   </span>
                   {!locked && <ChevronRight size={17} className="shrink-0 text-[var(--color-ink-3)]" />}
                 </button>
