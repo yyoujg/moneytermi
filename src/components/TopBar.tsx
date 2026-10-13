@@ -206,7 +206,7 @@ export const TopBar = () => {
           <button onClick={() => { setTip(null); setEnergyRefillNotice(null); openShop(); }} aria-label="포인트 상점" className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 active:opacity-60">
             <PointIcon size={19} /><span><RollingNumber value={points} /></span>
           </button>
-          <button onClick={e => toggleTip('words', e)} aria-label="배운 단어" className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 active:opacity-60">
+          <button onClick={e => toggleTip('words', e)} aria-label="익힌 말" className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 active:opacity-60">
             <WordsIcon size={19} /><span><RollingNumber value={knownWords.length} /></span>
           </button>
           <button onClick={() => { setTip(null); setEnergyRefillNotice(null); openShop('energy'); }} aria-label="에너지" className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 active:opacity-60">
@@ -223,12 +223,12 @@ export const TopBar = () => {
           <div role="status" onClick={() => setTip(null)} style={{ left: tipPos.left, width: TIP_W }} className="absolute top-full mt-2 rounded-chip bg-[#222] px-4 py-3 anim-pop-in">
             <span className="absolute -top-1 w-2.5 h-2.5 rotate-45 bg-[#222]" style={{ left: tipPos.tail - 5 }} />
             <p className="relative text-xs font-bold text-white">
-              {tip === 'streak' ? `연속 학습 ${streak}일` : tip === 'xp' ? `경험치(XP) ${xp.toLocaleString()}` : `배운 단어 ${knownWords.length}개`}
+              {tip === 'streak' ? `연속 학습 ${streak}일` : tip === 'xp' ? `경험치(XP) ${xp.toLocaleString()}` : `익힌 말 ${knownWords.length}개`}
             </p>
             <p className="relative mt-1 text-2xs text-white leading-relaxed break-keep">
               {tip === 'streak' ? '오늘까지 하루도 빠지지 않고 학습한 날 수예요. 하루라도 쉬면 처음부터 다시 세요.'
                 : tip === 'xp' ? `학습과 퀴즈로 쌓여요. 리그 순위와 성장 단계는 XP로 정해지고, XP ${XP_BONUS_STEP}마다 ${XP_BONUS_POINTS}P를 더 받아요.`
-                : '학습을 마친 단어 수예요. 같은 단어를 다시 배워도 늘지 않아요.'}
+                : '학습을 마친 말 수예요. 같은 말을 다시 배워도 늘지 않아요.'}
             </p>
           </div>
         )}

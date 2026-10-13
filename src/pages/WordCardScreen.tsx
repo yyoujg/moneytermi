@@ -15,10 +15,12 @@ import { feedbackLearned, feedbackLessonComplete } from '../lib/feedback';
 import { StreakCelebration } from '../components/StreakCelebration';
 import { Card } from '../components/ui/Card';
 import { WordVisuals } from '../components/WordVisuals';
+import { PraiseNote } from '../components/PraiseNote';
 import { termPattern } from '../lib/quiz';
 import { selectLessonQuizWords } from '../lib/lessonQuiz';
 import { buildWordLookup, relatedWordNames, type WordLookup } from '../lib/wordLookup';
 import { learningOutcomeFor } from '../lib/learningOutcome';
+import { praiseForProgress } from '../lib/praise';
 
 
 const SOURCE_NAMES: Record<string, string> = { bok800: '한국은행 경제금융용어 800선', tesat: 'TESAT', sgsg: '한경 생글생글 경제 퀴즈' };
@@ -312,15 +314,15 @@ const WordCardScreen = () => {
         <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden flex flex-col items-center justify-center-safe gap-5 p-8">
           <div className="w-20 h-20 bg-[var(--color-card)] rounded-full flex items-center justify-center text-4xl anim-pop-in">🎉</div>
           <div className="text-center anim-fade-up" style={{ '--i': 1 } as React.CSSProperties}>
-            <h2 className="text-2xl font-bold text-[var(--color-ink)] mb-1!">학습 완료!</h2>
-            <p className="text-sm text-[var(--color-ink-4)]">{words.length}개 단어를 학습했어요</p>
+            <h2 className="text-2xl font-bold text-[var(--color-ink)] mb-1!">오늘의 돈 공부 완료!</h2>
+            <p className="text-sm text-[var(--color-ink-4)]">{words.length}개 말을 생활 속 상황과 연결했어요</p>
           </div>
           <Card pad="md" className="w-full anim-fade-up" style={{ '--i': 2 } as React.CSSProperties}>
             <p className="text-xs font-bold text-brand-500 mb-1.5!">이제 할 수 있어요</p>
             <p className="text-sm font-semibold text-[var(--color-ink)] leading-relaxed break-keep">{completionOutcome}</p>
           </Card>
           <Card pad="md" className="w-full anim-fade-up" style={{ '--i': 3 } as React.CSSProperties}>
-            <p className="text-xs text-[var(--color-ink-4)] mb-3!">방금 배운 단어, 바로 확인해볼까요?</p>
+            <p className="text-xs text-[var(--color-ink-4)] mb-3!">방금 본 말, 바로 확인해볼까요?</p>
             <div className="flex flex-wrap gap-1.5">
               {words.slice(0, 5).map(w => (
                 <span key={w.id} className="text-xs px-2.5 py-1 rounded-full bg-[var(--color-surface)] text-[var(--color-ink-2)]">{w.word}</span>
@@ -343,7 +345,7 @@ const WordCardScreen = () => {
                   }}
                   className="w-full py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90"
                 >
-                  다음 단어 계속 배우기 →
+                  다음 말 계속 보기 →
                 </button>
               );
             }
@@ -352,7 +354,7 @@ const WordCardScreen = () => {
                 onClick={() => navigate('/quiz', { state: { quizQueue: lessonQuizWords, backPath, reviewMode: true, mode: 'lesson_recall' } })}
                 className="w-full py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90"
               >
-                바로 퀴즈 풀기 →
+                퀴즈로 확인하기 →
               </button>
             );
           })()}
@@ -441,16 +443,22 @@ const WordCardScreen = () => {
         }}
       >
         <div key={word.id}>
-        <WordCard
-          word={word}
-          onDetail={detail ? () => setDetailOpen(true) : undefined}
-          validRelated={related}
-          onRelatedClick={handleRelatedWordClick}
-          newsItems={newsItems}
-          newsLoading={newsLoading}
-          keyword={word.word}
-          visualTerms={visualTerms}
-        />
+          <div className="px-5 pb-3">
+            <PraiseNote
+              title="지금 하나 더 쌓는 중이에요"
+              body={praiseForProgress(wordIndex + 1, words.length)}
+            />
+          </div>
+          <WordCard
+            word={word}
+            onDetail={detail ? () => setDetailOpen(true) : undefined}
+            validRelated={related}
+            onRelatedClick={handleRelatedWordClick}
+            newsItems={newsItems}
+            newsLoading={newsLoading}
+            keyword={word.word}
+            visualTerms={visualTerms}
+          />
         </div>
       </div>
 

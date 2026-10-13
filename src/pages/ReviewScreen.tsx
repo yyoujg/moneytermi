@@ -17,6 +17,8 @@ import { shuffle } from '../lib/random';
 import { LearningCompletionScreen } from '../components/learning/LearningCompletionScreen';
 import { LearningEmptyState } from '../components/learning/LearningEmptyState';
 import { QuizProgressHeader } from '../components/learning/QuizProgressHeader';
+import { PraiseNote } from '../components/PraiseNote';
+import { praiseForReview } from '../lib/praise';
 
 type Status = 'idle' | 'correct' | 'wrong';
 
@@ -114,9 +116,9 @@ const QuizPage = () => {
     return (
       <LearningEmptyState
         mascot="empty"
-        title={nothingLearned ? '복습할 단어가 아직 없어요' : '오늘 복습 완료'}
-        description={nothingLearned ? '단어를 배우면 다음 날부터 복습이 열려요' : '지금 복습할 단어가 없어요'}
-        actionLabel={nothingLearned ? '학습하러 가기' : '퀘스트로'}
+        title={nothingLearned ? '다시 볼 말이 아직 없어요' : '오늘 다시 보기 완료'}
+        description={nothingLearned ? '자주 마주치는 말을 배우면 다음 날부터 다시 보기가 열려요' : '지금 다시 볼 말이 없어요'}
+        actionLabel={nothingLearned ? '시작하러 가기' : '퀘스트로'}
         onAction={() => navigate(nothingLearned ? '/course' : '/home')}
         actionPlacement="inline"
       />
@@ -127,13 +129,18 @@ const QuizPage = () => {
     return (
       <LearningCompletionScreen
         mascot="crown"
-        title="오늘 복습 완료!"
+        title="오늘 다시 보기 완료!"
         subtitle={`${queue.length}문제 중 ${totalCorrect}개 정답`}
         actionLabel="퀘스트로"
         onAction={() => navigate('/home')}
         actionPlacement="inline"
         titleSize="xl"
       >
+        <PraiseNote
+          title="기억이 더 단단해졌어요"
+          body={praiseForReview(totalCorrect, queue.length)}
+          className="w-full max-w-sm"
+        />
         <div className="flex items-center gap-2 bg-brand-500/10 border border-brand-500/20 rounded-card px-5 py-3 mb-8">
           <PointIcon size={16} />
           <span className="text-sm font-bold text-[var(--color-ink)]">누적 포인트 {points} P</span>
@@ -158,7 +165,7 @@ const QuizPage = () => {
       <div className="flex-1 flex flex-col px-5 py-4">
         {/* 문제 카드 */}
         <Card key={word.id} pad="lg" className="mb-4 flex-1 anim-slide-in">
-          <p className="text-sm font-semibold text-[var(--color-ink-3)] mb-3!">뜻을 보고 용어를 맞혀보세요</p>
+          <p className="text-sm font-semibold text-[var(--color-ink-3)] mb-3!">뜻을 보고 어떤 말인지 맞혀보세요</p>
 
           <p className="text-lg font-bold text-[var(--color-ink)] leading-relaxed mb-6!">{maskTerm(word.meaning, word.word)}</p>
 
@@ -182,7 +189,7 @@ const QuizPage = () => {
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="용어를 입력하세요"
+              placeholder="정답을 입력하세요"
               disabled={status !== 'idle'}
               autoComplete="off"
               className={`w-full px-4 py-4 rounded-button text-sm font-medium outline-none border transition-colors
@@ -193,7 +200,7 @@ const QuizPage = () => {
               style={{ caretColor: 'var(--color-brand-500)' }}
             />
             {status === 'correct' && (
-              <p className="text-xs font-bold text-success-400 mt-1.5! px-1">정답!{capped ? ' 오늘 보상 한도에 도달했어요' : lastEarned > 0 ? ` +${lastEarned}P` : ''}</p>
+              <p className="text-xs font-bold text-success-400 mt-1.5! px-1">정답! 기억이 잘 남아 있어요{capped ? ' 오늘 보상 한도에 도달했어요' : lastEarned > 0 ? ` +${lastEarned}P` : ''}</p>
             )}
             {status === 'wrong' && (
               <p className="text-xs font-bold text-danger-400 mt-1.5! px-1">틀렸어요. 다시 시도해보세요!</p>

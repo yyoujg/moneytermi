@@ -2,35 +2,316 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
 <style>
   * { margin: 0; box-sizing: border-box; }
-  html, body { width: 600px; height: 315px; overflow: hidden; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
   body {
-    font-family: 'Pretendard Variable', Pretendard, sans-serif;
-    background: #fff3e0;
-    display: flex; align-items: center; gap: 8px; padding: 0 40px 0 24px;
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", sans-serif;
+    background: #f3f4f6;
+    color: #191f28;
+  }
+
+  .canvas {
+    width: 1200px;
+    height: 630px;
+    padding: 54px 72px;
+  }
+
+  .panel {
+    height: 522px;
+    display: grid;
+    grid-template-columns: 462px 1fr;
+    overflow: hidden;
+    border: 1px solid #e5e8eb;
+    border-radius: 34px;
+    background: #ffffff;
+  }
+
+  .copy {
+    display: flex;
+    flex-direction: column;
+    padding: 44px 28px 44px 62px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    font-size: 23px;
+    font-weight: 800;
+  }
+
+  h1 {
+    margin-top: 28px;
+    font-size: 56px;
+    line-height: 1.08;
+    font-weight: 900;
+    letter-spacing: 0;
+  }
+
+  h1 strong { color: #f97316; }
+
+  .description {
+    margin-top: 16px;
+    font-size: 22px;
+    line-height: 1.48;
+    font-weight: 650;
+    color: #4e5968;
+  }
+
+  .topics {
+    margin-top: 14px;
+    color: #f97316;
+    font-size: 20px;
+    font-weight: 900;
+  }
+
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    min-width: 208px;
+    height: 58px;
+    margin-top: 20px;
+    border-radius: 18px;
+    background: #f97316;
+    color: #ffffff;
+    font-size: 23px;
+    font-weight: 900;
+  }
+
+  .preview-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 58px 10px 20px;
+  }
+
+  .preview {
+    width: 498px;
+    height: 502px;
     position: relative;
+    overflow: hidden;
+    border: 1px solid #e5e8eb;
+    border-radius: 30px;
+    background: #f3f4f6;
+    padding: 28px;
   }
-  body::before {
-    content: ''; position: absolute; left: -60px; top: -40px; width: 380px; height: 380px;
-    border-radius: 50%; background: #ffe2bf;
+
+  .status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #4e5968;
+    font-size: 17px;
+    font-weight: 800;
   }
-  .logo { position: relative; width: 250px; height: 250px; flex-shrink: 0; }
-  .text { position: relative; display: flex; flex-direction: column; gap: 14px; }
-  h1 { white-space: nowrap; font-size: 32px; font-weight: 800; line-height: 1.25; color: #191f28; letter-spacing: -0.5px; }
-  h1 b { color: #f97316; }
-  p { font-size: 16px; font-weight: 500; color: #6b5a4a; line-height: 1.5; }
-  .chips { display: flex; gap: 6px; }
-  .chips span { font-size: 13px; font-weight: 700; color: #ea580c; background: #fff; border-radius: 999px; padding: 6px 11px; }
+
+  .status strong {
+    display: inline-flex;
+    align-items: center;
+    height: 34px;
+    padding: 0 13px;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #191f28;
+  }
+
+  .lesson {
+    margin-top: 16px;
+    border-radius: 24px;
+    background: #ffffff;
+    border: 1px solid #e5e8eb;
+    padding: 18px 22px;
+  }
+
+  .eyebrow {
+    color: #ea580c;
+    font-size: 16px;
+    font-weight: 900;
+  }
+
+  .lesson h2 {
+    margin-top: 8px;
+    font-size: 28px;
+    line-height: 1.22;
+    font-weight: 900;
+    letter-spacing: 0;
+  }
+
+  .lesson p {
+    margin-top: 9px;
+    color: #4e5968;
+    font-size: 15px;
+    line-height: 1.45;
+    font-weight: 650;
+  }
+
+  .answer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .answer {
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 17px;
+    background: #f3f4f6;
+    color: #333d4b;
+    font-size: 16px;
+    font-weight: 900;
+  }
+
+  .answer.primary {
+    background: #191f28;
+    color: #ffffff;
+  }
+
+  .mini-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .review {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid #e5e8eb;
+    border-radius: 22px;
+    background: #ffffff;
+    padding: 15px;
+    min-height: 102px;
+  }
+
+  .review-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 16px;
+    background: #fff3e0;
+    color: #f97316;
+    font-size: 22px;
+    font-weight: 900;
+  }
+
+  .review-title {
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: 900;
+  }
+
+  .review-sub {
+    margin-top: 4px;
+    color: #6b7684;
+    font-size: 13px;
+    font-weight: 650;
+  }
+
+  .review-count {
+    color: #f97316;
+    font-size: 28px;
+    font-weight: 900;
+    position: absolute;
+    right: 15px;
+    top: 15px;
+  }
+
+  .quiz {
+    border-radius: 23px;
+    background: #ffffff;
+    padding: 15px;
+    min-height: 102px;
+  }
+
+  .quiz-label {
+    color: #6b7684;
+    font-size: 13px;
+    font-weight: 900;
+  }
+
+  .quiz-text {
+    margin-top: 7px;
+    font-size: 16px;
+    line-height: 1.32;
+    font-weight: 900;
+  }
+
+  .options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-top: 9px;
+  }
+
+  .options span {
+    border-radius: 14px;
+    background: #f3f4f6;
+    padding: 8px 9px;
+    text-align: center;
+    color: #4e5968;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .options span:first-child {
+    background: #191f28;
+    color: #ffffff;
+  }
+
 </style>
 </head>
 <body>
-  <img class="logo" src="../../public/logo.png" alt="" />
-  <div class="text">
-    <h1>경제 용어 <b>1,000개</b><br />하루 5분이면 충분해요</h1>
-    <p>뉴스 속 낯선 용어, 쉬운 예시와 퀴즈로<br />수달이랑 같이 배워요</p>
-    <div class="chips"><span>기초</span><span>중급</span><span>고급</span><span>심화</span></div>
-  </div>
+  <main class="canvas">
+    <section class="panel">
+      <div class="copy">
+        <div class="brand">머니터미</div>
+        <h1>뉴스 보다가<br /><strong>막혔다면</strong><br />3분만 봐요</h1>
+        <p class="description">전세·대출·금리 이야기를<br />쉬운 예시와 퀴즈로 알려줘요</p>
+        <p class="topics">어려운 말은 앱 안에서 쉽게</p>
+        <div class="cta">하나만 풀어보기</div>
+      </div>
+      <div class="preview-area">
+        <div class="preview">
+          <div class="status"><span>오늘의 쉬운 문제</span><strong>3분</strong></div>
+          <section class="lesson">
+            <div class="eyebrow">예시로 보기</div>
+            <h2>집값 3억,<br />전세 2억이면?</h2>
+            <p>숫자로 보면 어려운 말도 금방 감이 와요.</p>
+            <div class="answer-grid">
+              <div class="answer primary">전세금이 큰 편인지</div>
+              <div class="answer">월세가 얼마인지</div>
+            </div>
+          </section>
+          <div class="mini-grid">
+            <section class="review">
+              <div class="review-icon">R</div>
+              <div class="review-count">3</div>
+              <div>
+                <div class="review-title">다시 볼 말</div>
+                <div class="review-sub">헷갈린 것만 모아줘요</div>
+              </div>
+            </section>
+            <section class="quiz">
+              <div class="quiz-label">다음에 볼 말</div>
+              <div class="quiz-text">대출 상담 때 자주 나와요</div>
+              <div class="options">
+                <span>갚을 수 있는지</span>
+                <span>집값이 올랐는지</span>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
 </body>
 </html>

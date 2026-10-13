@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Check, X, Flame } from 'lucide-react';
+import { Check, X, Flame, Share2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
@@ -10,6 +10,7 @@ import { getGrowthStage } from '../constants';
 import { feedbackCorrect, feedbackWrong, feedbackQuizComplete, feedbackTierUp } from '../lib/feedback';
 import { requestAppReview } from '../lib/review';
 import { logClick } from '../lib/analytics';
+import { shareTossLink } from '../lib/share';
 import { Card } from '../components/ui/Card';
 import { PointIcon, XpIcon } from '../components/StatIcons';
 import { buildQuizItem, pickQuizType, type QuizOption } from '../lib/quiz';
@@ -20,6 +21,15 @@ import { LearningCompletionScreen } from '../components/learning/LearningComplet
 import { LearningEmptyState } from '../components/learning/LearningEmptyState';
 import { LearningStatRow } from '../components/learning/LearningStatRow';
 import { QuizProgressHeader } from '../components/learning/QuizProgressHeader';
+import { PraiseNote } from '../components/PraiseNote';
+import { praiseForAnswer, praiseForQuiz } from '../lib/praise';
+
+const quizShareMessage = (modeLabel: string, total: number, accuracy: number, maxCombo: number, words: Word[]) => {
+  const learned = words.slice(0, 3).map(word => word.word).join(' · ');
+  const comboText = maxCombo >= 3 ? ` 최고 ${maxCombo}연속 정답.` : '';
+  const learnedText = learned ? ` 오늘 확인한 말: ${learned}.` : '';
+  return `머니터미에서 ${modeLabel} ${total}문제 ${accuracy}% 달성!${comboText}${learnedText} 경제 공부, 쉬운 상황부터 같이 시작해요`;
+};
 
 const QuizScreen = () => {
   const navigate = useNavigate();
@@ -47,7 +57,7 @@ const QuizScreen = () => {
   const sessionLabel = navState?.mode === 'lesson_warmup'
     ? '기억 깨우기'
     : navState?.mode === 'lesson_recall'
-      ? '방금 배운 단어'
+      ? '방금 본 말'
       : navState?.mode === 'course_review'
         ? '누적 복습'
         : '퀴즈';
@@ -120,8 +130,8 @@ const QuizScreen = () => {
     return (
       <LearningEmptyState
         title="아직 풀 문제가 없어요"
-        description="단어를 먼저 배우면 배운 단어로 퀴즈를 낼 수 있어요."
-        actionLabel="학습하러 가기"
+        description="자주 마주치는 말을 먼저 보면 퀴즈를 풀 수 있어요."
+        actionLabel="시작하러 가기"
         onAction={() => navigate('/course')}
       />
     );
@@ -136,8 +146,8 @@ const QuizScreen = () => {
     const completionTitle = navState?.mode === 'lesson_warmup'
       ? '준비 완료!'
       : navState?.mode === 'course_review'
-        ? '복습 완료!'
-        : '퀴즈 완료!';
+        ? '다시 보기 완료!'
+        : '확인 완료!';
     const outcome = learningOutcomeFor({ words: baseQueue });
 
     return (
@@ -175,9 +185,37 @@ const QuizScreen = () => {
             </LearningStatRow>
           )}
         </Card>
-        <Card pad="md" className="w-full anim-fade-up" style={{ '--i': 3 } as React.CSSProperties}>
+        <PraiseNote
+          title="오늘 만든 성과"
+          body={praiseForQuiz({ accuracy, maxCombo, total: baseQueue.length })}
+          className="w-full anim-fade-up"
+          style={{ '--i': 3 } as React.CSSProperties}
+        />
+        <Card pad="md" className="w-full anim-fade-up" style={{ '--i': 4 } as React.CSSProperties}>
           <p className="text-xs font-bold text-brand-500 mb-1.5!">다음에 보이면</p>
           <p className="text-sm font-semibold text-[var(--color-ink)] leading-relaxed break-keep">{outcome}</p>
+        </Card>
+        <Card tone="surface" pad="md" className="w-full flex flex-col gap-3 anim-fade-up" style={{ '--i': 5 } as React.CSSProperties}>
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-card)] text-brand-500">
+              <Share2 size={17} />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-[var(--color-ink)]">오늘의 성과 공유하기</p>
+              <p className="mt-1! text-xs text-[var(--color-ink-3)] leading-relaxed break-keep">
+                정답률과 오늘 확인한 말이 담긴 토스 링크를 보낼 수 있어요.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              logClick('quiz_result_share', { mode: navState?.mode ?? 'quiz', total: baseQueue.length, accuracy, max_combo: maxCombo });
+              void shareTossLink('intoss://moneytermi/course', quizShareMessage(sessionLabel, baseQueue.length, accuracy, maxCombo, baseQueue));
+            }}
+            className="w-full min-h-[46px] rounded-button bg-[var(--color-card)] text-sm font-bold text-brand-500 active:opacity-90"
+          >
+            친구에게 공유
+          </button>
         </Card>
       </LearningCompletionScreen>
     );
@@ -329,7 +367,7 @@ const QuizScreen = () => {
                 {status === 'correct' ? <Check size={16} strokeWidth={3} /> : <X size={16} strokeWidth={3} />}
               </span>
               <p className={`text-lg font-black ${status === 'correct' ? 'text-success-500' : 'text-danger-500'}`}>
-                {status === 'correct' ? '좋아요!' : `정답은 ${currentWord.word}`}
+                {status === 'correct' ? praiseForAnswer(combo) : `정답은 ${currentWord.word}`}
               </p>
             </div>
             {status === 'correct' && (

@@ -89,9 +89,9 @@ const LoadingScreen = () => (
 
 const WELCOME_KEY = 'welcome_seen_v1';
 const WELCOME_STEPS = [
-  { icon: BookOpen, title: '쉬운 설명으로 배워요', desc: '뉴스에 자주 나오는 용어를 한 줄 뜻과 예시로 익혀요' },
-  { icon: CircleHelp, title: '짧은 퀴즈로 확인해요', desc: '배운 단어를 바로 퀴즈로 풀며 기억에 남겨요' },
-  { icon: Trophy, title: '복습하고 리그에 도전해요', desc: '잊을 때쯤 다시 복습하고, 매주 리그 순위를 겨뤄요' },
+  { icon: BookOpen, title: '쉬운 상황부터 시작해요', desc: '금리·대출·전월세처럼 자주 마주치는 말을 예시로 익혀요' },
+  { icon: CircleHelp, title: '생활 속 상황으로 연결해요', desc: '월급, 소비, 대출, 계약서에서 어떻게 쓰이는지 짧게 확인해요' },
+  { icon: Trophy, title: '퀴즈와 다시 보기로 남겨요', desc: '오늘 들린 말을 잊기 전에 다시 꺼내보며 익혀요' },
 ];
 
 const WelcomeScreen = () => {
@@ -108,14 +108,14 @@ const WelcomeScreen = () => {
         <div className="flex shrink-0 flex-col items-center rounded-b-[32px] bg-[var(--color-card)] px-6 pb-8 pt-8 text-center">
           <Mascot name="hello" size={150} />
           <h1 className="mt-4 text-2xl font-extrabold leading-snug tracking-tight text-[var(--color-ink)] break-keep">
-            뉴스 속 낯선 경제 용어,<br />이제 어렵지 않아요!
+            경제 공부,<br />쉬운 상황부터 시작해요
           </h1>
-          <p className="mt-3 text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">하루 몇 분이면 경제 뉴스가 읽혀요</p>
+          <p className="mt-3 text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">월급·소비·대출·전월세에서 만나는 말을 쉽게 풀어요</p>
         </div>
 
         {/* 남는 높이의 가운데에 단계 카드를 둔다. 화면이 작으면 그대로 스크롤된다 */}
         <div className="flex flex-1 flex-col justify-center px-5 pt-7 pb-4">
-          <p className="mb-3 px-1 text-sm font-bold text-[var(--color-ink-2)]">이렇게 배워요</p>
+          <p className="mb-3 px-1 text-sm font-bold text-[var(--color-ink-2)]">이렇게 시작해요</p>
           <ol className="flex flex-col gap-3">
             {WELCOME_STEPS.map(({ icon: Icon, title, desc }) => (
               <li key={title} className="flex items-center gap-4 rounded-card bg-[var(--color-card)] px-4 py-4">

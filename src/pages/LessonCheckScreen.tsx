@@ -7,6 +7,8 @@ import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
 import { logClick } from '../lib/analytics';
 import { Card } from '../components/ui/Card';
 import { Mascot } from '../components/Mascot';
+import { PraiseNote } from '../components/PraiseNote';
+import { praiseForQuiz } from '../lib/praise';
 
 const LessonCheckScreen = () => {
   const navigate = useNavigate();
@@ -24,8 +26,8 @@ const LessonCheckScreen = () => {
     return (
       <div className="lesson-check-screen flex h-full flex-col items-center justify-center gap-4 px-5 text-center bg-[var(--color-canvas)]">
         <Mascot name="empty" size={110} />
-        <h1 className="mt-1 text-xl font-bold text-[var(--color-ink)]">{hasLesson ? '이번 레슨에는 이해 확인 문제가 없어요' : '단어를 먼저 배워보세요'}</h1>
-        <p className="text-[15px] text-[var(--color-ink-2)] break-keep">{hasLesson ? '다음 학습을 선택할 수 있어요.' : '단어를 배우면 이해 확인 문제를 풀 수 있어요.'}</p>
+        <h1 className="mt-1 text-xl font-bold text-[var(--color-ink)]">{hasLesson ? '이번 레슨에는 이해 확인 문제가 없어요' : '자주 마주치는 말부터 시작해요'}</h1>
+        <p className="text-[15px] text-[var(--color-ink-2)] break-keep">{hasLesson ? '다음 학습을 선택할 수 있어요.' : '말을 하나 익히면 이해 확인 문제를 풀 수 있어요.'}</p>
         <button onClick={() => navigate('/course', { replace: true })} className="mt-3 w-full min-h-[52px] rounded-button bg-brand-500 text-base font-bold text-white">
           {hasLesson ? '다음 학습 선택하기' : '학습 시작하기'}
         </button>
@@ -34,6 +36,8 @@ const LessonCheckScreen = () => {
   }
 
   if (!question) {
+    const correctCount = questions.length - mistakes.length;
+    const accuracy = questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0;
     return (
       <div className="lesson-check-screen flex h-full flex-col items-center justify-center gap-5 px-5 bg-[var(--color-canvas)]">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-success-soft)] text-success-400">
@@ -43,6 +47,11 @@ const LessonCheckScreen = () => {
           <h2 className="text-xl font-bold text-[var(--color-ink)]">이해 확인 완료!</h2>
           <p className="mt-2 text-sm text-[var(--color-ink-3)]">{questions.length}문제 중 {questions.length - mistakes.length}개 정답</p>
         </div>
+        <PraiseNote
+          title="방금 배운 걸 바로 써봤어요"
+          body={praiseForQuiz({ accuracy, maxCombo: correctCount, total: questions.length })}
+          className="w-full"
+        />
         <div className="w-full flex flex-col gap-2">
           {mistakes.length > 0 && (
             <button
@@ -117,7 +126,7 @@ const LessonCheckScreen = () => {
         </div>
         {selected !== null && (
           <Card pad="lg" className={`mt-4 border ${isCorrect ? 'border-success-500/30' : 'border-danger-500/30'}`} style={{ backgroundColor: isCorrect ? 'var(--color-success-soft)' : 'var(--color-danger-soft)' }}>
-            <p className={`text-sm font-bold mb-2! ${isCorrect ? 'text-success-400' : 'text-danger-400'}`}>{isCorrect ? '맞았어요' : `정답: ${answer.label}`}</p>
+            <p className={`text-sm font-bold mb-2! ${isCorrect ? 'text-success-400' : 'text-danger-400'}`}>{isCorrect ? '맞았어요. 바로 이해했어요' : `정답: ${answer.label}`}</p>
             <p className="text-sm leading-relaxed text-[var(--color-ink-2)] break-keep">{question.explanation}</p>
           </Card>
         )}

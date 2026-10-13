@@ -10,6 +10,8 @@ import { Storage } from '../lib/storage';
 import { showModal } from '../components/AlertModal';
 import { COURSE_REVIEW_COUNT, LESSON_WARMUP_COUNT, firstUnknownWordIndex, learnedOrFallbackWords, selectCourseQuizWords } from '../lib/coursePractice';
 import { learningOutcomeFor } from '../lib/learningOutcome';
+import { praiseForProgress } from '../lib/praise';
+import { PraiseNote } from '../components/PraiseNote';
 
 const SEEN_KEY = 'path_seen_done';   // 코스 화면에서 마지막으로 본 완료 노드들(도장 연출용)
 const GATE_KEY = 'path_seen_levels';  // 열린 것을 본 레벨들(관문 연출용)
@@ -90,7 +92,7 @@ const LevelGate = ({ level, title, stat, locked, opening }: {
 };
 import { buildPath, type PathNode } from '../lib/path';
 
-const LEVEL_TITLES: Record<string, string> = { 기초: '경제 뉴스의 기본 단어', 중급: '용어끼리 연결하기', 고급: '경제 메커니즘 설명하기', 심화: '모형과 제도 깊이 보기' };
+const LEVEL_TITLES: Record<string, string> = { 기초: '돈 공부의 기본기', 중급: '생활 속 상황과 연결하기', 고급: '경제 흐름 읽어보기', 심화: '제도와 구조 깊이 보기' };
 const COURSE_ROW = 164;
 const COURSE_NODE = 54;
 const COURSE_TOPIC_CARD_TOP = 14;
@@ -101,22 +103,22 @@ const nodeCopy = (node: PathNode) => {
   if (node.type === 'lesson') {
     return {
       kind: '학습',
-      title: `${node.words[0]?.word ?? '새 단어'}부터 익히기`,
-      meta: `${node.words.length}개 새 단어`,
+      title: `${node.words[0]?.word ?? '새 말'}부터 시작하기`,
+      meta: `${node.words.length}개 말, 쉬운 예시로 확인`,
     };
   }
   if (node.type === 'quiz') {
     return {
       kind: '실전 퀴즈',
-      title: '상황으로 단어 맞히기',
-      meta: `${node.words.length}개 용어로 판단 연습`,
+      title: '내 상황에 맞는 말 고르기',
+      meta: `${node.words.length}개 말로 적용 연습`,
     };
   }
   const finalReview = node.id.endsWith('-r');
   return {
     kind: finalReview ? '누적 복습' : '중간 복습',
-    title: finalReview ? '누적 단어 실전 점검' : '기억 깨우기',
-    meta: `${node.words.length}개 용어 섞어서 복습`,
+    title: finalReview ? '배운 말 다시 연결하기' : '오늘 익힌 말 다시 보기',
+    meta: `${node.words.length}개 말 섞어서 복습`,
   };
 };
 
@@ -163,6 +165,8 @@ const CourseScreen = () => {
   const requestedTopic = searchParams.get('topic');
   const topicIndex = requestedTopic !== null && /^\d+$/.test(requestedTopic) ? Number(requestedTopic) : -1;
   const activeTopic = topics[topicIndex] ?? null;
+  const totalKnown = topics.reduce((sum, topic) => sum + topic.known, 0);
+  const totalWords = topics.reduce((sum, topic) => sum + topic.total, 0);
   const backPath = activeTopic ? `/course?topic=${topicIndex}` : '/course';
   const focusRef = useRef<HTMLButtonElement>(null);
   const focusTopicRef = useRef<HTMLElement | null>(null);
@@ -317,7 +321,7 @@ const CourseScreen = () => {
             backPath,
             reviewMode: true,
             mode: 'lesson_warmup',
-            nextRoute: { pathname: '/word-card', state: lessonState, label: '새 단어 배우기' },
+            nextRoute: { pathname: '/word-card', state: lessonState, label: '새 말 보기' },
           },
         });
       } else {
@@ -348,14 +352,24 @@ const CourseScreen = () => {
             {/* 뒤로가기는 토스 내비게이션 바가 맡는다(자체 뒤로가기 중복은 검수 반려 사유) */}
             <div className="min-w-0">
               <h1 className="truncate text-xl font-bold tracking-tight text-[var(--color-ink)]">{activeTopic.category}</h1>
-              <p className="mt-1! text-xs text-[var(--color-ink-3)]">{activeTopic.level} · {activeTopic.parts.length}개 코스 · {activeTopic.known}/{activeTopic.total}개 단어 학습</p>
+              <p className="mt-1! text-xs text-[var(--color-ink-3)]">{activeTopic.level} · {activeTopic.parts.length}개 코스 · {activeTopic.known}/{activeTopic.total}개 말 확인</p>
               <p className="mt-1! text-xs text-[var(--color-ink-3)] break-keep leading-relaxed">{learningOutcomeFor({ category: activeTopic.category })}</p>
+              <PraiseNote
+                title="지금까지 잘 쌓고 있어요"
+                body={praiseForProgress(activeTopic.known, activeTopic.total)}
+                className="mt-3"
+              />
             </div>
           </div>
         ) : (
           <>
             <h1 className="text-xl font-bold tracking-tight text-[var(--color-ink)]">전체 주제</h1>
-            <p className="mt-1! text-xs text-[var(--color-ink-3)]">{topics.length}개 주제를 하나씩 완성해요</p>
+            <p className="mt-1! text-xs text-[var(--color-ink-3)]">{topics.length}개 주제를 생활 속 상황과 연결해요</p>
+            <PraiseNote
+              title="전체 성장 기록"
+              body={praiseForProgress(totalKnown, totalWords)}
+              className="mt-3"
+            />
           </>
         )}
       </div>
@@ -436,13 +450,14 @@ const CourseScreen = () => {
                 <p className="mt-1! text-xs text-[var(--color-ink-3)] break-keep leading-relaxed">{learningOutcomeFor({ category: sec.course.category, title: sec.course.title, words: sec.course.words })}</p>
               </div>
             </div>}
-            <p className="mb-2 text-xs font-semibold text-[var(--color-ink-2)]">{sec.course.words.length}개 단어 중 {sec.knownCount}개 학습</p>
+            <p className="mb-2 text-xs font-semibold text-[var(--color-ink-2)]">{sec.course.words.length}개 말 중 {sec.knownCount}개 확인</p>
             <div className="relative flex items-center gap-3">
               <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--color-button-secondary)]">
                 <div className={`h-full rounded-full bg-brand-500 ${sec.course.id === focus?.courseId ? 'course-progress-reveal' : ''}`} style={{ width: `${sec.course.words.length ? (sec.knownCount / sec.course.words.length) * 100 : 0}%` }} />
               </div>
               <span className="min-w-10 text-right text-2xs font-semibold tabular-nums text-[var(--color-ink-3)]">{sec.course.words.length ? Math.round((sec.knownCount / sec.course.words.length) * 100) : 0}%</span>
             </div>
+            <p className="mt-2! text-2xs font-semibold text-brand-500 break-keep">{praiseForProgress(sec.knownCount, sec.course.words.length)}</p>
           </div>
 
           {sec.nodes.map((node, k) => {

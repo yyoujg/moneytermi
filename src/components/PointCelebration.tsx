@@ -28,7 +28,7 @@ export const PointCelebration = ({ reward, onClose }: { reward: PointReward; onC
           {reward.source === 'mission' ? '오늘의 미션 완료!' : '포인트를 받았어요!'}
         </h2>
         <p className="mt-2! text-sm text-[var(--color-ink-3)] break-keep">
-          {reward.source === 'mission' ? '수고했어요. 내일도 함께해요.' : '광고를 끝까지 봐 주셔서 고마워요.'}
+          {reward.source === 'mission' ? '오늘 할 일을 직접 끝냈어요. 이런 기록이 실력이 돼요.' : '포인트도 챙겼고, 다음 학습을 이어갈 준비가 됐어요.'}
         </p>
         <div className={`mt-6 grid w-full gap-2 ${reward.xp ? 'grid-cols-2' : 'grid-cols-1'}`}>
           {reward.xp ? (

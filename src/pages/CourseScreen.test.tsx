@@ -147,7 +147,7 @@ describe('CourseScreen energy gates', () => {
     await flushScrollEffects();
 
     const scrollIntoView = vi.mocked(HTMLElement.prototype.scrollIntoView);
-    const target = scrollIntoView.mock.contexts.find(el => (el as HTMLElement).textContent?.includes('용어5부터 익히기'));
+    const target = scrollIntoView.mock.contexts.find(el => (el as HTMLElement).textContent?.includes('용어5부터 시작하기'));
     expect(target).toBeDefined();
   });
 
@@ -217,7 +217,7 @@ describe('CourseScreen energy gates', () => {
     baseContext({ knownIds: new Set([1, 2, 3, 4]) });
     const { container, clickButtonContaining } = await mount();
 
-    await clickButtonContaining('누적 단어 실전 점검');
+    await clickButtonContaining('배운 말 다시 연결하기');
 
     expect(state.spendEnergy).not.toHaveBeenCalled();
     expect(state.pickRecallWords).toHaveBeenCalledWith({ candidates: [1, 2, 3, 4].map(word), count: 10 });

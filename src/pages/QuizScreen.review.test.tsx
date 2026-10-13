@@ -9,6 +9,7 @@ const state = vi.hoisted(() => ({
   recordReview: vi.fn(),
   submitQuizAnswer: vi.fn(),
   refreshWallet: vi.fn(),
+  shareTossLink: vi.fn(),
 }));
 
 vi.mock('../lib/quiz', () => ({
@@ -45,6 +46,7 @@ vi.mock('../lib/review', async importOriginal => {
   return { ...actual };
 });
 vi.mock('../lib/analytics', () => ({ logClick: vi.fn() }));
+vi.mock('../lib/share', () => ({ shareTossLink: (...args: unknown[]) => state.shareTossLink(...args) }));
 
 Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { value: true, configurable: true });
 
@@ -92,6 +94,7 @@ beforeEach(() => {
   state.recordReview = vi.fn(() => Promise.resolve());
   state.submitQuizAnswer = vi.fn(() => Promise.resolve({ combo: 1, earned: 0, capped: false }));
   state.refreshWallet = vi.fn(() => Promise.resolve());
+  state.shareTossLink = vi.fn(() => Promise.resolve());
 });
 
 describe('QuizScreen review SRS', () => {
@@ -107,5 +110,21 @@ describe('QuizScreen review SRS', () => {
     expect(state.recordReview).toHaveBeenCalledTimes(2);
     expect(state.recordReview).toHaveBeenNthCalledWith(1, 1, false, false);
     expect(state.recordReview).toHaveBeenNthCalledWith(2, 2, true, false);
+  });
+
+  it('완료 화면에서 퀴즈 성과를 공유한다', async () => {
+    const { click } = await mount();
+
+    await click('용어1');
+    await click('다음 문제');
+    await click('용어2');
+    await click('결과 보기');
+    await click('친구에게 공유');
+
+    expect(state.shareTossLink).toHaveBeenCalledWith(
+      'intoss://moneytermi/course',
+      expect.stringContaining('머니터미에서 퀴즈 2문제 100% 달성!'),
+    );
+    expect(state.shareTossLink.mock.calls[0][1]).toContain('오늘 확인한 말: 용어1 · 용어2.');
   });
 });

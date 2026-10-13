@@ -15,6 +15,8 @@ import { ProfileAvatar } from '../components/ProfileAvatar';
 import { calcStreak } from '../lib/streak';
 import { Card } from '../components/ui/Card';
 import { PointCelebration, type PointReward } from '../components/PointCelebration';
+import { PraiseNote } from '../components/PraiseNote';
+import { praiseForHome, praiseForMission } from '../lib/praise';
 import type { Mission } from '../types';
 
 const HomeScreen = () => {
@@ -35,6 +37,9 @@ const HomeScreen = () => {
   const missionRank = (m: Mission) => (m.isRewarded ? 2 : m.current >= m.target ? 1 : 0);
   const missionList = Object.values(missions).sort((a, b) => missionRank(a) - missionRank(b) || a.sortOrder - b.sortOrder);
   const streak = calcStreak(attendanceDates);
+  const homePraise = praiseForHome({ knownCount: knownWords.length, streak, dueCount: dueQueue.length });
+  const readyMissions = missionList.filter(m => !m.isRewarded && m.current >= m.target).length;
+  const completedMissions = missionList.filter(m => m.isRewarded).length;
 
   // 보상 수령: 성공하면 축하 모달 + 정답과 같은 햅틱, 실패(슬롯이 바뀌었거나 네트워크)면 이유를 알려준다
   const [celebration, setCelebration] = useState<PointReward | null>(null);
@@ -82,12 +87,19 @@ const HomeScreen = () => {
               onClick={() => navigate('/course')}
               className="w-full flex items-center justify-between rounded-button bg-white px-4 py-3 text-sm font-bold text-brand-500 active:opacity-90"
             >
-              오늘 첫 단어를 배워봐요 <ArrowRight size={16} />
+              오늘의 돈 공부 시작하기 <ArrowRight size={16} />
             </button>
           ) : (
             <WeekStrip attendanceDates={attendanceDates} />
           )}
         </div>
+
+        <PraiseNote
+          title={homePraise.title}
+          body={homePraise.body}
+          className="mt-4 anim-fade-up"
+          style={{ '--i': 1 } as React.CSSProperties}
+        />
 
         {/* 오늘 복습 카드 */}
         {dueQueue.length > 0 && (
@@ -103,8 +115,8 @@ const HomeScreen = () => {
                 <RotateCcw size={16} className="text-brand-500" />
               </div>
               <div className="text-left">
-                <p className="text-sm font-bold text-[var(--color-ink)]">오늘 복습할 단어 {dueQueue.length}개</p>
-                <p className="text-2xs text-[var(--color-ink-4)]">기억이 흐려지기 전에 복습해요</p>
+                <p className="text-sm font-bold text-[var(--color-ink)]">오늘 다시 볼 말 {dueQueue.length}개</p>
+                <p className="text-2xs text-[var(--color-ink-4)]">다시 마주치면 바로 떠오르게요</p>
               </div>
             </div>
             <ChevronRight size={16} className="text-[var(--color-ink-4)]" />
@@ -116,8 +128,11 @@ const HomeScreen = () => {
       <div className="px-5 flex flex-col gap-4">
         <Card pad="lg" className="mb-4 anim-fade-up">
           <div className="flex justify-between items-center mb-3">
-            <h2 className="text-sm font-bold text-[var(--color-ink-2)]">오늘의 미션</h2>
-            <span className="text-2xs font-medium text-[var(--color-ink-4)]">{resetLabel}</span>
+            <div>
+              <h2 className="text-sm font-bold text-[var(--color-ink-2)]">오늘의 미션</h2>
+              <p className="mt-1! text-2xs font-medium text-brand-500 break-keep">{praiseForMission({ ready: readyMissions, completed: completedMissions })}</p>
+            </div>
+            <span className="shrink-0 text-2xs font-medium text-[var(--color-ink-4)]">{resetLabel}</span>
           </div>
 
           <div className="flex flex-col">

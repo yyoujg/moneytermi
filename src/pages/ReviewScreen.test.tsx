@@ -121,7 +121,7 @@ describe('ReviewScreen retry spacing', () => {
     await submit('틀림');
     await act(async () => { vi.advanceTimersByTime(1000); });
 
-    expect(container.textContent).toContain('오늘 복습 완료');
+    expect(container.textContent).toContain('오늘 다시 보기 완료');
     expect(state.recordReview).toHaveBeenCalledTimes(1);
   });
 });

@@ -36,8 +36,8 @@ export const DailyAlarmPromptCard = () => {
           <img src="/icons/bell.png" alt="" aria-hidden="true" width={20} height={20} />
         </IconBox>
         <div>
-          <p className="text-sm font-semibold text-[var(--color-ink)]">매일 오늘의 용어 받기</p>
-          <p className="text-xs text-[var(--color-ink-4)]">매일 09:00, 오늘의 경제 용어를 알림으로 보내드려요</p>
+          <p className="text-sm font-semibold text-[var(--color-ink)]">매일 돈 공부 한 조각 받기</p>
+          <p className="text-xs text-[var(--color-ink-4)]">매일 09:00, 자주 마주치는 말을 쉽게 보내드려요</p>
         </div>
       </div>
       <div className="flex gap-2">

@@ -16,6 +16,8 @@ import { SettingsSheet } from '../components/mypage/SettingsSheet';
 import { NicknameSheet } from '../components/mypage/NicknameSheet';
 import { Card } from '../components/ui/Card';
 import { IconBox } from '../components/ui/IconBox';
+import { PraiseNote } from '../components/PraiseNote';
+import { praiseForProfile } from '../lib/praise';
 
 const MyPageScreen = () => {
   const { points, xp, knownWords, attendanceDates, myEmoji, updateMyEmoji } = useAppContext();
@@ -91,7 +93,7 @@ const MyPageScreen = () => {
         <Card tone="surface" pad="md" className="anim-fade-up">
           <div className="flex items-stretch">
             {[
-              { icon: <WordsIcon size={28} />, label: '배운 단어', value: knownWords.length.toLocaleString(), unit: '개', color: STAT_COLOR.words },
+              { icon: <WordsIcon size={28} />, label: '익힌 말', value: knownWords.length.toLocaleString(), unit: '개', color: STAT_COLOR.words },
               { icon: <StreakIcon size={28} />, label: '연속 학습', value: streak.toLocaleString(), unit: '일', color: STAT_COLOR.streak },
               { icon: <XpIcon size={28} />, label: 'XP', value: xp.toLocaleString(), unit: '', color: STAT_COLOR.xp },
               { icon: <PointIcon size={28} />, label: '포인트', value: points.toLocaleString(), unit: 'P', color: STAT_COLOR.points },
@@ -106,6 +108,12 @@ const MyPageScreen = () => {
             ))}
           </div>
         </Card>
+
+        <PraiseNote
+          title="여기까지 쌓였어요"
+          body={praiseForProfile({ knownCount: knownWords.length, streak, earnedBadges: earned })}
+          className="mt-4 anim-fade-up"
+        />
 
       </div>
 

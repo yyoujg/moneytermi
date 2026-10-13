@@ -13,7 +13,10 @@ const PAD = { l: 34, r: 8, t: 10, b: 22 };
 const fmt = (v: number) => (Math.abs(v) >= 100 ? Math.round(v).toLocaleString('ko-KR') : String(Math.round(v * 100) / 100));
 
 const LineChart = ({ x, series, unit }: { x: string[]; series: { name: string; values: number[] }[]; unit?: string }) => {
-  const all = series.flatMap(s => s.values);
+  const safeSeries = series.filter(s => s.values.length === x.length && s.values.every(Number.isFinite));
+  const all = safeSeries.flatMap(s => s.values);
+  if (x.length === 0 || all.length === 0) return null;
+
   const min = Math.min(...all);
   const max = Math.max(...all);
   const span = max - min || 1;
@@ -35,7 +38,7 @@ const LineChart = ({ x, series, unit }: { x: string[]; series: { name: string; v
         {ticks.map(i => (
           <text key={i} x={px(i)} y={H - 6} textAnchor={i === 0 ? 'start' : i === x.length - 1 ? 'end' : 'middle'} fontSize="9" fill="var(--color-ink-4)">{x[i]}</text>
         ))}
-        {series.map((s, si) => (
+        {safeSeries.map((s, si) => (
           <g key={s.name}>
             <polyline
               points={s.values.map((v, i) => `${px(i)},${py(v)}`).join(' ')}
@@ -50,7 +53,7 @@ const LineChart = ({ x, series, unit }: { x: string[]; series: { name: string; v
         ))}
       </svg>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-2xs text-[var(--color-ink-3)]">
-        {series.map((s, si) => (
+        {safeSeries.map((s, si) => (
           <span key={s.name} className="flex items-center gap-1">
             <span className="w-2.5 h-2.5" style={{ borderRadius: 9999, background: COLORS[si % COLORS.length] }} />
             {s.name} {fmt(s.values[s.values.length - 1])}{unit ?? ''}
@@ -61,28 +64,50 @@ const LineChart = ({ x, series, unit }: { x: string[]; series: { name: string; v
   );
 };
 
-const Table = ({ columns, rows }: { columns: string[]; rows: string[][] }) => (
-  <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden">
-    <table className="w-full text-xs border-collapse">
-      <thead>
-        <tr>
-          {columns.map((c, i) => (
-            <th key={i} className={`py-2 px-2 text-left font-bold break-keep ${i === 0 ? 'text-[var(--color-ink-4)]' : 'text-brand-500'} bg-[var(--color-surface)] first:rounded-l-md last:rounded-r-md`}>{c}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((r, ri) => (
-          <tr key={ri} className="border-b border-[var(--color-surface)] last:border-0">
-            {r.map((cell, ci) => (
-              <td key={ci} className={`py-2.5 px-2 align-top break-keep leading-[1.5] ${ci === 0 ? 'font-bold text-[var(--color-ink-2)]' : 'text-[var(--color-ink-2)]'}`}>{cell}</td>
+const textWeight = (value: string) =>
+  Array.from(value).reduce((sum, ch) => sum + (/[a-zA-Z0-9%.,+-]/.test(ch) ? 0.65 : 1), 0);
+
+const tableColumnLayout = (columns: string[], rows: string[][]) => {
+  const count = columns.length;
+  const firstColumn = rows.map(row => row[0] ?? '');
+  const maxByColumn = columns.map((column, i) => Math.max(textWeight(column), ...rows.map(row => textWeight(row[i] ?? ''))));
+  const maxCell = Math.max(...maxByColumn, 0);
+  const hasLongRowLabels = firstColumn.some(cell => textWeight(cell) >= 9 || /[\s()]/.test(cell));
+  const minWidth = count >= 4 ? Math.max(520, count * 128) : maxCell >= 30 ? 430 : undefined;
+
+  if (count === 3 && hasLongRowLabels) return { widths: ['34%', '30%', '36%'], minWidth };
+  if (count === 3 && maxByColumn[2] > maxByColumn[1] + 4) return { widths: ['22%', '38%', '40%'], minWidth };
+  if (count === 3) return { widths: ['22%', '45%', '33%'], minWidth };
+  if (count === 2) return { widths: ['38%', '62%'], minWidth };
+  return { widths: null, minWidth };
+};
+
+const Table = ({ columns, rows }: { columns: string[]; rows: string[][] }) => {
+  const { widths, minWidth } = tableColumnLayout(columns, rows);
+  return (
+    <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden">
+      <table className={`w-full text-xs border-collapse ${widths ? 'table-fixed' : ''}`} style={minWidth ? { minWidth } : undefined}>
+        {widths && <colgroup>{widths.map((width, i) => <col key={i} style={{ width }} />)}</colgroup>}
+        <thead>
+          <tr>
+            {columns.map((c, i) => (
+              <th key={i} className={`py-2 px-2 text-left font-bold break-keep ${i === 0 ? 'text-[var(--color-ink-4)]' : 'text-brand-500'} bg-[var(--color-surface)] first:rounded-l-md last:rounded-r-md`}>{c}</th>
             ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-);
+        </thead>
+        <tbody>
+          {rows.map((r, ri) => (
+            <tr key={ri} className="border-b border-[var(--color-surface)] last:border-0">
+              {r.map((cell, ci) => (
+                <td key={ci} className={`py-2.5 px-2 align-top break-keep leading-[1.5] ${ci === 0 ? 'font-bold text-[var(--color-ink-2)]' : 'text-[var(--color-ink-2)]'}`}>{cell}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
 
 // 원인 -> 결과 사슬. 단계마다 한 칸, 사이에 아래 화살표
 // 원인 -> 결과 사슬을 직접 맞혀 보며 배운다. 첫 칸(원인)만 보여 주고, 다음 칸이 오를지(↑) 내릴지(↓) 고르면 정답을 펼친다.
@@ -184,6 +209,8 @@ const EcosChart = ({ v, onFail }: { v: Extract<WordVisual, { type: 'ecos' }>; on
   // 여러 통계는 모두 값이 있는 달만 맞춰 그린다
   const times = data.map(l => new Set(l.map(p => p.time)));
   const common = data[0].map(p => p.time).filter(t => times.every(s => s.has(t)));
+  if (common.length < 2) return null;
+
   const k = v.scale ?? 1;
   const last = label(common[common.length - 1]);
   const series = data.map((l, i) => {
