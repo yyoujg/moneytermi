@@ -280,6 +280,10 @@ const QuizScreen = () => {
   const example = currentWord?.learningExample?.replace(/^학습용 가정:\s*/, '') || currentWord?.meaning;
   // 오답: 고른 보기가 어떤 용어(의 뜻)인지 한 줄로 짚어 준다. 직접 만든 문제(custom)는 보기가 용어가 아니라 없음
   const picked = status === 'wrong' && selected ? wordByName.get(selected) : undefined;
+  const feedbackPanelClass = status === 'correct'
+    ? 'border-success-500/20 bg-[var(--color-success-soft)]'
+    : 'border-danger-500/20 bg-[var(--color-danger-soft)]';
+  const nextButtonClass = status === 'correct' ? 'bg-success-500' : 'bg-danger-500';
 
   return (
     <div className="flex flex-col h-full bg-[var(--color-card)]">
@@ -360,7 +364,7 @@ const QuizScreen = () => {
 
       {/* 답을 고른 뒤: 판정은 아이콘·제목 색으로만, 공간은 이해(예시·헷갈린 지점)에. 다음 버튼은 판정과 무관하게 같은 모양 */}
       {status !== 'idle' && (
-        <div key={currentQuizIndex} className="anim-feedback-panel px-5 pt-4 pb-8 flex flex-col gap-3 border-t border-[var(--color-line)] bg-[var(--color-card)]">
+        <div key={currentQuizIndex} className={`anim-feedback-panel px-5 pt-4 pb-8 flex flex-col gap-3 border-t ${feedbackPanelClass}`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className={`w-7 h-7 flex items-center justify-center text-white ${status === 'correct' ? 'bg-success-500' : 'bg-danger-500'}`} style={{ borderRadius: 9999 }}>
@@ -380,17 +384,23 @@ const QuizScreen = () => {
           {status === 'correct' ? (
             <div>
               <p className="text-xs font-bold text-[var(--color-ink-3)] mb-1!">예를 들면</p>
-              <p className="text-[15px] text-[var(--color-ink)] leading-relaxed break-keep">{example}</p>
+              <p className="text-sm text-[var(--color-ink)] leading-snug break-keep">{example}</p>
             </div>
           ) : (
             <div className="flex flex-col gap-2">
-              <p className="text-[15px] text-[var(--color-ink)] leading-relaxed break-keep"><span className="font-bold">{currentWord.word}</span>: {currentWord.meaning}</p>
-              {picked && <p className="text-sm text-[var(--color-ink-3)] leading-relaxed break-keep">고른 답 <span className="font-semibold text-[var(--color-ink-2)]">{picked.word}</span>: {picked.meaning}</p>}
+              <p className="text-[15px] text-[var(--color-ink)] leading-snug break-keep"><span className="font-bold">{currentWord.word}</span>: {currentWord.meaning}</p>
+              {picked && (
+                <div className="rounded-chip border border-[var(--color-line)] bg-[var(--color-card)] px-3 py-2.5">
+                  <p className="mb-1! text-2xs font-bold text-[var(--color-ink-4)]">내가 고른 답</p>
+                  <p className="text-sm font-bold text-[var(--color-ink-2)]">{picked.word}</p>
+                  <p className="mt-0.5! text-xs text-[var(--color-ink-3)] leading-snug break-keep">{picked.meaning}</p>
+                </div>
+              )}
             </div>
           )}
           <button
             onClick={goNextQuestion}
-            className="w-full min-h-[52px] rounded-button text-base font-bold text-white bg-brand-500 active:opacity-90"
+            className={`w-full min-h-[52px] rounded-button text-base font-bold text-white active:opacity-90 ${nextButtonClass}`}
           >
             {currentQuizIndex === quizQueue.length - 1 ? '결과 보기' : '다음 문제'}
           </button>
