@@ -1,7 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { addEnergyState, fillEnergyState, nextEnergyAt, normalizeEnergy, spendEnergyState } from './energy';
+import { addEnergyState, fillEnergyState, nextEnergyAt, normalizeEnergy, spendEnergyState, spendEnergyOnce } from './energy';
 
 describe('energy', () => {
+  it('저장 후 재진입과 충전에도 시작 기록을 유지하고 중복 차감하지 않는다', () => {
+    const first = spendEnergyOnce({ current: 1, updatedAt: 0 }, 1, 'lesson:1,2', 0)!;
+    const restored = JSON.parse(JSON.stringify(first));
+    expect(spendEnergyOnce(restored, 1, 'lesson:1,2', 0)?.current).toBe(0);
+    expect(spendEnergyOnce(restored, 1, 'lesson:3,4', 0)).toBeNull();
+    const filled = fillEnergyState(restored, 1000);
+    expect(spendEnergyOnce(filled, 1, 'lesson:1,2', 1000)?.current).toBe(25);
+    expect(spendEnergyOnce(filled, 1, 'lesson:1,2,3', 1000)?.current).toBe(24);
+  });
   it('시간이 지난 만큼 회복하고 최대치를 넘지 않는다', () => {
     expect(normalizeEnergy({ current: 3, updatedAt: 0 }, 3_600_000, 25, 3_600_000)).toEqual({ current: 4, updatedAt: 3_600_000 });
     expect(normalizeEnergy({ current: 24, updatedAt: 0 }, 7_200_000, 25, 3_600_000)).toEqual({ current: 25, updatedAt: 7_200_000 });

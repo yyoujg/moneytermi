@@ -7,7 +7,6 @@ import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
 import { openExternalUrl } from '../lib/external';
-import { requestAppReview } from '../lib/review';
 import { claimPromotion } from '../lib/promotion';
 import { useNews, type NaverNewsItem } from '../hooks/useNews';
 import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
@@ -15,10 +14,9 @@ import { feedbackLearned, feedbackLessonComplete } from '../lib/feedback';
 import { StreakCelebration } from '../components/StreakCelebration';
 import { Card } from '../components/ui/Card';
 import { WordVisuals } from '../components/WordVisuals';
-import { termPattern } from '../lib/quiz';
+import { lessonChecks, termPattern } from '../lib/quiz';
 import { selectLessonQuizWords } from '../lib/lessonQuiz';
 import { buildWordLookup, relatedWordNames, type WordLookup } from '../lib/wordLookup';
-import { learningOutcomeFor } from '../lib/learningOutcome';
 
 
 const SOURCE_NAMES: Record<string, string> = { bok800: '한국은행 경제금융용어 800선', tesat: 'TESAT', sgsg: '한경 생글생글 경제 퀴즈' };
@@ -39,7 +37,7 @@ const Highlight = ({ text, keyword, pattern }: { text: string; keyword: string; 
     <>
       {parts.map((part, i) =>
         i % 2 === 1
-          ? <mark key={i} style={{ background: 'var(--color-brand-cream)', color: 'var(--color-brand-500)', fontWeight: 700, borderRadius: 3, padding: '0 2px' }}>{part}</mark>
+          ? <mark key={i} style={{ background: 'var(--color-brand-cream)', color: 'var(--color-brand-ink)', fontWeight: 700, borderRadius: 3, padding: '0 2px' }}>{part}</mark>
           : <span key={i}>{part}</span>
       )}
     </>
@@ -214,6 +212,8 @@ const WordCardScreen = () => {
     autoAdvance?: boolean;
     continueWords?: Word[];
     courseTitle?: string;
+    courseId?: string;
+    nodeId?: string;
   } | null;
 
   // 콜드 딥링크(state 없음) 진입 시: 미완료 코스 우선으로 기본 단어 로드
@@ -263,8 +263,9 @@ const WordCardScreen = () => {
     if (!done) { completedRef.current = false; return; }
     if (completedRef.current) return;
     completedRef.current = true;
+    logClick('lesson_view_complete', { course_id: state?.courseId, node_id: state?.nodeId, total: words.length });
     feedbackLessonComplete();
-  }, [wordIndex, words.length, autoAdvance]);
+  }, [wordIndex, words.length, autoAdvance, state?.courseId, state?.nodeId]);
 
   // 설명 글에서 강조할 다른 용어들(지금 단어는 빼고)
   const curName = words[wordIndex]?.word;
@@ -305,19 +306,18 @@ const WordCardScreen = () => {
 
   // autoAdvance 완료 화면
   if (autoAdvance && words.length > 0 && wordIndex >= words.length) {
-    const completionOutcome = learningOutcomeFor({ title: state?.courseTitle, words });
     return (
       <div className="app-soft-screen flex h-full flex-col">
         {/* 카드 + 알림 카드 + 축하가 작은 화면에서 넘칠 수 있어 이 영역만 스크롤 */}
         <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden flex flex-col items-center justify-center-safe gap-5 p-8">
           <div className="w-20 h-20 bg-[var(--color-card)] rounded-full flex items-center justify-center text-4xl anim-pop-in">🎉</div>
           <div className="text-center anim-fade-up" style={{ '--i': 1 } as React.CSSProperties}>
-            <h2 className="text-2xl font-bold text-[var(--color-ink)] mb-1!">오늘의 돈 공부 완료!</h2>
-            <p className="text-sm text-[var(--color-ink-4)]">{words.length}개 용어를 생활 속 상황과 연결했어요</p>
+            <h2 className="text-2xl font-bold text-[var(--color-ink)] mb-1!">용어를 살펴봤어요</h2>
+            <p className="text-sm text-[var(--color-ink-4)]">{words.length}개 용어의 설명을 확인했어요</p>
           </div>
           <Card pad="md" className="w-full anim-fade-up" style={{ '--i': 2 } as React.CSSProperties}>
-            <p className="text-xs font-bold text-brand-500 mb-1.5!">이제 할 수 있어요</p>
-            <p className="text-sm font-semibold text-[var(--color-ink)] leading-relaxed break-keep">{completionOutcome}</p>
+            <p className="text-xs font-bold text-brand-500 mb-1.5!">이해했는지 확인해볼까요?</p>
+            <p className="text-sm font-semibold text-[var(--color-ink)] leading-relaxed break-keep">{lessonChecks(words).length > 0 ? '상황 문제를 풀며 어떤 변화가 생기는지 확인해요.' : '이번에는 용어의 뜻을 확인해요. 상황 적용 문제는 아직 준비 중이에요.'}</p>
           </Card>
           <Card pad="md" className="w-full anim-fade-up" style={{ '--i': 3 } as React.CSSProperties}>
             <p className="text-xs text-[var(--color-ink-4)] mb-3!">방금 본 용어, 바로 확인해볼까요?</p>
@@ -349,10 +349,12 @@ const WordCardScreen = () => {
             }
             return (
               <button
-                onClick={() => navigate('/quiz', { state: { quizQueue: lessonQuizWords, backPath, reviewMode: true, mode: 'lesson_recall' } })}
+                onClick={() => lessonChecks(words).length > 0
+                  ? navigate('/lesson-check', { state: { words, backPath, courseId: state?.courseId, nodeId: state?.nodeId } })
+                  : navigate('/quiz', { state: { quizQueue: lessonQuizWords, backPath, reviewMode: true, mode: 'lesson_recall', courseId: state?.courseId, lessonId: state?.nodeId } })}
                 className="w-full py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90"
               >
-                퀴즈로 확인하기 →
+                {lessonChecks(words).length > 0 ? '상황 문제로 이해 확인하기' : '용어 퀴즈로 확인하기'}
               </button>
             );
           })()}
@@ -377,7 +379,6 @@ const WordCardScreen = () => {
     if (autoAdvance) {
       if (knownWords.length === 0) {
         logClick('activation_first_card');
-        requestAppReview();
         claimPromotion().then(amount => { if (amount) claimPromotionReward(amount); });
       }
       setKnownWords(prev => prev.some(w => w.id === word.id) ? prev : [...prev, word]);
@@ -419,7 +420,7 @@ const WordCardScreen = () => {
 
       {/* 상단: 레슨 안의 단어 위치 */}
       <div className="px-5 pt-4 flex items-center justify-between gap-3">
-        <div className="flex flex-1 items-center gap-1.5 overflow-hidden">
+        <div role="progressbar" aria-label="레슨 용어 진행률" aria-valuemin={0} aria-valuemax={words.length} aria-valuenow={wordIndex + 1} className="flex flex-1 items-center gap-1.5 overflow-hidden">
           {words.map((w, i) => (
             <span
               key={w.id}
@@ -461,7 +462,7 @@ const WordCardScreen = () => {
             type="button"
             onClick={() => slide(-1)}
             disabled={!canPrev}
-            className="flex-1 py-3.5 rounded-button bg-[var(--color-surface)] text-sm font-bold text-[var(--color-ink-2)] active:opacity-80 disabled:opacity-30 flex items-center justify-center gap-1"
+            className="flex-1 py-3.5 rounded-button bg-[var(--color-surface)] text-sm font-bold text-[var(--color-ink-2)] active:opacity-80 disabled:opacity-100 disabled:text-[var(--color-ink-4)] flex items-center justify-center gap-1"
           >
             <ChevronLeft size={16} />이전
           </button>
@@ -469,9 +470,9 @@ const WordCardScreen = () => {
             type="button"
             onClick={() => slide(1)}
             disabled={lastWord && !autoAdvance}
-            className="flex-1 py-3.5 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-80 disabled:opacity-30 flex items-center justify-center gap-1"
+            className="flex-1 py-3.5 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-80 disabled:opacity-100 disabled:bg-[var(--color-surface)] disabled:text-[var(--color-ink-4)] flex items-center justify-center gap-1"
           >
-            {lastWord && autoAdvance ? '완료 🎉' : <>다음 <ChevronRight size={16} /></>}
+            {lastWord && autoAdvance ? '살펴보기 완료' : <>다음 <ChevronRight size={16} /></>}
           </button>
         </div>
       </div>

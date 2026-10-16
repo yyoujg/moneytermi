@@ -118,6 +118,15 @@ describe('buildPath', () => {
     const secs = buildPath([makeCourse('a', 4), makeCourse('b', 4)], new Set());
     expect(secs.map(s => s.course.id)).toEqual(['a', 'b']);
   });
+
+  it('다른 주제는 열고 같은 주제의 다음 코스만 잠근다', () => {
+    const a = makeCourse('a', 4);
+    const b = { ...makeCourse('b', 4), category: '주거' };
+    const c = makeCourse('c', 4);
+    const sections = buildPath([a, b, c], new Set());
+    expect(sections.map(section => section.nodes[0].state)).toEqual(['current', 'current', 'locked']);
+    expect(sections[1].nodes.at(-1)?.words).toHaveLength(4);
+  });
 });
 
 describe('기하', () => {

@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Word } from '../types';
 import QuizScreen from './QuizScreen';
+import { logClick } from '../lib/analytics';
 
 const state = vi.hoisted(() => ({
   recordReview: vi.fn(),
@@ -65,13 +66,13 @@ function word(id: number): Word {
 let cleanup = () => {};
 afterEach(() => cleanup());
 
-const mount = async () => {
+const mount = async (extraState: Record<string, unknown> = {}) => {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
   await act(async () => {
     root.render(
-      <MemoryRouter initialEntries={[{ pathname: '/quiz', state: { quizQueue: [word(1), word(2)], reviewMode: true, backPath: '/course' } }]}>
+      <MemoryRouter initialEntries={[{ pathname: '/quiz', state: { quizQueue: [word(1), word(2)], reviewMode: true, backPath: '/course', ...extraState } }]}>
         <Routes>
           <Route path="/quiz" element={<QuizScreen />} />
           <Route path="/course" element={<div>코스 화면</div>} />
@@ -98,6 +99,17 @@ beforeEach(() => {
 });
 
 describe('QuizScreen review SRS', () => {
+  it('재시도 정답을 첫 시도 성과에 합치지 않고 복습 종류를 기록한다', async () => {
+    const { container, click } = await mount({ mode: 'lesson_warmup', lessonId: 'c1-l0', courseId: 'c1' });
+    await click('오답');
+    await click('다음 문제');
+    await click('용어2');
+    await click('다음 문제');
+    await click('용어1');
+    await click('결과 보기');
+    expect(container.textContent).toContain('50%');
+    expect(logClick).toHaveBeenCalledWith('quiz_complete', expect.objectContaining({ mode: 'lesson_warmup', total: 2, correct: 1, attempts: 3, node_id: 'c1-l0', course_id: 'c1' }));
+  });
   it('첫 오답만 SRS에 기록하고 재정답은 같은 세션에서 다시 성공 기록하지 않는다', async () => {
     const { click } = await mount();
 

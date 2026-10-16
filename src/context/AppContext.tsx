@@ -4,7 +4,6 @@ import { supabase, getGuestClient } from '../lib/supabase';
 import { loadStoredProfile } from '../hooks/useAuth';
 import { useDebouncedEffect } from '../hooks/useDebouncedEffect';
 import { Storage } from '../lib/storage';
-import { requestAppReview } from '../lib/review';
 import { claimPromotion } from '../lib/promotion';
 import { logClick } from '../lib/analytics';
 import { missionSlot, msUntilNextSlot, toDateStr } from '../lib/date';
@@ -13,7 +12,7 @@ import { DAILY_REVIEW_CAP, ENERGY_AD_REWARD, ENERGY_MAX, ENERGY_REFILL_COST, MIS
 import type { PointReward } from '../components/PointCelebration';
 import { feedbackClaim } from '../lib/feedback';
 import { fetchAll, PAGE } from '../lib/fetchAll';
-import { addEnergyState, fillEnergyState, nextEnergyAt as calcNextEnergyAt, normalizeEnergy, spendEnergyState, type EnergyState } from '../lib/energy';
+import { addEnergyState, fillEnergyState, nextEnergyAt as calcNextEnergyAt, normalizeEnergy, spendEnergyState, spendEnergyOnce, type EnergyState } from '../lib/energy';
 import { runEnergyRefill, type EnergyRefillResult } from '../lib/energyRefill';
 import { nextReviewDateFromRows, selectDueReviewWords, selectRecallWords, type ReviewProgressRow } from '../lib/review';
 import { buildCourseContent } from '../lib/courseContent';
@@ -34,7 +33,7 @@ type AppContextValue = {
   energy: number;
   energyMax: number;
   nextEnergyAt: number | null;
-  spendEnergy: (amount: number, reason: string) => Promise<boolean>;
+  spendEnergy: (amount: number, reason: string, accessKey?: string) => Promise<boolean>;
   claimEnergyAd: (amount?: number) => Promise<number | null>;
   buyEnergyRefill: () => Promise<EnergyRefillResult | 'full'>;
   spendPoints: (amount: number, reason: string) => Promise<boolean>;
@@ -46,6 +45,7 @@ type AppContextValue = {
   closeShop: () => void;
   knownWords: Word[];
   knownIds: Set<number>;
+  viewedIds: Set<number>;
   setKnownWords: React.Dispatch<React.SetStateAction<Word[]>>;
   unknownWords: Word[];
   setUnknownWords: React.Dispatch<React.SetStateAction<Word[]>>;
@@ -109,6 +109,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const pendingUnknownIds = useRef<Set<number> | null>(null);
 
   const knownIds = useMemo(() => new Set(knownWords.map(w => w.id)), [knownWords]);
+  const viewedIds = useMemo(() => new Set([...knownWords, ...unknownWords].map(w => w.id).concat(wpRows.map(row => row.word_id))), [knownWords, unknownWords, wpRows]);
   const normalizedEnergy = useMemo(() => normalizeEnergy(energyState), [energyState]);
   const energy = normalizedEnergy.current;
   const nextEnergyAt = calcNextEnergyAt(energyState);
@@ -492,7 +493,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     } else {
       if (knownWords.length === 0) {
         logClick('activation_first_card');
-        requestAppReview();
         claimPromotion().then(amount => { if (amount) claimPromotionReward(amount); });
       }
       setKnownWords(prev => prev.some(w => w.id === word.id) ? prev : [...prev, word]);
@@ -528,7 +528,6 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     if (typeof data.xp === 'number') setXp(data.xp); else setXp(x => x + MISSION_XP);
     setMissions(prev => ({ ...prev, [missionId]: { ...prev[missionId], isRewarded: true } }));
     logClick('mission_reward_claim', { mission_id: missionId, reward: mission.reward });
-    requestAppReview();
     return { xpGained };
   };
 
@@ -602,9 +601,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   // ── spendEnergy — 학습/퀴즈/복습 시작 1회당 에너지를 쓴다 ───────
-  const spendEnergy = async (amount: number, reason: string) => {
+  const spendEnergy = async (amount: number, reason: string, accessKey?: string) => {
     const prev = energyStateRef.current;
-    const next = spendEnergyState(prev, amount);
+    if (accessKey && prev.startedNodeKeys?.includes(accessKey)) return true;
+    const next = accessKey ? spendEnergyOnce(prev, amount, accessKey) : spendEnergyState(prev, amount);
     if (!next) {
       const normalized = normalizeEnergy(prev);
       energyStateRef.current = normalized;
@@ -736,7 +736,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       hydrated,
       contentStatus, retryContent: () => { setContentStatus('loading'); setContentRetryKey(key => key + 1); },
       points, setPoints,
-      knownWords, knownIds, setKnownWords,
+      knownWords, knownIds, viewedIds, setKnownWords,
       unknownWords, setUnknownWords,
       xp, boostUntil, buyBoost,
       energy, energyMax: ENERGY_MAX, nextEnergyAt, spendEnergy, claimEnergyAd, buyEnergyRefill,

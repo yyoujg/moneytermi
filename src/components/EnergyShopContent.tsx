@@ -1,5 +1,5 @@
 import { ChevronsUp, Lock, Tv, Zap } from 'lucide-react';
-import { ENERGY_AD_REWARD, ENERGY_REFILL_COST, LESSON_COST, XP_BONUS_POINTS, XP_BONUS_STEP } from '../constants';
+import { ENERGY_AD_REWARD, ENERGY_REFILL_COST, XP_BONUS_POINTS, XP_BONUS_STEP } from '../constants';
 import { PointIcon } from './StatIcons';
 
 export type EnergyRefillNotice = {
@@ -173,7 +173,7 @@ export const EnergyShopContent = ({
         </p>
       </div>
       <p className="text-2xs text-[var(--color-ink-4)] mt-1 leading-relaxed">
-        첫 레슨은 무료예요. 이후 레슨 시작에 {LESSON_COST}P가 들어요. 학습·퀴즈 시작에는 에너지 1이 들고, 복습은 무료예요. 포인트는 순위에 반영되지 않아요.
+        새 학습과 코스 퀴즈를 처음 시작할 때 에너지 1을 써요. 이어하기, 다시 보기, 복습은 무료예요. 포인트는 선택한 에너지 충전과 부스트에만 써요.
       </p>
     </div>
   );

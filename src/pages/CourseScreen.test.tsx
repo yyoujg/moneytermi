@@ -73,6 +73,10 @@ const baseContext = (overrides: Record<string, unknown> = {}) => {
     contentStatus: 'ready',
     retryContent: state.retryContent,
     knownIds: new Set<number>(),
+    viewedIds: overrides.knownIds ?? new Set<number>(),
+    dueQueue: [],
+    nextReviewDate: null,
+    energyMax: 25,
     courses: [course()],
     points: 1000,
     energy: 25,
@@ -133,7 +137,7 @@ beforeEach(() => {
 });
 
 describe('CourseScreen energy gates', () => {
-  it('전체 주제 화면에서 진행 중인 주제 카드로 스크롤한다', async () => {
+  it('홈에서 복습과 새 학습을 보여주고 자동 스크롤로 가리지 않는다', async () => {
     baseContext({
       courses: [
         course({ id: 'c1', category: '경제', wordCount: 4, startId: 1 }),
@@ -141,12 +145,12 @@ describe('CourseScreen energy gates', () => {
       ],
       knownIds: new Set([1, 2, 3, 4]),
     });
-    await mount('/course');
+    const { container } = await mount('/course');
     await flushScrollEffects();
 
-    const scrollIntoView = vi.mocked(HTMLElement.prototype.scrollIntoView);
-    const target = scrollIntoView.mock.contexts.find(el => (el as HTMLElement).textContent?.includes('금융'));
-    expect(target).toBeDefined();
+    expect(container.textContent).toContain('오늘 다시 볼 용어 0개');
+    expect(container.textContent).toContain('새로운 용어 이어 배우기');
+    expect(HTMLElement.prototype.scrollIntoView).not.toHaveBeenCalled();
   });
 
   it('확인한 용어가 늘어도 일반 성장 모달은 띄우지 않는다', async () => {
@@ -186,7 +190,7 @@ describe('CourseScreen energy gates', () => {
 
     await clickButtonContaining('용어1');
 
-    expect(spendEnergy).not.toHaveBeenCalled();
+    expect(spendEnergy).toHaveBeenCalledWith(1, 'lesson', 'c1-l0:1,2,3,4');
     expect(state.openShop).toHaveBeenCalledWith('energy');
     expect(container.textContent).not.toContain('단어 카드');
   });
@@ -215,7 +219,37 @@ describe('CourseScreen energy gates', () => {
     await clickButtonContaining('용어1');
 
     expect(state.spendEnergy).not.toHaveBeenCalled();
+    expect(state.spendPoints).not.toHaveBeenCalled();
+    expect(state.claimFirstLesson).not.toHaveBeenCalled();
     expect(container.textContent).toContain('단어 카드');
+  });
+
+  it('포인트가 없어도 다른 주제의 첫 레슨을 시작한다', async () => {
+    baseContext({ points: 0, courses: [course({ category: '경제' }), course({ id: 'c2', category: '금융', startId: 5 })] });
+    const { container, clickButtonContaining } = await mount('/course?topic=1');
+    expect(container.textContent).toContain('코스 1/1');
+    expect(container.textContent).not.toContain('코스 2/1');
+    await clickButtonContaining('용어5');
+    expect(container.textContent).toContain('단어 카드');
+    expect(state.spendPoints).not.toHaveBeenCalled();
+    expect(state.spendEnergy).toHaveBeenCalledWith(1, 'lesson', 'c2-l0:5,6,7,8');
+  });
+
+  it('복습에서 틀렸어도 열람 진도가 있으면 다음 레슨은 잠기지 않는다', async () => {
+    baseContext({ courses: [course({ wordCount: 8 })], knownIds: new Set(), viewedIds: new Set([1, 2, 3, 4]) });
+    const { container, clickButtonContaining } = await mount();
+    expect(container.textContent).toContain('살펴봄');
+    await clickButtonContaining('용어5');
+    expect(container.textContent).toContain('단어 카드');
+  });
+
+  it('홈의 이어 배우기는 마지막으로 시작한 주제로 이동한다', async () => {
+    state.storage.set('learning_resume_course_v1', 'c2');
+    baseContext({ courses: [course({ category: '경제' }), course({ id: 'c2', category: '금융', startId: 5 })], knownIds: new Set([5]) });
+    const { container, clickButtonContaining } = await mount('/course');
+    await clickButtonContaining('새로운 용어 이어 배우기');
+    expect(container.textContent).toContain('용어5부터 시작하기');
+    expect(container.textContent).not.toContain('용어1부터 시작하기');
   });
 
   it('새 레슨 앞에 과거 용어 인출 문제가 있으면 먼저 퀴즈로 보낸다', async () => {

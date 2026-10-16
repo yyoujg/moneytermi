@@ -23,7 +23,7 @@ const MENU_ITEMS = [
 ];
 
 const MyPageScreen = () => {
-  const { points, xp, knownWords, attendanceDates, myEmoji, updateMyEmoji } = useAppContext();
+  const { points, xp, knownWords, viewedIds, attendanceDates, myEmoji, updateMyEmoji } = useAppContext();
   const stage = getGrowthStage(xp);
   const streak = calcStreak(attendanceDates);
   const badges = buildBadges({ words: knownWords.length, streak, xp });
@@ -91,7 +91,7 @@ const MyPageScreen = () => {
         <Card pad="md" className="my-page-stats anim-fade-up">
           <div className="flex items-stretch">
             {[
-              { icon: <WordsIcon size={31} />, label: '익힌 용어', value: knownWords.length.toLocaleString(), unit: '개', color: STAT_COLOR.words },
+              { icon: <WordsIcon size={31} />, label: '살펴본 용어', value: viewedIds.size.toLocaleString(), unit: '개', color: STAT_COLOR.words },
               { icon: <StreakIcon size={31} />, label: '연속 학습', value: streak.toLocaleString(), unit: '일', color: STAT_COLOR.streak },
               { icon: <XpIcon size={31} />, label: 'XP', value: xp.toLocaleString(), unit: '', color: STAT_COLOR.xp },
               { icon: <PointIcon size={31} />, label: '포인트', value: points.toLocaleString(), unit: 'P', color: STAT_COLOR.points },
@@ -121,7 +121,7 @@ const MyPageScreen = () => {
               {badges.map((b, i) => (
                 <div key={b.id} className="flex flex-col items-center gap-1 anim-pop-in" style={{ '--i': i } as React.CSSProperties}>
                   <BadgeGlyph id={b.id} size={52} className={b.earned ? '' : 'grayscale opacity-40'} />
-                  <span className={`text-3xs text-center leading-tight ${b.earned ? 'font-bold text-[var(--color-ink-2)]' : 'text-[var(--color-ink-4)]'}`}>
+                  <span className={`text-2xs text-center leading-tight break-keep ${b.earned ? 'font-bold text-[var(--color-ink-2)]' : 'text-[var(--color-ink-3)]'}`}>
                     {b.title}
                   </span>
                 </div>
@@ -146,7 +146,7 @@ const MyPageScreen = () => {
                       <img src={icon} alt="" aria-hidden="true" width={24} height={24} />
                     </IconBox>
                   }
-                  contents={<ListRow.Texts type="2RowTypeA" top={<span className="text-sm font-semibold">{label}</span>} bottom={<span className="block mt-1! text-3xs">{sub}</span>} />}
+                  contents={<ListRow.Texts type="2RowTypeA" top={<span className="text-sm font-semibold">{label}</span>} bottom={<span className="block mt-1! text-2xs text-[var(--color-ink-3)]">{sub}</span>} />}
                   right={<ChevronRight size={16} className="text-[var(--color-ink-4)]" />}
                 />
               ))}

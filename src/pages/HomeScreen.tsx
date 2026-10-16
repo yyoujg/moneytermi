@@ -61,7 +61,7 @@ const HomeScreen = () => {
       <div className="pt-4 px-5 pb-4">
         <div
           className="rounded-card px-5 pt-5 pb-4 text-white shadow-lg anim-fade-up"
-          style={{ background: 'linear-gradient(135deg, #f97316 0%, #fb923c 100%)' }}
+          style={{ background: 'linear-gradient(135deg, #9a3412 0%, #c2410c 100%)' }}
         >
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 flex items-center justify-center text-2xl shrink-0" style={{ borderRadius: 9999, background: 'rgba(255,255,255,0.22)' }}>
@@ -97,8 +97,17 @@ const HomeScreen = () => {
           <Card
             pad="md"
             role="button"
-            onClick={() => { logClick('review_start', { count: dueQueue.length }); navigate('/review'); }}
-            className="mt-4 flex items-center justify-between active:opacity-80 cursor-pointer anim-fade-up"
+            tabIndex={0}
+            aria-label={`오늘 다시 볼 용어 ${dueQueue.length}개 복습 시작`}
+            onClick={() => { logClick('review_start', { count: dueQueue.length, source: 'quest' }); navigate('/review'); }}
+            onKeyDown={event => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                logClick('review_start', { count: dueQueue.length, source: 'quest' });
+                navigate('/review');
+              }
+            }}
+            className="mt-4 flex items-center justify-between active:opacity-80 cursor-pointer anim-fade-up focus-visible:outline-2 focus-visible:outline-brand-500"
             style={{ '--i': 1 } as React.CSSProperties}
           >
             <div className="flex items-center gap-3">
@@ -107,7 +116,7 @@ const HomeScreen = () => {
               </div>
               <div className="text-left">
                 <p className="text-sm font-bold text-[var(--color-ink)]">오늘 다시 볼 용어 {dueQueue.length}개</p>
-                <p className="text-2xs text-[var(--color-ink-4)]">다시 마주치면 바로 떠오르게요</p>
+                <p className="text-xs text-[var(--color-ink-3)]">다시 마주치면 바로 떠오르게요</p>
               </div>
             </div>
             <ChevronRight size={16} className="text-[var(--color-ink-4)]" />
@@ -145,7 +154,7 @@ const HomeScreen = () => {
                         : <span className="text-base font-bold text-[var(--color-ink)] shrink-0">{mission.current}<span className="text-xs text-[var(--color-ink-4)]">/{mission.target}</span></span>
                     }
                   </div>
-                  <div className="flex gap-1">
+                  <div role="progressbar" aria-label={`${mission.title} 진행률`} aria-valuemin={0} aria-valuemax={mission.target} aria-valuenow={Math.min(mission.current, mission.target)} className="flex gap-1">
                     {Array.from({ length: mission.target }).map((_, i) => (
                       <div key={i} className={`flex-1 h-1.5 rounded-full transition-all duration-300 ${i >= mission.current ? 'bg-[var(--color-line)]' : mission.isRewarded ? 'bg-[var(--color-line-strong)]' : 'bg-brand-500'}`} />
                     ))}

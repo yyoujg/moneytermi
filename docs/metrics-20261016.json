@@ -1,0 +1,46 @@
+{
+  "d1": [
+    {
+      "period": "latest_mature",
+      "denominator": 14,
+      "d1_attendance": 1,
+      "d1_learning_proxy": 0
+    },
+    {
+      "period": "previous",
+      "denominator": 2,
+      "d1_attendance": 0,
+      "d1_learning_proxy": 0
+    }
+  ],
+  "periods": [
+    {
+      "label": "previous",
+      "end_date": "2026-10-08",
+      "start_date": "2026-10-02",
+      "new_profiles": 2,
+      "attendance_users": 11,
+      "card_mission_users": 5,
+      "attendance_user_days": 21,
+      "energy_purchase_users": 0,
+      "new_word_mission_users": 5,
+      "quiz_correct_mission_users": 2
+    },
+    {
+      "label": "latest",
+      "end_date": "2026-10-15",
+      "start_date": "2026-10-09",
+      "new_profiles": 14,
+      "attendance_users": 17,
+      "card_mission_users": 8,
+      "attendance_user_days": 27,
+      "energy_purchase_users": 3,
+      "new_word_mission_users": 8,
+      "quiz_correct_mission_users": 6
+    }
+  ],
+  "observed_at": "2026-10-16T03:18:41.013997+00:00",
+  "total_words": 1233,
+  "total_profiles": 391,
+  "latest_word_updates_users": 10
+}

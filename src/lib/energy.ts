@@ -3,6 +3,7 @@ import { ENERGY_MAX, ENERGY_REGEN_MS } from '../constants';
 export type EnergyState = {
   current: number;
   updatedAt: number;
+  startedNodeKeys?: string[];
 };
 
 const clamp = (value: number, max = ENERGY_MAX) => Math.min(max, Math.max(0, Math.floor(value)));
@@ -14,12 +15,13 @@ export const normalizeEnergy = (
   regenMs = ENERGY_REGEN_MS,
 ): EnergyState => {
   const current = clamp(state.current, max);
-  if (current >= max) return { current: max, updatedAt: now };
+  if (current >= max) return { ...state, current: max, updatedAt: now };
   const updatedAt = Number.isFinite(state.updatedAt) ? state.updatedAt : now;
   const recovered = Math.floor(Math.max(0, now - updatedAt) / regenMs);
-  if (recovered <= 0) return { current, updatedAt };
+  if (recovered <= 0) return { ...state, current, updatedAt };
   const nextCurrent = clamp(current + recovered, max);
   return {
+    ...state,
     current: nextCurrent,
     updatedAt: nextCurrent >= max ? now : updatedAt + recovered * regenMs,
   };
@@ -47,6 +49,7 @@ export const spendEnergyState = (
   if (cost <= 0) return normalized;
   if (normalized.current < cost) return null;
   return {
+    ...normalized,
     current: normalized.current - cost,
     updatedAt: normalized.current >= max ? now : normalized.updatedAt,
   };
@@ -62,6 +65,7 @@ export const addEnergyState = (
   const normalized = normalizeEnergy(state, now, max, regenMs);
   const current = clamp(normalized.current + Math.max(0, Math.floor(amount)), max);
   return {
+    ...normalized,
     current,
     updatedAt: current >= max ? now : normalized.updatedAt,
   };
@@ -73,3 +77,9 @@ export const fillEnergyState = (
   max = ENERGY_MAX,
   regenMs = ENERGY_REGEN_MS,
 ): EnergyState => addEnergyState(state, max, now, max, regenMs);
+
+export const spendEnergyOnce = (state: EnergyState, amount: number, accessKey: string, now = Date.now()): EnergyState | null => {
+  if (state.startedNodeKeys?.includes(accessKey)) return normalizeEnergy(state, now);
+  const next = spendEnergyState(state, amount, now);
+  return next ? { ...next, startedNodeKeys: [...(next.startedNodeKeys ?? []), accessKey] } : null;
+};

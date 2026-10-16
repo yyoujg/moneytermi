@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Check, X } from 'lucide-react';
 import type { Word } from '../types';
@@ -14,9 +14,16 @@ import { keepShortUnitsTogether } from '../lib/formatText';
 const LessonCheckScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const state = location.state as { words?: Word[]; backPath?: string } | null;
+  const state = location.state as { words?: Word[]; backPath?: string; courseId?: string; nodeId?: string } | null;
   const backPath = state?.backPath ?? '/course';
-  const [questions, setQuestions] = useState(() => lessonChecks(state?.words ?? []).map(({ quiz }) => buildCustomQuizItem(quiz)));
+  const [questions, setQuestions] = useState(() => lessonChecks(state?.words ?? []).map(({ word, quiz }) => ({ ...buildCustomQuizItem(quiz), wordId: word.id })));
+  const [attempt, setAttempt] = useState(1);
+  const startedRef = useRef(false);
+  useEffect(() => {
+    if (startedRef.current || questions.length === 0) return;
+    startedRef.current = true;
+    logClick('lesson_check_start', { course_id: state?.courseId, node_id: state?.nodeId, total: questions.length });
+  }, [questions.length, state?.courseId, state?.nodeId]);
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [mistakes, setMistakes] = useState<typeof questions>([]);
@@ -49,14 +56,14 @@ const LessonCheckScreen = () => {
           <p className="mt-2 text-sm text-[var(--color-ink-3)]">{questions.length}문제 중 {questions.length - mistakes.length}개 정답</p>
         </div>
         <PraiseNote
-          title="방금 배운 걸 바로 써봤어요"
+          title={correctCount > 0 ? `${correctCount}개 상황 문제에 정답을 골랐어요` : '해설을 확인했어요'}
           body={praiseForQuiz({ accuracy, maxCombo: correctCount, total: questions.length })}
           className="w-full"
         />
         <div className="w-full flex flex-col gap-2">
           {mistakes.length > 0 && (
             <button
-              onClick={() => { setQuestions(mistakes); setMistakes([]); setIndex(0); setSelected(null); }}
+              onClick={() => { setQuestions(mistakes); setMistakes([]); setIndex(0); setSelected(null); setAttempt(value => value + 1); }}
               className="w-full py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90"
             >
               틀린 문제 다시 풀기
@@ -75,7 +82,7 @@ const LessonCheckScreen = () => {
 
   const goNext = () => {
     if (index === questions.length - 1) {
-      logClick('lesson_check_complete', { total: questions.length, correct: questions.length - mistakes.length });
+      logClick('lesson_check_complete', { course_id: state?.courseId, node_id: state?.nodeId, total: questions.length, correct: questions.length - mistakes.length, attempt });
     }
     setIndex(index + 1);
     setSelected(null);
@@ -85,7 +92,7 @@ const LessonCheckScreen = () => {
     <div className="lesson-check-screen app-soft-screen flex h-full flex-col">
       <div className="app-soft-header px-5 pb-4 pt-4">
         <div className="flex items-center gap-3">
-          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--color-button-secondary)]">
+          <div role="progressbar" aria-label="이해 확인 진행률" aria-valuemin={0} aria-valuemax={questions.length} aria-valuenow={index + 1} className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--color-button-secondary)]">
             <div className="h-full rounded-full bg-brand-500" style={{ width: `${((index + 1) / questions.length) * 100}%` }} />
           </div>
           <p className="text-xs font-semibold tabular-nums text-[var(--color-ink-3)]">{index + 1}/{questions.length}</p>
@@ -116,6 +123,7 @@ const LessonCheckScreen = () => {
                 disabled={revealed}
                 onClick={() => {
                   setSelected(optionIndex);
+                  logClick('lesson_check_answer', { course_id: state?.courseId, node_id: state?.nodeId, word_id: question.wordId, correct: option.isCorrect, attempt });
                   if (option.isCorrect) feedbackCorrect();
                   else { feedbackWrong(); setMistakes(prev => [...prev, question]); }
                 }}

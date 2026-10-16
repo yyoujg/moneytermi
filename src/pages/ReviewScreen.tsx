@@ -30,10 +30,13 @@ const QuizPage = () => {
 
   const [queue, setQueue] = useState<Word[]>([]);
   const [started, setStarted] = useState(false);
+  const [initialTotal, setInitialTotal] = useState(0);
   useEffect(() => {
     if (!started && dueQueue.length > 0) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setQueue(shuffle(dueQueue));
+      setInitialTotal(dueQueue.length);
+      logClick('quiz_start', { mode: 'review', total: dueQueue.length });
       setStarted(true);
     }
   }, [dueQueue, started]);
@@ -43,6 +46,7 @@ const QuizPage = () => {
   const [showHint, setShowHint] = useState(false);
   const [combo, setCombo] = useState(0);
   const [totalCorrect, setTotalCorrect] = useState(0);
+  const [firstCorrect, setFirstCorrect] = useState(0);
   const [lastEarned, setLastEarned] = useState(0);   // 서버가 채점한 금액. 응답 전엔 0
   const [capped, setCapped] = useState(false);
   const reviewRecordedIds = useRef<Set<number>>(new Set());
@@ -63,10 +67,10 @@ const QuizPage = () => {
     if (!completed || completedRef.current) return;
     completedRef.current = true;
     feedbackQuizComplete(totalCorrect === queue.length);
-    logClick('quiz_complete', { mode: 'review', total: queue.length, correct: totalCorrect });
-    requestAppReview();
+    logClick('quiz_complete', { mode: 'review', total: initialTotal, correct: firstCorrect, attempts: queue.length });
+    if (firstCorrect > 0) requestAppReview();
     void refreshWallet();   // m4·50XP 보너스 반영
-  }, [completed, queue.length, refreshWallet, totalCorrect]);
+  }, [completed, queue.length, refreshWallet, totalCorrect, firstCorrect, initialTotal]);
 
   const goNext = () => {
     setIndex((i) => i + 1);
@@ -82,10 +86,12 @@ const QuizPage = () => {
     // 즉시 피드백은 낙관적, 포인트·콤보·m3는 서버가 채점
     // 괄호 약어·슬래시 항목도 정답 인정 (서버 answer_matches와 동일 규칙)
     const isCorrect = answerMatches(input, word.word);
+    logClick('quiz_answer', { mode: 'review', word_id: word.id, correct: isCorrect, first_attempt: !reviewRecordedIds.current.has(word.id), used_hint: showHint });
 
     // SRS 일정은 같은 세션의 단어별 첫 제출 결과로 한 번만 기록한다.
     // 첫 오답 뒤 재정답을 별도 완전 성공으로 기록하면 간격이 과하게 늘 수 있다.
     if (!reviewRecordedIds.current.has(word.id)) {
+      if (isCorrect) setFirstCorrect(value => value + 1);
       reviewRecordedIds.current.add(word.id);
       void recordReview(word.id, isCorrect, showHint);
     }
@@ -130,10 +136,10 @@ const QuizPage = () => {
     return (
       <LearningCompletionScreen
         mascot="crown"
-        title="오늘 다시 보기 완료!"
-        subtitle={`${queue.length}문제 중 ${totalCorrect}개 정답`}
-        actionLabel="퀘스트로"
-        onAction={() => navigate('/home')}
+        title="오늘 기억 확인을 마쳤어요"
+        subtitle={`첫 시도 ${initialTotal}문제 중 ${firstCorrect}개 정답`}
+        actionLabel="홈으로"
+        onAction={() => navigate('/course')}
         actionPlacement="inline"
         titleSize="xl"
       >
@@ -198,7 +204,7 @@ const QuizPage = () => {
                   status === 'wrong' ? 'bg-danger-500/10 border-danger-500/40 text-danger-400' :
                   'bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink)] focus:border-brand-500/50'}
               `}
-              style={{ caretColor: 'var(--color-brand-500)' }}
+              style={{ caretColor: 'var(--color-brand-action)' }}
             />
             {status === 'correct' && (
               <p className="text-xs font-bold text-success-400 mt-1.5! px-1">정답! 바로 맞혔어요{capped ? ' 오늘 보상 한도에 도달했어요' : lastEarned > 0 ? ` +${lastEarned}P` : ''}</p>
@@ -212,8 +218,7 @@ const QuizPage = () => {
             type="button"
             onClick={() => handleSubmit()}
             disabled={status !== 'idle' || !input.trim()}
-            className="w-full py-4 rounded-button text-white text-xs font-bold active:opacity-90 disabled:opacity-30"
-            style={{ backgroundColor: 'var(--color-brand-500)' }}
+            className="w-full py-4 rounded-button bg-brand-500 text-white text-xs font-bold active:opacity-90 disabled:opacity-100"
           >
             제출하기
           </button>

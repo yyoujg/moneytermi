@@ -8,7 +8,6 @@ import { useCountUp } from '../hooks/useCountUp';
 import { markNodeDone } from '../lib/pathProgress';
 import { getGrowthStage } from '../constants';
 import { feedbackCorrect, feedbackWrong, feedbackQuizComplete, feedbackTierUp } from '../lib/feedback';
-import { requestAppReview } from '../lib/review';
 import { logClick } from '../lib/analytics';
 import { shareTossLink } from '../lib/share';
 import { Card } from '../components/ui/Card';
@@ -16,7 +15,6 @@ import { PointIcon, XpIcon } from '../components/StatIcons';
 import { buildQuizItem, pickQuizType, type QuizOption } from '../lib/quiz';
 import { shouldScheduleRetry } from '../lib/review';
 import { takeShuffled } from '../lib/random';
-import { learningOutcomeFor } from '../lib/learningOutcome';
 import { LearningCompletionScreen } from '../components/learning/LearningCompletionScreen';
 import { LearningEmptyState } from '../components/learning/LearningEmptyState';
 import { LearningStatRow } from '../components/learning/LearningStatRow';
@@ -48,11 +46,14 @@ const QuizScreen = () => {
     quizQueue?: Word[];
     backPath?: string;
     nodeId?: string;
+    lessonId?: string;
+    courseId?: string;
     reviewMode?: boolean;
-    mode?: 'lesson_recall' | 'lesson_warmup' | 'course_review';
+    mode?: 'lesson_recall' | 'lesson_warmup' | 'course_review' | 'course_quiz';
     nextRoute?: { pathname: string; state?: unknown; label?: string };
   } | null;
   const passedQueue: Word[] = navState?.quizQueue ?? [];
+  const mode = navState?.mode ?? 'quiz';
   const backPath = navState?.backPath ?? '/home';
   const reviewMode = navState?.reviewMode === true || navState?.mode === 'lesson_recall' || navState?.mode === 'lesson_warmup' || navState?.mode === 'course_review';
   const sessionLabel = navState?.mode === 'lesson_warmup'
@@ -85,10 +86,17 @@ const QuizScreen = () => {
   const [capped, setCapped] = useState(false);   // 하루 보상 한도(서버) 도달
   const [showPointPop, setShowPointPop] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
+  const [firstCorrect, setFirstCorrect] = useState(0);
   const [shake, setShake] = useState(false);
   const { soundOn, vibrationOn } = useSettings();
   const reviewRecordedIds = useRef<Set<number>>(new Set());
   const completedRef = useRef(false);
+  const startedRef = useRef(false);
+  useEffect(() => {
+    if (startedRef.current || baseQueue.length === 0) return;
+    startedRef.current = true;
+    logClick('quiz_start', { mode, total: baseQueue.length, node_id: navState?.nodeId ?? navState?.lessonId, course_id: navState?.courseId });
+  }, [baseQueue.length, mode, navState?.nodeId, navState?.lessonId, navState?.courseId]);
 
   const currentWord = quizQueue[currentQuizIndex];
   const earnedShown = useCountUp(totalEarned);
@@ -114,11 +122,10 @@ const QuizScreen = () => {
     // 승급이면 웅장하게, 아니면 정답률에 따라
     if (getGrowthStage(xp).id > getGrowthStage(xpAtStart.current).id) feedbackTierUp();
     else feedbackQuizComplete(correctCount === quizQueue.length);
-    logClick('quiz_complete', { mode: 'quiz', total: quizQueue.length, correct: correctCount, node_id: navState?.nodeId });
+    logClick('quiz_complete', { mode, total: baseQueue.length, correct: firstCorrect, attempts: quizQueue.length, node_id: navState?.nodeId ?? navState?.lessonId, course_id: navState?.courseId });
     if (navState?.nodeId) markNodeDone(navState.nodeId);   // 패스의 퀴즈·복습 노드를 완료 표시
-    requestAppReview();
     void refreshWallet();   // m4(퀴즈 N문제)·50XP 보너스는 서버가 올린다 — 세션 끝에 한 번 읽는다
-  }, [correctCount, finished, navState?.nodeId, quizQueue.length, refreshWallet, xp]);
+  }, [correctCount, firstCorrect, finished, navState?.nodeId, navState?.lessonId, navState?.courseId, mode, baseQueue.length, quizQueue.length, refreshWallet, xp]);
 
   // 풀 문제가 없을 때(아는 단어 0개로 딥링크 진입 등). 완료 화면으로 보내면 "0문제 완료 🎉"가 뜬다.
   if (quizQueue.length === 0) {
@@ -134,7 +141,7 @@ const QuizScreen = () => {
 
   // 완료 화면
   if (currentQuizIndex >= quizQueue.length) {
-    const accuracy = quizQueue.length > 0 ? Math.round((correctCount / quizQueue.length) * 100) : 0;
+    const accuracy = baseQueue.length > 0 ? Math.round((firstCorrect / baseQueue.length) * 100) : 0;
     const stageBefore = getGrowthStage(xpAtStart.current);
     const stageAfter = getGrowthStage(xp);
     const stageUp = stageAfter.id > stageBefore.id;
@@ -143,14 +150,13 @@ const QuizScreen = () => {
       : navState?.mode === 'course_review'
         ? '다시 보기 완료!'
         : '확인 완료!';
-    const outcome = learningOutcomeFor({ words: baseQueue });
 
     return (
       <LearningCompletionScreen
         mascot="great"
         title={completionTitle}
         subtitle={`${baseQueue.length}문제 완료${retryQueue.length > 0 ? ` · 다시 푼 문제 ${retryQueue.length}개` : ''}`}
-        actionLabel={navState?.nextRoute?.label ?? (backPath === '/course' ? '코스로' : '홈으로')}
+        actionLabel={navState?.nextRoute?.label ?? (backPath.startsWith('/course') ? '주제로 돌아가기' : '퀘스트로')}
         onAction={() => navState?.nextRoute
           ? navigate(navState.nextRoute.pathname, navState.nextRoute.state === undefined ? undefined : { state: navState.nextRoute.state })
           : navigate(backPath)}
@@ -168,7 +174,7 @@ const QuizScreen = () => {
               <span className="text-xl font-bold text-[var(--color-ink)]">+{Math.max(0, xp - xpAtStart.current)}</span>
             </div>
           </LearningStatRow>
-          <LearningStatRow label="정답률">
+          <LearningStatRow label="첫 시도 정답률">
             <span className="text-xl font-bold text-[var(--color-ink)]">{accuracy}%</span>
           </LearningStatRow>
           <LearningStatRow label="최고 연속 정답">
@@ -187,8 +193,8 @@ const QuizScreen = () => {
           style={{ '--i': 3 } as React.CSSProperties}
         />
         <Card pad="md" className="w-full anim-fade-up" style={{ '--i': 4 } as React.CSSProperties}>
-          <p className="text-xs font-bold text-brand-500 mb-1.5!">다음에 보이면</p>
-          <p className="text-sm font-semibold text-[var(--color-ink)] leading-relaxed break-keep">{outcome}</p>
+          <p className="text-xs font-bold text-brand-500 mb-1.5!">이번에 확인한 내용</p>
+          <p className="text-sm font-semibold text-[var(--color-ink)] leading-relaxed break-keep">처음 푼 {baseQueue.length}문제 중 {firstCorrect}개에 정답을 골랐어요. 나중에 다시 보며 기억을 확인해요.</p>
         </Card>
         <Card tone="surface" pad="md" className="w-full flex flex-col gap-3 anim-fade-up" style={{ '--i': 5 } as React.CSSProperties}>
           <div className="flex items-start gap-3">
@@ -225,6 +231,9 @@ const QuizScreen = () => {
     setSelected(option.answer);
     // 즉시 피드백은 낙관적 (정답 단어는 클라가 이미 앎). 포인트·콤보는 서버가 채점.
     const isCorrect = option.isCorrect;
+    const firstAttempt = currentQuizIndex < baseQueue.length;
+    logClick('quiz_answer', { mode, word_id: currentWord.id, correct: isCorrect, first_attempt: firstAttempt, node_id: navState?.nodeId ?? navState?.lessonId, course_id: navState?.courseId });
+    if (firstAttempt && isCorrect) setFirstCorrect(value => value + 1);
     if (reviewMode && !reviewRecordedIds.current.has(currentWord.id)) {
       reviewRecordedIds.current.add(currentWord.id);
       void recordReview(currentWord.id, isCorrect, false);

@@ -9,7 +9,7 @@ import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
 import { calcStreak } from '../lib/streak';
 import { isRewardedAdEnabled, preloadRewardedAd, showRewardedAd } from '../lib/ads';
-import { ENERGY_REFILL_COST, LESSON_COST, XP_BONUS_POINTS, XP_BONUS_STEP } from '../constants';
+import { ENERGY_REFILL_COST, XP_BONUS_POINTS, XP_BONUS_STEP } from '../constants';
 import { feedbackClaim, feedbackBoost } from '../lib/feedback';
 import { PointCelebration, type PointReward } from './PointCelebration';
 import { RollingNumber } from './RollingNumber';
@@ -260,7 +260,7 @@ export const TopBar = () => {
         ) : (
           <div className="px-5 pb-6 flex flex-col gap-2">
             {shopReason === 'lesson' && (
-              <p className="text-sm font-bold text-[var(--color-ink)] mb-1 break-keep">레슨을 시작하려면 {LESSON_COST}P가 필요해요</p>
+              <p className="text-sm font-bold text-[var(--color-ink)] mb-1 break-keep">학습 시작에는 포인트가 필요하지 않아요</p>
             )}
             <p className="flex items-center gap-1 text-xs text-[var(--color-ink-3)] mb-1">보유 <PointIcon size={12} />{points.toLocaleString()}P</p>
 
@@ -301,7 +301,7 @@ export const TopBar = () => {
               </p>
             </div>
             <p className="text-2xs text-[var(--color-ink-4)] mt-1 leading-relaxed">
-              첫 레슨은 무료예요. 이후 레슨 시작에 {LESSON_COST}P가 들어요. 학습·퀴즈 시작에는 에너지 1이 들고, 복습은 무료예요. 포인트는 순위에 반영되지 않아요.
+              새 학습과 코스 퀴즈를 처음 시작할 때 에너지 1을 써요. 이어하기, 다시 보기, 복습은 무료예요. 포인트는 선택한 에너지 충전과 부스트에만 써요.
             </p>
           </div>
         )}

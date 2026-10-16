@@ -5,6 +5,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Word } from '../types';
 import { lessonChecks } from '../lib/quiz';
 import LessonCheckScreen from './LessonCheckScreen';
+import expandedChecks from '../../supabase/content/lesson-checks-20261016.json';
+import type { CustomQuiz } from '../lib/quiz';
 
 vi.mock('../lib/feedback', () => ({ feedbackCorrect: vi.fn(), feedbackWrong: vi.fn() }));
 vi.mock('../lib/analytics', () => ({ logClick: vi.fn() }));
@@ -33,7 +35,10 @@ const mount = (entry: string | { pathname: string; state: unknown }) => {
   ));
   cleanup = () => { act(() => root.unmount()); container.remove(); };
   const click = (label: string) => {
-    const button = [...container.querySelectorAll('button')].find(el => el.textContent?.trim().endsWith(label));
+    const button = [...container.querySelectorAll('button')].find(el => {
+      const text = [...el.childNodes].filter(node => node.nodeType === Node.TEXT_NODE).map(node => node.textContent).join('').replace(/\u00a0/g, ' ').trim();
+      return text === label;
+    });
     expect(button, `버튼: ${label}`).toBeDefined();
     act(() => button!.dispatchEvent(new MouseEvent('click', { bubbles: true })));
   };
@@ -41,6 +46,18 @@ const mount = (entry: string | { pathname: string; state: unknown }) => {
 };
 
 describe('레슨 이해 확인', () => {
+  it.each([0, 1, 2, 173, 220])('신규 문항 %i의 정답과 해설을 표시하고 완료한다', index => {
+    const entry = expandedChecks[index];
+    const quiz = entry.quiz as CustomQuiz;
+    const { container, click } = mount({ pathname: '/lesson-check', state: { words: [word(entry.wordId, [quiz])] } });
+    expect(container.textContent?.replace(/\u00a0/g, ' ')).toContain(quiz.q);
+    click(quiz.options[quiz.answer]);
+    expect(container.textContent).toContain('맞았어요');
+    expect(container.textContent?.replace(/\u00a0/g, ' ')).toContain(quiz.explanation);
+    click('결과 보기');
+    expect(container.textContent).toContain('1문제 중 1개 정답');
+  });
+
   it('해설이 있는 전용 문항만 용어당 하나 고른다', () => {
     const words = [
       word(1, [{ type: 'quiz', q: '일반 퀴즈', options: ['a'], answer: 0 }, check, { ...check, q: '두 번째' }]),

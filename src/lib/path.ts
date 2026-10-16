@@ -127,13 +127,14 @@ const buildSection = (course: Course, knownIds: Set<number>, carried: Word[], ga
 };
 
 export const buildPath = (courses: Course[], knownIds: Set<number>): PathSection[] => {
-  const carried: Word[] = [];
-  let gated = false;
+  const topics = new Map<string, { carried: Word[]; gated: boolean }>();
   return courses.map(c => {
-    const sec = buildSection(c, knownIds, [...carried], gated);
-    carried.push(...c.words);
-    // 이 코스의 단어를 전부 알아야 다음 코스가 열린다.
-    gated = gated || !c.words.every(w => knownIds.has(w.id));
+    const key = `${c.level}|${c.category}`;
+    const topic = topics.get(key) ?? { carried: [], gated: false };
+    const sec = buildSection(c, knownIds, [...topic.carried], topic.gated);
+    topic.carried.push(...c.words);
+    topic.gated = topic.gated || !c.words.every(w => knownIds.has(w.id));
+    topics.set(key, topic);
     return sec;
   });
 };
