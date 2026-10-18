@@ -1,28 +1,83 @@
-name: Deploy to App in Toss
+name: 앱 배포 및 서버 격리 검사
 
 on:
   push:
     branches:
       - main
+      - quality/quiz-server-v2
+  workflow_dispatch:
 
 jobs:
+  server-tests:
+    name: 서버 동시성 및 멱등성 검사
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: moneytermi_quiz_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 127.0.0.1:16493:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d moneytermi_quiz_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - name: 소스 가져오기
+        uses: actions/checkout@v5
+
+      - name: 노드 20 준비
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+
+      - name: 데이터베이스 명령 도구 준비
+        run: |
+          if ! command -v psql >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y postgresql-client
+          fi
+
+      - name: 독립 서버의 실제 동시성 검사
+        run: node supabase/tests/quiz-idempotency.cjs
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: '16493'
+          PGUSER: postgres
+          PGDATABASE: moneytermi_quiz_test
+
   deploy:
+    name: 메인 브랜치 자동 배포
+    needs: server-tests
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: 소스 가져오기
         uses: actions/checkout@v5
 
-      - name: Setup Node.js
+      - name: 노드 20 준비
         uses: actions/setup-node@v5
         with:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: 의존성 설치
         run: npm ci
 
-      - name: Build
+      - name: 단위 검사
+        run: npm test
+
+      - name: 코드 규칙 검사
+        run: npm run lint
+
+      - name: 타입 검사
+        run: npx tsc -b
+
+      - name: 빌드
         run: npm run build
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
@@ -30,5 +85,5 @@ jobs:
           VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
           VITE_REWARDED_AD_GROUP_ID: ${{ secrets.VITE_REWARDED_AD_GROUP_ID }}
 
-      - name: Deploy
+      - name: 배포
         run: npx ait deploy --api-key ${{ secrets.AIT_API_KEY }}
