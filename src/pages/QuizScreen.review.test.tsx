@@ -100,11 +100,21 @@ const mount = async (extraState: Record<string, unknown> = {}, screen: ReactNode
   const click = async (text: string) => {
     const button = [...container.querySelectorAll('button')].find(el => el.textContent?.includes(text));
     expect(button, `버튼: ${text}`).toBeDefined();
+    const isOption = button!.classList.contains('quiz-option');
     await act(async () => {
       button!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
+    // 기존 채점 후 흐름 검사는 선택과 확정을 함께 진행한다. 선택 단계는 아래 choose로 별도 검사한다.
+    if (isOption) {
+      const confirm = [...container.querySelectorAll('button')].find(el => el.textContent === '정답 확인')!;
+      await act(async () => { confirm.click(); });
+    }
   };
-  return { container, click };
+  const choose = async (text: string) => {
+    const button = [...container.querySelectorAll<HTMLButtonElement>('.quiz-option')].find(el => el.textContent?.includes(text))!;
+    await act(async () => { button.click(); });
+  };
+  return { container, click, choose };
 };
 
 beforeEach(() => {
@@ -233,5 +243,84 @@ describe('조개 표시와 보상 값 유지', () => {
     expect(container.textContent).toContain('XP 50마다 조개 50개');
     expect(container.textContent).toContain('학습·퀴즈를 새로 시작할 때 1씩 써요');
     expect(container.textContent).not.toMatch(/포인트|10P|50P|300P/);
+  });
+});
+
+describe('선택 후 정답 확인과 답안 전송 순서', () => {
+  it('보기 선택만으로 채점하지 않고 확정 전 답을 바꿀 수 있다', async () => {
+    const { container, choose, click } = await mount();
+    await choose('오답');
+    expect(state.submitQuizAnswer).not.toHaveBeenCalled();
+    expect(state.recordReview).not.toHaveBeenCalled();
+    expect(container.querySelector('[aria-pressed="true"]')).toHaveTextContent('오답');
+    await choose('용어1');
+    expect(state.submitQuizAnswer).not.toHaveBeenCalled();
+    await click('정답 확인');
+    expect(state.submitQuizAnswer).toHaveBeenCalledWith(1, '용어1', 'mc', false, true);
+    expect(state.submitQuizAnswer).toHaveBeenCalledTimes(1);
+  });
+  it('오답 뒤에도 모든 보기를 보존하고 정답과 내 답을 구분한다', async () => {
+    const { container, click } = await mount();
+    await click('오답');
+    const options = [...container.querySelectorAll<HTMLButtonElement>('.quiz-option')];
+    expect(options).toHaveLength(2);
+    expect(options.every(option => option.disabled)).toBe(true);
+    expect(options.find(option => option.textContent?.includes('용어1'))).toHaveTextContent('정답');
+    expect(options.find(option => option.textContent?.includes('오답'))).toHaveTextContent('내 답');
+  });
+  it('서버 답안을 기다리는 동안 다음 문제와 중복 제출을 막는다', async () => {
+    let resolve!: (value: { combo: number; earned: number; capped: boolean }) => void;
+    state.submitQuizAnswer.mockImplementationOnce(() => new Promise(done => { resolve = done; }));
+    const { container, click } = await mount();
+    await click('용어1');
+    const next = [...container.querySelectorAll<HTMLButtonElement>('button')].find(button => button.textContent === '답안 확인 중...')!;
+    expect(next).toBeDisabled();
+    await act(async () => { next.click(); });
+    expect(container).toHaveTextContent('뜻1');
+    expect(state.submitQuizAnswer).toHaveBeenCalledTimes(1);
+    await act(async () => { resolve({ combo: 1, earned: 10, capped: false }); });
+    await click('다음 문제');
+    expect(container).toHaveTextContent('뜻2');
+  });
+  it('전송 오류에 보상을 만들어내지 않고 안내 후 이동할 수 있다', async () => {
+    state.submitQuizAnswer.mockRejectedValueOnce(new Error('연결 끊김'));
+    const { container, click } = await mount();
+    await click('용어1');
+    expect(container.querySelector('[role="alert"]')).toHaveTextContent('답안 전송을 확인하지 못했어요.');
+    expect(container).not.toHaveTextContent('+10개');
+    await click('다음 문제');
+    expect(container).toHaveTextContent('뜻2');
+  });
+});
+
+describe('선택 정보와 문제 전환', () => {
+  it('확정 전에는 정답 여부에 따라 선택 색이나 표시가 달라지지 않는다', async () => {
+    const { container, choose } = await mount();
+    await choose('오답');
+    const wrongClass = container.querySelector('.quiz-option[aria-pressed="true"]')!.className;
+    const wrongMarker = container.querySelector('.quiz-option[aria-pressed="true"] > span')!.className;
+    await choose('용어1');
+    expect(container.querySelector('.quiz-option[aria-pressed="true"]')).toHaveClass(wrongClass);
+    expect(container.querySelector('.quiz-option[aria-pressed="true"] > span')!.className).toBe(wrongMarker);
+    expect(state.submitQuizAnswer).not.toHaveBeenCalled();
+  });
+  it('같은 단어가 연속되어도 문제 맨 위와 제목으로 초점을 옮긴다', async () => {
+    const { container, click } = await mount({ quizQueue: [word(1), word(1)] });
+    await click('오답');
+    const content = container.querySelector<HTMLDivElement>('.quiz-question-content')!;
+    content.scrollTop = 100;
+    await click('다음 문제');
+    expect(content.scrollTop).toBe(0);
+    expect(document.activeElement).toBe(container.querySelector('.quiz-prompt-main'));
+    expect(container.querySelector('.quiz-confirm-footer button')).toBeDisabled();
+  });
+  it('응답이 없으면 전송 안내를 표시하고 지급액을 추정하지 않는다', async () => {
+    state.submitQuizAnswer.mockResolvedValueOnce(null);
+    const { container, click } = await mount();
+    await click('용어1');
+    expect(container.querySelector('[role="alert"]')).toHaveTextContent('답안 전송을 확인하지 못했어요.');
+    expect(container.querySelector('.quiz-answer-reward')).toBeNull();
+    await click('다음 문제');
+    expect(container).toHaveTextContent('뜻2');
   });
 });

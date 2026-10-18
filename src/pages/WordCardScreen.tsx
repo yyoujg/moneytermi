@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ExternalLink, BookOpen, Newspaper, Link2 } from '../components/ui/OtterIcons';
+import { ExternalLink, Newspaper, Link2 } from '../components/ui/OtterIcons';
 import { ChevronLeft, ChevronRight } from '../components/ui/ControlIcons';
 import { BottomSheet } from '@toss/tds-mobile';
 import { showModal } from '../components/AlertModal';
@@ -15,6 +15,8 @@ import { feedbackLearned, feedbackLessonComplete } from '../lib/feedback';
 import { StreakCelebration } from '../components/StreakCelebration';
 import { Card } from '../components/ui/Card';
 import { ActionButton } from '../components/ui/ActionButton';
+import { WordMeaningCard } from '../components/learning/WordMeaningCard';
+import { additionalMeaning } from '../lib/learningText';
 import { WordVisuals, type Terms } from '../components/WordVisuals';
 import { lessonChecks, termPattern } from '../lib/quiz';
 import { selectLessonQuizWords } from '../lib/lessonQuiz';
@@ -51,9 +53,7 @@ const Highlight = ({ text, keyword, pattern }: { text: string; keyword: string; 
 
 // 자세히 알아보기 본문(요약과 겹치는 첫 문장 제외)과 유효한 관련 용어
 const wordExtras = (word: Word, lookup: WordLookup) => {
-  const detail = word.detailedMeaning.startsWith(word.meaning)
-    ? word.detailedMeaning.slice(word.meaning.length).trim()
-    : word.detailedMeaning;
+  const detail = additionalMeaning(word.meaning, word.detailedMeaning);
   const related = relatedWordNames(word, lookup);
   return { detail, related };
 };
@@ -85,39 +85,10 @@ const WordCard = ({
   keyword: string;
   visualTerms: Terms;
 }) => {
-  // 쉬운 예시(데이터 앞의 '학습용 가정:' 표시는 뺀다)
-  const example = word.learningExample?.replace(/^학습용 가정:\s*/, '');
   return (
   <div className="flex flex-col gap-3 px-5 pb-6">
 
-    {/* 단어 + 뜻 */}
-    <Card pad="lg" className="word-study-definition">
-      <p className="mb-3! text-xs font-bold text-[var(--color-ink-3)]">한 문장으로 이해하기</p>
-      <h1 className="font-bold text-[var(--color-ink)] tracking-[-0.03em] break-keep text-[28px] leading-[1.3]">
-        {word.word}
-      </h1>
-
-      {/* 뜻 — 단어와 같은 카드 */}
-      <div className="mt-3">
-        <p className="text-[17px] text-[var(--color-ink)] font-medium break-keep leading-[1.65] tracking-[-0.01em]">{word.meaning}</p>
-        {/* 출처는 자세히 보기 시트 맨 아래로. 시트가 없는 단어만 여기 둔다 */}
-        {!onDetail && word.sources && word.sources.length > 0 && (
-          <p className="mt-2 text-2xs text-[var(--color-ink-3)]">{word.sources.map(s => SOURCE_NAMES[s] ?? s).join(' · ')} 참고</p>
-        )}
-      </div>
-      {/* 읽었더니 이해됐다고 느낄 예시 하나는 자세히 보기 밖에 둔다 */}
-      {example && (
-        <div className="word-study-example">
-          <p className="text-sm font-bold text-[var(--color-ink)]">예를 들어볼게요</p>
-          <p className="mt-1.5 text-[15px] text-[var(--color-ink-2)] break-keep leading-[1.7]">{example}</p>
-        </div>
-      )}
-      {onDetail && (
-        <ActionButton tone="soft" fullWidth onClick={onDetail} className="mt-5!">
-          <BookOpen size={18} />자세히 보기
-        </ActionButton>
-      )}
-    </Card>
+    <WordMeaningCard word={word} sources={(word.sources ?? []).map(source => SOURCE_NAMES[source] ?? source)} onDetail={onDetail} />
 
     {/* 순서: 단어+뜻 → 그래프·표 → 뉴스 → 관련 용어. 자세히 알아보기는 단어 카드의 버튼으로 여는 시트 */}
     {/* 그래프·표 — 뜻 바로 아래에서 그림으로 이해시킨다 */}

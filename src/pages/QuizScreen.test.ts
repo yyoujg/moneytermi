@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { maskTerm } from '../lib/quiz';
-import { calcEarned, getOptions, getDistractors, buildQuizItem, pickQuizType, clozeText, scenarioText, termPattern } from '../lib/quiz';
+import { calcEarned, getOptions, getDistractors, buildQuizItem, pickQuizType, clozeText, scenarioText, termPattern, buildCustomQuizItem, lessonChecks, type CustomQuiz } from '../lib/quiz';
 import type { Word } from '../types';
 
 // ── calcEarned ────────────────────────────────────────────────
@@ -234,5 +234,147 @@ describe('custom quiz', () => {
   });
   it('객관식이 없으면 기존 유형', () => {
     expect(pickQuizType(w(3, '금리'))).not.toBe('custom');
+  });
+});
+
+
+describe('자동 보기 품질 회귀', () => {
+  const key = (label: string) => label.normalize('NFKC').replace(/\s+/gu, '').toLowerCase();
+
+  it('정답과 오답의 공백·대소문자·유니코드 표기 중복을 제외하고 전체 자료로 보충한다', () => {
+    const correct = w(101, 'ＧＤＰ');
+    const known = [correct, w(102, 'GDP'), w(103, 'g d p'), w(104, '가계수지')];
+    const pool = [...known, w(105, '가계수지'.normalize('NFD')), w(106, '물가'), w(107, '환율')];
+    for (let i = 0; i < 20; i++) {
+      const options = getOptions(correct, known, pool);
+      expect(options).toHaveLength(4);
+      expect(options).toContain(correct.word);
+      expect(new Set(options.map(key)).size).toBe(4);
+    }
+  });
+
+  it('같은 식별자와 같은 이름을 반복해서 오답으로 쓰지 않는다', () => {
+    const correct = w(201, '금리');
+    const pool = [correct, w(202, '물가'), w(202, '환율'), w(203, ' 물 가 '), w(204, '세금'), w(205, '투자')];
+    const wrong = getDistractors(correct, pool, pool);
+    expect(wrong).toHaveLength(3);
+    expect(new Set(wrong.map(word => word.id)).size).toBe(3);
+    expect(new Set(wrong.map(word => key(word.word))).size).toBe(3);
+  });
+
+  it('자료가 부족하면 가짜 보기나 표기만 바꾼 보기를 만들지 않는다', () => {
+    const correct = w(301, 'GDP', { meaning: '국내에서 생산한 가치의 합' });
+    const pool = [correct, w(302, 'ＧＤＰ'), w(303, '기준 금리'), w(304, '기준금리')];
+    for (const type of ['meaning_to_word', 'word_to_meaning', 'cloze', 'scenario_to_word'] as const) {
+      const item = buildQuizItem(type, correct, pool, pool);
+      expect(item.options).toHaveLength(2);
+      expect(item.options.filter(option => option.isCorrect)).toEqual([
+        expect.objectContaining({ answer: correct.word }),
+      ]);
+    }
+    expect(getOptions(correct, pool, pool)).toHaveLength(2);
+    expect(getDistractors(correct, [correct], [correct])).toEqual([]);
+  });
+
+  it('뜻 보기의 마스킹 이후 중복도 제거하고 다른 후보를 끝까지 보충한다', () => {
+    const correct = w(401, '기준금리', { meaning: '기준금리: Ａ' });
+    const known = [correct, w(402, '통화량', { meaning: '통화량: a' }),
+      w(403, '소득', { meaning: '소득: A' }), w(404, '자산', { meaning: '자산: a' })];
+    const pool = [...known, w(405, '물가', { meaning: '가격의 수준' }),
+      w(406, '환율', { meaning: '통화 교환 비율' }), w(407, '세금', { meaning: '정부에 내는 돈' })];
+    for (let i = 0; i < 20; i++) {
+      const item = buildQuizItem('word_to_meaning', correct, known, pool);
+      expect(item.options).toHaveLength(4);
+      expect(new Set(item.options.map(option => key(option.label))).size).toBe(4);
+      expect(item.options.filter(option => option.isCorrect)).toEqual([
+        { label: '____: Ａ', answer: correct.word, isCorrect: true },
+      ]);
+      expect(item.options.filter(option => !option.isCorrect).every(option => option.answer !== correct.word)).toBe(true);
+    }
+  });
+
+  it('뜻 후보가 전부 같은 문구이거나 비어 있으면 정답만 남긴다', () => {
+    const correct = w(501, '기준금리');
+    const pool = [correct, w(502, '물가'), w(503, '환율'), w(504, '세금', { meaning: '  ' })];
+    const item = buildQuizItem('word_to_meaning', correct, pool, pool);
+    expect(item.options).toEqual([{ label: '____ 뜻', answer: correct.word, isCorrect: true }]);
+  });
+});
+
+describe('직접 작성 문제 검증 회귀', () => {
+  const valid: CustomQuiz = { type: 'quiz', q: '올바른 선택은?', options: ['첫째', '둘째', '셋째'], answer: 1, lessonCheck: true, explanation: '둘째가 정답이다.' };
+  const invalid: CustomQuiz[] = [
+    { ...valid, q: ' \n ' },
+    { ...valid, options: [] },
+    { ...valid, options: new Array<string>(3) },
+    { ...valid, options: ['하나'] },
+    { ...valid, options: ['첫째', '  '] },
+    { ...valid, options: ['첫째', '첫째'] },
+    { ...valid, options: ['ＧＤＰ', 'g d p'] },
+    { ...valid, options: ['가계수지', '가계수지'.normalize('NFD')] },
+    ...[-1, 3, 0.5, NaN, Infinity].map(answer => ({ ...valid, answer })),
+  ];
+
+  it.each(invalid)('잘못된 직접 작성 문제는 모든 선택 경로에서 제외한다: %#', quiz => {
+    const word = w(601, '기회비용', { visuals: [quiz], newsExample: '' });
+    expect(pickQuizType(word, () => 0)).toBe('meaning_to_word');
+    const item = buildQuizItem('custom', word, allWords, allWords);
+    expect(item.type).toBe('meaning_to_word');
+    expect(item.options).toHaveLength(4);
+    expect(item.options.filter(option => option.isCorrect)).toEqual([
+      expect.objectContaining({ answer: word.word }),
+    ]);
+    expect(lessonChecks([word])).toEqual([]);
+  });
+
+  it('무효 문제와 섞여 있어도 유효한 직접 작성 문제만 고른다', () => {
+    const word = w(602, '기회비용', { visuals: [invalid[0], valid, invalid[1]] });
+    expect(pickQuizType(word)).toBe('custom');
+    for (let i = 0; i < 20; i++) {
+      const item = buildQuizItem('custom', word, [], [word]);
+      expect(item.promptMain).toBe(valid.q);
+      expect(item.options.filter(option => option.isCorrect)).toEqual([
+        { label: '둘째', answer: word.word, isCorrect: true },
+      ]);
+    }
+    expect(lessonChecks([word])).toEqual([{ word, quiz: valid }]);
+  });
+
+  it('이해 확인은 유효한 문제 중 해설이 있는 첫 문제만 사용한다', () => {
+    const word = w(603, '금리', { visuals: [invalid[0], { ...valid, explanation: ' ' }, valid, { ...valid, q: '다음 문제' }] });
+    expect(lessonChecks([word])).toEqual([{ word, quiz: valid }]);
+  });
+
+  it('독립 호출은 정답 용어 주입 없이 기존 보기 글자 answer와 3개 보기를 유지한다', () => {
+    const item = buildCustomQuizItem(valid);
+    expect(item.type).toBe('custom');
+    expect(item.options).toHaveLength(3);
+    expect(item.options.filter(option => option.isCorrect)).toEqual([
+      { label: '둘째', answer: '둘째', isCorrect: true },
+    ]);
+    expect(item.options.every(option => option.answer === option.label)).toBe(true);
+  });
+});
+
+
+describe('직접 작성 문제 제출값 충돌 방지', () => {
+  it.each(['기회비용', ' 기회 비용 '])('오답 문구가 정답 용어인 문제는 기본 문제로 대체한다: %s', label => {
+    const quiz: CustomQuiz = { type: 'quiz', q: '올바른 것은?', options: ['정답 설명', label, '다른 설명'], answer: 0, lessonCheck: true, explanation: '해설' };
+    const word = w(701, '기회비용', { visuals: [quiz], newsExample: '' });
+    expect(pickQuizType(word, () => 0)).toBe('meaning_to_word');
+    expect(lessonChecks([word])).toEqual([]);
+    const item = buildQuizItem('custom', word, allWords, allWords);
+    expect(item.type).toBe('meaning_to_word');
+    expect(item.options.filter(option => option.answer === word.word)).toHaveLength(1);
+  });
+
+  it('정답 보기 자체가 정답 용어인 문제는 기존대로 사용할 수 있다', () => {
+    const quiz: CustomQuiz = { type: 'quiz', q: '알맞은 용어는?', options: ['기회비용', '매몰비용'], answer: 0 };
+    const word = w(702, '기회비용', { visuals: [quiz] });
+    expect(pickQuizType(word)).toBe('custom');
+    const item = buildQuizItem('custom', word, [], [word]);
+    expect(item.options.filter(option => option.answer === word.word)).toEqual([
+      { label: '기회비용', answer: word.word, isCorrect: true },
+    ]);
   });
 });

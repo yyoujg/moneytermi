@@ -4,44 +4,52 @@ import { shuffle } from './random';
 // 단어 id → 코스 카테고리. buildQuizItem/getDistractors에 주입해 같은 주제 오답을 우선.
 export type CategoryOf = (wordId: number) => string | undefined;
 
-// 오답용 방해 단어 3개 (정답과 겹치지 않게). knownWords가 충분하면 그 안에서.
-// categoryOf가 있으면 정답과 같은 카테고리의 단어를 먼저 채워 그럴듯한 보기를 만든다.
-export const getDistractors = (
+// 화면 표시의 공백·대소문자·유니코드 호환 표기 차이는 같은 보기로 취급한다.
+const optionKey = (text: string): string => text.normalize('NFKC').replace(/\s+/gu, '').toLowerCase();
+
+// 이름 중복은 모든 유형에서, 표시 문구 중복은 뜻 고르기에서 추가로 제외한다.
+const selectDistractors = (
   correctWord: Word,
   knownWords: Word[],
   allWords: Word[],
   categoryOf?: CategoryOf,
+  labelOf?: (word: Word) => string,
 ): Word[] => {
   const pool = knownWords.length >= 4 ? knownWords : allWords;
-  const others = pool.filter(w => w.id !== correctWord.id);
-
-  // 이름이 비슷한 용어(통화정책수단 vs 통화정책체계)는 오답으로 두지 않는다. 기본형 앞 3글자 비교.
-  const head = (w: string) => w.split(/[(/;]/)[0].replace(/\s+/g, '').slice(0, 3);
+  const head = (word: string) => optionKey(word.split(/[(/;]/)[0]).slice(0, 3);
   const myHead = head(correctWord.word);
-  const dissimilar = myHead.length >= 3 ? others.filter(w => head(w.word) !== myHead) : others;
-
-  // 같은 카테고리 우선 정렬 (카테고리 정보 있을 때만)
+  const dissimilar = pool.filter(w => w.id !== correctWord.id && (myHead.length < 3 || head(w.word) !== myHead));
   const cat = categoryOf?.(correctWord.id);
   const ranked = cat
     ? [...shuffle(dissimilar.filter(w => categoryOf?.(w.id) === cat)),
        ...shuffle(dissimilar.filter(w => categoryOf?.(w.id) !== cat))]
     : shuffle(dissimilar);
 
+  const ids = new Set([correctWord.id]);
+  const names = new Set([optionKey(correctWord.word)]);
+  const labels = new Set(labelOf ? [optionKey(labelOf(correctWord))] : []);
   const wrong: Word[] = [];
-  for (const w of ranked) {
+  // 우선 후보가 중복으로 빠져도 전체 자료에서 보충하되, 가짜 보기는 만들지 않는다.
+  for (const w of [...ranked, ...shuffle(allWords)]) {
     if (wrong.length >= 3) break;
+    const name = optionKey(w.word);
+    const label = labelOf ? optionKey(labelOf(w)) : name;
+    if (!name || !label || ids.has(w.id) || names.has(name) || labels.has(label)) continue;
+    ids.add(w.id);
+    names.add(name);
+    labels.add(label);
     wrong.push(w);
   }
-
-  if (wrong.length < 3) {
-    const fallback = shuffle(allWords.filter(w => w.id !== correctWord.id));
-    for (const w of fallback) {
-      if (wrong.length >= 3) break;
-      if (!wrong.some(x => x.id === w.id)) wrong.push(w);
-    }
-  }
-  return wrong.slice(0, 3);
+  return wrong;
 };
+
+// 같은 카테고리와 이미 배운 단어를 우선하며, 유일한 후보가 부족하면 3개 미만을 반환한다.
+export const getDistractors = (
+  correctWord: Word,
+  knownWords: Word[],
+  allWords: Word[],
+  categoryOf?: CategoryOf,
+): Word[] => selectDistractors(correctWord, knownWords, allWords, categoryOf);
 
 export const getOptions = (correctWord: Word, knownWords: Word[], allWords: Word[]): string[] => {
   const wrong = getDistractors(correctWord, knownWords, allWords).map(w => w.word);
@@ -96,13 +104,25 @@ export const clozeText = (word: Word): string | null => {
 
 export type CustomQuiz = Extract<NonNullable<Word['visuals']>[number], { type: 'quiz' }>;
 
+const isValidCustomQuiz = (quiz: CustomQuiz): boolean => {
+  if (typeof quiz.q !== 'string' || !quiz.q.trim() || !Array.isArray(quiz.options) || quiz.options.length < 2) return false;
+  if (!Number.isInteger(quiz.answer) || quiz.answer < 0 || quiz.answer >= quiz.options.length) return false;
+  const labels = Array.from(quiz.options, label => typeof label === 'string' ? optionKey(label) : '');
+  return labels.every(Boolean) && new Set(labels).size === labels.length;
+};
+
 const customQuizzes = (word: Word) =>
-  (word.visuals ?? []).filter((v): v is Extract<NonNullable<Word['visuals']>[number], { type: 'quiz' }> => v.type === 'quiz');
+  (word.visuals ?? []).filter((v): v is CustomQuiz =>
+    v.type === 'quiz' && isValidCustomQuiz(v) &&
+    // 서버는 answer가 정답 용어인지 비교하므로, 오답 문구가 용어와 같으면 문제 전체를 제외한다.
+    v.options.every((label, index) => index === v.answer || optionKey(label) !== optionKey(word.word))
+  );
 
 export const lessonChecks = (words: Word[]) => words.flatMap(word =>
   customQuizzes(word).filter(quiz => quiz.lessonCheck && quiz.explanation?.trim()).slice(0, 1).map(quiz => ({ word, quiz }))
 );
 
+// 직접 호출은 기존대로 보기 글자 자체를 answer로 반환한다. 단어 기반 선택 경로에서 유효성을 검증한다.
 export const buildCustomQuizItem = (quiz: CustomQuiz): QuizItem => {
   const options = quiz.options.map((label, i) => ({ label, answer: label, isCorrect: i === quiz.answer }));
   return {
@@ -137,7 +157,10 @@ export const buildQuizItem = (
     return { ...item, options: item.options.map(opt => opt.isCorrect ? { ...opt, answer: correctWord.word } : opt) };
   }
 
-  const distractors = getDistractors(correctWord, knownWords, allWords, categoryOf);
+  const distractors = selectDistractors(
+    correctWord, knownWords, allWords, categoryOf,
+    type === 'word_to_meaning' ? w => maskTerm(w.meaning, w.word) : undefined,
+  );
 
   if (type === 'word_to_meaning') {
     const opts: QuizOption[] = shuffle([

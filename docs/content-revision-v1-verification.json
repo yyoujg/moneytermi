@@ -1,0 +1,19 @@
+{
+  "observedAt": "2026-10-18T14:18:29.630Z",
+  "totalWords": 1233,
+  "targets": 119,
+  "matched": 119,
+  "untouchedChanged": [],
+  "mismatches": [],
+  "courses": {
+    "rows": 78,
+    "preserved": true
+  },
+  "course_words": {
+    "rows": 1234,
+    "preserved": true
+  },
+  "totalQuizzes": 401,
+  "untouchedWords": 1114,
+  "status": "verified"
+}
