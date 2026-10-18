@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { TrendingUp, X } from 'lucide-react';
+import { X } from '../ui/OtterIcons';
 import { useAppContext } from '../../context/AppContext';
 import { useAuth } from '../../hooks/useAuth';
 import { feedbackCelebrate } from '../../lib/feedback';
@@ -36,7 +36,7 @@ export const LeagueRankCelebration = () => {
     let cancelled = false;
     const db = guestToken ? getGuestClient(guestToken) : supabase;
 
-    db.rpc('my_league_rank')
+    Promise.resolve(db.rpc('my_league_rank'))
       .then(async ({ data, error }) => {
         if (cancelled || error) return;
         const current = normalizeRank(data);
@@ -76,7 +76,7 @@ export const LeagueRankCelebration = () => {
 
   return (
     <div
-      className="fixed inset-0 z-[72] flex items-center justify-center bg-black/55 px-6"
+      className="fixed inset-0 z-[72] flex items-center justify-center bg-[var(--color-overlay)] px-6"
       role="presentation"
       onClick={close}
     >
@@ -85,7 +85,7 @@ export const LeagueRankCelebration = () => {
         aria-modal="true"
         aria-labelledby="league-rank-up-title"
         onClick={e => e.stopPropagation()}
-        className="w-full max-w-xs overflow-hidden rounded-card bg-[var(--color-card)] anim-pop-in"
+        className="app-card w-full max-w-xs overflow-hidden rounded-card bg-[var(--color-card)] anim-pop-in"
       >
         <div className="relative flex flex-col items-center px-5 pb-5 pt-6 text-center">
           <button
@@ -102,9 +102,6 @@ export const LeagueRankCelebration = () => {
             <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-[var(--color-card)] shadow-sm">
               <ProfileAvatar emoji={myEmoji} size={64} />
             </div>
-            <span className="absolute -right-2 -top-1 flex h-9 w-9 items-center justify-center rounded-full bg-brand-500 text-white shadow-sm">
-              <TrendingUp size={19} strokeWidth={2.8} />
-            </span>
           </div>
 
           <p className="mt-5! text-xs font-black text-brand-600">주간 순위 상승</p>

@@ -75,6 +75,20 @@ beforeEach(() => {
 });
 
 describe('NavBar new badges', () => {
+  it.each(['/course', '/home', '/league', '/my'])('%s에서 역할 그림과 진한 메뉴명·현재 페이지로 선택을 구분한다', async path => {
+    const container = await mount(path);
+    const active = container.querySelector('button[aria-current="page"]');
+    expect(active).toBeInTheDocument();
+    expect(active?.querySelector('img[data-icon]')).toHaveAttribute('src', expect.stringMatching(/^\/otter\/v3\/icons\/(library|checklist|chart|profile)\.png$/));
+    expect(active?.querySelector('img[data-icon]')).not.toHaveClass('app-nav-muted');
+    expect(active?.querySelector('img[data-icon]')).toHaveClass('text-[var(--color-ink)]');
+    expect(active?.querySelector(':scope > span')).toHaveClass('text-[var(--color-ink)]');
+    for (const inactive of container.querySelectorAll('button:not([aria-current])')) {
+      expect(inactive.querySelector('img[data-icon]')).toHaveClass('app-nav-muted');
+      expect(inactive.querySelector(':scope > span')).toHaveClass('app-nav-muted');
+    }
+  });
+
   it('받을 수 있는 퀘스트 보상이 있으면 퀘스트 탭에 NEW를 표시한다', async () => {
     baseContext({
       missions: {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Info, Share2 } from 'lucide-react';
+import { Info, Share2 } from '../components/ui/OtterIcons';
 import { BottomSheet, TextButton, Spacing } from '@toss/tds-mobile';
 import { GROWTH_STAGES, getGrowthStage } from '../constants';
 import { useAppContext } from '../context/AppContext';
@@ -12,11 +12,11 @@ import { Card } from '../components/ui/Card';
 import { LeagueRules } from '../components/LeagueRules';
 import { StageGlyph } from '../components/StageGlyph';
 import { ProfileAvatar } from '../components/ProfileAvatar';
+import { LeagueRankBadge } from '../components/league/LeagueRankBadge';
 
 type Row = { rank: number; nickname: string; emoji: string; points: number; is_me: boolean };
 type MyRank = { rank: number | null; total: number; points: number };
 
-const MEDAL = ['🥇', '🥈', '🥉'];
 // 공유 문구: 이번 주 성과가 있으면 그걸 앞세운다
 const shareMessage = (tier: string, weeklyXp: number, rank: number | null | undefined) =>
   rank
@@ -84,7 +84,7 @@ const LeagueScreen = () => {
               <span className="text-lg font-bold text-[var(--color-ink)]">{stage.name}</span>
             </div>
             <div className="mt-auto pt-3">
-              <div className="w-full bg-[var(--color-surface)] rounded-full h-1.5 overflow-hidden mb-1.5">
+              <div role="progressbar" aria-label="다음 등급까지 진행률" aria-valuemin={0} aria-valuemax={100} aria-valuenow={next === null ? 100 : Math.min(100, Math.round(((xp - stage.minPoints) / (next - stage.minPoints)) * 100))} className="w-full bg-[var(--color-surface)] rounded-full h-2 overflow-hidden mb-1.5">
                 <div
                   className="bg-brand-500 h-full rounded-full transition-all duration-700"
                   style={{ width: barReady ? `${next === null ? 100 : Math.min(100, Math.round(((xp - stage.minPoints) / (next - stage.minPoints)) * 100))}%` : '0%' }}
@@ -149,34 +149,32 @@ const LeagueScreen = () => {
         )}
 
         {!failed && rows && rows.length > 0 && (
-          <Card pad="none" className="overflow-hidden" style={{ border: 0 }}>
+          <Card pad="none" className="league-ranking-list overflow-hidden" style={{ border: 0 }}>
             {rows.map((r, i) => (
               <div
                 key={`${r.rank}-${i}`}
-                className="anim-fade-up flex items-center gap-3 px-4 py-3"
-                style={{ '--i': i, ...(r.is_me ? { backgroundColor: 'var(--color-brand-soft)' } : {}) } as React.CSSProperties}
+                className={`league-ranking-row anim-fade-up${r.is_me ? ' is-me' : ''}`}
+                data-podium={r.rank >= 1 && r.rank <= 3 ? r.rank : undefined}
+                style={{ '--i': i } as React.CSSProperties}
               >
-                <span className="w-7 text-center text-sm font-bold text-[var(--color-ink-3)] shrink-0">
-                  {r.rank <= 3 ? MEDAL[r.rank - 1] : r.rank}
-                </span>
+                <LeagueRankBadge rank={r.rank} />
                 <ProfileAvatar emoji={r.is_me ? myEmoji : r.emoji} size={32} />
-                <span className={`flex-1 text-sm truncate ${r.is_me ? 'font-bold text-brand-500' : 'font-medium text-[var(--color-ink)]'}`}>
+                <span className="league-rank-name">
                   {r.is_me ? (user?.nickname ?? r.nickname) : r.nickname}
                 </span>
-                <span className="text-sm font-bold text-[var(--color-ink-2)] shrink-0">{r.points.toLocaleString()}XP</span>
+                <span className="league-rank-xp"><span>{r.points.toLocaleString()}</span><span className="league-rank-xp-unit">XP</span></span>
               </div>
             ))}
 
             {/* 10위 밖이면 내 순위를 맨 아래에 따로 붙인다 */}
             {mine?.rank != null && !rows.some(r => r.is_me) && (
               <div
-                className="flex items-center gap-3 px-4 py-3 border-t-2 border-dashed border-[var(--color-line)]"
-                style={{ backgroundColor: 'var(--color-brand-soft)' }}
+                className="league-ranking-row is-me is-own-separate"
               >
-                <span className="w-7 text-center text-sm font-bold text-brand-500 shrink-0">{mine.rank}</span>
+                <LeagueRankBadge rank={mine.rank} />
                 <ProfileAvatar emoji={myEmoji} size={32} />
-                <span className="flex-1 text-sm font-bold text-brand-500 truncate">{user?.nickname ?? '나'}</span>
-                <span className="text-sm font-bold text-[var(--color-ink-2)] shrink-0">{mine.points.toLocaleString()}XP</span>
+                <span className="league-rank-name">{user?.nickname ?? '나'}</span>
+                <span className="league-rank-xp"><span>{mine.points.toLocaleString()}</span><span className="league-rank-xp-unit">XP</span></span>
               </div>
             )}
           </Card>

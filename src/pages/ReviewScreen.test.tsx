@@ -6,6 +6,7 @@ import type { Word } from '../types';
 import ReviewScreen from './ReviewScreen';
 
 const state = vi.hoisted(() => ({
+  points: 0,
   dueQueue: [] as Word[],
   recordReview: vi.fn(),
   submitQuizAnswer: vi.fn(),
@@ -14,7 +15,7 @@ const state = vi.hoisted(() => ({
 
 vi.mock('../context/AppContext', () => ({
   useAppContext: () => ({
-    points: 0,
+    points: state.points,
     dueQueue: state.dueQueue,
     knownWords: state.dueQueue,
     submitQuizAnswer: state.submitQuizAnswer,
@@ -90,6 +91,7 @@ const mount = async (queue: Word[]) => {
 
 beforeEach(() => {
   vi.useFakeTimers();
+  state.points = 0;
   state.recordReview = vi.fn(() => Promise.resolve());
   state.submitQuizAnswer = vi.fn(() => Promise.resolve({ combo: 0, earned: 0, capped: false }));
   state.refreshWallet = vi.fn(() => Promise.resolve());
@@ -121,8 +123,53 @@ describe('ReviewScreen retry spacing', () => {
     await submit('틀림');
     await act(async () => { vi.advanceTimersByTime(1000); });
 
-    expect(container.textContent).toContain('오늘 기억 확인을 마쳤어요');
-    expect(container.textContent).toContain('첫 시도 1문제 중 0개 정답');
+    expect(container.textContent).toContain('오늘 복습을 마쳤어요');
+    expect(container.querySelector('[data-review-total]')).toHaveTextContent('1문제');
+    expect(container.querySelector('[data-review-correct]')).toHaveTextContent('0개');
+    expect(container.querySelector('section')).toHaveAttribute('aria-label', '첫 시도 1문제 중 0개 정답');
     expect(state.recordReview).toHaveBeenCalledTimes(1);
+  });
+});
+
+
+describe('복습 조개 표시', () => {
+  it.each([0, 1234])('보유 조개는 실제 잔액 %i개를 그대로 표시한다', async points => {
+    state.points = points;
+    const { container, submit } = await mount([word(1)]);
+    await submit('용어1');
+    await act(async () => { vi.advanceTimersByTime(900); });
+    expect(container.querySelector('.review-complete-wallet')).toHaveAttribute('aria-label', '보유 조개 ' + points + '개');
+    expect(container.querySelector('[data-review-balance]')).toHaveTextContent(points + '개');
+    expect(container.textContent).not.toContain('누적 포인트');
+  });
+
+  it('정답 보상을 조개 개수로 표시하고 제출 인수를 유지한다', async () => {
+    state.submitQuizAnswer.mockResolvedValue({ combo: 3, earned: 28, capped: false });
+    const { container, submit } = await mount([word(1)]);
+    await submit('용어1');
+    expect(container.textContent).toContain('+28개');
+    expect(container.textContent).not.toContain('+28P');
+    expect(state.submitQuizAnswer).toHaveBeenCalledWith(1, '용어1', 'typed', false, true);
+  });
+
+  it('보상 한도일 때 조개 수치 대신 기존 한도 문구를 유지한다', async () => {
+    state.submitQuizAnswer.mockResolvedValue({ combo: 1, earned: 0, capped: true });
+    const { container, submit } = await mount([word(1)]);
+    await submit('용어1');
+    expect(container.textContent).toContain('오늘 보상 한도에 도달했어요');
+    expect(container.textContent).not.toContain('+0개');
+  });
+});
+
+describe('복습 완료의 기존 이동과 기록', () => {
+  it('완료 버튼은 기존 학습 홈으로 이동하고 복습 기록을 다시 만들지 않는다', async () => {
+    const { container, submit } = await mount([word(1)]);
+    await submit('용어1');
+    await act(async () => { vi.advanceTimersByTime(900); });
+    const button = [...container.querySelectorAll('button')].find(el => el.textContent === '학습 홈으로')!;
+    await act(async () => { button.click(); });
+    expect(container).toHaveTextContent('코스 화면');
+    expect(state.recordReview).toHaveBeenCalledTimes(1);
+    expect(state.refreshWallet).toHaveBeenCalledTimes(1);
   });
 });

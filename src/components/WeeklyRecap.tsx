@@ -22,13 +22,13 @@ export const WeeklyRecap = ({ snap, onClose }: { snap: WeekSnapshot; onClose: ()
 
   const s = slides[i];
   return (
-    <div className="original-modal fixed inset-0 z-[1500] flex flex-col bg-brand-500 text-[var(--color-on-brand)] anim-fade" onClick={() => !last && setI(n => n + 1)}>
+    <div className="original-modal fixed inset-0 z-[1500] flex flex-col bg-[var(--color-canvas)] text-[var(--color-hero-ink)] anim-fade" onClick={() => !last && setI(n => n + 1)}>
       {/* 장 진행 막대 */}
       <div className="flex gap-1 px-4 pt-4">
         {[...slides, null].map((_, k) => (
-          <div key={k} className="flex-1 h-1 rounded-full bg-white/30 overflow-hidden">
+          <div key={k} className="flex-1 h-1 rounded-full bg-[var(--color-hero-chip)] overflow-hidden">
             {/* 지난 장은 꽉 참, 지금 장은 0에서 STEP_MS 동안 차오름(key로 장마다 새로 그린다) */}
-            <div key={`${k}-${i}`} className="h-full bg-white rounded-full"
+            <div key={`${k}-${i}`} className="h-full bg-[var(--color-hero-complete)] rounded-full"
               style={{ width: k < i || (last && k === i) ? '100%' : '0%' }}
               ref={el => {
                 if (!el || k !== i || last) return;
@@ -38,7 +38,7 @@ export const WeeklyRecap = ({ snap, onClose }: { snap: WeekSnapshot; onClose: ()
         ))}
       </div>
       {/* 앱 자체 닫기·뒤로 아이콘은 검수 반려 사유라 글자 버튼으로 둔다 */}
-      <button type="button" onClick={e => { e.stopPropagation(); onClose(); }} className="self-end m-3 px-2 py-1 text-xs font-bold text-[var(--color-on-brand)] active:opacity-60">
+      <button type="button" onClick={e => { e.stopPropagation(); onClose(); }} className="self-end m-3 px-2 py-1 text-xs font-bold text-[var(--color-hero-ink)] active:opacity-60">
         건너뛰기
       </button>
 
@@ -56,7 +56,7 @@ export const WeeklyRecap = ({ snap, onClose }: { snap: WeekSnapshot; onClose: ()
             <p className="text-2xl font-black anim-pop-in">새로운 한 주가 시작됐어요</p>
             <p className="mt-3! text-sm anim-fade-up" style={{ '--i': 3 } as React.CSSProperties}>리그가 초기화됐어요. 이번 주도 함께 올라가 봐요.</p>
             <button type="button" onClick={e => { e.stopPropagation(); onClose(); }}
-              className="mt-8! w-full py-4 rounded-button bg-white text-[var(--color-brand-deep)] text-sm font-bold active:opacity-90 anim-fade-up" style={{ '--i': 6 } as React.CSSProperties}>
+              className="action-secondary mt-8! w-full py-4 rounded-button text-sm font-bold active:opacity-90 anim-fade-up" style={{ '--i': 6 } as React.CSSProperties}>
               이번 주 시작하기
             </button>
           </>

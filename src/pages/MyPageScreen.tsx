@@ -1,30 +1,28 @@
 import { useState } from 'react';
-import { ProfileAvatar } from '../components/ProfileAvatar';
-import { ChevronRight, Pencil } from 'lucide-react';
-import { StreakIcon, XpIcon, PointIcon, WordsIcon, STAT_COLOR } from '../components/StatIcons';
+import { PointIcon, StreakIcon, WordsIcon, XpIcon } from '../components/StatIcons';
+import { ChevronRight, CircleHelp, Settings } from '../components/ui/OtterIcons';
 import { useAppContext } from '../context/AppContext';
-import { DEFAULT_NICKNAME, getGrowthStage } from '../constants';
+import { DEFAULT_NICKNAME } from '../constants';
 import { calcStreak } from '../lib/streak';
 import { buildBadges } from '../lib/badges';
 import { BadgeGlyph } from '../components/mypage/BadgeGlyph';
-import { StageGlyph } from '../components/StageGlyph';
 import { List, ListRow } from '@toss/tds-mobile';
 import { useAuth } from '../hooks/useAuth';
 import { GuideSheet } from '../components/mypage/GuideSheet';
 import { EmojiPickerSheet } from '../components/mypage/EmojiPickerSheet';
 import { SettingsSheet } from '../components/mypage/SettingsSheet';
 import { NicknameSheet } from '../components/mypage/NicknameSheet';
+import { ProfileHeader } from '../components/mypage/ProfileHeader';
 import { Card } from '../components/ui/Card';
 import { IconBox } from '../components/ui/IconBox';
 
 const MENU_ITEMS = [
-  { icon: '/icons/guide.png',    label: '앱 사용법', sub: '사용법 및 자주 묻는 질문' },
-  { icon: '/icons/settings.png', label: '앱 설정',  sub: '알림, 테마 등' },
+  { icon: CircleHelp, label: '앱 사용법', sub: '사용법 및 자주 묻는 질문' },
+  { icon: Settings, label: '앱 설정', sub: '알림, 테마 등' },
 ];
 
 const MyPageScreen = () => {
   const { points, xp, knownWords, viewedIds, attendanceDates, myEmoji, updateMyEmoji } = useAppContext();
-  const stage = getGrowthStage(xp);
   const streak = calcStreak(attendanceDates);
   const badges = buildBadges({ words: knownWords.length, streak, xp });
 
@@ -58,50 +56,29 @@ const MyPageScreen = () => {
       />
 
       {/* 프로필 헤더 */}
-      <div className="my-page-hero pt-4 px-5 pb-5">
+      <div className="my-page-hero shrink-0 pt-4 px-5 pb-5">
         <h2 className="text-xl font-bold mb-4! text-[var(--color-ink)]">마이페이지</h2>
-        <div className="flex items-center gap-4 mb-4">
-          <button
-            onClick={() => setShowEmojiPicker(true)}
-            aria-label="아바타 변경"
-            className="relative w-16 h-16 bg-[var(--color-surface)] flex items-center justify-center shrink-0 active:opacity-70"
-            style={{ borderRadius: 9999 }}
-          >
-            <ProfileAvatar emoji={myEmoji} size={64} />
-            <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-brand-500 rounded-full flex items-center justify-center">
-              <Pencil size={9} className="text-white" />
-            </div>
-          </button>
-          <div>
-            <button
-              onClick={() => setShowNicknameSheet(true)}
-              aria-label="닉네임 변경"
-              className="flex items-center gap-1.5 group active:opacity-70"
-            >
-              <p className="font-bold text-[var(--color-ink)] text-base">{user?.nickname ?? DEFAULT_NICKNAME}</p>
-              <Pencil size={13} className="text-[var(--color-ink-4)] group-active:text-brand-400" />
-            </button>
-            <div className="flex items-center gap-1 mt-1">
-              <StageGlyph id={stage.id} size={22} />
-              <span className="text-xs font-bold text-[var(--color-ink-3)]">{stage.name}</span>
-            </div>
-          </div>
-        </div>
+        <ProfileHeader
+          nickname={user?.nickname ?? DEFAULT_NICKNAME}
+          emoji={myEmoji}
+          xp={xp}
+          onEditAvatar={() => setShowEmojiPicker(true)}
+          onEditNickname={() => setShowNicknameSheet(true)}
+        />
 
-        <Card pad="md" className="my-page-stats anim-fade-up">
-          <div className="flex items-stretch">
+        <Card pad="lg" className="my-page-stats anim-fade-up">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-5">
             {[
-              { icon: <WordsIcon size={31} />, label: '살펴본 용어', value: viewedIds.size.toLocaleString(), unit: '개', color: STAT_COLOR.words },
-              { icon: <StreakIcon size={31} />, label: '연속 학습', value: streak.toLocaleString(), unit: '일', color: STAT_COLOR.streak },
-              { icon: <XpIcon size={31} />, label: 'XP', value: xp.toLocaleString(), unit: '', color: STAT_COLOR.xp },
-              { icon: <PointIcon size={31} />, label: '포인트', value: points.toLocaleString(), unit: 'P', color: STAT_COLOR.points },
-            ].map((it, i) => (
-              <div key={it.label} className={`flex-1 min-w-0 flex flex-col items-center gap-1 py-1 ${i < 3 ? 'border-r border-[var(--color-line)]' : ''}`}>
-                {it.icon}
-                <p className="text-lg font-bold leading-tight whitespace-nowrap" style={{ color: it.color }}>
-                  {it.value}<span className="text-xs font-medium text-[var(--color-ink-3)] ml-0.5">{it.unit}</span>
+              { label: '살펴본 용어', value: viewedIds.size.toLocaleString(), unit: '개', icon: <WordsIcon size={16} /> },
+              { label: '연속 학습', value: streak.toLocaleString(), unit: '일', icon: <StreakIcon size={16} /> },
+              { label: '경험치', value: xp.toLocaleString(), unit: 'XP', icon: <XpIcon size={16} /> },
+              { label: '조개', value: points.toLocaleString(), unit: '개', icon: <PointIcon size={18} /> },
+            ].map(it => (
+              <div key={it.label} className="min-w-0">
+                <p className="flex min-h-[18px] items-center gap-1.5 text-xs font-medium text-[var(--color-ink-3)]">{it.icon}{it.label}</p>
+                <p className="mt-1.5! text-2xl font-semibold leading-tight tabular-nums text-[var(--color-ink)]">
+                  {it.value}<span className="ml-1 text-xs font-medium text-[var(--color-ink-3)]">{it.unit}</span>
                 </p>
-                <span className="text-2xs font-medium text-[var(--color-ink-3)] whitespace-nowrap">{it.label}</span>
               </div>
             ))}
           </div>
@@ -109,7 +86,7 @@ const MyPageScreen = () => {
 
       </div>
 
-      <div className="px-5 pt-5 flex flex-col gap-4">
+      <div className="shrink-0 px-5 pt-5 flex flex-col gap-4">
         {/* 배지 */}
         <div>
           <div className="flex items-center justify-between mb-3">
@@ -120,8 +97,8 @@ const MyPageScreen = () => {
             <div className="grid grid-cols-5 gap-y-4">
               {badges.map((b, i) => (
                 <div key={b.id} className="flex flex-col items-center gap-1 anim-pop-in" style={{ '--i': i } as React.CSSProperties}>
-                  <BadgeGlyph id={b.id} size={52} className={b.earned ? '' : 'grayscale opacity-40'} />
-                  <span className={`text-2xs text-center leading-tight break-keep ${b.earned ? 'font-bold text-[var(--color-ink-2)]' : 'text-[var(--color-ink-3)]'}`}>
+                  <BadgeGlyph id={b.id} size={52} earned={b.earned} />
+                  <span className={`min-h-7 text-2xs text-center leading-snug break-keep ${b.earned ? 'font-semibold text-[var(--color-ink-2)]' : 'text-[var(--color-ink-3)]'}`}>
                     {b.title}
                   </span>
                 </div>
@@ -134,7 +111,7 @@ const MyPageScreen = () => {
         <div>
           <Card pad="none" className="overflow-hidden">
             <List>
-              {MENU_ITEMS.map(({ icon, label, sub }) => (
+              {MENU_ITEMS.map(({ icon: Icon, label, sub }) => (
                 <ListRow
                   key={label}
                   as="button"
@@ -142,8 +119,8 @@ const MyPageScreen = () => {
                   className="w-full"
                   onClick={() => handleMenuClick(label)}
                   left={
-                    <IconBox className="rounded-chip bg-[var(--color-brand-soft)]">
-                      <img src={icon} alt="" aria-hidden="true" width={24} height={24} />
+                    <IconBox className="text-[var(--color-ink-3)]">
+                      <Icon size={21} strokeWidth={1.7} aria-hidden="true" />
                     </IconBox>
                   }
                   contents={<ListRow.Texts type="2RowTypeA" top={<span className="text-sm font-semibold">{label}</span>} bottom={<span className="block mt-1! text-2xs text-[var(--color-ink-3)]">{sub}</span>} />}

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronRight, Lightbulb } from 'lucide-react';
+import { Lightbulb } from '../components/ui/OtterIcons';
+import { ChevronRight } from '../components/ui/ControlIcons';
 import { useNavigate } from 'react-router-dom';
 import { Spacing } from '@toss/tds-mobile';
 import type { Word } from '../types';
@@ -11,13 +12,11 @@ import { maskTerm } from '../lib/quiz';
 import { feedbackCorrect, feedbackWrong, feedbackQuizComplete } from '../lib/feedback';
 import { useSettings } from '../hooks/useSettings';
 import { Card } from '../components/ui/Card';
-import { PointIcon } from '../components/StatIcons';
 import { shouldScheduleRetry } from '../lib/review';
 import { shuffle } from '../lib/random';
-import { LearningCompletionScreen } from '../components/learning/LearningCompletionScreen';
+import { ReviewCompletionScreen } from '../components/learning/ReviewCompletionScreen';
 import { LearningEmptyState } from '../components/learning/LearningEmptyState';
 import { QuizProgressHeader } from '../components/learning/QuizProgressHeader';
-import { PraiseNote } from '../components/PraiseNote';
 import { praiseForReview } from '../lib/praise';
 import { keepShortUnitsTogether } from '../lib/formatText';
 
@@ -134,25 +133,13 @@ const QuizPage = () => {
 
   if (isFinished) {
     return (
-      <LearningCompletionScreen
-        mascot="crown"
-        title="오늘 기억 확인을 마쳤어요"
-        subtitle={`첫 시도 ${initialTotal}문제 중 ${firstCorrect}개 정답`}
-        actionLabel="홈으로"
+      <ReviewCompletionScreen
+        initialTotal={initialTotal}
+        firstCorrect={firstCorrect}
+        points={points}
+        note={praiseForReview(totalCorrect, queue.length)}
         onAction={() => navigate('/course')}
-        actionPlacement="inline"
-        titleSize="xl"
-      >
-        <PraiseNote
-          title="오늘 다시 본 용어"
-          body={praiseForReview(totalCorrect, queue.length)}
-          className="w-full max-w-sm"
-        />
-        <div className="flex items-center gap-2 bg-brand-500/10 border border-brand-500/20 rounded-card px-5 py-3 mb-8">
-          <PointIcon size={16} />
-          <span className="text-sm font-bold text-[var(--color-ink)]">{keepShortUnitsTogether(`누적 포인트 ${points} P`)}</span>
-        </div>
-      </LearningCompletionScreen>
+      />
     );
   }
 
@@ -207,7 +194,7 @@ const QuizPage = () => {
               style={{ caretColor: 'var(--color-brand-action)' }}
             />
             {status === 'correct' && (
-              <p className="text-xs font-bold text-success-400 mt-1.5! px-1">정답! 바로 맞혔어요{capped ? ' 오늘 보상 한도에 도달했어요' : lastEarned > 0 ? ` +${lastEarned}P` : ''}</p>
+              <p className="text-xs font-bold text-success-400 mt-1.5! px-1">정답! 바로 맞혔어요{capped ? ' 오늘 보상 한도에 도달했어요' : lastEarned > 0 ? ` +${lastEarned}개` : ''}</p>
             )}
             {status === 'wrong' && (
               <p className="text-xs font-bold text-danger-400 mt-1.5! px-1">틀렸어요. 다시 시도해보세요!</p>
@@ -231,7 +218,7 @@ const QuizPage = () => {
           {!showHint && (
             <button
               onClick={() => setShowHint(true)}
-              className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-button bg-[var(--color-card)] text-xs font-bold text-[var(--color-ink-3)] active:opacity-70"
+              className="action-secondary flex-1 flex items-center justify-center gap-1.5 py-3 rounded-button text-sm font-bold active:opacity-70"
             >
               <Lightbulb size={13} className="text-[var(--color-ink-4)]" /> 초성 힌트
             </button>
@@ -239,7 +226,7 @@ const QuizPage = () => {
           <button
             onClick={goNext}
             disabled={status !== 'idle'}
-            className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-button bg-[var(--color-card)] text-xs font-bold text-[var(--color-ink-3)] active:opacity-70 disabled:opacity-40"
+            className="action-secondary flex-1 flex items-center justify-center gap-1.5 py-3 rounded-button text-sm font-bold active:opacity-70"
           >
             <ChevronRight size={13} /> 건너뛰기
           </button>

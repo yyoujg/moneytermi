@@ -1,3 +1,4 @@
+import { CELEBRATION_COLORS } from '../../lib/visualPalette';
 import { useEffect, useState } from 'react';
 import { buildBadges, type Badge } from '../../lib/badges';
 import { useAppContext } from '../../context/AppContext';
@@ -6,12 +7,11 @@ import { Storage } from '../../lib/storage';
 import { logClick } from '../../lib/analytics';
 import { feedbackBadge } from '../../lib/feedback';
 import { BadgeGlyph } from './BadgeGlyph';
-import { Sparkles } from 'lucide-react';
 
 // 새로 획득한 배지 축하. 배지는 서버 기록 없이 통계에서 파생되므로, "이미 보여준 배지" 목록을 기기에 남겨 차이만 축하한다.
 // 여러 개를 한 번에 얻었으면 한 화면에 같이 보여준다. 유실돼도 축하가 한 번 더 뜰 뿐이다.
 const KEY = 'badges_seen';
-const CONFETTI = ['#f97316', '#fde68a', '#fecaca', '#bfdbfe', '#bbf7d0', '#c7d2fe', '#fbcfe8', '#f97316', '#fde68a', '#bfdbfe', '#bbf7d0', '#fecaca'];
+const CONFETTI = Array.from({ length: 5 }, (_, i) => CELEBRATION_COLORS[i % CELEBRATION_COLORS.length]);
 
 // 앱 전역(Layout)에 붙어 있어 어느 화면에서든 달성 즉시 뜬다.
 export const BadgeCelebration = () => {
@@ -49,7 +49,7 @@ export const BadgeCelebration = () => {
         />
       ))}
 
-      <p className="flex items-center gap-2 text-2xl font-black text-[var(--color-ink)] anim-pop-in"><Sparkles size={24} className="text-brand-ink" />새 배지 획득!</p>
+      <p className="flex items-center gap-2 text-2xl font-black text-[var(--color-ink)] anim-pop-in"><img src="/otter/v3/celebrations/badge-earned.png" width={24} height={24} alt="" aria-hidden="true" className="shrink-0" />새 배지 획득!</p>
 
       <div className={`flex flex-wrap justify-center gap-5 ${fresh.length === 1 ? '' : 'max-w-xs'}`}>
         {fresh.map((b, i) => (

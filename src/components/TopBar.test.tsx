@@ -107,13 +107,13 @@ describe('TopBar energy shop', () => {
     const { container, refillButton } = await mount();
     const button = refillButton();
 
-    expect(container.textContent).toContain('490P 부족');
+    expect(container.textContent).toContain('조개 490개 부족');
     expect(button.disabled).toBe(true);
 
     await act(async () => { button.click(); });
 
     expect(state.buyEnergyRefill).not.toHaveBeenCalled();
-    expect(state.showModal).not.toHaveBeenCalledWith('포인트가 부족해요', 'error');
+    expect(state.showModal).not.toHaveBeenCalledWith('조개가 부족해요', 'error');
   });
 
   it('연속 클릭해도 에너지 충전 요청은 한 번만 보낸다', async () => {

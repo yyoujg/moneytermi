@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, ExternalLink, BookOpen, Newspaper, Link2 } from 'lucide-react';
+import { ExternalLink, BookOpen, Newspaper, Link2 } from '../components/ui/OtterIcons';
+import { ChevronLeft, ChevronRight } from '../components/ui/ControlIcons';
 import { BottomSheet } from '@toss/tds-mobile';
 import { showModal } from '../components/AlertModal';
 import type { Word } from '../types';
@@ -13,7 +14,8 @@ import { DailyAlarmPromptCard } from '../components/DailyAlarmPromptCard';
 import { feedbackLearned, feedbackLessonComplete } from '../lib/feedback';
 import { StreakCelebration } from '../components/StreakCelebration';
 import { Card } from '../components/ui/Card';
-import { WordVisuals } from '../components/WordVisuals';
+import { ActionButton } from '../components/ui/ActionButton';
+import { WordVisuals, type Terms } from '../components/WordVisuals';
 import { lessonChecks, termPattern } from '../lib/quiz';
 import { selectLessonQuizWords } from '../lib/lessonQuiz';
 import { buildWordLookup, relatedWordNames, type WordLookup } from '../lib/wordLookup';
@@ -37,7 +39,7 @@ const Highlight = ({ text, keyword, pattern }: { text: string; keyword: string; 
     <>
       {parts.map((part, i) =>
         i % 2 === 1
-          ? <mark key={i} style={{ background: 'var(--color-brand-cream)', color: 'var(--color-brand-ink)', fontWeight: 700, borderRadius: 3, padding: '0 2px' }}>{part}</mark>
+          ? <mark key={i} style={{ background: 'var(--color-brand-cream)', color: 'var(--color-ink-2)', fontWeight: 700, borderRadius: 3, padding: '0 2px' }}>{part}</mark>
           : <span key={i}>{part}</span>
       )}
     </>
@@ -81,7 +83,7 @@ const WordCard = ({
   newsItems: NaverNewsItem[];
   newsLoading: boolean;
   keyword: string;
-  visualTerms: { names: string[]; meaningOf: (name: string) => string | undefined; onClick: (name: string) => void };
+  visualTerms: Terms;
 }) => {
   // 쉬운 예시(데이터 앞의 '학습용 가정:' 표시는 뺀다)
   const example = word.learningExample?.replace(/^학습용 가정:\s*/, '');
@@ -89,8 +91,9 @@ const WordCard = ({
   <div className="flex flex-col gap-3 px-5 pb-6">
 
     {/* 단어 + 뜻 */}
-    <Card pad="lg">
-      <h1 className="font-black text-[var(--color-ink)] tracking-[-0.03em] break-keep text-[22px] leading-[1.3]">
+    <Card pad="lg" className="word-study-definition">
+      <p className="mb-3! text-xs font-bold text-[var(--color-ink-3)]">한 문장으로 이해하기</p>
+      <h1 className="font-bold text-[var(--color-ink)] tracking-[-0.03em] break-keep text-[28px] leading-[1.3]">
         {word.word}
       </h1>
 
@@ -104,19 +107,15 @@ const WordCard = ({
       </div>
       {/* 읽었더니 이해됐다고 느낄 예시 하나는 자세히 보기 밖에 둔다 */}
       {example && (
-        <div className="mt-4 border-t border-[var(--color-line)] pt-4">
-          <p className="text-xs font-bold text-brand-500">예를 들어볼게요</p>
+        <div className="word-study-example">
+          <p className="text-sm font-bold text-[var(--color-ink)]">예를 들어볼게요</p>
           <p className="mt-1.5 text-[15px] text-[var(--color-ink-2)] break-keep leading-[1.7]">{example}</p>
         </div>
       )}
       {onDetail && (
-        <button
-          type="button"
-          onClick={onDetail}
-          className="mt-4! w-full py-3 rounded-button bg-brand-500/10 text-sm font-bold text-brand-500 active:opacity-70 flex items-center justify-center gap-1"
-        >
-          <BookOpen size={15} />자세히 보기
-        </button>
+        <ActionButton tone="soft" fullWidth onClick={onDetail} className="mt-5!">
+          <BookOpen size={18} />자세히 보기
+        </ActionButton>
       )}
     </Card>
 
@@ -277,6 +276,7 @@ const WordCardScreen = () => {
     return map;
   }, [words]);
   const meaningOf = React.useCallback((name: string) => wordLookup.byName.get(name)?.meaning, [wordLookup]);
+  const exampleOf = React.useCallback((name: string) => wordLookup.byName.get(name)?.learningExample?.replace(/^학습용 가정:\s*/, ''), [wordLookup]);
   const lessonQuizWords = React.useMemo(() => selectLessonQuizWords(words, knownIds), [knownIds, words]);
   const handleRelatedWordClick = React.useCallback((rawName: string) => {
     const wordName = rawName.replace(/["""'']/g, '').trim();
@@ -300,8 +300,8 @@ const WordCardScreen = () => {
     }
   }, [autoAdvance, backPath, navigate, wordIndexByName, wordLookup]);
   const visualTerms = React.useMemo(
-    () => ({ names: termNames, meaningOf, onClick: handleRelatedWordClick }),
-    [handleRelatedWordClick, meaningOf, termNames],
+    () => ({ names: termNames, meaningOf, exampleOf, onClick: handleRelatedWordClick }),
+    [handleRelatedWordClick, meaningOf, exampleOf, termNames],
   );
 
   // autoAdvance 완료 화면
@@ -316,7 +316,7 @@ const WordCardScreen = () => {
             <p className="text-sm text-[var(--color-ink-4)]">{words.length}개 용어의 설명을 확인했어요</p>
           </div>
           <Card pad="md" className="w-full anim-fade-up" style={{ '--i': 2 } as React.CSSProperties}>
-            <p className="text-xs font-bold text-brand-500 mb-1.5!">이해했는지 확인해볼까요?</p>
+            <p className="text-xs font-bold text-[var(--color-info)] mb-1.5!">이해했는지 확인해볼까요?</p>
             <p className="text-sm font-semibold text-[var(--color-ink)] leading-relaxed break-keep">{lessonChecks(words).length > 0 ? '상황 문제를 풀며 어떤 변화가 생기는지 확인해요.' : '이번에는 용어의 뜻을 확인해요. 상황 적용 문제는 아직 준비 중이에요.'}</p>
           </Card>
           <Card pad="md" className="w-full anim-fade-up" style={{ '--i': 3 } as React.CSSProperties}>
@@ -360,7 +360,7 @@ const WordCardScreen = () => {
           })()}
           <button
             onClick={() => navigate(backPath, backState ? { state: backState } : undefined)}
-            className="w-full py-3 rounded-button bg-[var(--color-card)] text-xs font-medium text-[var(--color-ink-3)] active:opacity-70"
+            className="action-secondary w-full py-3 rounded-button text-sm font-semibold active:opacity-70"
           >
             코스로 돌아가기
           </button>
@@ -416,7 +416,7 @@ const WordCardScreen = () => {
 
   return (
     <>
-    <div className="app-soft-screen flex flex-col h-full overflow-hidden">
+    <div className="word-study-screen app-soft-screen flex flex-col h-full overflow-hidden">
 
       {/* 상단: 레슨 안의 단어 위치 */}
       <div className="px-5 pt-4 flex items-center justify-between gap-3">
@@ -456,24 +456,14 @@ const WordCardScreen = () => {
       </div>
 
       {/* 하단: 이전 · 다음 */}
-      <div className="px-5 pb-8 pt-3">
+      <div className="study-action-footer px-5 pb-8 pt-3">
         <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={() => slide(-1)}
-            disabled={!canPrev}
-            className="flex-1 py-3.5 rounded-button bg-[var(--color-surface)] text-sm font-bold text-[var(--color-ink-2)] active:opacity-80 disabled:opacity-100 disabled:text-[var(--color-ink-4)] flex items-center justify-center gap-1"
-          >
-            <ChevronLeft size={16} />이전
-          </button>
-          <button
-            type="button"
-            onClick={() => slide(1)}
-            disabled={lastWord && !autoAdvance}
-            className="flex-1 py-3.5 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-80 disabled:opacity-100 disabled:bg-[var(--color-surface)] disabled:text-[var(--color-ink-4)] flex items-center justify-center gap-1"
-          >
-            {lastWord && autoAdvance ? '살펴보기 완료' : <>다음 <ChevronRight size={16} /></>}
-          </button>
+          <ActionButton tone="soft" onClick={() => slide(-1)} disabled={!canPrev} className="flex-1">
+            <ChevronLeft size={18} />이전
+          </ActionButton>
+          <ActionButton onClick={() => slide(1)} disabled={lastWord && !autoAdvance} className="flex-[2]">
+            {lastWord && autoAdvance ? '살펴보기 완료' : <>다음 <ChevronRight size={18} /></>}
+          </ActionButton>
         </div>
       </div>
     </div>

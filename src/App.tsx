@@ -19,7 +19,7 @@ import { LeagueRankCelebration } from './components/league/LeagueRankCelebration
 import { PointCelebration } from './components/PointCelebration';
 import { SplashScreen } from './components/SplashScreen';
 import { useTapHaptics } from './hooks/useTapHaptics';
-import { ArrowRight, BookOpen, CircleHelp, Trophy } from 'lucide-react';
+import { ArrowRight, BookOpenText, WalletCards, ListChecks } from './components/ui/OtterIcons';
 import { Mascot } from './components/Mascot';
 import { Storage } from './lib/storage';
 
@@ -69,9 +69,9 @@ const LoadingScreen = SplashScreen;
 
 const WELCOME_KEY = 'welcome_seen_v1';
 const WELCOME_STEPS = [
-  { icon: BookOpen, title: '쉬운 상황부터 시작해요', desc: '금리·대출·전월세처럼 자주 마주치는 용어를 예시로 익혀요' },
-  { icon: CircleHelp, title: '생활 속 상황으로 연결해요', desc: '월급, 소비, 대출, 계약서에서 어떻게 쓰이는지 짧게 확인해요' },
-  { icon: Trophy, title: '퀴즈와 다시 보기로 남겨요', desc: '오늘 들린 용어를 잊기 전에 다시 꺼내보며 익혀요' },
+  { icon: BookOpenText, title: '쉬운 상황부터 시작해요', desc: '금리·대출·전월세처럼 자주 마주치는 용어를 예시로 익혀요' },
+  { icon: WalletCards, title: '생활 속 상황으로 연결해요', desc: '월급, 소비, 대출, 계약서에서 어떻게 쓰이는지 짧게 확인해요' },
+  { icon: ListChecks, title: '퀴즈와 다시 보기로 남겨요', desc: '오늘 들린 용어를 잊기 전에 다시 꺼내보며 익혀요' },
 ];
 
 const WelcomeScreen = () => {
@@ -88,9 +88,9 @@ const WelcomeScreen = () => {
         <div className="app-soft-header flex shrink-0 flex-col items-center rounded-b-[32px] px-6 pb-8 pt-8 text-center">
           <Mascot name="hello" size={150} />
           <h1 className="mt-4 text-2xl font-extrabold leading-snug tracking-tight text-[var(--color-ink)] break-keep">
-            경제 공부,<br />쉬운 상황부터 시작해요
+            경제 공부,<br />수달과 차근차근
           </h1>
-          <p className="mt-3 text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">월급·소비·대출·전월세에서 만나는 용어를 쉽게 풀어요</p>
+          <p className="mt-3 text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">뜻은 예시로 익히고, 조개는 차곡차곡 모아요.</p>
         </div>
 
         {/* 남는 높이의 가운데에 단계 카드를 둔다. 화면이 작으면 그대로 스크롤된다 */}
@@ -98,9 +98,9 @@ const WelcomeScreen = () => {
           <p className="mb-3 px-1 text-sm font-bold text-[var(--color-ink-2)]">이렇게 시작해요</p>
           <ol className="flex flex-col gap-3">
             {WELCOME_STEPS.map(({ icon: Icon, title, desc }) => (
-              <li key={title} className="flex items-center gap-4 rounded-card bg-[var(--color-card)] px-4 py-4">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-soft)] text-brand-500">
-                  <Icon size={21} />
+              <li key={title} className="app-card flex items-start gap-3 rounded-card bg-[var(--color-card)] px-4 py-4">
+                <span aria-hidden="true" className="flex h-8 w-8 shrink-0 items-center justify-center text-[var(--color-ink-2)]">
+                  <Icon size={22} strokeWidth={1.75} />
                 </span>
                 <span className="min-w-0">
                   <span className="block text-[15px] font-bold text-[var(--color-ink)]">{title}</span>

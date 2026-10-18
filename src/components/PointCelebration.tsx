@@ -1,17 +1,18 @@
+import { CELEBRATION_COLORS } from '../lib/visualPalette';
 import { PointIcon, XpIcon } from './StatIcons';
 import { Mascot } from './Mascot';
 import { logClick } from '../lib/analytics';
 
-// 포인트를 받았을 때 토스트 대신 띄우는 축하 모달. 미션 보상(포인트+XP)과 광고 보상(포인트)이 함께 쓴다.
+// 조개를 받았을 때 토스트 대신 띄우는 축하 모달. 미션 보상(조개+XP)과 광고 보상(조개)이 함께 쓴다.
 // 색종이·등장 애니메이션은 StreakCelebration/BadgeCelebration과 같은 클래스.
-const CONFETTI = ['#f97316', '#fde68a', '#fecaca', '#bfdbfe', '#bbf7d0', '#c7d2fe', '#fbcfe8', '#f97316', '#fde68a', '#bfdbfe', '#bbf7d0', '#fecaca'];
+const CONFETTI = Array.from({ length: 5 }, (_, i) => CELEBRATION_COLORS[i % CELEBRATION_COLORS.length]);
 
 export type PointReward = { points: number; xp?: number; source: 'mission' | 'ad' };
 
 export const PointCelebration = ({ reward, onClose }: { reward: PointReward; onClose: () => void }) => {
   const close = () => { logClick('point_celebration_close', { source: reward.source, points: reward.points }); onClose(); };
   return (
-    <div className="original-modal fixed inset-0 z-[60] flex items-center justify-center px-6 overflow-hidden" style={{ background: 'rgba(0,0,0,0.55)' }} onClick={close}>
+    <div className="original-modal fixed inset-0 z-[60] flex items-center justify-center px-6 overflow-hidden" style={{ background: 'var(--color-overlay)' }} onClick={close}>
       {CONFETTI.map((c, i) => (
         <span
           key={i}
@@ -21,14 +22,14 @@ export const PointCelebration = ({ reward, onClose }: { reward: PointReward; onC
         />
       ))}
 
-      <div role="dialog" aria-label="포인트 획득" onClick={e => e.stopPropagation()}
-        className="flex w-full max-w-xs flex-col items-center rounded-card bg-[var(--color-card)] px-6 pb-6 pt-8 text-center anim-pop-in">
+      <div role="dialog" aria-label="조개 획득" onClick={e => e.stopPropagation()}
+        className="app-card flex w-full max-w-xs flex-col items-center rounded-card bg-[var(--color-card)] px-6 pb-6 pt-8 text-center anim-pop-in">
         <Mascot name={reward.source === 'mission' ? 'mission' : 'reward'} size={120} />
         <h2 className="mt-5! text-xl font-bold text-[var(--color-ink)]">
-          {reward.source === 'mission' ? '오늘의 미션 완료!' : '포인트를 받았어요!'}
+          {reward.source === 'mission' ? '오늘의 미션 완료!' : '조개를 받았어요!'}
         </h2>
         <p className="mt-2! text-sm text-[var(--color-ink-3)] break-keep">
-          {reward.source === 'mission' ? '오늘 할 일을 직접 끝냈어요. 이런 기록이 실력이 돼요.' : '포인트도 챙겼고, 다음 학습을 이어갈 준비가 됐어요.'}
+          {reward.source === 'mission' ? '미션을 마치고 조개를 모았어요.' : '광고 시청 보상으로 조개를 받았어요.'}
         </p>
         <div className={`mt-6 grid w-full gap-2 ${reward.xp ? 'grid-cols-2' : 'grid-cols-1'}`}>
           {reward.xp ? (
@@ -40,8 +41,8 @@ export const PointCelebration = ({ reward, onClose }: { reward: PointReward; onC
           ) : null}
           <div className="flex flex-col items-center rounded-card bg-[var(--color-brand-soft)] px-3 py-4">
             <PointIcon size={22} />
-            <span className="mt-2 text-lg font-bold text-[var(--color-ink)]">+{reward.points}P</span>
-            <span className="text-xs text-[var(--color-ink-3)]">포인트</span>
+            <span className="mt-2 text-lg font-bold text-[var(--color-ink)]">+{reward.points}개</span>
+            <span className="text-xs text-[var(--color-ink-3)]">조개</span>
           </div>
         </div>
         <button onClick={close} className="mt-6 w-full rounded-button bg-brand-500 py-4 text-sm font-bold text-white active:opacity-90">

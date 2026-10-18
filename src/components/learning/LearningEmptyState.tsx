@@ -8,7 +8,7 @@ export const LearningEmptyState = ({
   description,
   actionLabel,
   onAction,
-  mascot,
+  mascot = 'empty',
   mascotSize = 110,
   actionPlacement = 'bottom',
 }: {

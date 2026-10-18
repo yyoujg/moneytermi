@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { LibraryBig, ListChecks, ChartNoAxesColumnIncreasing, UserRound } from './ui/OtterIcons';
 import { useSafeAreaInsets } from '../hooks/useSafeAreaInsets';
 import { useAppContext } from '../context/AppContext';
 import { Storage } from '../lib/storage';
@@ -10,10 +11,10 @@ import { weekStart } from '../lib/league';
 // 코스(패스)가 메인. /home은 경로를 그대로 두고 라벨만 퀘스트로 바꾼다 —
 // 딥링크 allowlist와 푸시 랜딩이 /home을 쓰고 있어 경로를 바꾸면 같이 깨진다.
 const NAV_ITEMS = [
-  { path: '/course', icon: '/icons/home.png', label: '홈' },
-  { path: '/home', icon: '/icons/quest.png', label: '퀘스트' },
-  { path: '/league', icon: '/icons/league.png', label: '리그' },
-  { path: '/my', icon: '/icons/my.png', label: '마이' },
+  { path: '/course', icon: LibraryBig, label: '홈' },
+  { path: '/home', icon: ListChecks, label: '퀘스트' },
+  { path: '/league', icon: ChartNoAxesColumnIncreasing, label: '리그' },
+  { path: '/my', icon: UserRound, label: '마이' },
 ];
 
 const SEEN_LEAGUE_WEEK_KEY = 'moneytermi_nav_seen_league_week_v1';
@@ -102,28 +103,29 @@ const NavBar = () => {
       className="absolute bottom-0 w-full flex justify-center z-50 pointer-events-none"
       style={{ paddingBottom: 24 + insets.bottom }}
     >
-      <div className="flex items-center gap-1 bg-[var(--color-card)] backdrop-blur-md rounded-full px-4 py-2 shadow-lg border border-[var(--color-line)] pointer-events-auto"
-        style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.12)' }}
-      >
+      <div className="app-nav-tray flex items-center gap-1 rounded-full px-4 py-2 border border-[var(--color-line)] pointer-events-auto">
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.path;
           const hasNew = newByPath[item.path] ?? false;
+          const Icon = item.icon;
+          const colorClass = isActive ? 'text-[var(--color-ink)]' : 'app-nav-muted';
           return (
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
               aria-label={hasNew ? `${item.label}, 새 내용 있음` : item.label}
+              aria-current={isActive ? 'page' : undefined}
               className="flex flex-col items-center justify-center gap-1.5 px-1.5 py-0.5 transition-all duration-200"
             >
-              <div className={`relative w-12 h-8 flex items-center justify-center rounded-full transition-all duration-200 ${isActive ? 'bg-[var(--color-brand-soft)]' : ''}`}>
-                <img src={item.icon} alt="" aria-hidden="true" width={26} height={26} className={isActive ? '' : 'grayscale opacity-50'} />
+              <div className="relative w-12 h-8 flex items-center justify-center">
+                <Icon size={22} strokeWidth={isActive ? 2 : 1.7} aria-hidden="true" className={colorClass} />
                 {hasNew && (
-                  <span className="absolute -right-1.5 -top-1.5 rounded-full bg-emerald-500 px-1.5 py-0.5 text-[8px] font-black leading-none text-white shadow-[0_3px_8px_rgba(16,185,129,0.35)] ring-2 ring-[var(--color-card)]">
+                  <span className="absolute -right-1.5 -top-1.5 rounded-full bg-[var(--color-selection-soft)] px-1.5 py-0.5 text-[8px] font-black leading-none text-[var(--color-selection-ink)] ring-2 ring-[var(--color-card)]">
                     NEW
                   </span>
                 )}
               </div>
-              <span className={`text-[10px] leading-none font-bold ${isActive ? 'text-brand-500' : 'text-[var(--color-ink-4)]'}`}>{item.label}</span>
+              <span className={`text-[11px] leading-none font-bold ${colorClass}`}>{item.label}</span>
             </button>
           );
         })}

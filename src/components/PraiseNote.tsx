@@ -1,5 +1,5 @@
 import type { HTMLAttributes } from 'react';
-import { BadgeCheck } from 'lucide-react';
+import { BadgeCheck } from './ui/OtterIcons';
 
 export const PraiseNote = ({
   title,

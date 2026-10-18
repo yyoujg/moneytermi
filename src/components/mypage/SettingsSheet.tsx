@@ -1,4 +1,4 @@
-import { Volume2, VolumeX, Bell, Moon, Vibrate, Music2 } from 'lucide-react';
+import { Volume2, VolumeX, Bell, Moon, Vibrate, Music2 } from '../ui/OtterIcons';
 import { Switch, BottomSheet } from '@toss/tds-mobile';
 import { useSettings } from '../../hooks/useSettings';
 import { useNotificationAgreement } from '../../hooks/useNotificationAgreement';
@@ -31,8 +31,9 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
               <button
                 key={val}
                 type="button"
+                aria-pressed={theme === val}
                 onClick={() => setTheme(val)}
-                className={`flex-1 py-2 rounded-button text-xs font-bold transition-colors
+                className={`flex-1 min-h-11 rounded-button text-xs font-bold transition-colors
                   ${theme === val ? 'bg-brand-500 text-white' : 'bg-[var(--color-card)] border border-[var(--color-line)] text-[var(--color-ink-3)]'}`}
               >
                 {label}
@@ -55,7 +56,7 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
               <p className="text-xs text-[var(--color-ink-4)]">퀴즈 정답/오답 효과음</p>
             </div>
           </div>
-          <Switch checked={soundOn} onChange={toggleSound} />
+          <Switch checked={soundOn} onChange={toggleSound} aria-label="효과음" />
         </Card>
 
         {/* 배경음악 */}
@@ -69,7 +70,7 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
               <p className="text-xs text-[var(--color-ink-4)]">조용한 학습 루프</p>
             </div>
           </div>
-          <Switch checked={bgmOn} onChange={toggleBgm} />
+          <Switch checked={bgmOn} onChange={toggleBgm} aria-label="배경음악" />
         </Card>
 
         {/* 진동 */}
@@ -83,7 +84,7 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
               <p className="text-xs text-[var(--color-ink-4)]">햅틱 피드백</p>
             </div>
           </div>
-          <Switch checked={vibrationOn} onChange={toggleVibration} />
+          <Switch checked={vibrationOn} onChange={toggleVibration} aria-label="진동" />
         </Card>
 
         {/* 학습 알림 */}
@@ -91,10 +92,10 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
           type="button"
           onClick={() => requestAgreement('settings')}
           disabled={agreed}
-          className="flex items-center justify-between bg-[var(--color-surface)] rounded-card px-4 py-4 text-left disabled:opacity-100"
+          className="action-secondary flex items-center justify-between rounded-card px-4 py-4 text-left disabled:opacity-100"
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-chip bg-[var(--color-line)] flex items-center justify-center">
+            <div className="w-9 h-9 rounded-chip bg-white/20 flex items-center justify-center">
               <Bell size={16} className={agreed ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-4)]'} />
             </div>
             <div>

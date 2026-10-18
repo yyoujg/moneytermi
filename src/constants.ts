@@ -33,12 +33,13 @@ export const ENERGY_REFILL_COST = 600;
 // 미션 보상 수령 시 서버가 함께 주는 XP (migration_xp.sql STEP 7 claim_mission_reward → add_xp 5)
 export const MISSION_XP = 5;
 
+// 표시 이름만 수달의 학습 성장 단계로 바꾼다. 단계 ID·누적 XP 기준·기존 저장값은 유지한다.
 export const GROWTH_STAGES: Omit<GrowthStage, 'nextMinPoints'>[] = [
-  { id: 1, name: '루키',     emoji: '🌱', minPoints: 0 },
-  { id: 2, name: '챌린저',   emoji: '🚀', minPoints: 20 },
-  { id: 3, name: '프로',     emoji: '🎯', minPoints: 100 },
-  { id: 4, name: '엘리트',   emoji: '🌟', minPoints: 300 },
-  { id: 5, name: '레전드',   emoji: '🏆', minPoints: 800 },
+  { id: 1, name: '아기수달', emoji: '🌱', minPoints: 0 },
+  { id: 2, name: '꼬마수달', emoji: '🚀', minPoints: 20 },
+  { id: 3, name: '탐험수달', emoji: '🎯', minPoints: 100 },
+  { id: 4, name: '척척수달', emoji: '🌟', minPoints: 300 },
+  { id: 5, name: '박사수달', emoji: '🏆', minPoints: 800 },
 ];
 
 export const getGrowthStage = (points: number): GrowthStage => {
@@ -51,4 +52,4 @@ export const getGrowthStage = (points: number): GrowthStage => {
 export const DAILY_REVIEW_CAP = 10;
 
 // 프로필 아바타 값(서버 저장값). 고르기 시트에 이 순서로 나온다. 그림 매핑은 ProfileAvatar.
-export const AVATAR_OPTIONS = ['🍊','🥰','🐼','🐻','🦉','🌟','🎯','🎮','🚀','🍀'];
+export const AVATAR_OPTIONS = ['🍊','🐼','🥰','🦉'];

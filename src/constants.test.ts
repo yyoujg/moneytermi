@@ -2,8 +2,25 @@ import { describe, it, expect } from 'vitest';
 import { GROWTH_STAGES, getGrowthStage } from './constants';
 
 describe('getGrowthStage', () => {
-  it('0XP는 루키(1단계)', () => {
-    expect(getGrowthStage(0).name).toBe('루키');
+  it('이름만 수달 성장 단계로 바꾸고 기존 식별자와 기준을 보존한다', () => {
+    expect(GROWTH_STAGES.map(({ id, name, minPoints }) => ({ id, name, minPoints }))).toEqual([
+      { id: 1, name: '아기수달', minPoints: 0 },
+      { id: 2, name: '꼬마수달', minPoints: 20 },
+      { id: 3, name: '탐험수달', minPoints: 100 },
+      { id: 4, name: '척척수달', minPoints: 300 },
+      { id: 5, name: '박사수달', minPoints: 800 },
+    ]);
+  });
+
+  it('다섯 단계의 진입 직전과 진입 시점을 유지한다', () => {
+    for (const stage of GROWTH_STAGES) {
+      expect(getGrowthStage(stage.minPoints).id).toBe(stage.id);
+      if (stage.id > 1) expect(getGrowthStage(stage.minPoints - 1).id).toBe(stage.id - 1);
+    }
+  });
+
+  it('0XP는 아기수달(1단계)', () => {
+    expect(getGrowthStage(0).name).toBe('아기수달');
   });
 
   it('경계값은 다음 단계 포함', () => {
@@ -12,7 +29,7 @@ describe('getGrowthStage', () => {
   });
 
   it('최고 단계는 nextMinPoints가 null', () => {
-    expect(getGrowthStage(800).name).toBe('레전드');
+    expect(getGrowthStage(800).name).toBe('박사수달');
     expect(getGrowthStage(800).nextMinPoints).toBeNull();
     expect(getGrowthStage(999999).nextMinPoints).toBeNull();
   });

@@ -1,11 +1,13 @@
-import { memo, useEffect, useState } from 'react';
-import { BarChart3, ArrowDown } from 'lucide-react';
+import { memo, useEffect, useId, useRef, useState } from 'react';
+import { BarChart3, ArrowDown, X } from './ui/OtterIcons';
+import { ArrowRight } from './ui/ControlIcons';
 import type { WordVisual } from '../types';
 import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
 import { Card } from './ui/Card';
+import { ActionButton } from './ui/ActionButton';
 
 // 단어 설명용 선 그래프·비교표·한국은행 실제 통계. 차트 라이브러리 없이 SVG로 그린다.
-const COLORS = ['var(--color-brand-500)', 'var(--color-ink-3)'];
+const COLORS = ['var(--color-brand-action)', 'var(--color-ink-3)'];
 const W = 320;
 const H = 160;
 const PAD = { l: 34, r: 8, t: 10, b: 22 };
@@ -244,9 +246,14 @@ const EcosCard = ({ v }: { v: Extract<WordVisual, { type: 'ecos' }> }) => {
 // ponytail: 모듈 플래그. 서버 오류(인증키 없음 등)가 한 번 나면 이 세션에서는 통계 카드를 아예 숨긴다. 통계 하나가 비는 건 그 카드만 숨긴다.
 let ecosDown = false;
 
-// 설명 글 속 다른 용어를 연한 주황 알약으로 강조한다. 누르면 글 아래에 뜻 말풍선이 뜨고, '카드 보기'로 그 용어 카드로 간다.
+// 본문에서 고른 용어의 뜻과 등록된 예시를 밝은 설명 카드로 펼친다. 이동은 별도 버튼으로 구분한다.
 // 이름이 '주당순이익(EPS)'이면 괄호 앞 '주당순이익'도 찾는다. 같은 용어는 글마다 처음 한 번만 강조한다.
-export type Terms = { names: string[]; meaningOf: (name: string) => string | undefined; onClick: (name: string) => void };
+export type Terms = {
+  names: string[];
+  meaningOf: (name: string) => string | undefined;
+  exampleOf?: (name: string) => string | undefined;
+  onClick: (name: string) => void;
+};
 let termCache: { src: string[]; re: RegExp | null; full: Map<string, string> } | null = null;
 const termIndex = (names: string[]) => {
   if (termCache?.src === names) return termCache;   // 같은 배열(부모 useMemo)이면 다시 만들지 않는다
@@ -262,6 +269,20 @@ const termIndex = (names: string[]) => {
 };
 const LinkedText = ({ text, terms }: { text: string; terms?: Terms }) => {
   const [open, setOpen] = useState<string | null>(null);
+  const panelId = useId();
+  const panelRef = useRef<HTMLSpanElement>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    if (!open) return;
+    panelRef.current?.scrollIntoView?.({ block: 'nearest', behavior: 'auto' });
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      setOpen(null);
+      triggerRef.current?.focus({ preventScroll: true });
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [open]);
   if (!terms || terms.names.length === 0) return <>{text}</>;
   const { re, full } = termIndex(terms.names);
   if (!re) return <>{text}</>;
@@ -273,17 +294,39 @@ const LinkedText = ({ text, terms }: { text: string; terms?: Terms }) => {
         if (!name || seen.has(name)) return part;
         seen.add(name);
         return (
-          <button key={i} type="button" onClick={() => setOpen(o => (o === name ? null : name))}
-            className={`inline px-1! py-0.5! rounded-md text-brand-500 font-medium active:opacity-60 ${open === name ? 'bg-brand-200' : 'bg-[var(--color-brand-cream)]'}`}>
+          <button key={i} type="button" onClick={event => {
+            triggerRef.current = event.currentTarget;
+            setOpen(o => (o === name ? null : name));
+          }}
+            aria-expanded={open === name}
+            aria-controls={open === name ? panelId : undefined}
+            className="word-term-button inline px-1! py-0.5! rounded-md font-medium">
             {part}
           </button>
         );
       })}
       {open && (
-        <span className="block mt-2 rounded-chip bg-[#222] px-4 py-3 anim-pop-in">
-          <span className="block text-xs font-bold text-white">{open}</span>
-          <span className="block mt-1 text-xs text-white leading-relaxed break-keep">{terms.meaningOf(open)}</span>
-          <button type="button" onClick={() => terms.onClick(open)} className="mt-1.5 text-xs font-bold text-brand-300 active:opacity-60">카드 보기 ›</button>
+        <span ref={panelRef} id={panelId} role="region" aria-label={`${open} 뜻 설명`} className="word-term-panel anim-pop-in">
+          <span className="word-term-panel-header">
+            <span className="min-w-0">
+              <span className="word-term-panel-label">용어 뜻</span>
+              <span role="heading" aria-level={2} className="word-term-panel-title">{open}</span>
+            </span>
+            <button type="button" className="word-term-close" aria-label="뜻 설명 닫기" onClick={() => {
+              setOpen(null);
+              triggerRef.current?.focus({ preventScroll: true });
+            }}><X size={18} strokeWidth={1.75} aria-hidden="true" /></button>
+          </span>
+          <span className="word-term-panel-meaning">{terms.meaningOf(open) || '뜻 설명을 준비 중이에요.'}</span>
+          {terms.exampleOf?.(open) && (
+            <span className="word-term-example">
+              <span className="word-term-example-label">예를 들면</span>
+              <span className="word-term-example-copy">{terms.exampleOf(open)}</span>
+            </span>
+          )}
+          <ActionButton tone="soft" fullWidth onClick={() => terms.onClick(open)} className="word-term-card-link">
+            용어 카드 보기<ArrowRight size={16} aria-hidden="true" />
+          </ActionButton>
         </span>
       )}
     </>

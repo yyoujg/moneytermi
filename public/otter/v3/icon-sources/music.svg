@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 100 100" fill="none">
+<circle cx="50" cy="50" r="48" fill="#F8DADD"/>
+<g><path fill="#DB7686" d="M38 31Q38 27 42 26L71 20Q76 19 76 24L76 65L68 65L68 34L46 39L46 73L38 73Z"/><path fill="#F28792" d="M38 31Q38 27 42 26L71 20Q76 19 76 24L76 28L38 36Z"/><ellipse cx="34" cy="73" rx="12" ry="8" transform="rotate(-16 34 73)" fill="#DB7686"/><ellipse cx="34" cy="70.5" rx="12" ry="7" transform="rotate(-16 34 70.5)" fill="#F28792"/><ellipse cx="64" cy="64" rx="12" ry="8" transform="rotate(-16 64 64)" fill="#DB7686"/><ellipse cx="64" cy="61.5" rx="12" ry="7" transform="rotate(-16 64 61.5)" fill="#F28792"/></g>
+</svg>

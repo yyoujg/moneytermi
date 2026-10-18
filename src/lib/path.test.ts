@@ -163,13 +163,16 @@ describe('커넥터가 노드를 침범하지 않는다', () => {
 });
 
 describe('sectionColor', () => {
-  it('코스마다 브랜드 팔레트 색을 순환한다', () => {
-    expect([0, 1, 2].map((index) => sectionColor(index).face)).toEqual([
-      '#f97316',
-      '#099268',
-      '#6d4aff',
-    ]);
-    expect(sectionColor(4)).toEqual(sectionColor(0));
+  it('코스 순서와 관계없이 같은 시맨틱 팔레트를 순환한다', () => {
+    const palette = {
+      face: 'var(--color-brand-action)',
+      shadow: 'var(--color-brand-ink)',
+      ink: 'var(--color-on-brand)',
+    };
+    for (let index = 0; index < 64; index++) {
+      expect(sectionColor(index)).toEqual(palette);
+      expect(sectionColor(index)).toEqual(sectionColor(0));
+    }
   });
 });
 

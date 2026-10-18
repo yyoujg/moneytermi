@@ -1,6 +1,7 @@
-import { ChevronsUp, Lock, Tv, Zap } from 'lucide-react';
+import { Tv } from './ui/OtterIcons';
+import { ChevronRight } from './ui/ControlIcons';
 import { ENERGY_AD_REWARD, ENERGY_REFILL_COST, XP_BONUS_POINTS, XP_BONUS_STEP } from '../constants';
-import { PointIcon } from './StatIcons';
+import { EnergyIcon, PointIcon, XpIcon } from './StatIcons';
 
 export type EnergyRefillNotice = {
   tone: 'points' | 'network' | 'info';
@@ -38,7 +39,7 @@ const getEnergyRefillState = (points: number, energy: number, energyMax: number,
     full,
     shortfall,
     canRefill: !full && shortfall === 0 && !refillPending,
-    buttonHint: full ? '가득 찼어요' : refillPending ? '충전 중' : shortfall > 0 ? `${shortfall.toLocaleString()}P 부족` : `${ENERGY_REFILL_COST.toLocaleString()}P`,
+    buttonHint: full ? '가득 찼어요' : refillPending ? '충전 중' : shortfall > 0 ? `조개 ${shortfall.toLocaleString()}개 부족` : `조개 ${ENERGY_REFILL_COST.toLocaleString()}개`,
   };
 };
 
@@ -60,121 +61,67 @@ export const EnergyShopContent = ({
 }: Props) => {
   const refill = getEnergyRefillState(points, energy, energyMax, refillPending);
   const energyPercent = energyMax > 0 ? Math.min(100, Math.max(0, (energy / energyMax) * 100)) : 0;
-  const statusText = refill.full ? '충전 완료' : '충전 중';
-  const statusClass = refill.full
-    ? 'bg-[var(--color-success-soft)] text-success-500'
-    : 'bg-[var(--color-brand-soft)] text-[var(--color-brand-ink)]';
-  const progressClass = refill.full ? 'bg-success-500' : 'bg-brand-500';
-  const pointCardClass = refill.shortfall > 0
-    ? 'border-brand-200 bg-[var(--color-brand-soft)]'
-    : 'border-[var(--color-line)] bg-[var(--color-card)]';
-  const refillButtonClass = refill.canRefill
-    ? 'border-brand-200 bg-[var(--color-brand-soft)] text-[var(--color-brand-ink)] active:opacity-70'
-    : 'border-transparent bg-[var(--color-button-secondary)] text-[var(--color-ink-4)]';
-  const noticeClass = refillNotice?.tone === 'network'
-    ? 'border-danger-300 bg-danger-500/10 text-danger-500'
-    : refillNotice?.tone === 'points'
-      ? 'border-brand-200 bg-[var(--color-brand-soft)] text-[var(--color-brand-ink)]'
-      : 'border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-ink-3)]';
   const adDisabled = rewardedAdAvailable && (!rewardedAdReady || rewardedAdPending);
   const adHint = rewardedAdPending ? '여는 중' : rewardedAdPreparing ? '준비 중' : rewardedAdReady ? `시청 후 +${ENERGY_AD_REWARD}` : '잠시 후';
+  const boostDisabled = points < 300 || boostLeft > 0;
 
   return (
-    <div className="px-5 pb-6 flex flex-col gap-2">
-      <div className="mb-2 rounded-card bg-[var(--color-surface)] px-4 py-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-sm font-bold text-[var(--color-ink)]">에너지</p>
-            <p className={`mt-1 inline-flex items-center rounded-full px-2.5 py-1 text-2xs font-bold ${statusClass}`}>
-              {statusText}
-            </p>
-          </div>
-          <p className={`flex items-center gap-1 text-sm font-black ${refill.full ? 'text-success-500' : 'text-[var(--color-brand-ink)]'}`}>
-            <Zap size={16} className="fill-current" />{energy}/{energyMax}
-          </p>
+    <div className="energy-shop-content">
+      <section className="energy-shop-summary" aria-label="현재 에너지">
+        <div className="energy-shop-summary-heading">
+          <EnergyIcon size={48} />
+          <div className="energy-shop-balance"><h2>학습 에너지</h2><p><strong>{energy}</strong><span>/ {energyMax}</span></p></div>
+          <span className="energy-shop-state" data-full={refill.full}>{refill.full ? '충전 완료' : '충전 중'}</span>
         </div>
-        <div
-          role="progressbar"
-          aria-label="에너지 충전 진행률"
-          aria-valuemin={0}
-          aria-valuemax={energyMax}
-          aria-valuenow={energy}
-          className="mt-3 h-3 overflow-hidden rounded-full bg-[var(--color-card)]"
-        >
-          <div className={`h-full rounded-full transition-all duration-500 ${progressClass}`} style={{ width: `${energyPercent}%` }} />
+        <div role="progressbar" aria-label="에너지 충전 진행률" aria-valuemin={0} aria-valuemax={energyMax} aria-valuenow={energy} className="energy-shop-progress" data-full={refill.full}>
+          <span style={{ width: `${energyPercent}%` }} />
         </div>
-        <p className="mt-2! text-2xs font-semibold text-[var(--color-ink-4)]">
-          {refill.full ? '가득 차면 자동 충전은 잠시 멈춰요' : `다음 충전: ${formatEnergyLeft(energyLeft)} 후`}
-        </p>
-      </div>
+        <p className="energy-shop-timer">{refill.full ? '가득 차면 자동 충전은 잠시 멈춰요' : `다음 충전: ${formatEnergyLeft(energyLeft)} 후`}</p>
+      </section>
 
-      <div className={`rounded-chip border px-4 py-3 ${pointCardClass}`} role="status" aria-live="polite">
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-2xs font-bold text-[var(--color-ink-3)]">보유 포인트</span>
-          <span className="flex items-center gap-1 text-sm font-black text-[var(--color-ink)]">
-            <PointIcon size={13} />{points.toLocaleString()}P
-          </span>
-        </div>
-        <p id="energy-refill-status" className="mt-1! text-2xs leading-relaxed text-[var(--color-ink-3)] break-keep">
-          {refill.full
-            ? '에너지가 가득해서 지금은 충전할 필요가 없어요.'
-            : refill.shortfall > 0
-              ? `${refill.shortfall.toLocaleString()}P 부족해요. 포인트를 더 모으면 구매 버튼이 열려요.`
-              : `${ENERGY_REFILL_COST.toLocaleString()}P로 지금 바로 완충할 수 있어요.`}
-        </p>
-      </div>
+      <div className="energy-shop-wallet" role="status" aria-live="polite"><PointIcon size={24} /><span>보유 조개</span><strong>{points.toLocaleString()}<span>개</span></strong></div>
 
-      <button
-        onClick={onEnergyAd}
-        disabled={refill.full || adDisabled}
-        className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-chip bg-brand-500 px-4 py-4 text-sm font-bold active:opacity-70 disabled:opacity-60"
-      >
-        <span className="flex min-w-0 items-center gap-2 text-left leading-5"><Tv size={18} className="shrink-0" />광고 보고 에너지 받기</span>
-        <span className="shrink-0 text-right text-2xs font-medium leading-4">{adHint}</span>
-      </button>
-      {rewardedAdAvailable && !rewardedAdReady && (
-        <p role="status" className="text-2xs font-semibold text-[var(--color-ink-4)] leading-relaxed break-keep">
-          광고를 미리 준비하고 있어요. 버튼이 활성화되면 시청 후 에너지를 받을 수 있어요.
-        </p>
-      )}
-      <button
-        onClick={onEnergyRefill}
-        disabled={!refill.canRefill}
-        aria-describedby="energy-refill-status"
-        className={`grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-chip border px-4 py-4 text-sm font-bold disabled:opacity-100 ${refillButtonClass}`}
-      >
-        <span className="flex min-w-0 items-center gap-2 text-left leading-5"><Lock size={18} className="shrink-0" />에너지 모두 충전</span>
-        <span className="shrink-0 text-right text-2xs font-bold leading-4">{refill.buttonHint}</span>
-      </button>
+      <section className="energy-shop-section" aria-label="에너지 충전 방법">
+        <h2>충전 방법</h2>
+        <button type="button" onClick={onEnergyAd} disabled={refill.full || adDisabled} className="energy-shop-option" data-energy-option="ad">
+          <Tv size={32} />
+          <span className="energy-shop-option-body"><strong>광고 보고 에너지 받기</strong><span>시청 보상 에너지 +{ENERGY_AD_REWARD}</span></span>
+          <span className="energy-shop-option-state">{refill.full ? '가득 찼어요' : adHint}{!(refill.full || adDisabled) && <ChevronRight size={14} />}</span>
+        </button>
+        {rewardedAdAvailable && !rewardedAdReady && <p role="status" className="energy-shop-caption">광고를 미리 준비하고 있어요. 버튼이 활성화되면 시청 후 에너지를 받을 수 있어요.</p>}
 
-      {refillNotice && (
-        <div role={refillNotice.tone === 'network' ? 'alert' : 'status'} className={`rounded-chip border px-4 py-3 text-2xs font-bold leading-relaxed break-keep ${noticeClass}`}>
-          {refillNotice.text}
-        </div>
-      )}
+        <button type="button" onClick={onEnergyRefill} disabled={!refill.canRefill} aria-describedby="energy-refill-status" className="energy-shop-option" data-energy-option="refill">
+          <EnergyIcon size={32} />
+          <span className="energy-shop-option-body"><strong>에너지 모두 충전</strong><span>조개 {ENERGY_REFILL_COST.toLocaleString()}개</span></span>
+          <span className="energy-shop-option-state">{refill.buttonHint}{refill.canRefill && <ChevronRight size={14} />}</span>
+        </button>
+        <p id="energy-refill-status" role="status" aria-live="polite" className="energy-shop-caption">{refill.full
+          ? '에너지가 가득해서 지금은 충전할 필요가 없어요.'
+          : refill.shortfall > 0
+            ? `조개 ${refill.shortfall.toLocaleString()}개 부족해요. 조개를 더 모으면 구매 버튼이 열려요.`
+            : `조개 ${ENERGY_REFILL_COST.toLocaleString()}개로 지금 바로 완충할 수 있어요.`}</p>
+      </section>
 
-      <button
-        onClick={onBoost}
-        disabled={points < 300 || boostLeft > 0}
-        className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-chip bg-[var(--color-button-secondary)] px-4 py-4 text-sm font-bold text-[var(--color-ink-2)] active:opacity-70 disabled:opacity-60"
-      >
-        <span className="flex min-w-0 items-center gap-2 text-left leading-5"><ChevronsUp size={18} className="shrink-0" />{boostLeft > 0 ? '부스트 사용 중' : 'XP 2배 부스트'}</span>
-        <span className="shrink-0 text-right text-2xs font-medium leading-4">
-          {boostLeft > 0
+      {refillNotice && <div role={refillNotice.tone === 'network' ? 'alert' : 'status'} className="energy-shop-notice" data-tone={refillNotice.tone}>{refillNotice.text}</div>}
+
+      <section className="energy-shop-section" aria-label="학습 부스트">
+        <h2>학습 부스트</h2>
+        <button type="button" onClick={onBoost} disabled={boostDisabled} className="energy-shop-option" data-energy-option="boost">
+          <XpIcon size={32} />
+          <span className="energy-shop-option-body"><strong>{boostLeft > 0 ? '부스트 사용 중' : 'XP 2배 부스트'}</strong><span>조개 300개 · 30분</span></span>
+          <span className="energy-shop-option-state">{boostLeft > 0
             ? `${Math.floor(boostLeft / 60000)}:${String(Math.floor((boostLeft % 60000) / 1000)).padStart(2, '0')} 남음`
-            : points < 300 ? `${(300 - points).toLocaleString()}P 더 필요` : '300P · 30분'}
-        </span>
-      </button>
+            : points < 300 ? `조개 ${(300 - points).toLocaleString()}개 더 필요` : '사용하기'}{!boostDisabled && <ChevronRight size={14} />}</span>
+        </button>
+      </section>
 
-      <div className="rounded-chip px-4 py-3 mt-1" style={{ backgroundColor: 'var(--color-surface)' }}>
-        <p className="text-2xs font-bold text-[var(--color-ink-3)] mb-1!">학습으로 모으기</p>
-        <p className="text-2xs text-[var(--color-ink-4)] leading-relaxed break-keep">
-          퀴즈 정답 +10~20P · 미션 보상 +10~50P · XP {XP_BONUS_STEP}마다 +{XP_BONUS_POINTS}P
-        </p>
-      </div>
-      <p className="text-2xs text-[var(--color-ink-4)] mt-1 leading-relaxed">
-        새 학습과 코스 퀴즈를 처음 시작할 때 에너지 1을 써요. 이어하기, 다시 보기, 복습은 무료예요. 포인트는 선택한 에너지 충전과 부스트에만 써요.
-      </p>
+      <section className="energy-shop-info" aria-label="에너지와 조개 이용 안내">
+        <h2>이용 안내</h2>
+        <p>번개 아이콘은 학습에 쓰는 에너지를 뜻해요.</p>
+        <p>새 학습과 코스 퀴즈를 처음 시작할 때 에너지 1을 써요. 이어하기, 다시 보기, 복습은 무료예요. 조개는 선택한 에너지 충전과 부스트에만 써요.</p>
+        <h3>학습으로 조개 모으기</h3>
+        <p>퀴즈 정답 조개 +10~20개 · 미션 보상 +10~50개 · XP {XP_BONUS_STEP}마다 조개 +{XP_BONUS_POINTS}개</p>
+      </section>
     </div>
   );
 };

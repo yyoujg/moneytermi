@@ -1,5 +1,5 @@
 export const praiseForMission = ({ ready, completed }: { ready: number; completed: number }) => {
-  if (ready > 0) return `${ready}개 미션 보상을 받을 수 있어요. 오늘 할 일을 이미 해냈어요.`;
+  if (ready > 0) return `${ready}개 미션 보상을 받을 수 있어요. 완료한 미션의 조개를 챙겨요.`;
   if (completed > 0) return `${completed}개 미션 완료. 작게 보여도 꾸준함이 쌓이고 있어요.`;
   return '하나씩 채우면 오늘의 성과가 바로 보여요.';
 };
@@ -9,7 +9,7 @@ export const praiseForQuiz = ({ accuracy, maxCombo, total }: { accuracy: number;
   if (accuracy === 100) return `${total}문제를 모두 맞혔어요. 바로 다음 단계로 가도 좋아요.`;
   if (accuracy >= 80) return `정답률 ${accuracy}%. 헷갈리는 부분만 조금 더 보면 돼요.`;
   if (maxCombo >= 3) return `${maxCombo}문제를 연속으로 맞혔어요. 흐름을 잘 이어갔어요.`;
-  return '헷갈린 문제까지 다시 봤어요. 다음에 보면 더 익숙해질 거예요.';
+  return '헷갈린 문제까지 다시 봤어요. 차근차근 한 번 더 확인해요.';
 };
 
 export const praiseForAnswer = (combo: number) => {

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { X } from 'lucide-react';
+import { X } from '../ui/OtterIcons';
 import { getGrowthStage, GROWTH_STAGES, type GrowthStage } from '../../constants';
 import { useAppContext } from '../../context/AppContext';
 import { feedbackTierUp } from '../../lib/feedback';
@@ -40,7 +40,7 @@ export const LeaguePromotionCelebration = () => {
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/55 px-6"
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-[var(--color-overlay)] px-6"
       role="presentation"
       onClick={close}
     >
@@ -49,7 +49,7 @@ export const LeaguePromotionCelebration = () => {
         aria-modal="true"
         aria-labelledby="league-promotion-title"
         onClick={e => e.stopPropagation()}
-        className="w-full max-w-xs overflow-hidden rounded-card bg-[var(--color-card)] anim-pop-in"
+        className="app-card w-full max-w-xs overflow-hidden rounded-card bg-[var(--color-card)] anim-pop-in"
       >
         <div className="relative flex flex-col items-center px-5 pb-5 pt-6 text-center">
           <button

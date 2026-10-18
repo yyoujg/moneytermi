@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Check, X, Flame, Share2 } from 'lucide-react';
+import { Check, X, Flame, Share2, Target, TrendingUp } from '../components/ui/OtterIcons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
@@ -11,6 +11,7 @@ import { feedbackCorrect, feedbackWrong, feedbackQuizComplete, feedbackTierUp } 
 import { logClick } from '../lib/analytics';
 import { shareTossLink } from '../lib/share';
 import { Card } from '../components/ui/Card';
+import { ActionButton } from '../components/ui/ActionButton';
 import { PointIcon, XpIcon } from '../components/StatIcons';
 import { buildQuizItem, pickQuizType, type QuizOption } from '../lib/quiz';
 import { shouldScheduleRetry } from '../lib/review';
@@ -22,6 +23,9 @@ import { QuizProgressHeader } from '../components/learning/QuizProgressHeader';
 import { PraiseNote } from '../components/PraiseNote';
 import { praiseForAnswer, praiseForQuiz } from '../lib/praise';
 import { keepShortUnitsTogether } from '../lib/formatText';
+
+// 결과의 장식 아이콘은 숫자와 분리하고 항목명 왼쪽에 같은 규격으로 둔다.
+const resultIconProps = { size: 18, strokeWidth: 1.8, className: 'quiz-result-icon', 'aria-hidden': true } as const;
 
 const quizShareMessage = (modeLabel: string, total: number, accuracy: number, maxCombo: number, words: Word[]) => {
   const learned = words.slice(0, 3).map(word => word.word).join(' · ');
@@ -161,28 +165,22 @@ const QuizScreen = () => {
           ? navigate(navState.nextRoute.pathname, navState.nextRoute.state === undefined ? undefined : { state: navState.nextRoute.state })
           : navigate(backPath)}
       >
-        <Card pad="lg" className="w-full flex flex-col gap-4 anim-fade-up" style={{ '--i': 2 } as React.CSSProperties}>
-          <LearningStatRow label="획득 포인트" withDivider={false}>
-            <div className="flex items-center gap-1.5">
-              <PointIcon size={16} />
-              <span className="text-xl font-bold text-brand-500">+{earnedShown}P</span>
-            </div>
+        <Card pad="lg" className="quiz-result-stats w-full flex flex-col gap-4 anim-fade-up" role="group" aria-label="퀴즈 결과 요약" style={{ '--i': 2 } as React.CSSProperties}>
+          <LearningStatRow label="모은 조개" icon={<PointIcon size={18} className="quiz-result-icon" />} withDivider={false}>
+            <span className="shrink-0 text-xl font-bold text-brand-500">+{earnedShown}개</span>
           </LearningStatRow>
-          <LearningStatRow label="획득 XP">
-            <div className="flex items-center gap-1.5">
-              <XpIcon size={16} />
-              <span className="text-xl font-bold text-[var(--color-ink)]">+{Math.max(0, xp - xpAtStart.current)}</span>
-            </div>
+          <LearningStatRow label="획득 XP" icon={<XpIcon size={18} className="quiz-result-icon" />}>
+            <span className="shrink-0 text-xl font-bold text-[var(--color-ink)]">+{Math.max(0, xp - xpAtStart.current)}</span>
           </LearningStatRow>
-          <LearningStatRow label="첫 시도 정답률">
+          <LearningStatRow label="첫 시도 정답률" icon={<Target {...resultIconProps} />}>
             <span className="text-xl font-bold text-[var(--color-ink)]">{accuracy}%</span>
           </LearningStatRow>
-          <LearningStatRow label="최고 연속 정답">
-            <span className="flex items-center gap-1 text-xl font-bold text-[var(--color-ink)]">{maxCombo}연속<Flame size={18} className="text-brand-500 fill-current" /></span>
+          <LearningStatRow label="최고 연속 정답" icon={<Flame {...resultIconProps} />}>
+            <span className="shrink-0 text-xl font-bold text-[var(--color-ink)]">{maxCombo}연속</span>
           </LearningStatRow>
           {stageUp && (
-            <LearningStatRow label="단계 변화">
-              <span className="text-sm font-bold text-success-400">🎉 {stageBefore.name} → {stageAfter.name} 승급!</span>
+            <LearningStatRow label="단계 변화" icon={<TrendingUp {...resultIconProps} />}>
+              <span className="text-sm font-bold text-[var(--color-ink)]">{stageBefore.name} → {stageAfter.name} 승급!</span>
             </LearningStatRow>
           )}
         </Card>
@@ -193,14 +191,12 @@ const QuizScreen = () => {
           style={{ '--i': 3 } as React.CSSProperties}
         />
         <Card pad="md" className="w-full anim-fade-up" style={{ '--i': 4 } as React.CSSProperties}>
-          <p className="text-xs font-bold text-brand-500 mb-1.5!">이번에 확인한 내용</p>
+          <p className="text-xs font-bold text-[var(--color-info)] mb-1.5!">이번에 확인한 내용</p>
           <p className="text-sm font-semibold text-[var(--color-ink)] leading-relaxed break-keep">처음 푼 {baseQueue.length}문제 중 {firstCorrect}개에 정답을 골랐어요. 나중에 다시 보며 기억을 확인해요.</p>
         </Card>
         <Card tone="surface" pad="md" className="w-full flex flex-col gap-3 anim-fade-up" style={{ '--i': 5 } as React.CSSProperties}>
           <div className="flex items-start gap-3">
-            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-card)] text-brand-500">
-              <Share2 size={17} />
-            </span>
+            <Share2 {...resultIconProps} className="quiz-result-icon mt-0.5" />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-bold text-[var(--color-ink)]">오늘의 성과 공유하기</p>
               <p className="mt-1! text-xs text-[var(--color-ink-3)] leading-relaxed break-keep">
@@ -213,7 +209,7 @@ const QuizScreen = () => {
               logClick('quiz_result_share', { mode: navState?.mode ?? 'quiz', total: baseQueue.length, accuracy, max_combo: maxCombo });
               void shareTossLink('intoss://moneytermi/course', quizShareMessage(sessionLabel, baseQueue.length, accuracy, maxCombo, baseQueue));
             }}
-            className="w-full min-h-[46px] rounded-button bg-[var(--color-card)] text-sm font-bold text-brand-500 active:opacity-90"
+            className="action-secondary w-full min-h-[46px] rounded-button text-sm font-bold active:opacity-90"
           >
             친구에게 공유
           </button>
@@ -279,7 +275,7 @@ const QuizScreen = () => {
   };
 
   // 스트릭 메시지
-  const streakMessage = combo >= 5 ? `${combo}연속! x2 보너스` : combo >= 3 ? `${combo}연속! +5P 보너스` : null;
+  const streakMessage = combo >= 5 ? `${combo}연속! x2 보너스` : combo >= 3 ? `${combo}연속! 조개 5개 보너스` : null;
   // 쉬운 예시(데이터 앞의 '학습용 가정:' 표시는 뺀다). 없으면 뜻
   const example = currentWord?.learningExample?.replace(/^학습용 가정:\s*/, '') || currentWord?.meaning;
   const answeredCorrectly = status === 'correct';
@@ -300,7 +296,6 @@ const QuizScreen = () => {
         accentBg: 'bg-[var(--color-surface)]',
         accentBorder: 'border-[var(--color-line)]',
       };
-  const nextButtonClass = answeredCorrectly ? 'bg-success-500' : 'bg-[var(--color-ink)]';
   const visibleOptions = (quizItem?.options ?? [])
     .map((option, index) => ({ option, index }))
     .filter(({ option }) => status === 'idle' || selected === null || selected === option.answer);
@@ -319,7 +314,7 @@ const QuizScreen = () => {
                 key={totalEarned}
                 className="anim-reward-rise absolute -top-1 right-0 text-xs font-bold text-brand-500 whitespace-nowrap"
               >
-                +{lastEarned}P
+                +{lastEarned}개
               </span>
             )}
           </div>
@@ -329,19 +324,19 @@ const QuizScreen = () => {
       {/* 콘텐츠 — 뜻 보기 4개가 길면 작은 화면에서 넘치므로 이 영역만 스크롤 */}
       <div className="flex-1 min-h-0 overflow-y-auto flex flex-col px-5 pt-3 pb-5 gap-4 [&::-webkit-scrollbar]:hidden">
         {/* 문제 카드 */}
-        <div key={currentQuizIndex} className={`quiz-question-card anim-slide-in rounded-card px-5 py-5 flex flex-col items-center text-center gap-3
-          ${status === 'correct' ? 'anim-answer-wash bg-[var(--color-card)]' : 'bg-[var(--color-card)]'}
+        <div key={currentQuizIndex} className={`quiz-question-card anim-slide-in rounded-card bg-[var(--color-card)] px-5 py-5 flex flex-col items-start text-left gap-3
+          ${status === 'correct' ? 'anim-answer-wash' : ''}
           ${shake ? 'anim-soft-nudge' : ''}
         `}>
-          <span className="rounded-full bg-[var(--color-surface)] px-3 py-1 text-2xs font-black text-[var(--color-ink-3)]">{quizItem?.promptLabel}</span>
+          <span className="text-xs font-bold text-brand-600">{quizItem?.promptLabel}</span>
 
-          <p className="quiz-prompt-main mx-auto max-w-[18rem] text-[21px] font-black text-[var(--color-ink)] leading-[1.42] break-keep">
+          <h2 className="quiz-prompt-main w-full text-[22px] font-bold text-[var(--color-ink)] leading-[1.5] break-keep">
             {keepShortUnitsTogether(quizItem?.promptMain ?? '')}
-          </p>
+          </h2>
 
           {quizItem?.promptSub && (
-            <div className="w-full bg-[var(--color-canvas)] rounded-chip px-4 py-3">
-              <p className="text-sm text-[var(--color-ink-3)] leading-relaxed break-keep">{keepShortUnitsTogether(quizItem.promptSub)}</p>
+            <div className="w-full border-t border-[var(--color-line)] pt-3">
+              <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep">{keepShortUnitsTogether(quizItem.promptSub)}</p>
             </div>
           )}
 
@@ -362,7 +357,7 @@ const QuizScreen = () => {
             const tag = status === 'idle' ? null : isCorrectOption ? '정답' : isSelected ? '내 답' : null;
             const feedbackMotion = status !== 'idle' && (isCorrectOption || isSelected) ? 'anim-choice-lock' : '';
             const markerClass = status === 'idle'
-              ? 'border border-[var(--color-line-strong)] bg-[var(--color-surface)] text-[var(--color-ink-3)]'
+              ? 'border border-[var(--color-line-strong)] bg-[var(--color-card)] text-[var(--color-ink-3)]'
               : isCorrectOption
                 ? 'bg-success-500 text-white'
                 : isSelected
@@ -373,10 +368,10 @@ const QuizScreen = () => {
               <button
                 key={`${i}-${opt.answer}`}
                 onClick={() => handleSelect(opt)}
-                className={`quiz-option anim-fade-up ${feedbackMotion} flex items-center gap-3 min-h-[62px] py-3.5 px-4 border text-[15px] font-bold text-left break-keep transition-colors duration-150 ${optionStyle}`}
-                style={{ '--i': rowIndex + 1, borderRadius: 18 } as React.CSSProperties}
+                className={`quiz-option anim-fade-up ${feedbackMotion} flex items-center gap-3 min-h-[64px] py-4 px-4 border text-base font-semibold leading-relaxed text-left break-keep transition-colors duration-150 ${optionStyle}`}
+                style={{ '--i': rowIndex + 1, borderRadius: 'var(--shape-button)' } as React.CSSProperties}
               >
-                <span className={`w-7 h-7 shrink-0 flex items-center justify-center text-xs font-black ${markerClass}`} style={{ borderRadius: 9999 }}>
+                <span className={`w-7 h-7 shrink-0 flex items-center justify-center text-xs font-semibold ${markerClass}`} style={{ borderRadius: 9999 }}>
                   {status !== 'idle' && isCorrectOption ? <Check size={14} strokeWidth={3} /> : status !== 'idle' && isSelected ? <X size={14} strokeWidth={3} /> : i + 1}
                 </span>
                 <span className="min-w-0 flex-1">{keepShortUnitsTogether(opt.label)}</span>
@@ -398,23 +393,24 @@ const QuizScreen = () => {
                   {feedbackTone.icon}
                 </span>
                 <div className="min-w-0">
-                  <p className={`text-lg font-black leading-snug ${feedbackTone.accentText}`}>
+                  <p className={`text-lg font-bold leading-snug ${feedbackTone.accentText}`}>
                     {feedbackTone.title}
                   </p>
                   <p className="mt-0.5! text-xs font-semibold text-[var(--color-ink-4)]">{feedbackTone.helper}</p>
                 </div>
               </div>
-              <div className="rounded-card border border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-3.5">
+              <div className="rounded-card border border-[var(--color-line)] bg-[var(--color-card)] px-4 py-3.5">
                 <p className="mb-1! text-2xs font-black text-[var(--color-ink-4)]">정답</p>
                 <p className="text-base font-black text-[var(--color-ink)]">{currentWord.word}</p>
-                <p className="mt-1! text-sm font-semibold text-[var(--color-ink-2)] leading-snug break-keep">{keepShortUnitsTogether(currentWord.meaning)}</p>
+                <p className="mt-1! text-sm font-medium text-[var(--color-ink-2)] leading-relaxed break-keep">{keepShortUnitsTogether(currentWord.meaning)}</p>
               </div>
-              <button
+              <ActionButton
                 onClick={goNextQuestion}
-                className={`w-full min-h-[54px] rounded-button text-base font-bold text-white active:opacity-90 ${nextButtonClass}`}
+                fullWidth
+                tone="primary"
               >
                 {currentQuizIndex === quizQueue.length - 1 ? '결과 보기' : '다음 문제'}
-              </button>
+              </ActionButton>
             </div>
           </div>
         )}
@@ -422,7 +418,7 @@ const QuizScreen = () => {
 
       {/* 답을 고른 뒤: 선택지는 채점 표시, 하단은 다음 행동과 해설에 집중한다. */}
       {answeredCorrectly && (
-        <div key={currentQuizIndex} className="quiz-feedback-sheet anim-feedback-panel rounded-t-[28px] border-t border-[var(--color-line)] bg-[var(--color-card)] px-5 pt-3 pb-8">
+        <div key={currentQuizIndex} className="quiz-feedback-sheet anim-feedback-panel rounded-t-[var(--shape-card)] border-t border-[var(--color-line)] bg-[var(--color-card)] px-5 pt-3 pb-8">
           <div aria-hidden className="mx-auto mb-3 h-1 w-10 rounded-full bg-[var(--color-line)]" />
           <div className="flex flex-col gap-3">
             <div className="flex items-start justify-between gap-3">
@@ -431,7 +427,7 @@ const QuizScreen = () => {
                   {feedbackTone.icon}
                 </span>
                 <div className="min-w-0">
-                  <p className={`text-lg font-black leading-snug ${feedbackTone.accentText}`}>
+                  <p className={`text-lg font-bold leading-snug ${feedbackTone.accentText}`}>
                     {feedbackTone.title}
                   </p>
                   <p className="mt-0.5! text-xs font-semibold text-[var(--color-ink-4)]">{feedbackTone.helper}</p>
@@ -439,33 +435,34 @@ const QuizScreen = () => {
               </div>
               {answeredCorrectly && (
                 <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-[var(--color-brand-soft)] px-2.5 py-1 text-2xs font-black text-brand-600">
-                  {capped ? <span className="text-[var(--color-ink-3)]">한도 도달</span> : lastEarned > 0 ? `+${lastEarned}P` : null}
+                  {capped ? <span className="text-[var(--color-ink-3)]">한도 도달</span> : lastEarned > 0 ? `+${lastEarned}개` : null}
                   {combo >= 3 && <span className="flex items-center gap-0.5"><Flame size={12} className="fill-current" />{combo}연속</span>}
                 </span>
               )}
             </div>
 
             {answeredCorrectly ? (
-              <div className="rounded-card border border-[var(--color-line)] bg-[var(--color-surface)] px-4 py-3.5">
+              <div className="rounded-card border border-[var(--color-line)] bg-[var(--color-card)] px-4 py-3.5">
                 <p className="text-2xs font-black text-[var(--color-ink-4)] mb-1.5!">이렇게 쓰여요</p>
-                <p className="text-sm font-semibold text-[var(--color-ink)] leading-snug break-keep">{keepShortUnitsTogether(example)}</p>
+                <p className="text-sm font-medium text-[var(--color-ink)] leading-relaxed break-keep">{keepShortUnitsTogether(example)}</p>
               </div>
             ) : (
               <div className="flex flex-col gap-2">
                 <div className="rounded-card border border-success-500/25 bg-[var(--color-success-soft)] px-4 py-3.5">
                   <p className="mb-1! text-2xs font-black text-success-500">정답</p>
                   <p className="text-base font-black text-[var(--color-ink)]">{currentWord.word}</p>
-                  <p className="mt-1! text-sm font-semibold text-[var(--color-ink-2)] leading-snug break-keep">{keepShortUnitsTogether(currentWord.meaning)}</p>
+                  <p className="mt-1! text-sm font-medium text-[var(--color-ink-2)] leading-relaxed break-keep">{keepShortUnitsTogether(currentWord.meaning)}</p>
                 </div>
               </div>
             )}
 
-            <button
+            <ActionButton
               onClick={goNextQuestion}
-              className={`w-full min-h-[54px] rounded-button text-base font-bold text-white active:opacity-90 ${nextButtonClass}`}
+              fullWidth
+              tone="primary"
             >
               {currentQuizIndex === quizQueue.length - 1 ? '결과 보기' : '다음 문제'}
-            </button>
+            </ActionButton>
           </div>
         </div>
       )}

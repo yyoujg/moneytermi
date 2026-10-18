@@ -1,0 +1,251 @@
+/* 머니터미 색상·크기 규칙의 단일 원본. 화면 파일에 개별 팔레트를 추가하지 않는다. */
+:root {
+  color-scheme: light;
+
+  /* 연회색 바탕과 흰 카드 위에 중성 본문을 사용한다. */
+  --color-canvas: #f4f4f6;
+  --color-card: #ffffff;
+  --color-surface: #f3f3f5;
+  --color-ink: #202124;
+  --color-ink-2: #45484f;
+  --color-ink-3: #60646c;
+  --color-ink-4: #686a70;
+  --color-line: #e7e8ed;
+  --color-line-strong: #858893;
+
+  /* 주행동은 차콜, 선택과 작은 장식은 민트 계열로 분리한다. */
+  --color-brand-action: #3d3e44;
+  --color-brand-pressed: #38393f;
+  --color-brand-accent: #8ecaa9;
+  --color-brand-decoration: #287a58;
+  --color-brand-text: var(--color-ink-2);
+  --color-brand-soft: #e5f4eb;
+  --color-brand-line: #c5e4d1;
+  --color-brand-line-strong: #4f9679;
+  --color-brand-on-light-surface: var(--color-ink-2);
+  --color-on-brand: #ffffff;
+
+  /* 행동: 주요/보조/비활성을 구분하되 모든 채운 버튼의 글자는 흰색. */
+  --color-action-secondary: #60646c;
+  --color-action-secondary-pressed: #565a62;
+  --color-action-soft: #f3f3f5;
+  --color-action-soft-pressed: #e9e9ee;
+  --color-on-action-soft: var(--color-ink-2);
+  --color-button-secondary: var(--color-surface);
+  --color-button-disabled: #70747c;
+  --color-on-action: #ffffff;
+  --color-action-boundary: var(--color-line-strong);
+
+
+  /* 진행은 비문자 대비 3:1, 보상 글자는 4.5:1 이상으로 구분한다. */
+  --color-progress: #c27915;
+  --color-reward-foreground: #a45a00;
+  --color-selection-soft: var(--color-brand-soft);
+  --color-selection-ink: #1d684b;
+  --color-character-stage: #f8f0df;
+  --color-filter-tray: #e9eaee;
+
+  /* 의미색: 정답·완료·오류 등 상태 전달에만 사용한다. */
+  --color-success-foreground: #18794e;
+  --color-success-action: #18794e;
+  --color-success-soft: #eaf5ee;
+  --color-success-mark: #ffffff;
+  --color-danger-foreground: #cc3340;
+  --color-danger-action: #cc3340;
+  --color-danger-line: #eb929a;
+  --color-danger-soft: #ffedef;
+  --color-warning-foreground: #8a5a00;
+  --color-info: var(--color-ink-2);
+  --color-info-soft: var(--color-surface);
+  --color-info-line: var(--color-line);
+
+  /* 실제 경험치·재화는 중성 역할을 보존하고 일반 진행·보상 장식과 분리한다. */
+  --color-stat-ink: var(--color-ink);
+  --color-stat-streak: var(--color-brand-decoration);
+  --color-stat-xp: var(--color-ink-2);
+  --color-stat-points: var(--color-ink-2);
+  --color-stat-words: var(--color-ink-2);
+  --color-xp: var(--color-ink-2);
+  --color-xp-soft: var(--color-surface);
+  --color-points: var(--color-ink-2);
+  --color-points-soft: var(--color-surface);
+
+  /* 기존 화면의 호환 역할. 실제 색은 위의 공통 역할을 참조한다. */
+  --color-brand-cream: var(--color-brand-soft);
+  --color-wash-top: var(--color-canvas);
+  --color-wash-soft: var(--color-card);
+  --color-wash-mid: var(--color-surface);
+  --color-hero-start: var(--color-card);
+  --color-hero-end: var(--color-card);
+  --color-hero-deep: var(--color-brand-decoration);
+  --color-hero-ink: var(--color-ink);
+  --color-hero-chip: var(--color-surface);
+  --color-hero-chip-line: var(--color-brand-decoration);
+  --color-hero-complete: var(--color-brand-action);
+  --color-hero-complete-ink: var(--color-on-brand);
+  --color-tooltip: #3d3e44;
+  --color-tooltip-ink: #ffffff;
+  --color-overlay: rgba(20, 23, 29, 0.5);
+  --color-league-symbol-ink: #45484f;
+  --color-league-hero: var(--color-card);
+  --color-league-first: var(--color-brand-soft);
+  --color-league-second: var(--color-surface);
+  --color-league-third: var(--color-surface);
+
+  --shape-card: 24px;
+  --shape-button: 18px;
+  --shape-chip: 14px;
+  --shape-inset: 16px;
+
+  /* 카드·선택·버튼의 모든 상태는 그림자 없는 평면 표면이다. */
+  --shadow-card: none;
+  --shadow-card-pressed: none;
+  --shadow-choice: none;
+  --shadow-action: none;
+  --shadow-action-secondary: none;
+  --shadow-action-soft: none;
+  --shadow-action-pressed: none;
+  --size-action: 52px;
+  --size-action-large: 56px;
+  --size-touch-min: 44px;
+  --font-size-action: 17px;
+  --font-size-action-secondary: 16px;
+  --font-weight-action: 600;
+
+  /* TDS 바텀시트·리스트도 같은 표면을 따른다. */
+  --adaptiveBackground: var(--color-card) !important;
+  --adaptiveFloatBackground: var(--color-card) !important;
+  --adaptiveLayeredBackground: var(--color-card) !important;
+  --adaptiveBackgroundLevel01: var(--color-surface) !important;
+  --adaptiveBackgroundLevel02: var(--color-card) !important;
+  --adaptiveBackgroundLevelB01: var(--color-surface) !important;
+  --adaptiveGreyBackground: var(--color-surface) !important;
+  --adaptiveCardBgWhite: var(--color-card) !important;
+  --adaptiveCardBgGrey: var(--color-surface) !important;
+}
+
+.dark {
+  color-scheme: dark;
+  --color-canvas: #202126;
+  --color-card: #2b2c31;
+  --color-surface: #38393f;
+  --color-ink: #f4f5f7;
+  --color-ink-2: #d7dae0;
+  --color-ink-3: #b5bac3;
+  --color-ink-4: #a4aab4;
+  --color-line: #4b4d56;
+  --color-line-strong: #9499a6;
+  /* 흰 글자와 중성 바탕의 대비를 모두 확보하는 중성 주행동. */
+  --color-brand-action: #6c717b;
+  --color-brand-pressed: #676d77;
+  --color-brand-accent: #9ed8b6;
+  --color-brand-decoration: #91cfae;
+  --color-brand-soft: #253e33;
+  --color-brand-line: #4b6c5b;
+  --color-brand-line-strong: #8cc6a7;
+  --color-action-secondary: #60646c;
+  --color-action-secondary-pressed: #565a62;
+  --color-action-soft: #38393f;
+  --color-action-soft-pressed: #303137;
+  --color-progress: #e8a950;
+  --color-reward-foreground: #f3bc72;
+  --color-selection-ink: #bce7ce;
+  --color-character-stage: #40382f;
+  --color-filter-tray: #303138;
+  --color-success-foreground: #75d7a5;
+  --color-success-soft: #20382d;
+  --color-danger-foreground: #ff9ca5;
+  --color-danger-line: #ba6670;
+  --color-danger-soft: #3c252c;
+  --color-warning-foreground: #e7c277;
+  --color-tooltip: #f4f4f6;
+  --color-tooltip-ink: #2b2c31;
+  --color-overlay: rgba(0, 0, 0, 0.65);
+  --shadow-card: none;
+  --shadow-card-pressed: none;
+  --shadow-choice: none;
+  --shadow-action: none;
+  --shadow-action-secondary: none;
+  --shadow-action-soft: none;
+  --shadow-action-pressed: none;
+}
+
+/* 페이지 바탕·일반 표면·글자는 공통 중성 역할을 상속하고, 그림·등급 장식만 보존한다. */
+:is(.my-page-screen, .league-screen, .identity-badge, .badge-tone) {
+  --color-brand-ink: var(--color-brand-decoration);
+  --color-brand-on-light-surface: var(--color-ink-2);
+  --color-brand-cream: var(--color-brand-soft);
+  --color-stat-streak: var(--color-brand-decoration);
+  --color-stat-xp: var(--color-ink-2);
+  --color-stat-points: var(--color-ink-2);
+  --color-stat-words: var(--color-ink-2);
+  --color-xp-soft: var(--color-surface);
+  --color-points-soft: var(--color-surface);
+  --radius-card: var(--shape-card);
+  --radius-chip: var(--shape-chip);
+  --adaptiveBackground: var(--color-card) !important;
+  --adaptiveCardBgWhite: var(--color-card) !important;
+  --adaptiveCardBgGrey: var(--color-surface) !important;
+}
+.league-screen {
+  --radius-card: var(--shape-card);
+  --color-league-first: var(--color-card);
+  --color-league-second: var(--color-card);
+  --color-league-third: var(--color-card);
+  --color-league-first-emphasis: #f1e7c9;
+  --color-league-second-emphasis: #e9ecf1;
+  --color-league-third-emphasis: #f0e0d3;
+  --color-league-podium-ink: #45484f;
+}
+.dark .league-screen {
+  --color-league-first: var(--color-card);
+  --color-league-second: var(--color-card);
+  --color-league-third: var(--color-card);
+  --color-league-first-emphasis: #4a4434;
+  --color-league-second-emphasis: #3c4048;
+  --color-league-third-emphasis: #4b3e36;
+  --color-league-podium-ink: #f4f5f7;
+}
+.badge-tone[data-badge-stat='words'] {
+  --badge-bg: #e7f1ec;
+  --badge-ink: #496557;
+  --badge-line: #bfd3c8;
+  --badge-ring: rgba(73, 101, 87, 0.12);
+}
+.badge-tone[data-badge-stat='streak'] {
+  --badge-bg: #fff0df;
+  --badge-ink: #995100;
+  --badge-line: #ebc69b;
+  --badge-ring: rgba(153, 81, 0, 0.14);
+}
+.badge-tone[data-badge-stat='xp'] {
+  --badge-bg: #eeeaf8;
+  --badge-ink: #51456f;
+  --badge-line: #d9d1ed;
+  --badge-ring: rgba(81, 69, 111, 0.14);
+}
+.dark .badge-tone[data-badge-stat='words'] {
+  --badge-bg: #2d3c34;
+  --badge-ink: #b6d4c2;
+  --badge-line: #4e695a;
+}
+.dark .badge-tone[data-badge-stat='streak'] {
+  --badge-bg: #40382f;
+  --badge-ink: #f3bc72;
+  --badge-line: #776247;
+}
+.dark .badge-tone[data-badge-stat='xp'] {
+  --badge-bg: #3c354c;
+  --badge-ink: #d9c9f1;
+  --badge-line: #635573;
+}
+.badge-tone[data-earned='false'] {
+  --badge-bg: var(--color-surface);
+  --badge-ink: var(--color-ink-3);
+  --badge-line: var(--color-line);
+}
+.dark .badge-tone[data-earned='false'] {
+  --badge-bg: var(--color-surface);
+  --badge-ink: var(--color-ink-3);
+  --badge-line: var(--color-line);
+}

@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useId } from 'react';
 import { X } from 'lucide-react';
 import { BottomSheet } from '@toss/tds-mobile';
-import { Card } from '../ui/Card';
+import { ActionButton } from '../ui/ActionButton';
+import { UserRound } from '../ui/OtterIcons';
 
 export const NicknameSheet = ({
   open,
@@ -21,6 +22,17 @@ export const NicknameSheet = ({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const hintId = useId();
+  const errorId = useId();
+  const fieldId = useId();
+  const helpId = useId();
+  const introId = useId();
+  const saveDisabled = loading || value.trim().length === 0 || (!required && value.trim() === currentNickname);
+  const help = value.trim().length === 0
+    ? '닉네임을 입력해주세요.'
+    : !required && value.trim() === currentNickname
+      ? '새 닉네임을 입력하면 저장할 수 있어요.'
+      : '최대 10자까지 입력할 수 있어요.';
 
   // 시트는 항상 마운트돼 있고 open만 바뀐다. 열릴 때마다 값을 현재 닉네임으로 되돌리고 포커스를 준다.
   useEffect(() => {
@@ -32,6 +44,7 @@ export const NicknameSheet = ({
   }, [open, required, currentNickname]);
 
   const handleSave = async () => {
+    if (saveDisabled) return;
     setLoading(true);
     setError(null);
     try {
@@ -50,43 +63,56 @@ export const NicknameSheet = ({
       open={open}
       className="original-modal"
       onDimmerClick={required ? () => {} : onClose}
-      header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>{required ? '닉네임을 정해주세요' : '닉네임 변경'}</span>}
+      header={<div className="nickname-sheet-heading"><UserRound size={30} /><span>{required ? '닉네임을 정해주세요' : '닉네임 변경'}</span></div>}
       hasTextField
     >
-      <div className="px-5 pb-6 flex flex-col gap-5">
-        {required && (
-          <p className="text-xs text-[var(--color-ink-3)] leading-relaxed">
-            학습 기록과 랭킹에 쓰일 이름이에요. 나중에 마이페이지에서 바꿀 수 있어요.
-          </p>
-        )}
-        <div className="flex flex-col gap-2">
-          <Card tone="surface" pad="none" className={`flex items-center gap-3 px-4 py-3.5 transition-colors ${error ? 'ring-2 ring-danger-400/50' : ''}`}>
+      <div className="nickname-sheet-body">
+        <p id={introId} className="nickname-sheet-intro">{required
+          ? '학습 기록과 랭킹에 쓰일 이름이에요. 나중에 마이페이지에서 바꿀 수 있어요.'
+          : '학습 기록과 리그에 표시할 이름이에요.'}</p>
+        <div className="nickname-editor">
+          <div className="nickname-label-row">
+            <label htmlFor={fieldId}>닉네임</label>
+            <span className={`nickname-counter${value.length === 10 ? ' is-full' : ''}`} aria-hidden="true">{value.length}<span> / 10</span></span>
+          </div>
+          <div className={`nickname-field${error ? ' has-error' : ''}`}>
             <input
               ref={inputRef}
+              id={fieldId}
               value={value}
               onChange={e => { setValue(e.target.value); setError(null); }}
-              onKeyDown={e => { if (e.key === 'Enter') handleSave(); }}
+              onKeyDown={e => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) { e.preventDefault(); void handleSave(); } }}
               maxLength={10}
+              autoComplete="off"
+              enterKeyHint="done"
               placeholder="닉네임 입력"
-              className="flex-1 bg-transparent text-sm font-semibold text-[var(--color-ink)] placeholder:text-[var(--color-ink-4)] outline-none"
+              aria-label="닉네임"
+              aria-invalid={Boolean(error)}
+              aria-describedby={`${introId} ${hintId} ${error ? errorId : helpId}`}
+              className="nickname-input"
             />
-            <span className="text-xs text-[var(--color-ink-4)] shrink-0">{value.length}/10</span>
+            <span id={hintId} className="sr-only">최대 10자, 현재 {value.length}자 입력</span>
             {value.length > 0 && (
-              <button onClick={() => { setValue(''); setError(null); }} aria-label="지우기" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-line)]"><X size={11} className="text-[var(--color-ink-2)]" /></span>
+              <button type="button" onClick={() => { setValue(''); setError(null); inputRef.current?.focus(); }} aria-label="지우기" className="nickname-clear">
+                <span><X size={14} strokeWidth={2.25} absoluteStrokeWidth aria-hidden="true" focusable="false" /></span>
               </button>
             )}
-          </Card>
-          {error && <p className="text-xs text-danger-400 font-medium px-1">{error}</p>}
+          </div>
+          {error
+            ? <p id={errorId} role="alert" className="nickname-help is-error">{error}</p>
+            : <p id={helpId} className="nickname-help">{help}</p>}
         </div>
 
-        <button
+        <ActionButton
           onClick={handleSave}
-          disabled={loading || value.trim().length === 0 || (!required && value.trim() === currentNickname)}
-          className="w-full py-4 rounded-button bg-brand-500 text-white text-sm font-bold active:bg-brand-600 disabled:opacity-40 transition-colors"
+          disabled={saveDisabled}
+          aria-busy={loading}
+          fullWidth
+          size="lg"
+          className="nickname-save"
         >
           {loading ? '확인 중...' : required ? '시작하기' : '저장하기'}
-        </button>
+        </ActionButton>
       </div>
     </BottomSheet>
   );

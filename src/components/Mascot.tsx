@@ -1,15 +1,18 @@
-// 수달 캐릭터. 말을 거는 순간(시작·빈 화면·완료·보상·오류)에만 쓰고, 문제를 풀거나 읽는 화면에는 넣지 않는다.
-// 이미지 배경이 흰색이라 흰 둥근 타일로 보여준다(흰 화면 위에서는 경계가 보이지 않는다).
+import { OTTER_IMAGES } from '../lib/otter';
+
+// 수달은 안내·빈 화면·완료·보상·오류에서만 함께한다. 학습 본문과 문제 풀이에는 추가하지 않는다.
+// empty는 공부하는 수달로 연결한다. 기존 역할 이름과 이미지 매핑은 유지한다.
 const SRC = {
-  hello: '/otter/hello.jpg',     // 안녕! 함께 배워요
-  empty: '/otter/empty.jpg',     // 아직 배울 내용이 없어요
-  error: '/otter/error.jpg',     // 문제가 생겼어요
-  great: '/otter/great.jpg',     // 잘하고 있어요
-  mission: '/otter/mission.jpg', // 미션 완료
-  reward: '/otter/reward.jpg',   // 보상을 받았어요
-  crown: '/otter/crown.jpg',     // 꾸준히 하면 더 높이
+  hello: OTTER_IMAGES.hello,
+  empty: OTTER_IMAGES.study,
+  error: OTTER_IMAGES.think,
+  great: OTTER_IMAGES.joy,
+  mission: OTTER_IMAGES.joy,
+  reward: OTTER_IMAGES.joy,
+  crown: OTTER_IMAGES.joy,
 } as const;
 
 export const Mascot = ({ name, size = 120 }: { name: keyof typeof SRC; size?: number }) => (
-  <img src={SRC[name]} alt="" aria-hidden="true" className="shrink-0 rounded-3xl bg-white object-contain" style={{ height: size }} />
+  <img src={SRC[name]} alt="" aria-hidden="true" width={size} height={size}
+    className="shrink-0 object-contain" style={{ width: size, height: size }} />
 );

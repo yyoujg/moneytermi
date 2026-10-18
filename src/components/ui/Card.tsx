@@ -15,7 +15,7 @@ export const Card = ({
   children,
   ...rest
 }: { pad?: Pad; tone?: keyof typeof TONE } & HTMLAttributes<HTMLDivElement>) => (
-  <div className={`${TONE[tone]} rounded-card ${PAD[pad]} ${className}`.replace(/\s+/g, ' ').trim()} {...rest}>
+  <div data-card-tone={tone} className={`app-card ${TONE[tone]} rounded-card ${PAD[pad]} ${className}`.replace(/\s+/g, ' ').trim()} {...rest}>
     {children as ReactNode}
   </div>
 );

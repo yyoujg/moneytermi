@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronRight, RotateCcw, Flame, ArrowRight } from 'lucide-react';
-import { Badge } from '@toss/tds-mobile';
+import { BookOpenText, CalendarDays, RotateCcw, Target } from '../components/ui/OtterIcons';
+import { ArrowRight, ChevronRight } from '../components/ui/ControlIcons';
+import { MissionRewardStatus } from '../components/home/MissionRewardStatus';
 import { showModal } from '../components/AlertModal';
 import { feedbackClaim, feedbackError } from '../lib/feedback';
 import { useNavigate } from 'react-router-dom';
@@ -12,11 +13,18 @@ import { useAuth } from '../hooks/useAuth';
 import { WeekStrip } from '../components/home/WeekStrip';
 import { StageGlyph } from '../components/StageGlyph';
 import { ProfileAvatar } from '../components/ProfileAvatar';
+import { PointIcon, StreakIcon, XpIcon } from '../components/StatIcons';
 import { calcStreak } from '../lib/streak';
 import { Card } from '../components/ui/Card';
+import { ActionButton } from '../components/ui/ActionButton';
 import { PointCelebration, type PointReward } from '../components/PointCelebration';
 import { praiseForMission } from '../lib/praise';
 import type { Mission } from '../types';
+
+// 서버의 순서나 식별자와 무관하게 미션 내용에 맞는 역할 그림을 고른다.
+const missionIconFor = (title: string) => /출석|방문|접속/.test(title)
+  ? CalendarDays
+  : /퀴즈|정답|복습|문제/.test(title) ? Target : BookOpenText;
 
 const HomeScreen = () => {
   const navigate = useNavigate();
@@ -59,34 +67,28 @@ const HomeScreen = () => {
 
       {/* 히어로: 인사 · 티어 · 이번 주 출석 스트립 */}
       <div className="pt-4 px-5 pb-4">
-        <div
-          className="rounded-card px-5 pt-5 pb-4 text-white shadow-lg anim-fade-up"
-          style={{ background: 'linear-gradient(135deg, #9a3412 0%, #c2410c 100%)' }}
-        >
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 flex items-center justify-center text-2xl shrink-0" style={{ borderRadius: 9999, background: 'rgba(255,255,255,0.22)' }}>
-              <ProfileAvatar emoji={myEmoji} size={48} />
+        <div className="home-profile text-[var(--color-hero-ink)] anim-fade-up">
+          <div className="home-profile-line">
+            <div className="home-profile-avatar" style={{ borderRadius: 9999, background: 'var(--color-hero-chip)' }}>
+              <ProfileAvatar emoji={myEmoji} size={56} />
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-base font-bold truncate">안녕하세요, {user?.nickname ?? DEFAULT_NICKNAME}님</p>
               <div className="flex items-center gap-2 mt-1">
-                <span className="inline-flex items-center gap-1 text-2xs font-bold pl-0.5 pr-2 py-0.5" style={{ borderRadius: 9999, background: 'rgba(255,255,255,0.22)' }}>
+                <span className="inline-flex items-center gap-1 text-2xs font-bold pl-0.5 pr-2 py-0.5" style={{ borderRadius: 9999, background: 'var(--color-hero-chip)' }}>
                   <StageGlyph id={stage.id} size={18} />{stage.name}
                 </span>
                 <span className="inline-flex items-center gap-0.5 text-2xs font-bold">
-                  <Flame size={12} className="fill-current" />{streak}일 연속
+                  <StreakIcon size={13} />{streak}일 연속
                 </span>
               </div>
             </div>
           </div>
 
           {isNewUser ? (
-            <button
-              onClick={() => navigate('/course')}
-              className="w-full flex items-center justify-between rounded-button bg-white px-4 py-3 text-sm font-bold text-brand-500 active:opacity-90"
-            >
-              오늘의 돈 공부 시작하기 <ArrowRight size={16} />
-            </button>
+            <ActionButton fullWidth size="lg" onClick={() => navigate('/course')} className="justify-between">
+              돈 공부 시작하기 <ArrowRight size={18} />
+            </ActionButton>
           ) : (
             <WeekStrip attendanceDates={attendanceDates} />
           )}
@@ -126,37 +128,44 @@ const HomeScreen = () => {
 
       {/* 오늘의 미션 */}
       <div className="px-5 flex flex-col gap-4">
-        <Card pad="lg" className="mb-4 anim-fade-up">
-          <div className="flex justify-between items-center mb-3">
-            <div>
-              <h2 className="text-sm font-bold text-[var(--color-ink-2)]">오늘의 미션</h2>
-              <p className="mt-1! text-2xs font-medium text-brand-500 break-keep">{praiseForMission({ ready: readyMissions, completed: completedMissions })}</p>
-            </div>
-            <span className="shrink-0 text-2xs font-medium text-[var(--color-ink-4)]">{resetLabel}</span>
+        <div className="home-mission-heading anim-fade-up">
+          <div>
+            <h2 id="home-missions-heading">오늘의 미션</h2>
+            <p className="mt-1! text-xs text-[var(--color-ink-3)] break-keep">{praiseForMission({ ready: readyMissions, completed: completedMissions })}</p>
           </div>
+          <span className="shrink-0 text-2xs font-medium text-[var(--color-ink-4)]">{resetLabel}</span>
+        </div>
 
+        <Card pad="none" className="home-missions mb-4 anim-fade-up" aria-labelledby="home-missions-heading">
           <div className="flex flex-col">
             {missionList.map((mission, idx) => {
               const done = mission.current >= mission.target;
+              const MissionIcon = missionIconFor(mission.title);
               return (
-                <div key={mission.id} className={`anim-fade-up ${idx > 0 ? 'pt-3 mt-3 border-t border-[var(--color-line)]' : ''}`} style={{ '--i': idx } as React.CSSProperties}>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="min-w-0">
-                      <p className={`text-sm font-bold truncate ${mission.isRewarded ? 'text-[var(--color-ink-4)] line-through' : 'text-[var(--color-ink)]'}`}>
+                <div key={mission.id} className="home-mission-row anim-fade-up" data-rewarded={mission.isRewarded || undefined} style={{ '--i': idx } as React.CSSProperties}>
+                  <div className="home-mission-top">
+                    <MissionIcon size={28} className="home-mission-icon" aria-hidden="true" />
+                    <div className="home-mission-info">
+                      <p className={`home-mission-title text-sm ${mission.isRewarded ? 'text-[var(--color-ink-4)] line-through' : 'text-[var(--color-ink)]'}`}>
                         {mission.title}
                       </p>
-                      <p className="text-xs text-[var(--color-ink-3)] mt-0.5!">+{mission.reward}P · +{MISSION_XP} XP</p>
+                      <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+                        <span className="home-mission-reward inline-flex items-center gap-1"><PointIcon size={16} />+{mission.reward}개</span>
+                        <span className="inline-flex items-center gap-1 font-medium text-[var(--color-ink-3)]"><XpIcon size={13} />+{MISSION_XP} XP</span>
+                      </p>
                     </div>
-                    {mission.isRewarded
-                      ? <span className="anim-pop-in inline-flex"><Badge color="elephant" size="small" variant="fill">완료</Badge></span>
-                      : done
-                        ? <button onClick={() => handleClaim(mission.id, mission.reward)} className="anim-attn px-3 py-1.5 rounded-button bg-brand-500 text-white text-xs font-bold active:bg-brand-600 shrink-0">받기</button>
-                        : <span className="text-base font-bold text-[var(--color-ink)] shrink-0">{mission.current}<span className="text-xs text-[var(--color-ink-4)]">/{mission.target}</span></span>
+                    {mission.isRewarded || done
+                      ? <MissionRewardStatus isRewarded={mission.isRewarded} onClaim={() => handleClaim(mission.id, mission.reward)} />
+                      : <span className="home-mission-count text-base font-bold text-[var(--color-ink)]">{mission.current}<span className="text-xs text-[var(--color-ink-4)]">/{mission.target}</span></span>
                     }
                   </div>
-                  <div role="progressbar" aria-label={`${mission.title} 진행률`} aria-valuemin={0} aria-valuemax={mission.target} aria-valuenow={Math.min(mission.current, mission.target)} className="flex gap-1">
+                  <div role="progressbar" aria-label={`${mission.title} 진행률`} aria-valuemin={0} aria-valuemax={mission.target} aria-valuenow={Math.min(mission.current, mission.target)} className="home-mission-progress flex gap-1">
                     {Array.from({ length: mission.target }).map((_, i) => (
-                      <div key={i} className={`flex-1 h-1.5 rounded-full transition-all duration-300 ${i >= mission.current ? 'bg-[var(--color-line)]' : mission.isRewarded ? 'bg-[var(--color-line-strong)]' : 'bg-brand-500'}`} />
+                      <div
+                        key={i}
+                        className="flex-1 h-1 rounded-full transition-all duration-300"
+                        style={{ backgroundColor: mission.isRewarded ? 'var(--color-line-strong)' : i < mission.current ? 'var(--color-progress)' : 'var(--color-surface)' }}
+                      />
                     ))}
                   </div>
                 </div>
