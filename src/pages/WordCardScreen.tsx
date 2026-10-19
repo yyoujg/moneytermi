@@ -75,6 +75,7 @@ const WordCard = ({
   newsLoading,
   keyword,
   visualTerms,
+  detailContent,
 }: {
   word: Word;
   onDetail?: () => void;
@@ -84,11 +85,14 @@ const WordCard = ({
   newsLoading: boolean;
   keyword: string;
   visualTerms: Terms;
+  detailContent?: React.ReactNode;
 }) => {
   return (
   <div className="flex flex-col gap-3 px-5 pb-6">
 
     <WordMeaningCard word={word} sources={(word.sources ?? []).map(source => SOURCE_NAMES[source] ?? source)} onDetail={onDetail} />
+
+    {detailContent}
 
     {/* 순서: 단어+뜻 → 그래프·표 → 뉴스 → 관련 용어. 자세히 알아보기는 단어 카드의 버튼으로 여는 시트 */}
     {/* 그래프·표 — 뜻 바로 아래에서 그림으로 이해시킨다 */}
@@ -166,6 +170,111 @@ const WordCard = ({
   );
 };
 
+// 학습 화면은 유지하고 용어만 읽는다. 경로·진도·보상은 변경하지 않는다.
+const RelatedWordPreviewContent = ({ word, lookup, onRelatedClick }: {
+  word: Word;
+  lookup: WordLookup;
+  onRelatedClick: (name: string) => void;
+}) => {
+  const previewWords = React.useMemo(() => [word], [word]);
+  const { newsItems, newsStatus } = useNews(previewWords, 0);
+  const { detail, related } = wordExtras(word, lookup);
+  const visualTerms = React.useMemo(() => ({
+    names: [...lookup.byName.keys()].filter(name => name !== word.word),
+    meaningOf: (name: string) => lookup.byName.get(name)?.meaning,
+    exampleOf: (name: string) => lookup.byName.get(name)?.learningExample?.replace(/^학습용 가정:\s*/, ''),
+    onClick: onRelatedClick,
+  }), [lookup, onRelatedClick, word.word]);
+  return <WordCard
+    word={word}
+    validRelated={related}
+    onRelatedClick={onRelatedClick}
+    newsItems={newsItems}
+    newsLoading={newsStatus === 'loading'}
+    keyword={word.word}
+    visualTerms={visualTerms}
+    detailContent={detail ? <details className="rounded-card bg-[var(--color-card)] p-5">
+      <summary className="cursor-pointer font-semibold text-[var(--color-ink)]">자세히 보기</summary>
+      <div className="mt-3 flex flex-col gap-4">
+        {toParagraphs(detail).map((para, i) => <p key={i} className="text-base leading-[1.75] break-keep text-[var(--color-ink-2)]">
+          <Highlight text={para} keyword={word.word} pattern={termPattern(word.word) ?? undefined} />
+        </p>)}
+      </div>
+    </details> : undefined}
+  />;
+};
+
+const RelatedWordPreview = ({ initialWord, lookup, onClose }: {
+  initialWord: Word;
+  lookup: WordLookup;
+  onClose: () => void;
+}) => {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const previousStackRef = useRef<Word[] | null>(null);
+  const titleId = React.useId();
+  const descriptionId = React.useId();
+  const [stack, setStack] = React.useState([initialWord]);
+  const word = stack[stack.length - 1];
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    dialog?.showModal();
+    dialog?.querySelector<HTMLElement>('button')?.focus();
+    return () => {
+      dialog?.close();
+      if (trigger?.isConnected) trigger.focus();
+    };
+  }, []);
+  useEffect(() => {
+    if (dialogRef.current) dialogRef.current.scrollTop = 0;
+    if (previousStackRef.current && previousStackRef.current !== stack) titleRef.current?.focus();
+    previousStackRef.current = stack;
+  }, [stack]);
+  const openRelated = React.useCallback((name: string) => {
+    const target = lookup.byName.get(name);
+    if (target) setStack(previous => [...previous, target]);
+  }, [lookup]);
+  return <dialog
+    role="dialog"
+    data-related-word-preview
+    ref={dialogRef}
+    aria-labelledby={titleId}
+    aria-describedby={descriptionId}
+    aria-modal="true"
+    onCancel={event => { event.preventDefault(); onClose(); }}
+    onKeyDown={event => {
+      if (event.key !== 'Tab') return;
+      const items = [...event.currentTarget.querySelectorAll<HTMLElement>('button:not([disabled]), summary, a[href], [tabindex="0"]')]
+        .filter(element => element.getClientRects().length > 0);
+      const first = items[0], last = items[items.length - 1];
+      if (!first || !last) return;
+      const active = event.currentTarget.ownerDocument.activeElement;
+      if (event.shiftKey && (active === first || active === titleRef.current)) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault(); first.focus();
+      }
+    }}
+    onClick={event => { if (event.target === event.currentTarget) onClose(); }}
+    className="m-auto max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-card border-0 bg-[var(--color-canvas)] p-0 text-[var(--color-ink)] backdrop:bg-black/40"
+  >
+    <div>
+      <header className="sticky top-0 z-10 flex flex-col gap-2 bg-[var(--color-card)] px-5 py-4">
+        <div className="flex items-center justify-between gap-3">
+          <h2 id={titleId} ref={titleRef} tabIndex={-1} className="text-base font-bold">{word.word} 미리보기</h2>
+          <button type="button" onClick={onClose} className="action-secondary rounded-button px-4 py-3 text-sm font-semibold">미리보기 닫기</button>
+        </div>
+        <p id={descriptionId} className="text-xs text-[var(--color-ink-3)]">읽기 전용이에요. 닫으면 학습하던 위치로 돌아가요.</p>
+        {stack.length > 1 && <button type="button" onClick={() => setStack(previous => previous.slice(0, -1))} className="self-start py-2 text-sm font-semibold">이전 미리보기</button>}
+      </header>
+      <div key={stack.length + ':' + word.id} className="pt-4">
+        <RelatedWordPreviewContent word={word} lookup={lookup} onRelatedClick={openRelated} />
+      </div>
+    </div>
+  </dialog>;
+};
+
 // ── 메인 ─────────────────────────────────────────────────────────
 const WordCardScreen = () => {
   const navigate = useNavigate();
@@ -202,6 +311,7 @@ const WordCardScreen = () => {
   const autoAdvance = state?.autoAdvance ?? false;
 
   const [wordIndex, setWordIndex] = React.useState(state?.index ?? 0);
+  const [previewWord, setPreviewWord] = React.useState<Word | null>(null);
 
   // 자세히 알아보기 시트. 단어가 바뀌면 닫는다.
   const [detailOpen, setDetailOpen] = React.useState(false);
@@ -241,35 +351,18 @@ const WordCardScreen = () => {
   const curName = words[wordIndex]?.word;
   const allTermNames = React.useMemo(() => allWords.map(w => w.word), [allWords]);
   const termNames = React.useMemo(() => allTermNames.filter(n => n !== curName), [allTermNames, curName]);
-  const wordIndexByName = React.useMemo(() => {
-    const map = new Map<string, number>();
-    words.forEach((w, i) => map.set(w.word, i));
-    return map;
-  }, [words]);
   const meaningOf = React.useCallback((name: string) => wordLookup.byName.get(name)?.meaning, [wordLookup]);
   const exampleOf = React.useCallback((name: string) => wordLookup.byName.get(name)?.learningExample?.replace(/^학습용 가정:\s*/, ''), [wordLookup]);
   const lessonQuizWords = React.useMemo(() => selectLessonQuizWords(words, knownIds), [knownIds, words]);
   const handleRelatedWordClick = React.useCallback((rawName: string) => {
     const wordName = rawName.replace(/["""'']/g, '').trim();
-    // 현재 코스 내에 있으면 바로 이동
-    const idx = wordIndexByName.get(wordName);
-    if (idx !== undefined) { setWordIndex(idx); return; }
-
-    // 다른 코스에서 검색 (word id 기반으로 매칭)
-    const targetWord = wordLookup.byName.get(wordName);
+    const targetWord = words.find(word => word.word === wordName) ?? wordLookup.byName.get(wordName);
     if (!targetWord) {
       showModal('아직 등록되지 않은 용어예요', 'error');
       return;
     }
-
-    const targetCourse = wordLookup.courseByWordId.get(targetWord.id);
-    if (targetCourse) {
-      const targetIdx = targetCourse.words.findIndex(w => w.id === targetWord.id);
-      navigate('/word-card', { state: { words: targetCourse.words, index: targetIdx, backPath, autoAdvance } });
-    } else {
-      navigate('/word-card', { state: { words: [targetWord], index: 0, backPath, autoAdvance } });
-    }
-  }, [autoAdvance, backPath, navigate, wordIndexByName, wordLookup]);
+    setPreviewWord(targetWord);
+  }, [words, wordLookup]);
   const visualTerms = React.useMemo(
     () => ({ names: termNames, meaningOf, exampleOf, onClick: handleRelatedWordClick }),
     [handleRelatedWordClick, meaningOf, exampleOf, termNames],
@@ -438,6 +531,8 @@ const WordCardScreen = () => {
         </div>
       </div>
     </div>
+
+    {previewWord && <RelatedWordPreview initialWord={previewWord} lookup={wordLookup} onClose={() => setPreviewWord(null)} />}
 
     {/* 자세히 알아보기 바텀시트 */}
     <BottomSheet

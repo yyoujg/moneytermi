@@ -7,7 +7,7 @@ import { logClick } from '../lib/analytics';
 import { Card } from '../components/ui/Card';
 import { Mascot } from '../components/Mascot';
 import { LessonCheckFeedback } from '../components/learning/LessonCheckFeedback';
-import { LessonCheckSummary } from '../components/learning/LessonCheckSummary';
+import { LessonCheckSummary, type LessonCheckRoundResult } from '../components/learning/LessonCheckSummary';
 import { keepShortUnitsTogether } from '../lib/formatText';
 
 const LessonCheckScreen = () => {
@@ -17,7 +17,9 @@ const LessonCheckScreen = () => {
   const backPath = state?.backPath ?? '/course';
   const [questions, setQuestions] = useState(() => lessonChecks(state?.words ?? []).map(({ word, quiz }) => ({ ...buildCustomQuizItem(quiz), wordId: word.id })));
   const [attempt, setAttempt] = useState(1);
+  const [roundResults, setRoundResults] = useState<LessonCheckRoundResult[]>([]);
   const startedRef = useRef(false);
+  const advancedQuestionRef = useRef<string | null>(null);
   useEffect(() => {
     if (startedRef.current || questions.length === 0) return;
     startedRef.current = true;
@@ -35,7 +37,7 @@ const LessonCheckScreen = () => {
         <Mascot name="empty" size={110} />
         <h1 className="mt-1 text-xl font-bold text-[var(--color-ink)]">{hasLesson ? '이번 레슨에는 이해 확인 문제가 없어요' : '자주 마주치는 용어부터 시작해요'}</h1>
         <p className="text-[15px] text-[var(--color-ink-2)] break-keep">{hasLesson ? '다음 학습을 선택할 수 있어요.' : '용어를 하나 익히면 이해 확인 문제를 풀 수 있어요.'}</p>
-        <button onClick={() => navigate('/course', { replace: true })} className="mt-3 w-full min-h-[52px] rounded-button bg-brand-500 text-base font-bold text-white">
+        <button onClick={() => navigate(backPath, { replace: true })} className="mt-3 w-full min-h-[52px] rounded-button bg-brand-500 text-base font-bold text-white">
           {hasLesson ? '다음 학습 선택하기' : '학습 시작하기'}
         </button>
       </div>
@@ -45,8 +47,7 @@ const LessonCheckScreen = () => {
   if (!question) {
     return (
       <LessonCheckSummary
-        correct={questions.length - mistakes.length}
-        total={questions.length}
+        results={roundResults}
         reviewCount={mistakes.length}
         onRetry={() => { setQuestions(mistakes); setMistakes([]); setIndex(0); setSelected(null); setAttempt(value => value + 1); }}
         onBack={() => navigate(backPath)}
@@ -55,7 +56,11 @@ const LessonCheckScreen = () => {
   }
 
   const goNext = () => {
+    const questionKey = `${attempt}:${index}`;
+    if (advancedQuestionRef.current === questionKey) return;
+    advancedQuestionRef.current = questionKey;
     if (index === questions.length - 1) {
+      setRoundResults(previous => [...previous, { correct: questions.length - mistakes.length, total: questions.length }]);
       logClick('lesson_check_complete', { course_id: state?.courseId, node_id: state?.nodeId, total: questions.length, correct: questions.length - mistakes.length, attempt });
     }
     setIndex(index + 1);
@@ -77,7 +82,7 @@ const LessonCheckScreen = () => {
         </div>
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto px-5 py-5 [&::-webkit-scrollbar]:hidden">
-        <h1 className="mb-4! text-sm font-bold text-[var(--color-ink-2)]">이해 확인</h1>
+        <h1 className="mb-4! text-sm font-bold text-[var(--color-ink-2)]">{attempt === 1 ? '이해 확인 · 첫 풀이' : `틀린 문제 재도전 ${attempt - 1}차`}</h1>
         <Card pad="lg" className="mb-5 bg-[var(--color-surface)]" style={{ border: 0 }}>
           <p className="mb-2! text-xs font-bold text-[var(--color-ink-3)]">상황을 읽고 골라보세요</p>
           <h2 className="quiz-prompt-main text-lg font-bold text-[var(--color-ink)] leading-relaxed break-keep">

@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { useState, useEffect, useContext, createContext } from 'react';
+import { useState, useEffect, useContext, useRef, useCallback, createContext } from 'react';
 import { closeView, getAnonymousKey, getSchemeUri } from '@apps-in-toss/web-framework';
 import type { AuthState, AuthUser } from '../types';
 import { randomNickname } from '../lib/nickname';
@@ -84,13 +84,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   });
   const [guestToken, setGuestToken] = useState<string | null>(null);
   const [profileId, setProfileId] = useState<string | null>(null);
+  const activeProfileIdRef = useRef<string | null>(null);
+  const nicknameVersionRef = useRef(0);
 
-  useEffect(() => {
-    initAuth();
+  // 캐시를 즉시 복원한 후, 인증된 본인의 서버 값으로 이름만 보정한다.
+  // 이전 캐시 저장이 실패했어도 다음 부팅에 오래된 이름이 남지 않도록 한다.
+  const refreshStoredNickname = useCallback(async (sp: StoredProfile) => {
+    if (!sp.profileId || !sp.guestToken) return;
+    const version = nicknameVersionRef.current;
+    try {
+      const { data: profile, error } = await getGuestClient(sp.guestToken)
+        .from('profiles')
+        .select('nickname')
+        .eq('id', sp.profileId)
+        .single();
+      if (error || typeof profile?.nickname !== 'string' || !profile.nickname) return;
+      // 늦은 부팅 응답이 다른 프로필이나 수동 변경 성공 후 이름을 덮지 않게 한다.
+      if (activeProfileIdRef.current !== sp.profileId || nicknameVersionRef.current !== version) return;
+      setAuthState(prev => {
+        if (prev.user?.id !== sp.profileId) return prev;
+        return { ...prev, user: { ...prev.user, nickname: profile.nickname } };
+      });
+    } catch {
+      // 오프라인·권한·통신 오류면 즉시 복원한 캐시를 그대로 사용한다.
+    }
   }, []);
 
-  const initAuth = async () => {
+  const initAuth = useCallback(async () => {
     const restoreStored = (sp: StoredProfile) => {
+      activeProfileIdRef.current = sp.profileId;
       setProfileId(sp.profileId);
       setGuestToken(sp.guestToken);
       setAuthState({
@@ -107,6 +129,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // 저장된 프로필이 이미 이 토스 키로 확정돼 있으면 RPC 없이 즉시 복원 (부팅 성능 유지)
     if (stored?.tossAnonymousKey && stored.tossAnonymousKey === tossKey) {
       restoreStored(stored);
+      void refreshStoredNickname(stored);
       return;
     }
 
@@ -148,6 +171,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // 1. 저장된 프로필 있으면 복원
     if (stored) {
       restoreStored(stored);
+      void refreshStoredNickname(stored);
       return;
     }
 
@@ -174,6 +198,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           leagueTier: profile.league_tier,
         };
         await Storage.setItem(STORAGE_KEY, JSON.stringify(toStore));
+        activeProfileIdRef.current = profile.id;
         setProfileId(profile.id);
         setGuestToken(newGuestToken);
         setAuthState({
@@ -200,13 +225,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (err) {
       console.warn('오프라인 프로필 저장 실패:', err);
     }
+    activeProfileIdRef.current = id;
     setProfileId(id);
     setGuestToken(token);
     setAuthState({
       user: { id, nickname: offlineNickname, isGuest: true, leagueTier: 'bronze' },
       accessToken: null, refreshToken: null, isAuthenticated: true,
     });
-  };
+  }, [refreshStoredNickname]);
+
+  useEffect(() => { void initAuth(); }, [initAuth]);
 
   const updateNickname = async (newNickname: string): Promise<{ error: string | null }> => {
     const trimmed = newNickname.trim();
@@ -215,34 +243,43 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (trimmed === authState.user?.nickname) return { error: '현재 닉네임과 동일해요' };
     if (isDefaultNickname(trimmed)) return { error: '다른 닉네임을 정해주세요' };
 
-    if (profileId) {
-      const { data: taken } = await supabase.rpc('is_nickname_taken', {
-        p_nickname: trimmed, p_exclude_id: profileId,
-      });
+    // 서버 프로필이 없으면 로컬 상태만 바꿔 성공으로 처리하지 않는다.
+    if (!profileId || !authState.user) return { error: '닉네임 변경에 실패했어요' };
 
-      if (taken) return { error: '이미 사용 중인 닉네임이에요' };
+    const { data: taken } = await supabase.rpc('is_nickname_taken', {
+      p_nickname: trimmed, p_exclude_id: profileId,
+    });
 
-      // profiles_update 정책은 x-guest-token 헤더로 본인 행을 찾는다. 기본 클라이언트면 0행 갱신인데
-      // PostgREST는 이를 에러로 주지 않아 서버는 그대로고 내 기기만 바뀐다(다른 사람 리그에 옛 닉네임).
-      const db = guestToken ? getGuestClient(guestToken) : supabase;
-      const { data: updated, error: updateError } = await db
-        .from('profiles')
-        .update({ nickname: trimmed })
-        .eq('id', profileId)
-        .select('id');
+    if (taken) return { error: '이미 사용 중인 닉네임이에요' };
 
-      if (updateError || !updated?.length) return { error: '닉네임 변경에 실패했어요' };
-    }
+    // profiles_update 정책은 x-guest-token 헤더로 본인 행을 찾는다. 기본 클라이언트면 0행 갱신인데
+    // PostgREST는 이를 에러로 주지 않아 서버는 그대로고 내 기기만 바뀐다(다른 사람 리그에 옛 닉네임).
+    const db = guestToken ? getGuestClient(guestToken) : supabase;
+    const { data: updated, error: updateError } = await db
+      .from('profiles')
+      .update({ nickname: trimmed })
+      .eq('id', profileId)
+      .select('id');
 
-    const stored = await loadStoredProfile();
-    if (stored) {
-      await Storage.setItem(STORAGE_KEY, JSON.stringify({ ...stored, nickname: trimmed }));
-    }
+    if (updateError || !updated?.length) return { error: '닉네임 변경에 실패했어요' };
+    if (activeProfileIdRef.current !== profileId) return { error: '프로필이 바뀌었어요. 현재 프로필에서 다시 시도해 주세요' };
 
+    // 서버에서 실제 행 갱신이 확인됐으므로 필수 닉네임 게이트도 즉시 해제한다.
+    // 기기 캐시는 보조 저장소다. 캐시 오류를 서버 변경 실패로 반환하거나 서버 쓰기를 재시도하지 않는다.
+    nicknameVersionRef.current += 1;
     setAuthState(prev => {
-      if (!prev.user) return prev;
+      if (prev.user?.id !== profileId) return prev;
       return { ...prev, user: { ...prev.user, nickname: trimmed } };
     });
+
+    try {
+      const stored = await loadStoredProfile();
+      if (stored?.profileId === profileId) {
+        await Storage.setItem(STORAGE_KEY, JSON.stringify({ ...stored, nickname: trimmed }));
+      }
+    } catch (err) {
+      console.warn('닉네임 서버 변경 완료, 기기 캐시 저장 실패:', err);
+    }
 
     return { error: null };
   };

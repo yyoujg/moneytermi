@@ -28,6 +28,8 @@ export const TopBar = () => {
   const [tip, setTip] = useState<Tip | null>(null);
   const rewardedAdLockRef = useRef(false);
   const energyRefillLockRef = useRef(false);
+  const boostLockRef = useRef(false);
+  const [boostPending, setBoostPending] = useState(false);
   const [energyRefillPending, setEnergyRefillPending] = useState(false);
   const [energyRefillNotice, setEnergyRefillNotice] = useState<EnergyRefillNotice>(null);
   const [rewardedAdReady, setRewardedAdReady] = useState(false);
@@ -186,10 +188,21 @@ export const TopBar = () => {
   };
 
   const handleBoost = async () => {
-    const r = await buyBoost();
-    if (r === 'ok') { feedbackBoost(); showModal('30분간 XP 2배!'); closeShopAndReset(); }
-    else if (r === 'active') { showModal('이미 부스트 중이에요', 'error'); closeShopAndReset(); }
-    else showModal('조개가 부족해요', 'error');
+    if (boostLockRef.current) return;
+    boostLockRef.current = true;
+    setBoostPending(true);
+    try {
+      const r = await buyBoost();
+      if (r === 'ok') { feedbackBoost(); showModal('30분간 XP 2배!'); closeShopAndReset(); }
+      else if (r === 'active') { showModal('이미 부스트 중이에요', 'error'); closeShopAndReset(); }
+      else if (r === 'points') showModal('잔액이 바뀌어 조개가 부족해요. 잔액을 확인해 주세요', 'error');
+      else if (r !== 'pending') showModal('구매 결과를 확인하지 못했어요. 잠시 후 잔액과 부스트 상태를 다시 확인해 주세요', 'error');
+    } catch {
+      showModal('구매 결과를 확인하지 못했어요. 잠시 후 잔액과 부스트 상태를 다시 확인해 주세요', 'error');
+    } finally {
+      boostLockRef.current = false;
+      setBoostPending(false);
+    }
   };
 
   return (
@@ -290,12 +303,13 @@ export const TopBar = () => {
 
             <button
               onClick={handleBoost}
-              disabled={points < 300 || boostLeft > 0}
+              disabled={boostPending || points < 300 || boostLeft > 0}
+              aria-busy={boostPending}
               className="action-secondary grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-chip px-4 py-4 text-sm font-bold active:opacity-70"
             >
               <span className="flex min-w-0 items-center gap-2 text-left leading-5"><ChevronsUp size={18} className="shrink-0" />XP 2배 부스트</span>
               <span className="shrink-0 text-right text-2xs font-medium leading-4">
-                {boostLeft > 0
+                {boostPending ? '구매 확인 중' : boostLeft > 0
                   ? `${Math.floor(boostLeft / 60000)}:${String(Math.floor((boostLeft % 60000) / 1000)).padStart(2, '0')} 남음`
                   : points < 300 ? `조개 ${(300 - points).toLocaleString()}개 더 필요` : '조개 300개 · 30분'}
               </span>

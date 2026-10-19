@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AppProvider, useAppContext } from './AppContext';
 import { addDays } from '../lib/srs';
 import { msUntilNextSlot, toDateStr } from '../lib/date';
+import { MISSION_XP } from '../constants';
 
 // 실제 Provider·SRS·응답 검증·타임아웃을 사용한다. 인증/저장소/DB/부수효과만 격리한다.
 // 모든 DB 호출은 아래 허용 목록으로만 처리하며 실제 클라이언트는 가져오지 않는다.
@@ -11,6 +12,13 @@ const mocks = vi.hoisted(() => ({
   profile: 'user-a' as string | null,
   progress: [] as Record<string, unknown>[],
   profileRead: vi.fn(),
+  profileUpdate: vi.fn(),
+  profileUpdateEq: vi.fn(),
+  profileUpdateSelect: vi.fn(),
+  boost: vi.fn(),
+  missionClaim: vi.fn(),
+  feedback: vi.fn(),
+  analytics: vi.fn(),
   upsert: vi.fn(),
   quiz: vi.fn(),
   rpc: vi.fn(),
@@ -27,6 +35,7 @@ type DbResponse = { data: unknown; error: unknown };
 vi.mock('../lib/supabase', () => {
   const query = (table: string) => {
     let columns = '';
+    let updatingProfile = false;
     let write: Promise<DbResponse> | undefined;
     const result = (): Promise<DbResponse> => {
       if (write) return write;
@@ -51,8 +60,21 @@ vi.mock('../lib/supabase', () => {
       }
     };
     const builder = {
-      select: (value: string) => { columns = value; return builder; },
-      eq: () => builder,
+      select: (value: string) => {
+        columns = value;
+        if (updatingProfile) mocks.profileUpdateSelect(value);
+        return builder;
+      },
+      eq: (column: string, value: unknown) => {
+        if (updatingProfile) mocks.profileUpdateEq(column, value);
+        return builder;
+      },
+      update: (payload: unknown) => {
+        if (table !== 'profiles') throw new Error('허용되지 않은 갱신');
+        updatingProfile = true;
+        write = Promise.resolve().then(() => mocks.profileUpdate(payload));
+        return builder;
+      },
       order: () => builder,
       range: () => builder,
       limit: () => builder,
@@ -72,6 +94,8 @@ vi.mock('../lib/supabase', () => {
     rpc: (name: string, args?: unknown) => {
       mocks.rpc(name, args);
       if (name === 'checkin') return Promise.resolve({ data: null, error: null });
+      if (name === 'buy_boost') return Promise.resolve().then(() => mocks.boost());
+      if (name === 'claim_mission_reward') return Promise.resolve().then(() => mocks.missionClaim(args));
       if (name !== 'submit_quiz_answer_once') throw new Error(`허용되지 않은 RPC: ${name}`);
       const promise = Promise.resolve().then(() => mocks.quiz(args));
       return {
@@ -87,8 +111,8 @@ vi.mock('../hooks/useDebouncedEffect', () => ({ useDebouncedEffect: vi.fn() }));
 vi.mock('../lib/storage', () => ({ Storage: mocks.storage }));
 vi.mock('../lib/energyRefill', () => ({ runEnergyRefill: async () => 'fail' }));
 vi.mock('../lib/promotion', () => ({ claimPromotion: vi.fn() }));
-vi.mock('../lib/analytics', () => ({ logClick: vi.fn() }));
-vi.mock('../lib/feedback', () => ({ feedbackClaim: vi.fn() }));
+vi.mock('../lib/analytics', () => ({ logClick: mocks.analytics }));
+vi.mock('../lib/feedback', () => ({ feedbackClaim: mocks.feedback }));
 vi.mock('@apps-in-toss/web-framework', () => ({ requestReview: vi.fn() }));
 
 Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { value: true, configurable: true });
@@ -148,6 +172,9 @@ beforeEach(() => {
     due_date: addDays(new Date(), -1), last_grade: 2 }];
   mocks.signals.length = 0;
   mocks.profileRead.mockReset().mockResolvedValue({ data: { points: 100, xp: 20, boost_until: null }, error: null });
+  mocks.profileUpdate.mockReset().mockResolvedValue({ data: [], error: null });
+  mocks.boost.mockReset().mockResolvedValue({ data: null, error: null });
+  mocks.missionClaim.mockReset().mockResolvedValue({ data: null, error: null });
   mocks.upsert.mockReset().mockResolvedValue({ data: null, error: null });
   mocks.quiz.mockReset().mockResolvedValue({ data: valid(), error: null });
   mocks.storage.getItem.mockResolvedValue(null);
@@ -413,5 +440,251 @@ describe('AppProvider 사용자 전환 중 늦은 응답', () => {
     expect(reviewResult).toBe(false);
     expect(wallet()).toEqual({ points: 700, xp: 80, m3: 0 });
     expect(localProgress()).toEqual(before);
+  });
+});
+
+
+// 저장 결과 계약 회귀: 실제 AppProvider를 유지하고 외부 DB 허용 목록만 확장한다.
+const boostData = () => ({ points: 40, boost_until: '2026-10-16T04:00:00Z' });
+const boostWallet = () => ({ points: current.points, xp: current.xp, boostUntil: current.boostUntil });
+const rpcCalls = (name: string) => mocks.rpc.mock.calls.filter(([called]) => called === name);
+
+async function completeQuizMission() {
+  await act(async () => {
+    current.setMissions(prev => ({ ...prev, m3: { ...prev.m3, current: prev.m3.target } }));
+  });
+}
+
+describe('AppProvider 이모지 저장 결과 계약', () => {
+  it('profiles 갱신 행 확인 전에는 기존값을 유지하고 성공 후에만 true와 새 값을 반영한다', async () => {
+    await mount();
+    const before = current.myEmoji;
+    const response = deferred<DbResponse>();
+    mocks.profileUpdate.mockReturnValueOnce(response.promise);
+    let pending!: ReturnType<Context['updateMyEmoji']>;
+    let settled = false;
+    await act(async () => {
+      pending = current.updateMyEmoji('새 프로필 표시');
+      void pending.then(() => { settled = true; });
+    });
+    expect(settled).toBe(false);
+    expect(current.myEmoji).toBe(before);
+    expect(mocks.profileUpdate).toHaveBeenCalledExactlyOnceWith({ emoji: '새 프로필 표시' });
+    expect(mocks.profileUpdateEq).toHaveBeenCalledExactlyOnceWith('id', 'user-a');
+    expect(mocks.profileUpdateSelect).toHaveBeenCalledExactlyOnceWith('id');
+    await act(async () => {
+      response.resolve({ data: [{ id: 'user-a' }], error: null });
+      expect(await pending).toBe(true);
+    });
+    expect(current.myEmoji).toBe('새 프로필 표시');
+  });
+
+  it.each(['DB 오류', '요청 거절', '0행', '응답 누락'] as const)('%s이면 false이고 기존값을 유지하며 재시도할 수 있다', async failure => {
+    await mount();
+    const before = current.myEmoji;
+    if (failure === '요청 거절') mocks.profileUpdate.mockRejectedValueOnce(new Error('연결 실패'));
+    else mocks.profileUpdate.mockResolvedValueOnce({
+      data: failure === 'DB 오류' ? [{ id: 'user-a' }] : failure === '0행' ? [] : null,
+      error: failure === 'DB 오류' ? { message: '갱신 실패' } : null,
+    });
+    await act(async () => { expect(await current.updateMyEmoji('새 프로필 표시')).toBe(false); });
+    expect(current.myEmoji).toBe(before);
+    mocks.profileUpdate.mockResolvedValueOnce({ data: [{ id: 'user-a' }], error: null });
+    await act(async () => { expect(await current.updateMyEmoji('새 프로필 표시')).toBe(true); });
+    expect(current.myEmoji).toBe('새 프로필 표시');
+    expect(mocks.profileUpdate).toHaveBeenCalledTimes(2);
+  });
+
+  it('프로필이 없으면 false이고 갱신 요청 없이 기존값을 유지한다', async () => {
+    mocks.profile = null;
+    await mount();
+    const before = current.myEmoji;
+    await act(async () => { expect(await current.updateMyEmoji('새 프로필 표시')).toBe(false); });
+    expect(current.myEmoji).toBe(before);
+    expect(mocks.profileUpdate).not.toHaveBeenCalled();
+    expect(mocks.profileUpdateEq).not.toHaveBeenCalled();
+    expect(mocks.profileUpdateSelect).not.toHaveBeenCalled();
+  });
+});
+
+describe('AppProvider 부스트 구매 결과 계약', () => {
+  it('진행 중 재요청은 pending이며 추가 호출·낙관적 갱신 없이 성공 지갑만 반영한다', async () => {
+    await mount();
+    const before = boostWallet();
+    const response = deferred<DbResponse>();
+    mocks.boost.mockReturnValueOnce(response.promise);
+    let pending!: ReturnType<Context['buyBoost']>;
+    const initialBuy = current.buyBoost;
+    await act(async () => { pending = initialBuy(); });
+    await act(async () => {
+      expect(await current.buyBoost()).toBe('pending');
+      expect(await initialBuy()).toBe('pending');
+    });
+    expect(rpcCalls('buy_boost')).toHaveLength(1);
+    expect(boostWallet()).toEqual(before);
+    expect(mocks.analytics).not.toHaveBeenCalledWith('boost_buy');
+    const data = boostData();
+    await act(async () => {
+      response.resolve({ data, error: null });
+      expect(await pending).toBe('ok');
+    });
+    expect(boostWallet()).toEqual({ points: data.points, xp: before.xp, boostUntil: Date.parse(data.boost_until) });
+    expect(mocks.analytics.mock.calls.filter(([name]) => name === 'boost_buy')).toHaveLength(1);
+  });
+
+  it.each([
+    ['명시 포인트 부족', 'insufficient points', 'points'],
+    ['이미 활성화됨', 'boost already active', 'active'],
+    ['일반 서버 오류', 'server unavailable', 'fail'],
+    ['통신 오류', 'Failed to fetch', 'fail'],
+    ['인증 오류', 'permission denied', 'fail'],
+    ['모호한 포인트 오류', 'points service unavailable', 'fail'],
+  ] as const)('%s는 %s 오류에서 %s를 반환하고 지갑을 보존한다', async (_label, message, expected) => {
+    await mount();
+    const before = boostWallet();
+    mocks.boost.mockResolvedValueOnce({ data: boostData(), error: { message } });
+    await act(async () => { expect(await current.buyBoost()).toBe(expected); });
+    expect(boostWallet()).toEqual(before);
+    expect(mocks.analytics).not.toHaveBeenCalledWith('boost_buy');
+    mocks.boost.mockResolvedValueOnce({ data: boostData(), error: null });
+    await act(async () => { expect(await current.buyBoost()).toBe('ok'); });
+    expect(rpcCalls('buy_boost')).toHaveLength(2);
+  });
+
+  it('요청이 throw되어도 fail이고 지갑을 보존하며 잠금 해제 후 재시도할 수 있다', async () => {
+    await mount();
+    const before = boostWallet();
+    mocks.boost.mockRejectedValueOnce(new Error('insufficient points: 연결 예외는 잔액 부족으로 확정하지 않음'));
+    await act(async () => { expect(await current.buyBoost()).toBe('fail'); });
+    expect(boostWallet()).toEqual(before);
+    mocks.boost.mockResolvedValueOnce({ data: boostData(), error: null });
+    await act(async () => { expect(await current.buyBoost()).toBe('ok'); });
+    expect(rpcCalls('buy_boost')).toHaveLength(2);
+  });
+
+  it.each([
+    ['null', null], ['빈 객체', {}], ['문자열', 'ok'],
+    ['포인트 누락', { boost_until: boostData().boost_until }],
+    ['문자열 포인트', { ...boostData(), points: '40' }],
+    ['음수 포인트', { ...boostData(), points: -1 }],
+    ['소수 포인트', { ...boostData(), points: 1.5 }],
+    ['비정상 포인트', { ...boostData(), points: NaN }],
+    ['안전 정수 초과', { ...boostData(), points: Number.MAX_SAFE_INTEGER + 1 }],
+    ['만료 시각 누락', { points: 40 }],
+    ['잘못된 만료 시각', { ...boostData(), boost_until: 'not-a-date' }],
+    ['숫자 만료 시각', { ...boostData(), boost_until: Date.now() }],
+  ])('%s 응답은 fail이고 지갑·부스트를 바꾸지 않는다', async (_label, data) => {
+    await mount();
+    const before = boostWallet();
+    mocks.boost.mockResolvedValueOnce({ data, error: null });
+    await act(async () => { expect(await current.buyBoost()).toBe('fail'); });
+    expect(boostWallet()).toEqual(before);
+    expect(mocks.analytics).not.toHaveBeenCalledWith('boost_buy');
+  });
+});
+
+
+describe('AppProvider 미션 보상 수령 결과 계약', () => {
+  it('미달성·없는 미션은 null이며 수령 중 집합이 비어 있고 RPC를 보내지 않는다', async () => {
+    await mount();
+    expect(current.claimingMissionIds).toBeInstanceOf(Set);
+    expect([...current.claimingMissionIds]).toEqual([]);
+    await act(async () => {
+      expect(await current.claimReward('m3')).toBeNull();
+      expect(await current.claimReward('없는 미션')).toBeNull();
+    });
+    expect(rpcCalls('claim_mission_reward')).toHaveLength(0);
+    expect(current.missionRewards).toEqual([]);
+  });
+
+  it('자동 수령 중 수동·효과 재실행은 pending이며 추가 RPC와 중복 축하 없이 성공한다', async () => {
+    await mount();
+    const before = boostWallet();
+    const response = deferred<DbResponse>();
+    mocks.missionClaim.mockReturnValueOnce(response.promise);
+    await completeQuizMission();
+    expect([...current.claimingMissionIds]).toEqual(['m3']);
+    const pendingIds = current.claimingMissionIds;
+    const initialClaim = current.claimReward;
+    expect(current.missions.m3.isRewarded).toBe(false);
+    expect(boostWallet()).toEqual(before);
+    expect(current.missionRewards).toEqual([]);
+    expect(mocks.feedback).not.toHaveBeenCalled();
+    await act(async () => {
+      expect(await initialClaim('m3')).toBe('pending');
+      expect(await current.claimReward('m3')).toBe('pending');
+      // missions 의존 효과가 다시 실행되어도 동일 보상은 이미 진행 중이다.
+      current.setMissions(prev => ({ ...prev, m1: { ...prev.m1, current: 2 } }));
+    });
+    expect(rpcCalls('claim_mission_reward')).toHaveLength(1);
+    expect(mocks.missionClaim).toHaveBeenCalledExactlyOnceWith({ p_mission_id: 'm3', p_date: toDateStr() });
+    expect(current.missionRewards).toEqual([]);
+    expect(mocks.feedback).not.toHaveBeenCalled();
+    await act(async () => { response.resolve({ data: { points: 130, xp: 37 }, error: null }); });
+    expect(boostWallet()).toEqual({ points: 130, xp: 37, boostUntil: before.boostUntil });
+    expect(current.missions.m3.isRewarded).toBe(true);
+    expect([...current.claimingMissionIds]).toEqual([]);
+    expect(current.claimingMissionIds).not.toBe(pendingIds);
+    expect([...pendingIds]).toEqual(['m3']);
+    expect(current.missionRewards).toEqual([{ points: 30, xp: 17, source: 'mission' }]);
+    expect(mocks.feedback).toHaveBeenCalledTimes(1);
+    expect(mocks.analytics.mock.calls.filter(([name]) => name === 'mission_reward_claim')).toHaveLength(1);
+    await act(async () => { expect(await current.claimReward('m3')).toBeNull(); });
+    expect(rpcCalls('claim_mission_reward')).toHaveLength(1);
+    expect(mocks.feedback).toHaveBeenCalledTimes(1);
+    expect(current.missionRewards).toHaveLength(1);
+  });
+
+  it.each(['DB 오류', '요청 거절', '응답 누락'] as const)('자동 수령 %s 뒤 잠금을 해제하고 수동 실패는 null, 수동 재시도는 성공한다', async failure => {
+    await mount();
+    const before = boostWallet();
+    if (failure === '요청 거절') mocks.missionClaim.mockRejectedValue(new Error('연결 실패'));
+    else mocks.missionClaim.mockResolvedValue({
+      data: failure === 'DB 오류' ? { points: 999, xp: 999 } : null,
+      error: failure === 'DB 오류' ? { message: '저장 실패' } : null,
+    });
+    await completeQuizMission();
+    expect(rpcCalls('claim_mission_reward')).toHaveLength(1);
+    expect([...current.claimingMissionIds]).toEqual([]);
+    expect(current.missions.m3.isRewarded).toBe(false);
+    expect(boostWallet()).toEqual(before);
+    expect(current.missionRewards).toEqual([]);
+    expect(mocks.feedback).not.toHaveBeenCalled();
+    await act(async () => { expect(await current.claimReward('m3')).toBeNull(); });
+    expect(rpcCalls('claim_mission_reward')).toHaveLength(2);
+    expect([...current.claimingMissionIds]).toEqual([]);
+    expect(boostWallet()).toEqual(before);
+    mocks.missionClaim.mockResolvedValueOnce({ data: { points: 130, xp: 37 }, error: null });
+    await act(async () => { expect(await current.claimReward('m3')).toEqual({ xpGained: 17 }); });
+    expect(rpcCalls('claim_mission_reward')).toHaveLength(3);
+    expect([...current.claimingMissionIds]).toEqual([]);
+    expect(current.missions.m3.isRewarded).toBe(true);
+    expect(boostWallet()).toEqual({ points: 130, xp: 37, boostUntil: before.boostUntil });
+    // 수동 수령은 호출자가 축하를 담당하고 자동 축하 대기열을 중복 추가하지 않는다.
+    expect(current.missionRewards).toEqual([]);
+    expect(mocks.feedback).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['서버 XP 차이', { points: 130, xp: 37 }, 17, 37],
+    ['차이 하한 0', { points: 130, xp: 12 }, 0, 12],
+    ['동일 XP', { points: 130, xp: 20 }, 0, 20],
+    ['XP 누락의 기존 기본 보상', { points: 130 }, MISSION_XP, 20 + MISSION_XP],
+  ])('%s의 기존 지급 공식을 유지한다', async (_label, data, xpGained, finalXp) => {
+    mocks.profileRead.mockResolvedValue({ data: { points: 100, xp: 20, boost_until: boostData().boost_until }, error: null });
+    await mount();
+    const beforeBoost = current.boostUntil;
+    // 최초 자동 수령만 실패시켜 다음 호출의 반환값을 수동으로 검사한다.
+    mocks.missionClaim.mockResolvedValueOnce({ data: null, error: { message: '아직 서버에 진행도 미반영' } });
+    await completeQuizMission();
+    mocks.missionClaim.mockResolvedValueOnce({ data, error: null });
+    await act(async () => { expect(await current.claimReward('m3')).toEqual({ xpGained }); });
+    expect(current.xp).toBe(finalXp);
+    expect(current.points).toBe(130);
+    expect(current.boostUntil).toBe(beforeBoost);
+    expect(current.missions.m3.reward).toBe(30);
+    expect(current.missions.m3.isRewarded).toBe(true);
+    expect([...current.claimingMissionIds]).toEqual([]);
+    expect(rpcCalls('claim_mission_reward')).toHaveLength(2);
   });
 });

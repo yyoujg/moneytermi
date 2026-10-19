@@ -6,6 +6,7 @@ import type { Course, Word } from '../types';
 import CourseScreen from './CourseScreen';
 import HomeScreen from './HomeScreen';
 import { MISSION_XP } from '../constants';
+import { showModal } from '../components/AlertModal';
 import { OTTER_AVATAR_IMAGES, getOtterAvatarPose } from '../lib/otter';
 
 const state = vi.hoisted(() => ({
@@ -470,4 +471,15 @@ describe('홈의 독립 카드와 미션 동작', () => {
     await act(async () => start.click());
     expect(container).toHaveTextContent('학습 목록');
   });
+  it('자동 적립 중인 미션 버튼은 잠그고 진행 상태를 표시한다', async () => {
+    const claimReward=vi.fn();baseContext({xp:0,knownWords:[word(1)],unknownWords:[],attendanceDates:[],myEmoji:'🍊',claimReward,claimingMissionIds:new Set(['m3']),missions:{m3:{id:'m3',title:'퀴즈 정답',reward:30,current:3,target:3,isRewarded:false,sortOrder:1}}});
+    const container=await mountHome();const button=container.querySelector<HTMLButtonElement>('[data-state="pending"]')!;
+    expect(button).toBeDisabled();expect(button).toHaveTextContent('적립 중');act(()=>button.click());expect(claimReward).not.toHaveBeenCalled();
+  });
+  it('동시에 진행 중인 적립 응답을 실패나 중복 성공으로 안내하지 않는다', async () => {
+    vi.mocked(showModal).mockClear();const claimReward=vi.fn().mockResolvedValue('pending');baseContext({xp:0,knownWords:[word(1)],unknownWords:[],attendanceDates:[],myEmoji:'🍊',claimReward,missions:{m3:{id:'m3',title:'퀴즈 정답',reward:30,current:3,target:3,isRewarded:false,sortOrder:1}}});
+    const container=await mountHome();await act(async()=>{container.querySelector<HTMLButtonElement>('[data-state="ready"]')!.click();});
+    expect(showModal).not.toHaveBeenCalled();expect(container).not.toHaveTextContent('미션 보상 축하');
+  });
+
 });

@@ -30,7 +30,7 @@ type AppContextValue = {
   setPoints: React.Dispatch<React.SetStateAction<number>>;
   xp: number;
   boostUntil: number | null;
-  buyBoost: () => Promise<'ok' | 'active' | 'fail'>;
+  buyBoost: () => Promise<'ok' | 'active' | 'points' | 'pending' | 'fail'>;
   energy: number;
   energyMax: number;
   nextEnergyAt: number | null;
@@ -52,7 +52,8 @@ type AppContextValue = {
   setUnknownWords: React.Dispatch<React.SetStateAction<Word[]>>;
   missions: Missions;
   setMissions: React.Dispatch<React.SetStateAction<Missions>>;
-  claimReward: (missionId: keyof Missions) => Promise<{ xpGained: number } | null>;
+  claimReward: (missionId: keyof Missions) => Promise<{ xpGained: number } | 'pending' | null>;
+  claimingMissionIds: Set<string>;
   claimAdReward: (amount: number, unit: string) => Promise<number | null>;
   claimPromotionReward: (amount: number) => Promise<number | null>;
   submitQuizAnswer: (
@@ -69,7 +70,7 @@ type AppContextValue = {
   pickRecallWords: (options?: { candidates?: Word[]; excludeIds?: Iterable<number>; count?: number }) => Word[];
   recordReview: (wordId: number, correct: boolean, usedHint: boolean) => Promise<boolean>;
   myEmoji: string;
-  updateMyEmoji: (emoji: string) => Promise<void>;
+  updateMyEmoji: (emoji: string) => Promise<boolean>;
   // 자동 수령한 미션 보상 축하 대기열. 학습 화면 중엔 Layout이 보류했다가 나가면 보여준다
   missionRewards: PointReward[];
   dismissMissionReward: () => void;
@@ -164,6 +165,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   // 진행도 행이 정의보다 먼저 도착하면 모르는 미션 id가 버려진다. 정의가 오면 다시 합치도록 보관.
   const missionRowsRef  = useRef<{ mission_id: string; current: number; is_rewarded: boolean }[]>([]);
   const claimingRef     = useRef<Set<string>>(new Set());
+  const [claimingMissionIds, setClaimingMissionIds] = useState<Set<string>>(new Set());
   const boostingRef     = useRef(false);
   const energyRefillingRef = useRef(false);
 
@@ -507,34 +509,46 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   // ── updateMyEmoji ─────────────────────────────────────────────
-  const updateMyEmoji = async (emoji: string) => {
-    setMyEmoji(emoji);
+  const updateMyEmoji = async (emoji: string): Promise<boolean> => {
     const profileId = profileIdRef.current;
-    if (!profileId) return;
-    await dbRef.current.from('profiles').update({ emoji }).eq('id', profileId);
+    if (!profileId) return false;
+    try {
+      // 0행 갱신(RLS 등)도 성공으로 보이지 않도록 실제 반영을 확인한다.
+      const { data, error } = await dbRef.current.from('profiles').update({ emoji }).eq('id', profileId).select('id');
+      if (error || !data?.length || profileIdRef.current !== profileId) return false;
+      setMyEmoji(emoji);
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   // ── claimReward — 서버가 자격 검증 후 적립 ─────────────────────
   // 성공 여부를 돌려줘 화면이 토스트/햅틱을 결정한다
-  const claimReward = async (missionId: keyof Missions): Promise<{ xpGained: number } | null> => {
+  const claimReward = async (missionId: keyof Missions): Promise<{ xpGained: number } | 'pending' | null> => {
+    if (claimingRef.current.has(missionId)) return 'pending';
     const mission = missions[missionId];
-    if (mission.current < mission.target || mission.isRewarded) return null;
-    if (claimingRef.current.has(missionId)) return null;   // 연타로 RPC 두 번 나가지 않게
+    if (!mission || mission.current < mission.target || mission.isRewarded) return null;
     claimingRef.current.add(missionId);
+    setClaimingMissionIds(new Set(claimingRef.current));
     const today = toDateStr(new Date());
-    let res;
     try {
-      res = await dbRef.current.rpc('claim_mission_reward', { p_mission_id: missionId, p_date: today });
-    } finally { claimingRef.current.delete(missionId); }
-    const { data, error } = res;
-    if (error || !data) { console.error('[claimReward] 실패:', error); return null; }
-    // 서버가 XP 지급 뒤의 최종 잔고를 준다(부스트 배수·50XP 보너스 포함). 옛 서버면 xp가 없어 5로 본다.
-    const xpGained = typeof data.xp === 'number' ? Math.max(data.xp - xp, 0) : MISSION_XP;
-    setPoints(data.points);
-    if (typeof data.xp === 'number') setXp(data.xp); else setXp(x => x + MISSION_XP);
-    setMissions(prev => ({ ...prev, [missionId]: { ...prev[missionId], isRewarded: true } }));
-    logClick('mission_reward_claim', { mission_id: missionId, reward: mission.reward });
-    return { xpGained };
+      const { data, error } = await dbRef.current.rpc('claim_mission_reward', { p_mission_id: missionId, p_date: today });
+      if (error || !data) { console.error('[claimReward] 실패:', error); return null; }
+      // 기존 서버 최종 잔고와 지급 규칙을 그대로 사용한다.
+      const xpGained = typeof data.xp === 'number' ? Math.max(data.xp - xp, 0) : MISSION_XP;
+      setPoints(data.points);
+      if (typeof data.xp === 'number') setXp(data.xp); else setXp(x => x + MISSION_XP);
+      setMissions(prev => ({ ...prev, [missionId]: { ...prev[missionId], isRewarded: true } }));
+      logClick('mission_reward_claim', { mission_id: missionId, reward: mission.reward });
+      return { xpGained };
+    } catch (error) {
+      console.error('[claimReward] 저장 확인 실패:', error);
+      return null;
+    } finally {
+      claimingRef.current.delete(missionId);
+      setClaimingMissionIds(new Set(claimingRef.current));
+    }
   };
 
   // ── 미션 자동 수령: 달성하는 순간 받는다 (받기 버튼 없음) ──────────
@@ -546,7 +560,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     Object.values(missions).forEach(m => {
       if (m.current < m.target || m.isRewarded) return;
       claimReward(m.id).then(res => {
-        if (!res) return;
+        if (!res || res === 'pending') return;
         feedbackClaim();
         setMissionRewards(q => [...q, { points: m.reward, xp: res.xpGained, source: 'mission' }]);
       });
@@ -652,19 +666,26 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   // ── 상점 — 부스트 구매 (서버가 차감·검증) ──────────────────────
-  const buyBoost = async (): Promise<'ok' | 'active' | 'fail'> => {
-    if (boostingRef.current) return 'fail';   // 연타 가드
+  const buyBoost = async (): Promise<'ok' | 'active' | 'points' | 'pending' | 'fail'> => {
+    if (boostingRef.current) return 'pending';
     boostingRef.current = true;
     try {
       const { data, error } = await dbRef.current.rpc('buy_boost');
       if (error || !data) {
         console.error('[buyBoost] 실패:', error);
-        return error?.message?.includes('boost already active') ? 'active' : 'fail';
+        if (error?.message?.includes('boost already active')) return 'active';
+        if (error?.message?.includes('insufficient points')) return 'points';
+        return 'fail';
       }
+      const until = typeof data.boost_until === 'string' ? Date.parse(data.boost_until) : NaN;
+      if (!Number.isSafeInteger(data.points) || data.points < 0 || !Number.isFinite(until)) return 'fail';
       setPoints(data.points);
-      setBoostUntil(new Date(data.boost_until).getTime());
+      setBoostUntil(until);
       logClick('boost_buy');
       return 'ok';
+    } catch (error) {
+      console.error('[buyBoost] 저장 확인 실패:', error);
+      return 'fail';
     } finally { boostingRef.current = false; }
   };
 
@@ -759,7 +780,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       energy, energyMax: ENERGY_MAX, nextEnergyAt, spendEnergy, claimEnergyAd, buyEnergyRefill,
       spendPoints, claimFirstLesson, refreshWallet, shopReason, shopOpen, openShop, closeShop,
       missions, setMissions,
-      claimReward,
+      claimReward, claimingMissionIds,
       claimAdReward,
       claimPromotionReward,
       submitQuizAnswer,

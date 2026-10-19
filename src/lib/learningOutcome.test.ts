@@ -18,3 +18,9 @@ describe('learningOutcomeFor', () => {
     expect(learningOutcomeFor({})).toBe('경제 용어의 뜻과 생활 속 예시를 살펴봐요');
   });
 });
+
+it('일부 단어보다 코스 분류를 우선해 전체 학습 내용을 안내한다', () => {
+ expect(learningOutcomeFor({category:'경제 기초 개념',title:'경제 기초 개념 1',words:[{word:'규모의 경제'},{word:'단리'},{word:'복리'}]})).toBe('경제의 기본 용어를 생활 속 예시로 살펴봐요');
+ expect(learningOutcomeFor({category:'가계·소비·부동산',words:[{word:'담보'},{word:'대출'}]})).toBe('주거 계약과 부동산에 관한 용어를 살펴봐요');
+ expect(learningOutcomeFor({title:'경제 기초 개념',words:[{word:'단리'}]})).toBe('경제의 기본 용어를 생활 속 예시로 살펴봐요');
+});

@@ -9,12 +9,12 @@ import { MissionRewardStatus } from './MissionRewardStatus';
 Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { value: true, configurable: true });
 let cleanup = () => {};
 afterEach(() => cleanup());
-const mount = (isRewarded: boolean) => {
+const mount = (isRewarded: boolean, pending = false) => {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
   const onClaim = vi.fn();
-  act(() => root.render(<MissionRewardStatus isRewarded={isRewarded} onClaim={onClaim} />));
+  act(() => root.render(<MissionRewardStatus isRewarded={isRewarded} pending={pending} onClaim={onClaim} />));
   cleanup = () => { act(() => root.unmount()); container.remove(); };
   return { container, onClaim };
 };
@@ -44,3 +44,9 @@ describe('미션 보상 버튼과 완료 상태의 동일한 크기', () => {
     expect(css).toMatch(/\.mission-reward-status,\s*button\.mission-reward-status\s*\{[^}]*width: 64px;[^}]*height: var\(--size-touch-min\);[^}]*font-size: 14px !important;[^}]*font-weight: 600 !important;/s);
   });
 });
+
+ it('적립 중에는 수령 버튼을 잠그고 진행 상태를 알려준다', () => {
+  const {container,onClaim}=mount(false,true);const button=container.querySelector('button')!;
+  expect(button).toBeDisabled();expect(button).toHaveTextContent('적립 중');expect(button).toHaveAttribute('aria-busy','true');
+  act(()=>button.click());expect(onClaim).not.toHaveBeenCalled();
+ });

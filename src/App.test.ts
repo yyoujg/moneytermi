@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { parseLandingPath } from './lib/landing';
-import { resolveBackEventAction } from './lib/backEvent';
+import { dismissRelatedWordPreview, resolveBackEventAction } from './lib/backEvent';
 
 describe('parseLandingPath', () => {
   it('null/undefined/빈 문자열 → null', () => {
@@ -88,4 +88,17 @@ describe('resolveBackEventAction', () => {
     expect(resolveBackEventAction(1)).toBe('back');
     expect(resolveBackEventAction(4)).toBe('back');
   });
+});
+
+describe('관련 용어 미리보기의 기기 뒤로가기', () => {
+ it('열린 미리보기가 없으면 기존 경로 뒤로가기를 유지한다', () => {expect(dismissRelatedWordPreview()).toBe(false);});
+ it('열린 미리보기에 취소를 전달하고 경로 이동을 중단한다', () => {
+  const dialog=document.createElement('dialog');dialog.setAttribute('data-related-word-preview','');dialog.open=true;
+  document.body.appendChild(dialog);let cancelled=false;dialog.addEventListener('cancel',event=>{event.preventDefault();cancelled=true;dialog.remove();});
+  try {expect(dismissRelatedWordPreview()).toBe(true);expect(cancelled).toBe(true);}finally{dialog.remove();}
+ });
+ it('닫힌 미리보기는 뒤로가기를 가로채지 않는다', () => {
+  const dialog=document.createElement('dialog');dialog.setAttribute('data-related-word-preview','');document.body.appendChild(dialog);
+  try {expect(dismissRelatedWordPreview()).toBe(false);}finally{dialog.remove();}
+ });
 });

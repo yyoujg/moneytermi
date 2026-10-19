@@ -25,8 +25,9 @@ const RULES = [
 ] as const;
 
 export const learningOutcomeFor = ({ category = '', title = '', words = [] }: LearningOutcomeInput): string => {
-  const source = `${category} ${title} ${words.map(word => word.word).join(' ')}`;
-  const match = RULES.find(rule => rule.re.test(source));
+  const match = [category, title, words.map(word => word.word).join(' ')]
+    .map(source => RULES.find(rule => rule.re.test(source)))
+    .find(Boolean);
   if (match) return match.text;
   const firstWord = words[0]?.word;
   return firstWord ? `${firstWord}의 뜻과 예시를 살펴봐요` : '경제 용어의 뜻과 생활 속 예시를 살펴봐요';

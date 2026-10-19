@@ -28,7 +28,7 @@ const missionIconFor = (title: string) => /출석|방문|접속/.test(title)
 
 const HomeScreen = () => {
   const navigate = useNavigate();
-  const { hydrated, xp, knownWords, unknownWords, missions, claimReward, attendanceDates, dueQueue, myEmoji } = useAppContext();
+  const { hydrated, xp, knownWords, unknownWords, missions, claimReward, claimingMissionIds, attendanceDates, dueQueue, myEmoji } = useAppContext();
   const { user } = useAuth();
   const isNewUser = hydrated && knownWords.length + unknownWords.length === 0;
 
@@ -51,6 +51,7 @@ const HomeScreen = () => {
   const [celebration, setCelebration] = useState<PointReward | null>(null);
   const handleClaim = async (missionId: string, reward: number) => {
     const res = await claimReward(missionId);
+    if (res === 'pending') return;
     if (res) {
       feedbackClaim();
       setCelebration({ points: reward, xp: res.xpGained, source: 'mission' });   // 부스트 중이면 10
@@ -155,7 +156,7 @@ const HomeScreen = () => {
                       </p>
                     </div>
                     {mission.isRewarded || done
-                      ? <MissionRewardStatus isRewarded={mission.isRewarded} onClaim={() => handleClaim(mission.id, mission.reward)} />
+                      ? <MissionRewardStatus isRewarded={mission.isRewarded} pending={claimingMissionIds?.has(mission.id)} onClaim={() => handleClaim(mission.id, mission.reward)} />
                       : <span className="home-mission-count text-base font-bold text-[var(--color-ink)]">{mission.current}<span className="text-xs text-[var(--color-ink-4)]">/{mission.target}</span></span>
                     }
                   </div>

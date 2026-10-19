@@ -212,3 +212,47 @@ describe('TopBar energy shop', () => {
     expect(state.showModal).toHaveBeenCalledWith('광고를 열지 못했어요. 잠시 후 다시 시도해 주세요', 'error');
   });
 });
+
+describe('부스트 구매 결과 구분', () => {
+  const button = (container: HTMLElement) => [...container.querySelectorAll('button')].find(el => el.textContent?.includes('XP 2배 부스트'))!;
+  it('잔액이 충분한 통신 실패는 잔액 부족이나 미차감으로 단정하지 않는다', async () => {
+    baseContext({ points: 1000, shopReason: null });
+    const { container } = await mount();
+    await act(async () => { button(container).click(); });
+    expect(state.showModal).toHaveBeenCalledWith(expect.stringContaining('구매 결과를 확인하지 못했어요'), 'error');
+    expect(state.showModal.mock.calls.flat().join(' ')).not.toMatch(/부족|차감되지/);
+    expect(state.closeShop).not.toHaveBeenCalled();
+  });
+  it('서버가 명시한 잔액 부족은 별도로 안내한다', async () => {
+    baseContext({ points: 1000, shopReason: null, buyBoost: vi.fn().mockResolvedValue('points') });
+    const { container } = await mount();
+    await act(async () => { button(container).click(); });
+    expect(state.showModal).toHaveBeenCalledWith(expect.stringContaining('잔액이 바뀌어 조개가 부족해요'), 'error');
+  });
+  it('연속 클릭은 한 번만 요청하고 구매 확인 중임을 표시한다', async () => {
+    let resolve!: (value: string) => void;
+    const purchase = vi.fn(() => new Promise<string>(done => { resolve = done; }));
+    baseContext({ points: 1000, shopReason: null, buyBoost: purchase });
+    const { container } = await mount();
+    act(() => { button(container).click(); button(container).click(); });
+    expect(purchase).toHaveBeenCalledOnce();
+    expect(button(container)).toBeDisabled();
+    expect(button(container)).toHaveTextContent('구매 확인 중');
+    await act(async () => { resolve('ok'); });
+    expect(state.closeShop).toHaveBeenCalledOnce();
+    expect(state.showModal).toHaveBeenCalledWith('30분간 XP 2배!');
+  });
+  it('이미 진행 중인 요청을 실패로 안내하지 않는다', async () => {
+    baseContext({ points: 1000, shopReason: null, buyBoost: vi.fn().mockResolvedValue('pending') });
+    const { container } = await mount();
+    await act(async () => { button(container).click(); });
+    expect(state.showModal).not.toHaveBeenCalled();
+  });
+  it('요청 예외가 나도 대기 상태를 해제하고 결과 미확인으로 안내한다', async () => {
+    baseContext({ points: 1000, shopReason: null, buyBoost: vi.fn().mockRejectedValue(new Error('통신 오류')) });
+    const { container } = await mount();
+    await act(async () => { button(container).click(); });
+    expect(state.showModal).toHaveBeenCalledWith(expect.stringContaining('구매 결과를 확인하지 못했어요'), 'error');
+    expect(button(container)).not.toBeDisabled();
+  });
+});
