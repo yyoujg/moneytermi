@@ -12,6 +12,7 @@ import { Storage } from '../lib/storage';
 import { COURSE_REVIEW_COUNT, LESSON_WARMUP_COUNT, firstUnknownWordIndex, learnedOrFallbackWords, selectCourseQuizWords } from '../lib/coursePractice';
 import { learningOutcomeFor } from '../lib/learningOutcome';
 import { ActionButton } from '../components/ui/ActionButton';
+import { EnergyIcon } from '../components/StatIcons';
 import { OTTER_IMAGES } from '../lib/otter';
 import { buildPath, type PathNode } from '../lib/path';
 
@@ -84,7 +85,7 @@ const nodeCopy = (node: PathNode) => {
 const CourseScreen = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { hydrated, contentStatus, retryContent, viewedIds: knownIds, courses, energy, spendEnergy, pickRecallWords, openShop } = useAppContext();
+  const { hydrated, contentStatus, retryContent, viewedIds: knownIds, courses, energy, energyMax, spendEnergy, pickRecallWords, openShop } = useAppContext();
   // 이 기기에서 끝낸 퀴즈·복습 노드. 화면에 돌아올 때마다 다시 읽는다(퀴즈 끝내고 돌아온 직후 반영).
   const [doneNodes, setDoneNodes] = useState<Set<string>>(new Set());
   const [doneNodesLoaded, setDoneNodesLoaded] = useState(false);
@@ -276,6 +277,10 @@ const CourseScreen = () => {
             <p className="mt-1! text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">가볍게 시작하고, 차근차근 쌓아가요.</p>
           </>
         )}
+        <button type="button" className="course-energy-entry" aria-label={`학습 에너지 ${energy}/${energyMax}, 충전 방법 보기`} onClick={() => openShop('energy')}>
+          <span><EnergyIcon size={20} /><span>에너지 <strong>{energy}/{energyMax}</strong></span></span>
+          <span className="course-energy-action">충전 방법<ChevronRight size={16} aria-hidden="true" /></span>
+        </button>
       </div>
       {!activeTopic && <>
         <section aria-label="오늘 할 학습" className="course-home-hero">

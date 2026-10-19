@@ -142,6 +142,20 @@ beforeEach(() => {
 });
 
 describe('CourseScreen energy gates', () => {
+  it.each(['/course', '/course?topic=0'])('학습 전 에너지 잔량을 표시하고 충전 방법을 연다: %s', async entry => {
+    baseContext({ energy: 7, energyMax: 25 });
+    const { container } = await mount(entry);
+    const button = container.querySelector<HTMLButtonElement>('[aria-label="학습 에너지 7/25, 충전 방법 보기"]')!;
+    expect(button).toHaveTextContent('에너지 7/25');
+    expect(button).toHaveTextContent('충전 방법');
+    await act(async () => button.click());
+    expect(state.openShop).toHaveBeenCalledExactlyOnceWith('energy');
+    expect(state.spendEnergy).not.toHaveBeenCalled();
+    expect(state.spendPoints).not.toHaveBeenCalled();
+    expect(state.ctx.energy).toBe(7);
+    expect(state.ctx.points).toBe(1000);
+  });
+
   it('홈에서 추천 학습과 주제를 보여주고 자동 스크롤로 가리지 않는다', async () => {
     baseContext({
       courses: [

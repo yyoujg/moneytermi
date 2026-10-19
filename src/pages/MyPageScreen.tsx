@@ -22,7 +22,7 @@ const MENU_ITEMS = [
 ];
 
 const MyPageScreen = () => {
-  const { points, xp, knownWords, viewedIds, attendanceDates, myEmoji, updateMyEmoji } = useAppContext();
+  const { points, xp, knownWords, viewedIds, attendanceDates, myEmoji, updateMyEmoji, openShop } = useAppContext();
   const streak = calcStreak(attendanceDates);
   const badges = buildBadges({ words: knownWords.length, streak, xp });
 
@@ -67,20 +67,24 @@ const MyPageScreen = () => {
         />
 
         <Card pad="lg" className="my-page-stats anim-fade-up">
-          <div className="grid grid-cols-2 gap-x-6 gap-y-5">
+          <div className="my-page-stats-grid">
             {[
               { label: '살펴본 용어', value: viewedIds.size.toLocaleString(), unit: '개', icon: <WordsIcon size={16} /> },
               { label: '연속 학습', value: streak.toLocaleString(), unit: '일', icon: <StreakIcon size={16} /> },
               { label: '경험치', value: xp.toLocaleString(), unit: 'XP', icon: <XpIcon size={16} /> },
               { label: '조개', value: points.toLocaleString(), unit: '개', icon: <PointIcon size={18} /> },
-            ].map(it => (
-              <div key={it.label} className="min-w-0">
-                <p className="flex min-h-[18px] items-center gap-1.5 text-xs font-medium text-[var(--color-ink-3)]">{it.icon}{it.label}</p>
-                <p className="mt-1.5! text-2xl font-semibold leading-tight tabular-nums text-[var(--color-ink)]">
-                  {it.value}<span className="ml-1 text-xs font-medium text-[var(--color-ink-3)]">{it.unit}</span>
-                </p>
-              </div>
-            ))}
+            ].map(it => {
+              const isShop = it.label === '조개';
+              // 긴 값은 열 전체를 사용한다. 숫자를 줄이거나 반올림하지 않는다.
+              const className = `my-page-stat${it.value.length > 7 ? ' is-wide' : ''}${isShop ? ' my-page-shop-entry' : ''}`;
+              const contents = <>
+                <span className="my-page-stat-label">{it.icon}{it.label}{isShop && <span className="my-page-shop-link">상점<ChevronRight size={14} aria-hidden="true" /></span>}</span>
+                <span className="my-page-stat-value"><span data-stat-number>{it.value}</span><span className="my-page-stat-unit">{it.unit}</span></span>
+              </>;
+              return isShop
+                ? <button key={it.label} type="button" className={className} aria-label={`보유 조개 ${it.value}개, 상점 열기`} onClick={() => openShop()}>{contents}</button>
+                : <div key={it.label} className={className}>{contents}</div>;
+            })}
           </div>
         </Card>
 

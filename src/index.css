@@ -455,6 +455,16 @@ svg:is(.text-brand-300, .text-brand-400, .text-brand-500, .text-brand-600, .text
   border-color: var(--color-line);
   background: var(--color-card);
 }
+.my-page-stats-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 24px; }
+.my-page-stat { min-width: 0; text-align: left; }
+.my-page-stat.is-wide { grid-column: 1 / -1; }
+.my-page-stat-label { display: flex; min-height: 18px; align-items: center; gap: 6px; color: var(--color-ink-3); font-size: 12px; font-weight: 500; }
+.my-page-stat-value { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px; margin-top: 6px; color: var(--color-ink); font-size: 24px; font-weight: 600; line-height: 1.25; font-variant-numeric: tabular-nums; }
+.my-page-stat-value [data-stat-number] { white-space: nowrap; overflow-wrap: normal; word-break: normal; }
+.my-page-stat-unit { color: var(--color-ink-3); font-size: 12px; font-weight: 500; }
+button.my-page-shop-entry { min-height: var(--size-touch-min); border-radius: 8px; cursor: pointer; }
+button.my-page-shop-entry:active { opacity: 0.7; }
+.my-page-shop-link { display: inline-flex; align-items: center; gap: 2px; margin-left: auto; color: var(--color-ink-2); font-size: 11px; white-space: nowrap; }
 
 .badge-tone {
   --badge-bg: var(--color-brand-soft);
@@ -532,6 +542,11 @@ button.action-button svg { flex-shrink: 0; }
 /* 학습 홈: 한 개의 주요 학습과 간결한 도구, 넓은 주제 목록으로 정리한다. */
 .course-home-header { padding: 16px 20px 12px; }
 .course-home-header h1 { font-size: 26px; }
+button.course-energy-entry { display: flex; width: 100%; min-height: var(--size-touch-min); align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; padding: 10px 12px; border: 1px solid var(--color-line); border-radius: var(--shape-inset); background: var(--color-card); color: var(--color-ink-2); font-size: 13px; text-align: left; cursor: pointer; }
+.course-energy-entry > span { display: inline-flex; align-items: center; gap: 6px; }
+.course-energy-entry strong { font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.course-energy-action { flex-shrink: 0; color: var(--color-ink-3); font-size: 12px; }
+button.course-energy-entry:active { background: var(--color-surface); }
 .course-home-hero {
   margin: 0 20px;
   padding: 20px;
