@@ -320,6 +320,25 @@ export type Database = {
           capped?: boolean;   // migration_economy_hardening_2 이후
         };
       };
+      submit_quiz_answer_once: {
+        Args: {
+          p_word_id: number;
+          p_answer: string;
+          p_mode: 'mc' | 'typed';
+          p_used_hint: boolean;
+          p_session_start: boolean;
+          p_request_id: string;
+        };
+        Returns: {
+          correct: boolean;
+          earned: number;
+          combo: number;
+          points: number;
+          xp: number;
+          m3_current: number;
+          capped: boolean;
+        };
+      };
       spend_points: {
         Args: {
           p_amount: number;

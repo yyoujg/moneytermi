@@ -1,0 +1,47 @@
+{
+  "verifiedAt": "2026-10-19T00:15:38.003Z",
+  "allWordsMatch": true,
+  "targetWordsMatched": 242,
+  "nonTargetWordsUnchanged": 991,
+  "totalWords": 1233,
+  "quizzes": 401,
+  "repeatedDefinitionExamples": 0,
+  "protectedData": {
+    "courses": 78,
+    "course_words": 1234
+  },
+  "contentSummary": {
+    "originalWordCount": 1233,
+    "proposedWordCount": 1233,
+    "changedWordCount": 242,
+    "changedFieldCount": 306,
+    "changedFields": {
+      "meaning": 19,
+      "detailed_meaning": 27,
+      "learning_example": 210,
+      "news_example": 10,
+      "visuals": 40
+    },
+    "verifiedFieldProposals": 25,
+    "verifiedExamplesApplied": 188,
+    "nonQuizVisualProposalsApplied": 45,
+    "manualSupplementWordCount": 10,
+    "quizBefore": 401,
+    "quizAfter": 401,
+    "quizEditsApplied": 2,
+    "changedNonQuizCards": 48,
+    "allChecksPassed": true
+  },
+  "serverCiRun": "https://github.com/yyoujg/moneytermi/actions/runs/39176191198",
+  "serverPublicAccess": {
+    "capturedAt": "2026-10-19T00:10:41.080Z",
+    "endpointRegistered": true,
+    "noProfileDenied": true,
+    "directReceiptDenied": true,
+    "rpcStatus": 403,
+    "rpcErrorCode": "28000",
+    "receiptStatus": 401,
+    "receiptErrorCode": "42501",
+    "denialInterpretation": "접근 거부 상태 401 또는 403과 SQLSTATE 28000으로 프로필 없는 요청 차단을 판정"
+  }
+}

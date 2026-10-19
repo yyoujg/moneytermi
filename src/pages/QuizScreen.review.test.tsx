@@ -8,6 +8,8 @@ import HomeScreen from './HomeScreen';
 import { LeagueRules } from '../components/LeagueRules';
 import { MISSION_XP } from '../constants';
 import { logClick } from '../lib/analytics';
+import { shouldScheduleRetry } from '../lib/review';
+import type { QuizAnswerResult } from '../lib/quizSubmission';
 
 const state = vi.hoisted(() => ({
   claimReward: vi.fn(),
@@ -60,7 +62,7 @@ vi.mock('../lib/feedback', () => ({
 }));
 vi.mock('../lib/review', async importOriginal => {
   const actual = await importOriginal<typeof import('../lib/review')>();
-  return { ...actual };
+  return { ...actual, shouldScheduleRetry: vi.fn(actual.shouldScheduleRetry) };
 });
 vi.mock('../lib/analytics', () => ({ logClick: vi.fn() }));
 vi.mock('../lib/share', () => ({ shareTossLink: (...args: unknown[]) => state.shareTossLink(...args) }));
@@ -117,10 +119,13 @@ const mount = async (extraState: Record<string, unknown> = {}, screen: ReactNode
   return { container, click, choose };
 };
 
+const quizResult = (overrides: Partial<QuizAnswerResult> = {}): QuizAnswerResult => ({ correct: true, combo: 1, earned: 0, capped: false, points: 0, xp: 0, m3Current: 0, ...overrides });
+
 beforeEach(() => {
+  vi.clearAllMocks();
   state.claimReward = vi.fn(() => Promise.resolve({ xpGained: MISSION_XP }));
-  state.recordReview = vi.fn(() => Promise.resolve());
-  state.submitQuizAnswer = vi.fn(() => Promise.resolve({ combo: 1, earned: 0, capped: false }));
+  state.recordReview = vi.fn(() => Promise.resolve(true));
+  state.submitQuizAnswer = vi.fn((id: number, answer: string) => Promise.resolve(quizResult({ correct: answer === `용어${id}`, combo: answer === `용어${id}` ? 1 : 0 })));
   state.refreshWallet = vi.fn(() => Promise.resolve());
   state.shareTossLink = vi.fn(() => Promise.resolve());
 });
@@ -202,13 +207,13 @@ describe('QuizScreen review SRS', () => {
 
 describe('조개 표시와 보상 값 유지', () => {
   it.each([3, 4])('%i연속의 고정 보너스는 조개 5개이고 서버 보상 값은 그대로 표시한다', async combo => {
-    state.submitQuizAnswer.mockResolvedValue({ combo, earned: 15, capped: false });
+    state.submitQuizAnswer.mockResolvedValue(quizResult({ combo, earned: 15 }));
     const { container, click } = await mount();
     await click('용어1');
     expect(container.textContent).toContain(combo + '연속! 조개 5개 보너스');
     expect(container.querySelector('.anim-reward-rise')).toHaveTextContent('+15개');
     expect(container.querySelector('.quiz-feedback-sheet')).toHaveTextContent('+15개');
-    expect(state.submitQuizAnswer).toHaveBeenCalledWith(1, '용어1', 'mc', false, true);
+    expect(state.submitQuizAnswer).toHaveBeenCalledWith(1, '용어1', 'mc', false, true, expect.any(String));
     await click('다음 문제');
     await click('용어2');
     await click('결과 보기');
@@ -216,7 +221,7 @@ describe('조개 표시와 보상 값 유지', () => {
   });
 
   it('5연속 배수 보너스와 보상 한도 조건을 유지한다', async () => {
-    state.submitQuizAnswer.mockResolvedValue({ combo: 5, earned: 0, capped: true });
+    state.submitQuizAnswer.mockResolvedValue(quizResult({ combo: 5, capped: true }));
     const { container, click } = await mount();
     await click('용어1');
     expect(container.textContent).toContain('5연속! x2 보너스');
@@ -256,7 +261,7 @@ describe('선택 후 정답 확인과 답안 전송 순서', () => {
     await choose('용어1');
     expect(state.submitQuizAnswer).not.toHaveBeenCalled();
     await click('정답 확인');
-    expect(state.submitQuizAnswer).toHaveBeenCalledWith(1, '용어1', 'mc', false, true);
+    expect(state.submitQuizAnswer).toHaveBeenCalledWith(1, '용어1', 'mc', false, true, expect.any(String));
     expect(state.submitQuizAnswer).toHaveBeenCalledTimes(1);
   });
   it('오답 뒤에도 모든 보기를 보존하고 정답과 내 답을 구분한다', async () => {
@@ -269,25 +274,42 @@ describe('선택 후 정답 확인과 답안 전송 순서', () => {
     expect(options.find(option => option.textContent?.includes('오답'))).toHaveTextContent('내 답');
   });
   it('서버 답안을 기다리는 동안 다음 문제와 중복 제출을 막는다', async () => {
-    let resolve!: (value: { combo: number; earned: number; capped: boolean }) => void;
+    let resolve!: (value: QuizAnswerResult) => void;
     state.submitQuizAnswer.mockImplementationOnce(() => new Promise(done => { resolve = done; }));
     const { container, click } = await mount();
     await click('용어1');
     const next = [...container.querySelectorAll<HTMLButtonElement>('button')].find(button => button.textContent === '답안 확인 중...')!;
     expect(next).toBeDisabled();
+    expect(state.recordReview).not.toHaveBeenCalled();
+    expect(shouldScheduleRetry).not.toHaveBeenCalled();
+    expect(vi.mocked(logClick).mock.calls.filter(([event]) => event === 'quiz_answer' || event === 'quiz_complete')).toEqual([]);
+    expect(container.querySelector('.quiz-answer-feedback')).toBeNull();
+    expect(container.querySelector('.anim-reward-rise')).toBeNull();
+    expect([...container.querySelectorAll<HTMLButtonElement>('.quiz-option')].every(option => option.disabled)).toBe(true);
     await act(async () => { next.click(); });
     expect(container).toHaveTextContent('뜻1');
     expect(state.submitQuizAnswer).toHaveBeenCalledTimes(1);
-    await act(async () => { resolve({ combo: 1, earned: 10, capped: false }); });
+    await act(async () => { resolve(quizResult({ combo: 1, earned: 10 })); });
     await click('다음 문제');
     expect(container).toHaveTextContent('뜻2');
   });
-  it('전송 오류에 보상을 만들어내지 않고 안내 후 이동할 수 있다', async () => {
+  it('전송 오류에 보상을 만들어내지 않고 같은 답안으로 재시도한다', async () => {
     state.submitQuizAnswer.mockRejectedValueOnce(new Error('연결 끊김'));
     const { container, click } = await mount();
     await click('용어1');
     expect(container.querySelector('[role="alert"]')).toHaveTextContent('답안 전송을 확인하지 못했어요.');
     expect(container).not.toHaveTextContent('+10개');
+    expect(container).toHaveTextContent('뜻1');
+    expect(state.recordReview).not.toHaveBeenCalled();
+    const first = [...state.submitQuizAnswer.mock.calls[0]];
+    expect(first).toEqual([1, '용어1', 'mc', false, true, expect.any(String)]);
+    expect(first[5]).not.toBe('');
+    expect([...container.querySelectorAll<HTMLButtonElement>('.quiz-option')].every(option => option.disabled)).toBe(true);
+    await act(async () => { container.querySelectorAll<HTMLButtonElement>('.quiz-option')[1].click(); });
+    expect(container.querySelector('[aria-pressed="true"]')).toHaveTextContent('용어1');
+    expect(state.submitQuizAnswer).toHaveBeenCalledTimes(1);
+    await click('다시 저장하기');
+    expect(state.submitQuizAnswer.mock.calls[1]).toEqual(first);
     await click('다음 문제');
     expect(container).toHaveTextContent('뜻2');
   });
@@ -320,7 +342,171 @@ describe('선택 정보와 문제 전환', () => {
     await click('용어1');
     expect(container.querySelector('[role="alert"]')).toHaveTextContent('답안 전송을 확인하지 못했어요.');
     expect(container.querySelector('.quiz-answer-reward')).toBeNull();
+    expect(state.recordReview).not.toHaveBeenCalled();
+    expect(container.querySelector('.quiz-confirm-footer button')).toHaveTextContent('다시 저장하기');
+    expect([...container.querySelectorAll<HTMLButtonElement>('.quiz-option')].every(button => button.disabled)).toBe(true);
+    const firstPayload = [...state.submitQuizAnswer.mock.calls[0]];
+    expect(firstPayload).toEqual([1, '용어1', 'mc', false, true, expect.any(String)]);
+    expect(firstPayload[5]).not.toBe('');
+    await act(async () => { container.querySelectorAll<HTMLButtonElement>('.quiz-option')[1].click(); });
+    expect(container.querySelector('[aria-pressed="true"]')).toHaveTextContent('용어1');
+    expect(state.submitQuizAnswer).toHaveBeenCalledTimes(1);
+    await click('다시 저장하기');
+    expect(state.submitQuizAnswer).toHaveBeenCalledTimes(2);
+    expect(state.submitQuizAnswer.mock.calls[1]).toEqual(firstPayload);
     await click('다음 문제');
     expect(container).toHaveTextContent('뜻2');
+  });
+});
+
+
+describe('서버 채점과 저장 확정 회귀', () => {
+  it('로컬 정답을 서버가 오답으로 채점하면 오답 복습·재출제·50%로 확정하고 오래된 정답은 숨긴다', async () => {
+    state.submitQuizAnswer.mockResolvedValueOnce(quizResult({ correct: false, combo: 0 }));
+    const { container, click } = await mount();
+    await click('용어1');
+    expect(state.recordReview).toHaveBeenNthCalledWith(1, 1, false, false);
+    expect(container.querySelector('[role="alert"]')).toHaveTextContent('문제 정보와 서버 채점이 달라 정답 표시를 생략했어요.');
+    expect(container.querySelector('.quiz-answer-feedback')).toHaveAttribute('data-correct', 'false');
+    expect(container.querySelector('.quiz-answer-result')).toBeNull();
+    expect(container.querySelector('.quiz-answer-explanation')).toBeNull();
+    for (const option of container.querySelectorAll('.quiz-option')) {
+      expect(option.className).not.toMatch(/success|danger|anim-choice-lock/);
+      expect(option.querySelector('svg')).toBeNull();
+      expect(option).not.toHaveTextContent('정답');
+    }
+    await click('다음 문제');
+    await click('용어2');
+    await click('다음 문제');
+    expect(container.querySelector('.quiz-prompt-main')).toHaveTextContent('뜻1');
+    await click('용어1');
+    await click('결과 보기');
+    expect(container.querySelector('[aria-label="퀴즈 결과 요약"]')).toHaveTextContent('50%');
+    expect(logClick).toHaveBeenCalledWith('quiz_complete', expect.objectContaining({ total: 2, correct: 1, attempts: 3 }));
+    expect(state.recordReview).toHaveBeenCalledTimes(2);
+  });
+
+  it('로컬 오답을 서버가 정답으로 채점하면 정답 복습·보상·100%로 확정하고 재출제하지 않는다', async () => {
+    state.submitQuizAnswer.mockResolvedValueOnce(quizResult({ correct: true, earned: 17, combo: 2 }));
+    const { container, click } = await mount();
+    await click('오답');
+    expect(state.recordReview).toHaveBeenNthCalledWith(1, 1, true, false);
+    expect(container.querySelector('.quiz-answer-feedback')).toHaveAttribute('data-correct', 'true');
+    expect(container.querySelector('.quiz-answer-reward')).toHaveTextContent('+17개');
+    expect(shouldScheduleRetry).not.toHaveBeenCalled();
+    expect(logClick).toHaveBeenCalledWith('quiz_answer', expect.objectContaining({ word_id: 1, correct: true, first_attempt: true }));
+    await click('다음 문제');
+    await click('용어2');
+    await click('결과 보기');
+    expect(container.querySelector('[aria-label="퀴즈 결과 요약"]')).toHaveTextContent('100%');
+    expect(container.querySelector('[aria-label="퀴즈 결과 요약"]')).toHaveTextContent('+17개');
+    expect(state.submitQuizAnswer).toHaveBeenCalledTimes(2);
+    expect(logClick).toHaveBeenCalledWith('quiz_complete', expect.objectContaining({ total: 2, correct: 2, attempts: 2 }));
+  });
+
+  it.each(['false', 'reject'] as const)('복습 저장 %s 뒤 성공하면 원격 영수증을 재사용하고 첫 오답을 그대로 저장한다', async failure => {
+    state.submitQuizAnswer.mockResolvedValueOnce(quizResult({ correct: false, combo: 0 }));
+    if (failure === 'false') state.recordReview.mockResolvedValueOnce(false);
+    else state.recordReview.mockRejectedValueOnce(new Error('복습 저장 실패'));
+    const { container, click } = await mount();
+    await click('오답');
+    const originalPayload = [...state.submitQuizAnswer.mock.calls[0]];
+    expect(originalPayload).toEqual([1, '오답', 'mc', false, true, expect.any(String)]);
+    expect(state.recordReview).toHaveBeenNthCalledWith(1, 1, false, false);
+    expect(container.querySelector('.quiz-confirm-footer button')).toHaveTextContent('다시 저장하기');
+    expect(container.querySelector('.quiz-answer-feedback')).toBeNull();
+    expect(shouldScheduleRetry).not.toHaveBeenCalled();
+    expect(vi.mocked(logClick).mock.calls.filter(([event]) => event === 'quiz_answer')).toEqual([]);
+    await act(async () => { container.querySelector<HTMLButtonElement>('.quiz-option')!.click(); });
+    expect(container.querySelector('[aria-pressed="true"]')).toHaveTextContent('오답');
+    await click('다시 저장하기');
+    expect(state.submitQuizAnswer).toHaveBeenCalledTimes(1);
+    expect(state.submitQuizAnswer.mock.calls[0]).toEqual(originalPayload);
+    expect(state.recordReview).toHaveBeenNthCalledWith(2, 1, false, false);
+    expect(container.querySelector('.quiz-answer-feedback')).toHaveAttribute('data-correct', 'false');
+    expect(shouldScheduleRetry).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(logClick).mock.calls.filter(([event]) => event === 'quiz_answer')).toHaveLength(1);
+    await click('다음 문제');
+    await click('용어2');
+    await click('다음 문제');
+    await click('용어1');
+    await click('결과 보기');
+    expect(container.querySelector('[aria-label="퀴즈 결과 요약"]')).toHaveTextContent('50%');
+    expect(state.recordReview.mock.calls.filter(([id]) => id === 1)).toEqual([[1, false, false], [1, false, false]]);
+  });
+
+  it('서버 영수증이 도착해도 복습 저장이 늦으면 다음 문제와 성과 확정을 막는다', async () => {
+    let finishReview!: (saved: boolean) => void;
+    state.recordReview.mockImplementationOnce(() => new Promise<boolean>(done => { finishReview = done; }));
+    const { container, click } = await mount();
+    await click('용어1');
+    expect(state.submitQuizAnswer).toHaveBeenCalledTimes(1);
+    expect(state.recordReview).toHaveBeenCalledWith(1, true, false);
+    const pending = container.querySelector<HTMLButtonElement>('.quiz-confirm-footer button')!;
+    expect(pending).toHaveTextContent('답안 확인 중...');
+    expect(pending).toBeDisabled();
+    expect(container.querySelector('.quiz-answer-feedback')).toBeNull();
+    expect(shouldScheduleRetry).not.toHaveBeenCalled();
+    expect(vi.mocked(logClick).mock.calls.filter(([event]) => event === 'quiz_answer')).toEqual([]);
+    await act(async () => { pending.click(); pending.click(); });
+    expect(container.querySelector('.quiz-prompt-main')).toHaveTextContent('뜻1');
+    expect(state.submitQuizAnswer).toHaveBeenCalledTimes(1);
+    expect(state.recordReview).toHaveBeenCalledTimes(1);
+    await act(async () => { finishReview(true); });
+    expect(container.querySelector('.quiz-answer-feedback')).toHaveAttribute('data-correct', 'true');
+    await click('다음 문제');
+    expect(container.querySelector('.quiz-prompt-main')).toHaveTextContent('뜻2');
+  });
+
+  it('다음 문제를 같은 순간 두 번 눌러도 미응답 문제를 건너뛰지 않는다', async () => {
+    const { container, click } = await mount({ quizQueue: [word(1), word(2), word(3)] });
+    for (const id of [1, 2]) {
+      await click('용어' + id);
+      const next = [...container.querySelectorAll<HTMLButtonElement>('button')].find(button => button.textContent === '다음 문제')!;
+      await act(async () => {
+        next.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        next.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      });
+      expect(container.querySelector('.quiz-prompt-main')).toHaveTextContent('뜻' + (id + 1));
+      expect(container.querySelector('.quiz-confirm-footer button')).toBeDisabled();
+      expect(state.submitQuizAnswer).toHaveBeenCalledTimes(id);
+    }
+    await click('용어3');
+    await click('결과 보기');
+    expect(container.querySelector('[aria-label="퀴즈 결과 요약"]')).toHaveTextContent('100%');
+    expect(logClick).toHaveBeenCalledWith('quiz_complete', expect.objectContaining({ total: 3, correct: 3, attempts: 3 }));
+  });
+
+  it('다른 문제와 같은 단어 재출제에는 각각 새로운 요청 식별자를 발급한다', async () => {
+    const { click } = await mount();
+    await click('오답');
+    await click('다음 문제');
+    await click('용어2');
+    await click('다음 문제');
+    await click('용어1');
+    expect(state.submitQuizAnswer.mock.calls).toEqual([
+      [1, '오답', 'mc', false, true, expect.any(String)],
+      [2, '용어2', 'mc', false, false, expect.any(String)],
+      [1, '용어1', 'mc', false, false, expect.any(String)],
+    ]);
+    const ids = state.submitQuizAnswer.mock.calls.map(call => call[5]);
+    expect(ids.every(id => typeof id === 'string' && id.length > 0)).toBe(true);
+    expect(new Set(ids).size).toBe(3);
+  });
+});
+
+
+describe('작은 화면 저장 실패 안내', () => {
+  it('안내 영역이 커져도 선택한 답을 가리지 않도록 읽기 위치를 맞춘다', async () => {
+    state.submitQuizAnswer.mockResolvedValueOnce(null);
+    const { container, choose, click } = await mount();
+    await choose('용어1');
+    const selected = container.querySelector<HTMLButtonElement>('.quiz-option[aria-pressed="true"]')!;
+    const scrollIntoView = vi.fn();
+    selected.scrollIntoView = scrollIntoView;
+    await click('정답 확인');
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest' });
+    expect(container.querySelector('.quiz-selection-guide')).toHaveTextContent('선택한 답안 그대로 다시 저장할 수 있어요.');
+    expect(container.querySelector('.quiz-confirm-footer button')).toHaveTextContent('다시 저장하기');
   });
 });

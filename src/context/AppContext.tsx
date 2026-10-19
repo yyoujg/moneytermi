@@ -16,6 +16,7 @@ import { addEnergyState, fillEnergyState, nextEnergyAt as calcNextEnergyAt, norm
 import { runEnergyRefill, type EnergyRefillResult } from '../lib/energyRefill';
 import { nextReviewDateFromRows, selectDueReviewWords, selectRecallWords, type ReviewProgressRow } from '../lib/review';
 import { buildCourseContent } from '../lib/courseContent';
+import { createQuizRequestId, parseQuizAnswerResult, withStudyRequestTimeout, type QuizAnswerResult } from '../lib/quizSubmission';
 
 type WpRow = ReviewProgressRow & { ease: number; interval_d: number; reps: number; due_date: string };
 type ShopReason = 'lesson' | 'energy';
@@ -56,8 +57,8 @@ type AppContextValue = {
   claimPromotionReward: (amount: number) => Promise<number | null>;
   submitQuizAnswer: (
     wordId: number, answer: string, mode: 'mc' | 'typed',
-    usedHint: boolean, sessionStart: boolean,
-  ) => Promise<{ correct: boolean; earned: number; combo: number; points: number; m3Current: number; capped: boolean } | null>;
+    usedHint: boolean, sessionStart: boolean, requestId?: string,
+  ) => Promise<QuizAnswerResult | null>;
   toggleKnown: (word: Word) => void;
   attendanceDates: string[];
   checkIn: () => Promise<void>;
@@ -66,7 +67,7 @@ type AppContextValue = {
   dueQueue: Word[];
   nextReviewDate: string | null;
   pickRecallWords: (options?: { candidates?: Word[]; excludeIds?: Iterable<number>; count?: number }) => Word[];
-  recordReview: (wordId: number, correct: boolean, usedHint: boolean) => Promise<void>;
+  recordReview: (wordId: number, correct: boolean, usedHint: boolean) => Promise<boolean>;
   myEmoji: string;
   updateMyEmoji: (emoji: string) => Promise<void>;
   // 자동 수령한 미션 보상 축하 대기열. 학습 화면 중엔 Layout이 보류했다가 나가면 보여준다
@@ -456,32 +457,37 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     else await refreshWallet();   // 출석 +3 XP(하루 1회)·m1 서버 진행도 반영
   };
 
+  // 예약된 작업도 최신 사용자와 지갑 갱신 함수를 사용한다.
+  const checkInRef = useRef(checkIn);
+  useEffect(() => { checkInRef.current = checkIn; });
+
   // ── 앱 진입 시 자동 출석 (세션 1회 래치) ──────────────────────
   useEffect(() => {
     if (!ready || !profileIdRef.current || autoCheckedRef.current) return;
     autoCheckedRef.current = true;
     // 출석은 서버가 하루 1회로 막지만 m1 미션은 8시간 슬롯마다 다시 채워야 하므로 매번 부른다.
     if (!attendanceDates.includes(toDateStr(new Date()))) logClick('checkin_auto');
-    checkIn();
-  }, [ready]);
+    void checkInRef.current();
+  }, [ready, attendanceDates]);
 
   // ── 8시간마다 미션 초기화 (KST 0/8/16시) ──────────────────────
   useEffect(() => {
     if (!ready) return;
 
+    let stopped = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
     const scheduleReset = () => {
-      const t = setTimeout(() => {
+      timer = setTimeout(() => {
+        if (stopped) return;
         lastMissionDate.current = `${toDateStr(new Date())}#${missionSlot()}`;
         setMissions(missionBaseRef.current);
-        checkIn();
+        void checkInRef.current();
         scheduleReset();
       }, msUntilNextSlot() + 1000);
-
-      return t;
     };
 
-    const t = scheduleReset();
-    return () => clearTimeout(t);
+    scheduleReset();
+    return () => { stopped = true; if (timer !== undefined) clearTimeout(timer); };
   }, [ready]);
 
   // ── toggleKnown ───────────────────────────────────────────────
@@ -622,20 +628,27 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   // ── submitQuizAnswer — 서버 채점 (포인트·콤보·m3 서버 소유) ────
   const submitQuizAnswer = async (
     wordId: number, answer: string, mode: 'mc' | 'typed',
-    usedHint: boolean, sessionStart: boolean,
-  ) => {
-    const { data, error } = await dbRef.current.rpc('submit_quiz_answer', {
-      p_word_id: wordId, p_answer: answer, p_mode: mode,
-      p_used_hint: usedHint, p_session_start: sessionStart,
-    });
-    if (error || !data) { console.error('[submitQuizAnswer] 실패:', error); return null; }
-    setPoints(data.points);
-    if (typeof data.xp === 'number') setXp(data.xp);
-    setMissions(prev => ({ ...prev, m3: { ...prev.m3, current: data.m3_current } }));
-    return {
-      correct: data.correct, earned: data.earned, combo: data.combo,
-      points: data.points, m3Current: data.m3_current, capped: data.capped === true,
-    };
+    usedHint: boolean, sessionStart: boolean, requestId = createQuizRequestId(),
+  ): Promise<QuizAnswerResult | null> => {
+    const profileId = profileIdRef.current;
+    if (!profileId) return null;
+    const db = dbRef.current;
+    try {
+      const { data, error } = await withStudyRequestTimeout(signal => db.rpc('submit_quiz_answer_once', {
+        p_word_id: wordId, p_answer: answer, p_mode: mode,
+        p_used_hint: usedHint, p_session_start: sessionStart, p_request_id: requestId,
+      }).abortSignal(signal));
+      const result = error ? null : parseQuizAnswerResult(data);
+      if (!result) { console.error('[submitQuizAnswer] 저장 확인 실패:', error); return null; }
+      if (profileIdRef.current !== profileId) return null;
+      setPoints(result.points);
+      setXp(result.xp);
+      setMissions(prev => ({ ...prev, m3: { ...prev.m3, current: result.m3Current } }));
+      return result;
+    } catch (error) {
+      console.error('[submitQuizAnswer] 저장 확인 실패:', error);
+      return null;
+    }
   };
 
   // ── 상점 — 부스트 구매 (서버가 차감·검증) ──────────────────────
@@ -707,27 +720,31 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     }), [knownWords, knownIds, wpRows, courses]);
 
   // ── recordReview — SRS 일정만 갱신 (포인트는 submitQuizAnswer가 담당) ─
-  const recordReview = async (wordId: number, correct: boolean, usedHint: boolean) => {
+  const recordReview = async (wordId: number, correct: boolean, usedHint: boolean): Promise<boolean> => {
+    const profileId = profileIdRef.current;
+    if (!profileId) return false;
     const existing = wpRows.find(r => r.word_id === wordId);
     const base = existing ?? { ease: 2.5, interval_d: 0, reps: 0 };
     const grade = gradeFromResult(correct, usedHint);
     const ns = nextSrs(base, grade);
     const due = addDays(new Date(), ns.interval_d);
-
-    setWpRows(prev => [
-      ...prev.filter(r => r.word_id !== wordId),
-      { word_id: wordId, ease: ns.ease, interval_d: ns.interval_d, reps: ns.reps, due_date: due, status: correct ? 'known' : 'unknown', last_grade: grade },
-    ]);
-
-    const profileId = profileIdRef.current;
-    if (!profileId) return;
-    const { error } = await dbRef.current.from('word_progress').upsert({
-      user_id: profileId, word_id: wordId,
-      status: correct ? 'known' : 'unknown',
-      ease: ns.ease, interval_d: ns.interval_d, reps: ns.reps,
-      due_date: due, last_grade: grade,
-    }, { onConflict: 'user_id,word_id' });
-    if (error) console.error('[recordReview] word_progress 저장 실패:', error);
+    const progress = {
+      word_id: wordId, ease: ns.ease, interval_d: ns.interval_d, reps: ns.reps,
+      due_date: due, status: correct ? 'known' : 'unknown', last_grade: grade,
+    } satisfies WpRow;
+    const db = dbRef.current;
+    try {
+      const { error } = await withStudyRequestTimeout(signal => db.from('word_progress').upsert({
+        user_id: profileId, ...progress,
+      }, { onConflict: 'user_id,word_id' }).abortSignal(signal));
+      if (error) { console.error('[recordReview] word_progress 저장 실패:', error); return false; }
+      if (profileIdRef.current !== profileId) return false;
+      setWpRows(prev => [...prev.filter(r => r.word_id !== wordId), progress]);
+      return true;
+    } catch (error) {
+      console.error('[recordReview] word_progress 저장 실패:', error);
+      return false;
+    }
   };
 
   return (

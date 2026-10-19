@@ -24,6 +24,7 @@ import { PraiseNote } from '../components/PraiseNote';
 import { praiseForAnswer, praiseForQuiz } from '../lib/praise';
 import { keepShortUnitsTogether } from '../lib/formatText';
 import { QuizAnswerFeedback } from '../components/learning/QuizAnswerFeedback';
+import { createQuizRequestId, type QuizAnswerResult } from '../lib/quizSubmission';
 
 // 결과의 장식 아이콘은 숫자와 분리하고 항목명 왼쪽에 같은 규격으로 둔다.
 const resultIconProps = { size: 18, strokeWidth: 1.8, className: 'quiz-result-icon', 'aria-hidden': true } as const;
@@ -75,7 +76,7 @@ const QuizScreen = () => {
     setRandomQueue(current => current.length > 0 ? current : takeShuffled(knownWords, 10));
   }, [passedQueue.length, knownWords]);
   const baseQueue: Word[] = passedQueue.length > 0 ? passedQueue : randomQueue;
-  // 틀린 문제는 끝에 다시 붙인다 — 전부 맞힐 때까지 끝나지 않고, 그 전엔 노드도 완료되지 않는다
+  // 오답은 다른 문제 뒤에 재출제한다. 마지막 문제는 무한 반복하지 않는다.
   const [retryQueue, setRetryQueue] = useState<Word[]>([]);
   const quizQueue: Word[] = [...baseQueue, ...retryQueue];
 
@@ -89,6 +90,10 @@ const QuizScreen = () => {
   const [answerPending, setAnswerPending] = useState(false);
   const [submissionMessage, setSubmissionMessage] = useState<string | null>(null);
   const answerLock = useRef(false);
+  const attemptRef = useRef<{ requestId: string; wordId: number; answer: string; receipt: QuizAnswerResult | null } | null>(null);
+  const [gradingConflict, setGradingConflict] = useState(false);
+  const mountedRef = useRef(true);
+  useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false; }; }, []);
   const questionHeadingRef = useRef<HTMLHeadingElement>(null);
   const questionContentRef = useRef<HTMLDivElement>(null);
   const [totalEarned, setTotalEarned] = useState(0);
@@ -139,9 +144,15 @@ const QuizScreen = () => {
 
   useEffect(() => {
     if (finished) return;
+    answerLock.current = false;
     if (questionContentRef.current) questionContentRef.current.scrollTop = 0;
     questionHeadingRef.current?.focus({ preventScroll: true });
   }, [currentWord?.id, currentQuizIndex, finished]);
+
+  useEffect(() => {
+    if (status !== 'idle' || answerPending || !submissionMessage) return;
+    questionContentRef.current?.querySelector<HTMLButtonElement>('.quiz-option[aria-pressed="true"]')?.scrollIntoView?.({ block: 'nearest' });
+  }, [status, answerPending, submissionMessage]);
 
   // 풀 문제가 없을 때(아는 단어 0개로 딥링크 진입 등). 완료 화면으로 보내면 "0문제 완료 🎉"가 뜬다.
   if (quizQueue.length === 0) {
@@ -230,7 +241,7 @@ const QuizScreen = () => {
     );
   }
 
-  // 진행률 = 맞힌 문제 / 원래 문제 수. 틀린 문제가 뒤에 붙어도 줄지 않는다(단어마다 정답은 한 번뿐이라 correctCount가 곧 끝낸 수)
+  // 서버에서 정답으로 확인한 횟수를 기준으로 표시하며 재출제로 분모가 늘어나지 않는다.
   const progressPercent = Math.min(100, (correctCount / baseQueue.length) * 100);
   const retrying = currentQuizIndex >= baseQueue.length;
 
@@ -239,53 +250,65 @@ const QuizScreen = () => {
     answerLock.current = true;
     setAnswerPending(true);
     setSubmissionMessage(null);
-    setSelected(option.answer);
     setLastEarned(0);
     setCapped(false);
-    const isCorrect = option.isCorrect;
-    const firstAttempt = currentQuizIndex < baseQueue.length;
-    logClick('quiz_answer', { mode, word_id: currentWord.id, correct: isCorrect, first_attempt: firstAttempt, node_id: navState?.nodeId ?? navState?.lessonId, course_id: navState?.courseId });
-    if (firstAttempt && isCorrect) setFirstCorrect(value => value + 1);
-    if (reviewMode && !reviewRecordedIds.current.has(currentWord.id)) {
-      reviewRecordedIds.current.add(currentWord.id);
-      void recordReview(currentWord.id, isCorrect, false);
-    }
-    if (isCorrect) {
-      feedbackCorrect(soundOn, vibrationOn, combo + 1);
-      setStatus('correct');
-      setCorrectCount(c => c + 1);
-    } else {
-      feedbackWrong();
-      setCombo(0);
-      setStatus('wrong');
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
-      if (shouldScheduleRetry(quizQueue, currentQuizIndex, currentWord.id)) setRetryQueue(q => [...q, currentWord]);
-    }
     try {
-      const res = await submitQuizAnswer(currentWord.id, option.answer, 'mc', false, currentQuizIndex === 0);
-      if (!res) setSubmissionMessage('답안 전송을 확인하지 못했어요. 보상은 서버 확인 후 반영돼요.');
-      if (isCorrect) {
-        const nextCombo = res ? res.combo : combo + 1;
-        setCombo(nextCombo);
-        setMaxCombo(m => Math.max(m, nextCombo));
-        if (res) {
-          setTotalEarned(t => t + res.earned);
-          setLastEarned(res.earned);
-          setCapped(res.capped);
-          if (res.earned > 0) setShowPointPop(true);
+      const attempt = attemptRef.current ?? {
+        requestId: createQuizRequestId(), wordId: currentWord.id, answer: option.answer, receipt: null,
+      };
+      attemptRef.current = attempt;
+      setSelected(attempt.answer);
+      const res = attempt.receipt ?? await submitQuizAnswer(attempt.wordId, attempt.answer, 'mc', false, currentQuizIndex === 0, attempt.requestId);
+      if (!mountedRef.current) return;
+      if (!res) {
+        setSubmissionMessage('답안 전송을 확인하지 못했어요. 같은 답안으로 다시 저장해 주세요.');
+        return;
+      }
+      attempt.receipt = res;
+      if (reviewMode && !reviewRecordedIds.current.has(attempt.wordId)) {
+        const saved = await recordReview(attempt.wordId, res.correct, false);
+        if (!mountedRef.current) return;
+        if (!saved) {
+          setSubmissionMessage('복습 일정 저장을 확인하지 못했어요. 같은 답안으로 다시 저장해 주세요.');
+          return;
         }
+        reviewRecordedIds.current.add(attempt.wordId);
+      }
+      const firstAttempt = currentQuizIndex < baseQueue.length;
+      logClick('quiz_answer', { mode, word_id: attempt.wordId, correct: res.correct, first_attempt: firstAttempt, node_id: navState?.nodeId ?? navState?.lessonId, course_id: navState?.courseId });
+      if (firstAttempt && res.correct) setFirstCorrect(value => value + 1);
+      setCombo(res.combo);
+      setMaxCombo(value => Math.max(value, res.combo));
+      setTotalEarned(value => value + res.earned);
+      setLastEarned(res.earned);
+      setCapped(res.capped);
+      if (res.earned > 0) setShowPointPop(true);
+      const conflict = res.correct !== option.isCorrect;
+      setGradingConflict(conflict);
+      if (conflict) setSubmissionMessage('문제 정보와 서버 채점이 달라 정답 표시를 생략했어요. 최신 학습 내용으로 다시 확인해 주세요.');
+      setStatus(res.correct ? 'correct' : 'wrong');
+      if (res.correct) {
+        feedbackCorrect(soundOn, vibrationOn, res.combo);
+        setCorrectCount(value => value + 1);
+      } else {
+        feedbackWrong();
+        setShake(true);
+        setTimeout(() => { if (mountedRef.current) setShake(false); }, 500);
+        if (shouldScheduleRetry(quizQueue, currentQuizIndex, attempt.wordId)) setRetryQueue(queue => [...queue, currentWord]);
       }
     } catch {
-      setSubmissionMessage('답안 전송을 확인하지 못했어요. 보상은 서버 확인 후 반영돼요.');
+      if (mountedRef.current) setSubmissionMessage('답안 전송을 확인하지 못했어요. 같은 답안으로 다시 저장해 주세요.');
     } finally {
       answerLock.current = false;
-      setAnswerPending(false);
+      if (mountedRef.current) setAnswerPending(false);
     }
   };
 
   const goNextQuestion = () => {
-    if (answerLock.current || answerPending) return;
+    if (answerLock.current || answerPending || status === 'idle') return;
+    answerLock.current = true;
+    attemptRef.current = null;
+    setGradingConflict(false);
     setCurrentQuizIndex(i => i + 1);
     setSelected(null);
     setStatus('idle');
@@ -299,7 +322,8 @@ const QuizScreen = () => {
   const streakMessage = combo >= 5 ? `${combo}연속! x2 보너스` : combo >= 3 ? `${combo}연속! 조개 5개 보너스` : null;
   const answeredCorrectly = status === 'correct';
   const correctOption = quizItem?.options.find(option => option.isCorrect);
-  const answerLabel = quizItem?.type === 'word_to_meaning' ? currentWord.meaning : correctOption?.label ?? currentWord.word;
+  const answerLabel = gradingConflict ? '' : quizItem?.type === 'word_to_meaning' ? currentWord.meaning : correctOption?.label ?? currentWord.word;
+  const showGrading = status !== 'idle' && !gradingConflict;
 
   return (
     <div className="quiz-screen app-soft-screen flex flex-col h-full">
@@ -343,7 +367,7 @@ const QuizScreen = () => {
 
         </div>
 
-        <p className="quiz-selection-guide">{status === 'idle' ? '답을 고른 뒤 정답 확인을 눌러주세요.' : '내 답과 정답을 비교해 보세요.'}</p>
+        <p className="quiz-selection-guide">{status === 'idle' ? answerPending ? '답안 저장을 확인하고 있어요.' : submissionMessage ? '선택한 답안 그대로 다시 저장할 수 있어요.' : '답을 고른 뒤 정답 확인을 눌러주세요.' : gradingConflict ? '서버 채점 결과로 기록했어요. 문제 정보를 다시 확인해 주세요.' : '내 답과 정답을 비교해 보세요.'}</p>
         {/* 객관식 선택지는 채점 뒤에도 숨기지 않는다. */}
         <div className="grid grid-cols-1 gap-2.5">
           {(quizItem?.options ?? []).map((opt, i) => {
@@ -351,15 +375,15 @@ const QuizScreen = () => {
             const isCorrectOption = opt.isCorrect;
             // 색은 배경·테두리·아이콘에만. 보기 글자는 어떤 상태에서도 진하게 둔다
             let optionStyle = 'bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink)] active:border-brand-300 active:bg-[var(--color-brand-soft)]';
-            if (status === 'idle' && isSelected) optionStyle = 'bg-[var(--color-surface)] border-[var(--color-ink-3)] text-[var(--color-ink)]';
-            if (status !== 'idle') {
+            if (!showGrading && isSelected) optionStyle = 'bg-[var(--color-surface)] border-[var(--color-ink-3)] text-[var(--color-ink)]';
+            if (showGrading) {
               optionStyle = isCorrectOption ? 'bg-[var(--color-success-soft)] border-success-500/55 text-[var(--color-ink)]'
                 : isSelected ? 'bg-[var(--color-card)] border-danger-300/50 text-[var(--color-ink)]'
                 : 'bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink-3)]';
             }
-            const tag = status === 'idle' ? (isSelected ? '선택' : null) : isCorrectOption ? '정답' : isSelected ? '내 답' : null;
-            const feedbackMotion = status !== 'idle' && (isCorrectOption || isSelected) ? 'anim-choice-lock' : '';
-            const markerClass = status === 'idle'
+            const tag = !showGrading ? (isSelected ? (status === 'idle' ? '선택' : '내 답') : null) : isCorrectOption ? '정답' : isSelected ? '내 답' : null;
+            const feedbackMotion = showGrading && (isCorrectOption || isSelected) ? 'anim-choice-lock' : '';
+            const markerClass = !showGrading
               ? isSelected ? 'bg-[var(--color-ink-2)] text-[var(--color-card)]' : 'border border-[var(--color-line-strong)] bg-[var(--color-card)] text-[var(--color-ink-3)]'
               : isCorrectOption
                 ? 'bg-[var(--color-success-foreground)] text-[var(--color-card)]'
@@ -370,18 +394,18 @@ const QuizScreen = () => {
             return (
               <button
                 key={`${i}-${opt.answer}`}
-                onClick={() => { if (status === 'idle' && !answerPending) setSelected(opt.answer); }}
+                onClick={() => { if (status === 'idle' && !answerPending && !submissionMessage) setSelected(opt.answer); }}
                 aria-pressed={isSelected}
-                disabled={status !== 'idle' || answerPending}
+                disabled={status !== 'idle' || answerPending || submissionMessage !== null}
                 className={`quiz-option anim-fade-up ${feedbackMotion} flex items-center gap-3 min-h-[64px] py-4 px-4 border text-base font-semibold leading-relaxed text-left break-keep transition-colors duration-150 ${optionStyle}`}
                 style={{ '--i': i + 1, borderRadius: 'var(--shape-button)' } as React.CSSProperties}
               >
                 <span className={`w-7 h-7 shrink-0 flex items-center justify-center text-xs font-semibold ${markerClass}`} style={{ borderRadius: 9999 }}>
-                  {status !== 'idle' && isCorrectOption ? <Check size={14} strokeWidth={3} /> : status !== 'idle' && isSelected ? <X size={14} strokeWidth={3} /> : i + 1}
+                  {showGrading && isCorrectOption ? <Check size={14} strokeWidth={3} /> : showGrading && isSelected ? <X size={14} strokeWidth={3} /> : i + 1}
                 </span>
                 <span className="min-w-0 flex-1">{keepShortUnitsTogether(opt.label)}</span>
                 {tag && (
-                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-2xs font-black ${status !== 'idle' && isCorrectOption ? 'bg-[var(--color-card)] text-[var(--color-success-foreground)]' : 'bg-[var(--color-surface)] text-[var(--color-ink-4)]'}`}>
+                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-2xs font-black ${showGrading && isCorrectOption ? 'bg-[var(--color-card)] text-[var(--color-success-foreground)]' : 'bg-[var(--color-surface)] text-[var(--color-ink-4)]'}`}>
                     {tag}
                   </span>
                 )}
@@ -393,12 +417,15 @@ const QuizScreen = () => {
       </div>
 
       {status === 'idle' ? (
-        <footer className="quiz-confirm-footer"><ActionButton fullWidth onClick={confirmAnswer} disabled={selected === null || answerPending}>정답 확인</ActionButton></footer>
+        <footer className="quiz-confirm-footer">
+          {submissionMessage && <p className="quiz-answer-network mb-3!" role="alert">{submissionMessage}</p>}
+          <ActionButton fullWidth onClick={confirmAnswer} disabled={selected === null || answerPending} aria-busy={answerPending}>{answerPending ? '답안 확인 중...' : submissionMessage ? '다시 저장하기' : '정답 확인'}</ActionButton>
+        </footer>
       ) : (
         <QuizAnswerFeedback key={currentQuizIndex}
-          correct={answeredCorrectly} title={answeredCorrectly ? praiseForAnswer(combo) : '정답을 확인해요'}
-          answerLabel={answerLabel} word={currentWord.word} meaning={currentWord.meaning}
-          explanation={quizItem?.explanation} example={currentWord.learningExample}
+          correct={answeredCorrectly} title={gradingConflict ? '서버 채점 결과를 반영했어요' : answeredCorrectly ? praiseForAnswer(combo) : '정답을 확인해요'}
+          answerLabel={answerLabel} word={currentWord.word} meaning={gradingConflict ? '' : currentWord.meaning}
+          explanation={gradingConflict ? undefined : quizItem?.explanation} example={gradingConflict ? undefined : currentWord.learningExample}
           pending={answerPending} submissionMessage={submissionMessage}
           earned={lastEarned} capped={capped} combo={combo}
           nextLabel={currentQuizIndex === quizQueue.length - 1 ? '결과 보기' : '다음 문제'} onNext={goNextQuestion}

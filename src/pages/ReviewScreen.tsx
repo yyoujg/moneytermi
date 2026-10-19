@@ -6,7 +6,7 @@ import { Spacing } from '@toss/tds-mobile';
 import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
 import { requestAppReview } from '../lib/review';
-import { answerMatches } from '../lib/answer';
+import { createQuizRequestId, type QuizAnswerResult } from '../lib/quizSubmission';
 import { logClick } from '../lib/analytics';
 import { maskTerm } from '../lib/quiz';
 import { feedbackCorrect, feedbackWrong, feedbackQuizComplete } from '../lib/feedback';
@@ -20,7 +20,16 @@ import { QuizProgressHeader } from '../components/learning/QuizProgressHeader';
 import { praiseForReview } from '../lib/praise';
 import { keepShortUnitsTogether } from '../lib/formatText';
 
-type Status = 'idle' | 'correct' | 'wrong';
+type Status = 'idle' | 'saving' | 'save-error' | 'correct' | 'wrong';
+
+type ReviewAttempt = Readonly<{
+  requestId: string;
+  wordId: number;
+  answer: string;
+  hint: boolean;
+  sessionStart: boolean;
+  receipt?: QuizAnswerResult;
+}>;
 
 const QuizPage = () => {
   const navigate = useNavigate();
@@ -32,7 +41,6 @@ const QuizPage = () => {
   const [initialTotal, setInitialTotal] = useState(0);
   useEffect(() => {
     if (!started && dueQueue.length > 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setQueue(shuffle(dueQueue));
       setInitialTotal(dueQueue.length);
       logClick('quiz_start', { mode: 'review', total: dueQueue.length });
@@ -51,6 +59,19 @@ const QuizPage = () => {
   const reviewRecordedIds = useRef<Set<number>>(new Set());
   const completedRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const retryRef = useRef<HTMLButtonElement>(null);
+  const attemptRef = useRef<ReviewAttempt | null>(null);
+  const submittingRef = useRef(false);
+  const nextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      if (nextTimerRef.current !== null) clearTimeout(nextTimerRef.current);
+    };
+  }, []);
 
   const word = queue[index];
   const isEmpty = !started && dueQueue.length === 0;
@@ -58,6 +79,7 @@ const QuizPage = () => {
 
   useEffect(() => {
     if (status === 'idle') inputRef.current?.focus();
+    if (status === 'save-error') retryRef.current?.focus();
   }, [index, status]);
 
   // 퀴즈 완료 시 앱 리뷰 요청 (플랫폼이 노출 제어)
@@ -72,6 +94,8 @@ const QuizPage = () => {
   }, [completed, queue.length, refreshWallet, totalCorrect, firstCorrect, initialTotal]);
 
   const goNext = () => {
+    nextTimerRef.current = null;
+    attemptRef.current = null;
     setIndex((i) => i + 1);
     setInput('');
     setStatus('idle');
@@ -79,40 +103,63 @@ const QuizPage = () => {
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (status !== 'idle' || !input.trim()) return;
-
-    // 즉시 피드백은 낙관적, 포인트·콤보·m3는 서버가 채점
-    // 괄호 약어·슬래시 항목도 정답 인정 (서버 answer_matches와 동일 규칙)
-    const isCorrect = answerMatches(input, word.word);
-    logClick('quiz_answer', { mode: 'review', word_id: word.id, correct: isCorrect, first_attempt: !reviewRecordedIds.current.has(word.id), used_hint: showHint });
-
-    // SRS 일정은 같은 세션의 단어별 첫 제출 결과로 한 번만 기록한다.
-    // 첫 오답 뒤 재정답을 별도 완전 성공으로 기록하면 간격이 과하게 늘 수 있다.
-    if (!reviewRecordedIds.current.has(word.id)) {
-      if (isCorrect) setFirstCorrect(value => value + 1);
-      reviewRecordedIds.current.add(word.id);
-      void recordReview(word.id, isCorrect, showHint);
+    e?.preventDefault();
+    // 상태 갱신 전 연속 클릭·엔터까지 같은 잠금으로 막는다.
+    if (submittingRef.current || !word || (status !== 'idle' && status !== 'save-error')) return;
+    if (!attemptRef.current) {
+      if (!input.trim()) return;
+      attemptRef.current = Object.freeze({
+        requestId: createQuizRequestId(),
+        wordId: word.id,
+        answer: input,
+        hint: showHint,
+        sessionStart: index === 0,
+      });
     }
+    submittingRef.current = true;
+    setStatus('saving');
 
-    if (isCorrect) {
-      feedbackCorrect(soundOn, vibrationOn, combo + 1);
-      setTotalCorrect((c) => c + 1);
-      setStatus('correct');
-      setLastEarned(0);
-      setCapped(false);
-      const res = await submitQuizAnswer(word.id, input, 'typed', showHint, index === 0);
-      if (res) { setCombo(res.combo); setLastEarned(res.earned); setCapped(res.capped); }
-      setTimeout(goNext, 900);
-    } else {
-      feedbackWrong();
-      setCombo(0);
-      setStatus('wrong');
-      if (shouldScheduleRetry(queue, index, word.id)) {
-        setQueue(q => [...q, word]);
+    try {
+      let attempt = attemptRef.current;
+      if (!attempt.receipt) {
+        const receipt = await submitQuizAnswer(
+          attempt.wordId, attempt.answer, 'typed', attempt.hint, attempt.sessionStart, attempt.requestId,
+        );
+        if (!mountedRef.current) return;
+        if (!receipt) throw new Error('답안 저장 미확인');
+        attempt = Object.freeze({ ...attempt, receipt });
+        attemptRef.current = attempt;
       }
-      setTimeout(goNext, 1000);
-      await submitQuizAnswer(word.id, input, 'typed', showHint, index === 0);   // 다음 정답 응답과 순서 보장
+      const receipt = attempt.receipt!;
+      const firstAttempt = !reviewRecordedIds.current.has(attempt.wordId);
+      // 서버 영수증을 보관하므로 SRS만 실패하면 채점·보상 없이 저장만 재시도한다.
+      if (firstAttempt) {
+        const saved = await recordReview(attempt.wordId, receipt.correct, attempt.hint);
+        if (!mountedRef.current) return;
+        if (saved !== true) throw new Error('복습 저장 미확인');
+        reviewRecordedIds.current.add(attempt.wordId);
+        if (receipt.correct) setFirstCorrect(value => value + 1);
+      }
+
+      logClick('quiz_answer', { mode: 'review', word_id: attempt.wordId, correct: receipt.correct, first_attempt: firstAttempt, used_hint: attempt.hint });
+      setCombo(receipt.combo);
+      setLastEarned(receipt.earned);
+      setCapped(receipt.capped);
+      if (receipt.correct) {
+        feedbackCorrect(soundOn, vibrationOn, receipt.combo);
+        setTotalCorrect(value => value + 1);
+        setStatus('correct');
+      } else {
+        feedbackWrong();
+        setStatus('wrong');
+        if (shouldScheduleRetry(queue, index, attempt.wordId)) setQueue(q => [...q, word]);
+      }
+      // 모든 저장이 확인된 시점부터 기존 피드백 시간을 보장한다.
+      nextTimerRef.current = setTimeout(goNext, receipt.correct ? 900 : 1000);
+    } catch {
+      if (mountedRef.current) setStatus('save-error');
+    } finally {
+      submittingRef.current = false;
     }
   };
 
@@ -182,7 +229,7 @@ const QuizPage = () => {
             <input
               ref={inputRef}
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => { if (!attemptRef.current && !submittingRef.current) setInput(e.target.value); }}
               placeholder="정답을 입력하세요"
               disabled={status !== 'idle'}
               autoComplete="off"
@@ -201,13 +248,17 @@ const QuizPage = () => {
             )}
           </div>
 
+          <p role="status" aria-live="polite" aria-atomic="true" className={status === 'save-error' || status === 'saving' ? 'text-xs text-[var(--color-ink-2)]' : 'sr-only'}>
+            {status === 'save-error' ? '답안 저장을 확인하지 못했어요. 같은 답안으로 다시 저장해 주세요.' : status === 'saving' ? '답안을 저장하고 있어요.' : ''}
+          </p>
           <button
+            ref={retryRef}
             type="button"
             onClick={() => handleSubmit()}
-            disabled={status !== 'idle' || !input.trim()}
+            disabled={(status !== 'idle' && status !== 'save-error') || !input.trim()}
             className="w-full py-4 rounded-button bg-brand-500 text-white text-xs font-bold active:opacity-90 disabled:opacity-100"
           >
-            제출하기
+            {status === 'save-error' ? '다시 저장하기' : status === 'saving' ? '저장 중' : '제출하기'}
           </button>
         </form>
 
@@ -217,14 +268,15 @@ const QuizPage = () => {
         <div className="flex gap-3">
           {!showHint && (
             <button
-              onClick={() => setShowHint(true)}
+              onClick={() => { if (status === 'idle' && !attemptRef.current && !submittingRef.current) setShowHint(true); }}
+              disabled={status !== 'idle'}
               className="action-secondary flex-1 flex items-center justify-center gap-1.5 py-3 rounded-button text-sm font-bold active:opacity-70"
             >
               <Lightbulb size={13} className="text-[var(--color-ink-4)]" /> 초성 힌트
             </button>
           )}
           <button
-            onClick={goNext}
+            onClick={() => { if (status === 'idle' && !attemptRef.current && !submittingRef.current) goNext(); }}
             disabled={status !== 'idle'}
             className="action-secondary flex-1 flex items-center justify-center gap-1.5 py-3 rounded-button text-sm font-bold active:opacity-70"
           >

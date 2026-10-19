@@ -21,8 +21,8 @@ export const QuizAnswerFeedback = ({ correct, title, answerLabel, word, meaning,
         </span>}
       </div>
       <div className="quiz-answer-content">
-        <div className="quiz-answer-result"><span>정답</span><strong>{keepShortUnitsTogether(answerLabel)}</strong></div>
-        {answerLabel !== word && <p className="quiz-answer-term">확인한 용어 · {word}</p>}
+        {answerLabel && <div className="quiz-answer-result"><span>정답</span><strong>{keepShortUnitsTogether(answerLabel)}</strong></div>}
+        {answerLabel && answerLabel !== word && <p className="quiz-answer-term">확인한 용어 · {word}</p>}
         {copy && <div className="quiz-answer-explanation"><h3>{explanation?.trim() ? '풀이' : '핵심 뜻'}</h3><p>{keepShortUnitsTogether(copy)}</p></div>}
         {exampleText && <details className="quiz-answer-example" onToggle={event => { if (event.currentTarget.open) event.currentTarget.scrollIntoView?.({ block: 'nearest' }); }}><summary>예시로 다시 보기{hypothetical && <span>학습용 가정</span>}</summary><p>{keepShortUnitsTogether(exampleText)}</p></details>}
         {submissionMessage && <p className="quiz-answer-network" role="alert">{submissionMessage}</p>}
