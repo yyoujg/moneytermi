@@ -16,7 +16,7 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
     <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>앱 설정</span>}>
       <div className="px-5 pb-6 flex flex-col gap-2">
         {/* 테마 */}
-        <Card tone="surface" pad="md">
+        <Card pad="md">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-9 h-9 rounded-chip bg-[var(--color-line)] flex items-center justify-center">
               <Moon size={16} className="text-[var(--color-ink-2)]" />
@@ -43,7 +43,7 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
         </Card>
 
         {/* 효과음 */}
-        <Card tone="surface" pad="md" className="flex items-center justify-between">
+        <Card pad="md" className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-chip bg-[var(--color-line)] flex items-center justify-center">
               {soundOn
@@ -60,7 +60,7 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
         </Card>
 
         {/* 배경음악 */}
-        <Card tone="surface" pad="md" className="flex items-center justify-between">
+        <Card pad="md" className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-chip bg-[var(--color-line)] flex items-center justify-center">
               <Music2 size={16} className={bgmOn ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-4)]'} />
@@ -74,7 +74,7 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
         </Card>
 
         {/* 진동 */}
-        <Card tone="surface" pad="md" className="flex items-center justify-between">
+        <Card pad="md" className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-chip bg-[var(--color-line)] flex items-center justify-center">
               <Vibrate size={16} className={vibrationOn ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-4)]'} />

@@ -193,8 +193,8 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
   background: var(--color-card);
 }
 .course-topic-summary {
-  border-color: var(--color-line);
-  background: var(--color-card);
+  border: 0;
+  background: var(--color-canvas);
 }
 .course-node-card {
   position: relative;
@@ -451,10 +451,6 @@ svg:is(.text-brand-300, .text-brand-400, .text-brand-500, .text-brand-600, .text
   position: relative;
   z-index: 1;
 }
-.my-page-stats {
-  border-color: var(--color-line);
-  background: var(--color-card);
-}
 .my-page-stats-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 24px; }
 .my-page-stat { min-width: 0; text-align: left; }
 .my-page-stat.is-wide { grid-column: 1 / -1; }
@@ -549,10 +545,9 @@ button.course-energy-entry { display: flex; width: 100%; min-height: var(--size-
 button.course-energy-entry:active { background: var(--color-surface); }
 .course-home-hero {
   margin: 0 20px;
-  padding: 20px;
+  padding: 4px 0;
   border: 0;
-  border-radius: var(--shape-card);
-  background: var(--color-card);
+  background: transparent;
 }
 .course-home-hero-heading { display: flex; align-items: center; gap: 16px; }
 .course-home-eyebrow { color: var(--color-ink-3); font-size: 12px; font-weight: 600; line-height: 1.5; }
@@ -582,7 +577,10 @@ button.course-home-primary {
 button.course-home-filter { flex-shrink: 0; min-height: var(--size-touch-min); padding: 10px 16px; border: 0; border-radius: 12px; color: var(--color-ink-3); font-size: 14px !important; font-weight: 500 !important; line-height: 22px !important; white-space: nowrap; }
 button.course-home-filter[aria-pressed='true'] { background: var(--color-selection-soft); color: var(--color-selection-ink); font-weight: 700 !important; }
 .course-home-topic-list { display: grid; gap: 12px; }
-button.course-home-topic { display: block; width: 100%; padding: 16px; border: 0; border-radius: 20px; background: var(--color-card); color: var(--color-ink); text-align: left; -webkit-tap-highlight-color: transparent; }
+button.course-home-topic { display: block; width: 100%; padding: 16px; border: 0; border-radius: 20px; background: transparent; color: var(--color-ink); text-align: left; -webkit-tap-highlight-color: transparent; }
+/* 이어서 볼 주제만 카드로 띄운다 */
+button.course-home-topic[data-current] { background: var(--color-card); }
+button.course-home-topic:not([data-current]) { padding-inline: 0; }
 button.course-home-topic:not(:disabled):active { background: var(--color-surface); }
 button.course-home-topic:focus-visible { outline-offset: -3px; }
 button.course-home-topic:disabled { cursor: default; opacity: 1; }
@@ -596,7 +594,6 @@ button.course-home-topic:disabled .course-home-topic-title { color: var(--color-
 .course-home-topic .course-home-progress-track { margin-top: 8px; height: 3px; }
 .course-home-topic .course-home-progress-track > span { background: var(--color-line-strong); }
 @media (max-width: 359px) {
-  .course-home-hero { padding: 18px; }
   .course-home-hero-title { font-size: 20px; }
   .course-home-hero-heading { gap: 10px; }
   .course-home-otter { width: 82px; height: 82px; }
@@ -713,7 +710,7 @@ button.action-button.word-term-card-link { min-height: var(--size-touch-min); ma
 .lesson-feedback-character { display: block; width: 96px; height: 96px; flex-shrink: 0; object-fit: contain; }
 .lesson-feedback-intro h1 { color: var(--color-ink); font-size: 24px; font-weight: 700; line-height: 1.4; letter-spacing: -0.02em; word-break: keep-all; overflow-wrap: anywhere; }
 .lesson-feedback-intro p { margin-top: 4px; color: var(--color-ink-3); font-size: 13px; line-height: 1.6; word-break: keep-all; }
-.lesson-feedback-card { padding: 20px; border: 1px solid var(--color-line); border-radius: var(--shape-card); background: var(--color-card); }
+.lesson-feedback-card { padding: 8px 0; }
 .lesson-feedback-label { color: var(--color-ink-3); font-size: 12px; font-weight: 600; line-height: 1.5; }
 .lesson-feedback-question { margin-top: 8px; color: var(--color-ink); font-size: 17px; font-weight: 650; line-height: 1.65; word-break: keep-all; overflow-wrap: anywhere; }
 .lesson-feedback-answer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 20px; padding: 16px; border-radius: var(--shape-inset); background: var(--color-surface); color: var(--color-ink); }
@@ -742,7 +739,7 @@ button.lesson-feedback-disclosure { display: flex; width: 100%; min-height: var(
 .lesson-complete-hero > img { display: block; margin: 0 auto 12px; }
 .lesson-complete-hero h1 { color: var(--color-ink); font-size: 26px; font-weight: 700; line-height: 1.4; letter-spacing: -0.025em; word-break: keep-all; }
 .lesson-complete-hero > p { max-width: 285px; margin: 8px auto 0; color: var(--color-ink-3); font-size: 14px; line-height: 1.65; word-break: keep-all; }
-.lesson-complete-summary { padding: 20px; border: 1px solid var(--color-line); border-radius: var(--shape-card); background: var(--color-card); }
+.lesson-complete-summary { padding: 8px 0; }
 .lesson-complete-summary-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
 .lesson-complete-summary-heading h2 { color: var(--color-ink-2); font-size: 13px; font-weight: 600; line-height: 1.5; }
 .lesson-complete-summary-heading > span { color: var(--color-ink-3); font-size: 12px; line-height: 1.5; }
@@ -757,7 +754,6 @@ button.lesson-feedback-disclosure { display: flex; width: 100%; min-height: var(
 /* 읽기 위치 안내를 위한 비대화형 제목 초점은 버튼 테두리로 표현하지 않는다. */
 :is(.lesson-feedback-intro, .lesson-complete-hero) h1:focus { outline: none; }
 @media (max-width: 359px) {
-  .lesson-feedback-card, .lesson-complete-summary { padding: 16px; }
   .lesson-feedback-character { width: 88px; height: 88px; }
   .lesson-feedback-intro h1 { font-size: 22px; }
   .lesson-complete-hero { padding-top: 4px; padding-bottom: 20px; }
@@ -780,14 +776,10 @@ button.lesson-feedback-disclosure { display: flex; width: 100%; min-height: var(
 @media (prefers-reduced-motion: reduce) { .lesson-feedback-disclosure > :is(svg, .otter-icon) { transition: none; } }
 
 /* 수달 그림과 흰 표면을 분리한다. 카드·버튼은 평평한 공통 그림자 토큰을 따른다. */
-:is(.app-card, .course-home-hero, .course-home-topic, .course-topic-summary, .course-node-card, .quiz-question-card, .lesson-feedback-card, .lesson-complete-summary, .word-term-panel, .app-nav-tray) {
+:is(.app-card[data-card-tone='card'], .course-home-topic, .course-node-card, .quiz-question-card, .word-term-panel, .app-nav-tray) {
   box-shadow: var(--shadow-card) !important;
 }
-.app-card { border-radius: var(--shape-card); }
-.app-card[data-card-tone='surface'] {
-  border-radius: var(--shape-inset);
-  box-shadow: none !important;
-}
+.app-card[data-card-tone='card'] { border-radius: var(--shape-card); }
 .app-card[role='button']:not([aria-disabled='true']):active,
 .course-node-card:not(:disabled):active {
   box-shadow: var(--shadow-card-pressed) !important;
@@ -858,6 +850,7 @@ button.mission-reward-status {
 .week-strip-empty-mark { width: 7px; height: 2px; border-radius: 1px; background: currentColor; }
 
 /* 리그 순위표: 숫자 순위·기존 수달·이름·경험치를 일정한 열로 정렬한다. */
+.league-ranking-list { margin-inline: -16px; }
 .league-ranking-row { display: grid; grid-template-columns: minmax(40px, max-content) 32px minmax(0, 1fr) auto; align-items: center; column-gap: 12px; min-height: 60px; padding: 12px 16px; }
 .league-ranking-row + .league-ranking-row { border-top: 1px solid var(--color-surface); }
 .league-ranking-row.is-me { background: var(--color-brand-soft); }
@@ -872,7 +865,6 @@ button.mission-reward-status {
 .league-rank-xp-unit { color: var(--color-ink-3); font-size: 11px; font-weight: 500; }
 /* 상위 세 명은 같은 카드 표면을 쓰고 작은 순위 표식과 글자 위계로 구분한다. */
 .league-ranking-row[data-podium] { min-height: 72px; }
-.league-ranking-row[data-podium]:not(.is-me) { background: var(--color-card); }
 .league-ranking-row[data-podium] .league-rank-name { font-size: 15px; font-weight: 700; }
 .league-ranking-row[data-podium] .league-rank-xp { font-size: 15px; }
 
@@ -901,15 +893,14 @@ button.nickname-clear { display: inline-flex; flex: 0 0 44px; width: 44px; heigh
 /* 홈: 인사는 배경 위에, 출석과 미션은 각각 독립된 흰 카드에 담는다. */
 .home-profile-line { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
 .home-profile-avatar { display: flex; width: 56px; height: 56px; flex-shrink: 0; align-items: center; justify-content: center; }
-.home-profile .week-strip { padding: 16px; border: 0; border-radius: var(--shape-card); background: var(--color-card); }
+.home-profile .week-strip { padding: 0; border: 0; }
 .home-mission-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .home-mission-heading > div { min-width: 0; flex: 1; }
 .home-mission-heading h2 { color: var(--color-ink); font-size: 22px; font-weight: 700; line-height: 1.4; }
 .home-mission-heading p { line-height: 1.6; }
 .home-mission-heading > span { margin-top: 8px; }
-.home-missions.app-card { padding: 0 16px; border: 0; }
-.home-mission-row { padding: 16px 0; }
-.home-mission-row + .home-mission-row { border-top: 1px solid var(--color-line); }
+.home-missions.app-card { padding: 0; }
+.home-mission-row { padding: 12px 0; }
 .home-mission-top { display: grid; grid-template-columns: 28px minmax(0, 1fr) 64px; align-items: center; gap: 10px; }
 .home-mission-icon { align-self: start; margin-top: 2px; }
 .home-mission-info { min-width: 0; }
@@ -934,20 +925,19 @@ button.nickname-clear { display: inline-flex; flex: 0 0 44px; width: 44px; heigh
 .review-complete-hero h1 { color: var(--color-ink); font-size: 26px; font-weight: 750; line-height: 1.4; letter-spacing: -0.035em; word-break: keep-all; }
 .review-complete-hero h1:focus { outline: none; }
 .review-complete-subtitle { margin-top: 8px; color: var(--color-ink-3); font-size: 14px; line-height: 1.6; word-break: keep-all; }
-.review-complete-summary, .review-complete-wallet { box-sizing: border-box; border: 1px solid var(--color-line); border-radius: var(--shape-card); background: var(--color-card); }
-.review-complete-summary { padding: 18px 20px; }
+.review-complete-summary, .review-complete-wallet { box-sizing: border-box; }
+.review-complete-summary { padding: 8px 0; }
 .review-complete-summary-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .review-complete-summary-heading h2 { color: var(--color-ink-2); font-size: 14px; font-weight: 650; line-height: 1.6; }
-.review-complete-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 16px; }
+.review-complete-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 16px; }
 .review-complete-stats > div { min-width: 0; }
-.review-complete-stats > div + div { padding-left: 22px; border-left: 1px solid var(--color-line); }
 .review-complete-stats dt { color: var(--color-ink-3); font-size: 12px; line-height: 1.6; }
 .review-complete-stats dd { display: flex; align-items: baseline; flex-wrap: wrap; gap: 5px; margin-top: 5px; color: var(--color-ink-3); font-size: 13px; line-height: 1.5; font-variant-numeric: tabular-nums; }
 .review-complete-stats dd strong { color: var(--color-ink); font-size: 34px; font-weight: 750; line-height: 1.2; letter-spacing: -0.03em; overflow-wrap: anywhere; }
 .review-complete-note { display: flex; align-items: flex-start; gap: 10px; margin-top: 18px; padding-top: 15px; border-top: 1px solid var(--color-line); }
 .review-complete-note > img { flex-shrink: 0; }
 .review-complete-note p { color: var(--color-ink-2); font-size: 13px; line-height: 1.7; word-break: keep-all; overflow-wrap: anywhere; }
-.review-complete-wallet { display: flex; align-items: center; gap: 10px; padding: 16px; }
+.review-complete-wallet { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
 .review-complete-wallet-label { flex: 1; min-width: 0; }
 .review-complete-wallet-label h2 { color: var(--color-ink-2); font-size: 13px; font-weight: 650; line-height: 1.6; }
 .review-complete-wallet-label > p { margin-top: 2px; color: var(--color-ink-3); font-size: 11px; line-height: 1.6; word-break: keep-all; }
@@ -960,7 +950,6 @@ button.nickname-clear { display: inline-flex; flex: 0 0 44px; width: 44px; heigh
   .review-complete-content { padding: 20px 16px 12px; gap: 14px; }
   .review-complete-hero h1 { font-size: 24px; }
   .review-complete-summary { padding: 16px; }
-  .review-complete-stats > div + div { padding-left: 16px; }
   .review-complete-wallet-label > p { display: none; }
   .review-complete-footer { padding-inline: 16px; }
 }
@@ -971,7 +960,7 @@ button.nickname-clear { display: inline-flex; flex: 0 0 44px; width: 44px; heigh
 }
 
 /* 프로필 편집은 그림 위에 겹치지 않고 이름 있는 두 행동으로 구분한다. */
-.my-profile-card { margin-bottom: 16px; padding: 20px; border: 1px solid var(--color-line); border-radius: var(--shape-card); background: var(--color-card); }
+.my-profile-card { margin-bottom: 24px; padding: 4px 0; }
 .my-profile-identity { display: flex; align-items: center; gap: 16px; }
 .my-profile-avatar { display: flex; flex: 0 0 80px; width: 80px; height: 80px; align-items: center; justify-content: center; border-radius: 50%; background: var(--color-brand-soft); }
 .my-profile-details { flex: 1; min-width: 0; }
@@ -988,7 +977,6 @@ button.my-profile-action > svg { flex-shrink: 0; }
 button.my-profile-action:active { background: var(--color-action-soft-pressed); }
 button.my-profile-action:focus-visible { outline: 2px solid var(--color-brand-decoration); outline-offset: 2px; }
 @media (max-width: 350px) {
-  .my-profile-card { padding: 16px; }
   .my-profile-identity { gap: 12px; }
   .my-profile-avatar { flex-basis: 64px; width: 64px; height: 64px; }
   .my-profile-avatar > img { width: 62px !important; height: 62px !important; }

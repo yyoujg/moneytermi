@@ -337,7 +337,7 @@ const CourseScreen = () => {
         const pct = sec.course.words.length ? Math.round((sec.knownCount / sec.course.words.length) * 100) : 0;
         return (
         <section key={sec.course.id} data-section-index={si} className="scroll-mt-4">
-          <div className={`course-topic-summary sticky top-0 z-10 mx-5 mt-3 mb-4 overflow-hidden rounded-card border border-[var(--color-line)] bg-[var(--color-card)] px-4 py-4 ${sec.course.id === focus?.courseId ? 'anim-fade' : ''}`}>
+          <div className={`course-topic-summary sticky top-0 z-10 mx-5 mt-3 mb-4 overflow-hidden py-4 ${sec.course.id === focus?.courseId ? 'anim-fade' : ''}`}>
             {/* 코스 제목이 화면 제목(주제명)과 같으면 반복하지 않고 진행 정도만 보여준다 */}
             {sec.course.title !== activeTopic.category && <div className="relative mb-4 flex items-start gap-3">
               <span aria-hidden="true" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-chip border border-[var(--color-line)] text-lg font-semibold tabular-nums text-[var(--color-ink-3)]">{String(partIndex + 1).padStart(2, '0')}</span>
@@ -365,15 +365,14 @@ const CourseScreen = () => {
             const copy = nodeCopy(node);
             const Icon = node.type === 'quiz' ? ListChecks : node.type === 'review' ? RotateCcw : BookOpenText;
             const inProgress = node.type === 'lesson' && !done && node.words.some(word => knownIds.has(word.id));
-            const nodeCardClass = locked
-              ? 'border-[var(--color-line)] bg-[var(--color-surface)]'
-              : isFocus ? 'course-node-current border-[var(--color-line)] bg-[var(--color-card)]' : 'border-transparent bg-[var(--color-card)]';
+            // 다음에 할 단계만 카드로 띄우고, 끝났거나 잠긴 단계는 평평한 행으로 둔다
+            const nodeCardClass = isFocus && !locked ? 'course-node-current border-[var(--color-line)] bg-[var(--color-card)] px-4' : 'border-transparent bg-transparent px-0';
             const nodeStatus = done ? node.type === 'lesson' ? '살펴봄' : '풀이 완료' : locked ? '잠김' : inProgress ? '진행 중' : '시작 가능';
             return (
               <div key={node.id} className="mx-5 mb-4">
                 <button ref={isFocus ? focusRef : undefined} type="button" disabled={locked} data-own-sfx data-node-id={node.id}
                   onClick={() => handleNodeTap(node, k, sec.knownCount, sec.course.title)}
-                  className={`course-node-card flex w-full items-center gap-3 border px-4 py-3.5 text-left disabled:cursor-default ${nodeCardClass} ${newlyDone.has(node.id) ? 'anim-stamp' : ''}`}
+                  className={`course-node-card flex w-full items-center gap-3 border py-3.5 text-left disabled:cursor-default ${nodeCardClass} ${newlyDone.has(node.id) ? 'anim-stamp' : ''}`}
                   style={{ borderRadius: 'var(--shape-card)', '--d': `${0.2 + (newlyDone.get(node.id) ?? 0) * 0.15}s` } as React.CSSProperties}>
                   <span className="min-w-0 flex-1">
                     <span className={`flex flex-wrap items-center gap-x-2 gap-y-1 text-2xs ${locked ? 'text-[var(--color-ink-4)]' : 'text-[var(--color-ink-3)]'}`}>

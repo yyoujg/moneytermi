@@ -16,22 +16,22 @@ const mount = (props: Parameters<typeof Card>[0] = {}) => {
 };
 
 describe('수달 컨셉 공통 카드', () => {
-  it('기본 카드는 입체 표면과 공통 곡률을 연결한다', () => {
+  it('기본 묶음은 배경·테두리 없이 세로 여백만 둔다', () => {
     const card = mount();
-    expect(card).toHaveClass('app-card', 'rounded-card', 'p-4');
-    expect(card).toHaveAttribute('data-card-tone', 'card');
+    expect(card).toHaveClass('app-card', 'py-4');
+    expect(card).toHaveAttribute('data-card-tone', 'plain');
+    expect(card.className).not.toMatch(/\b(border|bg-|px-|p-4)\b/);
     expect(card).toHaveTextContent('경제 기초');
   });
-  it('중첩 보조 표면은 별도 역할로 구분한다', () => {
-    const card = mount({ tone: 'surface', pad: 'lg' });
-    expect(card).toHaveAttribute('data-card-tone', 'surface');
-    expect(card).toHaveClass('bg-[var(--color-surface)]', 'p-5');
-    expect(card.classList.contains('border')).toBe(false);
+  it('누르는 카드는 card 톤으로 표면을 유지한다', () => {
+    const card = mount({ tone: 'card', pad: 'lg' });
+    expect(card).toHaveAttribute('data-card-tone', 'card');
+    expect(card).toHaveClass('bg-[var(--color-card)]', 'border', 'rounded-card', 'p-5');
   });
   it('크기·접근성·직접 스타일을 보존한다', () => {
     const card = mount({ pad: 'none', className: 'custom', role: 'group', 'aria-label': '결과 요약', style: { border: 0 } });
     expect(card).toHaveClass('custom');
-    expect(card).not.toHaveClass('p-4');
+    expect(card).not.toHaveClass('py-4');
     expect(card).toHaveAttribute('aria-label', '결과 요약');
     expect(card).toHaveAttribute('role', 'group');
     expect(card.style.border).toBe('0px');

@@ -232,7 +232,7 @@ const EcosCard = ({ v }: { v: Extract<WordVisual, { type: 'ecos' }> }) => {
   const [failed, setFailed] = useState(false);
   if (failed || ecosDown) return null;
   return (
-    <Card pad="none" className="px-5 pt-4 pb-5 flex flex-col gap-3">
+    <Card pad="none" className="pt-4 pb-5 flex flex-col gap-3">
       <div className="flex flex-col gap-1">
         <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><BarChart3 size={13} />실제 통계</p>
         <p className="text-sm font-bold text-[var(--color-ink)] break-keep">{v.title}</p>
@@ -334,7 +334,7 @@ const LinkedText = ({ text, terms }: { text: string; terms?: Terms }) => {
 };
 
 const VisualCard = ({ v, className = '', terms }: { v: Exclude<WordVisual, { type: 'ecos' | 'quiz' }>; className?: string; terms?: Terms }) => (
-  <Card pad="none" className={`px-5 pt-4 pb-5 flex flex-col gap-3 ${className}`}>
+  <Card pad="none" className={`pt-4 pb-5 flex flex-col gap-3 ${className}`}>
     {v.type === 'text' ? (
       <>
         <p className="text-sm font-bold text-[var(--color-ink)] break-keep">{v.title}</p>

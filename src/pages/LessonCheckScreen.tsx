@@ -83,7 +83,7 @@ const LessonCheckScreen = () => {
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto px-5 py-5 [&::-webkit-scrollbar]:hidden">
         <h1 className="mb-4! text-sm font-bold text-[var(--color-ink-2)]">{attempt === 1 ? '이해 확인 · 첫 풀이' : `틀린 문제 재도전 ${attempt - 1}차`}</h1>
-        <Card pad="lg" className="mb-5 bg-[var(--color-surface)]" style={{ border: 0 }}>
+        <Card pad="sm" className="mb-5">
           <p className="mb-2! text-xs font-bold text-[var(--color-ink-3)]">상황을 읽고 골라보세요</p>
           <h2 className="quiz-prompt-main text-lg font-bold text-[var(--color-ink)] leading-relaxed break-keep">
             {keepShortUnitsTogether(question.promptMain)}

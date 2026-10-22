@@ -8,7 +8,7 @@ export const PraiseNote = ({
   ...rest
 }: { title: string; body: string } & HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={`rounded-card border border-brand-500/15 bg-brand-500/10 px-4 py-3 ${className}`.replace(/\s+/g, ' ').trim()}
+    className={`py-3 ${className}`.replace(/\s+/g, ' ').trim()}
     {...rest}
   >
     <div className="flex gap-2.5">

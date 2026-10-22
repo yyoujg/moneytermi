@@ -205,19 +205,19 @@ const QuizPage = () => {
 
       <div className="flex-1 flex flex-col px-5 py-4">
         {/* 문제 카드 */}
-        <Card key={word.id} pad="lg" className="mb-4 flex-1 anim-slide-in">
+        <Card key={word.id} tone="card" pad="lg" className="mb-4 flex-1 anim-slide-in">
           <p className="text-sm font-semibold text-[var(--color-ink-3)] mb-3!">뜻을 보고 어떤 용어인지 맞혀보세요</p>
 
           <p className="quiz-prompt-main text-lg font-bold text-[var(--color-ink)] leading-relaxed mb-6!">{keepShortUnitsTogether(maskTerm(word.meaning, word.word))}</p>
 
           {showHint && (
-            <Card tone="surface" pad="none" className="px-4 py-3 flex items-center gap-2 mb-4">
+            <Card pad="sm" className="flex items-center gap-2 mb-4">
               <Lightbulb size={14} className="text-[var(--color-ink-3)] shrink-0" />
               <span className="text-base font-bold text-[var(--color-ink)] tracking-widest">{word.hint}</span>
             </Card>
           )}
 
-          <Card tone="surface" pad="md">
+          <Card pad="md">
             <p className="text-xs font-bold text-[var(--color-ink-3)] mb-1.5!">상세 설명</p>
             <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep">{keepShortUnitsTogether(maskTerm(word.detailedMeaning, word.word))}</p>
           </Card>

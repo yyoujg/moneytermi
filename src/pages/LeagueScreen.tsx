@@ -149,7 +149,7 @@ const LeagueScreen = () => {
         )}
 
         {!failed && rows && rows.length > 0 && (
-          <Card pad="none" className="league-ranking-list overflow-hidden" style={{ border: 0 }}>
+          <Card pad="none" className="league-ranking-list overflow-hidden">
             {rows.map((r, i) => (
               <div
                 key={`${r.rank}-${i}`}
@@ -198,7 +198,7 @@ const LeagueScreen = () => {
       >
         <div className="px-5 pb-6 flex flex-col gap-3">
           {/* 받는 사람이 보게 될 내용 미리보기: 내 카드 + 문구. 내부 스킴 주소는 보여주지 않는다 */}
-          <Card tone="surface" pad="md" className="flex flex-col gap-3 anim-fade-up">
+          <Card tone="card" pad="md" className="flex flex-col gap-3 anim-fade-up">
             <div className="flex items-center gap-3">
               <span className="w-11 h-11 flex items-center justify-center text-2xl shrink-0" style={{ borderRadius: 9999, background: 'var(--color-card)' }}><ProfileAvatar emoji={myEmoji} size={44} /></span>
               <div className="min-w-0">

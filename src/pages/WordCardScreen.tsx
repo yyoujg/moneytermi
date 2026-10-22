@@ -100,7 +100,7 @@ const WordCard = ({
 
     {/* 뉴스 — 사진보다 '이 용어가 기사에서 어떻게 쓰였는지'가 보이게 작은 썸네일 목록. 불러온 뒤 기사가 없으면 섹션째 숨긴다 */}
     {(newsLoading || newsItems.length > 0) && (
-    <Card pad="none" className="px-5 py-4 flex flex-col">
+    <Card pad="md" className="flex flex-col">
       <p className="flex items-center gap-1.5 pb-1 text-xs font-bold text-[var(--color-ink-3)] tracking-[0.02em]"><Newspaper size={13} />실제 뉴스에서는 이렇게 나와요</p>
       {newsLoading ? (
         [1, 2, 3].map(i => (
@@ -149,7 +149,7 @@ const WordCard = ({
 
     {/* 관련 용어 */}
     {validRelated.length > 0 && (
-      <Card pad="none" className="px-5 py-4 flex flex-col gap-2.5">
+      <Card pad="md" className="flex flex-col gap-2.5">
         <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><Link2 size={13} />관련 용어</p>
         <div className="flex flex-col">
           {validRelated.map((tag, i) => (

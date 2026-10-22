@@ -98,6 +98,7 @@ const HomeScreen = () => {
         {/* 오늘 복습 카드 */}
         {dueQueue.length > 0 && (
           <Card
+            tone="card"
             pad="md"
             role="button"
             tabIndex={0}

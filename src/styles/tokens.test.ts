@@ -251,7 +251,7 @@ describe('배지·리그·프로필의 기존 표현 보존', () => {
     expect(league['--color-league-first']).toBe('var(--color-card)');
     expect(league['--color-league-second']).toBe('var(--color-card)');
     expect(league['--color-league-third']).toBe('var(--color-card)');
-    expect(indexCss).toContain('.league-ranking-row[data-podium]:not(.is-me) { background: var(--color-card); }');
+    expect(indexCss).not.toContain('.league-ranking-row[data-podium]:not(.is-me)');
     expect(indexCss).not.toContain('--league-row-tint');
   });
 });
@@ -274,7 +274,8 @@ describe('수달 아이콘과 통일한 평면 카드·버튼 표면', () => {
   });
   it('카드·버튼은 평면 역할을 참조하고 누를 때 위치를 이동하지 않는다', () => {
     expect(indexCss).toContain('box-shadow: var(--shadow-card) !important');
-    expect(indexCss).toMatch(/\.app-card\[data-card-tone='surface'\]\s*\{[^}]*box-shadow:\s*none !important/s);
+    expect(indexCss).toContain(":is(.app-card[data-card-tone='card'],");
+    expect(indexCss).not.toContain("data-card-tone='surface'");
     expect(indexCss).toMatch(/button\.action-button\[data-tone='soft'\]:disabled\s*\{[^}]*box-shadow:\s*none !important;\s*transform:\s*none !important/s);
     const pressed = [...indexCss.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
       .filter(([, selector]) => selector.includes('button.action-button:not(:disabled):active'))
