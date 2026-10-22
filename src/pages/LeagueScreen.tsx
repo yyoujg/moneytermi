@@ -158,7 +158,6 @@ const LeagueScreen = () => {
                 style={{ '--i': i } as React.CSSProperties}
               >
                 <LeagueRankBadge rank={r.rank} />
-                <ProfileAvatar emoji={r.is_me ? myEmoji : r.emoji} size={32} />
                 <span className="league-rank-name">
                   {r.is_me ? (user?.nickname ?? r.nickname) : r.nickname}
                 </span>
@@ -172,7 +171,6 @@ const LeagueScreen = () => {
                 className="league-ranking-row is-me is-own-separate"
               >
                 <LeagueRankBadge rank={mine.rank} />
-                <ProfileAvatar emoji={myEmoji} size={32} />
                 <span className="league-rank-name">{user?.nickname ?? '나'}</span>
                 <span className="league-rank-xp"><span>{mine.points.toLocaleString()}</span><span className="league-rank-xp-unit">XP</span></span>
               </div>

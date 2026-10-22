@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { BookOpenText, CalendarDays, RotateCcw, Target } from '../components/ui/OtterIcons';
+import { RotateCcw } from '../components/ui/OtterIcons';
 import { ArrowRight, ChevronRight } from '../components/ui/ControlIcons';
 import { MissionRewardStatus } from '../components/home/MissionRewardStatus';
 import { showModal } from '../components/AlertModal';
@@ -11,20 +11,14 @@ import { logClick } from '../lib/analytics';
 import { msUntilNextSlot } from '../lib/date';
 import { useAuth } from '../hooks/useAuth';
 import { WeekStrip } from '../components/home/WeekStrip';
-import { StageGlyph } from '../components/StageGlyph';
 import { ProfileAvatar } from '../components/ProfileAvatar';
-import { PointIcon, StreakIcon, XpIcon } from '../components/StatIcons';
+import { StreakIcon } from '../components/StatIcons';
 import { calcStreak } from '../lib/streak';
 import { Card } from '../components/ui/Card';
 import { ActionButton } from '../components/ui/ActionButton';
 import { PointCelebration, type PointReward } from '../components/PointCelebration';
 import { praiseForMission } from '../lib/praise';
 import type { Mission } from '../types';
-
-// 서버의 순서나 식별자와 무관하게 미션 내용에 맞는 역할 그림을 고른다.
-const missionIconFor = (title: string) => /출석|방문|접속/.test(title)
-  ? CalendarDays
-  : /퀴즈|정답|복습|문제/.test(title) ? Target : BookOpenText;
 
 const HomeScreen = () => {
   const navigate = useNavigate();
@@ -76,8 +70,8 @@ const HomeScreen = () => {
             <div className="min-w-0 flex-1">
               <p className="text-base font-bold truncate">안녕하세요, {user?.nickname ?? DEFAULT_NICKNAME}님</p>
               <div className="flex items-center gap-2 mt-1">
-                <span className="inline-flex items-center gap-1 text-2xs font-bold pl-0.5 pr-2 py-0.5" style={{ borderRadius: 9999, background: 'var(--color-hero-chip)' }}>
-                  <StageGlyph id={stage.id} size={18} />{stage.name}
+                <span className="inline-flex items-center text-2xs font-bold px-2 py-0.5" style={{ borderRadius: 9999, background: 'var(--color-hero-chip)' }}>
+                  {stage.name}
                 </span>
                 <span className="inline-flex items-center gap-0.5 text-2xs font-bold">
                   <StreakIcon size={13} />{streak}일 연속
@@ -142,18 +136,16 @@ const HomeScreen = () => {
           <div className="flex flex-col">
             {missionList.map((mission, idx) => {
               const done = mission.current >= mission.target;
-              const MissionIcon = missionIconFor(mission.title);
               return (
                 <div key={mission.id} className="home-mission-row anim-fade-up" data-rewarded={mission.isRewarded || undefined} style={{ '--i': idx } as React.CSSProperties}>
                   <div className="home-mission-top">
-                    <MissionIcon size={28} className="home-mission-icon" aria-hidden="true" />
                     <div className="home-mission-info">
                       <p className={`home-mission-title text-sm ${mission.isRewarded ? 'text-[var(--color-ink-4)] line-through' : 'text-[var(--color-ink)]'}`}>
                         {mission.title}
                       </p>
                       <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-                        <span className="home-mission-reward inline-flex items-center gap-1"><PointIcon size={16} />+{mission.reward}개</span>
-                        <span className="inline-flex items-center gap-1 font-medium text-[var(--color-ink-3)]"><XpIcon size={13} />+{MISSION_XP} XP</span>
+                        <span className="home-mission-reward">조개 +{mission.reward}개</span>
+                        <span className="font-medium text-[var(--color-ink-3)]">+{MISSION_XP} XP</span>
                       </p>
                     </div>
                     {mission.isRewarded || done

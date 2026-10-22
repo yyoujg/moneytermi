@@ -179,8 +179,7 @@ describe('CourseScreen energy gates', () => {
     const hero = container.querySelector('.course-home-hero');
     expect(hero).toHaveAttribute('aria-label', '오늘 할 학습');
     expect(hero?.querySelectorAll('button')).toHaveLength(1);
-    expect(hero?.querySelector('.course-home-otter')).toHaveAttribute('width', '96');
-    expect(hero?.querySelector('.course-home-otter')).toHaveAttribute('height', '96');
+    expect(hero?.querySelector('img')).toBeNull();
     const primary = hero?.querySelector('.course-home-primary');
     expect(primary).not.toHaveClass('w-full');
     expect(primary?.querySelector('img[data-icon]')).toBeNull();
@@ -445,9 +444,9 @@ describe('홈의 독립 카드와 미션 동작', () => {
     expect(container.querySelector('.home-mission-heading')).toHaveTextContent('오늘의 미션');
     const rows = [...container.querySelectorAll('.home-mission-row')];
     expect(rows.map(row => row.querySelector('.home-mission-title')?.textContent?.trim())).toEqual(['용어 학습하기', '퀴즈 풀기', '오늘 출석하기']);
-    expect(rows.map(row => row.querySelector('.home-mission-icon')?.getAttribute('data-icon'))).toEqual(['BookOpenText', 'Target', 'CalendarDays']);
+    expect(rows.every(row => row.querySelector('.home-mission-top svg, .home-mission-top img') === null)).toBe(true);
     expect(rows[0].querySelector('.home-mission-count')).toHaveTextContent('1/3');
-    expect(rows[0].querySelector('.home-mission-reward')).toHaveTextContent('+7개');
+    expect(rows[0].querySelector('.home-mission-reward')).toHaveTextContent('조개 +7개');
     expect(rows[0]).toHaveTextContent('+' + MISSION_XP + ' XP');
     expect(rows[1].querySelector('[role=progressbar]')).toHaveAttribute('aria-valuenow', '2');
     expect(rows[1].querySelector('[role=progressbar]')?.children).toHaveLength(2);

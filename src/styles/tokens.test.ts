@@ -124,8 +124,7 @@ describe('이해 확인의 캐릭터·중성 상태 표현', () => {
       .map(([rule]) => rule)
       .join('\n');
     expect(feedbackCss).not.toMatch(/--color-(answer|danger|success)-/);
-    expect(feedbackCss).toContain('.lesson-feedback-character { display: block; width: 96px; height: 96px;');
-    expect(feedbackCss).toContain('.lesson-feedback-character { width: 88px; height: 88px; }');
+    expect(feedbackCss).not.toContain('.lesson-feedback-character');
     expect(feedbackCss).toContain('.lesson-complete-score-track > span { background: var(--color-ink-3); }');
     for (const [values, success, danger] of [[light, '#18794e', '#cc3340'], [dark, '#75d7a5', '#ff9ca5']] as const) {
       expect(resolve('--color-success-foreground', values)).toBe(success);

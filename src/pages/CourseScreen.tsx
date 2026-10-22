@@ -13,7 +13,6 @@ import { COURSE_REVIEW_COUNT, LESSON_WARMUP_COUNT, firstUnknownWordIndex, learne
 import { learningOutcomeFor } from '../lib/learningOutcome';
 import { ActionButton } from '../components/ui/ActionButton';
 import { EnergyIcon } from '../components/StatIcons';
-import { OTTER_IMAGES } from '../lib/otter';
 import { buildPath, type PathNode } from '../lib/path';
 
 const SEEN_KEY = 'path_seen_done';   // 코스 화면에서 마지막으로 본 완료 노드들(도장 연출용)
@@ -290,7 +289,6 @@ const CourseScreen = () => {
               <h2 className="course-home-hero-title">{focusTopic?.category ?? '주제를 다시 살펴볼까요?'}</h2>
               {!focusTopic && <p className="course-home-hero-description">배운 용어와 예시를 가볍게 되짚어보세요.</p>}
             </div>
-            <img src={OTTER_IMAGES.study} alt="" aria-hidden="true" width={96} height={96} className="course-home-otter" />
           </div>
           {focusTopic && <div className="course-home-hero-progress">
             <div className="flex items-center justify-between gap-3">

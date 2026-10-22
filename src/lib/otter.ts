@@ -41,12 +41,6 @@ const AVATAR_POSES: Record<string, OtterPose> = {
 export const getOtterAvatarPose = (emoji: string): OtterPose =>
   Object.hasOwn(AVATAR_POSES, emoji) ? AVATAR_POSES[emoji] : 'hello';
 
-// 채점 이후 피드백 전용. 프로필과 기존 네 포즈에는 연결하지 않는다.
-export const OTTER_FEEDBACK_IMAGES = {
-  correct: '/otter/v3/feedback/correct.png',
-  wrong: '/otter/v3/feedback/wrong.png',
-} as const;
-
 // 재화는 원형 파스텔 조개·번개 그림으로 표시한다. fish 키·파일명은 기존 연결 호환용이며 현재 그림은 에너지 번개다. 저장 단위와 잔액은 바꾸지 않는다.
 export const OTTER_ITEM_IMAGES = {
   shell: '/otter/v3/items/shell.png',

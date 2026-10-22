@@ -89,15 +89,13 @@ describe('레슨 이해 확인', () => {
     expect(container.textContent).toContain('1문제 중 1개 정답');
   });
 
-  it('정답은 O 포즈 수달과 문구, 완료 행동은 기존 주황으로 구분한다', () => {
+  it('정답은 수달 없이 문구로 알리고, 완료 행동은 기존 주황으로 구분한다', () => {
     const { container, click } = mount({ pathname: '/lesson-check', state: { words: [word(1, [check])] } });
     click('오른다');
     const correct = container.querySelector('[data-lesson-check-result="correct"]');
     expect(correct).toHaveClass('lesson-feedback-answer');
-    expect(container.querySelector('.lesson-feedback-character')).toHaveAttribute('src', '/otter/v3/feedback/correct.png');
-    expect(container.querySelector('.lesson-feedback-character')).toHaveAttribute('alt', '정답을 알리는 O 포즈 수달');
-    expect(container.querySelector('.lesson-feedback-character')).toHaveAttribute('width', '96');
-    expect(container.querySelector('.lesson-feedback-character')).toHaveAttribute('height', '96');
+    expect(container.querySelector('.lesson-feedback-intro img')).toBeNull();
+    expect(container.querySelector('.lesson-feedback-intro h1')).toHaveTextContent('맞았어요!');
     expect(container.querySelector('.lesson-feedback-status-icon')).toBeNull();
     expect(container.querySelector('.lesson-feedback-answer :is(svg, img[data-icon])')).toBeNull();
     expect(container.querySelector('[class*="answer-soft"]')).toBeNull();
@@ -114,11 +112,10 @@ describe('레슨 이해 확인', () => {
     expect(container.querySelector('[class*="success-"]')).toBeNull();
   });
 
-  it('오답은 X 포즈 수달과 명확한 문구, 중성 내 선택과 정답으로 알려준다', () => {
+  it('오답은 수달 없이 명확한 문구, 중성 내 선택과 정답으로 알려준다', () => {
     const { container, click } = mount({ pathname: '/lesson-check', state: { words: [word(1, [check])] } });
     click('내린다');
-    expect(container.querySelector('.lesson-feedback-character')).toHaveAttribute('src', '/otter/v3/feedback/wrong.png');
-    expect(container.querySelector('.lesson-feedback-character')).toHaveAttribute('alt', '오답을 알리는 X 포즈 수달');
+    expect(container.querySelector('.lesson-feedback-intro img')).toBeNull();
     expect(container.querySelector('.lesson-feedback-intro h1')).toHaveTextContent('아쉬워요, 오답이에요');
     expect(container.querySelector('[data-lesson-check-result="wrong"]')).toHaveClass('lesson-feedback-my-answer');
     expect(container.querySelector('[class*="danger-"], [class*="answer-soft"], [class*="success-"]')).toBeNull();

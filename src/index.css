@@ -553,7 +553,6 @@ button.course-energy-entry:active { background: var(--color-surface); }
 .course-home-eyebrow { color: var(--color-ink-3); font-size: 12px; font-weight: 600; line-height: 1.5; }
 .course-home-hero-title { margin-top: 6px; color: var(--color-ink); font-size: 21px; font-weight: 700; line-height: 1.35; word-break: keep-all; overflow-wrap: anywhere; }
 .course-home-hero-description { margin-top: 7px; color: var(--color-ink-3); font-size: 13px; line-height: 1.6; word-break: keep-all; overflow-wrap: anywhere; }
-.course-home-otter { box-sizing: border-box; flex-shrink: 0; width: 96px; height: 96px; padding: 6px; border-radius: var(--shape-card); background: var(--color-character-stage); object-fit: contain; }
 .course-home-hero-progress { margin-top: 16px; color: var(--color-ink-3); font-size: 12px; line-height: 1.5; }
 .course-home-progress-track { display: block; height: 4px; overflow: hidden; border-radius: 9999px; background: var(--color-surface); }
 .course-home-progress-track > span { display: block; height: 100%; border-radius: inherit; background: var(--color-progress); }
@@ -596,7 +595,6 @@ button.course-home-topic:disabled .course-home-topic-title { color: var(--color-
 @media (max-width: 359px) {
   .course-home-hero-title { font-size: 20px; }
   .course-home-hero-heading { gap: 10px; }
-  .course-home-otter { width: 82px; height: 82px; }
 }
 
 /* 하단 탐색 메뉴는 같은 표면·중성 글자 위계를 사용한다. */
@@ -707,7 +705,6 @@ button.action-button.word-term-card-link { min-height: var(--size-touch-min); ma
 .lesson-feedback-content::-webkit-scrollbar, .lesson-complete-content::-webkit-scrollbar { display: none; }
 .lesson-feedback-intro { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
 .lesson-feedback-intro > div { min-width: 0; }
-.lesson-feedback-character { display: block; width: 96px; height: 96px; flex-shrink: 0; object-fit: contain; }
 .lesson-feedback-intro h1 { color: var(--color-ink); font-size: 24px; font-weight: 700; line-height: 1.4; letter-spacing: -0.02em; word-break: keep-all; overflow-wrap: anywhere; }
 .lesson-feedback-intro p { margin-top: 4px; color: var(--color-ink-3); font-size: 13px; line-height: 1.6; word-break: keep-all; }
 .lesson-feedback-card { padding: 8px 0; }
@@ -754,7 +751,6 @@ button.lesson-feedback-disclosure { display: flex; width: 100%; min-height: var(
 /* 읽기 위치 안내를 위한 비대화형 제목 초점은 버튼 테두리로 표현하지 않는다. */
 :is(.lesson-feedback-intro, .lesson-complete-hero) h1:focus { outline: none; }
 @media (max-width: 359px) {
-  .lesson-feedback-character { width: 88px; height: 88px; }
   .lesson-feedback-intro h1 { font-size: 22px; }
   .lesson-complete-hero { padding-top: 4px; padding-bottom: 20px; }
   .lesson-complete-hero > img { width: 112px !important; height: 112px !important; }
@@ -851,7 +847,7 @@ button.mission-reward-status {
 
 /* 리그 순위표: 숫자 순위·기존 수달·이름·경험치를 일정한 열로 정렬한다. */
 .league-ranking-list { margin-inline: -16px; }
-.league-ranking-row { display: grid; grid-template-columns: minmax(40px, max-content) 32px minmax(0, 1fr) auto; align-items: center; column-gap: 12px; min-height: 60px; padding: 12px 16px; }
+.league-ranking-row { display: grid; grid-template-columns: minmax(40px, max-content) minmax(0, 1fr) auto; align-items: center; column-gap: 12px; min-height: 60px; padding: 12px 16px; }
 .league-ranking-row + .league-ranking-row { border-top: 1px solid var(--color-surface); }
 .league-ranking-row.is-me { background: var(--color-brand-soft); }
 .league-ranking-row.is-own-separate { border-top: 2px dashed var(--color-surface); }
@@ -901,15 +897,13 @@ button.nickname-clear { display: inline-flex; flex: 0 0 44px; width: 44px; heigh
 .home-mission-heading > span { margin-top: 8px; }
 .home-missions.app-card { padding: 0; }
 .home-mission-row { padding: 12px 0; }
-.home-mission-top { display: grid; grid-template-columns: 28px minmax(0, 1fr) 64px; align-items: center; gap: 10px; }
-.home-mission-icon { align-self: start; margin-top: 2px; }
+.home-mission-top { display: grid; grid-template-columns: minmax(0, 1fr) 64px; align-items: center; gap: 10px; }
 .home-mission-info { min-width: 0; }
 .home-mission-title { font-weight: 600; line-height: 1.45; word-break: keep-all; overflow-wrap: anywhere; }
 .home-mission-info > p + p { margin-top: 5px; }
 .home-mission-reward { color: var(--color-reward-foreground); font-weight: 650; }
 .home-mission-count { display: inline-flex; width: 64px; min-height: var(--size-touch-min); align-items: center; justify-content: center; font-variant-numeric: tabular-nums; }
-.home-mission-progress { margin-left: 38px; margin-top: 10px; }
-.home-mission-row[data-rewarded='true'] .home-mission-icon { filter: grayscale(1); opacity: 0.45; }
+.home-mission-progress { margin-top: 10px; }
 .home-mission-row[data-rewarded='true'] .home-mission-reward { color: var(--color-ink-4); }
 
 /* 복습 완료: 원래 수달·결과·잔액은 유지하고 결과 기록과 행동을 분리한다. */
