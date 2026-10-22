@@ -41,7 +41,7 @@ describe('구분하기 쉬운 주간 출석', () => {
     const today = container.querySelector('[aria-current="date"]')!;
     expect(today).toHaveAttribute('data-state', 'done');
     expect(today).toHaveTextContent('오늘');
-    expect(today.querySelector('svg')).toHaveAttribute('stroke', 'currentColor');
+    expect(today.querySelector('svg')).toHaveAttribute('fill', 'currentColor');
     expect(today.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
     expect(today.querySelector('img')).toBeNull();
   });

@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { RotateCcw } from '../components/ui/OtterIcons';
 import { ArrowRight, ChevronRight } from '../components/ui/ControlIcons';
 import { MissionRewardStatus } from '../components/home/MissionRewardStatus';
 import { showModal } from '../components/AlertModal';
@@ -22,7 +21,7 @@ import type { Mission } from '../types';
 
 const HomeScreen = () => {
   const navigate = useNavigate();
-  const { hydrated, xp, knownWords, unknownWords, missions, claimReward, claimingMissionIds, attendanceDates, dueQueue, myEmoji } = useAppContext();
+  const { hydrated, xp, knownWords, unknownWords, missions, claimReward, claimingMissionIds, attendanceDates, dueQueue } = useAppContext();
   const { user } = useAuth();
   const isNewUser = hydrated && knownWords.length + unknownWords.length === 0;
 
@@ -64,16 +63,16 @@ const HomeScreen = () => {
       <div className="pt-4 px-5 pb-4">
         <div className="home-profile text-[var(--color-hero-ink)] anim-fade-up">
           <div className="home-profile-line">
-            <div className="home-profile-avatar" style={{ borderRadius: 9999, background: 'var(--color-hero-chip)' }}>
-              <ProfileAvatar emoji={myEmoji} size={56} />
+            <div className="home-profile-avatar rounded-full bg-[var(--color-hero-chip)]">
+              <ProfileAvatar name={user?.nickname ?? DEFAULT_NICKNAME} size={56} />
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-base font-bold truncate">안녕하세요, {user?.nickname ?? DEFAULT_NICKNAME}님</p>
               <div className="flex items-center gap-2 mt-1">
-                <span className="inline-flex items-center text-2xs font-bold px-2 py-0.5" style={{ borderRadius: 9999, background: 'var(--color-hero-chip)' }}>
+                <span className="inline-flex items-center rounded-full bg-[var(--color-hero-chip)] text-2xs text-[var(--color-ink-2)] px-2 py-0.5">
                   {stage.name}
                 </span>
-                <span className="inline-flex items-center gap-0.5 text-2xs font-bold">
+                <span className="inline-flex items-center gap-0.5 text-2xs text-[var(--color-ink-3)]">
                   <StreakIcon size={13} />{streak}일 연속
                 </span>
               </div>
@@ -108,22 +107,14 @@ const HomeScreen = () => {
             className="mt-4 flex items-center justify-between active:opacity-80 cursor-pointer anim-fade-up focus-visible:outline-2 focus-visible:outline-brand-500"
             style={{ '--i': 1 } as React.CSSProperties}
           >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-brand-500/10 flex items-center justify-center shrink-0">
-                <RotateCcw size={16} className="text-brand-500" />
-              </div>
-              <div className="text-left">
-                <p className="text-sm font-bold text-[var(--color-ink)]">오늘 다시 볼 용어 {dueQueue.length}개</p>
-                <p className="text-xs text-[var(--color-ink-3)]">다시 마주치면 바로 떠오르게요</p>
-              </div>
-            </div>
-            <ChevronRight size={16} className="text-[var(--color-ink-4)]" />
+            <p className="text-sm font-bold text-[var(--color-ink)]">오늘 다시 볼 용어 {dueQueue.length}개</p>
+            <span className="flex items-center gap-1 text-xs font-semibold text-[var(--color-ink-2)]">복습하기<ChevronRight size={16} className="text-[var(--color-ink-4)]" /></span>
           </Card>
         )}
       </div>
 
       {/* 오늘의 미션 */}
-      <div className="px-5 flex flex-col gap-4">
+      <div className="px-5 pt-8 flex flex-col gap-4">
         <div className="home-mission-heading anim-fade-up">
           <div>
             <h2 id="home-missions-heading">오늘의 미션</h2>
@@ -134,23 +125,23 @@ const HomeScreen = () => {
 
         <Card pad="none" className="home-missions mb-4 anim-fade-up" aria-labelledby="home-missions-heading">
           <div className="flex flex-col">
-            {missionList.map((mission, idx) => {
+            {missionList.map(mission => {
               const done = mission.current >= mission.target;
               return (
-                <div key={mission.id} className="home-mission-row anim-fade-up" data-rewarded={mission.isRewarded || undefined} style={{ '--i': idx } as React.CSSProperties}>
+                <div key={mission.id} className="home-mission-row" data-rewarded={mission.isRewarded || undefined}>
                   <div className="home-mission-top">
                     <div className="home-mission-info">
                       <p className={`home-mission-title text-sm ${mission.isRewarded ? 'text-[var(--color-ink-4)] line-through' : 'text-[var(--color-ink)]'}`}>
                         {mission.title}
                       </p>
                       <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-                        <span className="home-mission-reward">조개 +{mission.reward}개</span>
+                        <span className="home-mission-reward">코인 +{mission.reward}개</span>
                         <span className="font-normal text-[var(--color-ink-3)]">+{MISSION_XP} XP</span>
                       </p>
                     </div>
                     {mission.isRewarded || done
                       ? <MissionRewardStatus isRewarded={mission.isRewarded} pending={claimingMissionIds?.has(mission.id)} onClaim={() => handleClaim(mission.id, mission.reward)} />
-                      : <span className="home-mission-count text-base font-bold text-[var(--color-ink)]">{mission.current}<span className="text-xs text-[var(--color-ink-4)]">/{mission.target}</span></span>
+                      : <span className="home-mission-count text-sm font-semibold text-[var(--color-ink)]">{mission.current}<span className="text-xs text-[var(--color-ink-4)]">/{mission.target}</span></span>
                     }
                   </div>
                   <div role="progressbar" aria-label={`${mission.title} 진행률`} aria-valuemin={0} aria-valuemax={mission.target} aria-valuenow={Math.min(mission.current, mission.target)} className="home-mission-progress flex gap-1">

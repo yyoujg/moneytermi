@@ -26,7 +26,7 @@ const normalizeRank = (data: unknown): MyRank | null => {
 };
 
 export const LeagueRankCelebration = () => {
-  const { hydrated, xp, myEmoji } = useAppContext();
+  const { hydrated, xp } = useAppContext();
   const { user, guestToken } = useAuth();
   const [rankUp, setRankUp] = useState<RankUp | null>(null);
   const storageKey = useMemo(() => user ? leagueRankSeenKey(user.id, weekStart()) : null, [user]);
@@ -98,9 +98,8 @@ export const LeagueRankCelebration = () => {
           </button>
 
           <div className="relative">
-            <div className="absolute -inset-3 rounded-full bg-[var(--color-brand-soft)]" />
             <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-[var(--color-card)] shadow-sm">
-              <ProfileAvatar emoji={myEmoji} size={64} />
+              <ProfileAvatar name={user?.nickname ?? '나'} size={64} />
             </div>
           </div>
 
@@ -113,7 +112,7 @@ export const LeagueRankCelebration = () => {
               {rankUp.fromRank}위
             </span>
             <span className="text-xl font-bold text-brand-500">→</span>
-            <span className="rounded-chip bg-brand-500 px-4 py-2 text-lg font-bold text-white tabular-nums">
+            <span className="rounded-chip bg-[var(--accent-lavender-ink)] px-4 py-2 text-lg font-bold text-white tabular-nums">
               {rankUp.toRank}위
             </span>
           </div>

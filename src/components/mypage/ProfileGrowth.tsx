@@ -10,7 +10,7 @@ export const ProfileGrowth = ({ xp }: { xp: number }) => {
   const progress = span > 0 ? earned / span * 100 : 0;
 
   return (
-    <div role="group" aria-label="수달 성장" className="profile-growth">
+    <div role="group" aria-label="등급 성장" className="profile-growth">
       <p className="profile-growth-stage">{stage.name}</p>
       <p className="profile-growth-detail">
         {next && remaining !== null ? (

@@ -100,32 +100,30 @@ const NavBar = () => {
   return (
     <div
       ref={wrapRef}
-      className="absolute bottom-0 w-full flex justify-center z-50 pointer-events-none"
-      style={{ paddingBottom: 24 + insets.bottom }}
+      className="app-nav-tray absolute bottom-0 w-full flex z-50 border-t border-[var(--color-line)]"
+      style={{ paddingBottom: insets.bottom }}
     >
-      <div className="app-nav-tray flex items-center gap-1 rounded-full px-4 py-2 border border-[var(--color-line)] pointer-events-auto">
+      <div className="flex w-full items-stretch">
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.path;
           const hasNew = newByPath[item.path] ?? false;
           const Icon = item.icon;
-          const colorClass = isActive ? 'text-[var(--color-ink)]' : 'app-nav-muted';
+          const colorClass = isActive ? 'text-[var(--color-ink)]' : 'text-[var(--color-ink-3)]';
           return (
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
               aria-label={hasNew ? `${item.label}, 새 내용 있음` : item.label}
               aria-current={isActive ? 'page' : undefined}
-              className="flex flex-col items-center justify-center gap-1 px-1 py-0.5 transition-all duration-200"
+              className="flex flex-1 flex-col items-center justify-center gap-1 pt-2 pb-2"
             >
               <div className="relative w-12 h-8 flex items-center justify-center">
-                <Icon size={22} strokeWidth={isActive ? 2 : 1.7} aria-hidden="true" className={colorClass} />
+                <Icon size={24} aria-hidden="true" className={colorClass} />
                 {hasNew && (
-                  <span className="absolute -right-1 -top-1 rounded-full bg-[var(--color-selection-soft)] px-1 py-0.5 text-[8px] font-bold leading-none text-[var(--color-selection-ink)] ring-2 ring-[var(--color-card)]">
-                    NEW
-                  </span>
+                  <span aria-hidden="true" className="absolute right-2 top-0.5 h-1.5 w-1.5 rounded-full bg-[var(--accent-rose)]" />
                 )}
               </div>
-              <span className={`text-xs leading-none font-bold ${colorClass}`}>{item.label}</span>
+              <span className={`text-xs leading-none ${isActive ? 'font-bold' : 'font-medium'} ${colorClass}`}>{item.label}</span>
             </button>
           );
         })}

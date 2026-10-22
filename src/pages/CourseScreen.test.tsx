@@ -7,7 +7,6 @@ import CourseScreen from './CourseScreen';
 import HomeScreen from './HomeScreen';
 import { MISSION_XP } from '../constants';
 import { showModal } from '../components/AlertModal';
-import { OTTER_AVATAR_IMAGES, getOtterAvatarPose } from '../lib/otter';
 
 const state = vi.hoisted(() => ({
   ctx: {} as Record<string, unknown>,
@@ -186,16 +185,15 @@ describe('CourseScreen energy gates', () => {
     const arrow = primary?.querySelector('svg');
     expect(arrow).toHaveAttribute('width', '20');
     expect(arrow).toHaveAttribute('height', '20');
-    expect(arrow).toHaveAttribute('stroke', 'currentColor');
-    expect(arrow).toHaveAttribute('stroke-width', '3');
+    expect(arrow).toHaveAttribute('fill', 'currentColor');
     expect(arrow).toHaveAttribute('aria-hidden', 'true');
     expect(arrow).toHaveAttribute('focusable', 'false');
     expect(container.querySelectorAll('.course-home-topic')).toHaveLength(2);
     expect(container.querySelector('.course-topic-index')).toBeNull();
     for (const button of container.querySelectorAll('.course-home-topic')) {
       expect(button).toHaveAttribute('aria-label', expect.stringMatching(/^(기초|중급) .+ 주제 열기$/));
-      expect(button.querySelector('.course-home-topic-icon')).toHaveAttribute('data-icon', 'BookOpenText');
-      expect(button.querySelector('.course-home-topic-heading > svg')).toHaveAttribute('stroke', 'currentColor');
+      expect(button.querySelector('.course-home-topic-icon')).toBeNull();
+      expect(button.querySelector('.course-home-topic-heading > svg')).toHaveAttribute('fill', 'currentColor');
       expect(button.querySelector('[role=progressbar]')).toHaveAttribute('aria-valuemax', '100');
     }
   });
@@ -390,10 +388,10 @@ describe('학습 주제의 역할 아이콘', () => {
       expect(icon).toHaveAttribute('width', '16');
       if (icon.getAttribute('data-learning-icon') === 'review') {
         expect(icon.tagName.toLowerCase()).toBe('svg');
-        expect(icon).toHaveAttribute('stroke', 'currentColor');
+        expect(icon).toHaveAttribute('fill', 'currentColor');
       } else {
-        expect(icon).toHaveAttribute('src', ['/otter/v3/icons/book.png', '/otter/v3/icons/checklist.png'][icons.indexOf(icon)]);
-        expect(icon).not.toHaveAttribute('stroke-width');
+        expect(icon).toHaveAttribute('data-icon', ['BookOpenText', 'ListChecks'][icons.indexOf(icon)]);
+        expect(icon).toHaveAttribute('fill', 'currentColor');
       }
       expect(icon).toHaveAttribute('aria-hidden', 'true');
     }
@@ -446,7 +444,7 @@ describe('홈의 독립 카드와 미션 동작', () => {
     expect(rows.map(row => row.querySelector('.home-mission-title')?.textContent?.trim())).toEqual(['용어 학습하기', '퀴즈 풀기', '오늘 출석하기']);
     expect(rows.every(row => row.querySelector('.home-mission-top svg, .home-mission-top img') === null)).toBe(true);
     expect(rows[0].querySelector('.home-mission-count')).toHaveTextContent('1/3');
-    expect(rows[0].querySelector('.home-mission-reward')).toHaveTextContent('조개 +7개');
+    expect(rows[0].querySelector('.home-mission-reward')).toHaveTextContent('코인 +7개');
     expect(rows[0]).toHaveTextContent('+' + MISSION_XP + ' XP');
     expect(rows[1].querySelector('[role=progressbar]')).toHaveAttribute('aria-valuenow', '2');
     expect(rows[1].querySelector('[role=progressbar]')?.children).toHaveLength(2);
@@ -456,8 +454,8 @@ describe('홈의 독립 카드와 미션 동작', () => {
     expect(claimReward).toHaveBeenCalledExactlyOnceWith('quiz');
     expect(container).toHaveTextContent('미션 보상 축하');
     expect(container.querySelector('.home-profile')).not.toHaveClass('app-card');
-    expect(container.querySelector('.home-profile-avatar img')).toHaveAttribute('src', OTTER_AVATAR_IMAGES[getOtterAvatarPose('🦦')]);
-    expect(container.querySelector('.home-profile-avatar img')).toHaveAttribute('width', '56');
+    expect(container.querySelector('.home-profile-avatar img')).toBeNull();
+    expect(container.querySelector('.home-profile-avatar .profile-avatar')).toHaveStyle({ width: '56px' });
     expect(container.querySelector('[aria-label="이번 주 출석"]')).toBeInTheDocument();
   });
 
@@ -465,7 +463,7 @@ describe('홈의 독립 카드와 미션 동작', () => {
     baseContext({ xp: 0, knownWords: [], unknownWords: [], attendanceDates: [], myEmoji: '🦦', missions: {}, claimReward: vi.fn() });
     const container = await mountHome();
     const start = [...container.querySelectorAll<HTMLButtonElement>('button')].find(button => button.textContent?.includes('돈 공부 시작하기'))!;
-    expect(start.querySelector('svg')).toHaveAttribute('stroke', 'currentColor');
+    expect(start.querySelector('svg')).toHaveAttribute('fill', 'currentColor');
     expect(start).toHaveAttribute('data-size', 'lg');
     await act(async () => start.click());
     expect(container).toHaveTextContent('학습 목록');

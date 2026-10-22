@@ -15,31 +15,31 @@ const mount = (xp: number) => {
   return container;
 };
 
-describe('프로필 수달 성장 정보', () => {
+describe('프로필 등급 성장 정보', () => {
   it.each([
-    [0, '아기수달', '꼬마수달까지 20 XP'],
-    [19, '아기수달', '꼬마수달까지 1 XP'],
-    [20, '꼬마수달', '탐험수달까지 80 XP'],
-    [120, '탐험수달', '척척수달까지 180 XP'],
-    [299, '탐험수달', '척척수달까지 1 XP'],
-    [300, '척척수달', '박사수달까지 500 XP'],
-    [799, '척척수달', '박사수달까지 1 XP'],
+    [0, '돈알못', '짠테크러까지 20 XP'],
+    [19, '돈알못', '짠테크러까지 1 XP'],
+    [20, '짠테크러', '갓생러까지 80 XP'],
+    [120, '갓생러', '재테크러까지 180 XP'],
+    [299, '갓생러', '재테크러까지 1 XP'],
+    [300, '재테크러', '경제고수까지 500 XP'],
+    [799, '재테크러', '경제고수까지 1 XP'],
   ])('%i 경험치에 맞는 현재 등급과 실제 남은 경험치를 보여준다', (xp, name, detail) => {
     const container = mount(xp as number);
-    const group = container.querySelector('[aria-label="수달 성장"]');
+    const group = container.querySelector('[aria-label="등급 성장"]');
     expect(group?.querySelector('p')).toHaveTextContent(name as string);
     expect(group).toHaveTextContent(detail as string);
   });
 
   it.each([800, 9000])('최고 단계 %i에서는 존재하지 않는 다음 등급을 표시하지 않는다', xp => {
-    const group = mount(xp).querySelector('[aria-label="수달 성장"]');
-    expect(group).toHaveTextContent('박사수달');
+    const group = mount(xp).querySelector('[aria-label="등급 성장"]');
+    expect(group).toHaveTextContent('경제고수');
     expect(group).toHaveTextContent('최고 단계에 도달했어요');
     expect(group).not.toHaveTextContent('까지');
   });
 
   it('불필요한 테두리 배지와 추상적인 안내 대신 두 줄 정보로 정리한다', () => {
-    const group = mount(120).querySelector('[aria-label="수달 성장"]');
+    const group = mount(120).querySelector('[aria-label="등급 성장"]');
     expect(group).toHaveAttribute('role', 'group');
     expect(group).not.toHaveClass('border', 'rounded-full');
     expect(group?.querySelectorAll('p')).toHaveLength(2);

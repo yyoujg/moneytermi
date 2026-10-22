@@ -79,7 +79,7 @@ describe('LeaguePromotionCelebration', () => {
     baseContext(20);
     const { container } = await mount();
 
-    expect(container.querySelector('[role="dialog"]')?.textContent).toContain('꼬마수달 리그에 올라갔어요');
+    expect(container.querySelector('[role="dialog"]')?.textContent).toContain('짠테크러 리그에 올라갔어요');
     expect(container.querySelector('[role="dialog"]')?.textContent).toContain('20XP');
     expect(state.feedbackTierUp).toHaveBeenCalledTimes(1);
     expect(state.logClick).toHaveBeenCalledWith('league_promotion_modal_view', { from: 1, to: 2, xp: 20 });
@@ -104,7 +104,7 @@ describe('LeaguePromotionCelebration', () => {
     baseContext(20);
     await render();
 
-    expect(container.querySelector('[role="dialog"]')?.textContent).toContain('꼬마수달 리그에 올라갔어요');
+    expect(container.querySelector('[role="dialog"]')?.textContent).toContain('짠테크러 리그에 올라갔어요');
     expect(state.feedbackTierUp).toHaveBeenCalledTimes(1);
   });
 });

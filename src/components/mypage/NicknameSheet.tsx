@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useId } from 'react';
-import { X } from 'lucide-react';
+import { X } from '../ui/OtterIcons';
 import { BottomSheet } from '@toss/tds-mobile';
 import { ActionButton } from '../ui/ActionButton';
 import { UserRound } from '../ui/OtterIcons';

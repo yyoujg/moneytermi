@@ -106,7 +106,7 @@ describe('레슨 이해 확인', () => {
     expect(container.querySelector('[class*="success-"]')).toBeNull();
     click('결과 보기');
     expect(container.querySelector('[data-lesson-check-complete]')).toHaveClass('lesson-complete-screen');
-    expect(container.querySelector('.lesson-complete-hero img')).toHaveAttribute('src', '/otter/v3/characters/joy.png');
+    expect(container.querySelector('.lesson-complete-hero img')).toBeNull();
     expect(container.querySelector('[data-lesson-check-summary]')).toHaveTextContent('정답률 100%');
     expect([...container.querySelectorAll('button')].find(button => button.textContent?.includes('다음 학습 선택하기'))).toHaveAttribute('data-tone', 'primary');
     expect(container.querySelector('[class*="success-"]')).toBeNull();
@@ -162,7 +162,7 @@ describe('레슨 이해 확인', () => {
     click('결과 보기');
     expect(container.querySelector('[data-lesson-check-summary]')).toHaveTextContent('1문제 중 0개 정답');
     expect(container.querySelector('[data-lesson-check-summary]')).toHaveTextContent('정답률 0%');
-    expect(container.querySelector('.lesson-complete-hero img')).toHaveAttribute('src', '/otter/v3/characters/study.png');
+    expect(container.querySelector('.lesson-complete-hero img')).toBeNull();
     expect(container.querySelector('.lesson-complete-review')).toHaveTextContent('다시 확인할 문제 1개');
     const buttons = [...container.querySelectorAll('button')];
     expect(buttons.find(button => button.textContent?.includes('틀린 문제 다시 풀기'))).toHaveAttribute('data-tone', 'primary');

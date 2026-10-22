@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react';
+import { Check } from '../ui/OtterIcons';
 import { weekDays } from '../../lib/streak';
 
 // 실제 출석 기록을 월~일로 표시한다. 오늘·완료·지난 날·예정일은 색뿐 아니라 표시로도 구분한다.

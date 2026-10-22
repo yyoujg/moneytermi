@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Check, X, Flame, Share2, Target, TrendingUp } from '../components/ui/OtterIcons';
+import { Check, X } from '../components/ui/OtterIcons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
@@ -25,9 +25,6 @@ import { praiseForAnswer, praiseForQuiz } from '../lib/praise';
 import { keepShortUnitsTogether } from '../lib/formatText';
 import { QuizAnswerFeedback } from '../components/learning/QuizAnswerFeedback';
 import { createQuizRequestId, type QuizAnswerResult } from '../lib/quizSubmission';
-
-// 결과의 장식 아이콘은 숫자와 분리하고 항목명 왼쪽에 같은 규격으로 둔다.
-const resultIconProps = { size: 18, strokeWidth: 1.8, className: 'quiz-result-icon', 'aria-hidden': true } as const;
 
 const quizShareMessage = (modeLabel: string, total: number, accuracy: number, maxCombo: number, words: Word[]) => {
   const learned = words.slice(0, 3).map(word => word.word).join(' · ');
@@ -180,7 +177,6 @@ const QuizScreen = () => {
 
     return (
       <LearningCompletionScreen
-        mascot="great"
         title={completionTitle}
         subtitle={`${baseQueue.length}문제 완료${retryQueue.length > 0 ? ` · 다시 푼 문제 ${retryQueue.length}개` : ''}`}
         actionLabel={navState?.nextRoute?.label ?? (backPath.startsWith('/course') ? '주제로 돌아가기' : '퀘스트로')}
@@ -189,21 +185,21 @@ const QuizScreen = () => {
           : navigate(backPath)}
       >
         <Card pad="lg" className="quiz-result-stats w-full flex flex-col gap-4 anim-fade-up" role="group" aria-label="퀴즈 결과 요약" style={{ '--i': 2 } as React.CSSProperties}>
-          <LearningStatRow label="모은 조개" icon={<PointIcon size={18} className="quiz-result-icon" />} withDivider={false}>
-            <span className="shrink-0 text-xl font-bold text-brand-500">+{earnedShown}개</span>
+          <LearningStatRow label="모은 코인" icon={<PointIcon size={18} className="quiz-result-icon" />} withDivider={false}>
+            <span className="shrink-0 text-xl font-bold text-[var(--color-reward-foreground)]">+{earnedShown}개</span>
           </LearningStatRow>
           <LearningStatRow label="획득 XP" icon={<XpIcon size={18} className="quiz-result-icon" />}>
-            <span className="shrink-0 text-xl font-bold text-[var(--color-ink)]">+{Math.max(0, xp - xpAtStart.current)}</span>
+            <span className="shrink-0 text-base font-semibold text-[var(--color-ink-2)]">+{Math.max(0, xp - xpAtStart.current)}</span>
           </LearningStatRow>
-          <LearningStatRow label="첫 시도 정답률" icon={<Target {...resultIconProps} />}>
+          <LearningStatRow label="첫 시도 정답률">
             <span className="text-xl font-bold text-[var(--color-ink)]">{accuracy}%</span>
           </LearningStatRow>
-          <LearningStatRow label="최고 연속 정답" icon={<Flame {...resultIconProps} />}>
-            <span className="shrink-0 text-xl font-bold text-[var(--color-ink)]">{maxCombo}연속</span>
+          <LearningStatRow label="최고 연속 정답">
+            <span className="shrink-0 text-base font-semibold text-[var(--color-ink-2)]">{maxCombo}연속</span>
           </LearningStatRow>
           {stageUp && (
-            <LearningStatRow label="단계 변화" icon={<TrendingUp {...resultIconProps} />}>
-              <span className="text-sm font-bold text-[var(--color-ink)]">{stageBefore.name} → {stageAfter.name} 승급!</span>
+            <LearningStatRow label="단계 변화">
+              <span className="text-sm font-semibold text-[var(--color-ink-2)]">{stageBefore.name} → {stageAfter.name} 승급!</span>
             </LearningStatRow>
           )}
         </Card>
@@ -213,30 +209,18 @@ const QuizScreen = () => {
           className="w-full anim-fade-up"
           style={{ '--i': 3 } as React.CSSProperties}
         />
-        <Card pad="md" className="w-full anim-fade-up" style={{ '--i': 4 } as React.CSSProperties}>
-          <p className="text-xs font-bold text-[var(--color-info)] mb-1!">이번에 확인한 내용</p>
-          <p className="text-sm font-semibold text-[var(--color-ink)] leading-relaxed break-keep">처음 푼 {baseQueue.length}문제 중 {firstCorrect}개에 정답을 골랐어요. 나중에 다시 보며 기억을 확인해요.</p>
-        </Card>
-        <Card pad="md" className="w-full flex flex-col gap-3 anim-fade-up" style={{ '--i': 5 } as React.CSSProperties}>
-          <div className="flex items-start gap-3">
-            <Share2 {...resultIconProps} className="quiz-result-icon mt-0.5" />
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold text-[var(--color-ink)]">오늘의 성과 공유하기</p>
-              <p className="mt-1! text-xs text-[var(--color-ink-3)] leading-relaxed break-keep">
-                정답률과 오늘 확인한 용어가 담긴 토스 링크를 보낼 수 있어요.
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={() => {
-              logClick('quiz_result_share', { mode: navState?.mode ?? 'quiz', total: baseQueue.length, accuracy, max_combo: maxCombo });
-              void shareTossLink('intoss://moneytermi/course', quizShareMessage(sessionLabel, baseQueue.length, accuracy, maxCombo, baseQueue));
-            }}
-            className="action-secondary w-full min-h-[46px] rounded-button text-sm font-bold active:opacity-90"
-          >
-            친구에게 공유
-          </button>
-        </Card>
+        <ActionButton
+          tone="secondary"
+          fullWidth
+          className="anim-fade-up"
+          style={{ '--i': 4 } as React.CSSProperties}
+          onClick={() => {
+            logClick('quiz_result_share', { mode: navState?.mode ?? 'quiz', total: baseQueue.length, accuracy, max_combo: maxCombo });
+            void shareTossLink('intoss://moneytermi/course', quizShareMessage(sessionLabel, baseQueue.length, accuracy, maxCombo, baseQueue));
+          }}
+        >
+          친구에게 공유
+        </ActionButton>
       </LearningCompletionScreen>
     );
   }
@@ -319,7 +303,7 @@ const QuizScreen = () => {
     const option = quizItem?.options.find(candidate => candidate.answer === selected);
     if (option) void handleSelect(option);
   };
-  const streakMessage = combo >= 5 ? `${combo}연속! x2 보너스` : combo >= 3 ? `${combo}연속! 조개 5개 보너스` : null;
+  const streakMessage = combo >= 5 ? `${combo}연속! x2 보너스` : combo >= 3 ? `${combo}연속! 코인 5개 보너스` : null;
   const answeredCorrectly = status === 'correct';
   const correctOption = quizItem?.options.find(option => option.isCorrect);
   const answerLabel = gradingConflict ? '' : quizItem?.type === 'word_to_meaning' ? currentWord.meaning : correctOption?.label ?? currentWord.word;
@@ -337,7 +321,7 @@ const QuizScreen = () => {
             {showPointPop && (
               <span
                 key={totalEarned}
-                className="anim-reward-rise absolute -top-1 right-0 text-xs font-bold text-brand-500 whitespace-nowrap"
+                className="anim-reward-rise absolute -top-1 right-0 text-xs font-bold text-[var(--color-reward-foreground)] whitespace-nowrap"
               >
                 +{lastEarned}개
               </span>
@@ -353,7 +337,7 @@ const QuizScreen = () => {
           ${status === 'correct' ? 'anim-answer-wash' : ''}
           ${shake ? 'anim-soft-nudge' : ''}
         `}>
-          <span className="text-xs font-bold text-brand-600">{quizItem?.promptLabel}</span>
+          <span className="text-xs text-[var(--color-ink-3)]">{quizItem?.promptLabel}</span>
 
           <h2 ref={questionHeadingRef} tabIndex={-1} className="quiz-prompt-main w-full text-xl font-bold text-[var(--color-ink)] leading-normal break-keep">
             {keepShortUnitsTogether(quizItem?.promptMain ?? '')}

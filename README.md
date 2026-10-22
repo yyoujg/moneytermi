@@ -34,7 +34,7 @@
 - **프레임워크/언어**: React 18.3, TypeScript 5.9, Vite 8
 - **라우팅**: React Router DOM 7
 - **스타일**: Tailwind CSS 4 (`@tailwindcss/vite`)
-- **UI 컴포넌트**: `@toss/tds-mobile`, `@toss/tds-mobile-ait` (Toss Design System), `lucide-react` (아이콘)
+- **UI 컴포넌트**: `@toss/tds-mobile`, `@toss/tds-mobile-ait` (Toss Design System), `@phosphor-icons/react` (듀오톤 아이콘)
 - **백엔드**: Supabase (`@supabase/supabase-js`) - DB, RPC, Edge Functions
 - **플랫폼 프레임워크**: `@apps-in-toss/web-framework` (Apps in Toss)
 - **모니터링**: `@sentry/react`

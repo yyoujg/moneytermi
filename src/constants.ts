@@ -33,13 +33,13 @@ export const ENERGY_REFILL_COST = 600;
 // 미션 보상 수령 시 서버가 함께 주는 XP (migration_xp.sql STEP 7 claim_mission_reward → add_xp 5)
 export const MISSION_XP = 5;
 
-// 표시 이름만 수달의 학습 성장 단계로 바꾼다. 단계 ID·누적 XP 기준·기존 저장값은 유지한다.
+// 표시 이름만 학습 성장 단계로 바꾼다. 단계 ID·누적 XP 기준·기존 저장값은 유지한다.
 export const GROWTH_STAGES: Omit<GrowthStage, 'nextMinPoints'>[] = [
-  { id: 1, name: '아기수달', emoji: '🌱', minPoints: 0 },
-  { id: 2, name: '꼬마수달', emoji: '🚀', minPoints: 20 },
-  { id: 3, name: '탐험수달', emoji: '🎯', minPoints: 100 },
-  { id: 4, name: '척척수달', emoji: '🌟', minPoints: 300 },
-  { id: 5, name: '박사수달', emoji: '🏆', minPoints: 800 },
+  { id: 1, name: '돈알못', emoji: '🌱', minPoints: 0 },
+  { id: 2, name: '짠테크러', emoji: '🚀', minPoints: 20 },
+  { id: 3, name: '갓생러', emoji: '🎯', minPoints: 100 },
+  { id: 4, name: '재테크러', emoji: '🌟', minPoints: 300 },
+  { id: 5, name: '경제고수', emoji: '🏆', minPoints: 800 },
 ];
 
 export const getGrowthStage = (points: number): GrowthStage => {

@@ -33,7 +33,7 @@ export const DailyAlarmPromptCard = () => {
   return (
     <Card pad="lg" className="w-full flex flex-col gap-3 anim-fade-up">
       <div className="flex items-center gap-3">
-        <IconBox className="rounded-chip bg-[var(--color-brand-soft)] text-[var(--color-brand-text)]">
+        <IconBox className="text-[var(--accent-slate)]">
           <Bell size={20} strokeWidth={2} aria-hidden="true" />
         </IconBox>
         <div>

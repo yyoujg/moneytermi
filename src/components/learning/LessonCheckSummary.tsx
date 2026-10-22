@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { ArrowRight, RotateCcw } from '../ui/ControlIcons';
 import { praiseForQuiz } from '../../lib/praise';
-import { Mascot } from '../Mascot';
 import { ActionButton } from '../ui/ActionButton';
 
 export type LessonCheckRoundResult = { correct: number; total: number };
@@ -27,7 +26,6 @@ export const LessonCheckSummary = ({ results, reviewCount, onRetry, onBack }: {
       <main className="lesson-complete-content">
         <p className="lesson-complete-overline">학습 결과</p>
         <div className="lesson-complete-hero">
-          <Mascot name={reviewCount === 0 ? 'great' : 'empty'} size={128} />
           <h1 ref={headingRef} tabIndex={-1}>{currentLabel} 완료!</h1>
           <p>{reviewCount === 0 ? (retryRound > 0 ? '헷갈렸던 문제를 모두 확인했어요.' : '방금 배운 내용을 한 번 더 확인했어요.') : '헷갈린 문제만 한 번 더 살펴볼까요?'}</p>
         </div>

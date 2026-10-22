@@ -12,7 +12,7 @@ export const PraiseNote = ({
     {...rest}
   >
     <div className="flex gap-2">
-      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--color-card)] text-brand-500">
+      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center text-[var(--accent-sage)]">
         <BadgeCheck size={16} strokeWidth={2.4} />
       </span>
       <div className="min-w-0">

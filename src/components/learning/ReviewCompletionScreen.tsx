@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { DailyAlarmPromptCard } from '../DailyAlarmPromptCard';
-import { Mascot } from '../Mascot';
 import { PointIcon } from '../StatIcons';
 import { StreakCelebration } from '../StreakCelebration';
 import { ActionButton } from '../ui/ActionButton';
@@ -22,9 +21,7 @@ export const ReviewCompletionScreen = ({ initialTotal, firstCorrect, points, not
       <main className="review-complete-content">
         <header className="review-complete-hero">
           <p className="review-complete-overline"><BookOpenText size={26} />오늘의 복습</p>
-          <div className="review-complete-mascot"><Mascot name="crown" size={124} /></div>
           <h1 ref={headingRef} tabIndex={-1}>오늘 복습을 마쳤어요</h1>
-          <p className="review-complete-subtitle">수달과 함께, 오늘도 한 걸음.</p>
         </header>
 
         <section className="review-complete-summary" aria-label={`첫 시도 ${initialTotal}문제 중 ${firstCorrect}개 정답`}>
@@ -36,9 +33,9 @@ export const ReviewCompletionScreen = ({ initialTotal, firstCorrect, points, not
           <div className="review-complete-note"><Lightbulb size={30} /><p>{note}</p></div>
         </section>
 
-        <section className="review-complete-wallet" aria-label={`보유 조개 ${points}개`}>
+        <section className="review-complete-wallet" aria-label={`보유 코인 ${points}개`}>
           <PointIcon size={36} />
-          <div className="review-complete-wallet-label"><h2>보유 조개</h2><p>지금 가지고 있는 조개예요</p></div>
+          <div className="review-complete-wallet-label"><h2>보유 코인</h2><p>지금 가지고 있는 코인이에요</p></div>
           <p className="review-complete-balance" data-review-balance><strong>{points}</strong><span>개</span></p>
         </section>
 

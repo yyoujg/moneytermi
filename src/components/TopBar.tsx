@@ -17,7 +17,7 @@ import { RollingNumber } from './RollingNumber';
 import { EnergyShopContent, type EnergyRefillNotice } from './EnergyShopContent';
 
 // 모든 화면 상단 고정 바. 아이콘 + 숫자만 나열한다(티어는 마이페이지에만).
-// 연속 학습·XP·배운 단어는 누르면 아래에 짧은 설명 말풍선, 조개는 구매 시트(광고 충전 / XP 2배 부스트)가 열린다.
+// 연속 학습·XP·배운 단어는 누르면 아래에 짧은 설명 말풍선, 코인은 구매 시트(광고 충전 / XP 2배 부스트)가 열린다.
 type Tip = 'streak' | 'xp' | 'words';
 const TIP_W = 256;
 
@@ -166,7 +166,7 @@ export const TopBar = () => {
     if (points < ENERGY_REFILL_COST) {
       setEnergyRefillNotice({
         tone: 'points',
-        text: `조개 ${(ENERGY_REFILL_COST - points).toLocaleString()}개 부족해요. 조개를 더 모으면 충전할 수 있어요.`,
+        text: `코인 ${(ENERGY_REFILL_COST - points).toLocaleString()}개 부족해요. 코인을 더 모으면 충전할 수 있어요.`,
       });
       logClick('energy_refill_blocked_points', { points, shortfall: ENERGY_REFILL_COST - points });
       return;
@@ -181,9 +181,9 @@ export const TopBar = () => {
     else if (result === 'pending') { showModal('충전했어요. 저장 상태는 자동으로 다시 확인해요'); closeShopAndReset(); }
     else if (result === 'full') { setEnergyRefillNotice({ tone: 'info', text: '에너지가 이미 가득 찼어요.' }); }
     else if (result === 'points') {
-      setEnergyRefillNotice({ tone: 'points', text: '잔액이 바뀌어 충전할 수 없어요. 조개를 더 모아 주세요.' });
+      setEnergyRefillNotice({ tone: 'points', text: '잔액이 바뀌어 충전할 수 없어요. 코인을 더 모아 주세요.' });
     } else {
-      setEnergyRefillNotice({ tone: 'network', text: '네트워크가 불안정해 충전하지 못했어요. 조개는 차감되지 않았어요.' });
+      setEnergyRefillNotice({ tone: 'network', text: '네트워크가 불안정해 충전하지 못했어요. 코인은 차감되지 않았어요.' });
     }
   };
 
@@ -195,7 +195,7 @@ export const TopBar = () => {
       const r = await buyBoost();
       if (r === 'ok') { feedbackBoost(); showModal('30분간 XP 2배!'); closeShopAndReset(); }
       else if (r === 'active') { showModal('이미 부스트 중이에요', 'error'); closeShopAndReset(); }
-      else if (r === 'points') showModal('잔액이 바뀌어 조개가 부족해요. 잔액을 확인해 주세요', 'error');
+      else if (r === 'points') showModal('잔액이 바뀌어 코인이 부족해요. 잔액을 확인해 주세요', 'error');
       else if (r !== 'pending') showModal('구매 결과를 확인하지 못했어요. 잠시 후 잔액과 부스트 상태를 다시 확인해 주세요', 'error');
     } catch {
       showModal('구매 결과를 확인하지 못했어요. 잠시 후 잔액과 부스트 상태를 다시 확인해 주세요', 'error');
@@ -217,7 +217,7 @@ export const TopBar = () => {
           {!compactBar && <button onClick={e => toggleTip('xp', e)} aria-label="경험치" className="flex min-h-11 min-w-11 items-center justify-center gap-1 active:opacity-60">
             <XpIcon size={19} /><span><RollingNumber value={xp} /></span>
           </button>}
-          <button onClick={() => { setTip(null); setEnergyRefillNotice(null); openShop(); }} aria-label="조개 상점" className="flex min-h-11 min-w-11 items-center justify-center gap-1 active:opacity-60">
+          <button onClick={() => { setTip(null); setEnergyRefillNotice(null); openShop(); }} aria-label="코인 상점" className="flex min-h-11 min-w-11 items-center justify-center gap-1 active:opacity-60">
             <PointIcon size={19} /><span><RollingNumber value={points} /></span>
           </button>
           <button onClick={e => toggleTip('words', e)} aria-label="익힌 용어" className="flex min-h-11 min-w-11 items-center justify-center gap-1 active:opacity-60">
@@ -241,7 +241,7 @@ export const TopBar = () => {
             </p>
             <p className="relative mt-1 text-2xs text-[var(--color-tooltip-ink)] leading-relaxed break-keep">
               {tip === 'streak' ? '오늘까지 하루도 빠지지 않고 학습한 날 수예요. 하루라도 쉬면 처음부터 다시 세요.'
-                : tip === 'xp' ? `학습과 퀴즈로 쌓여요. 리그 순위와 성장 단계는 XP로 정해지고, XP ${XP_BONUS_STEP}마다 조개 ${XP_BONUS_POINTS}개를 더 받아요.`
+                : tip === 'xp' ? `학습과 퀴즈로 쌓여요. 리그 순위와 성장 단계는 XP로 정해지고, XP ${XP_BONUS_STEP}마다 코인 ${XP_BONUS_POINTS}개를 더 받아요.`
                 : '학습을 마친 용어 수예요. 같은 용어를 다시 배워도 늘지 않아요.'}
             </p>
           </div>
@@ -252,7 +252,7 @@ export const TopBar = () => {
         open={shopOpen}
         className="original-modal"
         onDimmerClick={rewardedAdPending ? () => {} : closeShopAndReset}
-        header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>{shopReason === 'lesson' ? '조개가 부족해요' : shopReason === 'energy' ? '에너지' : '조개 상점'}</span>}
+        header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>{shopReason === 'lesson' ? '코인이 부족해요' : shopReason === 'energy' ? '에너지' : '코인 상점'}</span>}
       >
         {shopReason === 'energy' ? (
           <EnergyShopContent
@@ -274,13 +274,13 @@ export const TopBar = () => {
         ) : (
           <div className="px-5 pb-6 flex flex-col gap-2">
             {shopReason === 'lesson' && (
-              <p className="text-sm font-bold text-[var(--color-ink)] mb-1 break-keep">학습 시작에는 조개가 필요하지 않아요</p>
+              <p className="text-sm font-bold text-[var(--color-ink)] mb-1 break-keep">학습 시작에는 코인이 필요하지 않아요</p>
             )}
             <div className="mb-2 flex items-center gap-3">
               <PointIcon size={44} />
               <div className="min-w-0">
-                <p className="text-sm font-bold text-[var(--color-ink)]">차곡차곡 모은 조개</p>
-                <p className="mt-1! text-xs text-[var(--color-ink-3)]">보유 조개 {points.toLocaleString()}개</p>
+                <p className="text-sm font-bold text-[var(--color-ink)]">차곡차곡 모은 코인</p>
+                <p className="mt-1! text-xs text-[var(--color-ink-3)]">보유 코인 {points.toLocaleString()}개</p>
               </div>
             </div>
 
@@ -290,14 +290,14 @@ export const TopBar = () => {
               disabled={rewardedAdAvailable && (!rewardedAdReady || rewardedAdPending !== null)}
               className="action-secondary grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-chip px-4 py-4 text-sm font-bold active:opacity-70"
             >
-              <span className="flex min-w-0 items-center gap-2 text-left leading-5"><Tv size={18} className="shrink-0" />광고 보고 조개 받기</span>
+              <span className="flex min-w-0 items-center gap-2 text-left leading-5"><Tv size={18} className="shrink-0" />광고 보고 코인 받기</span>
               <span className="shrink-0 text-right text-2xs font-normal leading-4 opacity-80">
                 {rewardedAdPending === 'points' ? '여는 중' : rewardedAdPreparing ? '준비 중' : rewardedAdReady ? '시청 후 받기' : '잠시 후'}
               </span>
             </button>
             {rewardedAdAvailable && !rewardedAdReady && (
               <p role="status" className="text-2xs font-semibold text-[var(--color-ink-4)] leading-relaxed break-keep">
-                광고를 미리 준비하고 있어요. 버튼이 활성화되면 시청 후 조개를 받을 수 있어요.
+                광고를 미리 준비하고 있어요. 버튼이 활성화되면 시청 후 코인을 받을 수 있어요.
               </p>
             )}
 
@@ -311,18 +311,18 @@ export const TopBar = () => {
               <span className="shrink-0 text-right text-2xs font-normal leading-4">
                 {boostPending ? '구매 확인 중' : boostLeft > 0
                   ? `${Math.floor(boostLeft / 60000)}:${String(Math.floor((boostLeft % 60000) / 1000)).padStart(2, '0')} 남음`
-                  : points < 300 ? `조개 ${(300 - points).toLocaleString()}개 더 필요` : '조개 300개 · 30분'}
+                  : points < 300 ? `코인 ${(300 - points).toLocaleString()}개 더 필요` : '코인 300개 · 30분'}
               </span>
             </button>
 
             <div className="rounded-chip px-4 py-3 mt-1" style={{ backgroundColor: 'var(--color-surface)' }}>
               <p className="text-2xs font-bold text-[var(--color-ink-3)] mb-1!">학습으로 모으기</p>
               <p className="text-2xs text-[var(--color-ink-4)] leading-relaxed break-keep">
-                퀴즈 정답 조개 +10~20개 · 미션 보상 +10~50개 · XP {XP_BONUS_STEP}마다 조개 +{XP_BONUS_POINTS}개
+                퀴즈 정답 코인 +10~20개 · 미션 보상 +10~50개 · XP {XP_BONUS_STEP}마다 코인 +{XP_BONUS_POINTS}개
               </p>
             </div>
             <p className="text-2xs text-[var(--color-ink-4)] mt-1 leading-relaxed">
-              새 학습과 코스 퀴즈를 처음 시작할 때 에너지 1을 써요. 이어하기, 다시 보기, 복습은 무료예요. 조개는 선택한 에너지 충전과 부스트에만 써요.
+              새 학습과 코스 퀴즈를 처음 시작할 때 에너지 1을 써요. 이어하기, 다시 보기, 복습은 무료예요. 코인은 선택한 에너지 충전과 부스트에만 써요.
             </p>
           </div>
         )}

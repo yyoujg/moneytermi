@@ -12,6 +12,7 @@ import { maskTerm } from '../lib/quiz';
 import { feedbackCorrect, feedbackWrong, feedbackQuizComplete } from '../lib/feedback';
 import { useSettings } from '../hooks/useSettings';
 import { Card } from '../components/ui/Card';
+import { ActionButton } from '../components/ui/ActionButton';
 import { shouldScheduleRetry } from '../lib/review';
 import { shuffle } from '../lib/random';
 import { ReviewCompletionScreen } from '../components/learning/ReviewCompletionScreen';
@@ -168,7 +169,6 @@ const QuizPage = () => {
     const nothingLearned = knownWords.length === 0;
     return (
       <LearningEmptyState
-        mascot="empty"
         title={nothingLearned ? '다시 볼 용어가 아직 없어요' : '오늘 다시 보기 완료'}
         description={nothingLearned ? '자주 마주치는 용어를 배우면 다음 날부터 다시 보기가 열려요' : '지금 다시 볼 용어가 없어요'}
         actionLabel={nothingLearned ? '시작하러 가기' : '퀘스트로'}
@@ -206,21 +206,21 @@ const QuizPage = () => {
       <div className="flex-1 flex flex-col px-5 py-4">
         {/* 문제 카드 */}
         <Card key={word.id} tone="card" pad="lg" className="mb-4 flex-1 anim-slide-in">
-          <p className="text-sm font-semibold text-[var(--color-ink-3)] mb-3!">뜻을 보고 어떤 용어인지 맞혀보세요</p>
+          <p id="review-prompt-guide" className="text-xs text-[var(--color-ink-3)] mb-3!">뜻을 보고 어떤 용어인지 맞혀보세요</p>
 
           <p className="quiz-prompt-main text-lg font-bold text-[var(--color-ink)] leading-relaxed mb-6!">{keepShortUnitsTogether(maskTerm(word.meaning, word.word))}</p>
 
           {showHint && (
-            <Card pad="sm" className="flex items-center gap-2 mb-4">
+            <p className="flex items-center gap-2 mb-4!">
               <Lightbulb size={14} className="text-[var(--color-ink-3)] shrink-0" />
               <span className="text-base font-bold text-[var(--color-ink)] tracking-widest">{word.hint}</span>
-            </Card>
+            </p>
           )}
 
-          <Card pad="md">
-            <p className="text-xs font-bold text-[var(--color-ink-3)] mb-1!">상세 설명</p>
+          <div className="border-t border-[var(--color-line)] pt-4">
+            <p className="text-xs text-[var(--color-ink-3)] mb-1!">상세 설명</p>
             <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep">{keepShortUnitsTogether(maskTerm(word.detailedMeaning, word.word))}</p>
-          </Card>
+          </div>
         </Card>
 
         {/* 입력 + 제출 */}
@@ -230,7 +230,8 @@ const QuizPage = () => {
               ref={inputRef}
               value={input}
               onChange={(e) => { if (!attemptRef.current && !submittingRef.current) setInput(e.target.value); }}
-              placeholder="정답을 입력하세요"
+              aria-labelledby="review-prompt-guide"
+              placeholder="용어를 입력하세요"
               disabled={status !== 'idle'}
               autoComplete="off"
               className={`w-full px-4 py-4 rounded-button text-sm font-normal outline-none border transition-colors
@@ -244,22 +245,21 @@ const QuizPage = () => {
               <p className="text-xs font-bold text-success-400 mt-1! px-1">정답! 바로 맞혔어요{capped ? ' 오늘 보상 한도에 도달했어요' : lastEarned > 0 ? ` +${lastEarned}개` : ''}</p>
             )}
             {status === 'wrong' && (
-              <p className="text-xs font-bold text-danger-400 mt-1! px-1">틀렸어요. 다시 시도해보세요!</p>
+              <p className="text-xs font-bold text-danger-400 mt-1! px-1">틀렸어요. 정답: {word.word}</p>
             )}
           </div>
 
           <p role="status" aria-live="polite" aria-atomic="true" className={status === 'save-error' || status === 'saving' ? 'text-xs text-[var(--color-ink-2)]' : 'sr-only'}>
             {status === 'save-error' ? '답안 저장을 확인하지 못했어요. 같은 답안으로 다시 저장해 주세요.' : status === 'saving' ? '답안을 저장하고 있어요.' : ''}
           </p>
-          <button
+          <ActionButton
             ref={retryRef}
-            type="button"
+            fullWidth
             onClick={() => handleSubmit()}
             disabled={(status !== 'idle' && status !== 'save-error') || !input.trim()}
-            className="w-full py-4 rounded-button bg-brand-500 text-white text-xs font-bold active:opacity-90 disabled:opacity-100"
           >
-            {status === 'save-error' ? '다시 저장하기' : status === 'saving' ? '저장 중' : '제출하기'}
-          </button>
+            {status === 'save-error' ? '다시 저장하기' : status === 'saving' ? '저장 중' : '정답 확인'}
+          </ActionButton>
         </form>
 
         <Spacing size={12} />
@@ -270,7 +270,7 @@ const QuizPage = () => {
             <button
               onClick={() => { if (status === 'idle' && !attemptRef.current && !submittingRef.current) setShowHint(true); }}
               disabled={status !== 'idle'}
-              className="action-secondary flex-1 flex items-center justify-center gap-1 py-3 rounded-button text-sm font-bold active:opacity-70"
+              className="action-secondary flex-1 flex items-center justify-center gap-1 py-3 rounded-button text-sm font-semibold active:opacity-70"
             >
               <Lightbulb size={13} className="text-[var(--color-ink-4)]" /> 초성 힌트
             </button>
@@ -278,7 +278,7 @@ const QuizPage = () => {
           <button
             onClick={() => { if (status === 'idle' && !attemptRef.current && !submittingRef.current) goNext(); }}
             disabled={status !== 'idle'}
-            className="action-secondary flex-1 flex items-center justify-center gap-1 py-3 rounded-button text-sm font-bold active:opacity-70"
+            className="action-secondary flex-1 flex items-center justify-center gap-1 py-3 rounded-button text-sm font-semibold active:opacity-70"
           >
             <ChevronRight size={13} /> 건너뛰기
           </button>

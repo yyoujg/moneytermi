@@ -59,6 +59,52 @@
   --red-600: #cc3340;
   --red-900: #3c252c;
 
+  /* 메인 컬러는 탠저린 하나. 주행동(CTA) 버튼에만 쓴다. 흰 글자 대비 4.5:1 이상. */
+  --tangerine-500: #cc4c1a;
+  --tangerine-600: #bd4819;
+
+  /* 보조색 5개: 메인보다 채도를 낮춰 아이콘·진행·상태에만 쓴다. -ink는 글자용(4.5:1 이상). */
+  --accent-sage: #5f8f7a;
+  --accent-sage-ink: #4a7362;
+  --accent-rose: #c2707a;
+  --accent-rose-ink: #a4505b;
+  --accent-amber: #c08a3e;
+  --accent-amber-ink: #8e6020;
+  --accent-slate: #5e7a99;
+  --accent-slate-ink: #4c6683;
+  --accent-lavender: #7c74b8;
+  --accent-lavender-ink: #615aa0;
+  --accent-sage-soft: #eaf2ee;
+  --accent-rose-soft: #f8ecee;
+
+  /* 리그 순위·배지 장식 전용 원시값. 의미 역할을 거치지 않고 아래 영역에서만 쓴다. */
+  --gray-40: #f4f5f7;
+  --gold-100: #f1e7c9;
+  --gold-800: #4a4434;
+  --silver-100: #e9ecf1;
+  --silver-800: #3c4048;
+  --bronze-100: #f0e0d3;
+  --bronze-800: #4b3e36;
+  --sage-50: #e7f1ec;
+  --sage-150: #b6d4c2;
+  --sage-200: #bfd3c8;
+  --sage-600: #4e695a;
+  --sage-700: #496557;
+  --sage-900: #2d3c34;
+  --sage-ring: rgba(73, 101, 87, 0.12);
+  --amber-50: #fff0df;
+  --amber-200: #ebc69b;
+  --amber-600: #776247;
+  --amber-700: #995100;
+  --amber-ring: rgba(153, 81, 0, 0.14);
+  --violet-50: #eeeaf8;
+  --violet-150: #d9c9f1;
+  --violet-200: #d9d1ed;
+  --violet-600: #635573;
+  --violet-700: #51456f;
+  --violet-900: #3c354c;
+  --violet-ring: rgba(81, 69, 111, 0.14);
+
   /* 글자 크기 8단계. 화면은 아래 역할 이름만 쓴다. */
   --font-size-caption: 11px;
   --font-size-label: 13px;
@@ -75,6 +121,9 @@
   --line-height-title: 1.4;
   --line-height-body: 1.5;
   --line-height-relaxed: 1.6;
+  /* 자간 2단계: 제목(20~28px)과 큰 숫자(34px). 본문은 0. */
+  --letter-spacing-title: -0.025em;
+  --letter-spacing-display: -0.03em;
 
   /* 간격은 4px 격자. 2px는 아이콘·글자 사이 미세 조정에만 쓴다. */
   --space-1: 4px;
@@ -106,23 +155,23 @@
   --color-line: var(--gray-150);
   --color-line-strong: var(--gray-450);
 
-  /* 주행동은 차콜, 선택과 작은 장식은 민트 계열로 분리한다. */
-  --color-brand-action: var(--gray-750);
-  --color-brand-pressed: var(--gray-800);
-  --color-brand-accent: var(--green-340);
-  --color-brand-decoration: var(--green-700);
+  /* 주행동만 탠저린. 선택·장식은 중성색으로 두어 메인 컬러가 CTA에만 보이게 한다. */
+  --color-brand-action: var(--tangerine-500);
+  --color-brand-pressed: var(--tangerine-600);
+  --color-brand-accent: var(--color-ink-3);
+  --color-brand-decoration: var(--color-ink-2);
   --color-brand-text: var(--color-ink-2);
-  --color-brand-soft: var(--green-75);
-  --color-brand-line: var(--green-150);
-  --color-brand-line-strong: var(--green-500);
+  --color-brand-soft: var(--color-surface);
+  --color-brand-line: var(--color-line);
+  --color-brand-line-strong: var(--color-line-strong);
   --color-brand-on-light-surface: var(--color-ink-2);
   --color-on-brand: var(--gray-0);
 
   /* 행동: 주요/보조/비활성을 구분하되 모든 채운 버튼의 글자는 흰색. */
   --color-action-secondary: var(--gray-600);
   --color-action-secondary-pressed: var(--gray-650);
-  --color-action-soft: var(--color-surface);
-  --color-action-soft-pressed: var(--gray-100);
+  --color-action-soft: var(--gray-100);
+  --color-action-soft-pressed: var(--gray-150);
   --color-on-action-soft: var(--color-ink-2);
   --color-button-secondary: var(--color-surface);
   --color-button-disabled: var(--gray-500);
@@ -130,33 +179,34 @@
   --color-action-boundary: var(--color-line-strong);
 
   /* 진행은 비문자 대비 3:1, 보상 글자는 4.5:1 이상으로 구분한다. */
-  --color-progress: var(--orange-500);
-  --color-reward-foreground: var(--orange-700);
-  --color-selection-soft: var(--color-brand-soft);
-  --color-selection-ink: var(--green-800);
-  --color-character-stage: var(--orange-50);
+  --color-progress: var(--accent-slate);
+  --color-reward-foreground: var(--accent-amber-ink);
+  --color-selection-soft: var(--color-surface);
+  --color-selection-ink: var(--color-ink);
+  --color-character-stage: var(--color-surface);
   --color-filter-tray: var(--gray-100);
 
   /* 의미색: 정답·완료·오류 등 상태 전달에만 사용한다. */
-  --color-success-foreground: var(--green-750);
-  --color-success-action: var(--green-750);
-  --color-success-soft: var(--green-50);
+  --color-success-foreground: var(--accent-sage-ink);
+  --color-success-action: var(--accent-sage-ink);
+  --color-success-soft: var(--accent-sage-soft);
   --color-success-mark: var(--gray-0);
-  --color-danger-foreground: var(--red-600);
-  --color-danger-action: var(--red-600);
-  --color-danger-line: var(--red-350);
-  --color-danger-soft: var(--red-50);
-  --color-warning-foreground: var(--orange-750);
+  --color-danger-foreground: var(--accent-rose-ink);
+  --color-danger-action: var(--accent-rose-ink);
+  --color-danger-line: var(--accent-rose);
+  --color-danger-soft: var(--accent-rose-soft);
+  --color-warning-foreground: var(--accent-amber-ink);
   --color-info: var(--color-ink-2);
   --color-info-soft: var(--color-surface);
   --color-info-line: var(--color-line);
 
   /* 실제 경험치·재화는 중성 역할을 보존하고 일반 진행·보상 장식과 분리한다. */
   --color-stat-ink: var(--color-ink);
-  --color-stat-streak: var(--color-brand-decoration);
-  --color-stat-xp: var(--color-ink-2);
-  --color-stat-points: var(--color-ink-2);
-  --color-stat-words: var(--color-ink-2);
+  --color-stat-streak: var(--accent-rose);
+  --color-stat-xp: var(--accent-lavender);
+  --color-stat-points: var(--accent-amber);
+  --color-stat-words: var(--accent-sage);
+  --color-stat-energy: var(--accent-slate);
   --color-xp: var(--color-ink-2);
   --color-xp-soft: var(--color-surface);
   --color-points: var(--color-ink-2);
@@ -169,10 +219,10 @@
   --color-wash-mid: var(--color-surface);
   --color-hero-start: var(--color-card);
   --color-hero-end: var(--color-card);
-  --color-hero-deep: var(--color-brand-decoration);
+  --color-hero-deep: var(--color-ink-2);
   --color-hero-ink: var(--color-ink);
   --color-hero-chip: var(--color-surface);
-  --color-hero-chip-line: var(--color-brand-decoration);
+  --color-hero-chip-line: var(--color-line-strong);
   --color-hero-complete: var(--color-brand-action);
   --color-hero-complete-ink: var(--color-on-brand);
   --color-tooltip: var(--gray-750);
@@ -180,7 +230,7 @@
   --color-overlay: rgba(20, 23, 29, 0.5);
   --color-league-symbol-ink: var(--gray-720);
   --color-league-hero: var(--color-card);
-  --color-league-first: var(--color-brand-soft);
+  --color-league-first: var(--color-surface);
   --color-league-second: var(--color-surface);
   --color-league-third: var(--color-surface);
 
@@ -226,29 +276,23 @@
   --color-ink-3: var(--gray-300);
   --color-line: var(--gray-700);
   --color-line-strong: var(--gray-400);
-  /* 흰 글자와 중성 바탕의 대비를 모두 확보하는 중성 주행동. */
-  --color-brand-action: var(--gray-520);
-  --color-brand-pressed: var(--gray-540);
-  --color-brand-accent: var(--green-300);
-  --color-brand-decoration: var(--green-320);
-  --color-brand-soft: var(--green-900);
-  --color-brand-line: var(--green-600);
-  --color-brand-line-strong: var(--green-360);
+  --accent-sage: #8dc0a8;
+  --accent-sage-ink: #8dc0a8;
+  --accent-rose: #e3949d;
+  --accent-rose-ink: #e3949d;
+  --accent-amber: #e0b068;
+  --accent-amber-ink: #e0b068;
+  --accent-slate: #93aecb;
+  --accent-slate-ink: #93aecb;
+  --accent-lavender: #aba4e0;
+  --accent-lavender-ink: #aba4e0;
+  --accent-sage-soft: #22302a;
+  --accent-rose-soft: #3a2629;
   --color-action-secondary: var(--gray-600);
   --color-action-secondary-pressed: var(--gray-650);
   --color-action-soft: var(--gray-800);
   --color-action-soft-pressed: var(--gray-830);
-  --color-progress: var(--orange-350);
-  --color-reward-foreground: var(--orange-300);
-  --color-selection-ink: var(--green-200);
-  --color-character-stage: var(--orange-900);
   --color-filter-tray: var(--gray-830);
-  --color-success-foreground: var(--green-380);
-  --color-success-soft: var(--green-950);
-  --color-danger-foreground: var(--red-300);
-  --color-danger-line: var(--red-500);
-  --color-danger-soft: var(--red-900);
-  --color-warning-foreground: var(--orange-380);
   --color-tooltip: var(--gray-50);
   --color-tooltip-ink: var(--gray-850);
   --color-overlay: rgba(0, 0, 0, 0.65);
@@ -266,10 +310,6 @@
   --color-brand-ink: var(--color-brand-decoration);
   --color-brand-on-light-surface: var(--color-ink-2);
   --color-brand-cream: var(--color-brand-soft);
-  --color-stat-streak: var(--color-brand-decoration);
-  --color-stat-xp: var(--color-ink-2);
-  --color-stat-points: var(--color-ink-2);
-  --color-stat-words: var(--color-ink-2);
   --color-xp-soft: var(--color-surface);
   --color-points-soft: var(--color-surface);
   --radius-card: var(--shape-card);
@@ -283,60 +323,22 @@
   --color-league-first: var(--color-card);
   --color-league-second: var(--color-card);
   --color-league-third: var(--color-card);
-  --color-league-first-emphasis: #f1e7c9;
-  --color-league-second-emphasis: #e9ecf1;
-  --color-league-third-emphasis: #f0e0d3;
-  --color-league-podium-ink: #45484f;
+  --color-league-first-emphasis: var(--gold-100);
+  --color-league-second-emphasis: var(--silver-100);
+  --color-league-third-emphasis: var(--bronze-100);
+  --color-league-podium-ink: var(--gray-720);
 }
 .dark .league-screen {
   --color-league-first: var(--color-card);
   --color-league-second: var(--color-card);
   --color-league-third: var(--color-card);
-  --color-league-first-emphasis: #4a4434;
-  --color-league-second-emphasis: #3c4048;
-  --color-league-third-emphasis: #4b3e36;
-  --color-league-podium-ink: #f4f5f7;
+  --color-league-first-emphasis: var(--gold-800);
+  --color-league-second-emphasis: var(--silver-800);
+  --color-league-third-emphasis: var(--bronze-800);
+  --color-league-podium-ink: var(--gray-40);
 }
-.badge-tone[data-badge-stat='words'] {
-  --badge-bg: #e7f1ec;
-  --badge-ink: #496557;
-  --badge-line: #bfd3c8;
-  --badge-ring: rgba(73, 101, 87, 0.12);
-}
-.badge-tone[data-badge-stat='streak'] {
-  --badge-bg: #fff0df;
-  --badge-ink: #995100;
-  --badge-line: #ebc69b;
-  --badge-ring: rgba(153, 81, 0, 0.14);
-}
-.badge-tone[data-badge-stat='xp'] {
-  --badge-bg: #eeeaf8;
-  --badge-ink: #51456f;
-  --badge-line: #d9d1ed;
-  --badge-ring: rgba(81, 69, 111, 0.14);
-}
-.dark .badge-tone[data-badge-stat='words'] {
-  --badge-bg: #2d3c34;
-  --badge-ink: #b6d4c2;
-  --badge-line: #4e695a;
-}
-.dark .badge-tone[data-badge-stat='streak'] {
-  --badge-bg: #40382f;
-  --badge-ink: #f3bc72;
-  --badge-line: #776247;
-}
-.dark .badge-tone[data-badge-stat='xp'] {
-  --badge-bg: #3c354c;
-  --badge-ink: #d9c9f1;
-  --badge-line: #635573;
-}
-.badge-tone[data-earned='false'] {
-  --badge-bg: var(--color-surface);
-  --badge-ink: var(--color-ink-3);
-  --badge-line: var(--color-line);
-}
-.dark .badge-tone[data-earned='false'] {
-  --badge-bg: var(--color-surface);
-  --badge-ink: var(--color-ink-3);
-  --badge-line: var(--color-line);
-}
+/* 배지는 바탕 없이 보조색 테두리·글자로만 구분한다. */
+.badge-tone[data-badge-stat='words'] { --badge-ink: var(--accent-sage-ink); --badge-line: var(--accent-sage); --badge-ring: var(--accent-sage); }
+.badge-tone[data-badge-stat='streak'] { --badge-ink: var(--accent-rose-ink); --badge-line: var(--accent-rose); --badge-ring: var(--accent-rose); }
+.badge-tone[data-badge-stat='xp'] { --badge-ink: var(--accent-lavender-ink); --badge-line: var(--accent-lavender); --badge-ring: var(--accent-lavender); }
+.badge-tone[data-earned='false'] { --badge-ink: var(--color-ink-3); --badge-line: var(--color-line); }

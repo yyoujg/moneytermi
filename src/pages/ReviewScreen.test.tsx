@@ -83,7 +83,7 @@ const mount = async (queue: Word[]) => {
       field.dispatchEvent(new Event('input', { bubbles: true }));
       field.dispatchEvent(new Event('change', { bubbles: true }));
     });
-    const button = [...container.querySelectorAll('button')].find(el => el.textContent?.includes('제출하기'))!;
+    const button = [...container.querySelectorAll('button')].find(el => el.textContent?.includes('정답 확인'))!;
     await act(async () => {
       button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
@@ -150,18 +150,18 @@ describe('ReviewScreen retry spacing', () => {
 });
 
 
-describe('복습 조개 표시', () => {
-  it.each([0, 1234])('보유 조개는 실제 잔액 %i개를 그대로 표시한다', async points => {
+describe('복습 코인 표시', () => {
+  it.each([0, 1234])('보유 코인은 실제 잔액 %i개를 그대로 표시한다', async points => {
     state.points = points;
     const { container, submit } = await mount([word(1)]);
     await submit('용어1');
     await act(async () => { vi.advanceTimersByTime(900); });
-    expect(container.querySelector('.review-complete-wallet')).toHaveAttribute('aria-label', '보유 조개 ' + points + '개');
+    expect(container.querySelector('.review-complete-wallet')).toHaveAttribute('aria-label', '보유 코인 ' + points + '개');
     expect(container.querySelector('[data-review-balance]')).toHaveTextContent(points + '개');
     expect(container.textContent).not.toContain('누적 포인트');
   });
 
-  it('정답 보상을 조개 개수로 표시하고 제출 인수를 유지한다', async () => {
+  it('정답 보상을 코인 개수로 표시하고 제출 인수를 유지한다', async () => {
     state.submitQuizAnswer.mockResolvedValue(receipt(true, { combo: 3, earned: 28 }));
     const { container, submit } = await mount([word(1)]);
     await submit('용어1');
@@ -170,7 +170,7 @@ describe('복습 조개 표시', () => {
     expect(state.submitQuizAnswer).toHaveBeenCalledWith(1, '용어1', 'typed', false, true, expect.any(String));
   });
 
-  it('보상 한도일 때 조개 수치 대신 기존 한도 문구를 유지한다', async () => {
+  it('보상 한도일 때 코인 수치 대신 기존 한도 문구를 유지한다', async () => {
     state.submitQuizAnswer.mockResolvedValue(receipt(true, { capped: true }));
     const { container, submit } = await mount([word(1)]);
     await submit('용어1');
@@ -300,7 +300,7 @@ describe('복습 답안의 확정 저장', () => {
     expect(state.recordReview).toHaveBeenCalledWith(1, correct, false);
     expect(feedbackCorrect).toHaveBeenCalledTimes(correct ? 1 : 0);
     expect(feedbackWrong).toHaveBeenCalledTimes(correct ? 0 : 1);
-    expect(container).toHaveTextContent(correct ? '정답! 바로 맞혔어요' : '틀렸어요. 다시 시도해보세요!');
+    expect(container).toHaveTextContent(correct ? '정답! 바로 맞혔어요' : '틀렸어요. 정답:');
     expect(container).toHaveTextContent(correct ? '복습 1 / 2' : '복습 1 / 3');
     await act(async () => { vi.advanceTimersByTime(correct ? 900 : 1000); });
     state.submitQuizAnswer.mockResolvedValue(receipt(true));
@@ -344,7 +344,7 @@ describe('복습 답안의 확정 저장', () => {
       const form = container.querySelector('form')!;
       form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
       form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-      [...container.querySelectorAll('button')].find(button => button.textContent === '제출하기')!.click();
+      [...container.querySelectorAll('button')].find(button => button.textContent === '정답 확인')!.click();
     });
     expect(state.submitQuizAnswer).toHaveBeenCalledTimes(1);
     await act(async () => { grading.resolve(receipt(true)); });

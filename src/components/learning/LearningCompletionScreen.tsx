@@ -1,13 +1,8 @@
-import type { ComponentProps, CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { DailyAlarmPromptCard } from '../DailyAlarmPromptCard';
-import { Mascot } from '../Mascot';
 import { StreakCelebration } from '../StreakCelebration';
 
-type MascotName = ComponentProps<typeof Mascot>['name'];
-
 export const LearningCompletionScreen = ({
-  mascot,
-  mascotSize = 130,
   title,
   subtitle,
   children,
@@ -16,8 +11,6 @@ export const LearningCompletionScreen = ({
   actionPlacement = 'bottom',
   titleSize = '2xl',
 }: {
-  mascot: MascotName;
-  mascotSize?: number;
   title: string;
   subtitle: ReactNode;
   children?: ReactNode;
@@ -38,13 +31,9 @@ export const LearningCompletionScreen = ({
   return (
     <div className="app-soft-screen flex h-full flex-col">
       <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden flex flex-col items-center justify-center-safe px-8 py-6 gap-5">
-        <div className="anim-reward-pop">
-          <Mascot name={mascot} size={mascotSize} />
-        </div>
         <div className="text-center anim-fade-up" style={{ '--i': 1 } as CSSProperties}>
           <h2 className={`${titleSize === '2xl' ? 'text-2xl' : 'text-xl'} font-bold text-[var(--color-ink)] mb-1!`}>{title}</h2>
           <p className="text-sm text-[var(--color-ink-4)]">{subtitle}</p>
-          <p className="mt-2! text-xs text-[var(--color-ink-3)] break-keep">수달과 함께, 오늘도 차근차근 배웠어요.</p>
         </div>
         {children}
         <div className={`w-full ${actionPlacement === 'inline' ? 'max-w-sm mb-3' : ''}`}>

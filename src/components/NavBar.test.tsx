@@ -79,13 +79,12 @@ describe('NavBar new badges', () => {
     const container = await mount(path);
     const active = container.querySelector('button[aria-current="page"]');
     expect(active).toBeInTheDocument();
-    expect(active?.querySelector('img[data-icon]')).toHaveAttribute('src', expect.stringMatching(/^\/otter\/v3\/icons\/(library|checklist|chart|profile)\.png$/));
-    expect(active?.querySelector('img[data-icon]')).not.toHaveClass('app-nav-muted');
-    expect(active?.querySelector('img[data-icon]')).toHaveClass('text-[var(--color-ink)]');
+    expect(active?.querySelector('svg[data-icon]')?.getAttribute('data-icon')).toMatch(/^(LibraryBig|ListChecks|ChartNoAxesColumnIncreasing|UserRound)$/);
+    expect(active?.querySelector('svg[data-icon]')).toHaveClass('text-[var(--color-ink)]');
     expect(active?.querySelector(':scope > span')).toHaveClass('text-[var(--color-ink)]');
     for (const inactive of container.querySelectorAll('button:not([aria-current])')) {
-      expect(inactive.querySelector('img[data-icon]')).toHaveClass('app-nav-muted');
-      expect(inactive.querySelector(':scope > span')).toHaveClass('app-nav-muted');
+      expect(inactive.querySelector('svg[data-icon]')).toHaveClass('text-[var(--color-ink-3)]');
+      expect(inactive.querySelector(':scope > span')).toHaveClass('text-[var(--color-ink-3)]');
     }
   });
 
@@ -99,7 +98,8 @@ describe('NavBar new badges', () => {
     const container = await mount();
 
     expect(container.querySelector('button[aria-label="퀘스트, 새 내용 있음"]')).toBeInTheDocument();
-    expect(navButton(container, '퀘스트')?.textContent).toContain('NEW');
+    // 새 내용은 글자 대신 작은 점으로 보이고, 읽기 프로그램에는 aria-label로 전달한다.
+    expect(navButton(container, '퀘스트')?.querySelector('span[aria-hidden="true"].rounded-full')).toBeInTheDocument();
   });
 
   it('이번 주 리그를 아직 확인하지 않았으면 NEW를 표시하고 방문하면 저장한다', async () => {

@@ -141,7 +141,7 @@ const ActiveAlert = ({ cur }: { cur: Msg }) => {
         onClick={e => e.stopPropagation()}
         className="app-card w-full max-w-xs rounded-card bg-[var(--color-card)] overflow-hidden flex flex-col items-center anim-pop-in"
       >
-        <div className={`w-full py-6 flex justify-center ${error ? 'bg-danger-500' : 'bg-brand-500'}`}>
+        <div className={`w-full py-6 flex justify-center ${error ? 'bg-danger-500' : 'bg-[var(--color-surface)]'}`}>
           <div className="w-14 h-14 flex items-center justify-center bg-white" style={{ borderRadius: 9999 }}>
             {error
               ? <AlertCircle size={28} className="text-danger-500" />

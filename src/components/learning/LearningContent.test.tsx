@@ -63,7 +63,7 @@ describe('정답과 풀이', () => {
     await act(async () => { details.open = true; details.dispatchEvent(new Event('toggle')); });
     expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest' });
   });
-  it('응답 대기에는 이동을 막고 서버에서 받은 조개만 표시한다', async () => {
+  it('응답 대기에는 이동을 막고 서버에서 받은 코인만 표시한다', async () => {
     const container = await mount(<QuizAnswerFeedback {...props} correct earned={15} combo={3} pending />);
     expect(container.querySelector('.quiz-answer-reward')).toHaveTextContent('+15개3연속');
     expect(container.querySelector('button')).toBeDisabled();

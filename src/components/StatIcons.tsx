@@ -1,10 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
-import { BookOpen, CalendarDays, Trophy } from './ui/OtterIcons';
-import { OTTER_ITEM_IMAGES } from '../lib/otter';
+import { BookOpen, Coins, Flame, Lightning, Trophy } from './ui/OtterIcons';
 
-// 재화와 학습 정보는 공통 원형 파스텔 그림, 숫자는 기존 본문색으로 표시한다.
+// 재화와 학습 정보는 듀오톤 아이콘에 역할별 보조색을 입힌다. 숫자는 본문색을 쓴다.
 type Props = { size?: number; className?: string };
-// 숫자는 공통 본문색을 사용하고, 아이콘의 기존 장식색과 분리한다
 export const STAT_COLOR = {
   streak: 'var(--color-ink-2)',
   xp: 'var(--color-ink-2)',
@@ -13,19 +11,17 @@ export const STAT_COLOR = {
 } as const;
 
 export const StreakIcon = ({ size = 16, className = '' }: Props) => (
-  <CalendarDays size={size} strokeWidth={1.8} aria-hidden="true" className={`shrink-0 text-[var(--color-stat-streak)] ${className}`} />
+  <Flame size={size} className={`shrink-0 text-[var(--color-stat-streak)] ${className}`} />
 );
 export const XpIcon = ({ size = 16, className = '' }: Props) => (
-  <Trophy size={size} strokeWidth={1.8} aria-hidden="true" className={`shrink-0 text-[var(--color-stat-xp)] ${className}`} />
+  <Trophy size={size} className={`shrink-0 text-[var(--color-stat-xp)] ${className}`} />
 );
 export const PointIcon = ({ size = 16, className = '' }: Props) => (
-  <img src={OTTER_ITEM_IMAGES.shell} alt="" aria-hidden="true" draggable={false} width={size} height={size}
-    className={`otter-item-icon shrink-0 object-contain ${className}`} style={{ width: size, height: size }} />
+  <Coins size={size} className={`shrink-0 text-[var(--color-stat-points)] ${className}`} />
 );
 export const EnergyIcon = ({ size = 16, className = '' }: Props) => (
-  <img src={OTTER_ITEM_IMAGES.fish} alt="" aria-hidden="true" draggable={false} width={size} height={size}
-    className={`otter-item-icon shrink-0 object-contain ${className}`} style={{ width: size, height: size }} />
+  <Lightning size={size} className={`shrink-0 text-[var(--color-stat-energy)] ${className}`} />
 );
 export const WordsIcon = ({ size = 16, className = '' }: Props) => (
-  <BookOpen size={size} strokeWidth={2} aria-hidden="true" className={`shrink-0 text-[var(--color-stat-words)] ${className}`} />
+  <BookOpen size={size} className={`shrink-0 text-[var(--color-stat-words)] ${className}`} />
 );

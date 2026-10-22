@@ -22,11 +22,11 @@ const mount = (overrides: Partial<Props> = {}) => {
 };
 
 describe('에너지 상점의 실제 조건과 동작', () => {
-  it('광고+5·완충600조개·부스트300조개/30분과 실제 잔액·진행률을 유지한다', () => {
+  it('광고+5·완충600코인·부스트300코인/30분과 실제 잔액·진행률을 유지한다', () => {
     const { container } = mount();
     expect(container).toHaveTextContent('시청 보상 에너지 +5');
-    expect(container).toHaveTextContent('조개 600개');
-    expect(container).toHaveTextContent('조개 300개 · 30분');
+    expect(container).toHaveTextContent('코인 600개');
+    expect(container).toHaveTextContent('코인 300개 · 30분');
     expect(container.querySelector('.energy-shop-wallet')).toHaveTextContent('1,000개');
     const bar = container.querySelector('[role="progressbar"]')!;
     expect(bar).toHaveAttribute('aria-valuenow', '3');
@@ -40,7 +40,7 @@ describe('에너지 상점의 실제 조건과 동작', () => {
     expect(button('boost')).not.toBeDisabled();
     expect(container).toHaveTextContent('에너지가 가득해서 지금은 충전할 필요가 없어요.');
   });
-  it.each([[599, false], [600, true]])('보유 조개%i개의 완충 가능 여부를 바꾸지 않는다', (points, canBuy) => {
+  it.each([[599, false], [600, true]])('보유 코인%i개의 완충 가능 여부를 바꾸지 않는다', (points, canBuy) => {
     const { button } = mount({ points: points as number });
     expect(button('refill').disabled).toBe(!canBuy);
   });
@@ -85,6 +85,6 @@ describe('에너지 상점의 실제 조건과 동작', () => {
     const { container } = mount({ refillNotice: { tone: 'network', text: '네트워크가 불안정해 충전하지 못했어요' } });
     expect(container.querySelector('[role="alert"]')).toHaveTextContent('네트워크가 불안정해 충전하지 못했어요');
     expect(container).toHaveTextContent('이어하기, 다시 보기, 복습은 무료예요.');
-    expect(container).toHaveTextContent('XP 50마다 조개 +50개');
+    expect(container).toHaveTextContent('XP 50마다 코인 +50개');
   });
 });

@@ -8,7 +8,6 @@ import { toDateStr } from '../lib/date';
 import { calcStreak, streakMessage, streakMilestone, weekDays } from '../lib/streak';
 import { feedbackCelebrate, feedbackStreak } from '../lib/feedback';
 import { Storage } from '../lib/storage';
-import { OTTER_FACE } from '../lib/otter';
 
 // 학습을 끝낸 뒤 하루 1회 뜨는 연속 출석 축하 모달.
 // DailyAlarmPromptCard와 같은 자기완결 패턴 — 완료 화면에 그냥 놓으면 알아서 판단한다.
@@ -89,9 +88,7 @@ export const StreakCelebration = () => {
         ))}
       </div>
 
-      {/* 캐릭터(수달)가 건네는 말풍선 */}
       <div className="flex items-center gap-3 anim-fade-up" style={{ '--i': 8 } as React.CSSProperties}>
-        <img src={OTTER_FACE} alt="" aria-hidden="true" className="h-12 w-12 shrink-0 rounded-full bg-[var(--color-card)] object-cover" />
         <div className={`rounded-card px-4 py-3 max-w-[220px] ${milestone ? 'bg-[var(--color-hero-complete)]' : 'bg-[var(--color-card)]'}`}>
           <p className={`text-sm font-normal break-keep leading-relaxed ${milestone ? 'text-[var(--color-hero-complete-ink)]' : 'text-[var(--color-ink-2)]'}`}>
             {streak === 1 ? '오늘 출석이 기록됐어요.' : streakMessage(streak)}

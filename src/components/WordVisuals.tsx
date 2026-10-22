@@ -366,7 +366,7 @@ const FlowCarousel = ({ flows }: { flows: Extract<WordVisual, { type: 'flow' }>[
       </div>
       <div className="flex justify-center gap-1">
         {flows.map((_, i) => (
-          <span key={i} style={{ borderRadius: 9999 }} className={`h-1.5 transition-all ${i === page ? 'w-4 bg-brand-500' : 'w-1.5 bg-[var(--color-line)]'}`} />
+          <span key={i} style={{ borderRadius: 9999 }} className={`h-1.5 transition-all ${i === page ? 'w-4 bg-[var(--color-ink)]' : 'w-1.5 bg-[var(--color-line)]'}`} />
         ))}
       </div>
     </div>

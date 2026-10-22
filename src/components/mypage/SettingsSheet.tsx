@@ -34,7 +34,7 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
                 aria-pressed={theme === val}
                 onClick={() => setTheme(val)}
                 className={`flex-1 min-h-11 rounded-button text-xs font-bold transition-colors
-                  ${theme === val ? 'bg-brand-500 text-white' : 'bg-[var(--color-card)] border border-[var(--color-line)] text-[var(--color-ink-3)]'}`}
+                  ${theme === val ? 'bg-[var(--color-ink)] text-[var(--color-card)]' : 'bg-[var(--color-card)] border border-[var(--color-line)] text-[var(--color-ink-3)]'}`}
               >
                 {label}
               </button>

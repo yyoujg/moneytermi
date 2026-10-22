@@ -16,22 +16,20 @@ const mount = (size?: number) => {
 };
 
 describe('잘 보이는 프로필 편집 표시', () => {
-  it('기본 크기18픽셀과 일정한 선 굵기를 사용한다', () => {
+  it('기본 크기 18픽셀의 듀오톤 표시를 사용한다', () => {
     const icon = mount();
     expect(icon).toHaveAttribute('width', '18');
     expect(icon).toHaveAttribute('height', '18');
-    expect(Number(icon.getAttribute('stroke-width'))).toBe(3);
-    expect(icon.querySelector('path')).not.toBeNull();
+    expect(icon.querySelector('[opacity="0.2"]')).not.toBeNull();
   });
-  it('닉네임 옆의 16픽셀에서도 같은 실제 선 굵기를 보존한다', () => {
+  it('닉네임 옆의 16픽셀 크기도 전달한다', () => {
     const icon = mount(16);
     expect(icon).toHaveAttribute('width', '16');
-    expect(Number(icon.getAttribute('stroke-width')) * 16 / 24).toBe(2.25);
   });
   it('라이트·다크 모두 본문색을 따르고 중복 조작 이름을 만들지 않는다', () => {
     const icon = mount();
     expect(icon).toHaveClass('text-[var(--color-ink)]');
-    expect(icon).toHaveAttribute('stroke', 'currentColor');
+    expect(icon).toHaveAttribute('fill', 'currentColor');
     expect(icon).toHaveAttribute('aria-hidden', 'true');
     expect(icon).toHaveAttribute('focusable', 'false');
   });

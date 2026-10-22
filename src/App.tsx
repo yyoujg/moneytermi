@@ -20,7 +20,6 @@ import { PointCelebration } from './components/PointCelebration';
 import { SplashScreen } from './components/SplashScreen';
 import { useTapHaptics } from './hooks/useTapHaptics';
 import { ArrowRight, BookOpenText, WalletCards, ListChecks } from './components/ui/OtterIcons';
-import { Mascot } from './components/Mascot';
 import { Storage } from './lib/storage';
 
 const HomeScreen = React.lazy(() => import('./pages/HomeScreen'));
@@ -49,7 +48,6 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
     if (this.state.error) {
       return (
         <div className="flex flex-col items-center justify-center h-full gap-4 px-6 text-center">
-          <Mascot name="error" size={120} />
           <p className="text-lg font-bold text-[var(--color-ink)]">앗, 문제가 생겼어요</p>
           <p className="text-sm text-[var(--color-ink-3)]">앱을 다시 시작해 주세요.</p>
           <button
@@ -69,9 +67,9 @@ const LoadingScreen = SplashScreen;
 
 const WELCOME_KEY = 'welcome_seen_v1';
 const WELCOME_STEPS = [
-  { icon: BookOpenText, title: '쉬운 상황부터 시작해요', desc: '금리·대출·전월세처럼 자주 마주치는 용어를 예시로 익혀요' },
-  { icon: WalletCards, title: '생활 속 상황으로 연결해요', desc: '월급, 소비, 대출, 계약서에서 어떻게 쓰이는지 짧게 확인해요' },
-  { icon: ListChecks, title: '퀴즈와 다시 보기로 남겨요', desc: '오늘 들린 용어를 잊기 전에 다시 꺼내보며 익혀요' },
+  { icon: BookOpenText, color: 'text-[var(--accent-sage)]', title: '쉬운 상황부터 시작해요', desc: '금리·대출·전월세처럼 자주 마주치는 용어를 예시로 익혀요' },
+  { icon: WalletCards, color: 'text-[var(--accent-amber)]', title: '생활 속 상황으로 연결해요', desc: '월급, 소비, 대출, 계약서에서 어떻게 쓰이는지 짧게 확인해요' },
+  { icon: ListChecks, color: 'text-[var(--accent-slate)]', title: '퀴즈와 다시 보기로 남겨요', desc: '오늘 들린 용어를 잊기 전에 다시 꺼내보며 익혀요' },
 ];
 
 const WelcomeScreen = () => {
@@ -85,26 +83,25 @@ const WelcomeScreen = () => {
   return (
     <div className="app-soft-screen flex h-full flex-col">
       <div className="flex flex-1 flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden">
-        <div className="app-soft-header flex shrink-0 flex-col items-center rounded-b-[var(--shape-xl)] px-6 pb-8 pt-8 text-center">
-          <Mascot name="hello" size={150} />
-          <h1 className="mt-4 text-2xl font-bold leading-snug tracking-tight text-[var(--color-ink)] break-keep">
-            경제 공부,<br />수달과 차근차근
+        <div className="flex shrink-0 flex-col items-center px-6 pb-4 pt-10 text-center">
+          <h1 className="text-2xl font-bold leading-snug text-[var(--color-ink)] break-keep">
+            경제 공부,<br />쉬운 상황부터 차근차근
           </h1>
-          <p className="mt-3 text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">뜻은 예시로 익히고, 조개는 차곡차곡 모아요.</p>
+          <p className="mt-3 text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">뜻은 예시로 익히고, 코인은 차곡차곡 모아요.</p>
         </div>
 
         {/* 남는 높이의 가운데에 단계 카드를 둔다. 화면이 작으면 그대로 스크롤된다 */}
         <div className="flex flex-1 flex-col justify-center px-5 pt-7 pb-4">
-          <p className="mb-3 px-1 text-sm font-bold text-[var(--color-ink-2)]">이렇게 시작해요</p>
-          <ol className="flex flex-col gap-3">
-            {WELCOME_STEPS.map(({ icon: Icon, title, desc }) => (
-              <li key={title} className="app-card flex items-start gap-3 rounded-card bg-[var(--color-card)] px-4 py-4">
-                <span aria-hidden="true" className="flex h-8 w-8 shrink-0 items-center justify-center text-[var(--color-ink-2)]">
-                  <Icon size={22} strokeWidth={1.75} />
+          <p className="mb-5 text-xs text-[var(--color-ink-3)]">이렇게 시작해요</p>
+          <ol className="flex flex-col gap-6">
+            {WELCOME_STEPS.map(({ icon: Icon, color, title, desc }) => (
+              <li key={title} className="flex items-start gap-3">
+                <span aria-hidden="true" className={`flex h-8 w-8 shrink-0 items-center justify-center ${color}`}>
+                  <Icon size={24} />
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-sm font-bold text-[var(--color-ink)]">{title}</span>
-                  <span className="mt-0.5 block text-xs leading-relaxed text-[var(--color-ink-3)] break-keep">{desc}</span>
+                  <span className="block text-base font-bold text-[var(--color-ink)]">{title}</span>
+                  <span className="mt-1 block text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">{desc}</span>
                 </span>
               </li>
             ))}

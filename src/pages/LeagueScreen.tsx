@@ -9,6 +9,7 @@ import { logClick } from '../lib/analytics';
 import { shareTossLink } from '../lib/share';
 import { daysUntilReset } from '../lib/league';
 import { Card } from '../components/ui/Card';
+import { ActionButton } from '../components/ui/ActionButton';
 import { LeagueRules } from '../components/LeagueRules';
 import { StageGlyph } from '../components/StageGlyph';
 import { ProfileAvatar } from '../components/ProfileAvatar';
@@ -26,11 +27,12 @@ const shareMessage = (tier: string, weeklyXp: number, rank: number | null | unde
       : `경제 공부, 뭐부터 볼지 모르겠다면 머니터미에서 ${tier} 리그부터 시작해요!`;
 
 const LeagueScreen = () => {
-  const { xp, myEmoji } = useAppContext();
+  const { xp } = useAppContext();
   const { user, guestToken } = useAuth();
   const [rows, setRows] = useState<Row[] | null>(null);
   const [mine, setMine] = useState<MyRank | null>(null);
   const [failed, setFailed] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [sheet, setSheet] = useState<'share' | 'rules' | null>(null);
   // 진행 바를 0에서 실제 값까지 차오르게: 마운트 다음 프레임에 값을 넣는다
   const [barReady, setBarReady] = useState(false);
@@ -47,7 +49,7 @@ const LeagueScreen = () => {
       setRows((top.data ?? []) as Row[]);
       setMine(my.data as MyRank);
     }).catch(() => setFailed(true));
-  }, [guestToken]);
+  }, [guestToken, reloadKey]);
 
   const stage = getGrowthStage(xp);
   const next = stage.nextMinPoints;
@@ -68,25 +70,25 @@ const LeagueScreen = () => {
         </div>
 
         {/* 이번 주 순위(이번 주 참여)와 내 등급(누적)을 나눠 보여준다 */}
-        <div className="grid grid-cols-2 gap-3 anim-fade-up">
-          <Card pad="lg" className="flex flex-col">
-            <p className="text-xs font-bold text-[var(--color-ink-3)]">이번 주 순위</p>
+        <Card tone="card" pad="lg" className="grid grid-cols-2 gap-4 anim-fade-up">
+          <div className="flex flex-col">
+            <p className="text-xs text-[var(--color-ink-3)]">이번 주 순위</p>
             <p className="mt-2! text-3xl font-bold text-brand-500 tabular-nums">{mine?.rank ? `${mine.rank}위` : '-'}</p>
             <p className="mt-1! text-xs text-[var(--color-ink-3)] break-keep">
               {mine?.rank ? `${mine.total}명 중 · ${mine.points?.toLocaleString() ?? 0}XP` : 'XP를 모으면 순위에 올라요'}
             </p>
-            <p className="mt-auto! pt-3 text-xs font-semibold text-[var(--color-ink-2)]">초기화까지 {daysUntilReset()}일</p>
-          </Card>
-          <Card pad="lg" className="flex flex-col">
-            <p className="text-xs font-bold text-[var(--color-ink-3)]">내 등급</p>
+            <p className="mt-auto! pt-3 text-xs text-[var(--color-ink-3)]">초기화까지 {daysUntilReset()}일</p>
+          </div>
+          <div className="flex flex-col border-l border-[var(--color-line)] pl-4">
+            <p className="text-xs text-[var(--color-ink-3)]">내 등급</p>
             <div className="mt-2 flex items-center gap-2">
               <StageGlyph id={stage.id} size={40} />
-              <span className="text-lg font-bold text-[var(--color-ink)]">{stage.name}</span>
+              <span className="text-base font-bold text-[var(--color-ink)]">{stage.name}</span>
             </div>
             <div className="mt-auto pt-3">
               <div role="progressbar" aria-label="다음 등급까지 진행률" aria-valuemin={0} aria-valuemax={100} aria-valuenow={next === null ? 100 : Math.min(100, Math.round(((xp - stage.minPoints) / (next - stage.minPoints)) * 100))} className="w-full bg-[var(--color-surface)] rounded-full h-2 overflow-hidden mb-1">
                 <div
-                  className="bg-brand-500 h-full rounded-full transition-all duration-700"
+                  className="bg-[var(--accent-lavender)] h-full rounded-full transition-all duration-700"
                   style={{ width: barReady ? `${next === null ? 100 : Math.min(100, Math.round(((xp - stage.minPoints) / (next - stage.minPoints)) * 100))}%` : '0%' }}
                 />
               </div>
@@ -94,15 +96,15 @@ const LeagueScreen = () => {
                 {next === null ? '최고 등급이에요' : `다음 등급까지 ${next - xp}XP`}
               </p>
             </div>
-          </Card>
-        </div>
+          </div>
+        </Card>
 
         {/* 티어 로드맵 */}
-        <Card pad="md" className="mt-4 anim-fade-up" style={{ '--i': 1 } as React.CSSProperties}>
+        <div className="mt-8 anim-fade-up" style={{ '--i': 1 } as React.CSSProperties}>
           <div className="flex justify-between items-start relative">
             <div className="absolute top-5 left-5 right-5 h-[2px] bg-[var(--color-line)] z-0 rounded-full">
               <div
-                className="h-full bg-brand-500 rounded-full transition-all duration-1000"
+                className="h-full bg-[var(--accent-lavender)] rounded-full transition-all duration-1000"
                 style={{ width: `${((stage.id - 1) / (GROWTH_STAGES.length - 1)) * 100}%` }}
               />
             </div>
@@ -118,20 +120,21 @@ const LeagueScreen = () => {
               );
             })}
           </div>
-        </Card>
+        </div>
       </div>
 
       {/* 랭킹 */}
-      <div className="px-5 pt-2">
+      <div className="px-5 pt-8">
         <div className="flex items-baseline justify-between mb-3">
-          <p className="text-sm font-bold text-[var(--color-ink-2)]">이번 주 TOP 10</p>
+          <h3 className="text-[length:var(--font-size-headline)] font-bold text-[var(--color-ink)]">이번 주 TOP 10</h3>
           <span className="text-2xs text-[var(--color-ink-4)]">매주 월요일 초기화</span>
         </div>
 
         {failed && (
-          <Card pad="lg">
+          <div className="flex flex-col items-center gap-3 py-6">
             <p className="text-sm text-[var(--color-ink-3)] text-center">순위를 불러오지 못했어요</p>
-          </Card>
+            <ActionButton tone="soft" onClick={() => { setFailed(false); setRows(null); setReloadKey(key => key + 1); }}>다시 시도</ActionButton>
+          </div>
         )}
 
         {!failed && rows === null && (
@@ -143,9 +146,7 @@ const LeagueScreen = () => {
         )}
 
         {!failed && rows?.length === 0 && (
-          <Card pad="lg">
-            <p className="text-sm text-[var(--color-ink-3)] text-center">이번 주엔 아직 아무도 없어요.<br />먼저 학습해서 1위를 차지해보세요!</p>
-          </Card>
+          <p className="py-6 text-sm text-[var(--color-ink-3)] text-center">이번 주엔 아직 아무도 없어요.<br />먼저 학습해서 1위를 차지해보세요!</p>
         )}
 
         {!failed && rows && rows.length > 0 && (
@@ -198,7 +199,7 @@ const LeagueScreen = () => {
           {/* 받는 사람이 보게 될 내용 미리보기: 내 카드 + 문구. 내부 스킴 주소는 보여주지 않는다 */}
           <Card tone="card" pad="md" className="flex flex-col gap-3 anim-fade-up">
             <div className="flex items-center gap-3">
-              <span className="w-11 h-11 flex items-center justify-center text-2xl shrink-0" style={{ borderRadius: 9999, background: 'var(--color-card)' }}><ProfileAvatar emoji={myEmoji} size={44} /></span>
+              <ProfileAvatar name={user?.nickname ?? '나'} size={44} />
               <div className="min-w-0">
                 <p className="text-sm font-bold text-[var(--color-ink)] truncate">{user?.nickname ?? '나'}</p>
                 <p className="text-2xs text-[var(--color-ink-4)]">{stage.name} · 이번 주 {(mine?.points ?? 0).toLocaleString()}XP{mine?.rank ? ` · ${mine.rank}위` : ''}</p>
@@ -207,17 +208,18 @@ const LeagueScreen = () => {
             <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep">{shareMessage(stage.name, mine?.points ?? 0, mine?.rank)}</p>
           </Card>
           <p className="text-2xs text-[var(--color-ink-4)] px-1 anim-fade-up" style={{ '--i': 1 } as React.CSSProperties}>머니터미로 바로 열리는 토스 링크가 함께 보내져요.</p>
-          <button
+          <ActionButton
+            fullWidth
             onClick={() => {
               logClick('league_share', { rank: mine?.rank ?? null, weekly_xp: mine?.points ?? 0 });
               shareTossLink('intoss://moneytermi/league', shareMessage(stage.name, mine?.points ?? 0, mine?.rank));
               setSheet(null);
             }}
-            className="w-full py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90 anim-fade-up"
+            className="anim-fade-up"
             style={{ '--i': 2 } as React.CSSProperties}
           >
             토스로 공유하기
-          </button>
+          </ActionButton>
         </div>
       </BottomSheet>
     </div>

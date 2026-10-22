@@ -1,8 +1,6 @@
-import { getOtterAvatarPose, OTTER_AVATAR_IMAGES } from '../lib/otter';
-
-const avatarSrc = (emoji: string) => OTTER_AVATAR_IMAGES[getOtterAvatarPose(emoji)];
-
-export const ProfileAvatar = ({ emoji, size }: { emoji: string; size: number }) => (
-  <img src={avatarSrc(emoji)} alt="" aria-hidden="true" width={size} height={size}
-    className="shrink-0 rounded-full object-contain" style={{ width: size, height: size }} />
+// 프로필은 닉네임 첫 글자로 표시한다. 캐릭터 그림은 쓰지 않는다.
+export const ProfileAvatar = ({ name, size }: { name: string; size: number }) => (
+  <span aria-hidden="true" className="profile-avatar" style={{ width: size, height: size, fontSize: Math.round(size * 0.4) }}>
+    {[...name.trim()][0] ?? '?'}
+  </span>
 );

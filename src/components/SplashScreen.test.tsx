@@ -30,7 +30,7 @@ describe('SplashScreen', () => {
     expect(subtitle).toContain('color: var(--color-ink-3)');
     expect(title).toContain('color: var(--color-ink)');
     expect(brand + subtitle).not.toContain('--color-brand-ink');
-    expect(css.match(/\.splash-progress span\s*\{([^}]+)\}/)?.[1]).toContain('background: var(--color-brand-action)');
+    expect(css.match(/\.splash-progress span\s*\{([^}]+)\}/)?.[1]).toContain('background: var(--color-ink)');
   });
 
   it('배경에 점무늬나 하단 장식 색면을 추가하지 않는다', () => {
@@ -51,11 +51,10 @@ describe('SplashScreen', () => {
     expect(container.textContent).toContain('오늘의 학습을 준비하고 있어요');
   });
 
-  it('머니터미 캐릭터 이미지를 사용한다', () => {
+  it('캐릭터 이미지 없이 이름과 안내 문구만 보여준다', () => {
     const container = mount();
-    const image = container.querySelector('img');
 
-    expect(image).toHaveAttribute('src', '/otter/v3/characters/hello.png');
+    expect(container.querySelector('img')).toBeNull();
     expect(container.querySelector('.splash-dash')).toBeNull();
   });
 });

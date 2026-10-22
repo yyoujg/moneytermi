@@ -95,7 +95,8 @@ describe('LeagueRankCelebration', () => {
     expect(container.querySelector('[role="dialog"]')?.textContent).toContain('5위');
     expect(container.querySelector('[role="dialog"]')?.textContent).toContain('3위');
     expect(container.querySelector('[role="dialog"]')?.textContent).toContain('70XP');
-    expect(container.querySelector('img:not([data-icon])')).toHaveAttribute('src', '/otter/v3/avatar/hello.png');
+    expect(container.querySelector('img:not([data-icon])')).toBeNull();
+    expect(container.querySelector('.profile-avatar')).toBeInTheDocument();
     expect(container.querySelector('[data-icon="TrendingUp"]')).not.toBeInTheDocument();
     expect(container.querySelector('button[aria-label="닫기"]')).toBeInTheDocument();
     expect(state.feedbackCelebrate).toHaveBeenCalledTimes(1);

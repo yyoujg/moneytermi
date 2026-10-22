@@ -1,23 +1,14 @@
-import type { ComponentProps } from 'react';
-import { Mascot } from '../Mascot';
-
-type MascotName = ComponentProps<typeof Mascot>['name'];
-
 export const LearningEmptyState = ({
   title,
   description,
   actionLabel,
   onAction,
-  mascot = 'empty',
-  mascotSize = 110,
   actionPlacement = 'bottom',
 }: {
   title: string;
   description: string;
   actionLabel: string;
   onAction: () => void;
-  mascot?: MascotName;
-  mascotSize?: number;
   actionPlacement?: 'bottom' | 'inline';
 }) => {
   const button = (
@@ -32,7 +23,6 @@ export const LearningEmptyState = ({
   return (
     <div className="app-soft-screen flex h-full flex-col">
       <div className="flex-1 flex flex-col items-center justify-center px-8 gap-3 text-center">
-        {mascot && <div className="mb-2"><Mascot name={mascot} size={mascotSize} /></div>}
         <h2 className="text-xl font-bold text-[var(--color-ink)]">{title}</h2>
         <p className={`text-sm text-[var(--color-ink-4)] break-keep ${actionPlacement === 'inline' ? 'mb-16!' : ''}`}>
           {description}

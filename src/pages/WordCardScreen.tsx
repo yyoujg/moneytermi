@@ -374,23 +374,18 @@ const WordCardScreen = () => {
       <div className="app-soft-screen flex h-full flex-col">
         {/* 카드 + 알림 카드 + 축하가 작은 화면에서 넘칠 수 있어 이 영역만 스크롤 */}
         <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden flex flex-col items-center justify-center-safe gap-5 p-8">
-          <div className="w-20 h-20 bg-[var(--color-card)] rounded-full flex items-center justify-center text-4xl anim-pop-in">🎉</div>
           <div className="text-center anim-fade-up" style={{ '--i': 1 } as React.CSSProperties}>
             <h2 className="text-2xl font-bold text-[var(--color-ink)] mb-1!">용어를 살펴봤어요</h2>
-            <p className="text-sm text-[var(--color-ink-4)]">{words.length}개 용어의 설명을 확인했어요</p>
+            <p className="text-sm text-[var(--color-ink-3)]">{words.length}개 용어의 설명을 확인했어요</p>
           </div>
-          <Card pad="md" className="w-full anim-fade-up" style={{ '--i': 2 } as React.CSSProperties}>
-            <p className="text-xs font-bold text-[var(--color-info)] mb-1!">이해했는지 확인해볼까요?</p>
-            <p className="text-sm font-semibold text-[var(--color-ink)] leading-relaxed break-keep">{lessonChecks(words).length > 0 ? '상황 문제를 풀며 어떤 변화가 생기는지 확인해요.' : '이번에는 용어의 뜻을 확인해요. 상황 적용 문제는 아직 준비 중이에요.'}</p>
-          </Card>
-          <Card pad="md" className="w-full anim-fade-up" style={{ '--i': 3 } as React.CSSProperties}>
-            <p className="text-xs text-[var(--color-ink-4)] mb-3!">방금 본 용어, 바로 확인해볼까요?</p>
+          <div className="w-full anim-fade-up" style={{ '--i': 2 } as React.CSSProperties}>
+            <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep mb-3!">{lessonChecks(words).length > 0 ? '상황 문제를 풀며 어떤 변화가 생기는지 확인해요.' : '이번에는 용어의 뜻을 확인해요. 상황 적용 문제는 아직 준비 중이에요.'}</p>
             <div className="flex flex-wrap gap-1">
               {words.slice(0, 5).map(w => (
-                <span key={w.id} className="text-xs px-2 py-1 rounded-full bg-[var(--color-surface)] text-[var(--color-ink-2)]">{w.word}</span>
+                <span key={w.id} className="text-xs px-2 py-1 rounded-full bg-[var(--color-card)] text-[var(--color-ink-2)]">{w.word}</span>
               ))}
             </div>
-          </Card>
+          </div>
           <DailyAlarmPromptCard />
           <StreakCelebration />
         </div>
@@ -399,35 +394,32 @@ const WordCardScreen = () => {
             const remaining = state?.continueWords?.filter(w => !knownIds.has(w.id)) ?? [];
             if (remaining.length > 0) {
               return (
-                <button
+                <ActionButton
+                  fullWidth
                   onClick={() => {
                     logClick('continue_after_first');
                     const idx = state!.continueWords!.findIndex(w => !knownIds.has(w.id));
                     navigate('/word-card', { state: { words: state!.continueWords, index: idx, backPath, autoAdvance: true } });
                   }}
-                  className="w-full py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90"
                 >
-                  다음 용어 계속 보기 →
-                </button>
+                  다음 용어 계속 보기 <ChevronRight size={18} />
+                </ActionButton>
               );
             }
             return (
-              <button
+              <ActionButton
+                fullWidth
                 onClick={() => lessonChecks(words).length > 0
                   ? navigate('/lesson-check', { state: { words, backPath, courseId: state?.courseId, nodeId: state?.nodeId } })
                   : navigate('/quiz', { state: { quizQueue: lessonQuizWords, backPath, reviewMode: true, mode: 'lesson_recall', courseId: state?.courseId, lessonId: state?.nodeId } })}
-                className="w-full py-4 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-90"
               >
                 {lessonChecks(words).length > 0 ? '상황 문제로 이해 확인하기' : '용어 퀴즈로 확인하기'}
-              </button>
+              </ActionButton>
             );
           })()}
-          <button
-            onClick={() => navigate(backPath, backState ? { state: backState } : undefined)}
-            className="action-secondary w-full py-3 rounded-button text-sm font-semibold active:opacity-70"
-          >
+          <ActionButton tone="soft" fullWidth onClick={() => navigate(backPath, backState ? { state: backState } : undefined)}>
             코스로 돌아가기
-          </button>
+          </ActionButton>
         </div>
       </div>
     );
@@ -489,11 +481,11 @@ const WordCardScreen = () => {
             <span
               key={w.id}
               style={{ borderRadius: 9999 }}
-              className={`shrink-0 h-2 transition-all ${i === wordIndex ? 'w-5 bg-brand-500' : 'w-2 bg-[var(--color-line)]'}`}
+              className={`shrink-0 h-2 transition-all ${i === wordIndex ? 'w-5 bg-[var(--color-ink)]' : 'w-2 bg-[var(--color-line)]'}`}
             />
           ))}
         </div>
-        <span className="shrink-0 text-xs font-bold text-[var(--color-ink-4)]">{wordIndex + 1}/{words.length}</span>
+        <span className="shrink-0 text-xs tabular-nums text-[var(--color-ink-3)]">{wordIndex + 1}/{words.length}</span>
       </div>
 
       {/* 스크롤 영역 */}

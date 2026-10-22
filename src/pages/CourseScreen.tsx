@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useLayoutEffect, useEffect, useState } from 'react';
-import { ChevronRight as ActionChevronRight } from 'lucide-react';
+import { ChevronRight as ActionChevronRight } from '../components/ui/OtterIcons';
 import { BookOpenText, ListChecks, LockKeyhole, RotateCcw } from '../components/ui/OtterIcons';
 import { ChevronRight } from '../components/ui/ControlIcons';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -250,7 +250,7 @@ const CourseScreen = () => {
     <div className="app-soft-screen flex h-full flex-col items-center justify-center gap-3 px-5 text-center">
       <h1 className="text-lg font-bold text-[var(--color-ink)]">학습 내용을 불러오지 못했어요</h1>
       <p className="text-sm text-[var(--color-ink-2)]">연결을 확인하고 다시 시도해 주세요.</p>
-      <button type="button" onClick={retryContent} className="mt-3 w-full rounded-button bg-brand-500 py-4 text-sm font-bold">다시 시도</button>
+      <ActionButton fullWidth onClick={retryContent} className="mt-3">다시 시도</ActionButton>
     </div>
   );
 
@@ -265,15 +265,14 @@ const CourseScreen = () => {
           <div className="flex items-center gap-3">
             {/* 뒤로가기는 토스 내비게이션 바가 맡는다(자체 뒤로가기 중복은 검수 반려 사유) */}
             <div className="min-w-0">
-              <h1 className="truncate text-xl font-bold tracking-tight text-[var(--color-ink)]">{activeTopic.category}</h1>
+              <h1 className="truncate text-xl font-bold text-[var(--color-ink)]">{activeTopic.category}</h1>
               <p className="mt-1! text-xs text-[var(--color-ink-3)]">{activeTopic.level} · {activeTopic.parts.length}개 코스 · {activeTopic.known}/{activeTopic.total}개 용어 확인</p>
               <p className="mt-1! text-xs text-[var(--color-ink-3)] break-keep leading-relaxed">{learningOutcomeFor({ category: activeTopic.category })}</p>
             </div>
           </div>
         ) : (
           <>
-            <h1 className="text-2xl font-bold tracking-tight text-[var(--color-ink)]">오늘의 학습</h1>
-            <p className="mt-1! text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">가볍게 시작하고, 차근차근 쌓아가요.</p>
+            <h1 className="text-2xl font-bold text-[var(--color-ink)]">오늘의 학습</h1>
           </>
         )}
         <button type="button" className="course-energy-entry" aria-label={`학습 에너지 ${energy}/${energyMax}, 충전 방법 보기`} onClick={() => openShop('energy')}>
@@ -285,7 +284,7 @@ const CourseScreen = () => {
         <section aria-label="오늘 할 학습" className="course-home-hero">
           <div className="course-home-hero-heading">
             <div className="min-w-0 flex-1">
-              <p className="course-home-eyebrow">{focusTopic ? focusTopic.known > 0 ? '이어서 배울 주제' : '추천 학습' : '차곡차곡 쌓인 배움'}{focusTopic && <span> · {focusTopic.level}</span>}</p>
+              <p className="course-home-eyebrow">{focusTopic ? focusTopic.known > 0 ? '이어서 배울 주제' : '추천 학습' : '모든 주제 완료'}{focusTopic && <span> · {focusTopic.level}</span>}</p>
               <h2 className="course-home-hero-title">{focusTopic?.category ?? '주제를 다시 살펴볼까요?'}</h2>
               {!focusTopic && <p className="course-home-hero-description">배운 용어와 예시를 가볍게 되짚어보세요.</p>}
             </div>
@@ -322,9 +321,9 @@ const CourseScreen = () => {
               const percent = topic.total ? Math.round(topic.known / topic.total * 100) : 0;
               return <button key={`${topic.level}-${topic.category}`} type="button" disabled={locked} data-topic-index={topic.index} data-current={isCurrent || undefined}
                 onClick={() => setSearchParams({ topic: String(topic.index) })} aria-label={`${topic.level} ${topic.category} 주제 열기`} aria-describedby={`topic-summary-${topic.index}`} className="course-home-topic">
-                <span className="course-home-topic-heading"><BookOpenText size={30} className="course-home-topic-icon" aria-hidden="true" /><span className="course-home-topic-title">{topic.category}</span>{locked ? <LockKeyhole size={17} aria-hidden="true" /> : <ChevronRight size={18} aria-hidden="true" />}</span>
+                <span className="course-home-topic-heading"><span className="course-home-topic-title">{topic.category}</span>{locked ? <LockKeyhole size={17} aria-hidden="true" /> : <ChevronRight size={18} aria-hidden="true" />}</span>
                 <span className="course-home-topic-description">{learningOutcomeFor({ category: topic.category })}</span>
-                <span id={`topic-summary-${topic.index}`} className="course-home-topic-meta"><span>{topic.level} · {topic.known}/{topic.total}개 용어 확인</span><span className={isCurrent ? 'font-semibold text-[var(--color-ink-2)]' : ''}>{locked ? '잠김' : done ? '살펴봄' : topic.known > 0 ? '진행 중' : isCurrent ? '추천' : '시작 전'}</span></span>
+                <span id={`topic-summary-${topic.index}`} className="course-home-topic-meta"><span>{topic.level} · {topic.known}/{topic.total}개 용어 확인</span><span className={isCurrent ? 'font-semibold text-brand-500' : ''}>{locked ? '잠김' : done ? '살펴봄' : topic.known > 0 ? '진행 중' : isCurrent ? '추천' : '시작 전'}</span></span>
                 <span role="progressbar" aria-label={`${topic.category} 진행률`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent} className="course-home-progress-track"><span className={locked || done ? 'course-home-progress-muted' : ''} style={{ width: `${percent}%` }} /></span>
               </button>;
             })}
@@ -338,20 +337,19 @@ const CourseScreen = () => {
           <div className={`course-topic-summary sticky top-0 z-10 mx-5 mt-3 mb-4 overflow-hidden py-4 ${sec.course.id === focus?.courseId ? 'anim-fade' : ''}`}>
             {/* 코스 제목이 화면 제목(주제명)과 같으면 반복하지 않고 진행 정도만 보여준다 */}
             {sec.course.title !== activeTopic.category && <div className="relative mb-4 flex items-start gap-3">
-              <span aria-hidden="true" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-chip border border-[var(--color-line)] text-lg font-semibold tabular-nums text-[var(--color-ink-3)]">{String(partIndex + 1).padStart(2, '0')}</span>
               <div className="min-w-0">
-                <p className="text-2xs font-bold text-brand-600">{sec.course.level} · 코스 {partIndex + 1}/{activeTopic.parts.length}</p>
+                <p className="text-2xs text-[var(--color-ink-3)]">{sec.course.level} · 코스 {partIndex + 1}/{activeTopic.parts.length}</p>
                 <h3 className="mt-1! text-base font-bold text-[var(--color-ink)] break-keep tracking-[-0.01em] leading-snug">{sec.course.title}</h3>
                 <p className="mt-1! text-xs text-[var(--color-ink-3)] break-keep leading-relaxed">{learningOutcomeFor({ category: sec.course.category, title: sec.course.title, words: sec.course.words })}</p>
               </div>
             </div>}
-            <div className="mb-2 flex items-center justify-between gap-3 text-xs font-bold">
-              <p className="text-[var(--color-ink-2)]"><span className="text-brand-600">{sec.knownCount}개</span> 확인 / {sec.course.words.length}개 용어</p>
+            <div className="mb-2 flex items-center justify-between gap-3 text-xs">
+              <p className="text-[var(--color-ink-3)]"><span className="font-semibold text-[var(--color-ink-2)]">{sec.knownCount}개</span> 확인 / {sec.course.words.length}개 용어</p>
               <span className="tabular-nums text-[var(--color-ink-3)]">{pct}%</span>
             </div>
             <div className="relative flex items-center">
               <div role="progressbar" aria-label={`${sec.course.title} 진행률`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--color-button-secondary)]">
-                <div className={`h-full rounded-full bg-brand-500 ${sec.course.id === focus?.courseId ? 'course-progress-reveal' : ''}`} style={{ width: `${sec.course.words.length ? (sec.knownCount / sec.course.words.length) * 100 : 0}%` }} />
+                <div className={`h-full rounded-full bg-[var(--color-progress)] ${sec.course.id === focus?.courseId ? 'course-progress-reveal' : ''}`} style={{ width: `${sec.course.words.length ? (sec.knownCount / sec.course.words.length) * 100 : 0}%` }} />
               </div>
             </div>
           </div>
@@ -380,10 +378,10 @@ const CourseScreen = () => {
                       </span>
                       <span data-learning-status className={`font-normal ${locked ? 'text-[var(--color-ink-4)]' : isFocus ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-3)]'}`}>{nodeStatus}</span>
                     </span>
-                    <span className={`mt-1 block text-sm font-bold break-keep ${locked ? 'text-[var(--color-ink-3)]' : 'text-[var(--color-ink)]'}`}>{copy.title}</span>
+                    <span className={`mt-1 block text-sm break-keep ${locked ? 'font-semibold text-[var(--color-ink-3)]' : done ? 'font-semibold text-[var(--color-ink-2)]' : 'font-bold text-[var(--color-ink)]'}`}>{copy.title}</span>
                     {locked && <span className="mt-1 block text-2xs text-[var(--color-ink-4)]">앞의 레슨을 마치면 시작할 수 있어요</span>}
-                    <span className={`mt-1 flex items-center gap-1 text-xs ${locked ? 'text-[var(--color-ink-3)]' : 'text-[var(--color-ink-2)]'}`}>{copy.meta}</span>
-                    {!locked && <span className="mt-1 block text-2xs text-[var(--color-ink-4)]">{done || node.type === 'review' ? '무료' : '처음 시작할 때 에너지 1 - 중단 후 이어하기 무료'}</span>}
+                    <span className={`mt-1 flex items-center gap-1 text-xs ${locked ? 'text-[var(--color-ink-4)]' : 'text-[var(--color-ink-3)]'}`}>{copy.meta}</span>
+                    {isFocus && !locked && !done && node.type !== 'review' && <span className="mt-1 block text-2xs text-[var(--color-ink-4)]">처음 시작할 때 에너지 1 - 중단 후 이어하기 무료</span>}
                   </span>
                   {!locked && <ChevronRight size={20} strokeWidth={1.75} aria-hidden="true" data-learning-action className="shrink-0 text-[var(--color-ink-3)]" />}
                 </button>
