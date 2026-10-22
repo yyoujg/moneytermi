@@ -129,7 +129,7 @@ const HomeScreen = () => {
             <h2 id="home-missions-heading">오늘의 미션</h2>
             <p className="mt-1! text-xs text-[var(--color-ink-3)] break-keep">{praiseForMission({ ready: readyMissions, completed: completedMissions })}</p>
           </div>
-          <span className="shrink-0 text-2xs font-medium text-[var(--color-ink-4)]">{resetLabel}</span>
+          <span className="shrink-0 text-2xs font-normal text-[var(--color-ink-4)]">{resetLabel}</span>
         </div>
 
         <Card pad="none" className="home-missions mb-4 anim-fade-up" aria-labelledby="home-missions-heading">
@@ -145,7 +145,7 @@ const HomeScreen = () => {
                       </p>
                       <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
                         <span className="home-mission-reward">조개 +{mission.reward}개</span>
-                        <span className="font-medium text-[var(--color-ink-3)]">+{MISSION_XP} XP</span>
+                        <span className="font-normal text-[var(--color-ink-3)]">+{MISSION_XP} XP</span>
                       </p>
                     </div>
                     {mission.isRewarded || done

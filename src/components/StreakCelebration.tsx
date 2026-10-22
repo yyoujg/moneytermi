@@ -57,20 +57,20 @@ export const StreakCelebration = () => {
         />
       ))}
       {milestone && (
-        <p className="text-2xl font-black text-[var(--color-hero-ink)] anim-pop-in tracking-tight">🎉 {milestone}</p>
+        <p className="text-2xl font-bold text-[var(--color-hero-ink)] anim-pop-in tracking-tight">🎉 {milestone}</p>
       )}
 
       {/* 학습 달력 + 실제 연속 일수 */}
       <div className="flex flex-col items-center">
         <StreakIcon size={milestone ? 88 : 72} className="anim-pop-in" />
-        <p className={`text-5xl font-black ${ink} mt-1! anim-pop-in`} style={{ '--i': 2 } as React.CSSProperties}>{streak}</p>
-        <p className={`text-sm font-medium ${sub} mt-2! anim-fade-up`} style={{ '--i': 3 } as React.CSSProperties}>일 연속 출석 성공</p>
+        <p className={`text-5xl font-bold ${ink} mt-1! anim-pop-in`} style={{ '--i': 2 } as React.CSSProperties}>{streak}</p>
+        <p className={`text-sm font-normal ${sub} mt-2! anim-fade-up`} style={{ '--i': 3 } as React.CSSProperties}>일 연속 출석 성공</p>
       </div>
 
       {/* 이번 주 */}
       <div className="flex gap-2">
         {week.map((d, i) => (
-          <div key={d.label} className="flex flex-col items-center gap-1.5 anim-pop-in" style={{ '--i': 4 + i } as React.CSSProperties}>
+          <div key={d.label} className="flex flex-col items-center gap-1 anim-pop-in" style={{ '--i': 4 + i } as React.CSSProperties}>
             <div
               className="w-9 h-9 flex items-center justify-center"
               style={{
@@ -82,7 +82,7 @@ export const StreakCelebration = () => {
             >
               {d.attended && <Check size={18} strokeWidth={3} className={milestone ? 'text-[var(--color-hero-complete-ink)]' : 'text-[var(--color-on-brand)]'} />}
             </div>
-            <span className={`text-2xs font-medium ${d.isToday ? (milestone ? 'text-[var(--color-hero-ink)] font-bold' : 'text-brand-ink font-bold') : (milestone ? 'text-[var(--color-hero-ink)]' : 'text-[var(--color-ink-4)]')}`}>
+            <span className={`text-2xs font-normal ${d.isToday ? (milestone ? 'text-[var(--color-hero-ink)] font-bold' : 'text-brand-ink font-bold') : (milestone ? 'text-[var(--color-hero-ink)]' : 'text-[var(--color-ink-4)]')}`}>
               {d.label}
             </span>
           </div>
@@ -93,7 +93,7 @@ export const StreakCelebration = () => {
       <div className="flex items-center gap-3 anim-fade-up" style={{ '--i': 8 } as React.CSSProperties}>
         <img src={OTTER_FACE} alt="" aria-hidden="true" className="h-12 w-12 shrink-0 rounded-full bg-[var(--color-card)] object-cover" />
         <div className={`rounded-card px-4 py-3 max-w-[220px] ${milestone ? 'bg-[var(--color-hero-complete)]' : 'bg-[var(--color-card)]'}`}>
-          <p className={`text-sm font-medium break-keep leading-relaxed ${milestone ? 'text-[var(--color-hero-complete-ink)]' : 'text-[var(--color-ink-2)]'}`}>
+          <p className={`text-sm font-normal break-keep leading-relaxed ${milestone ? 'text-[var(--color-hero-complete-ink)]' : 'text-[var(--color-ink-2)]'}`}>
             {streak === 1 ? '오늘 출석이 기록됐어요.' : streakMessage(streak)}
           </p>
         </div>

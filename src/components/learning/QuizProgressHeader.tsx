@@ -15,7 +15,7 @@ export const QuizProgressHeader = ({
   durationClass?: string;
 }) => (
   <div className="px-5 pt-3 pb-3 flex flex-col gap-3">
-    <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
       <span className="min-w-0 text-sm font-semibold leading-relaxed text-[var(--color-ink-2)]">{label}</span>
       {streakText && (
         <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-brand-600">

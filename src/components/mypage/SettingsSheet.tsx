@@ -26,7 +26,7 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
               <p className="text-xs text-[var(--color-ink-4)]">화면 밝기 모드</p>
             </div>
           </div>
-          <div className="flex gap-1.5">
+          <div className="flex gap-1">
             {THEME_OPTIONS.map(([val, label]) => (
               <button
                 key={val}

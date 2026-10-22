@@ -115,17 +115,17 @@ const NavBar = () => {
               onClick={() => navigate(item.path)}
               aria-label={hasNew ? `${item.label}, 새 내용 있음` : item.label}
               aria-current={isActive ? 'page' : undefined}
-              className="flex flex-col items-center justify-center gap-1.5 px-1.5 py-0.5 transition-all duration-200"
+              className="flex flex-col items-center justify-center gap-1 px-1 py-0.5 transition-all duration-200"
             >
               <div className="relative w-12 h-8 flex items-center justify-center">
                 <Icon size={22} strokeWidth={isActive ? 2 : 1.7} aria-hidden="true" className={colorClass} />
                 {hasNew && (
-                  <span className="absolute -right-1.5 -top-1.5 rounded-full bg-[var(--color-selection-soft)] px-1.5 py-0.5 text-[8px] font-black leading-none text-[var(--color-selection-ink)] ring-2 ring-[var(--color-card)]">
+                  <span className="absolute -right-1 -top-1 rounded-full bg-[var(--color-selection-soft)] px-1 py-0.5 text-[8px] font-bold leading-none text-[var(--color-selection-ink)] ring-2 ring-[var(--color-card)]">
                     NEW
                   </span>
                 )}
               </div>
-              <span className={`text-[11px] leading-none font-bold ${colorClass}`}>{item.label}</span>
+              <span className={`text-xs leading-none font-bold ${colorClass}`}>{item.label}</span>
             </button>
           );
         })}

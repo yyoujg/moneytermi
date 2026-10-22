@@ -49,7 +49,7 @@ export const BadgeCelebration = () => {
         />
       ))}
 
-      <p className="flex items-center gap-2 text-2xl font-black text-[var(--color-ink)] anim-pop-in"><img src="/otter/v3/celebrations/badge-earned.png" width={24} height={24} alt="" aria-hidden="true" className="shrink-0" />새 배지 획득!</p>
+      <p className="flex items-center gap-2 text-2xl font-bold text-[var(--color-ink)] anim-pop-in"><img src="/otter/v3/celebrations/badge-earned.png" width={24} height={24} alt="" aria-hidden="true" className="shrink-0" />새 배지 획득!</p>
 
       <div className={`flex flex-wrap justify-center gap-5 ${fresh.length === 1 ? '' : 'max-w-xs'}`}>
         {fresh.map((b, i) => (

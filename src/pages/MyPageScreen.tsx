@@ -95,7 +95,7 @@ const MyPageScreen = () => {
         <div>
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-bold text-[var(--color-ink-2)]">배지</p>
-            <span className="text-2xs font-medium text-[var(--color-ink-4)]">{earned} / {badges.length}</span>
+            <span className="text-2xs font-normal text-[var(--color-ink-4)]">{earned} / {badges.length}</span>
           </div>
           <Card pad="md">
             <div className="grid grid-cols-5 gap-y-4">

@@ -104,16 +104,16 @@ export const LeagueRankCelebration = () => {
             </div>
           </div>
 
-          <p className="mt-5! text-xs font-black text-brand-600">주간 순위 상승</p>
-          <h2 id="league-rank-up-title" className="mt-1! text-2xl font-black text-[var(--color-ink)]">
+          <p className="mt-5! text-xs font-bold text-brand-600">주간 순위 상승</p>
+          <h2 id="league-rank-up-title" className="mt-1! text-2xl font-bold text-[var(--color-ink)]">
             순위가 올랐어요
           </h2>
           <div className="mt-4 flex items-center justify-center gap-3">
-            <span className="rounded-chip bg-[var(--color-surface)] px-4 py-2 text-lg font-black text-[var(--color-ink-3)] tabular-nums">
+            <span className="rounded-chip bg-[var(--color-surface)] px-4 py-2 text-lg font-bold text-[var(--color-ink-3)] tabular-nums">
               {rankUp.fromRank}위
             </span>
-            <span className="text-xl font-black text-brand-500">→</span>
-            <span className="rounded-chip bg-brand-500 px-4 py-2 text-lg font-black text-white tabular-nums">
+            <span className="text-xl font-bold text-brand-500">→</span>
+            <span className="rounded-chip bg-brand-500 px-4 py-2 text-lg font-bold text-white tabular-nums">
               {rankUp.toRank}위
             </span>
           </div>

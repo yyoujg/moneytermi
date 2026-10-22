@@ -101,11 +101,11 @@ const WordCard = ({
     {/* 뉴스 — 사진보다 '이 용어가 기사에서 어떻게 쓰였는지'가 보이게 작은 썸네일 목록. 불러온 뒤 기사가 없으면 섹션째 숨긴다 */}
     {(newsLoading || newsItems.length > 0) && (
     <Card pad="md" className="flex flex-col">
-      <p className="flex items-center gap-1.5 pb-1 text-xs font-bold text-[var(--color-ink-3)] tracking-[0.02em]"><Newspaper size={13} />실제 뉴스에서는 이렇게 나와요</p>
+      <p className="flex items-center gap-1 pb-1 text-xs font-bold text-[var(--color-ink-3)] tracking-[0.02em]"><Newspaper size={13} />실제 뉴스에서는 이렇게 나와요</p>
       {newsLoading ? (
         [1, 2, 3].map(i => (
           <div key={i} className="flex gap-3 py-3">
-            <div className="flex-1 flex flex-col gap-1.5">
+            <div className="flex-1 flex flex-col gap-1">
               <div className="h-3.5 bg-[var(--color-surface)] rounded animate-pulse" style={{ width: '90%' }} />
               <div className="h-3.5 bg-[var(--color-surface)] rounded animate-pulse" style={{ width: '60%' }} />
             </div>
@@ -120,11 +120,11 @@ const WordCard = ({
           className="flex items-start gap-3 py-3 border-b border-[var(--color-line)] last:border-0 active:opacity-60 text-left"
         >
           <div className="min-w-0 flex-1">
-            <p className="text-[15px] font-semibold text-[var(--color-ink)] break-keep leading-[1.5] tracking-[-0.01em] line-clamp-2">
+            <p className="text-sm font-semibold text-[var(--color-ink)] break-keep leading-normal tracking-[-0.01em] line-clamp-2">
               <Highlight text={stripHtml(item.title)} keyword={keyword} />
             </p>
             {item.description && (
-              <p className="text-[13px] text-[var(--color-ink-3)] break-keep leading-[1.6] line-clamp-2 mt-1!">
+              <p className="text-xs text-[var(--color-ink-3)] break-keep leading-relaxed line-clamp-2 mt-1!">
                 <Highlight text={stripHtml(item.description)} keyword={keyword} />
               </p>
             )}
@@ -149,8 +149,8 @@ const WordCard = ({
 
     {/* 관련 용어 */}
     {validRelated.length > 0 && (
-      <Card pad="md" className="flex flex-col gap-2.5">
-        <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><Link2 size={13} />관련 용어</p>
+      <Card pad="md" className="flex flex-col gap-2">
+        <p className="flex items-center gap-1 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><Link2 size={13} />관련 용어</p>
         <div className="flex flex-col">
           {validRelated.map((tag, i) => (
             <button
@@ -158,7 +158,7 @@ const WordCard = ({
               onClick={() => onRelatedClick(tag)}
               className="flex items-center gap-3 py-3 border-b border-[var(--color-surface)] last:border-0 active:opacity-60 text-left"
             >
-              <span className="text-2xs font-black w-4 shrink-0 text-[var(--color-ink-4)]">{i + 1}</span>
+              <span className="text-2xs font-bold w-4 shrink-0 text-[var(--color-ink-4)]">{i + 1}</span>
               <p className="text-sm font-semibold text-[var(--color-ink)] break-keep flex-1 tracking-[-0.01em]">{tag}</p>
               <ChevronRight size={14} className="text-[var(--color-ink-4)] shrink-0" />
             </button>
@@ -196,7 +196,7 @@ const RelatedWordPreviewContent = ({ word, lookup, onRelatedClick }: {
     detailContent={detail ? <details className="rounded-card bg-[var(--color-card)] p-5">
       <summary className="cursor-pointer font-semibold text-[var(--color-ink)]">자세히 보기</summary>
       <div className="mt-3 flex flex-col gap-4">
-        {toParagraphs(detail).map((para, i) => <p key={i} className="text-base leading-[1.75] break-keep text-[var(--color-ink-2)]">
+        {toParagraphs(detail).map((para, i) => <p key={i} className="text-base leading-relaxed break-keep text-[var(--color-ink-2)]">
           <Highlight text={para} keyword={word.word} pattern={termPattern(word.word) ?? undefined} />
         </p>)}
       </div>
@@ -380,21 +380,21 @@ const WordCardScreen = () => {
             <p className="text-sm text-[var(--color-ink-4)]">{words.length}개 용어의 설명을 확인했어요</p>
           </div>
           <Card pad="md" className="w-full anim-fade-up" style={{ '--i': 2 } as React.CSSProperties}>
-            <p className="text-xs font-bold text-[var(--color-info)] mb-1.5!">이해했는지 확인해볼까요?</p>
+            <p className="text-xs font-bold text-[var(--color-info)] mb-1!">이해했는지 확인해볼까요?</p>
             <p className="text-sm font-semibold text-[var(--color-ink)] leading-relaxed break-keep">{lessonChecks(words).length > 0 ? '상황 문제를 풀며 어떤 변화가 생기는지 확인해요.' : '이번에는 용어의 뜻을 확인해요. 상황 적용 문제는 아직 준비 중이에요.'}</p>
           </Card>
           <Card pad="md" className="w-full anim-fade-up" style={{ '--i': 3 } as React.CSSProperties}>
             <p className="text-xs text-[var(--color-ink-4)] mb-3!">방금 본 용어, 바로 확인해볼까요?</p>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-1">
               {words.slice(0, 5).map(w => (
-                <span key={w.id} className="text-xs px-2.5 py-1 rounded-full bg-[var(--color-surface)] text-[var(--color-ink-2)]">{w.word}</span>
+                <span key={w.id} className="text-xs px-2 py-1 rounded-full bg-[var(--color-surface)] text-[var(--color-ink-2)]">{w.word}</span>
               ))}
             </div>
           </Card>
           <DailyAlarmPromptCard />
           <StreakCelebration />
         </div>
-        <div className="px-5 pb-12 flex flex-col gap-2.5">
+        <div className="px-5 pb-12 flex flex-col gap-2">
           {(() => {
             const remaining = state?.continueWords?.filter(w => !knownIds.has(w.id)) ?? [];
             if (remaining.length > 0) {
@@ -484,7 +484,7 @@ const WordCardScreen = () => {
 
       {/* 상단: 레슨 안의 단어 위치 */}
       <div className="px-5 pt-4 flex items-center justify-between gap-3">
-        <div role="progressbar" aria-label="레슨 용어 진행률" aria-valuemin={0} aria-valuemax={words.length} aria-valuenow={wordIndex + 1} className="flex flex-1 items-center gap-1.5 overflow-hidden">
+        <div role="progressbar" aria-label="레슨 용어 진행률" aria-valuemin={0} aria-valuemax={words.length} aria-valuenow={wordIndex + 1} className="flex flex-1 items-center gap-1 overflow-hidden">
           {words.map((w, i) => (
             <span
               key={w.id}
@@ -543,7 +543,7 @@ const WordCardScreen = () => {
       <div className="px-5 pb-8 flex flex-col gap-4 max-h-[60vh] overflow-y-auto">
         {/* 첫 문단이 핵심이라 진하게, 나머지는 본문 */}
         {toParagraphs(detail).map((para, i) => (
-          <p key={i} className={`text-base leading-[1.75] break-keep tracking-[-0.01em] ${i === 0 ? 'font-semibold text-[var(--color-ink)]' : 'text-[var(--color-ink-2)]'}`}>
+          <p key={i} className={`text-base leading-relaxed break-keep tracking-[-0.01em] ${i === 0 ? 'font-semibold text-[var(--color-ink)]' : 'text-[var(--color-ink-2)]'}`}>
             <Highlight text={para} keyword={word.word} pattern={termPattern(word.word) ?? undefined} />
           </p>
         ))}

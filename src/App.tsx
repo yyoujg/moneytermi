@@ -54,7 +54,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
           <p className="text-sm text-[var(--color-ink-3)]">앱을 다시 시작해 주세요.</p>
           <button
             onClick={() => closeView()}
-            className="mt-2 px-5 py-2.5 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-80"
+            className="mt-2 px-5 py-2 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-80"
           >
             다시 시작
           </button>
@@ -85,9 +85,9 @@ const WelcomeScreen = () => {
   return (
     <div className="app-soft-screen flex h-full flex-col">
       <div className="flex flex-1 flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden">
-        <div className="app-soft-header flex shrink-0 flex-col items-center rounded-b-[32px] px-6 pb-8 pt-8 text-center">
+        <div className="app-soft-header flex shrink-0 flex-col items-center rounded-b-[var(--shape-xl)] px-6 pb-8 pt-8 text-center">
           <Mascot name="hello" size={150} />
-          <h1 className="mt-4 text-2xl font-extrabold leading-snug tracking-tight text-[var(--color-ink)] break-keep">
+          <h1 className="mt-4 text-2xl font-bold leading-snug tracking-tight text-[var(--color-ink)] break-keep">
             경제 공부,<br />수달과 차근차근
           </h1>
           <p className="mt-3 text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">뜻은 예시로 익히고, 조개는 차곡차곡 모아요.</p>
@@ -103,7 +103,7 @@ const WelcomeScreen = () => {
                   <Icon size={22} strokeWidth={1.75} />
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-[15px] font-bold text-[var(--color-ink)]">{title}</span>
+                  <span className="block text-sm font-bold text-[var(--color-ink)]">{title}</span>
                   <span className="mt-0.5 block text-xs leading-relaxed text-[var(--color-ink-3)] break-keep">{desc}</span>
                 </span>
               </li>

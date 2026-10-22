@@ -147,7 +147,7 @@ describe('색상 정의의 단일 원본', () => {
       expect(css.match(new RegExp('--color-' + key + ':', 'g'))).toHaveLength(2);
     }
     expect(resolve('--color-canvas', light)).toBe('#f4f4f6');
-    expect(resolve('--color-canvas', dark)).toBe('#202126');
+    expect(resolve('--color-canvas', dark)).toBe('#202124');
     const recap = readFileSync(resolvePath(cwd(), 'src/components/WeeklyRecap.tsx'), 'utf8');
     expect(recap).toContain('bg-[var(--color-canvas)]');
     expect(recap).not.toContain('bg-[var(--color-hero-start)]');
@@ -213,7 +213,7 @@ describe('배지·리그·프로필의 기존 표현 보존', () => {
     expect(identity['--color-brand-ink']).toBe('var(--color-brand-decoration)');
     expect(identity['--color-brand-cream']).toBe('var(--color-brand-soft)');
     expect(identity['--radius-card']).toBe('var(--shape-card)');
-    expect(light['--color-canvas']).toBe('#f4f4f6');
+    expect(resolve('--color-canvas', light)).toBe('#f4f4f6');
   });
   it('다크 모드도 공통 바탕·카드와 등급 장식색을 분리한다', () => {
     const identity = declarations(`.dark ${scope}`);
@@ -259,10 +259,11 @@ describe('배지·리그·프로필의 기존 표현 보존', () => {
 describe('수달 아이콘과 통일한 평면 카드·버튼 표면', () => {
   it('모든 테마와 화면이 같은 둥근 모서리 원본을 사용한다', () => {
     for (const values of [light, dark]) {
-      expect(values['--shape-card']).toBe('24px');
-      expect(values['--shape-button']).toBe('18px');
-      expect(values['--shape-chip']).toBe('14px');
-      expect(values['--shape-inset']).toBe('16px');
+      expect(values['--shape-card']).toBe('var(--shape-xl)');
+      expect(values['--shape-button']).toBe('var(--shape-lg)');
+      expect(values['--shape-chip']).toBe('var(--shape-md)');
+      expect(values['--shape-inset']).toBe('var(--shape-lg)');
+      expect([values['--shape-sm'], values['--shape-md'], values['--shape-lg'], values['--shape-xl']]).toEqual(['8px', '12px', '16px', '24px']);
       const shadows = Object.keys(values).filter(key => key.startsWith('--shadow-'));
       expect(shadows).toEqual(expect.arrayContaining(['--shadow-card', '--shadow-card-pressed', '--shadow-choice', '--shadow-action', '--shadow-action-secondary', '--shadow-action-soft', '--shadow-action-pressed']));
       for (const key of shadows) expect(values[key], key).toBe('none');
@@ -312,18 +313,35 @@ describe('닉네임 입력의 둥근 초점 표시', () => {
   });
 });
 
+describe('원시값과 의미 역할의 2단계 구조', () => {
+  it('의미 색 역할은 원시 팔레트만 참조하고 직접 색값을 갖지 않는다', () => {
+    for (const selector of [':root', '.dark']) {
+      for (const [key, value] of Object.entries(declarations(selector)).filter(([key]) => key.startsWith('--color-') && key !== '--color-overlay')) {
+        expect(value, key).toMatch(/^var\(--/);
+      }
+    }
+  });
+  it('글자·간격·곡률은 정해진 단계만 정의한다', () => {
+    expect(['caption', 'label', 'body', 'headline', 'title-3', 'title-2', 'title-1', 'display'].map(step => light[`--font-size-${step}`])).toEqual(['11px', '13px', '15px', '17px', '20px', '24px', '28px', '34px']);
+    expect(['regular', 'semibold', 'bold'].map(step => light[`--font-weight-${step}`])).toEqual(['400', '600', '700']);
+    for (const [key, value] of Object.entries(light).filter(([key]) => key.startsWith('--space-'))) {
+      expect(parseInt(value) % 4, key).toBe(0);
+    }
+  });
+});
+
 describe('연회색·차콜·민트 팔레트', () => {
   it('라이트는 연회색 바탕·흰 카드·차콜 행동·민트 장식을 사용한다', () => {
-    expect(light['--color-canvas']).toBe('#f4f4f6');
-    expect(light['--color-card']).toBe('#ffffff');
-    expect(light['--color-surface']).toBe('#f3f3f5');
-    expect(light['--color-brand-action']).toBe('#3d3e44');
-    expect(light['--color-brand-decoration']).toBe('#287a58');
-    expect(light['--color-brand-accent']).toBe('#8ecaa9');
+    expect(resolve('--color-canvas', light)).toBe('#f4f4f6');
+    expect(resolve('--color-card', light)).toBe('#ffffff');
+    expect(resolve('--color-surface', light)).toBe('#f3f3f5');
+    expect(resolve('--color-brand-action', light)).toBe('#3d3e44');
+    expect(resolve('--color-brand-decoration', light)).toBe('#287a58');
+    expect(resolve('--color-brand-accent', light)).toBe('#8ecaa9');
   });
   it('다크에서도 행동 버튼과 바탕의 비문자 대비를 확보한다', () => {
     expect(contrast(resolve('--color-brand-action', dark), resolve('--color-canvas', dark))).toBeGreaterThanOrEqual(3);
-    expect(dark['--color-canvas']).toBe('#202126');
+    expect(resolve('--color-canvas', dark)).toBe('#202124');
   });
   it('마이페이지·리그의 구분선도 공통 중성·민트 역할을 상속한다', () => {
     for (const selector of [':is(.my-page-screen, .league-screen, .identity-badge, .badge-tone)', '.dark :is(.my-page-screen, .league-screen, .identity-badge, .badge-tone)']) {
@@ -342,8 +360,8 @@ describe('보상 장식과 실제 재화·배지 역할의 분리', () => {
       for (const role of ['--color-xp-soft', '--color-points-soft', '--color-info-soft']) {
         expect(values[role], role).toBe('var(--color-surface)');
       }
-      expect(values['--color-success-action']).toBe('#18794e');
-      expect(values['--color-danger-action']).toBe('#cc3340');
+      expect(resolve('--color-success-action', values)).toBe('#18794e');
+      expect(resolve('--color-danger-action', values)).toBe('#cc3340');
     }
   });
   for (const [name, base, prefix] of [['라이트', light, ''], ['다크', dark, '.dark ']] as const) {

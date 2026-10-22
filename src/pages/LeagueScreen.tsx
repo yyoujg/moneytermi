@@ -71,7 +71,7 @@ const LeagueScreen = () => {
         <div className="grid grid-cols-2 gap-3 anim-fade-up">
           <Card pad="lg" className="flex flex-col">
             <p className="text-xs font-bold text-[var(--color-ink-3)]">이번 주 순위</p>
-            <p className="mt-2! text-3xl font-black text-brand-500 tabular-nums">{mine?.rank ? `${mine.rank}위` : '-'}</p>
+            <p className="mt-2! text-3xl font-bold text-brand-500 tabular-nums">{mine?.rank ? `${mine.rank}위` : '-'}</p>
             <p className="mt-1! text-xs text-[var(--color-ink-3)] break-keep">
               {mine?.rank ? `${mine.total}명 중 · ${mine.points?.toLocaleString() ?? 0}XP` : 'XP를 모으면 순위에 올라요'}
             </p>
@@ -84,7 +84,7 @@ const LeagueScreen = () => {
               <span className="text-lg font-bold text-[var(--color-ink)]">{stage.name}</span>
             </div>
             <div className="mt-auto pt-3">
-              <div role="progressbar" aria-label="다음 등급까지 진행률" aria-valuemin={0} aria-valuemax={100} aria-valuenow={next === null ? 100 : Math.min(100, Math.round(((xp - stage.minPoints) / (next - stage.minPoints)) * 100))} className="w-full bg-[var(--color-surface)] rounded-full h-2 overflow-hidden mb-1.5">
+              <div role="progressbar" aria-label="다음 등급까지 진행률" aria-valuemin={0} aria-valuemax={100} aria-valuenow={next === null ? 100 : Math.min(100, Math.round(((xp - stage.minPoints) / (next - stage.minPoints)) * 100))} className="w-full bg-[var(--color-surface)] rounded-full h-2 overflow-hidden mb-1">
                 <div
                   className="bg-brand-500 h-full rounded-full transition-all duration-700"
                   style={{ width: barReady ? `${next === null ? 100 : Math.min(100, Math.round(((xp - stage.minPoints) / (next - stage.minPoints)) * 100))}%` : '0%' }}
@@ -111,7 +111,7 @@ const LeagueScreen = () => {
               return (
                 <div key={s.id} className="flex flex-col items-center relative z-10 w-14">
                   <StageGlyph id={s.id} size={40} className={`transition-all ${isCurrent ? 'scale-125' : s.id > stage.id ? 'grayscale opacity-40' : ''}`} />
-                  <span className={`text-2xs font-medium text-center mt-1.5 ${isCurrent ? 'text-brand-500' : 'text-[var(--color-ink-3)]'}`}>
+                  <span className={`text-2xs font-normal text-center mt-1 ${isCurrent ? 'text-brand-500' : 'text-[var(--color-ink-3)]'}`}>
                     {s.name}
                   </span>
                 </div>

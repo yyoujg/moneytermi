@@ -14,7 +14,7 @@ export const LeagueRules = () => (
   <div className="flex flex-col gap-3">
     {RULES.map((item, i) => (
       <div key={item.title} className="bg-[var(--color-canvas)] rounded-card px-4 py-4 anim-fade-up" style={{ '--i': i } as React.CSSProperties}>
-        <p className="text-sm font-bold text-[var(--color-ink)] mb-1.5!">{item.title}</p>
+        <p className="text-sm font-bold text-[var(--color-ink)] mb-1!">{item.title}</p>
         <p className="text-sm text-[var(--color-ink-3)] leading-relaxed break-keep">{item.desc}</p>
       </div>
     ))}

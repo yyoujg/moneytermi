@@ -214,7 +214,7 @@ const QuizScreen = () => {
           style={{ '--i': 3 } as React.CSSProperties}
         />
         <Card pad="md" className="w-full anim-fade-up" style={{ '--i': 4 } as React.CSSProperties}>
-          <p className="text-xs font-bold text-[var(--color-info)] mb-1.5!">이번에 확인한 내용</p>
+          <p className="text-xs font-bold text-[var(--color-info)] mb-1!">이번에 확인한 내용</p>
           <p className="text-sm font-semibold text-[var(--color-ink)] leading-relaxed break-keep">처음 푼 {baseQueue.length}문제 중 {firstCorrect}개에 정답을 골랐어요. 나중에 다시 보며 기억을 확인해요.</p>
         </Card>
         <Card pad="md" className="w-full flex flex-col gap-3 anim-fade-up" style={{ '--i': 5 } as React.CSSProperties}>
@@ -355,7 +355,7 @@ const QuizScreen = () => {
         `}>
           <span className="text-xs font-bold text-brand-600">{quizItem?.promptLabel}</span>
 
-          <h2 ref={questionHeadingRef} tabIndex={-1} className="quiz-prompt-main w-full text-[22px] font-bold text-[var(--color-ink)] leading-[1.5] break-keep">
+          <h2 ref={questionHeadingRef} tabIndex={-1} className="quiz-prompt-main w-full text-xl font-bold text-[var(--color-ink)] leading-normal break-keep">
             {keepShortUnitsTogether(quizItem?.promptMain ?? '')}
           </h2>
 
@@ -369,7 +369,7 @@ const QuizScreen = () => {
 
         <p className="quiz-selection-guide">{status === 'idle' ? answerPending ? '답안 저장을 확인하고 있어요.' : submissionMessage ? '선택한 답안 그대로 다시 저장할 수 있어요.' : '답을 고른 뒤 정답 확인을 눌러주세요.' : gradingConflict ? '서버 채점 결과로 기록했어요. 문제 정보를 다시 확인해 주세요.' : '내 답과 정답을 비교해 보세요.'}</p>
         {/* 객관식 선택지는 채점 뒤에도 숨기지 않는다. */}
-        <div className="grid grid-cols-1 gap-2.5">
+        <div className="grid grid-cols-1 gap-2">
           {(quizItem?.options ?? []).map((opt, i) => {
             const isSelected = selected === opt.answer;
             const isCorrectOption = opt.isCorrect;
@@ -405,7 +405,7 @@ const QuizScreen = () => {
                 </span>
                 <span className="min-w-0 flex-1">{keepShortUnitsTogether(opt.label)}</span>
                 {tag && (
-                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-2xs font-black ${showGrading && isCorrectOption ? 'bg-[var(--color-card)] text-[var(--color-success-foreground)]' : 'bg-[var(--color-surface)] text-[var(--color-ink-4)]'}`}>
+                  <span className={`shrink-0 rounded-full px-2 py-1 text-2xs font-bold ${showGrading && isCorrectOption ? 'bg-[var(--color-card)] text-[var(--color-success-foreground)]' : 'bg-[var(--color-surface)] text-[var(--color-ink-4)]'}`}>
                     {tag}
                   </span>
                 )}

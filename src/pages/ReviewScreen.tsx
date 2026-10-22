@@ -218,7 +218,7 @@ const QuizPage = () => {
           )}
 
           <Card pad="md">
-            <p className="text-xs font-bold text-[var(--color-ink-3)] mb-1.5!">상세 설명</p>
+            <p className="text-xs font-bold text-[var(--color-ink-3)] mb-1!">상세 설명</p>
             <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep">{keepShortUnitsTogether(maskTerm(word.detailedMeaning, word.word))}</p>
           </Card>
         </Card>
@@ -233,7 +233,7 @@ const QuizPage = () => {
               placeholder="정답을 입력하세요"
               disabled={status !== 'idle'}
               autoComplete="off"
-              className={`w-full px-4 py-4 rounded-button text-sm font-medium outline-none border transition-colors
+              className={`w-full px-4 py-4 rounded-button text-sm font-normal outline-none border transition-colors
                 ${status === 'correct' ? 'bg-success-500/10 border-success-500/40 text-success-400' :
                   status === 'wrong' ? 'bg-danger-500/10 border-danger-500/40 text-danger-400' :
                   'bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink)] focus:border-brand-500/50'}
@@ -241,10 +241,10 @@ const QuizPage = () => {
               style={{ caretColor: 'var(--color-brand-action)' }}
             />
             {status === 'correct' && (
-              <p className="text-xs font-bold text-success-400 mt-1.5! px-1">정답! 바로 맞혔어요{capped ? ' 오늘 보상 한도에 도달했어요' : lastEarned > 0 ? ` +${lastEarned}개` : ''}</p>
+              <p className="text-xs font-bold text-success-400 mt-1! px-1">정답! 바로 맞혔어요{capped ? ' 오늘 보상 한도에 도달했어요' : lastEarned > 0 ? ` +${lastEarned}개` : ''}</p>
             )}
             {status === 'wrong' && (
-              <p className="text-xs font-bold text-danger-400 mt-1.5! px-1">틀렸어요. 다시 시도해보세요!</p>
+              <p className="text-xs font-bold text-danger-400 mt-1! px-1">틀렸어요. 다시 시도해보세요!</p>
             )}
           </div>
 
@@ -270,7 +270,7 @@ const QuizPage = () => {
             <button
               onClick={() => { if (status === 'idle' && !attemptRef.current && !submittingRef.current) setShowHint(true); }}
               disabled={status !== 'idle'}
-              className="action-secondary flex-1 flex items-center justify-center gap-1.5 py-3 rounded-button text-sm font-bold active:opacity-70"
+              className="action-secondary flex-1 flex items-center justify-center gap-1 py-3 rounded-button text-sm font-bold active:opacity-70"
             >
               <Lightbulb size={13} className="text-[var(--color-ink-4)]" /> 초성 힌트
             </button>
@@ -278,7 +278,7 @@ const QuizPage = () => {
           <button
             onClick={() => { if (status === 'idle' && !attemptRef.current && !submittingRef.current) goNext(); }}
             disabled={status !== 'idle'}
-            className="action-secondary flex-1 flex items-center justify-center gap-1.5 py-3 rounded-button text-sm font-bold active:opacity-70"
+            className="action-secondary flex-1 flex items-center justify-center gap-1 py-3 rounded-button text-sm font-bold active:opacity-70"
           >
             <ChevronRight size={13} /> 건너뛰기
           </button>

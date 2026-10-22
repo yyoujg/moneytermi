@@ -63,12 +63,12 @@ export const LeaguePromotionCelebration = () => {
 
           <div className="flex items-center justify-center gap-3">
             {promotion.from && <StageGlyph id={promotion.from.id} size={52} className="opacity-45 grayscale" />}
-            <span className="text-xl font-black text-brand-500">→</span>
+            <span className="text-xl font-bold text-brand-500">→</span>
             <StageGlyph id={promotion.to.id} size={76} className="anim-pop-in" />
           </div>
 
-          <p className="mt-4! text-xs font-black text-brand-600">리그 승급</p>
-          <h2 id="league-promotion-title" className="mt-1! text-2xl font-black text-[var(--color-ink)]">
+          <p className="mt-4! text-xs font-bold text-brand-600">리그 승급</p>
+          <h2 id="league-promotion-title" className="mt-1! text-2xl font-bold text-[var(--color-ink)]">
             {promotion.to.name} 리그에 올라갔어요
           </h2>
           <p className="mt-2! text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">
@@ -77,7 +77,7 @@ export const LeaguePromotionCelebration = () => {
 
           <div className="mt-4 w-full rounded-chip bg-[var(--color-surface)] px-4 py-3">
             <p className="text-2xs font-bold text-[var(--color-ink-4)]">현재 누적 XP</p>
-            <p className="mt-1! text-xl font-black text-brand-500 tabular-nums">{xp.toLocaleString()}XP</p>
+            <p className="mt-1! text-xl font-bold text-brand-500 tabular-nums">{xp.toLocaleString()}XP</p>
           </div>
 
           <button

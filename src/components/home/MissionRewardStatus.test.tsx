@@ -41,7 +41,7 @@ describe('미션 보상 버튼과 완료 상태의 동일한 크기', () => {
   });
   it('두 상태에 같은 너비·최소 터치 높이·글자 크기를 지정한다', () => {
     const css = readFileSync(resolve(cwd(), 'src/index.css'), 'utf8');
-    expect(css).toMatch(/\.mission-reward-status,\s*button\.mission-reward-status\s*\{[^}]*width: 64px;[^}]*height: var\(--size-touch-min\);[^}]*font-size: 14px !important;[^}]*font-weight: 600 !important;/s);
+    expect(css).toMatch(/\.mission-reward-status,\s*button\.mission-reward-status\s*\{[^}]*width: 64px;[^}]*height: var\(--size-touch-min\);[^}]*font-size: var\(--font-size-body\) !important;[^}]*font-weight: var\(--font-weight-semibold\) !important;/s);
   });
 });
 

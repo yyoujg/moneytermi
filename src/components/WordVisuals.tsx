@@ -93,7 +93,7 @@ const Table = ({ columns, rows }: { columns: string[]; rows: string[][] }) => {
         <thead>
           <tr>
             {columns.map((c, i) => (
-              <th key={i} className={`py-2 px-2 text-left font-bold break-keep ${i === 0 ? 'text-[var(--color-ink-4)]' : 'text-brand-500'} bg-[var(--color-surface)] first:rounded-l-md last:rounded-r-md`}>{c}</th>
+              <th key={i} className={`py-2 px-2 text-left font-bold break-keep ${i === 0 ? 'text-[var(--color-ink-4)]' : 'text-brand-500'} bg-[var(--color-surface)] first:rounded-l-[var(--shape-sm)] last:rounded-r-[var(--shape-sm)]`}>{c}</th>
             ))}
           </tr>
         </thead>
@@ -101,7 +101,7 @@ const Table = ({ columns, rows }: { columns: string[]; rows: string[][] }) => {
           {rows.map((r, ri) => (
             <tr key={ri} className="border-b border-[var(--color-surface)] last:border-0">
               {r.map((cell, ci) => (
-                <td key={ci} className={`py-2.5 px-2 align-top break-keep leading-[1.5] ${ci === 0 ? 'font-bold text-[var(--color-ink-2)]' : 'text-[var(--color-ink-2)]'}`}>{cell}</td>
+                <td key={ci} className={`py-2 px-2 align-top break-keep leading-normal ${ci === 0 ? 'font-bold text-[var(--color-ink-2)]' : 'text-[var(--color-ink-2)]'}`}>{cell}</td>
               ))}
             </tr>
           ))}
@@ -137,7 +137,7 @@ const Flow = ({ steps, caption }: { steps: string[]; caption?: string }) => {
         return (
           <div key={i} className="w-full flex flex-col items-center gap-1 anim-fade-up">
             {i > 0 && <ArrowDown size={14} className="text-brand-500" />}
-            <p className={`w-full py-2.5 px-3 rounded-chip text-center text-[13px] font-semibold break-keep ${mine == null ? 'bg-[var(--color-surface)] text-[var(--color-ink-2)]' : right ? 'bg-success-500/10 text-success-500' : 'bg-danger-500/10 text-danger-500'}`}>
+            <p className={`w-full py-2 px-3 rounded-chip text-center text-xs font-semibold break-keep ${mine == null ? 'bg-[var(--color-surface)] text-[var(--color-ink-2)]' : right ? 'bg-success-500/10 text-success-500' : 'bg-danger-500/10 text-danger-500'}`}>
               {s}{mine != null && (right ? ' · 정답' : ` · 내 답 ${mine}`)}
             </p>
           </div>
@@ -149,23 +149,23 @@ const Flow = ({ steps, caption }: { steps: string[]; caption?: string }) => {
           <ArrowDown size={14} className="text-brand-500" />
           {quiz ? (
             <>
-              <p className="w-full py-2.5 px-3 rounded-chip border border-dashed border-brand-500/50 text-center text-[13px] font-semibold text-[var(--color-ink-2)] break-keep">
+              <p className="w-full py-2 px-3 rounded-chip border border-dashed border-brand-500/50 text-center text-xs font-semibold text-[var(--color-ink-2)] break-keep">
                 {next.replace(ARROW, '?')}
               </p>
               <div className="w-full grid grid-cols-2 gap-2 mt-1">
-                <button type="button" onClick={() => pick('↑')} className="py-2.5 rounded-button bg-brand-500/10 text-sm font-bold text-brand-500 active:opacity-70">↑ 오른다</button>
-                <button type="button" onClick={() => pick('↓')} className="py-2.5 rounded-button bg-brand-500/10 text-sm font-bold text-brand-500 active:opacity-70">↓ 내린다</button>
+                <button type="button" onClick={() => pick('↑')} className="py-2 rounded-button bg-brand-500/10 text-sm font-bold text-brand-500 active:opacity-70">↑ 오른다</button>
+                <button type="button" onClick={() => pick('↓')} className="py-2 rounded-button bg-brand-500/10 text-sm font-bold text-brand-500 active:opacity-70">↓ 내린다</button>
               </div>
             </>
           ) : (
-            <button type="button" onClick={() => setShown(n => n + 1)} className="w-full py-2.5 rounded-chip border border-dashed border-brand-500/50 text-[13px] font-bold text-brand-500 active:opacity-70">
+            <button type="button" onClick={() => setShown(n => n + 1)} className="w-full py-2 rounded-chip border border-dashed border-brand-500/50 text-xs font-bold text-brand-500 active:opacity-70">
               다음은 무엇일까요? 눌러서 보기
             </button>
           )}
         </div>
       )}
 
-      {done && caption && <p className="w-full mt-2 text-xs text-[var(--color-ink-3)] break-keep leading-[1.6] whitespace-pre-line anim-fade-up">{caption}</p>}
+      {done && caption && <p className="w-full mt-2 text-xs text-[var(--color-ink-3)] break-keep leading-relaxed whitespace-pre-line anim-fade-up">{caption}</p>}
     </div>
   );
 };
@@ -234,11 +234,11 @@ const EcosCard = ({ v }: { v: Extract<WordVisual, { type: 'ecos' }> }) => {
   return (
     <Card pad="none" className="pt-4 pb-5 flex flex-col gap-3">
       <div className="flex flex-col gap-1">
-        <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><BarChart3 size={13} />실제 통계</p>
+        <p className="flex items-center gap-1 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><BarChart3 size={13} />실제 통계</p>
         <p className="text-sm font-bold text-[var(--color-ink)] break-keep">{v.title}</p>
       </div>
       <EcosChart v={v} onFail={down => { if (down) ecosDown = true; setFailed(true); }} />
-      {v.caption && <p className="text-xs text-[var(--color-ink-3)] break-keep leading-[1.6] whitespace-pre-line">{v.caption}</p>}
+      {v.caption && <p className="text-xs text-[var(--color-ink-3)] break-keep leading-relaxed whitespace-pre-line">{v.caption}</p>}
     </Card>
   );
 };
@@ -300,7 +300,7 @@ const LinkedText = ({ text, terms }: { text: string; terms?: Terms }) => {
           }}
             aria-expanded={open === name}
             aria-controls={open === name ? panelId : undefined}
-            className="word-term-button inline px-1! py-0.5! rounded-md font-medium">
+            className="word-term-button inline px-1! py-0.5! rounded-[var(--shape-sm)] font-normal">
             {part}
           </button>
         );
@@ -338,18 +338,18 @@ const VisualCard = ({ v, className = '', terms }: { v: Exclude<WordVisual, { typ
     {v.type === 'text' ? (
       <>
         <p className="text-sm font-bold text-[var(--color-ink)] break-keep">{v.title}</p>
-        <p className="text-sm text-[var(--color-ink-2)] break-keep leading-[1.7] whitespace-pre-line"><LinkedText text={v.body} terms={terms} /></p>
+        <p className="text-sm text-[var(--color-ink-2)] break-keep leading-relaxed whitespace-pre-line"><LinkedText text={v.body} terms={terms} /></p>
       </>
     ) : <>
     <div className="flex flex-col gap-1">
-      <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><BarChart3 size={13} />{v.type === 'table' ? '한눈에 비교' : v.type === 'flow' ? '맞혀 보기' : '그래프로 보기'}</p>
+      <p className="flex items-center gap-1 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><BarChart3 size={13} />{v.type === 'table' ? '한눈에 비교' : v.type === 'flow' ? '맞혀 보기' : '그래프로 보기'}</p>
       <p className="text-sm font-bold text-[var(--color-ink)] break-keep">{v.title}</p>
     </div>
     {v.type === 'line' && <LineChart x={v.x} series={v.series} unit={v.unit} />}
     {v.type === 'table' && <Table columns={v.columns} rows={v.rows} />}
     {v.type === 'flow' && <Flow steps={v.steps} caption={v.caption} />}
     </>}
-    {v.caption && v.type !== 'flow' && <p className="text-xs text-[var(--color-ink-3)] break-keep leading-[1.6] whitespace-pre-line">{v.caption}</p>}
+    {v.caption && v.type !== 'flow' && <p className="text-xs text-[var(--color-ink-3)] break-keep leading-relaxed whitespace-pre-line">{v.caption}</p>}
   </Card>
 );
 
@@ -364,7 +364,7 @@ const FlowCarousel = ({ flows }: { flows: Extract<WordVisual, { type: 'flow' }>[
       >
         {flows.map((v, i) => <VisualCard key={i} v={v} className="w-[88%] shrink-0 snap-start" />)}
       </div>
-      <div className="flex justify-center gap-1.5">
+      <div className="flex justify-center gap-1">
         {flows.map((_, i) => (
           <span key={i} style={{ borderRadius: 9999 }} className={`h-1.5 transition-all ${i === page ? 'w-4 bg-brand-500' : 'w-1.5 bg-[var(--color-line)]'}`} />
         ))}

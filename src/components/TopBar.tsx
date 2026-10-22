@@ -210,20 +210,20 @@ export const TopBar = () => {
       {/* 앱 이름·홈 이동은 토스 내비게이션 바가 맡는다. 자체 로고 헤더를 두면 검수에서 '자체 헤더 중복'으로 반려된다(2026-09-29) */}
       {!hideBar && <div data-topbar className="app-soft-header relative z-40 shrink-0 h-12 flex items-center px-4 min-[390px]:px-5">
 
-        <div className="ml-auto flex max-w-full items-center justify-end gap-2 overflow-x-auto text-[13px] font-bold whitespace-nowrap text-[var(--color-ink)] min-[390px]:gap-3 min-[390px]:text-sm [&::-webkit-scrollbar]:hidden">
-          <button onClick={e => toggleTip('streak', e)} aria-label="연속 학습" className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 active:opacity-60">
+        <div className="ml-auto flex max-w-full items-center justify-end gap-2 overflow-x-auto text-xs font-bold whitespace-nowrap text-[var(--color-ink)] min-[390px]:gap-3 min-[390px]:text-sm [&::-webkit-scrollbar]:hidden">
+          <button onClick={e => toggleTip('streak', e)} aria-label="연속 학습" className="flex min-h-11 min-w-11 items-center justify-center gap-1 active:opacity-60">
             <StreakIcon size={19} /><span><RollingNumber value={streak} /></span>
           </button>
-          {!compactBar && <button onClick={e => toggleTip('xp', e)} aria-label="경험치" className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 active:opacity-60">
+          {!compactBar && <button onClick={e => toggleTip('xp', e)} aria-label="경험치" className="flex min-h-11 min-w-11 items-center justify-center gap-1 active:opacity-60">
             <XpIcon size={19} /><span><RollingNumber value={xp} /></span>
           </button>}
-          <button onClick={() => { setTip(null); setEnergyRefillNotice(null); openShop(); }} aria-label="조개 상점" className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 active:opacity-60">
+          <button onClick={() => { setTip(null); setEnergyRefillNotice(null); openShop(); }} aria-label="조개 상점" className="flex min-h-11 min-w-11 items-center justify-center gap-1 active:opacity-60">
             <PointIcon size={19} /><span><RollingNumber value={points} /></span>
           </button>
-          <button onClick={e => toggleTip('words', e)} aria-label="익힌 용어" className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 active:opacity-60">
+          <button onClick={e => toggleTip('words', e)} aria-label="익힌 용어" className="flex min-h-11 min-w-11 items-center justify-center gap-1 active:opacity-60">
             <WordsIcon size={19} /><span><RollingNumber value={knownWords.length} /></span>
           </button>
-          <button onClick={() => { setTip(null); setEnergyRefillNotice(null); openShop('energy'); }} aria-label="에너지" className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 active:opacity-60">
+          <button onClick={() => { setTip(null); setEnergyRefillNotice(null); openShop('energy'); }} aria-label="에너지" className="flex min-h-11 min-w-11 items-center justify-center gap-1 active:opacity-60">
             <EnergyIcon size={22} /><span><RollingNumber value={energy} /></span>
           </button>
           {boostLeft > 0 && (
@@ -291,7 +291,7 @@ export const TopBar = () => {
               className="action-secondary grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-chip px-4 py-4 text-sm font-bold active:opacity-70"
             >
               <span className="flex min-w-0 items-center gap-2 text-left leading-5"><Tv size={18} className="shrink-0" />광고 보고 조개 받기</span>
-              <span className="shrink-0 text-right text-2xs font-medium leading-4 opacity-80">
+              <span className="shrink-0 text-right text-2xs font-normal leading-4 opacity-80">
                 {rewardedAdPending === 'points' ? '여는 중' : rewardedAdPreparing ? '준비 중' : rewardedAdReady ? '시청 후 받기' : '잠시 후'}
               </span>
             </button>
@@ -308,7 +308,7 @@ export const TopBar = () => {
               className="action-secondary grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-chip px-4 py-4 text-sm font-bold active:opacity-70"
             >
               <span className="flex min-w-0 items-center gap-2 text-left leading-5"><ChevronsUp size={18} className="shrink-0" />XP 2배 부스트</span>
-              <span className="shrink-0 text-right text-2xs font-medium leading-4">
+              <span className="shrink-0 text-right text-2xs font-normal leading-4">
                 {boostPending ? '구매 확인 중' : boostLeft > 0
                   ? `${Math.floor(boostLeft / 60000)}:${String(Math.floor((boostLeft % 60000) / 1000)).padStart(2, '0')} 남음`
                   : points < 300 ? `조개 ${(300 - points).toLocaleString()}개 더 필요` : '조개 300개 · 30분'}

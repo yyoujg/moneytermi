@@ -341,7 +341,7 @@ const CourseScreen = () => {
               <span aria-hidden="true" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-chip border border-[var(--color-line)] text-lg font-semibold tabular-nums text-[var(--color-ink-3)]">{String(partIndex + 1).padStart(2, '0')}</span>
               <div className="min-w-0">
                 <p className="text-2xs font-bold text-brand-600">{sec.course.level} · 코스 {partIndex + 1}/{activeTopic.parts.length}</p>
-                <h3 className="mt-1! text-[17px] font-black text-[var(--color-ink)] break-keep tracking-[-0.01em] leading-snug">{sec.course.title}</h3>
+                <h3 className="mt-1! text-base font-bold text-[var(--color-ink)] break-keep tracking-[-0.01em] leading-snug">{sec.course.title}</h3>
                 <p className="mt-1! text-xs text-[var(--color-ink-3)] break-keep leading-relaxed">{learningOutcomeFor({ category: sec.course.category, title: sec.course.title, words: sec.course.words })}</p>
               </div>
             </div>}
@@ -370,15 +370,15 @@ const CourseScreen = () => {
               <div key={node.id} className="mx-5 mb-4">
                 <button ref={isFocus ? focusRef : undefined} type="button" disabled={locked} data-own-sfx data-node-id={node.id}
                   onClick={() => handleNodeTap(node, k, sec.knownCount, sec.course.title)}
-                  className={`course-node-card flex w-full items-center gap-3 border py-3.5 text-left disabled:cursor-default ${nodeCardClass} ${newlyDone.has(node.id) ? 'anim-stamp' : ''}`}
+                  className={`course-node-card flex w-full items-center gap-3 border py-3 text-left disabled:cursor-default ${nodeCardClass} ${newlyDone.has(node.id) ? 'anim-stamp' : ''}`}
                   style={{ borderRadius: 'var(--shape-card)', '--d': `${0.2 + (newlyDone.get(node.id) ?? 0) * 0.15}s` } as React.CSSProperties}>
                   <span className="min-w-0 flex-1">
                     <span className={`flex flex-wrap items-center gap-x-2 gap-y-1 text-2xs ${locked ? 'text-[var(--color-ink-4)]' : 'text-[var(--color-ink-3)]'}`}>
-                      <span className="inline-flex items-center gap-1.5">
+                      <span className="inline-flex items-center gap-1">
                         <Icon size={16} strokeWidth={1.75} aria-hidden="true" data-learning-icon={node.type} className="shrink-0" />
                         {partIndex + 1}-{k + 1} · {copy.kind}
                       </span>
-                      <span data-learning-status className={`font-medium ${locked ? 'text-[var(--color-ink-4)]' : isFocus ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-3)]'}`}>{nodeStatus}</span>
+                      <span data-learning-status className={`font-normal ${locked ? 'text-[var(--color-ink-4)]' : isFocus ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-3)]'}`}>{nodeStatus}</span>
                     </span>
                     <span className={`mt-1 block text-sm font-bold break-keep ${locked ? 'text-[var(--color-ink-3)]' : 'text-[var(--color-ink)]'}`}>{copy.title}</span>
                     {locked && <span className="mt-1 block text-2xs text-[var(--color-ink-4)]">앞의 레슨을 마치면 시작할 수 있어요</span>}
