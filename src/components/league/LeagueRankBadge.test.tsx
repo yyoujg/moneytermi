@@ -22,9 +22,11 @@ describe('읽기 쉬운 리그 순위 숫자', () => {
     expect(container).toHaveTextContent(`${rank}위`);
     expect(container.querySelector('.sr-only')).toHaveTextContent('위');
     expect(container.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
-    expect(container.querySelector('svg')).toHaveAttribute('data-style', 'pastel-object');
+    expect(container.querySelector('svg')).toHaveAttribute('data-style', 'mono');
     expect(container.querySelector('svg')).toHaveAttribute('viewBox', '0 0 100 100');
-    expect(container.querySelector('circle')).toHaveAttribute('r', '48');
+    // 바탕 원 없이 무채색 메달만 그린다.
+    expect(container.querySelector('circle[r="48"]')).toBeNull();
+    expect(container.querySelector('svg')?.innerHTML).not.toMatch(/#[\da-f]{6}/i);
     expect(container.querySelector('[data-rank-face]')).toHaveAttribute('cy', '55');
     expect(container.querySelector('[data-rank-face]')).toHaveAttribute('r', '18');
     expect(container.querySelector('[data-rank-shape]')).toHaveAttribute('data-rank-shape', 'medal');

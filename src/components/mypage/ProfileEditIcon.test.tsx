@@ -16,11 +16,11 @@ const mount = (size?: number) => {
 };
 
 describe('잘 보이는 프로필 편집 표시', () => {
-  it('기본 크기 18픽셀의 듀오톤 표시를 사용한다', () => {
+  it('기본 크기 18픽셀의 선형 표시를 사용한다', () => {
     const icon = mount();
     expect(icon).toHaveAttribute('width', '18');
     expect(icon).toHaveAttribute('height', '18');
-    expect(icon.querySelector('[opacity="0.2"]')).not.toBeNull();
+    expect(icon.querySelector('[opacity="0.2"]')).toBeNull();
   });
   it('닉네임 옆의 16픽셀 크기도 전달한다', () => {
     const icon = mount(16);

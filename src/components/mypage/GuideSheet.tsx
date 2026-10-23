@@ -11,11 +11,11 @@ const FAQ_ITEMS = [
 ];
 
 export const GuideSheet = ({ open, onClose }: { open: boolean; onClose: () => void }) => (
-  <BottomSheet open={open} onDimmerClick={onClose} header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>앱 사용법 & FAQ</span>}>
-    <div className="px-5 pb-6 flex flex-col gap-3">
+  <BottomSheet open={open} onDimmerClick={onClose} header={<span className="sheet-title">앱 사용법 & FAQ</span>}>
+    <div className="px-5 pb-6 flex flex-col">
       {FAQ_ITEMS.map((item, i) => (
-        <div key={i} className="bg-[var(--color-canvas)] rounded-card px-4 py-4 anim-fade-up" style={{ '--i': i } as React.CSSProperties}>
-          <p className="text-sm font-bold text-[var(--color-ink)] mb-1!">Q. {item.q}</p>
+        <div key={i} className="py-4 border-b border-[var(--color-line)] last:border-0 anim-fade-up" style={{ '--i': i } as React.CSSProperties}>
+          <p className="text-sm font-bold text-[var(--color-ink)] mb-1!">{item.q}</p>
           <p className="text-xs text-[var(--color-ink-3)] leading-relaxed">{item.a}</p>
         </div>
       ))}

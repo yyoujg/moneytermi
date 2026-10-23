@@ -1,11 +1,12 @@
+import { ActionButton } from '../ui/ActionButton';
 import { useEffect, useMemo, useState } from 'react';
-import { X } from '../ui/OtterIcons';
 import { getGrowthStage, GROWTH_STAGES, type GrowthStage } from '../../constants';
 import { useAppContext } from '../../context/AppContext';
 import { feedbackTierUp } from '../../lib/feedback';
 import { logClick } from '../../lib/analytics';
 import { Storage } from '../../lib/storage';
 import { StageGlyph } from '../StageGlyph';
+import { useModalTurn } from '../../lib/modalTurn';
 
 const KEY = 'league_promotion_seen_stage_v1';
 
@@ -31,7 +32,8 @@ export const LeaguePromotionCelebration = () => {
     return () => { cancelled = true; };
   }, [currentStage, hydrated, previousStage, xp]);
 
-  if (!promotion) return null;
+  const myTurn = useModalTurn(!!promotion);
+  if (!promotion || !myTurn) return null;
 
   const close = () => {
     logClick('league_promotion_modal_close', { to: promotion.to.id, xp });
@@ -52,41 +54,23 @@ export const LeaguePromotionCelebration = () => {
         className="app-card w-full max-w-xs overflow-hidden rounded-card bg-[var(--color-card)] anim-pop-in"
       >
         <div className="relative flex flex-col items-center px-5 pb-5 pt-6 text-center">
-          <button
-            type="button"
-            aria-label="닫기"
-            onClick={close}
-            className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-surface)] text-[var(--color-ink-3)] active:opacity-80"
-          >
-            <X size={16} strokeWidth={2.4} />
-          </button>
-
           <div className="flex items-center justify-center gap-3">
             {promotion.from && <StageGlyph id={promotion.from.id} size={52} className="opacity-45 grayscale" />}
-            <span className="text-xl font-bold text-brand-500">→</span>
+            <span className="text-lg text-[var(--color-ink-3)]" aria-hidden="true">→</span>
             <StageGlyph id={promotion.to.id} size={76} className="anim-pop-in" />
           </div>
 
-          <p className="mt-4! text-xs font-bold text-brand-600">리그 승급</p>
-          <h2 id="league-promotion-title" className="mt-1! text-2xl font-bold text-[var(--color-ink)]">
+          <p className="mt-4! text-xs text-[var(--color-ink-3)]">리그 승급</p>
+          <h2 id="league-promotion-title" className="mt-1! text-xl font-bold text-[var(--color-ink)]">
             {promotion.to.name} 리그에 올라갔어요
           </h2>
           <p className="mt-2! text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">
             지금까지 쌓은 XP가 다음 단계에 닿았어요. 꾸준히 이어온 기록이 보여요.
           </p>
 
-          <div className="mt-4 w-full rounded-chip bg-[var(--color-surface)] px-4 py-3">
-            <p className="text-2xs font-bold text-[var(--color-ink-4)]">현재 누적 XP</p>
-            <p className="mt-1! text-xl font-bold text-brand-500 tabular-nums">{xp.toLocaleString()}XP</p>
-          </div>
+          <p className="mt-4! text-xs text-[var(--color-ink-3)]">현재 누적 <span className="font-semibold text-[var(--color-ink)] tabular-nums">{xp.toLocaleString()}XP</span></p>
 
-          <button
-            type="button"
-            onClick={close}
-            className="mt-4 w-full rounded-button bg-brand-500 py-4 text-sm font-bold text-white active:opacity-90"
-          >
-            좋아요
-          </button>
+          <ActionButton fullWidth onClick={close} className="mt-5">좋아요</ActionButton>
         </div>
       </div>
     </div>

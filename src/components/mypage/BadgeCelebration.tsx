@@ -7,6 +7,7 @@ import { Storage } from '../../lib/storage';
 import { logClick } from '../../lib/analytics';
 import { feedbackBadge } from '../../lib/feedback';
 import { BadgeGlyph } from './BadgeGlyph';
+import { useModalTurn } from '../../lib/modalTurn';
 
 // 새로 획득한 배지 축하. 배지는 서버 기록 없이 통계에서 파생되므로, "이미 보여준 배지" 목록을 기기에 남겨 차이만 축하한다.
 // 여러 개를 한 번에 얻었으면 한 화면에 같이 보여준다. 유실돼도 축하가 한 번 더 뜰 뿐이다.
@@ -36,7 +37,8 @@ export const BadgeCelebration = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated, earnedIds]);
 
-  if (!fresh) return null;
+  const myTurn = useModalTurn(!!fresh);
+  if (!fresh || !myTurn) return null;
 
   return (
     <div className="original-modal app-soft-screen fixed inset-0 z-[60] flex flex-col items-center justify-center gap-6 px-6 overflow-hidden">
@@ -49,7 +51,7 @@ export const BadgeCelebration = () => {
         />
       ))}
 
-      <p className="flex items-center gap-2 text-2xl font-bold text-[var(--color-ink)] anim-pop-in">새 배지 획득!</p>
+      <h2 className="text-xl font-bold text-[var(--color-ink)] anim-pop-in">새 배지 획득!</h2>
 
       <div className={`flex flex-wrap justify-center gap-5 ${fresh.length === 1 ? '' : 'max-w-xs'}`}>
         {fresh.map((b, i) => (
@@ -66,7 +68,7 @@ export const BadgeCelebration = () => {
 
       <button
         onClick={() => { logClick('badge_earned_close', { count: fresh.length }); setFresh(null); }}
-        className="w-full max-w-xs py-4 rounded-button text-sm font-bold text-white bg-brand-500 active:opacity-90 anim-fade-up"
+        className="action-button w-full max-w-xs anim-fade-up"
         style={{ '--i': 5 } as React.CSSProperties}
       >
         확인

@@ -6,52 +6,59 @@
 
 - 핵심 정보와 주요 행동만 강조한다. 화면마다 가장 먼저 보여야 할 것은 하나다.
 - 카드는 적게, 여백과 타이포그래피로 위계를 만든다.
-- 메인 컬러는 CTA 버튼에만 쓴다. 나머지는 중성색과 낮은 채도의 보조색이다.
+- 메인 컬러(웜 잉크)는 CTA 버튼에만 쓴다. 오렌지는 작은 포인트에만, 아이콘은 무채색이다.
 - 평면이다. 그림자, 그라데이션, 떠 있는(아일랜드) UI를 쓰지 않는다.
-- 아이콘은 듀오톤 한 벌이고, 아이콘 뒤에 색 바탕을 깔지 않는다.
+- 아이콘은 선형 한 벌이고, 아이콘 뒤에 어떤 바탕도 깔지 않는다.
 
 ## 색
 
+웜 모노 팔레트다. 따뜻한 회색 바탕에 거의 검정인 잉크를 메인 컬러로 쓰고, 오렌지는 작은 포인트에만 쓴다. 아이콘에는 색을 넣지 않는다.
+
 ### 메인 컬러
 
-| 토큰 | 값 | 쓰는 곳 |
-|---|---|---|
-| `--color-brand-action` | `#CC4C1A` (탠저린) | 주요 CTA 버튼 배경 |
-| `--color-brand-pressed` | `#BD4819` | CTA 눌림 |
-| `--color-on-brand` | `#FFFFFF` | CTA 글자 (대비 4.55:1) |
+| 토큰 | 라이트 | 다크 | 쓰는 곳 |
+|---|---|---|---|
+| `--color-brand-action` | `#1C1917` (웜 잉크) | `#F7F5F2` | 주요 CTA 버튼 배경 |
+| `--color-brand-pressed` | `#3D3935` | `#E7E3DE` | CTA 눌림 |
+| `--color-on-brand` | `#FFFFFF` | `#1C1917` | CTA 글자 |
 
+- 다크 모드에서는 CTA가 밝은 면, 어두운 글자로 뒤집힌다.
 - 화면 면적의 5~10%를 넘지 않는다. 한 화면에 채운 CTA는 보통 하나다.
-- 진행 막대, 선택 상태, 숫자 강조, 장식, 로딩 표시에는 쓰지 않는다.
-- `.bg-brand-500`, `button.action-button`(primary)만 이 색을 받는다. `.text-brand-*`, `--color-brand-decoration`, `--color-brand-soft`는 중성색으로 연결되어 있다.
+- `.bg-brand-500`, `button.action-button`(primary)만 이 색을 받는다.
 
-### 중성색
+### 중성색 (웜 그레이)
 
 | 역할 | 라이트 | 다크 |
 |---|---|---|
-| `--color-canvas` 페이지 바탕 | `#F4F4F6` | `#202124` |
-| `--color-card` 카드 | `#FFFFFF` | `#2B2C31` |
-| `--color-surface` 보조 표면 | `#F3F3F5` | `#38393F` |
-| `--color-ink` 제목/주요 수치 | `#202124` | `#F4F4F6` |
-| `--color-ink-2` 본문 | `#45484F` | `#D7DAE0` |
-| `--color-ink-3` 보조 설명 | `#60646C` | `#B5BAC3` |
-| `--color-line` 구분선 | `#E7E8ED` | `#4B4D56` |
+| `--color-canvas` 페이지 바탕 | `#F7F5F2` | `#1C1917` |
+| `--color-card` 카드 | `#FFFFFF` | `#292524` |
+| `--color-surface` 보조 표면 | `#F2EFEB` | `#36322F` |
+| `--color-ink` 제목/주요 수치 | `#1C1917` | `#F7F5F2` |
+| `--color-ink-2` 본문, 아이콘 | `#44403C` | `#D6D3D1` |
+| `--color-ink-3` 보조 설명 | `#66605B` | `#B8B2AC` |
+| `--color-line` 구분선 | `#E7E3DE` | `#4A4541` |
 
-선택 상태(언더라인 탭, 하단 탭 활성, 세그먼트 선택, 스위치)는 `--color-ink`로 표시한다.
+원시값은 `--gray-*` 이름을 유지한 채 웜 그레이 값으로 바뀌어 있다.
 
-### 보조색 5개
+### 포인트 컬러
 
-메인 컬러보다 채도를 낮춘 색이다. 아이콘, 진행, 상태에만 쓰고 넓은 면에는 쓰지 않는다. 글자에는 `-ink` 단계를 쓴다(흰 카드 기준 4.5:1 이상).
+| 토큰 | 라이트 | 다크 | 쓰는 곳 |
+|---|---|---|---|
+| `--accent-orange` | `#E5562A` | `#FF8A61` | 선택 탭 밑줄, 진행 막대(`--color-progress`), 하단 탭 새 소식 점 |
+| `--accent-orange-ink` | `#A83C14` | `#FF8A61` | 보상/코인 글자(`--color-reward-foreground`), 경고 글자 |
 
-| 이름 | 아이콘/막대 | 글자(`-ink`) | 다크 | 역할 |
+넓은 면이나 버튼 배경에는 쓰지 않는다.
+
+### 상태색
+
+정답/완료와 오답/오류를 전달할 때만 쓴다. 상태를 색만으로 전달하지 않고 문구나 아이콘을 함께 쓴다.
+
+| 이름 | 표시 | 글자(`-ink`) | 옅은 면(`-soft`) | 토큰 |
 |---|---|---|---|---|
-| sage | `#5F8F7A` | `#4A7362` | `#8DC0A8` | 정답/성공, 학습/용어, 출석 완료 |
-| rose | `#C2707A` | `#A4505B` | `#E3949D` | 오답/오류, 연속 학습, 새 소식 점 |
-| amber | `#C08A3E` | `#8E6020` | `#E0B068` | 코인/보상 |
-| slate | `#5E7A99` | `#4C6683` | `#93AECB` | 진행 막대, 에너지, 정보 |
-| lavender | `#7C74B8` | `#615AA0` | `#ABA4E0` | XP, 등급, 리그 |
+| green | `#3FA67E` | `#2A7155` | `#E8F3EE` | `--color-success-*` |
+| rose | `#E86A7A` | `#A63A47` | `#FBECEE` | `--color-danger-*` |
 
-의미 토큰은 이 다섯 개를 참조한다: `--color-success-*` sage, `--color-danger-*` rose, `--color-reward-foreground` amber, `--color-progress` slate, `--color-stat-{words,streak,points,energy,xp}`.
-상태를 색만으로 전달하지 않는다. 문구나 아이콘을 함께 쓴다.
+다크 값: green `#6CC9A0`, rose `#F08A97`.
 
 ## 타이포그래피
 
@@ -61,8 +68,8 @@
 |---|---|---|
 | `display` | 34px | 큰 숫자 |
 | `title-1` | 28px | 드물게 쓰는 큰 제목 |
-| `title-2` | 24px | 화면 제목 |
-| `title-3` | 20px | 강조 블록 제목, 통계 값 |
+| `title-2` | 24px | 완료 화면처럼 한 번 크게 보여줄 제목 |
+| `title-3` | 20px | 탭 화면 제목, 강조 블록 제목, 통계 값 |
 | `headline` | 17px | 섹션 제목, 목록 항목 제목, 기본 CTA 글자 |
 | `body` | 15px | 본문 |
 | `label` | 13px | 보조 설명 |
@@ -79,7 +86,7 @@
 - 간격은 4px 격자(`--space-1` 4px ~ `--space-12` 48px).
 - 그룹 사이 32px(`--space-8`), 그룹 안 12~16px(`--space-3`~`--space-4`). 그룹 사이가 그룹 안보다 분명히 넓어야 한다.
 - 페이지 좌우 여백 20px(`--space-5`).
-- 곡률: 카드 24px(`--shape-card`), 버튼 16px(`--shape-button`), 칩 12px, 원 `--shape-full`.
+- 곡률: 카드 12px(`--shape-card`), 버튼 8px(`--shape-button`), 칩 6px, 작은 요소 4px, 원 `--shape-full`. 과하게 둥글게 하지 않는다.
 - 그림자 토큰은 모두 `none`이다.
 - 버튼 높이 52px(큰 버튼 56px), 최소 터치 영역 44px.
 
@@ -98,20 +105,25 @@
 
 ## 아이콘
 
-- `@phosphor-icons/react`의 `weight="duotone"`으로 통일한다. 색은 `currentColor`를 따르고 2차 레이어는 20% 불투명도다.
-- 꺾쇠(`ChevronRight/Left/Down`, `ChevronsUp`)만 예외로 `weight="bold"` 선형이다. 듀오톤 꺾쇠는 삼각형처럼 읽힌다.
+- `@phosphor-icons/react`의 선형으로 통일한다. 역할 아이콘은 `weight="regular"`, 18px 조작 표시는 `weight="bold"`. 색은 `currentColor`.
+- 듀오톤은 쓰지 않는다. 2차 채움 레이어가 아이콘 뒤 회색 배경(체크 뒤 사각형, ▷ 같은 꺾쇠)처럼 보인다.
 - 아이콘은 `src/components/ui/OtterIcons.tsx`의 export로만 가져온다(파일 이름은 호환용). 새 아이콘은 같은 파일에 `createIcon`으로 추가한다. 조작 표시는 `ControlIcons.tsx`에서 다시 내보낸다.
 - 기본 크기: 역할 아이콘 24px, 조작 아이콘 18px.
-- 아이콘 뒤에 색 원이나 파스텔 박스를 깔지 않는다. 의미가 있으면 아이콘 자체에 보조색을 준다.
-- 재화/통계 아이콘은 `src/components/StatIcons.tsx`: 코인 `Coins`(amber), 에너지 `Lightning`(slate), 연속 학습 `Flame`(rose), XP `Trophy`(lavender), 용어 `BookOpen`(sage).
+- 아이콘에는 색을 넣지 않는다. 기본 `--color-ink-2`, 활성/선택은 `--color-ink`. 아이콘 뒤에 색 원이나 박스도 깔지 않는다.
+- 재화/통계 아이콘은 `src/components/StatIcons.tsx`: 코인 `Coins`, 에너지 `Lightning`, 연속 학습 `Flame`, XP `Trophy`, 용어 `BookOpen`. 색은 모두 `--color-stat-*`(= `ink-2`).
 
 ## 컴포넌트 규칙
 
 - **CTA 버튼**: 메인 컬러 채움, 흰 글자, 굵게. 기본 `button.action-button`은 17px, `bg-brand-500` 버튼은 15px. 다크 모드에서는 `--color-action-boundary` 1px 테두리가 붙는다.
-- **카테고리 필터**: 칩이 아닌 언더라인 탭. 전체 폭 하단 1px 선, 선택 탭은 2px `ink` 밑줄과 굵은 글자. 배경 없음. 상단 고정과 가로 스크롤 유지(`.course-home-filters`).
-- **하단 탭바**: 화면 아래에 붙은 전체 폭 바. `--color-card` 배경, 상단 1px 선, 라운드/그림자 없음, 하단 안전 영역 패딩. 활성 탭은 `ink` 굵게, 비활성은 `ink-3`. 새 소식은 rose 점으로 표시하고 `aria-label`에 "새 내용 있음"을 넣는다.
-- **진행 막대**: `--color-progress`(slate). 리그 등급 막대만 lavender.
-- **배지**: 바탕 없이 보조색 테두리와 글자. 미획득은 `line` 테두리와 `ink-3`.
+- **카테고리 필터**: 칩이 아닌 언더라인 탭. 전체 폭 하단 1px 선, 선택 탭은 2px 오렌지(`--accent-orange`) 밑줄과 `ink` 굵은 글자. 배경 없음. 상단 고정과 가로 스크롤 유지(`.course-home-filters`).
+- **하단 탭바**: 화면 아래에 붙은 전체 폭 바. `--color-card` 배경, 상단 1px 선, 라운드/그림자 없음, 하단 안전 영역 패딩. 활성 탭은 `ink` 굵게, 비활성은 `ink-3`. 새 소식은 오렌지 점으로 표시하고 `aria-label`에 "새 내용 있음"을 넣는다.
+- **진행 막대**: `--color-progress`(오렌지). 리그 등급 막대와 프로필 성장 막대는 `ink`.
+- **리그 1~3위 메달**: 바탕 원 없는 무채색 메달(`LeagueRankBadge`). 1위가 가장 진하고 3위로 갈수록 옅다.
+- **배지**: 바탕 없이 테두리와 글자. 획득은 `ink-2` 테두리와 `ink` 글자, 미획득은 `line` 테두리와 `ink-3`.
+- **바텀시트 제목**: `.sheet-title`(17px 굵게, 좌우 20px). 인라인 스타일로 따로 만들지 않는다.
+- **시트 안 목록**: 항목마다 카드를 씌우지 않고 구분선(`divide-y`/`border-b`)으로 나눈다. 아이콘은 바탕 없이 24px 칸에 둔다.
+- **모달/축하 화면**: 제목은 `text-xl` 굵게, 위의 짧은 분류 문구는 `text-xs ink-3`. 오른쪽 위 별도 X 버튼을 두지 않고 하단 버튼과 바깥 영역으로 닫는다. 확인 버튼은 `action-button`/`ActionButton`. 보상은 박스 없이 한 줄(코인은 `--color-reward-foreground`).
+- **화면 제목**: 탭 화면 제목(오늘의 학습, 퀘스트 인사, 리그, 마이페이지)은 20px(`text-xl`, title-3) 굵게.
 - **뒤로가기**: 상단 X/뒤로 버튼을 직접 만들지 않는다. 토스 내비게이션 바가 맡는다(검수 반려 사유).
 
 ## 용어

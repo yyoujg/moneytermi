@@ -120,7 +120,7 @@ const NavBar = () => {
               <div className="relative w-12 h-8 flex items-center justify-center">
                 <Icon size={24} aria-hidden="true" className={colorClass} />
                 {hasNew && (
-                  <span aria-hidden="true" className="absolute right-2 top-0.5 h-1.5 w-1.5 rounded-full bg-[var(--accent-rose)]" />
+                  <span aria-hidden="true" className="absolute right-2 top-0.5 h-1.5 w-1.5 rounded-full bg-[var(--accent-orange)]" />
                 )}
               </div>
               <span className={`text-xs leading-none ${isActive ? 'font-bold' : 'font-medium'} ${colorClass}`}>{item.label}</span>

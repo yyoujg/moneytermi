@@ -15,8 +15,8 @@ import { Card } from '../components/ui/Card';
 import { IconBox } from '../components/ui/IconBox';
 
 const MENU_ITEMS = [
-  { icon: CircleHelp, label: '앱 사용법', sub: '사용법 및 자주 묻는 질문', color: 'text-[var(--accent-slate)]' },
-  { icon: Settings, label: '앱 설정', sub: '알림, 테마 등', color: 'text-[var(--accent-lavender)]' },
+  { icon: CircleHelp, label: '앱 사용법', sub: '사용법 및 자주 묻는 질문' },
+  { icon: Settings, label: '앱 설정', sub: '알림, 테마 등' },
 ];
 
 const MyPageScreen = () => {
@@ -104,7 +104,7 @@ const MyPageScreen = () => {
         <div>
           <Card pad="none" className="overflow-hidden">
             <List>
-              {MENU_ITEMS.map(({ icon: Icon, label, sub, color }) => (
+              {MENU_ITEMS.map(({ icon: Icon, label, sub }) => (
                 <ListRow
                   key={label}
                   as="button"
@@ -112,7 +112,7 @@ const MyPageScreen = () => {
                   className="w-full"
                   onClick={() => handleMenuClick(label)}
                   left={
-                    <IconBox className={color}>
+                    <IconBox className="text-[var(--color-ink-2)]">
                       <Icon size={21} strokeWidth={1.7} aria-hidden="true" />
                     </IconBox>
                   }

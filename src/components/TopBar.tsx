@@ -252,7 +252,7 @@ export const TopBar = () => {
         open={shopOpen}
         className="original-modal"
         onDimmerClick={rewardedAdPending ? () => {} : closeShopAndReset}
-        header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>{shopReason === 'lesson' ? '코인이 부족해요' : shopReason === 'energy' ? '에너지' : '코인 상점'}</span>}
+        header={<span className="sheet-title">{shopReason === 'lesson' ? '코인이 부족해요' : shopReason === 'energy' ? '에너지' : '코인 상점'}</span>}
       >
         {shopReason === 'energy' ? (
           <EnergyShopContent
@@ -277,7 +277,7 @@ export const TopBar = () => {
               <p className="text-sm font-bold text-[var(--color-ink)] mb-1 break-keep">학습 시작에는 코인이 필요하지 않아요</p>
             )}
             <div className="mb-2 flex items-center gap-3">
-              <PointIcon size={44} />
+              <PointIcon size={24} />
               <div className="min-w-0">
                 <p className="text-sm font-bold text-[var(--color-ink)]">차곡차곡 모은 코인</p>
                 <p className="mt-1! text-xs text-[var(--color-ink-3)]">보유 코인 {points.toLocaleString()}개</p>
@@ -288,7 +288,7 @@ export const TopBar = () => {
             <button
               onClick={handleAd}
               disabled={rewardedAdAvailable && (!rewardedAdReady || rewardedAdPending !== null)}
-              className="action-secondary grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-chip px-4 py-4 text-sm font-bold active:opacity-70"
+              className="action-secondary grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-button px-4 py-4 text-sm font-bold active:opacity-70"
             >
               <span className="flex min-w-0 items-center gap-2 text-left leading-5"><Tv size={18} className="shrink-0" />광고 보고 코인 받기</span>
               <span className="shrink-0 text-right text-2xs font-normal leading-4 opacity-80">
@@ -305,7 +305,7 @@ export const TopBar = () => {
               onClick={handleBoost}
               disabled={boostPending || points < 300 || boostLeft > 0}
               aria-busy={boostPending}
-              className="action-secondary grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-chip px-4 py-4 text-sm font-bold active:opacity-70"
+              className="action-secondary grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-button px-4 py-4 text-sm font-bold active:opacity-70"
             >
               <span className="flex min-w-0 items-center gap-2 text-left leading-5"><ChevronsUp size={18} className="shrink-0" />XP 2배 부스트</span>
               <span className="shrink-0 text-right text-2xs font-normal leading-4">
@@ -315,9 +315,9 @@ export const TopBar = () => {
               </span>
             </button>
 
-            <div className="rounded-chip px-4 py-3 mt-1" style={{ backgroundColor: 'var(--color-surface)' }}>
-              <p className="text-2xs font-bold text-[var(--color-ink-3)] mb-1!">학습으로 모으기</p>
-              <p className="text-2xs text-[var(--color-ink-4)] leading-relaxed break-keep">
+            <div className="mt-2">
+              <p className="text-xs font-semibold text-[var(--color-ink-2)] mb-1!">학습으로 모으기</p>
+              <p className="text-xs text-[var(--color-ink-3)] leading-relaxed break-keep">
                 퀴즈 정답 코인 +10~20개 · 미션 보상 +10~50개 · XP {XP_BONUS_STEP}마다 코인 +{XP_BONUS_POINTS}개
               </p>
             </div>

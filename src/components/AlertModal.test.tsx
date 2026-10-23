@@ -58,11 +58,12 @@ describe('전역 알림의 키보드와 접근성', () => {
     expect(container).toHaveAttribute('aria-hidden', 'true');
   });
 
-  it('오류 알림도 이름과 설명을 구분하고 기존 오류 디자인을 유지한다', () => {
+  it('오류 알림도 이름과 설명을 구분하고 색 띠 없이 오류 아이콘으로 표시한다', () => {
     open('코인이 부족해요', 'error');
     expect(dialog()).toHaveAccessibleName('오류 알림');
     expect(dialog()).toHaveAccessibleDescription('코인이 부족해요');
-    expect(dialog()!.querySelector('.bg-danger-500')).not.toBeNull();
+    expect(dialog()!.querySelector('.bg-danger-500')).toBeNull();
+    expect(dialog()!.querySelector('[data-icon="AlertCircle"]')).not.toBeNull();
     expect(dialog()!.parentElement).toHaveClass('original-modal', 'z-[40000]');
   });
 

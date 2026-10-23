@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Bell } from './ui/OtterIcons';
 import { Storage } from '../lib/storage';
 import { logClick } from '../lib/analytics';
 import { useNotificationAgreement } from '../hooks/useNotificationAgreement';
 import { Card } from './ui/Card';
-import { IconBox } from './ui/IconBox';
 
 // 학습 완료 결과 화면에서 미동의 사용자에게 1회만 노출하는 알림 동의 카드.
 // 노출/나중에 클릭 시 다시 자동으로 뜨지 않고, 재동의는 마이페이지에서만 가능하다.
@@ -33,12 +31,9 @@ export const DailyAlarmPromptCard = () => {
   return (
     <Card pad="lg" className="w-full flex flex-col gap-3 anim-fade-up">
       <div className="flex items-center gap-3">
-        <IconBox className="text-[var(--accent-slate)]">
-          <Bell size={20} strokeWidth={2} aria-hidden="true" />
-        </IconBox>
         <div>
           <p className="text-sm font-semibold text-[var(--color-ink)]">매일 돈 공부 한 조각 받기</p>
-          <p className="text-xs text-[var(--color-ink-4)]">매일 09:00, 자주 마주치는 용어를 쉽게 보내드려요</p>
+          <p className="text-xs text-[var(--color-ink-3)]">매일 09:00, 자주 마주치는 용어를 쉽게 보내드려요</p>
         </div>
       </div>
       <div className="flex gap-2">
@@ -50,7 +45,7 @@ export const DailyAlarmPromptCard = () => {
         </button>
         <button
           onClick={() => { logClick('notification_prompt_tap', { source: 'prompt_card' }); requestAgreement('prompt_card'); }}
-          className="flex-1 py-3 rounded-button text-sm font-bold text-white bg-brand-500 active:opacity-90"
+          className="action-secondary flex-1 py-3 rounded-button text-sm font-bold active:opacity-90"
         >
           알림 받기
         </button>

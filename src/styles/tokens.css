@@ -4,27 +4,27 @@
 
   /* 1단계 원시값: 실제 색·크기는 여기에만 둔다. 화면과 의미 역할은 이 값을 참조만 한다. */
   --gray-0: #ffffff;
-  --gray-50: #f4f4f6;
-  --gray-75: #f3f3f5;
-  --gray-100: #e9eaee;
-  --gray-150: #e7e8ed;
-  --gray-200: #d7dae0;
-  --gray-300: #b5bac3;
-  --gray-350: #a4aab4;
-  --gray-400: #9499a6;
-  --gray-450: #858893;
-  --gray-500: #70747c;
-  --gray-520: #6c717b;
-  --gray-540: #676d77;
-  --gray-600: #60646c;
-  --gray-650: #565a62;
-  --gray-700: #4b4d56;
-  --gray-720: #45484f;
-  --gray-750: #3d3e44;
-  --gray-800: #38393f;
-  --gray-830: #303138;
-  --gray-850: #2b2c31;
-  --gray-900: #202124;
+  --gray-50: #f7f5f2;
+  --gray-75: #f2efeb;
+  --gray-100: #ebe7e2;
+  --gray-150: #e7e3de;
+  --gray-200: #d6d3d1;
+  --gray-300: #b8b2ac;
+  --gray-350: #a8a29e;
+  --gray-400: #9c958f;
+  --gray-450: #8a837d;
+  --gray-500: #78716c;
+  --gray-520: #736c67;
+  --gray-540: #6e6762;
+  --gray-600: #66605b;
+  --gray-650: #5a544f;
+  --gray-700: #4a4541;
+  --gray-720: #44403c;
+  --gray-750: #3d3935;
+  --gray-800: #36322f;
+  --gray-830: #2e2a27;
+  --gray-850: #292524;
+  --gray-900: #1c1917;
 
   --green-50: #eaf5ee;
   --green-75: #e5f4eb;
@@ -59,23 +59,17 @@
   --red-600: #cc3340;
   --red-900: #3c252c;
 
-  /* 메인 컬러는 탠저린 하나. 주행동(CTA) 버튼에만 쓴다. 흰 글자 대비 4.5:1 이상. */
-  --tangerine-500: #cc4c1a;
-  --tangerine-600: #bd4819;
+  /* 포인트 컬러는 오렌지 하나. 탭 밑줄·진행·보상 글자처럼 작은 곳에만 쓴다. -ink는 글자용(4.5:1 이상). */
+  --accent-orange: #e5562a;
+  --accent-orange-ink: #a83c14;
 
-  /* 보조색 5개: 메인보다 채도를 낮춰 아이콘·진행·상태에만 쓴다. -ink는 글자용(4.5:1 이상). */
-  --accent-sage: #5f8f7a;
-  --accent-sage-ink: #4a7362;
-  --accent-rose: #c2707a;
-  --accent-rose-ink: #a4505b;
-  --accent-amber: #c08a3e;
-  --accent-amber-ink: #8e6020;
-  --accent-slate: #5e7a99;
-  --accent-slate-ink: #4c6683;
-  --accent-lavender: #7c74b8;
-  --accent-lavender-ink: #615aa0;
-  --accent-sage-soft: #eaf2ee;
-  --accent-rose-soft: #f8ecee;
+  /* 상태색 2개: 정답·완료와 오답·오류 전달에만 쓴다. */
+  --accent-green: #3fa67e;
+  --accent-green-ink: #2a7155;
+  --accent-green-soft: #e8f3ee;
+  --accent-rose: #e86a7a;
+  --accent-rose-ink: #a63a47;
+  --accent-rose-soft: #fbecee;
 
   /* 리그 순위·배지 장식 전용 원시값. 의미 역할을 거치지 않고 아래 영역에서만 쓴다. */
   --gray-40: #f4f5f7;
@@ -138,10 +132,10 @@
   --space-12: 48px;
 
   /* 곡률 4단계와 완전한 원. */
-  --shape-sm: 8px;
-  --shape-md: 12px;
-  --shape-lg: 16px;
-  --shape-xl: 24px;
+  --shape-sm: 4px;
+  --shape-md: 6px;
+  --shape-lg: 8px;
+  --shape-xl: 12px;
   --shape-full: 9999px;
 
   /* 2단계 의미 역할: 연회색 바탕과 흰 카드 위에 중성 본문을 사용한다. 글자는 ink > ink-2 > ink-3 세 단계다. */
@@ -155,9 +149,9 @@
   --color-line: var(--gray-150);
   --color-line-strong: var(--gray-450);
 
-  /* 주행동만 탠저린. 선택·장식은 중성색으로 두어 메인 컬러가 CTA에만 보이게 한다. */
-  --color-brand-action: var(--tangerine-500);
-  --color-brand-pressed: var(--tangerine-600);
+  /* 메인 컬러는 웜 잉크(거의 검정). 주행동(CTA)에만 쓰고, 다크에서는 밝게 뒤집는다. */
+  --color-brand-action: var(--gray-900);
+  --color-brand-pressed: var(--gray-750);
   --color-brand-accent: var(--color-ink-3);
   --color-brand-decoration: var(--color-ink-2);
   --color-brand-text: var(--color-ink-2);
@@ -179,34 +173,35 @@
   --color-action-boundary: var(--color-line-strong);
 
   /* 진행은 비문자 대비 3:1, 보상 글자는 4.5:1 이상으로 구분한다. */
-  --color-progress: var(--accent-slate);
-  --color-reward-foreground: var(--accent-amber-ink);
+  --color-progress: var(--accent-orange);
+  --color-reward-foreground: var(--accent-orange-ink);
   --color-selection-soft: var(--color-surface);
   --color-selection-ink: var(--color-ink);
   --color-character-stage: var(--color-surface);
   --color-filter-tray: var(--gray-100);
 
   /* 의미색: 정답·완료·오류 등 상태 전달에만 사용한다. */
-  --color-success-foreground: var(--accent-sage-ink);
-  --color-success-action: var(--accent-sage-ink);
-  --color-success-soft: var(--accent-sage-soft);
+  --color-success-foreground: var(--accent-green-ink);
+  --color-success-action: var(--accent-green-ink);
+  --color-success-soft: var(--accent-green-soft);
   --color-success-mark: var(--gray-0);
   --color-danger-foreground: var(--accent-rose-ink);
   --color-danger-action: var(--accent-rose-ink);
   --color-danger-line: var(--accent-rose);
   --color-danger-soft: var(--accent-rose-soft);
-  --color-warning-foreground: var(--accent-amber-ink);
+  --color-warning-foreground: var(--accent-orange-ink);
   --color-info: var(--color-ink-2);
   --color-info-soft: var(--color-surface);
   --color-info-line: var(--color-line);
 
   /* 실제 경험치·재화는 중성 역할을 보존하고 일반 진행·보상 장식과 분리한다. */
   --color-stat-ink: var(--color-ink);
-  --color-stat-streak: var(--accent-rose);
-  --color-stat-xp: var(--accent-lavender);
-  --color-stat-points: var(--accent-amber);
-  --color-stat-words: var(--accent-sage);
-  --color-stat-energy: var(--accent-slate);
+  /* 아이콘은 색 없이 본문색을 쓴다. */
+  --color-stat-streak: var(--color-ink-2);
+  --color-stat-xp: var(--color-ink-2);
+  --color-stat-points: var(--color-ink-2);
+  --color-stat-words: var(--color-ink-2);
+  --color-stat-energy: var(--color-ink-2);
   --color-xp: var(--color-ink-2);
   --color-xp-soft: var(--color-surface);
   --color-points: var(--color-ink-2);
@@ -276,17 +271,16 @@
   --color-ink-3: var(--gray-300);
   --color-line: var(--gray-700);
   --color-line-strong: var(--gray-400);
-  --accent-sage: #8dc0a8;
-  --accent-sage-ink: #8dc0a8;
-  --accent-rose: #e3949d;
-  --accent-rose-ink: #e3949d;
-  --accent-amber: #e0b068;
-  --accent-amber-ink: #e0b068;
-  --accent-slate: #93aecb;
-  --accent-slate-ink: #93aecb;
-  --accent-lavender: #aba4e0;
-  --accent-lavender-ink: #aba4e0;
-  --accent-sage-soft: #22302a;
+  --color-brand-action: var(--gray-50);
+  --color-brand-pressed: var(--gray-150);
+  --color-on-brand: var(--gray-900);
+  --accent-orange: #ff8a61;
+  --accent-orange-ink: #ff8a61;
+  --accent-green: #6cc9a0;
+  --accent-green-ink: #6cc9a0;
+  --accent-green-soft: #1f2e27;
+  --accent-rose: #f08a97;
+  --accent-rose-ink: #f08a97;
   --accent-rose-soft: #3a2629;
   --color-action-secondary: var(--gray-600);
   --color-action-secondary-pressed: var(--gray-650);
@@ -337,8 +331,6 @@
   --color-league-third-emphasis: var(--bronze-800);
   --color-league-podium-ink: var(--gray-40);
 }
-/* 배지는 바탕 없이 보조색 테두리·글자로만 구분한다. */
-.badge-tone[data-badge-stat='words'] { --badge-ink: var(--accent-sage-ink); --badge-line: var(--accent-sage); --badge-ring: var(--accent-sage); }
-.badge-tone[data-badge-stat='streak'] { --badge-ink: var(--accent-rose-ink); --badge-line: var(--accent-rose); --badge-ring: var(--accent-rose); }
-.badge-tone[data-badge-stat='xp'] { --badge-ink: var(--accent-lavender-ink); --badge-line: var(--accent-lavender); --badge-ring: var(--accent-lavender); }
+/* 배지는 바탕 없이 테두리·글자로만 구분한다. 획득은 진한 중성색. */
+.badge-tone[data-badge-stat] { --badge-ink: var(--color-ink); --badge-line: var(--color-ink-2); --badge-ring: var(--color-ink-2); }
 .badge-tone[data-earned='false'] { --badge-ink: var(--color-ink-3); --badge-line: var(--color-line); }

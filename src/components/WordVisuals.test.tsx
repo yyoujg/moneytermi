@@ -18,7 +18,7 @@ const mount = (visuals: Parameters<typeof WordVisuals>[0]['visuals'], terms?: Te
 };
 
 describe('WordVisuals tables and charts', () => {
-  it('gives long first-column labels more room in three-column tables', () => {
+  it('sizes columns by their text length instead of fixed ratios', () => {
     const container = mount([{
       type: 'table',
       title: '단리와 복리 비교',
@@ -29,7 +29,9 @@ describe('WordVisuals tables and charts', () => {
       ],
     }]);
 
-    expect([...container.querySelectorAll('col')].map(col => (col as HTMLTableColElement).style.width)).toEqual(['34%', '30%', '36%']);
+    // 고정 비율(colgroup, table-fixed) 없이 자동 배치로 글자 길이에 맞춘다.
+    expect(container.querySelector('col')).toBeNull();
+    expect(container.querySelector('table')).not.toHaveClass('table-fixed');
   });
 
   it('keeps wide tables horizontally scrollable instead of squeezing every column', () => {

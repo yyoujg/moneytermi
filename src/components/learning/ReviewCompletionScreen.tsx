@@ -3,7 +3,6 @@ import { DailyAlarmPromptCard } from '../DailyAlarmPromptCard';
 import { PointIcon } from '../StatIcons';
 import { StreakCelebration } from '../StreakCelebration';
 import { ActionButton } from '../ui/ActionButton';
-import { BookOpenText, Lightbulb, ListChecks } from '../ui/OtterIcons';
 
 // 복습 결과와 잔액은 전달받은 실제 값을 표시한다. 보상 계산·재출제는 이 화면에서 하지 않는다.
 export const ReviewCompletionScreen = ({ initialTotal, firstCorrect, points, note, onAction }: {
@@ -20,21 +19,21 @@ export const ReviewCompletionScreen = ({ initialTotal, firstCorrect, points, not
     <div className="review-complete-screen app-soft-screen">
       <main className="review-complete-content">
         <header className="review-complete-hero">
-          <p className="review-complete-overline"><BookOpenText size={26} />오늘의 복습</p>
+          <p className="review-complete-overline">오늘의 복습</p>
           <h1 ref={headingRef} tabIndex={-1}>오늘 복습을 마쳤어요</h1>
         </header>
 
         <section className="review-complete-summary" aria-label={`첫 시도 ${initialTotal}문제 중 ${firstCorrect}개 정답`}>
-          <div className="review-complete-summary-heading"><h2>이번 복습 기록</h2><ListChecks size={28} /></div>
+          <div className="review-complete-summary-heading"><h2>이번 복습 기록</h2></div>
           <dl className="review-complete-stats">
             <div><dt>다시 본 문제</dt><dd data-review-total><strong>{initialTotal}</strong><span>문제</span></dd></div>
             <div><dt>첫 시도 정답</dt><dd data-review-correct><strong>{firstCorrect}</strong><span>개</span></dd></div>
           </dl>
-          <div className="review-complete-note"><Lightbulb size={30} /><p>{note}</p></div>
+          <div className="review-complete-note"><p>{note}</p></div>
         </section>
 
         <section className="review-complete-wallet" aria-label={`보유 코인 ${points}개`}>
-          <PointIcon size={36} />
+          <PointIcon size={24} />
           <div className="review-complete-wallet-label"><h2>보유 코인</h2><p>지금 가지고 있는 코인이에요</p></div>
           <p className="review-complete-balance" data-review-balance><strong>{points}</strong><span>개</span></p>
         </section>

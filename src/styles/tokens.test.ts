@@ -56,19 +56,14 @@ for (const [name, values] of [['라이트', light], ['다크', dark]] as const) 
         expect(contrast(resolve(foreground, values), resolve(background, values))).toBeGreaterThanOrEqual(4.5);
       });
     }
-    it('주행동은 탠저린 하나를 두 테마에서 같이 쓴다', () => {
-      expect(resolve('--color-brand-action', values)).toBe('#cc4c1a');
+    it('주행동은 웜 잉크이고 다크에서는 밝게 뒤집는다', () => {
+      expect(resolve('--color-brand-action', values)).toBe(name === '라이트' ? '#1c1917' : '#f7f5f2');
       expect(contrast(resolve('--color-on-brand', values), resolve('--color-brand-action', values))).toBeGreaterThanOrEqual(4.5);
       expect(contrast(resolve('--color-on-brand', values), resolve('--color-brand-pressed', values))).toBeGreaterThanOrEqual(4.5);
     });
-    it('누름 색은 같은 중성 계열을 유지하며 조금만 어둡게 한다', () => {
-      const channels = (key: string) => resolve(key, values).slice(1).match(/../g)!.map(value => parseInt(value, 16));
-      const base = channels('--color-brand-action');
-      const pressed = channels('--color-brand-pressed');
-      pressed.forEach((channel, index) => {
-        expect(channel).toBeLessThan(base[index]);
-        expect(channel / base[index]).toBeGreaterThanOrEqual(0.9);
-      });
+    it('누름 색은 기본과 구분되고 글자 대비를 유지한다', () => {
+      expect(resolve('--color-brand-pressed', values)).not.toBe(resolve('--color-brand-action', values));
+      expect(contrast(resolve('--color-on-brand', values), resolve('--color-brand-pressed', values))).toBeGreaterThanOrEqual(4.5);
       expect(luminance(resolve('--color-action-soft-pressed', values)))
         .toBeLessThan(luminance(resolve('--color-action-soft', values)));
       expect(luminance(resolve('--color-action-secondary-pressed', values)))
@@ -81,7 +76,7 @@ for (const [name, values] of [['라이트', light], ['다크', dark]] as const) 
     });
     it('밝은 보조 버튼은 바탕과 구분되는 중성 면과 짙은 글자로 충분한 대비를 사용한다', () => {
       // 라이트는 surface가 canvas와 거의 같아 한 단계 진한 회색을 쓴다
-      expect(resolve('--color-action-soft', values)).toBe(name === '라이트' ? '#e9eaee' : resolve('--color-surface', values));
+      expect(resolve('--color-action-soft', values)).toBe(name === '라이트' ? '#ebe7e2' : resolve('--color-surface', values));
       expect(resolve('--color-on-action-soft', values)).toBe(resolve('--color-ink-2', values));
       for (const background of ['--color-action-soft', '--color-action-soft-pressed']) {
         expect(contrast(resolve('--color-on-action-soft', values), resolve(background, values))).toBeGreaterThanOrEqual(4.5);
@@ -107,10 +102,10 @@ for (const [name, values] of [['라이트', light], ['다크', dark]] as const) 
       }
       expect(resolve('--color-selection-soft', values)).toBe(resolve('--color-brand-soft', values));
       expect(resolve('--color-character-stage', values)).toBe(resolve('--color-surface', values));
-      expect(resolve('--color-filter-tray', values)).toBe(name === '라이트' ? '#e9eaee' : '#303138');
+      expect(resolve('--color-filter-tray', values)).toBe(name === '라이트' ? '#ebe7e2' : '#2e2a27');
     });
-    it('주요·중성 채움 버튼의 기본 글자는 흰색이다', () => {
-      expect(resolve('--color-on-brand', values)).toBe('#ffffff');
+    it('주행동 글자는 라이트 흰색·다크 잉크, 중성 채움 버튼 글자는 흰색이다', () => {
+      expect(resolve('--color-on-brand', values)).toBe(name === '라이트' ? '#ffffff' : '#1c1917');
       expect(resolve('--color-on-action', values)).toBe('#ffffff');
     });
   });
@@ -127,7 +122,7 @@ describe('이해 확인의 캐릭터·중성 상태 표현', () => {
     expect(feedbackCss).not.toMatch(/--color-(answer|danger|success)-/);
     expect(feedbackCss).not.toContain('.lesson-feedback-character');
     expect(feedbackCss).toContain('.lesson-complete-score-track > span { background: var(--color-ink-3); }');
-    for (const [values, success, danger] of [[light, '#4a7362', '#a4505b'], [dark, '#8dc0a8', '#e3949d']] as const) {
+    for (const [values, success, danger] of [[light, '#2a7155', '#a63a47'], [dark, '#6cc9a0', '#f08a97']] as const) {
       expect(resolve('--color-success-foreground', values)).toBe(success);
       expect(resolve('--color-danger-foreground', values)).toBe(danger);
     }
@@ -147,8 +142,8 @@ describe('색상 정의의 단일 원본', () => {
     for (const key of ['canvas', 'card', 'surface']) {
       expect(css.match(new RegExp('--color-' + key + ':', 'g'))).toHaveLength(2);
     }
-    expect(resolve('--color-canvas', light)).toBe('#f4f4f6');
-    expect(resolve('--color-canvas', dark)).toBe('#202124');
+    expect(resolve('--color-canvas', light)).toBe('#f7f5f2');
+    expect(resolve('--color-canvas', dark)).toBe('#1c1917');
     const recap = readFileSync(resolvePath(cwd(), 'src/components/WeeklyRecap.tsx'), 'utf8');
     expect(recap).toContain('bg-[var(--color-canvas)]');
     expect(recap).not.toContain('bg-[var(--color-hero-start)]');
@@ -215,7 +210,7 @@ describe('배지·리그·프로필의 기존 표현 보존', () => {
     expect(identity['--color-brand-ink']).toBe('var(--color-brand-decoration)');
     expect(identity['--color-brand-cream']).toBe('var(--color-brand-soft)');
     expect(identity['--radius-card']).toBe('var(--shape-card)');
-    expect(resolve('--color-canvas', light)).toBe('#f4f4f6');
+    expect(resolve('--color-canvas', light)).toBe('#f7f5f2');
   });
   it('다크 모드도 공통 바탕·카드와 등급 장식색을 분리한다', () => {
     const identity = declarations(`.dark ${scope}`);
@@ -265,7 +260,7 @@ describe('수달 아이콘과 통일한 평면 카드·버튼 표면', () => {
       expect(values['--shape-button']).toBe('var(--shape-lg)');
       expect(values['--shape-chip']).toBe('var(--shape-md)');
       expect(values['--shape-inset']).toBe('var(--shape-lg)');
-      expect([values['--shape-sm'], values['--shape-md'], values['--shape-lg'], values['--shape-xl']]).toEqual(['8px', '12px', '16px', '24px']);
+      expect([values['--shape-sm'], values['--shape-md'], values['--shape-lg'], values['--shape-xl']]).toEqual(['4px', '6px', '8px', '12px']);
       const shadows = Object.keys(values).filter(key => key.startsWith('--shadow-'));
       expect(shadows).toEqual(expect.arrayContaining(['--shadow-card', '--shadow-card-pressed', '--shadow-choice', '--shadow-action', '--shadow-action-secondary', '--shadow-action-soft', '--shadow-action-pressed']));
       for (const key of shadows) expect(values[key], key).toBe('none');
@@ -292,7 +287,7 @@ describe('다른 그림과 통일한 원형 파스텔 순위 표시', () => {
   for (const [name, values] of [['라이트', light], ['다크', dark]] as const) {
     it(`${name} 숫자는 테마와 관계없이 밝은 그림 안에서 충분히 구분된다`, () => {
       expect(contrast(resolve('--color-league-symbol-ink', values), '#fffbf3')).toBeGreaterThanOrEqual(4.5);
-      expect(resolve('--color-league-symbol-ink', values)).toBe('#45484f');
+      expect(resolve('--color-league-symbol-ink', values)).toBe('#44403c');
       expect(indexCss).toContain('.league-rank-symbol { display: block; flex: none; width: 40px; height: 40px; }');
       expect(indexCss).toContain('.league-rank-value { position: absolute; inset-inline: 0; top: 14px;');
       expect(indexCss).not.toContain(".league-rank-badge[data-podium='3'] .league-rank-value");
@@ -332,18 +327,18 @@ describe('원시값과 의미 역할의 2단계 구조', () => {
   });
 });
 
-describe('연회색·탠저린 팔레트', () => {
-  it('라이트는 연회색 바탕·흰 카드·탠저린 행동·중성 장식을 사용한다', () => {
-    expect(resolve('--color-canvas', light)).toBe('#f4f4f6');
+describe('웜 모노 팔레트', () => {
+  it('라이트는 따뜻한 회색 바탕·흰 카드·잉크 행동·중성 장식을 사용한다', () => {
+    expect(resolve('--color-canvas', light)).toBe('#f7f5f2');
     expect(resolve('--color-card', light)).toBe('#ffffff');
-    expect(resolve('--color-surface', light)).toBe('#f3f3f5');
-    expect(resolve('--color-brand-action', light)).toBe('#cc4c1a');
-    expect(resolve('--color-brand-decoration', light)).toBe('#45484f');
-    expect(resolve('--color-brand-accent', light)).toBe('#60646c');
+    expect(resolve('--color-surface', light)).toBe('#f2efeb');
+    expect(resolve('--color-brand-action', light)).toBe('#1c1917');
+    expect(resolve('--color-brand-decoration', light)).toBe('#44403c');
+    expect(resolve('--color-brand-accent', light)).toBe('#66605b');
   });
   it('다크에서도 행동 버튼과 바탕의 비문자 대비를 확보한다', () => {
     expect(contrast(resolve('--color-brand-action', dark), resolve('--color-canvas', dark))).toBeGreaterThanOrEqual(3);
-    expect(resolve('--color-canvas', dark)).toBe('#202124');
+    expect(resolve('--color-canvas', dark)).toBe('#1c1917');
   });
   it('마이페이지·리그의 구분선도 공통 중성·민트 역할을 상속한다', () => {
     for (const selector of [':is(.my-page-screen, .league-screen, .identity-badge, .badge-tone)', '.dark :is(.my-page-screen, .league-screen, .identity-badge, .badge-tone)']) {
@@ -354,27 +349,25 @@ describe('연회색·탠저린 팔레트', () => {
 });
 
 describe('보상 장식과 실제 재화·배지 역할의 분리', () => {
-  it('수치 글자는 중성색, 통계 아이콘은 보조색 5개 중 하나를 쓴다', () => {
+  it('수치 글자와 통계 아이콘은 색 없이 중성색을 쓴다', () => {
     for (const values of [light, dark]) {
       for (const role of ['--color-xp', '--color-points', '--color-info']) {
         expect(values[role], role).toBe('var(--color-ink-2)');
       }
-      expect(values['--color-stat-words']).toBe('var(--accent-sage)');
-      expect(values['--color-stat-streak']).toBe('var(--accent-rose)');
-      expect(values['--color-stat-points']).toBe('var(--accent-amber)');
-      expect(values['--color-stat-energy']).toBe('var(--accent-slate)');
-      expect(values['--color-stat-xp']).toBe('var(--accent-lavender)');
+      for (const role of ['--color-stat-words', '--color-stat-streak', '--color-stat-points', '--color-stat-energy', '--color-stat-xp']) {
+        expect(values[role], role).toBe('var(--color-ink-2)');
+      }
       for (const role of ['--color-xp-soft', '--color-points-soft', '--color-info-soft']) {
         expect(values[role], role).toBe('var(--color-surface)');
       }
-      expect(resolve('--color-success-action', values)).toBe(resolve('--accent-sage-ink', values));
+      expect(resolve('--color-success-action', values)).toBe(resolve('--accent-green-ink', values));
       expect(resolve('--color-danger-action', values)).toBe(resolve('--accent-rose-ink', values));
     }
   });
   for (const [name, base, prefix] of [['라이트', light, ''], ['다크', dark, '.dark ']] as const) {
     it(name + ' 배지의 의미·미획득 조건과 글자 대비를 보존한다', () => {
       for (const stat of ['words', 'streak', 'xp']) {
-        const selector = ".badge-tone[data-badge-stat='" + stat + "']";
+        const selector = '.badge-tone[data-badge-stat]';
         // 배지는 바탕 없이 카드 위에 바로 놓인다.
         const earned = { ...base, ...declarations(selector), ...declarations(prefix + selector) };
         expect(earned['--badge-bg']).toBeUndefined();

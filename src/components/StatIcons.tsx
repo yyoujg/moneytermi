@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { BookOpen, Coins, Flame, Lightning, Trophy } from './ui/OtterIcons';
 
-// 재화와 학습 정보는 듀오톤 아이콘에 역할별 보조색을 입힌다. 숫자는 본문색을 쓴다.
+// 재화와 학습 정보는 색 없는 선형 아이콘으로 표시한다. 숫자는 본문색을 쓴다.
 type Props = { size?: number; className?: string };
 export const STAT_COLOR = {
   streak: 'var(--color-ink-2)',

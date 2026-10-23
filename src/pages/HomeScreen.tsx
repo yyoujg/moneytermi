@@ -10,8 +10,6 @@ import { logClick } from '../lib/analytics';
 import { msUntilNextSlot } from '../lib/date';
 import { useAuth } from '../hooks/useAuth';
 import { WeekStrip } from '../components/home/WeekStrip';
-import { ProfileAvatar } from '../components/ProfileAvatar';
-import { StreakIcon } from '../components/StatIcons';
 import { calcStreak } from '../lib/streak';
 import { Card } from '../components/ui/Card';
 import { ActionButton } from '../components/ui/ActionButton';
@@ -63,19 +61,9 @@ const HomeScreen = () => {
       <div className="pt-4 px-5 pb-4">
         <div className="home-profile text-[var(--color-hero-ink)] anim-fade-up">
           <div className="home-profile-line">
-            <div className="home-profile-avatar rounded-full bg-[var(--color-hero-chip)]">
-              <ProfileAvatar name={user?.nickname ?? DEFAULT_NICKNAME} size={56} />
-            </div>
             <div className="min-w-0 flex-1">
-              <p className="text-base font-bold truncate">안녕하세요, {user?.nickname ?? DEFAULT_NICKNAME}님</p>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="inline-flex items-center rounded-full bg-[var(--color-hero-chip)] text-2xs text-[var(--color-ink-2)] px-2 py-0.5">
-                  {stage.name}
-                </span>
-                <span className="inline-flex items-center gap-0.5 text-2xs text-[var(--color-ink-3)]">
-                  <StreakIcon size={13} />{streak}일 연속
-                </span>
-              </div>
+              <p className="text-xl font-bold truncate">안녕하세요, {user?.nickname ?? DEFAULT_NICKNAME}님</p>
+              <p className="mt-1! text-xs text-[var(--color-ink-3)]">{stage.name} · {streak}일 연속</p>
             </div>
           </div>
 

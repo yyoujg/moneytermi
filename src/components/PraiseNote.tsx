@@ -1,5 +1,4 @@
 import type { HTMLAttributes } from 'react';
-import { BadgeCheck } from './ui/OtterIcons';
 
 export const PraiseNote = ({
   title,
@@ -11,12 +10,9 @@ export const PraiseNote = ({
     className={`py-3 ${className}`.replace(/\s+/g, ' ').trim()}
     {...rest}
   >
-    <div className="flex gap-2">
-      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center text-[var(--accent-sage)]">
-        <BadgeCheck size={16} strokeWidth={2.4} />
-      </span>
+    <div>
       <div className="min-w-0">
-        <p className="text-xs font-bold text-brand-600 break-keep">{title}</p>
+        <p className="text-sm font-semibold text-[var(--color-ink)] break-keep">{title}</p>
         <p className="mt-1! text-xs leading-relaxed text-[var(--color-ink-2)] break-keep">{body}</p>
       </div>
     </div>

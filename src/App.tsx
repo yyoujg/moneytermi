@@ -67,9 +67,9 @@ const LoadingScreen = SplashScreen;
 
 const WELCOME_KEY = 'welcome_seen_v1';
 const WELCOME_STEPS = [
-  { icon: BookOpenText, color: 'text-[var(--accent-sage)]', title: '쉬운 상황부터 시작해요', desc: '금리·대출·전월세처럼 자주 마주치는 용어를 예시로 익혀요' },
-  { icon: WalletCards, color: 'text-[var(--accent-amber)]', title: '생활 속 상황으로 연결해요', desc: '월급, 소비, 대출, 계약서에서 어떻게 쓰이는지 짧게 확인해요' },
-  { icon: ListChecks, color: 'text-[var(--accent-slate)]', title: '퀴즈와 다시 보기로 남겨요', desc: '오늘 들린 용어를 잊기 전에 다시 꺼내보며 익혀요' },
+  { icon: BookOpenText, color: 'text-[var(--color-ink-2)]', title: '쉬운 상황부터 시작해요', desc: '금리·대출·전월세처럼 자주 마주치는 용어를 예시로 익혀요' },
+  { icon: WalletCards, color: 'text-[var(--color-ink-2)]', title: '생활 속 상황으로 연결해요', desc: '월급, 소비, 대출, 계약서에서 어떻게 쓰이는지 짧게 확인해요' },
+  { icon: ListChecks, color: 'text-[var(--color-ink-2)]', title: '퀴즈와 다시 보기로 남겨요', desc: '오늘 들린 용어를 잊기 전에 다시 꺼내보며 익혀요' },
 ];
 
 const WelcomeScreen = () => {

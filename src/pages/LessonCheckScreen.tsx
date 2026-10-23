@@ -103,7 +103,7 @@ const LessonCheckScreen = () => {
               }}
               className="w-full flex items-center gap-3 rounded-card border border-[var(--color-line)] bg-[var(--color-card)] px-4 py-4 text-left text-sm font-semibold text-[var(--color-ink)] break-keep active:opacity-80"
             >
-              <span aria-hidden="true" className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--color-surface)] text-xs text-[var(--color-ink-3)]">{optionIndex + 1}</span>
+              <span aria-hidden="true" className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[var(--color-line-strong)] text-xs text-[var(--color-ink-3)]">{optionIndex + 1}</span>
               <span data-lesson-check-label className="min-w-0 flex-1">{keepShortUnitsTogether(option.label)}</span>
             </button>
           ))}

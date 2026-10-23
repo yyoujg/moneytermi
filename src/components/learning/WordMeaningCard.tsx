@@ -1,7 +1,6 @@
 import { useId } from 'react';
 import type { Word } from '../../types';
 import { keepShortUnitsTogether } from '../../lib/formatText';
-import { BookOpen, Lightbulb } from '../ui/OtterIcons';
 import { ChevronRight } from '../ui/ControlIcons';
 
 export const WordMeaningCard = ({ word, sources = [], onDetail }: {
@@ -18,12 +17,12 @@ export const WordMeaningCard = ({ word, sources = [], onDetail }: {
       <h1 id={titleId}>{word.word}</h1>
       <div className="word-meaning-definition"><h2>핵심 뜻</h2><p>{keepShortUnitsTogether(word.meaning)}</p></div>
       {example && <section className="word-meaning-example" aria-label="생활 속 예시">
-        <div className="word-meaning-example-heading"><Lightbulb size={26} /><h2>생활 속 예시</h2>{hypothetical && <span>학습용 가정</span>}</div>
+        <div className="word-meaning-example-heading"><h2>생활 속 예시</h2>{hypothetical && <span>학습용 가정</span>}</div>
         <p>{keepShortUnitsTogether(example)}</p>
       </section>}
       {(sources.length > 0 || onDetail) && <footer className="word-meaning-footer">
         {sources.length > 0 && <p className="word-meaning-source">{sources.join(' · ')} 참고</p>}
-        {onDetail && <button type="button" onClick={onDetail} className="word-meaning-detail"><BookOpen size={20} />자세히 보기<ChevronRight size={16} /></button>}
+        {onDetail && <button type="button" onClick={onDetail} className="word-meaning-detail">자세히 보기<ChevronRight size={16} /></button>}
       </footer>}
     </section>
   );

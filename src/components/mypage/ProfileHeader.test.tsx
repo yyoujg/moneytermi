@@ -20,7 +20,7 @@ describe('프로필 머리', () => {
   it('닉네임 첫 글자 프로필과 이름·경험치를 표시한다', () => {
     const { container } = mount();
     expect(container.querySelector('h3')).toHaveTextContent('예시 학습자');
-    expect(container.querySelector('.my-profile-avatar .profile-avatar')).toHaveTextContent('예');
+    expect(container.querySelector('.my-profile-avatar, .profile-avatar')).toBeNull();
     expect(container.querySelector('img')).toBeNull();
     expect(container).toHaveTextContent('갓생러');
     expect(container).toHaveTextContent('재테크러까지 180 XP');

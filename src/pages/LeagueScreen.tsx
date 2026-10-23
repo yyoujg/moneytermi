@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Info, Share2 } from '../components/ui/OtterIcons';
 import { BottomSheet, TextButton, Spacing } from '@toss/tds-mobile';
 import { GROWTH_STAGES, getGrowthStage } from '../constants';
 import { useAppContext } from '../context/AppContext';
@@ -12,7 +11,6 @@ import { Card } from '../components/ui/Card';
 import { ActionButton } from '../components/ui/ActionButton';
 import { LeagueRules } from '../components/LeagueRules';
 import { StageGlyph } from '../components/StageGlyph';
-import { ProfileAvatar } from '../components/ProfileAvatar';
 import { LeagueRankBadge } from '../components/league/LeagueRankBadge';
 
 type Row = { rank: number; nickname: string; emoji: string; points: number; is_me: boolean };
@@ -61,10 +59,10 @@ const LeagueScreen = () => {
           <h2 className="text-xl font-bold text-[var(--color-ink)]">리그</h2>
           <div className="flex items-center gap-1">
             <TextButton size="small" aria-label="리그 공유" onClick={() => setSheet('share')}>
-              <span className="flex items-center gap-1"><Share2 size={13} />공유</span>
+              공유
             </TextButton>
             <TextButton size="small" aria-label="리그 안내" onClick={() => setSheet('rules')}>
-              <span className="flex items-center gap-1"><Info size={13} />안내</span>
+              안내
             </TextButton>
           </div>
         </div>
@@ -73,7 +71,7 @@ const LeagueScreen = () => {
         <Card tone="card" pad="lg" className="grid grid-cols-2 gap-4 anim-fade-up">
           <div className="flex flex-col">
             <p className="text-xs text-[var(--color-ink-3)]">이번 주 순위</p>
-            <p className="mt-2! text-3xl font-bold text-brand-500 tabular-nums">{mine?.rank ? `${mine.rank}위` : '-'}</p>
+            <p className="mt-2! text-3xl font-bold text-[var(--color-ink)] tabular-nums">{mine?.rank ? `${mine.rank}위` : '-'}</p>
             <p className="mt-1! text-xs text-[var(--color-ink-3)] break-keep">
               {mine?.rank ? `${mine.total}명 중 · ${mine.points?.toLocaleString() ?? 0}XP` : 'XP를 모으면 순위에 올라요'}
             </p>
@@ -88,7 +86,7 @@ const LeagueScreen = () => {
             <div className="mt-auto pt-3">
               <div role="progressbar" aria-label="다음 등급까지 진행률" aria-valuemin={0} aria-valuemax={100} aria-valuenow={next === null ? 100 : Math.min(100, Math.round(((xp - stage.minPoints) / (next - stage.minPoints)) * 100))} className="w-full bg-[var(--color-surface)] rounded-full h-2 overflow-hidden mb-1">
                 <div
-                  className="bg-[var(--accent-lavender)] h-full rounded-full transition-all duration-700"
+                  className="bg-[var(--color-ink)] h-full rounded-full transition-all duration-700"
                   style={{ width: barReady ? `${next === null ? 100 : Math.min(100, Math.round(((xp - stage.minPoints) / (next - stage.minPoints)) * 100))}%` : '0%' }}
                 />
               </div>
@@ -104,7 +102,7 @@ const LeagueScreen = () => {
           <div className="flex justify-between items-start relative">
             <div className="absolute top-5 left-5 right-5 h-[2px] bg-[var(--color-line)] z-0 rounded-full">
               <div
-                className="h-full bg-[var(--accent-lavender)] rounded-full transition-all duration-1000"
+                className="h-full bg-[var(--color-ink)] rounded-full transition-all duration-1000"
                 style={{ width: `${((stage.id - 1) / (GROWTH_STAGES.length - 1)) * 100}%` }}
               />
             </div>
@@ -112,8 +110,8 @@ const LeagueScreen = () => {
               const isCurrent = s.id === stage.id;
               return (
                 <div key={s.id} className="flex flex-col items-center relative z-10 w-14">
-                  <StageGlyph id={s.id} size={40} className={`transition-all ${isCurrent ? 'scale-125' : s.id > stage.id ? 'grayscale opacity-40' : ''}`} />
-                  <span className={`text-2xs font-normal text-center mt-1 ${isCurrent ? 'text-brand-500' : 'text-[var(--color-ink-3)]'}`}>
+                  <StageGlyph id={s.id} size={40} className={`transition-all ${isCurrent ? 'scale-125' : s.id > stage.id ? 'is-future' : ''}`} />
+                  <span className={`text-2xs font-normal text-center mt-3 ${isCurrent ? 'font-semibold text-[var(--color-ink)]' : 'text-[var(--color-ink-3)]'}`}>
                     {s.name}
                   </span>
                 </div>
@@ -185,7 +183,7 @@ const LeagueScreen = () => {
       <BottomSheet
         open={sheet === 'rules'}
         onDimmerClick={() => setSheet(null)}
-        header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>리그 안내</span>}
+        header={<span className="sheet-title">리그 안내</span>}
       >
         <div className="px-5 pb-6"><LeagueRules /></div>
       </BottomSheet>
@@ -193,13 +191,12 @@ const LeagueScreen = () => {
       <BottomSheet
         open={sheet === 'share'}
         onDimmerClick={() => setSheet(null)}
-        header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>리그 공유</span>}
+        header={<span className="sheet-title">리그 공유</span>}
       >
         <div className="px-5 pb-6 flex flex-col gap-3">
           {/* 받는 사람이 보게 될 내용 미리보기: 내 카드 + 문구. 내부 스킴 주소는 보여주지 않는다 */}
           <Card tone="card" pad="md" className="flex flex-col gap-3 anim-fade-up">
             <div className="flex items-center gap-3">
-              <ProfileAvatar name={user?.nickname ?? '나'} size={44} />
               <div className="min-w-0">
                 <p className="text-sm font-bold text-[var(--color-ink)] truncate">{user?.nickname ?? '나'}</p>
                 <p className="text-2xs text-[var(--color-ink-4)]">{stage.name} · 이번 주 {(mine?.points ?? 0).toLocaleString()}XP{mine?.rank ? ` · ${mine.rank}위` : ''}</p>

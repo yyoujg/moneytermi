@@ -16,8 +16,8 @@ const mount = (content: React.ReactNode) => {
   return el;
 };
 
-describe('재화·학습 정보 듀오톤 아이콘', () => {
-  it('코인·에너지·경험치·연속 학습·용어를 각자의 보조색 듀오톤으로 구분한다', () => {
+describe('재화·학습 정보 선형 아이콘', () => {
+  it('코인·에너지·경험치·연속 학습·용어를 선형 아이콘으로 구분한다', () => {
     const el = mount(<><PointIcon size={24} className="example-point" /><EnergyIcon size={24} /><XpIcon /><StreakIcon /><WordsIcon /></>);
     expect(el.querySelector('img')).toBeNull();
     const icons = [...el.querySelectorAll('svg')];
@@ -25,7 +25,7 @@ describe('재화·학습 정보 듀오톤 아이콘', () => {
     ['points', 'energy', 'xp', 'streak', 'words'].forEach((stat, index) => {
       expect(icons[index]).toHaveClass(`text-[var(--color-stat-${stat})]`);
       expect(icons[index]).toHaveAttribute('fill', 'currentColor');
-      expect(icons[index].querySelector('[opacity="0.2"]')).not.toBeNull();
+      expect(icons[index].querySelector('[opacity="0.2"]')).toBeNull();
       expect(icons[index]).toHaveAttribute('aria-hidden', 'true');
     });
     expect(icons[0]).toHaveAttribute('width', '24');
@@ -35,7 +35,7 @@ describe('재화·학습 정보 듀오톤 아이콘', () => {
 });
 
 describe('공용 아이콘 export 호환', () => {
-  it('기존 이름과 재화 아이콘이 모두 바탕 없는 svg로 그려지고 꺾쇠만 선형이다', () => {
+  it('기존 이름과 재화 아이콘이 모두 채움 없는 선형 svg로 그려진다', () => {
     const names = Object.keys(OtterIcons) as (keyof typeof OtterIcons)[];
     expect(names).toHaveLength(45);
     const el = mount(<>{names.map(name => { const Icon = OtterIcons[name] as React.ComponentType; return <Icon key={name} />; })}</>);
@@ -44,9 +44,8 @@ describe('공용 아이콘 export 호환', () => {
     expect(icons.map(icon => icon.getAttribute('data-icon'))).toEqual(names);
     for (const icon of icons) {
       expect(icon).toHaveAttribute('fill', 'currentColor');
-      // 꺾쇠(Chevron*)만 선형, 나머지는 듀오톤 레이어를 가진다.
-      const caret = /^Chevron/.test(icon.getAttribute('data-icon') ?? '');
-      expect(icon.querySelector('[opacity="0.2"]') === null).toBe(caret);
+      // 모든 아이콘은 채움 레이어 없는 선형이다.
+      expect(icon.querySelector('[opacity=\"0.2\"]')).toBeNull();
       expect(icon).toHaveAttribute('aria-hidden', 'true');
       expect(icon).toHaveAttribute('focusable', 'false');
     }

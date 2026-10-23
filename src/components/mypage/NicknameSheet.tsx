@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useId } from 'react';
 import { X } from '../ui/OtterIcons';
 import { BottomSheet } from '@toss/tds-mobile';
 import { ActionButton } from '../ui/ActionButton';
-import { UserRound } from '../ui/OtterIcons';
 
 export const NicknameSheet = ({
   open,
@@ -63,7 +62,7 @@ export const NicknameSheet = ({
       open={open}
       className="original-modal"
       onDimmerClick={required ? () => {} : onClose}
-      header={<div className="nickname-sheet-heading"><UserRound size={30} /><span>{required ? '닉네임을 정해주세요' : '닉네임 변경'}</span></div>}
+      header={<span className="sheet-title">{required ? '닉네임을 정해주세요' : '닉네임 변경'}</span>}
       hasTextField
     >
       <div className="nickname-sheet-body">

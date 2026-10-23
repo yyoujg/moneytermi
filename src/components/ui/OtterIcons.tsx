@@ -15,20 +15,19 @@ import {
 } from '@phosphor-icons/react';
 
 // 이전 선 아이콘 호출부가 넘기던 선 굵기 props는 받아서 버린다.
-export type DuotoneIconProps = IconProps & { strokeWidth?: number | string; absoluteStrokeWidth?: boolean };
+export type LineIconProps = IconProps & { strokeWidth?: number | string; absoluteStrokeWidth?: boolean };
 
-// 모든 아이콘은 현재 글자색을 따르는 듀오톤 한 벌로 통일한다. 바탕 도형은 두지 않는다.
-const createIcon = (Icon: PhosphorIcon, name: string, defaultSize = 24, weight: IconWeight = 'duotone') => {
-  const Duotone = forwardRef<SVGSVGElement, DuotoneIconProps>(({ strokeWidth, absoluteStrokeWidth, size = defaultSize, ...props }, ref) => {
+// 모든 아이콘은 현재 글자색을 따르는 선형 한 벌이다. 듀오톤 채움은 아이콘 뒤 배경처럼 보여서 쓰지 않는다.
+const createIcon = (Icon: PhosphorIcon, name: string, defaultSize = 24, weight: IconWeight = 'regular') => {
+  const Line = forwardRef<SVGSVGElement, LineIconProps>(({ strokeWidth, absoluteStrokeWidth, size = defaultSize, ...props }, ref) => {
     void [strokeWidth, absoluteStrokeWidth];
     return <Icon weight={weight} color="currentColor" aria-hidden="true" focusable="false" size={size} data-icon={name} {...props} ref={ref} />;
   });
-  Duotone.displayName = name;
-  return Duotone;
+  Line.displayName = name;
+  return Line;
 };
-const createControl = (Icon: PhosphorIcon, name: string) => createIcon(Icon, name, 18);
-// 꺾쇠는 듀오톤 채움이 삼각형(▷)처럼 읽혀서 선형으로 그린다.
-const createCaret = (Icon: PhosphorIcon, name: string) => createIcon(Icon, name, 18, 'bold');
+// 작은 조작 표시는 18px에서도 또렷하게 굵은 선으로 그린다.
+const createControl = (Icon: PhosphorIcon, name: string) => createIcon(Icon, name, 18, 'bold');
 
 export const BookOpen = createIcon(BookSvg, 'BookOpen');
 export const BookOpenText = createIcon(BookTextSvg, 'BookOpenText');
@@ -60,10 +59,10 @@ export const Lock = createControl(LockSvg, 'Lock');
 export const LockKeyhole = createControl(LockSvg, 'LockKeyhole');
 export const ArrowRight = createControl(ArrowRightSvg, 'ArrowRight');
 export const ArrowDown = createControl(ArrowDownSvg, 'ArrowDown');
-export const ChevronRight = createCaret(CaretRightSvg, 'ChevronRight');
-export const ChevronLeft = createCaret(CaretLeftSvg, 'ChevronLeft');
-export const ChevronDown = createCaret(CaretDownSvg, 'ChevronDown');
-export const ChevronsUp = createCaret(CaretDoubleUpSvg, 'ChevronsUp');
+export const ChevronRight = createControl(CaretRightSvg, 'ChevronRight');
+export const ChevronLeft = createControl(CaretLeftSvg, 'ChevronLeft');
+export const ChevronDown = createControl(CaretDownSvg, 'ChevronDown');
+export const ChevronsUp = createControl(CaretDoubleUpSvg, 'ChevronsUp');
 export const RotateCcw = createControl(RotateSvg, 'RotateCcw');
 export const ExternalLink = createControl(ExternalSvg, 'ExternalLink');
 export const Link2 = createControl(LinkSvg, 'Link2');

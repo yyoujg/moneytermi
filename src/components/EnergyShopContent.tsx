@@ -69,7 +69,7 @@ export const EnergyShopContent = ({
     <div className="energy-shop-content">
       <section className="energy-shop-summary" aria-label="현재 에너지">
         <div className="energy-shop-summary-heading">
-          <EnergyIcon size={48} />
+          <EnergyIcon size={28} />
           <div className="energy-shop-balance"><h2>학습 에너지</h2><p><strong>{energy}</strong><span>/ {energyMax}</span></p></div>
           <span className="energy-shop-state" data-full={refill.full}>{refill.full ? '충전 완료' : '충전 중'}</span>
         </div>
@@ -84,14 +84,14 @@ export const EnergyShopContent = ({
       <section className="energy-shop-section" aria-label="에너지 충전 방법">
         <h2>충전 방법</h2>
         <button type="button" onClick={onEnergyAd} disabled={refill.full || adDisabled} className="energy-shop-option" data-energy-option="ad">
-          <Tv size={32} />
+          <Tv size={24} />
           <span className="energy-shop-option-body"><strong>광고 보고 에너지 받기</strong><span>시청 보상 에너지 +{ENERGY_AD_REWARD}</span></span>
           <span className="energy-shop-option-state">{refill.full ? '가득 찼어요' : adHint}{!(refill.full || adDisabled) && <ChevronRight size={14} />}</span>
         </button>
         {rewardedAdAvailable && !rewardedAdReady && <p role="status" className="energy-shop-caption">광고를 미리 준비하고 있어요. 버튼이 활성화되면 시청 후 에너지를 받을 수 있어요.</p>}
 
         <button type="button" onClick={onEnergyRefill} disabled={!refill.canRefill} aria-describedby="energy-refill-status" className="energy-shop-option" data-energy-option="refill">
-          <EnergyIcon size={32} />
+          <EnergyIcon size={24} />
           <span className="energy-shop-option-body"><strong>에너지 모두 충전</strong><span>코인 {ENERGY_REFILL_COST.toLocaleString()}개</span></span>
           <span className="energy-shop-option-state">{refill.buttonHint}{refill.canRefill && <ChevronRight size={14} />}</span>
         </button>
@@ -107,7 +107,7 @@ export const EnergyShopContent = ({
       <section className="energy-shop-section" aria-label="학습 부스트">
         <h2>학습 부스트</h2>
         <button type="button" onClick={onBoost} disabled={boostDisabled} className="energy-shop-option" data-energy-option="boost">
-          <XpIcon size={32} />
+          <XpIcon size={24} />
           <span className="energy-shop-option-body"><strong>{boostLeft > 0 ? '부스트 사용 중' : 'XP 2배 부스트'}</strong><span>코인 300개 · 30분</span></span>
           <span className="energy-shop-option-state">{boostLeft > 0
             ? `${Math.floor(boostLeft / 60000)}:${String(Math.floor((boostLeft % 60000) / 1000)).padStart(2, '0')} 남음`

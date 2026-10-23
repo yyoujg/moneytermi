@@ -1,4 +1,3 @@
-import { ProfileAvatar } from '../ProfileAvatar';
 import { ProfileEditIcon } from './ProfileEditIcon';
 import { ProfileGrowth } from './ProfileGrowth';
 
@@ -9,7 +8,6 @@ export const ProfileHeader = ({ nickname, xp, onEditNickname }: {
 }) => (
   <section className="my-profile-card" aria-label="내 프로필">
     <div className="my-profile-identity">
-      <div className="my-profile-avatar"><ProfileAvatar name={nickname} size={76} /></div>
       <div className="my-profile-details">
         <h3 className="my-profile-name">{nickname}</h3>
         <ProfileGrowth xp={xp} />

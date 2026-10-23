@@ -358,11 +358,11 @@ const QuizScreen = () => {
             const isSelected = selected === opt.answer;
             const isCorrectOption = opt.isCorrect;
             // 색은 배경·테두리·아이콘에만. 보기 글자는 어떤 상태에서도 진하게 둔다
-            let optionStyle = 'bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink)] active:border-brand-300 active:bg-[var(--color-brand-soft)]';
+            let optionStyle = 'bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink)] active:bg-[var(--color-surface)]';
             if (!showGrading && isSelected) optionStyle = 'bg-[var(--color-surface)] border-[var(--color-ink-3)] text-[var(--color-ink)]';
             if (showGrading) {
-              optionStyle = isCorrectOption ? 'bg-[var(--color-success-soft)] border-success-500/55 text-[var(--color-ink)]'
-                : isSelected ? 'bg-[var(--color-card)] border-danger-300/50 text-[var(--color-ink)]'
+              optionStyle = isCorrectOption ? 'bg-[var(--color-success-soft)] border-[var(--color-success-foreground)] text-[var(--color-ink)]'
+                : isSelected ? 'bg-[var(--color-card)] border-[var(--color-danger-line)] text-[var(--color-ink)]'
                 : 'bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink-3)]';
             }
             const tag = !showGrading ? (isSelected ? (status === 'idle' ? '선택' : '내 답') : null) : isCorrectOption ? '정답' : isSelected ? '내 답' : null;
@@ -372,7 +372,7 @@ const QuizScreen = () => {
               : isCorrectOption
                 ? 'bg-[var(--color-success-foreground)] text-[var(--color-card)]'
                 : isSelected
-                  ? 'border border-danger-300/70 bg-[var(--color-danger-soft)] text-danger-500'
+                  ? 'border border-[var(--color-danger-line)] bg-[var(--color-card)] text-[var(--color-danger-foreground)]'
                   : 'border border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-ink-4)]';
 
             return (

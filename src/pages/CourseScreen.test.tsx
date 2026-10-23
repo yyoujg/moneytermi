@@ -194,7 +194,9 @@ describe('CourseScreen energy gates', () => {
       expect(button).toHaveAttribute('aria-label', expect.stringMatching(/^(기초|중급) .+ 주제 열기$/));
       expect(button.querySelector('.course-home-topic-icon')).toBeNull();
       expect(button.querySelector('.course-home-topic-heading > svg')).toHaveAttribute('fill', 'currentColor');
-      expect(button.querySelector('[role=progressbar]')).toHaveAttribute('aria-valuemax', '100');
+      // 주제 행은 제목과 메타 한 줄만 둔다. 진행률은 메타 글자(0/31개)로 충분하다.
+      expect(button.querySelector('[role=progressbar]')).toBeNull();
+      expect(button.querySelector('.course-home-topic-description')).toBeNull();
     }
   });
 
@@ -454,8 +456,7 @@ describe('홈의 독립 카드와 미션 동작', () => {
     expect(claimReward).toHaveBeenCalledExactlyOnceWith('quiz');
     expect(container).toHaveTextContent('미션 보상 축하');
     expect(container.querySelector('.home-profile')).not.toHaveClass('app-card');
-    expect(container.querySelector('.home-profile-avatar img')).toBeNull();
-    expect(container.querySelector('.home-profile-avatar .profile-avatar')).toHaveStyle({ width: '56px' });
+    expect(container.querySelector('.home-profile-avatar, .profile-avatar')).toBeNull();
     expect(container.querySelector('[aria-label="이번 주 출석"]')).toBeInTheDocument();
   });
 

@@ -18,8 +18,8 @@ export const QuizProgressHeader = ({
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
       <span className="min-w-0 text-sm font-semibold leading-relaxed text-[var(--color-ink-2)]">{label}</span>
       {streakText && (
-        <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-brand-600">
-          <Flame size={13} className="fill-current" />{streakText}
+        <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-[var(--color-ink-3)]">
+          <Flame size={13} />{streakText}
         </span>
       )}
       {right}

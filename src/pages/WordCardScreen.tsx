@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ExternalLink, Newspaper, Link2 } from '../components/ui/OtterIcons';
+import { ExternalLink } from '../components/ui/OtterIcons';
 import { ChevronLeft, ChevronRight } from '../components/ui/ControlIcons';
 import { BottomSheet } from '@toss/tds-mobile';
 import { showModal } from '../components/AlertModal';
@@ -101,7 +101,7 @@ const WordCard = ({
     {/* 뉴스 — 사진보다 '이 용어가 기사에서 어떻게 쓰였는지'가 보이게 작은 썸네일 목록. 불러온 뒤 기사가 없으면 섹션째 숨긴다 */}
     {(newsLoading || newsItems.length > 0) && (
     <Card pad="md" className="flex flex-col">
-      <p className="flex items-center gap-1 pb-1 text-xs font-bold text-[var(--color-ink-3)] tracking-[0.02em]"><Newspaper size={13} />실제 뉴스에서는 이렇게 나와요</p>
+      <h3 className="pb-1 text-base font-bold text-[var(--color-ink)] break-keep">실제 뉴스에서는 이렇게 나와요</h3>
       {newsLoading ? (
         [1, 2, 3].map(i => (
           <div key={i} className="flex gap-3 py-3">
@@ -120,7 +120,7 @@ const WordCard = ({
           className="flex items-start gap-3 py-3 border-b border-[var(--color-line)] last:border-0 active:opacity-60 text-left"
         >
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-[var(--color-ink)] break-keep leading-normal tracking-[-0.01em] line-clamp-2">
+            <p className="text-sm font-semibold text-[var(--color-ink)] break-keep leading-normal line-clamp-2">
               <Highlight text={stripHtml(item.title)} keyword={keyword} />
             </p>
             {item.description && (
@@ -150,16 +150,15 @@ const WordCard = ({
     {/* 관련 용어 */}
     {validRelated.length > 0 && (
       <Card pad="md" className="flex flex-col gap-2">
-        <p className="flex items-center gap-1 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><Link2 size={13} />관련 용어</p>
+        <h3 className="text-base font-bold text-[var(--color-ink)]">관련 용어</h3>
         <div className="flex flex-col">
-          {validRelated.map((tag, i) => (
+          {validRelated.map(tag => (
             <button
               key={tag}
               onClick={() => onRelatedClick(tag)}
               className="flex items-center gap-3 py-3 border-b border-[var(--color-surface)] last:border-0 active:opacity-60 text-left"
             >
-              <span className="text-2xs font-bold w-4 shrink-0 text-[var(--color-ink-4)]">{i + 1}</span>
-              <p className="text-sm font-semibold text-[var(--color-ink)] break-keep flex-1 tracking-[-0.01em]">{tag}</p>
+              <p className="text-sm font-semibold text-[var(--color-ink)] break-keep flex-1">{tag}</p>
               <ChevronRight size={14} className="text-[var(--color-ink-4)] shrink-0" />
             </button>
           ))}
@@ -530,12 +529,12 @@ const WordCardScreen = () => {
     <BottomSheet
       open={detailOpen}
       onDimmerClick={() => setDetailOpen(false)}
-      header={<span style={{ paddingLeft: '20px', fontWeight: 700, color: 'var(--color-ink)' }}>{word.word} 자세히 알아보기</span>}
+      header={<span className="sheet-title">{word.word} 자세히 알아보기</span>}
     >
       <div className="px-5 pb-8 flex flex-col gap-4 max-h-[60vh] overflow-y-auto">
         {/* 첫 문단이 핵심이라 진하게, 나머지는 본문 */}
         {toParagraphs(detail).map((para, i) => (
-          <p key={i} className={`text-base leading-relaxed break-keep tracking-[-0.01em] ${i === 0 ? 'font-semibold text-[var(--color-ink)]' : 'text-[var(--color-ink-2)]'}`}>
+          <p key={i} className={`text-base leading-relaxed break-keep ${i === 0 ? 'font-semibold text-[var(--color-ink)]' : 'text-[var(--color-ink-2)]'}`}>
             <Highlight text={para} keyword={word.word} pattern={termPattern(word.word) ?? undefined} />
           </p>
         ))}

@@ -42,7 +42,7 @@ describe('내 정보의 상점 진입과 정확한 숫자 표시', () => {
     expect(state.openShop).toHaveBeenCalledExactlyOnceWith();
     expect(state.ctx.points).toBe(180);
     expect(state.ctx.xp).toBe(120);
-    expect(container.querySelector('.my-profile-avatar .profile-avatar')).toHaveTextContent('기');
+    expect(container.querySelector('.my-profile-avatar, .profile-avatar')).toBeNull();
     expect(container).not.toHaveTextContent('캐릭터 변경');
   });
   it('큰 경험치·코인은 전체 열을 쓰되 숫자를 반올림하거나 자르지 않는다', () => {

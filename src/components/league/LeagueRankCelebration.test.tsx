@@ -96,9 +96,11 @@ describe('LeagueRankCelebration', () => {
     expect(container.querySelector('[role="dialog"]')?.textContent).toContain('3위');
     expect(container.querySelector('[role="dialog"]')?.textContent).toContain('70XP');
     expect(container.querySelector('img:not([data-icon])')).toBeNull();
-    expect(container.querySelector('.profile-avatar')).toBeInTheDocument();
+    expect(container.querySelector('.profile-avatar')).toBeNull();
     expect(container.querySelector('[data-icon="TrendingUp"]')).not.toBeInTheDocument();
-    expect(container.querySelector('button[aria-label="닫기"]')).toBeInTheDocument();
+    // 별도 X 버튼 없이 '좋아요'와 바깥 영역으로 닫는다.
+    expect(container.querySelector('button[aria-label="닫기"]')).toBeNull();
+    expect([...container.querySelectorAll('button')].some(button => button.textContent === '좋아요')).toBe(true);
     expect(state.feedbackCelebrate).toHaveBeenCalledTimes(1);
     expect(state.logClick).toHaveBeenCalledWith('league_rank_up_modal_view', { from: 5, to: 3, total: 10, weekly_xp: 70 });
   });
