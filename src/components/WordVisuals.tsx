@@ -346,8 +346,8 @@ const VisualCard = ({ v, className = '', terms }: { v: Exclude<WordVisual, { typ
   <Card pad="none" className={`pt-4 pb-5 flex flex-col gap-3 ${className}`}>
     {v.type === 'text' ? (
       <>
-        <h3 className="text-base font-bold text-[var(--color-ink)] break-keep">{v.title}</h3>
-        <p className="text-xs text-[var(--color-ink-2)] break-keep leading-relaxed whitespace-pre-line"><LinkedText text={v.body} terms={terms} /></p>
+        {v.title && <h3 className="text-base font-bold text-[var(--color-ink)] break-keep">{v.title}</h3>}
+        <p className="text-sm text-[var(--color-ink-2)] break-keep leading-relaxed whitespace-pre-line"><LinkedText text={v.body} terms={terms} /></p>
       </>
     ) : <>
     <div className="flex flex-col gap-1">

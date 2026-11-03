@@ -2,6 +2,7 @@ import { act, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import MyPageScreen from './MyPageScreen';
+import { MemoryRouter } from 'react-router-dom';
 
 const state = vi.hoisted(() => ({ ctx: {} as Record<string, unknown>, openShop: vi.fn() }));
 vi.mock('../context/AppContext', () => ({ useAppContext: () => state.ctx }));
@@ -27,7 +28,7 @@ const mount = () => {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
-  act(() => root.render(<MyPageScreen />));
+  act(() => root.render(<MemoryRouter><MyPageScreen /></MemoryRouter>));
   cleanup = () => { act(() => root.unmount()); container.remove(); };
   return container;
 };
@@ -71,12 +72,15 @@ describe('내 정보의 정확한 숫자 표시', () => {
     expect(container.querySelector('.my-page-stat.is-wide')).toBeNull();
     expect([...container.querySelectorAll('[data-stat-number]')].map(item => item.textContent)).toEqual(['2', '0', '120']);
   });
-  it('실제 복습 위치와 복습 카드가 나타나는 조건을 안내한다', () => {
+  it('실제 복습 위치를 안내하고 규칙 수치는 담당 화면으로 넘긴다', () => {
     const container = mount();
     const guide = [...container.querySelectorAll('button')].find(button => button.textContent?.includes('앱 사용법'))!;
     act(() => guide.click());
-    expect(container).toHaveTextContent('퀘스트의 ‘오늘 다시 볼 용어’');
-    expect(container).toHaveTextContent('다시 볼 용어가 있을 때 복습 카드가 나타나요.');
+    expect(container).toHaveTextContent("퀘스트의 '오늘 다시 볼 용어'");
     expect(container).not.toHaveTextContent('홈의 오늘 다시 보기');
+    // XP·에너지 수치는 리그 안내·에너지 시트에만 둔다
+    expect(container).not.toHaveTextContent('1시간마다');
+    expect(container).not.toHaveTextContent('퀴즈 정답 2');
+    expect(container).toHaveTextContent('리그 안내 보기');
   });
 });

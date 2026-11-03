@@ -232,10 +232,11 @@ describe('코인 없이 XP와 연속 정답만 표시', () => {
     expect(container.querySelector('[role="dialog"]')).not.toHaveTextContent('코인');
   });
 
-  it('리그 안내는 코인·부스트 없이 에너지 사용을 설명한다', async () => {
+  it('리그 안내는 코인·부스트 없이 XP 규칙만 설명하고 에너지는 다루지 않는다', async () => {
     const { container } = await mount({}, <LeagueRules />);
     expect(container.textContent).not.toMatch(/코인|부스트|600개/);
-    expect(container.textContent).toContain('학습·퀴즈를 새로 시작할 때 1씩 써요');
+    expect(container.textContent).toContain('퀴즈 정답 2');
+    expect(container.textContent).not.toContain('에너지');
     expect(container.textContent).not.toMatch(/포인트|10P|50P|300P/);
   });
 });

@@ -527,10 +527,11 @@ const WordCardScreen = () => {
       header={<span className="sheet-title">{word.word} 자세히 알아보기</span>}
     >
       <div className="px-5 pb-8 flex flex-col gap-4 max-h-[60vh] overflow-y-auto">
-        {textVisuals.length > 0 && <WordVisuals visuals={textVisuals} terms={visualTerms} />}
-        {/* 첫 문단이 핵심이라 진하게, 나머지는 본문 */}
-        {toParagraphs(detail).map((para, i) => (
-          <p key={i} className={`text-base leading-relaxed break-keep ${i === 0 ? 'font-semibold text-[var(--color-ink)]' : 'text-[var(--color-ink-2)]'}`}>
+        {/* 시트 제목이 이미 '용어 자세히 알아보기'라 '… 쉽게 설명' 소제목은 뺀다.
+            설명 자료가 있으면 상세 뜻은 카드의 핵심 뜻·쉬운 설명과 겹쳐 싣지 않고, 없을 때만 본문으로 보여준다 */}
+        {textVisuals.length > 0 && <WordVisuals visuals={textVisuals.map(v => v.type === 'text' && v.title.endsWith('쉽게 설명') ? { ...v, title: '' } : v)} terms={visualTerms} />}
+        {textVisuals.length === 0 && toParagraphs(detail).map((para, i) => (
+          <p key={i} className="text-sm leading-relaxed break-keep text-[var(--color-ink-2)]">
             <Highlight text={para} keyword={word.word} pattern={termPattern(word.word) ?? undefined} />
           </p>
         ))}

@@ -229,95 +229,35 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
   background: var(--color-card);
 }
 .course-node-current::before { content: none; }
-@keyframes splash-progress {
-  0% { transform: translateX(-72%) scaleX(0.38); opacity: 0.75; }
-  56% { transform: translateX(12%) scaleX(0.78); opacity: 1; }
-  100% { transform: translateX(148%) scaleX(0.42); opacity: 0.65; }
-}
+/* 스플래시: 가운데 로고만. 로딩이 1초를 넘을 때만 아래 작은 스피너가 나타난다(진행률이 없어 막대는 쓰지 않는다) */
+@keyframes splash-spin { to { transform: rotate(360deg); } }
+@keyframes splash-reveal { to { opacity: 1; } }
 .splash-screen {
-  position: relative;
   display: flex;
   flex: 1;
   min-height: 100%;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  background: var(--color-canvas);
-  color: var(--color-ink);
-}
-/* 스플래시는 단색 바탕으로 유지한다. 점무늬·하단 색면을 추가하지 않는다. */
-.splash-screen::before,
-.splash-screen::after {
-  content: none;
-}
-.splash-frame {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  width: min(100%, 420px);
-  min-height: 560px;
   flex-direction: column;
   align-items: center;
+  position: relative;
   justify-content: center;
-  padding: var(--space-10) var(--space-7) var(--space-12);
+  background: var(--color-canvas);
+  color: var(--color-ink);
 }
 .splash-brand {
-  position: absolute;
-  top: 28px;
-  left: 28px;
-  color: var(--color-ink);
   font-size: var(--font-size-title-2);
   font-weight: var(--font-weight-bold);
-  letter-spacing: 0;
 }
-.splash-copy {
-  text-align: center;
-}
-.splash-copy p {
-  color: var(--color-ink-3);
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-bold);
-}
-.splash-copy h1 {
-  margin-top: var(--space-2);
-  color: var(--color-ink);
-  font-size: var(--font-size-title-3);
-  font-weight: var(--font-weight-bold);
-  line-height: var(--line-height-tight);
-  letter-spacing: 0;
-}
-.splash-progress {
-  position: relative;
-  width: 176px;
-  height: 7px;
-  margin-top: var(--space-7);
-  overflow: hidden;
-  border-radius: var(--shape-full);
-  background: var(--color-brand-200);
-}
-.splash-progress span {
+.splash-spinner {
+  /* 로고가 정확히 가운데 오도록 흐름에서 빼서 로고 아래에 둔다 */
   position: absolute;
-  inset: 0;
-  width: 74%;
-  border-radius: inherit;
-  background: var(--color-ink);
-  animation: splash-progress 1.45s var(--ease-soft) infinite;
-}
-.dark .splash-screen {
-  background: var(--color-canvas);
-}
-@media (max-height: 620px) {
-  .splash-frame {
-    min-height: 100%;
-    padding-top: var(--space-7);
-    padding-bottom: var(--space-7);
-  }
-  .splash-brand {
-    top: 18px;
-  }
-  .splash-copy {
-    margin-top: var(--space-5);
-  }
+  top: calc(50% + var(--space-7));
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-line);
+  border-top-color: var(--color-ink-3);
+  border-radius: var(--shape-full);
+  opacity: 0;
+  animation: splash-reveal 0s linear 1s forwards, splash-spin 0.9s linear infinite;
 }
 /* 마일스톤 축하 색종이: 위에서 흔들리며 떨어진다. --x(가로 위치 %), --d(지연), --r(회전 방향)은 인라인 */
 @keyframes confetti-fall {
@@ -336,9 +276,8 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
 button:focus:not(:focus-visible) { outline: none !important; }
 @media (prefers-reduced-motion: reduce) {
   .anim-fade, .anim-fade-up, .anim-pop-in, .anim-slide-in, .anim-slide-up, .anim-bump, .anim-confetti, .anim-draw, .anim-drop, .anim-glow-ok, .anim-shake, .anim-soft-nudge, .anim-answer-wash, .anim-reward-rise, .anim-reward-pop, .anim-choice-lock, .anim-feedback-panel, .anim-sweep, .anim-stamp, .anim-gate-l, .anim-gate-r, .anim-flip, .anim-flicker,
-  .animate-node-hop, .animate-node-ground, .course-focus-tip, .course-progress-reveal, .course-node-focus, .quiz-choice-reveal,
-  .splash-progress span { animation: none !important; }
-  .splash-progress span { transform: none; width: 68%; }
+  .animate-node-hop, .animate-node-ground, .course-focus-tip, .course-progress-reveal, .course-node-focus, .quiz-choice-reveal { animation: none !important; }
+  .splash-spinner { animation: splash-reveal 0s linear 1s forwards !important; }
   .animate-pulse, .animate-bounce-up, .animate-bounce-down { animation: none !important; }
   button:not(:disabled):active { transform: none; transition: none; }
 }

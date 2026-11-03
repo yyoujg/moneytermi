@@ -1,6 +1,6 @@
 import { Tv } from './ui/OtterIcons';
 import { ChevronRight } from './ui/ControlIcons';
-import { ENERGY_AD_REWARD } from '../constants';
+import { ENERGY_AD_REWARD, ENERGY_REGEN_MS } from '../constants';
 import { EnergyIcon } from './StatIcons';
 
 type Props = {
@@ -64,6 +64,7 @@ export const EnergyShopContent = ({
         <h2>이용 안내</h2>
         <p>번개 아이콘은 학습에 쓰는 에너지를 뜻해요.</p>
         <p>새 학습과 코스 퀴즈를 처음 시작할 때 에너지 1을 써요. 이어하기, 다시 보기, 복습은 무료예요.</p>
+        <p>에너지는 {ENERGY_REGEN_MS / (60 * 60 * 1000)}시간마다 1씩 다시 차요.</p>
       </section>
     </div>
   );
