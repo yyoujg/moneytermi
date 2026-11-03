@@ -102,7 +102,7 @@ const WelcomeScreen = () => {
               : 'bg-[var(--color-card)] border-transparent text-[var(--color-ink-3)]';
             return (
               <button key={opt} type="button" disabled={graded} aria-pressed={opt === picked} onClick={() => setPicked(opt)}
-                className={`quiz-option flex min-h-[56px] items-center justify-between gap-3 border px-4 py-3 text-left text-base font-semibold ${style}`}>
+                className={`quiz-option rounded-button flex min-h-[56px] items-center justify-between gap-3 border px-4 py-3 text-left text-base font-semibold ${style}`}>
                 {opt}
                 {graded && isAnswer && <span className="shrink-0 text-xs font-bold text-[var(--color-success-foreground)]">정답</span>}
                 {graded && !isAnswer && opt === picked && <span className="shrink-0 text-xs font-bold text-[var(--color-danger-foreground)]">내 답</span>}
