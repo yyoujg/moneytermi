@@ -577,7 +577,11 @@ button.course-energy-entry { display: flex; width: 100%; min-height: var(--size-
 button.course-energy-entry:active { opacity: 0.7; }
 .course-home-hero { flex-shrink: 0; margin: var(--space-1) var(--space-5) 0; padding: var(--space-5); border: 0; border-radius: var(--shape-card); background: var(--color-card); }
 .course-home-greeting { display: flex; align-items: flex-end; gap: var(--space-2); margin-bottom: var(--space-4); }
-.course-home-character { width: 88px; height: auto; flex-shrink: 0; filter: drop-shadow(0 6px 10px rgba(23, 29, 35, 0.12)); }
+.course-home-character { width: 88px; height: auto; flex-shrink: 0; }
+/* 다크 바탕에서는 흰 외곽선이 깔린 수달로 바꾼다 */
+.dark img[data-otter='idle'] { content: url('/otter/v5/otter-idle-dark.svg'); }
+.dark img[data-otter='cheer'] { content: url('/otter/v5/otter-cheer-dark.svg'); }
+.dark img[data-otter='explain'] { content: url('/otter/v5/otter-explain-dark.svg'); }
 .course-home-bubble { position: relative; flex: 1; min-width: 0; margin-bottom: var(--space-6); padding: var(--space-3) var(--space-4); border-radius: var(--shape-inset); background: var(--color-card); color: var(--color-ink); font-size: var(--font-size-label); font-weight: var(--font-weight-semibold); line-height: var(--line-height-body); word-break: keep-all; box-shadow: var(--shadow-choice); }
 .course-home-bubble::before { content: ''; position: absolute; left: -6px; bottom: 14px; width: 12px; height: 12px; background: var(--color-card); transform: rotate(45deg); }
 .course-home-book { display: flex; flex-shrink: 0; width: 56px; height: 56px; align-items: center; justify-content: center; border-radius: var(--shape-card); background: var(--color-accent-soft); color: var(--color-accent-foreground); }
@@ -1116,8 +1120,7 @@ button.home-review-entry { margin-bottom: var(--space-3); padding: var(--space-4
 .home-mission-row + .home-mission-row { border-top: 1px solid var(--color-line); }
 .my-page-stats.app-card { padding: var(--space-5) 0; }
 .my-page-stat + .my-page-stat { border-left: 1px solid var(--color-line); }
-button.my-profile-avatar { position: relative; flex-shrink: 0; border-radius: 50%; }
-.my-profile-avatar > span { position: absolute; bottom: 0; right: -2px; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border: 0; border-radius: 50%; background: transparent; color: var(--color-brand-text); }
+.my-profile-avatar { display: flex; flex-shrink: 0; }
 button.my-profile-name-button { display: flex; align-items: center; gap: var(--space-2); min-height: 44px; text-align: left; }
 .my-profile-name-button > svg { color: var(--color-ink-3); }
 .league-screen > div:first-child { padding-bottom: var(--space-2); background: transparent; }
@@ -1187,7 +1190,7 @@ button.course-home-rail-card:active { background: var(--color-surface); }
 
 /* 학습 완료: 보라 바탕 위 기뻐하는 수달과 흰 결과 카드 */
 .learning-completion-screen { background: var(--color-canvas); }
-.learning-completion-screen .learning-completion-card { margin-top: 72px; padding-top: 88px; }
+.learning-completion-screen .learning-completion-card { margin-top: 72px; padding-top: 44px; }
 .learning-completion-character { position: absolute; top: -96px; left: 50%; width: 128px; height: auto; transform: translateX(-50%); }
 .course-home-section-heading { margin-top: var(--space-6); }
 /* 리그: 이번 주 내 순위 카드 */
@@ -1259,3 +1262,6 @@ button.home-review-entry { border-bottom: 0; }
 /* 복습 보조 행동(초성 힌트·건너뛰기)은 외곽선 버튼: 채운 버튼은 정답 확인 하나 */
 button.review-aux-button { min-height: var(--size-touch-min); border: 1px solid var(--color-line); border-radius: var(--shape-button); background: transparent; color: var(--color-ink-2); font-size: var(--font-size-label); font-weight: var(--font-weight-semibold); }
 button.review-aux-button:disabled { color: var(--color-ink-3); }
+/* 사용자 아바타: 그림 없이 첫 글자. 배경색은 ProfileAvatar가 토큰 중 하나로 정한다 */
+.profile-avatar { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; color: var(--color-ink-2); font-weight: var(--font-weight-bold); line-height: 1; }
+.league-ranking-row.is-me .profile-avatar { background: var(--color-card) !important; }

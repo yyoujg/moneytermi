@@ -77,6 +77,22 @@ const tableMinWidth = (columns: string[], rows: string[][]) => {
 };
 
 const Table = ({ columns, rows }: { columns: string[]; rows: string[][] }) => {
+  // 3열 이하 비교는 390px에서 열이 비좁아 행마다 '항목 → 열 이름: 값' 목록으로 보여준다. 4열 이상 계산표만 표로 둔다.
+  if (columns.length <= 3) return (
+    <dl className="word-visual-rows text-xs">
+      {rows.map((r, ri) => (
+        <div key={ri} className="border-b border-[var(--color-surface)] py-3 last:border-0">
+          <dt className="font-bold text-[var(--color-ink)] break-keep leading-normal">{r[0]}</dt>
+          {r.slice(1).map((cell, ci) => (
+            <dd key={ci} className="mt-1 flex gap-2 leading-normal break-keep">
+              <span className="shrink-0 text-[var(--color-ink-3)]">{columns[ci + 1]}</span>
+              <span className="text-[var(--color-ink-2)]">{cell}</span>
+            </dd>
+          ))}
+        </div>
+      ))}
+    </dl>
+  );
   const minWidth = tableMinWidth(columns, rows);
   // 짧은 항목명은 한 줄로 두어 뜻 칸에 자리를 넘긴다.
   const keepLabelsOnOneLine = rows.every(row => textWeight(row[0] ?? '') <= 8);

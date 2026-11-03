@@ -26,7 +26,7 @@ export const LearningCompletionScreen = ({
     <div className="learning-completion-screen app-soft-screen flex h-full flex-col">
       <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden flex flex-col items-center justify-center-safe px-8 py-6 gap-5">
         <section className="learning-completion-card relative w-full max-w-sm flex flex-col items-center gap-5 px-5 py-8">
-          <img className="learning-completion-character" src="/otter/v4/joy.png" alt="" aria-hidden="true" width={128} height={172} />
+          <img className="learning-completion-character" src="/otter/v5/otter-cheer.svg" data-otter="cheer" alt="" aria-hidden="true" width={128} height={128} />
           <div className="text-center anim-fade-up" style={{ '--i': 1 } as CSSProperties}>
             <h2 className="type-result-title mb-1!">{title}</h2>
             <p className="type-supporting break-keep">{subtitle}</p>

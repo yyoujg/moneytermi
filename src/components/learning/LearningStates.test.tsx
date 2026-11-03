@@ -47,7 +47,7 @@ describe('학습 시작 전과 완료 후 안내', () => {
     expect(container).not.toHaveTextContent('수달');
     // 완료 화면 그림은 장식용 기쁨 수달 하나뿐이다
     expect(container.querySelectorAll('img')).toHaveLength(1);
-    expect(container.querySelector('img')).toHaveAttribute('src', '/otter/v4/joy.png');
+    expect(container.querySelector('img')).toHaveAttribute('src', '/otter/v5/otter-cheer.svg');
     expect(container.querySelector('img')).toHaveAttribute('aria-hidden', 'true');
     expect(container).not.toHaveTextContent('포인트를 받았어요');
     expect(container).toHaveTextContent('알림 안내');

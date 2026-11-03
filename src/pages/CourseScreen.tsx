@@ -334,7 +334,7 @@ const CourseScreen = () => {
           {/* 왼쪽은 캐릭터, 오른쪽은 등급 진행과 말풍선을 쌓는다 */}
           <div className="course-home-hero-body">
             <div className="course-home-character-wrap">
-              <img className="course-home-character" src="/otter/v4/study.png" alt="" aria-hidden="true" width={104} height={140} />
+              <img className="course-home-character" src="/otter/v5/otter-explain.svg" data-otter="explain" alt="" aria-hidden="true" width={96} height={96} />
               <span className="course-home-tier-chip">Lv.{stage.id} {stage.name}</span>
             </div>
             <div className="course-home-hero-side">

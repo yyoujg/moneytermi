@@ -20,14 +20,17 @@ describe('프로필 머리', () => {
   it('닉네임 첫 글자 프로필과 이름·경험치를 표시한다', () => {
     const { container } = mount();
     expect(container.querySelector('h3')).toHaveTextContent('예시 학습자');
-    expect(container.querySelector('.my-profile-avatar img')).toHaveAttribute('src', '/otter/v4/face.png');
+    // 사용자 아바타는 마스코트 그림이 아니라 닉네임 첫 글자다
+    expect(container.querySelector('.my-profile-avatar img')).toBeNull();
+    expect(container.querySelector('[data-avatar-initial]')).toHaveTextContent('예');
     expect(container).toHaveTextContent('갓생러');
     expect(container).toHaveTextContent('재테크러까지 1,800 XP');
   });
   it('편집 버튼은 닉네임 변경 하나만 둔다', () => {
     const { container, onEditNickname } = mount();
     const buttons = [...container.querySelectorAll('button')];
-    expect(buttons).toHaveLength(2);
+    // 아바타는 바꿀 수 없는 첫 글자 표시라 버튼이 아니다
+    expect(buttons).toHaveLength(1);
     const nicknameButton = container.querySelector<HTMLButtonElement>('[aria-label="닉네임 변경"]')!;
     expect(nicknameButton.type).toBe('button');
     act(() => nicknameButton.click());

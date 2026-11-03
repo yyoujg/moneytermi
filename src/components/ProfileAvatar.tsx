@@ -1,10 +1,12 @@
-// 서버에는 이모지가 그대로 저장되고, 화면에서는 이모지마다 다른 수달 캐릭터로 보여준다.
-export const OTTER_FACE = '/otter/v4/face.png';
+// 사용자 아바타는 마스코트(수달)와 분리한다: 원 안에 닉네임 첫 글자, 색은 닉네임으로 고정한 기존 토큰 하나.
+// 서버의 profiles.emoji는 그대로 두고 화면에서만 쓰지 않는다(docs/CHARACTER_BIBLE.md 8절).
+const AVATAR_TONES = ['var(--color-accent-soft)', 'var(--color-surface)', 'var(--color-action-soft)'];
 
-// 원형으로 잘라도 머리·소품이 안 잘리는 그림만 남겼다. 빠진 예전 이모지는 기본 수달로 보인다.
-const AVATAR_FILE: Record<string, number> = { '🥰': 2, '🐼': 7, '🐻': 8, '🦉': 14, '🌟': 15, '🎯': 16, '🎮': 17, '🚀': 18, '🍀': 19 };
-const avatarSrc = (emoji: string) => (AVATAR_FILE[emoji] ? `/otter/avatar/${AVATAR_FILE[emoji]}.jpg` : OTTER_FACE);
+const toneOf = (name: string) => AVATAR_TONES[Array.from(name).reduce((sum, ch) => sum + ch.codePointAt(0)!, 0) % AVATAR_TONES.length];
 
-export const ProfileAvatar = ({ emoji, size }: { emoji: string; size: number }) => (
-  <img src={avatarSrc(emoji)} alt="" aria-hidden="true" className="shrink-0 rounded-full bg-white object-cover" style={{ width: size, height: size }} />
+export const ProfileAvatar = ({ name, size }: { name: string; size: number }) => (
+  <span aria-hidden="true" data-avatar-initial className="profile-avatar shrink-0"
+    style={{ width: size, height: size, background: toneOf(name), fontSize: size >= 56 ? 'var(--font-size-title-2)' : size >= 40 ? 'var(--font-size-headline)' : 'var(--font-size-label)' }}>
+    {Array.from(name.trim())[0] ?? '?'}
+  </span>
 );

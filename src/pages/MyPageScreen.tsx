@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { StreakIcon, WordsIcon, XpIcon, STAT_COLOR } from '../components/StatIcons';
-import { EmojiPickerSheet } from '../components/mypage/EmojiPickerSheet';
 import { ChevronRight, CircleHelp, Settings } from '../components/ui/OtterIcons';
 import { useAppContext } from '../context/AppContext';
 import { DEFAULT_NICKNAME } from '../constants';
@@ -22,13 +21,12 @@ const MENU_ITEMS = [
 ];
 
 const MyPageScreen = () => {
-  const { xp, knownWords, viewedIds, attendanceDates, myEmoji, updateMyEmoji } = useAppContext();
+  const { xp, knownWords, viewedIds, attendanceDates } = useAppContext();
   const streak = calcStreak(attendanceDates);
   const badges = buildBadges({ words: knownWords.length, streak, xp });
 
   const earned = badges.filter(b => b.earned).length;
   const { user, updateNickname } = useAuth();
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showGuide, setShowGuide]                 = useState(false);
   const [showSettings, setShowSettings]           = useState(false);
   const [showNicknameSheet, setShowNicknameSheet] = useState(false);
@@ -40,7 +38,6 @@ const MyPageScreen = () => {
 
   return (
     <div className="my-page-screen flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
-      <EmojiPickerSheet open={showEmojiPicker} current={myEmoji} onSelect={updateMyEmoji} onClose={() => setShowEmojiPicker(false)} />
       <GuideSheet open={showGuide} onClose={() => setShowGuide(false)} />
       <SettingsSheet open={showSettings} onClose={() => setShowSettings(false)} />
       <NicknameSheet
@@ -56,8 +53,6 @@ const MyPageScreen = () => {
         <ProfileHeader
           nickname={user?.nickname ?? DEFAULT_NICKNAME}
           xp={xp}
-          emoji={myEmoji}
-          onEditAvatar={() => setShowEmojiPicker(true)}
           onEditNickname={() => setShowNicknameSheet(true)}
         />
 
