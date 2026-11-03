@@ -1,47 +1,17 @@
-import { Volume2, VolumeX, Bell, Moon, Vibrate, Music2 } from '../ui/OtterIcons';
+import { Volume2, VolumeX, Bell, Vibrate, Music2 } from '../ui/OtterIcons';
 import { Switch, BottomSheet } from '@toss/tds-mobile';
 import { useSettings } from '../../hooks/useSettings';
 import { useNotificationAgreement } from '../../hooks/useNotificationAgreement';
-import { useTheme, type Theme } from '../../hooks/useTheme';
 import { Card } from '../ui/Card';
-
-const THEME_OPTIONS: [Theme, string][] = [['system', '시스템'], ['light', '라이트'], ['dark', '다크']];
 
 export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   const { soundOn, bgmOn, vibrationOn, toggleSound, toggleBgm, toggleVibration } = useSettings();
   const { agreed, requestAgreement } = useNotificationAgreement();
-  const { theme, setTheme } = useTheme();
 
   return (
     <BottomSheet open={open} onDimmerClick={onClose} header={<span className="sheet-title">앱 설정</span>}>
       <div className="px-5 pb-6 flex flex-col divide-y divide-[var(--color-line)]">
-        {/* 테마 */}
-        <Card pad="md">
-          <div className="flex items-center gap-3 mb-3">
-            <span className="flex w-6 shrink-0 justify-center">
-              <Moon size={20} className="text-[var(--color-ink-2)]" />
-            </span>
-            <div>
-              <p className="text-sm font-semibold text-[var(--color-ink)]">테마</p>
-              <p className="text-xs text-[var(--color-ink-3)]">화면 밝기 모드</p>
-            </div>
-          </div>
-          <div className="flex gap-1">
-            {THEME_OPTIONS.map(([val, label]) => (
-              <button
-                key={val}
-                type="button"
-                aria-pressed={theme === val}
-                onClick={() => setTheme(val)}
-                className={`flex-1 min-h-11 rounded-button text-xs font-bold transition-colors
-                  ${theme === val ? 'bg-[var(--color-ink)] text-[var(--color-card)]' : 'bg-[var(--color-card)] border border-[var(--color-line)] text-[var(--color-ink-3)]'}`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </Card>
-
+        {/* 앱인토스 미니앱은 라이트 모드만 지원해 테마 선택은 두지 않는다 */}
         {/* 효과음 */}
         <Card pad="md" className="flex items-center justify-between">
           <div className="flex items-center gap-3">

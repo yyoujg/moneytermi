@@ -453,24 +453,19 @@ describe('학습 주제의 역할 아이콘', () => {
     expect(state.spendEnergy).toHaveBeenCalledWith(1, 'lesson', 'c1-l0:1,2,3,4');
   });
 
-  it('학습·퀴즈의 역할 그림과 복습 선형 표시를 구분한다', async () => {
+  it('학습·퀴즈는 번호와 역할 그림, 복습은 번호 없이 배지로 구분한다', async () => {
     const { container } = await mount();
     const icons = [...container.querySelectorAll('[data-learning-icon]')];
-    expect(icons.map(icon => icon.getAttribute('data-learning-icon'))).toEqual(['lesson', 'quiz', 'review']);
-    expect(container.querySelector('[data-icon="BookOpenText"]')).toBeInTheDocument();
-    expect(container.querySelector('[data-icon="ListChecks"]')).toBeInTheDocument();
-    expect(container.querySelector('[data-icon="RotateCcw"]')).toBeInTheDocument();
+    expect(icons.map(icon => icon.getAttribute('data-learning-icon'))).toEqual(['lesson', 'quiz']);
     for (const icon of icons) {
       expect(icon).toHaveAttribute('width', '16');
-      if (icon.getAttribute('data-learning-icon') === 'review') {
-        expect(icon.tagName.toLowerCase()).toBe('svg');
-        expect(icon).toHaveAttribute('fill', 'currentColor');
-      } else {
-        expect(icon).toHaveAttribute('data-icon', ['BookOpenText', 'ListChecks'][icons.indexOf(icon)]);
-        expect(icon).toHaveAttribute('fill', 'currentColor');
-      }
       expect(icon).toHaveAttribute('aria-hidden', 'true');
     }
+    expect(container.querySelector('[data-review-badge]')).toHaveTextContent('· 선택');
+    const markers = [...container.querySelectorAll('.course-step-marker')];
+    const review = markers.find(m => m.getAttribute('data-step-kind') === 'review')!;
+    expect(review.textContent).toBe('');
+    expect(review.querySelector('[data-icon="RotateCcw"]')).toBeInTheDocument();
   });
 
   it('잠긴 단계도 역할을 표시하며 잠금과 학습 동작은 유지한다', async () => {
@@ -478,7 +473,7 @@ describe('학습 주제의 역할 아이콘', () => {
     const locked = [...container.querySelectorAll<HTMLButtonElement>('button[data-node-id]:disabled')];
     expect(locked).toHaveLength(2);
     expect(locked[0].querySelector('[data-learning-icon="quiz"]')).toBeInTheDocument();
-    expect(locked[1].querySelector('[data-learning-icon="review"]')).toBeInTheDocument();
+    expect(locked[1].querySelector('[data-review-badge]')).toBeInTheDocument();
     for (const button of locked) {
       expect(button.textContent).toContain('잠김');
       expect(button.querySelector('[data-icon="LockKeyhole"]')).toBeNull();

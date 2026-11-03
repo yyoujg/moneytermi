@@ -120,8 +120,9 @@ const CourseScreen = () => {
   const focusRef = useRef<HTMLButtonElement>(null);
 
   const isDone = (node: PathNode) => node.state === 'done' || (doneNodes.has(node.id) && node.state === 'available');
-  // 진행은 화면 어디서나 단계(학습·퀴즈·복습) 기준 하나로 센다
-  const topicSteps = (topic: (typeof topics)[number]) => topic.parts.reduce((acc, part) => ({ done: acc.done + part.section.nodes.filter(isDone).length, total: acc.total + part.section.nodes.length }), { done: 0, total: 0 });
+  const isStep = (node: PathNode) => node.type !== 'review';
+  // 복습은 단계로 세지 않는다(순서를 막지 않는 덤이라 번호 대신 배지로 표시). 진행은 학습·퀴즈 단계로만 센다
+  const topicSteps = (topic: (typeof topics)[number]) => topic.parts.reduce((acc, part) => { const steps = part.section.nodes.filter(isStep); return { done: acc.done + steps.filter(isDone).length, total: acc.total + steps.length }; }, { done: 0, total: 0 });
   const topicStepsDone = (topic: (typeof topics)[number]) => { const steps = topicSteps(topic); return steps.total > 0 && steps.done >= steps.total; };
 
   // 지난번에 본 뒤 새로 끝낸 노드: 도장 연출 + 들어오는 경로가 색으로 그려진다. 첫 방문(기록 없음)은 연출 없이 기록만.
@@ -424,8 +425,10 @@ const CourseScreen = () => {
         </section>
       </>}
       {activeTopic && activeTopic.parts.map(({ section: sec, si }, partIndex) => {
-        const stepsDone = sec.nodes.filter(isDone).length;
-        const pct = sec.nodes.length ? Math.round((stepsDone / sec.nodes.length) * 100) : 0;
+        const steps = sec.nodes.filter(isStep);
+        const stepsDone = steps.filter(isDone).length;
+        const pct = steps.length ? Math.round((stepsDone / steps.length) * 100) : 0;
+        let stepNo = 0;
         return (
         <section key={sec.course.id} data-section-index={si} className="scroll-mt-4">
           <div className={`course-topic-summary sticky top-0 z-10 mx-5 mt-3 mb-4 overflow-hidden py-4 ${sec.course.id === focus?.courseId ? 'anim-fade' : ''}`}>
@@ -436,10 +439,8 @@ const CourseScreen = () => {
                 <h3 className="mt-1! text-base font-bold text-[var(--color-ink)] break-keep leading-snug">{sec.course.title}</h3>
               </div>
             </div>}
-            <div className="mb-2 flex items-center justify-between gap-3 text-xs">
-              <p className="text-[var(--color-ink-3)]"><span className="font-semibold text-[var(--color-ink-2)]">{stepsDone}단계</span> 완료 / {sec.nodes.length}단계</p>
-              <span className="tabular-nums text-[var(--color-ink-3)]">{pct}%</span>
-            </div>
+            {/* 진행은 단계 수 하나로만 말한다(같은 값을 %로 한 번 더 쓰지 않는다) */}
+            <p className="mb-2 text-xs text-[var(--color-ink-3)]"><span className="font-semibold text-[var(--color-ink-2)]">{stepsDone}단계</span> 완료 / {steps.length}단계</p>
             <div className="relative flex items-center">
               <div role="progressbar" aria-label={`${sec.course.title} 진행률`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--color-button-secondary)]">
                 <div className={`h-full rounded-full bg-[var(--color-progress)] ${sec.course.id === focus?.courseId ? 'course-progress-reveal' : ''}`} style={{ width: `${pct}%` }} />
@@ -459,19 +460,25 @@ const CourseScreen = () => {
             const nodeCardClass = isFocus && !locked ? 'course-node-current border-[var(--color-line)] bg-[var(--color-card)] px-4' : 'border-transparent bg-transparent px-0';
             // 상태어는 완료 / 진행 중 / 시작 가능 / 잠김 4개만 쓴다
             const nodeStatus = done ? '완료' : locked ? '잠김' : inProgress ? '진행 중' : '시작 가능';
+            const isReview = node.type === 'review';
+            if (!isReview) stepNo += 1;
             return (
               <div key={node.id} className="course-step" data-step-state={done ? 'done' : locked ? 'locked' : isFocus ? 'current' : 'open'}>
-                <span className="course-step-marker" aria-hidden="true">{done ? <Check size={16} /> : k + 1}</span>
+                <span className="course-step-marker" aria-hidden="true" data-step-kind={isReview ? 'review' : 'step'}>{done ? <Check size={16} /> : isReview ? <RotateCcw size={16} /> : stepNo}</span>
                 <button ref={isFocus ? focusRef : undefined} type="button" disabled={locked} data-own-sfx data-node-id={node.id}
                   onClick={() => handleNodeTap(node, k, sec.knownCount, sec.course.title)}
                   className={`course-node-card flex w-full items-center gap-3 border py-3 text-left disabled:cursor-default ${nodeCardClass} ${newlyDone.has(node.id) ? 'anim-stamp' : ''}`}
                   style={{ borderRadius: 'var(--shape-card)', '--d': `${0.2 + (newlyDone.get(node.id) ?? 0) * 0.15}s` } as React.CSSProperties}>
                   <span className="min-w-0 flex-1">
                     <span className={`flex flex-wrap items-center gap-x-2 gap-y-1 text-2xs ${locked ? 'text-[var(--color-ink-4)]' : 'text-[var(--color-ink-3)]'}`}>
-                      <span className="inline-flex items-center gap-1">
-                        <Icon size={16} strokeWidth={1.75} aria-hidden="true" data-learning-icon={node.type} className="shrink-0" />
-                        {copy.kind}
-                      </span>
+                      {isReview ? (
+                        <span data-review-badge className="inline-flex items-center rounded-chip border border-[var(--color-line-strong)] px-1.5 py-0.5 font-semibold text-[var(--color-ink-2)]">{copy.kind} · 선택</span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1">
+                          <Icon size={16} strokeWidth={1.75} aria-hidden="true" data-learning-icon={node.type} className="shrink-0" />
+                          {copy.kind}
+                        </span>
+                      )}
                       <span data-learning-status className={`font-normal ${locked ? 'text-[var(--color-ink-4)]' : isFocus ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-3)]'}`}>{nodeStatus}</span>
                     </span>
                     <span className={`mt-1 block text-sm break-keep ${locked ? 'font-semibold text-[var(--color-ink-3)]' : done ? 'font-semibold text-[var(--color-ink-2)]' : 'font-bold text-[var(--color-ink)]'}`}>{copy.title}</span>

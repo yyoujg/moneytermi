@@ -3,7 +3,7 @@ import { useState, useEffect, useContext, useRef, useCallback, createContext } f
 import { closeView, getAnonymousKey, getSchemeUri } from '@apps-in-toss/web-framework';
 import type { AuthState, AuthUser } from '../types';
 import { randomNickname } from '../lib/nickname';
-import { isDefaultNickname } from '../constants';
+import { GROWTH_STAGES, isDefaultNickname } from '../constants';
 import { supabase, getGuestClient } from '../lib/supabase';
 import { Storage } from '../lib/storage';
 import { parseReferrer } from '../lib/landing';
@@ -242,6 +242,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (trimmed.length > 10) return { error: '닉네임은 10자 이내로 입력해주세요' };
     if (trimmed === authState.user?.nickname) return { error: '현재 닉네임과 동일해요' };
     if (isDefaultNickname(trimmed)) return { error: '다른 닉네임을 정해주세요' };
+    // 티어 이름과 같으면 '경제고수 · 재테크러'처럼 닉네임과 등급이 뒤섞여 읽힌다
+    if (GROWTH_STAGES.some(stage => trimmed.includes(stage.name))) return { error: '등급 이름은 닉네임에 쓸 수 없어요' };
 
     // 서버 프로필이 없으면 로컬 상태만 바꿔 성공으로 처리하지 않는다.
     if (!profileId || !authState.user) return { error: '닉네임 변경에 실패했어요' };
