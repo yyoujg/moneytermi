@@ -96,7 +96,8 @@ const WordCard = ({
 
     {/* 순서: 단어+뜻 → 그래프·표 → 뉴스 → 관련 용어. 자세히 알아보기는 단어 카드의 버튼으로 여는 시트 */}
     {/* 그래프·표 — 뜻 바로 아래에서 그림으로 이해시킨다 */}
-    {word.visuals && word.visuals.length > 0 && <WordVisuals visuals={word.visuals} terms={visualTerms} />}
+    {/* 글로 된 '쉽게 설명'은 핵심 뜻과 겹쳐서 자세히 보기 시트로 옮기고, 본문에는 그래프·표만 둔다 */}
+    {word.visuals && word.visuals.some(v => v.type !== 'text') && <WordVisuals visuals={word.visuals.filter(v => v.type !== 'text')} terms={visualTerms} />}
 
     {/* 뉴스 — 사진보다 '이 용어가 기사에서 어떻게 쓰였는지'가 보이게 작은 썸네일 목록. 불러온 뒤 기사가 없으면 섹션째 숨긴다 */}
     {(newsLoading || newsItems.length > 0) && (
@@ -141,7 +142,7 @@ const WordCard = ({
               onError={e => { e.currentTarget.style.display = 'none'; }}
               className="h-[72px] w-[72px] shrink-0 rounded-chip object-cover bg-[var(--color-surface)]"
             />
-          ) : <ExternalLink size={14} className="text-[var(--color-ink-3)] shrink-0 mt-1" />}
+          ) : <ExternalLink size={16} className="text-[var(--color-ink-3)] shrink-0 mt-1" />}
         </button>
       ))}
     </Card>
@@ -159,7 +160,7 @@ const WordCard = ({
               className="flex items-center gap-3 py-3 border-b border-[var(--color-surface)] last:border-0 active:opacity-60 text-left"
             >
               <p className="text-sm font-semibold text-[var(--color-ink)] break-keep flex-1">{tag}</p>
-              <ChevronRight size={14} className="text-[var(--color-ink-4)] shrink-0" />
+              <ChevronRight size={16} className="text-[var(--color-ink-4)] shrink-0" />
             </button>
           ))}
         </div>
@@ -374,14 +375,16 @@ const WordCardScreen = () => {
         {/* 카드 + 알림 카드 + 축하가 작은 화면에서 넘칠 수 있어 이 영역만 스크롤 */}
         <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden flex flex-col items-center justify-center-safe gap-5 p-8">
           <div className="text-center anim-fade-up" style={{ '--i': 1 } as React.CSSProperties}>
-            <h2 className="text-2xl font-bold text-[var(--color-ink)] mb-1!">용어를 살펴봤어요</h2>
-            <p className="text-sm text-[var(--color-ink-3)]">{words.length}개 용어의 설명을 확인했어요</p>
+            <h2 className="text-xl font-bold text-[var(--color-ink)] mb-1!">용어를 살펴봤어요</h2>
+            {/* 끝 화면의 핵심 숫자 하나를 크게(피크엔드) */}
+            <p className="mt-3! text-4xl font-bold text-[var(--color-ink)] tabular-nums">{words.length}<span className="ml-1 text-base font-semibold text-[var(--color-ink-3)]">개 용어</span></p>
+            <p className="mt-1! text-sm text-[var(--color-ink-3)]">설명을 끝까지 확인했어요</p>
           </div>
-          <div className="w-full anim-fade-up" style={{ '--i': 2 } as React.CSSProperties}>
+          <div className="w-full text-center anim-fade-up" style={{ '--i': 2 } as React.CSSProperties}>
             <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep mb-3!">{lessonChecks(words).length > 0 ? '상황 문제를 풀며 어떤 변화가 생기는지 확인해요.' : '이번에는 용어의 뜻을 확인해요. 상황 적용 문제는 아직 준비 중이에요.'}</p>
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap justify-center gap-1">
               {words.slice(0, 5).map(w => (
-                <span key={w.id} className="text-xs px-2 py-1 rounded-full bg-[var(--color-card)] text-[var(--color-ink-2)]">{w.word}</span>
+                <span key={w.id} className="text-xs px-2 py-1 rounded-chip border border-[var(--color-line)] text-[var(--color-ink-2)]">{w.word}</span>
               ))}
             </div>
           </div>
@@ -401,7 +404,7 @@ const WordCardScreen = () => {
                     navigate('/word-card', { state: { words: state!.continueWords, index: idx, backPath, autoAdvance: true } });
                   }}
                 >
-                  다음 용어 계속 보기 <ChevronRight size={18} />
+                  다음 용어 계속 보기 <ChevronRight size={20} />
                 </ActionButton>
               );
             }
@@ -428,6 +431,7 @@ const WordCardScreen = () => {
 
   const word = words[wordIndex];
   const { detail, related } = wordExtras(word, wordLookup);
+  const textVisuals = word.visuals?.filter(v => v.type === 'text') ?? [];
   const lastWord = wordIndex === words.length - 1;
 
   const goNext = () => {
@@ -499,7 +503,7 @@ const WordCardScreen = () => {
         <div key={word.id}>
           <WordCard
             word={word}
-            onDetail={detail ? () => setDetailOpen(true) : undefined}
+            onDetail={detail || textVisuals.length > 0 ? () => setDetailOpen(true) : undefined}
             validRelated={related}
             onRelatedClick={handleRelatedWordClick}
             newsItems={newsItems}
@@ -511,13 +515,13 @@ const WordCardScreen = () => {
       </div>
 
       {/* 하단: 이전 · 다음 */}
-      <div className="study-action-footer px-5 pb-8 pt-3">
+      <div className="study-action-footer px-5 pt-3">
         <div className="flex gap-3">
           <ActionButton tone="soft" onClick={() => slide(-1)} disabled={!canPrev} className="flex-1">
-            <ChevronLeft size={18} />이전
+            <ChevronLeft size={20} />이전
           </ActionButton>
           <ActionButton onClick={() => slide(1)} disabled={lastWord && !autoAdvance} className="flex-[2]">
-            {lastWord && autoAdvance ? '살펴보기 완료' : <>다음 <ChevronRight size={18} /></>}
+            {lastWord && autoAdvance ? '살펴보기 완료' : <>다음 <ChevronRight size={20} /></>}
           </ActionButton>
         </div>
       </div>
@@ -532,6 +536,7 @@ const WordCardScreen = () => {
       header={<span className="sheet-title">{word.word} 자세히 알아보기</span>}
     >
       <div className="px-5 pb-8 flex flex-col gap-4 max-h-[60vh] overflow-y-auto">
+        {textVisuals.length > 0 && <WordVisuals visuals={textVisuals} terms={visualTerms} />}
         {/* 첫 문단이 핵심이라 진하게, 나머지는 본문 */}
         {toParagraphs(detail).map((para, i) => (
           <p key={i} className={`text-base leading-relaxed break-keep ${i === 0 ? 'font-semibold text-[var(--color-ink)]' : 'text-[var(--color-ink-2)]'}`}>

@@ -16,11 +16,11 @@ const mount = (props: Parameters<typeof Card>[0] = {}) => {
 };
 
 describe('수달 컨셉 공통 카드', () => {
-  it('기본 묶음은 배경·테두리 없이 세로 여백만 둔다', () => {
+  it('정보 묶음은 배경과 테두리 없이 여백으로 구분한다', () => {
     const card = mount();
     expect(card).toHaveClass('app-card', 'py-4');
     expect(card).toHaveAttribute('data-card-tone', 'plain');
-    expect(card.className).not.toMatch(/\b(border|bg-|px-|p-4)\b/);
+    expect(card).not.toHaveClass('border', 'rounded-card', 'bg-[var(--color-card)]');
     expect(card).toHaveTextContent('경제 기초');
   });
   it('누르는 카드는 card 톤으로 표면을 유지한다', () => {

@@ -19,32 +19,18 @@ const mount = (reward: PointReward) => {
   return { container, onClose };
 };
 
-describe('수달과 코인 보상 안내', () => {
-  it('미션으로 받은 실제 코인과 경험치를 그대로 보여준다', () => {
-    const { container } = mount({ source: 'mission', points: 30, xp: 10 });
+describe('수달과 미션 보상 안내', () => {
+  it('미션으로 받은 실제 경험치만 보여준다', () => {
+    const { container, onClose } = mount({ xp: 10 });
     expect(container).toHaveTextContent('오늘의 미션 완료!');
-    expect(container).toHaveTextContent('미션을 마치고 코인을 모았어요.');
-    expect(container).toHaveTextContent('+30개');
-    expect(container.querySelector('[role="dialog"]')).toHaveAttribute('aria-label', '코인 획득');
-    expect(container).not.toHaveTextContent('포인트');
-    expect(container).not.toHaveTextContent('+30P');
+    expect(container).toHaveTextContent('미션을 마치고 경험치를 모았어요.');
     expect(container).toHaveTextContent('+10 XP');
+    expect(container.querySelector('[role="dialog"]')).toHaveAttribute('aria-label', '미션 완료');
+    expect(container).not.toHaveTextContent(/코인|포인트/);
     expect(container.querySelector('img[src*="/characters/"]')).toBeNull();
     expect(container.querySelector('button')).toHaveTextContent('확인');
-  });
-
-  it('광고 보상을 공부 보상으로 표현하거나 없는 경험치를 보여주지 않는다', () => {
-    const { container, onClose } = mount({ source: 'ad', points: 5 });
-    expect(container).toHaveTextContent('광고 시청 보상으로 코인을 받았어요.');
-    expect(container).toHaveTextContent('+5개');
-    expect(container).toHaveTextContent('코인을 받았어요!');
-    expect(container.querySelector('[role="dialog"]')).toHaveAttribute('aria-label', '코인 획득');
-    expect(container).not.toHaveTextContent('포인트');
-    expect(container).not.toHaveTextContent('+5P');
-    expect(container).not.toHaveTextContent('XP');
-    expect(container).not.toHaveTextContent('미션을 마치고');
     act(() => container.querySelector('button')!.click());
     expect(onClose).toHaveBeenCalledOnce();
-    expect(logClick).toHaveBeenCalledWith('point_celebration_close', { source: 'ad', points: 5 });
+    expect(logClick).toHaveBeenCalledWith('point_celebration_close', { xp: 10 });
   });
 });

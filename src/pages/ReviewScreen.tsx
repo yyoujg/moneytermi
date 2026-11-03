@@ -33,7 +33,7 @@ type ReviewAttempt = Readonly<{
 
 const QuizPage = () => {
   const navigate = useNavigate();
-  const { points, dueQueue, knownWords, submitQuizAnswer, recordReview, refreshWallet } = useAppContext();
+  const { dueQueue, knownWords, submitQuizAnswer, recordReview, refreshWallet } = useAppContext();
   const { soundOn, vibrationOn } = useSettings();
 
   const [queue, setQueue] = useState<Word[]>([]);
@@ -54,8 +54,6 @@ const QuizPage = () => {
   const [combo, setCombo] = useState(0);
   const [totalCorrect, setTotalCorrect] = useState(0);
   const [firstCorrect, setFirstCorrect] = useState(0);
-  const [lastEarned, setLastEarned] = useState(0);   // 서버가 채점한 금액. 응답 전엔 0
-  const [capped, setCapped] = useState(false);
   const reviewRecordedIds = useRef<Set<number>>(new Set());
   const completedRef = useRef(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -143,8 +141,6 @@ const QuizPage = () => {
 
       logClick('quiz_answer', { mode: 'review', word_id: attempt.wordId, correct: receipt.correct, first_attempt: firstAttempt, used_hint: attempt.hint });
       setCombo(receipt.combo);
-      setLastEarned(receipt.earned);
-      setCapped(receipt.capped);
       if (receipt.correct) {
         feedbackCorrect(soundOn, vibrationOn, receipt.combo);
         setTotalCorrect(value => value + 1);
@@ -182,7 +178,6 @@ const QuizPage = () => {
       <ReviewCompletionScreen
         initialTotal={initialTotal}
         firstCorrect={firstCorrect}
-        points={points}
         note={praiseForReview(totalCorrect, queue.length)}
         onAction={() => navigate('/course')}
       />
@@ -204,22 +199,19 @@ const QuizPage = () => {
 
       <div className="flex-1 flex flex-col px-5 py-4">
         {/* 문제 카드 */}
-        <Card key={word.id} tone="card" pad="lg" className="mb-4 flex-1 anim-slide-in">
+        <Card key={word.id} tone="card" pad="lg" className="mb-4 anim-slide-in">
           <p id="review-prompt-guide" className="text-xs text-[var(--color-ink-3)] mb-3!">뜻을 보고 어떤 용어인지 맞혀보세요</p>
 
-          <p className="quiz-prompt-main text-lg font-bold text-[var(--color-ink)] leading-relaxed mb-6!">{keepShortUnitsTogether(maskTerm(word.meaning, word.word))}</p>
+          <p className="quiz-prompt-main text-lg font-bold text-[var(--color-ink)] leading-relaxed">{keepShortUnitsTogether(maskTerm(word.meaning, word.word))}</p>
 
           {showHint && (
-            <p className="flex items-center gap-2 mb-4!">
+            <p className="flex items-center gap-2 mt-4!">
               <span className="text-xs text-[var(--color-ink-3)]">초성</span>
               <span className="text-base font-bold text-[var(--color-ink)] tracking-wide">{word.hint}</span>
             </p>
           )}
 
-          <div className="border-t border-[var(--color-line)] pt-4">
-            <p className="text-xs text-[var(--color-ink-3)] mb-1!">상세 설명</p>
-            <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep">{keepShortUnitsTogether(maskTerm(word.detailedMeaning, word.word))}</p>
-          </div>
+          {/* 사전 원문(detailedMeaning)은 길고 문어체라 답을 흘리기 쉬워 문제에는 뜻 한 줄과 초성 힌트만 둔다 */}
         </Card>
 
         {/* 입력 + 제출 */}
@@ -241,7 +233,7 @@ const QuizPage = () => {
               style={{ caretColor: 'var(--color-ink)' }}
             />
             {status === 'correct' && (
-              <p className="text-xs font-bold text-[var(--color-success-foreground)] mt-1! px-1">정답! 바로 맞혔어요{capped ? ' 오늘 보상 한도에 도달했어요' : lastEarned > 0 ? ` +${lastEarned}개` : ''}</p>
+              <p className="text-xs font-bold text-[var(--color-success-foreground)] mt-1! px-1">정답! 바로 맞혔어요</p>
             )}
             {status === 'wrong' && (
               <p className="text-xs font-bold text-[var(--color-danger-foreground)] mt-1! px-1">틀렸어요. 정답: {word.word}</p>
@@ -269,7 +261,7 @@ const QuizPage = () => {
             <button
               onClick={() => { if (status === 'idle' && !attemptRef.current && !submittingRef.current) setShowHint(true); }}
               disabled={status !== 'idle'}
-              className="action-secondary flex-1 flex items-center justify-center gap-1 py-3 rounded-button text-sm font-semibold active:opacity-70"
+              className="review-aux-button flex-1 flex items-center justify-center gap-1 active:opacity-70"
             >
               초성 힌트
             </button>
@@ -277,9 +269,9 @@ const QuizPage = () => {
           <button
             onClick={() => { if (status === 'idle' && !attemptRef.current && !submittingRef.current) goNext(); }}
             disabled={status !== 'idle'}
-            className="action-secondary flex-1 flex items-center justify-center gap-1 py-3 rounded-button text-sm font-semibold active:opacity-70"
+            className="review-aux-button flex-1 flex items-center justify-center gap-1 active:opacity-70"
           >
-            건너뛰기<ChevronRight size={14} />
+            건너뛰기<ChevronRight size={16} />
           </button>
         </div>
       </div>

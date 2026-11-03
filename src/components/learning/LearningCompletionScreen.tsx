@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { DailyAlarmPromptCard } from '../DailyAlarmPromptCard';
 import { StreakCelebration } from '../StreakCelebration';
+import { ActionButton } from '../ui/ActionButton';
 
 export const LearningCompletionScreen = ({
   title,
@@ -9,7 +10,6 @@ export const LearningCompletionScreen = ({
   actionLabel,
   onAction,
   actionPlacement = 'bottom',
-  titleSize = '2xl',
 }: {
   title: string;
   subtitle: ReactNode;
@@ -17,29 +17,26 @@ export const LearningCompletionScreen = ({
   actionLabel: string;
   onAction: () => void;
   actionPlacement?: 'bottom' | 'inline';
-  titleSize?: 'xl' | '2xl';
 }) => {
   const button = (
-    <button
-      onClick={onAction}
-      className="w-full max-w-sm py-4 rounded-button text-sm font-bold text-white bg-brand-500 active:opacity-90"
-    >
-      {actionLabel}
-    </button>
+    <ActionButton fullWidth onClick={onAction} className="learning-completion-action max-w-sm">{actionLabel}</ActionButton>
   );
 
   return (
-    <div className="app-soft-screen flex h-full flex-col">
+    <div className="learning-completion-screen app-soft-screen flex h-full flex-col">
       <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden flex flex-col items-center justify-center-safe px-8 py-6 gap-5">
-        <div className="text-center anim-fade-up" style={{ '--i': 1 } as CSSProperties}>
-          <h2 className={`${titleSize === '2xl' ? 'text-2xl' : 'text-xl'} font-bold text-[var(--color-ink)] mb-1!`}>{title}</h2>
-          <p className="text-sm text-[var(--color-ink-4)]">{subtitle}</p>
-        </div>
-        {children}
-        <div className={`w-full ${actionPlacement === 'inline' ? 'max-w-sm mb-3' : ''}`}>
-          <DailyAlarmPromptCard />
-          <StreakCelebration />
-        </div>
+        <section className="learning-completion-card relative w-full max-w-sm flex flex-col items-center gap-5 px-5 py-8">
+          <img className="learning-completion-character" src="/otter/v4/joy.png" alt="" aria-hidden="true" width={128} height={172} />
+          <div className="text-center anim-fade-up" style={{ '--i': 1 } as CSSProperties}>
+            <h2 className="type-result-title mb-1!">{title}</h2>
+            <p className="type-supporting break-keep">{subtitle}</p>
+          </div>
+          {children}
+          <div className="w-full">
+            <DailyAlarmPromptCard />
+            <StreakCelebration />
+          </div>
+        </section>
         {actionPlacement === 'inline' && button}
       </div>
       {actionPlacement === 'bottom' && (

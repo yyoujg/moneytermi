@@ -75,16 +75,16 @@ beforeEach(() => {
 });
 
 describe('NavBar new badges', () => {
-  it.each(['/course', '/home', '/league', '/my'])('%s에서 역할 그림과 진한 메뉴명·현재 페이지로 선택을 구분한다', async path => {
+  it.each(['/course', '/course/topics', '/home', '/league', '/my'])('%s에서 보라 채움 아이콘과 보라 메뉴명·현재 페이지로 선택을 구분한다', async path => {
     const container = await mount(path);
     const active = container.querySelector('button[aria-current="page"]');
     expect(active).toBeInTheDocument();
-    expect(active?.querySelector('svg[data-icon]')?.getAttribute('data-icon')).toMatch(/^(LibraryBig|ListChecks|ChartNoAxesColumnIncreasing|UserRound)$/);
-    expect(active?.querySelector('svg[data-icon]')).toHaveClass('text-[var(--color-ink)]');
-    expect(active?.querySelector(':scope > span')).toHaveClass('text-[var(--color-ink)]');
+    expect(active?.querySelector('img')).toBeNull();
+    expect(active?.querySelector('svg[data-nav-icon]')?.parentElement).toHaveClass('text-[var(--color-brand-action)]');
+    expect(active?.querySelector(':scope > span')).toHaveClass('text-[var(--color-brand-action)]');
     for (const inactive of container.querySelectorAll('button:not([aria-current])')) {
-      expect(inactive.querySelector('svg[data-icon]')).toHaveClass('text-[var(--color-ink-3)]');
-      expect(inactive.querySelector(':scope > span')).toHaveClass('text-[var(--color-ink-3)]');
+      expect(inactive.querySelector('svg[data-nav-icon]')?.parentElement).toHaveClass('text-[var(--color-icon-inactive)]');
+      expect(inactive.querySelector(':scope > span')).toHaveClass('text-[var(--color-icon-inactive)]');
     }
   });
 

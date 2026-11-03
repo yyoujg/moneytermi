@@ -27,6 +27,7 @@ const CourseScreen = React.lazy(() => import('./pages/CourseScreen'));
 const ReviewScreen = React.lazy(() => import('./pages/ReviewScreen'));
 const QuizScreen = React.lazy(() => import('./pages/QuizScreen'));
 const LessonCheckScreen = React.lazy(() => import('./pages/LessonCheckScreen'));
+const LessonIntroScreen = React.lazy(() => import('./pages/LessonIntroScreen'));
 const WordCardScreen = React.lazy(() => import('./pages/WordCardScreen'));
 const LeagueScreen = React.lazy(() => import('./pages/LeagueScreen'));
 const LeagueRulesScreen = React.lazy(() => import('./pages/LeagueRulesScreen'));
@@ -87,7 +88,7 @@ const WelcomeScreen = () => {
           <h1 className="text-2xl font-bold leading-snug text-[var(--color-ink)] break-keep">
             경제 공부,<br />쉬운 상황부터 차근차근
           </h1>
-          <p className="mt-3 text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">뜻은 예시로 익히고, 코인은 차곡차곡 모아요.</p>
+          <p className="mt-3 text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">뜻은 예시로 익히고, 퀴즈로 다시 떠올려요.</p>
         </div>
 
         {/* 남는 높이의 가운데에 단계 카드를 둔다. 화면이 작으면 그대로 스크롤된다 */}
@@ -112,7 +113,7 @@ const WelcomeScreen = () => {
       <div className="shrink-0 px-5 pb-8 pt-3 text-center">
         <button type="button" onClick={start}
           className="flex w-full items-center justify-center gap-2 rounded-button bg-brand-500 py-4 text-base font-bold active:opacity-90">
-          첫 레슨 시작하기<ArrowRight size={18} />
+          첫 레슨 시작하기<ArrowRight size={20} />
         </button>
         <p className="mt-3! text-xs text-[var(--color-ink-4)]">별도 가입 없이 시작할 수 있어요</p>
       </div>
@@ -217,7 +218,7 @@ const Layout = () => {
   const { pathname } = location;
   const { ready, missionRewards, dismissMissionReward } = useAppContext();
   // 문제를 풀거나 읽는 중엔 미션 축하로 흐름을 끊지 않는다. 학습 화면을 나가면 대기열을 보여준다
-  const learning = ['/quiz', '/word-card', '/review', '/lesson-check'].some(p => pathname.startsWith(p));
+  const learning = ['/quiz', '/word-card', '/review', '/lesson-check', '/lesson-intro'].some(p => pathname.startsWith(p));
 
   if (!ready) return <LoadingScreen />;
 
@@ -236,6 +237,7 @@ const Layout = () => {
         <Route path="/welcome" element={<WelcomeScreen />} />
         <Route path="/home" element={<HomeScreen />} />
         <Route path="/course" element={<CourseScreen />} />
+        <Route path="/course/topics" element={<CourseScreen />} />
         <Route path="/league" element={<LeagueScreen />} />
         <Route path="/review" element={<ReviewScreen />} />
         <Route path="/my" element={<MyPageScreen />} />
@@ -244,6 +246,7 @@ const Layout = () => {
         <Route path="/league/rules" element={<LeagueRulesScreen />} />
         <Route path="/quiz" element={<QuizScreen />} />
         <Route path="/lesson-check" element={<LessonCheckScreen />} />
+        <Route path="/lesson-intro" element={<LessonIntroScreen />} />
       </Routes>
       </div>
       </React.Suspense>

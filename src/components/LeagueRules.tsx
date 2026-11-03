@@ -3,11 +3,10 @@ import { GROWTH_STAGES } from '../constants';
 // 리그 안내 항목. 마이페이지 '앱 사용법' 시트(GuideSheet)와 같은 카드 블록 스타일.
 // 티어 이름·기준은 리그 화면과 같은 GROWTH_STAGES에서 만든다(이름이 따로 놀지 않게)
 const RULES = [
-  { title: '리그 티어', desc: `누적 XP로 올라가요. ${GROWTH_STAGES.map(s => `${s.name} ${s.minPoints}`).join(' · ')} XP.` },
+  { title: '리그 티어', desc: `누적 XP로 올라가요. ${GROWTH_STAGES.map(s => `${s.name} ${s.minPoints.toLocaleString()}`).join(' · ')} XP.` },
   { title: 'XP 획득', desc: '새 용어 1 · 퀴즈 정답 2 · 출석 3 · 미션 보상 수령 5 XP. 학습으로만 쌓여요.' },
   { title: '주간 순위', desc: '이번 주에 얻은 XP로 순위를 매기고, 매주 월요일 0시에 초기화돼요.' },
   { title: '에너지', desc: '학습·퀴즈를 새로 시작할 때 1씩 써요. 복습과 완료한 노드 다시 보기는 무료이고, 시간이 지나면 다시 차요.' },
-  { title: '코인', desc: '순위와 무관한 재화예요. 에너지 모두 충전(600개)과 XP 2배 부스트(300개 · 30분)에 선택해서 써요. 레슨 시작에는 코인이 필요 없어요. 퀴즈 정답·미션 보상·광고, 그리고 XP 50마다 코인 50개를 모아요.' },
 ];
 
 export const LeagueRules = () => (

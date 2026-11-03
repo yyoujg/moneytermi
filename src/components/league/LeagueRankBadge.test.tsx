@@ -16,21 +16,14 @@ const mount = (rank: number) => {
 };
 
 describe('읽기 쉬운 리그 순위 숫자', () => {
-  it.each([1, 2, 3])('%i위는 실제 숫자와 같은 형태의 메달을 연결한다', rank => {
+  it.each([1, 2, 3])('%i위는 금·은·동 메달과 실제 순위를 표시한다', rank => {
     const container = mount(rank);
     expect(container.querySelector('.league-rank-badge')).toHaveAttribute('data-podium', String(rank));
     expect(container).toHaveTextContent(`${rank}위`);
     expect(container.querySelector('.sr-only')).toHaveTextContent('위');
-    expect(container.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
-    expect(container.querySelector('svg')).toHaveAttribute('data-style', 'mono');
-    expect(container.querySelector('svg')).toHaveAttribute('viewBox', '0 0 100 100');
-    // 바탕 원 없이 무채색 메달만 그린다.
-    expect(container.querySelector('circle[r="48"]')).toBeNull();
-    expect(container.querySelector('svg')?.innerHTML).not.toMatch(/#[\da-f]{6}/i);
-    expect(container.querySelector('[data-rank-face]')).toHaveAttribute('cy', '55');
-    expect(container.querySelector('[data-rank-face]')).toHaveAttribute('r', '18');
-    expect(container.querySelector('[data-rank-shape]')).toHaveAttribute('data-rank-shape', 'medal');
+    // 이모지 메달 없이 숫자만 쓴다
     expect(container.textContent).not.toMatch(/[🥇🥈🥉]/u);
+    expect(container.querySelector('svg')).toBeNull();
   });
   it.each([4, 10, 12345])('%i위도 숫자를 바꾸거나 세 자리로 잘라내지 않는다', rank => {
     const container = mount(rank);

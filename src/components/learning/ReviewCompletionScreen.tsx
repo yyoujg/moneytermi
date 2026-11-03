@@ -1,14 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { DailyAlarmPromptCard } from '../DailyAlarmPromptCard';
-import { PointIcon } from '../StatIcons';
 import { StreakCelebration } from '../StreakCelebration';
 import { ActionButton } from '../ui/ActionButton';
 
-// 복습 결과와 잔액은 전달받은 실제 값을 표시한다. 보상 계산·재출제는 이 화면에서 하지 않는다.
-export const ReviewCompletionScreen = ({ initialTotal, firstCorrect, points, note, onAction }: {
+// 복습 결과는 전달받은 실제 값을 표시한다. 보상 계산·재출제는 이 화면에서 하지 않는다.
+export const ReviewCompletionScreen = ({ initialTotal, firstCorrect, note, onAction }: {
   initialTotal: number;
   firstCorrect: number;
-  points: number;
   note: string;
   onAction: () => void;
 }) => {
@@ -30,12 +28,6 @@ export const ReviewCompletionScreen = ({ initialTotal, firstCorrect, points, not
             <div><dt>첫 시도 정답</dt><dd data-review-correct><strong>{firstCorrect}</strong><span>개</span></dd></div>
           </dl>
           <div className="review-complete-note"><p>{note}</p></div>
-        </section>
-
-        <section className="review-complete-wallet" aria-label={`보유 코인 ${points}개`}>
-          <PointIcon size={24} />
-          <div className="review-complete-wallet-label"><h2>보유 코인</h2><p>지금 가지고 있는 코인이에요</p></div>
-          <p className="review-complete-balance" data-review-balance><strong>{points}</strong><span>개</span></p>
         </section>
 
         <div className="review-complete-extras"><DailyAlarmPromptCard /><StreakCelebration /></div>

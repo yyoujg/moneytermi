@@ -81,7 +81,7 @@ export const StreakCelebration = () => {
                 opacity: d.isFuture ? 0.5 : 1,
               }}
             >
-              {d.attended && <Check size={18} className="text-[var(--color-card)]" />}
+              {d.attended && <Check size={20} className="text-[var(--color-card)]" />}
             </div>
             <span className={`text-2xs font-normal ${d.isToday ? (milestone ? 'text-[var(--color-hero-ink)] font-bold' : 'text-[var(--color-ink)] font-bold') : (milestone ? 'text-[var(--color-hero-ink)]' : 'text-[var(--color-ink-4)]')}`}>
               {d.label}

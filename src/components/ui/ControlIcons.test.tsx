@@ -22,8 +22,8 @@ describe('버튼 글자색을 따르는 작은 조작 표시', () => {
     expect(container.querySelectorAll('svg')).toHaveLength(6);
     for (const icon of container.querySelectorAll('svg')) {
       expect(icon).toHaveAttribute('fill', 'currentColor');
-      expect(icon).toHaveAttribute('width', '18');
-      expect(icon.querySelector('[opacity=\"0.2\"]')).toBeNull();
+      expect(icon).toHaveAttribute('width', '20');
+      expect(icon.querySelector('[opacity="0.2"]')).toBeNull();
       expect(icon).toHaveAttribute('aria-hidden', 'true');
       expect(icon).toHaveAttribute('focusable', 'false');
     }

@@ -17,20 +17,20 @@ const mount = (children: ReactNode) => {
 };
 
 describe('목표 숫자 배지', () => {
-  it('배지 10개를 분야 색과 목표 숫자로 표시하고 그림을 쓰지 않는다', () => {
+  it('배지마다 원 안의 선형 단색 아이콘을 하나씩 그린다', () => {
     const container = mount(<>{BADGES.map(b => <BadgeGlyph key={b.id} id={b.id} />)}</>);
     const glyphs = [...container.querySelectorAll('.badge-glyph')];
     expect(glyphs).toHaveLength(BADGES.length);
     expect(container.querySelector('img')).toBeNull();
     for (const [i, badge] of BADGES.entries()) {
       expect(glyphs[i]).toHaveAttribute('data-badge-stat', badge.stat);
-      expect(glyphs[i]).toHaveTextContent(String(badge.need));
+      expect(glyphs[i].querySelectorAll('svg')).toHaveLength(1);
     }
   });
-  it('미획득 배지는 기존 미획득 색 규칙으로 구분하고 요청한 크기를 유지한다', () => {
-    const glyph = mount(<BadgeGlyph id="w10" size={96} earned={false} />).querySelector('.badge-glyph')!;
+  it.each(['w1', 'w10'])('%s 미획득 배지는 잠김 표시와 요청한 크기를 유지한다', id => {
+    const glyph = mount(<BadgeGlyph id={id} size={96} earned={false} />).querySelector('.badge-glyph')!;
     expect(glyph).toHaveAttribute('data-earned', 'false');
-    expect(glyph).toHaveClass('badge-tone');
+    expect(glyph).toHaveClass('is-locked');
     expect(glyph).toHaveStyle({ width: '96px', height: '96px' });
   });
 });

@@ -66,9 +66,9 @@ export const LessonCheckSummary = ({ results, reviewCount, onRetry, onBack }: {
 
       <footer className="lesson-result-footer">
         {reviewCount > 0 ? <>
-          <ActionButton fullWidth onClick={onRetry}><RotateCcw size={18} aria-hidden="true" />틀린 문제 다시 풀기</ActionButton>
-          <ActionButton tone="soft" fullWidth onClick={onBack}>코스로 돌아가기<ArrowRight size={18} aria-hidden="true" /></ActionButton>
-        </> : <ActionButton fullWidth onClick={onBack}>다음 학습 선택하기<ArrowRight size={18} aria-hidden="true" /></ActionButton>}
+          <ActionButton fullWidth onClick={onRetry}><RotateCcw size={20} aria-hidden="true" />틀린 문제 다시 풀기</ActionButton>
+          <ActionButton tone="soft" fullWidth onClick={onBack}>코스로 돌아가기<ArrowRight size={20} aria-hidden="true" /></ActionButton>
+        </> : <ActionButton fullWidth onClick={onBack}>다음 학습 선택하기<ArrowRight size={20} aria-hidden="true" /></ActionButton>}
       </footer>
     </div>
   );

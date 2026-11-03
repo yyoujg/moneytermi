@@ -1,5 +1,5 @@
 export const praiseForMission = ({ ready, completed }: { ready: number; completed: number }) => {
-  if (ready > 0) return `${ready}개 미션 보상을 받을 수 있어요. 완료한 미션의 코인을 챙겨요.`;
+  if (ready > 0) return `${ready}개 미션 보상을 받을 수 있어요. 완료한 미션의 경험치를 챙겨요.`;
   if (completed > 0) return `${completed}개 미션 완료. 작게 보여도 꾸준함이 쌓이고 있어요.`;
   return '하나씩 채우면 오늘의 성과가 바로 보여요.';
 };

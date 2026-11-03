@@ -92,7 +92,7 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
           type="button"
           onClick={() => requestAgreement('settings')}
           disabled={agreed}
-          className="flex min-h-14 items-center justify-between py-4 text-left disabled:opacity-100"
+          className="press-fade flex min-h-14 items-center justify-between py-4 text-left disabled:opacity-100"
         >
           <div className="flex items-center gap-3">
             <span className="flex w-6 shrink-0 justify-center"><Bell size={20} className="text-[var(--color-ink-2)]" /></span>

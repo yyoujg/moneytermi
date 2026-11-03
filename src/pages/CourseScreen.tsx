@@ -1,20 +1,23 @@
 import React, { useMemo, useRef, useLayoutEffect, useEffect, useState } from 'react';
-import { ChevronRight as ActionChevronRight } from '../components/ui/OtterIcons';
 import { BookOpenText, Check, ListChecks, LockKeyhole, RotateCcw } from '../components/ui/OtterIcons';
 import { ChevronRight } from '../components/ui/ControlIcons';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
-import { ENERGY_ACTION_COST } from '../constants';
+import { ENERGY_ACTION_COST, getGrowthStage } from '../constants';
+import { calcStreak } from '../lib/streak';
+import { WeekStrip } from '../components/home/WeekStrip';
 import { feedbackNodeTap } from '../lib/feedback';
 import { loadDoneNodes } from '../lib/pathProgress';
 import { Storage } from '../lib/storage';
 import { COURSE_REVIEW_COUNT, LESSON_WARMUP_COUNT, firstUnknownWordIndex, learnedOrFallbackWords, selectCourseQuizWords } from '../lib/coursePractice';
 import { ActionButton } from '../components/ui/ActionButton';
-import { EnergyIcon } from '../components/StatIcons';
+import { HomeOverview } from '../components/home/HomeOverview';
+import { EnergyIcon, StreakIcon } from '../components/StatIcons';
 import { buildPath, type PathNode } from '../lib/path';
 
 const SEEN_KEY = 'path_seen_done';   // 코스 화면에서 마지막으로 본 완료 노드들(도장 연출용)
+const LEVEL_TABS = ['전체', '기초', '중급', '고급', '심화'];
 
 // 노드를 누르면 브랜드색 원이 화면 가득 퍼지고 로고를 보여준 뒤 다음 화면으로 넘어간다.
 // 오버레이를 body에 붙여 화면 전환 뒤에도 남게 한다. 동작 줄이기·WAAPI 미지원이면 바로 넘어간다.
@@ -61,7 +64,7 @@ const nodeCopy = (node: PathNode) => {
   if (node.type === 'lesson') {
     return {
       kind: '학습',
-      title: `${node.words[0]?.word ?? '새 용어'}부터 시작하기`,
+      title: node.words.length > 1 ? `${node.words[0].word} 외 ${node.words.length - 1}개` : node.words[0]?.word ?? '새 용어',
     };
   }
   if (node.type === 'quiz') {
@@ -79,8 +82,9 @@ const nodeCopy = (node: PathNode) => {
 
 const CourseScreen = () => {
   const navigate = useNavigate();
+  const isCatalog = useLocation().pathname === '/course/topics';
   const [searchParams, setSearchParams] = useSearchParams();
-  const { hydrated, contentStatus, retryContent, viewedIds: knownIds, courses, energy, energyMax, spendEnergy, pickRecallWords, openShop } = useAppContext();
+  const { hydrated, contentStatus, retryContent, viewedIds: knownIds, courses, energy, energyMax, spendEnergy, pickRecallWords, openShop, xp, attendanceDates } = useAppContext();
   // 이 기기에서 끝낸 퀴즈·복습 노드. 화면에 돌아올 때마다 다시 읽는다(퀴즈 끝내고 돌아온 직후 반영).
   const [doneNodes, setDoneNodes] = useState<Set<string>>(new Set());
   const [doneNodesLoaded, setDoneNodesLoaded] = useState(false);
@@ -111,11 +115,14 @@ const CourseScreen = () => {
   }), [sections]);
   const requestedTopic = searchParams.get('topic');
   const topicIndex = requestedTopic !== null && /^\d+$/.test(requestedTopic) ? Number(requestedTopic) : -1;
-  const activeTopic = topics[topicIndex] ?? null;
+  const activeTopic = isCatalog ? null : topics[topicIndex] ?? null;
   const backPath = activeTopic ? `/course?topic=${topicIndex}` : '/course';
   const focusRef = useRef<HTMLButtonElement>(null);
 
   const isDone = (node: PathNode) => node.state === 'done' || (doneNodes.has(node.id) && node.state === 'available');
+  // 진행은 화면 어디서나 단계(학습·퀴즈·복습) 기준 하나로 센다
+  const topicSteps = (topic: (typeof topics)[number]) => topic.parts.reduce((acc, part) => ({ done: acc.done + part.section.nodes.filter(isDone).length, total: acc.total + part.section.nodes.length }), { done: 0, total: 0 });
+  const topicStepsDone = (topic: (typeof topics)[number]) => { const steps = topicSteps(topic); return steps.total > 0 && steps.done >= steps.total; };
 
   // 지난번에 본 뒤 새로 끝낸 노드: 도장 연출 + 들어오는 경로가 색으로 그려진다. 첫 방문(기록 없음)은 연출 없이 기록만.
   const [newlyDone, setNewlyDone] = useState<Map<string, number>>(new Map());
@@ -154,22 +161,32 @@ const CourseScreen = () => {
     const candidates = activeTopic ? activeTopic.parts.map(part => part.section) : [...(resumeTopic?.parts.map(part => part.section) ?? []), ...sections];
     for (const sec of candidates) {
       const k = sec.nodes.findIndex(node => node.state === 'current');
-      if (k >= 0) return { id: sec.nodes[k].id, index: k, courseId: sec.course.id };
+      if (k >= 0) return { id: sec.nodes[k].id, index: k, courseId: sec.course.id, words: sec.nodes[k].words };
     }
     return null;
   };
   const focus = findFocus();
   const focusId = focus?.id ?? null;
   const newlyDoneCount = newlyDone.size;
-  const levelTabs = useMemo(() => ['전체', ...new Set(topics.map(topic => topic.level))], [topics]);
-  const [selectedLevel, setSelectedLevel] = useState('전체');
+  const requestedLevel = searchParams.get('level') ?? '전체';
+  const selectedLevel = LEVEL_TABS.includes(requestedLevel) ? requestedLevel : '전체';
+  const setSelectedLevel = (level: string) => setSearchParams(level === '전체' ? {} : { level }, { replace: true });
   const visibleTopics = topics.filter(topic => selectedLevel === '전체' || topic.level === selectedLevel);
   const focusTopic = focus ? topics.find(topic => topic.parts.some(part => part.section.course.id === focus.courseId)) : null;
-  const focusPercent = focusTopic?.total ? Math.round(focusTopic.known / focusTopic.total * 100) : 0;
+  const focusSteps = focusTopic ? topicSteps(focusTopic) : { done: 0, total: 0 };
+  const focusStepsLeft = focusSteps.total - focusSteps.done;
+  const streak = calcStreak(attendanceDates);
+  const stage = getGrowthStage(xp);
+  // 지금 할 학습(노드)의 용어를 다 보면 다음 학습으로 넘어간다
+  const nextWords = focus?.words ?? [];
+  const nextKnown = nextWords.filter(word => knownIds.has(word.id)).length;
+  const nextRemaining = nextWords.length - nextKnown;
+  const nextProgress = nextWords.length ? Math.round(nextKnown / nextWords.length * 100) : 100;
 
   useLayoutEffect(() => {
     document.querySelector('.course-screen')?.scrollTo({ top: 0 });
-  }, [requestedTopic]);
+    if (isCatalog) document.querySelector<HTMLHeadingElement>('#course-catalog-title')?.focus({ preventScroll: true });
+  }, [requestedTopic, isCatalog, contentStatus]);
 
   useEffect(() => {
     if (!hydrated || !stampCheckReady || newlyDoneCount > 0) return;
@@ -222,8 +239,9 @@ const CourseScreen = () => {
       await expandFromNode(node.id, courseTitle);
       const lessonState = { words: node.words, index: firstUnknownWordIndex(node.words, knownIds), backPath, autoAdvance: true, courseTitle, courseId: node.courseId, nodeId: node.id };
       const recallWords = needsEnergy ? pickRecallWords({ excludeIds: node.words.map(word => word.id), count: LESSON_WARMUP_COUNT }) : [];
-      if (recallWords.length > 0) {
-        navigate('/quiz', {
+      const destination = recallWords.length > 0
+        ? {
+          pathname: '/quiz',
           state: {
             quizQueue: recallWords,
             backPath,
@@ -233,10 +251,11 @@ const CourseScreen = () => {
             lessonId: node.id,
             nextRoute: { pathname: '/word-card', state: lessonState, label: '새 용어 보기' },
           },
-        });
-      } else {
-        navigate('/word-card', { state: lessonState });
-      }
+        }
+        : { pathname: '/word-card', state: lessonState };
+      // 처음 여는 레슨은 배울 용어와 진행 순서를 먼저 보여준다. 다시 보는 레슨은 바로 시작한다.
+      if (node.state !== 'done') navigate('/lesson-intro', { state: { courseTitle, words: node.words, warmupCount: recallWords.length, courseId: node.courseId, nodeId: node.id, next: destination } });
+      else navigate(destination.pathname, { state: destination.state });
     } finally {
       spending.current = false;
     }
@@ -250,8 +269,29 @@ const CourseScreen = () => {
     </div>
   );
 
+  // 글자 한 줄 대신 실제 화면 모양을 먼저 보여줘 기다림을 짧게 느끼게 한다(도허티 임계)
   if (contentStatus === 'loading') return (
-    <div className="app-soft-screen flex h-full items-center justify-center text-sm text-[var(--color-ink-2)]">학습 내용을 불러오는 중이에요</div>
+    <div className="course-screen app-soft-screen flex h-full flex-col overflow-hidden" role="status" aria-live="polite">
+      <span className="sr-only">학습 내용을 불러오는 중이에요</span>
+      <div aria-hidden="true" className="course-home-header">
+        <div className="h-6 w-32 rounded-chip bg-[var(--color-surface)] animate-pulse" />
+        <div className="mt-4 h-4 w-24 rounded-chip bg-[var(--color-surface)] animate-pulse" />
+      </div>
+      <div aria-hidden="true" className="course-home-hero">
+        <div className="h-3 w-20 rounded-chip bg-[var(--color-surface)] animate-pulse" />
+        <div className="mt-3 h-6 w-40 rounded-chip bg-[var(--color-surface)] animate-pulse" />
+        <div className="mt-5 h-1 w-full rounded-full bg-[var(--color-surface)] animate-pulse" />
+        <div className="mt-6 h-[var(--size-action)] w-full rounded-button bg-[var(--color-surface)] animate-pulse" />
+      </div>
+      <div aria-hidden="true" className="course-home-catalog flex flex-col gap-5">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="flex flex-col gap-2">
+            <div className="h-5 w-36 rounded-chip bg-[var(--color-surface)] animate-pulse" />
+            <div className="h-3 w-24 rounded-chip bg-[var(--color-surface)] animate-pulse" />
+          </div>
+        ))}
+      </div>
+    </div>
   );
 
   return (
@@ -261,70 +301,131 @@ const CourseScreen = () => {
           <div className="flex items-center gap-3">
             {/* 뒤로가기는 토스 내비게이션 바가 맡는다(자체 뒤로가기 중복은 검수 반려 사유) */}
             <div className="min-w-0 pr-24">
-              <h1 className="truncate text-xl font-bold text-[var(--color-ink)]">{activeTopic.category}</h1>
-              <p className="mt-1! text-xs text-[var(--color-ink-3)]">{activeTopic.level} · {activeTopic.parts.length}개 코스 · {activeTopic.known}/{activeTopic.total}개 용어 확인</p>
+              <h1 className="type-page-title truncate">{activeTopic.category}</h1>
+              <p className="mt-1! text-xs text-[var(--color-ink-3)]">{activeTopic.level} · {activeTopic.parts.length}개 코스 · {topicSteps(activeTopic).done}/{topicSteps(activeTopic).total}단계 완료</p>
             </div>
+          </div>
+        ) : isCatalog ? (
+          <div className="flex items-center gap-2">
+            {/* 뒤로가기는 토스 내비게이션 바가 맡는다(자체 뒤로가기 중복은 검수 반려 사유) */}
+            <h1 id="course-catalog-title" tabIndex={-1} className="type-page-title">전체 주제</h1>
           </div>
         ) : (
-          <>
-            <h1 className="text-xl font-bold text-[var(--color-ink)]">오늘의 학습</h1>
-          </>
+          // 앱 이름은 토스 내비게이션 바가 보여준다. 화면에는 제목을 숨기고 스크린리더용으로만 남긴다
+          <h1 className="sr-only">홈</h1>
         )}
         {/* 주제 상세에서는 제목 오른쪽의 작은 칩으로 줄인다 */}
-        <button type="button" className={`course-energy-entry${activeTopic ? ' is-compact' : ''}`} aria-label={`학습 에너지 ${energy}/${energyMax}, 충전 방법 보기`} onClick={() => openShop('energy')}>
+        {!isCatalog && <button type="button" className={`course-energy-entry${activeTopic ? ' is-compact' : ''}`} aria-label={`학습 에너지 ${energy}/${energyMax}, 충전 방법 보기`} onClick={() => openShop('energy')}>
           <span><EnergyIcon size={20} /><span><span className="course-energy-label">에너지 </span><strong>{energy}/{energyMax}</strong></span></span>
           <span className="course-energy-action">충전 방법<ChevronRight size={16} aria-hidden="true" /></span>
-        </button>
+        </button>}
       </div>
-      {!activeTopic && <>
+      {!activeTopic && !isCatalog && <>
+        {/* 연속 학습은 이번 주 칸으로 한눈에 보여주고, 오늘 할 학습은 캐릭터 말풍선으로 안내한다 */}
+        <section aria-labelledby="home-streak-title" className="home-streak-card">
+          <p id="home-streak-title" className="home-streak-title">
+            <StreakIcon size={24} />
+            {streak > 0 ? <span><strong>{streak}일째</strong> 연속 학습 중! 쭉 이어가 볼까요?</span> : <span>오늘 학습하면 연속 학습이 시작돼요</span>}
+          </p>
+          <WeekStrip attendanceDates={attendanceDates} />
+        </section>
+
         <section aria-label="오늘 할 학습" className="course-home-hero">
-          <div className="course-home-hero-heading">
-            <div className="min-w-0 flex-1">
-              <p className="course-home-eyebrow">{focusTopic ? focusTopic.known > 0 ? '이어서 배울 주제' : '추천 학습' : '모든 주제 완료'}{focusTopic && <span> · {focusTopic.level}</span>}</p>
-              <h2 className="course-home-hero-title">{focusTopic?.category ?? '주제를 다시 살펴볼까요?'}</h2>
-              {!focusTopic && <p className="course-home-hero-description">배운 용어와 예시를 가볍게 되짚어보세요.</p>}
+          {/* 왼쪽은 캐릭터, 오른쪽은 등급 진행과 말풍선을 쌓는다 */}
+          <div className="course-home-hero-body">
+            <div className="course-home-character-wrap">
+              <img className="course-home-character" src="/otter/v4/study.png" alt="" aria-hidden="true" width={104} height={140} />
+              <span className="course-home-tier-chip">Lv.{stage.id} {stage.name}</span>
+            </div>
+            <div className="course-home-hero-side">
+              <div className="course-home-bubble">
+                {focusTopic && <p className="course-home-bubble-topic">{focusTopic.category} · {focusSteps.done}/{focusSteps.total}단계</p>}
+                <p>{!focusTopic ? '모두 배웠어요! 가볍게 복습해 볼까요?' : focusSteps.done > 0 || focusTopic.known > 0 ? `${focusStepsLeft}단계만 더 하면 이 주제를 끝내요` : '오늘 첫 용어부터 같이 봐요'}</p>
+                <div className="course-home-level">
+                  <span className="course-home-level-label">{!focus ? '모든 학습을 마쳤어요!' : nextRemaining > 0 ? `'${nextWords[0]?.word}' 레슨 용어 ${nextRemaining}개 남았어요` : '다음 학습으로 넘어갈 수 있어요'}</span>
+                  <div role="progressbar" aria-label="다음 학습까지 진행률" aria-valuemin={0} aria-valuemax={100} aria-valuenow={nextProgress} className="course-home-level-track">
+                    <span style={{ width: `${nextProgress}%` }} />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          {focusTopic && <div className="course-home-hero-progress">
-            <div className="flex items-center justify-between gap-3">
-              <p>확인한 용어 <span className="font-semibold text-[var(--color-ink-2)]">{focusTopic.known}/{focusTopic.total}개</span></p>
-              <span className="tabular-nums">{focusPercent}%</span>
-            </div>
-            <div role="progressbar" aria-label="이어 배울 주제 진행률" aria-valuemin={0} aria-valuemax={100} aria-valuenow={focusPercent} className="course-home-progress-track">
-              <span style={{ width: `${focusPercent}%` }} />
-            </div>
-          </div>}
-          {focus && focusTopic && <ActionButton onClick={() => {
+          {focus && focusTopic && <ActionButton fullWidth onClick={() => {
             logClick('learning_continue', { course_id: focus.courseId, node_id: focus.id });
             setSearchParams({ topic: String(focusTopic.index) });
           }} className="course-home-primary">
-            <span>{knownIds.size > 0 ? '이어 배우기' : '첫 주제 시작하기'}</span><ActionChevronRight size={20} strokeWidth={2.5} absoluteStrokeWidth aria-hidden="true" focusable="false" />
+            {knownIds.size > 0 ? '이어 배우기' : '첫 주제 시작하기'}
           </ActionButton>}
         </section>
 
-        <section aria-label="학습 주제" className="course-home-catalog">
+        <div className="course-home-section-heading mx-5 flex shrink-0 items-center justify-between gap-3">
+          <h2 className="type-section-title">주제 둘러보기</h2>
+          <button type="button" onClick={() => navigate('/course/topics')} aria-label="전체 주제 더보기"
+            className="course-home-more inline-flex min-h-11 items-center gap-1 text-xs text-[var(--color-ink-3)] active:opacity-70">더보기<ChevronRight size={16} /></button>
+        </div>
+        {/* 바로 열 수 있는 주제를 가로 카드로 훑어본다 */}
+        <div className="course-home-rail" role="list" aria-label="바로 볼 수 있는 주제">
+          {topics.filter(topic => !topic.locked).slice(0, 6).map(topic => (
+            <button key={`${topic.level}-${topic.category}`} type="button" role="listitem" className="course-home-rail-card"
+              onClick={() => navigate(`/course?topic=${topic.index}`)} aria-label={`${topic.level} ${topic.category} 주제 열기, ${topicSteps(topic).done}/${topicSteps(topic).total}단계 완료`}>
+              <span className="course-home-rail-title">{topic.category}</span>
+              <span className="course-home-rail-meta">{topic.level} · {topicSteps(topic).done}/{topicSteps(topic).total}단계</span>
+            </button>
+          ))}
+        </div>
+        <HomeOverview />
+      </>}
+      {isCatalog && <>
+        <div className="px-5">
+          <div role="tablist" aria-label="학습 난이도" className="course-home-filters">
+            {LEVEL_TABS.map((level, index) => <button
+              key={level}
+              id={`course-level-${index}`}
+              type="button"
+              role="tab"
+              aria-selected={selectedLevel === level}
+              aria-controls="course-level-panel"
+              tabIndex={selectedLevel === level ? 0 : -1}
+              onClick={() => setSelectedLevel(level)}
+              onKeyDown={event => {
+                const next = event.key === 'ArrowRight' ? (index + 1) % LEVEL_TABS.length
+                  : event.key === 'ArrowLeft' ? (index + LEVEL_TABS.length - 1) % LEVEL_TABS.length
+                  : event.key === 'Home' ? 0 : event.key === 'End' ? LEVEL_TABS.length - 1 : null;
+                if (next === null) return;
+                event.preventDefault();
+                setSelectedLevel(LEVEL_TABS[next]);
+                event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[next]?.focus();
+              }}
+              className="course-home-filter"
+            >{level}</button>)}
+          </div>
+        </div>
+        <section id="course-level-panel" role="tabpanel" aria-labelledby={`course-level-${LEVEL_TABS.indexOf(selectedLevel)}`} tabIndex={0} className="course-home-catalog">
           <div className="course-home-catalog-heading">
             <h2>주제 둘러보기</h2><span>{visibleTopics.length}개 주제</span>
           </div>
-          <div role="group" aria-label="학습 난이도" className="course-home-filters">
-            {levelTabs.map(level => <button key={level} type="button" onClick={() => setSelectedLevel(level)} aria-pressed={selectedLevel === level} className="course-home-filter">{level}</button>)}
-          </div>
+
           <div className="course-home-topic-list">
+            {visibleTopics.length === 0 && <p className="type-supporting py-5 text-center">이 난이도의 학습을 준비하고 있어요.</p>}
             {visibleTopics.map(topic => {
               const locked = topic.locked;
-              const done = topic.total > 0 && topic.known >= topic.total;
+              const steps = topicSteps(topic);
+              const done = topicStepsDone(topic);
               const isCurrent = topic.index === focusTopic?.index;
               return <button key={`${topic.level}-${topic.category}`} type="button" disabled={locked} data-topic-index={topic.index} data-current={isCurrent || undefined}
-                onClick={() => setSearchParams({ topic: String(topic.index) })} aria-label={`${topic.level} ${topic.category} 주제 열기`} aria-describedby={`topic-summary-${topic.index}`} className="course-home-topic">
-                <span className="course-home-topic-heading"><span className="course-home-topic-title">{topic.category}</span>{locked ? <LockKeyhole size={17} aria-hidden="true" /> : <ChevronRight size={18} aria-hidden="true" />}</span>
-                <span id={`topic-summary-${topic.index}`} className="course-home-topic-meta"><span>{topic.level} · {topic.known}/{topic.total}개 용어 확인</span><span>{locked ? '잠김' : done ? '살펴봄' : topic.known > 0 ? '진행 중' : ''}</span></span>
+                onClick={() => navigate(`/course?topic=${topic.index}`)} aria-label={`${topic.level} ${topic.category} 주제 열기`} aria-describedby={`topic-summary-${topic.index}`} className="course-home-topic">
+                <span className="course-home-topic-icon" aria-hidden="true">{locked ? <LockKeyhole size={24} /> : done ? <Check size={24} /> : <BookOpenText size={24} />}</span>
+                <span className="course-home-topic-heading"><span className="course-home-topic-title">{topic.category}</span>{locked ? <LockKeyhole size={16} aria-hidden="true" /> : <ChevronRight size={20} aria-hidden="true" />}</span>
+                <span id={`topic-summary-${topic.index}`} className="course-home-topic-meta"><span>{topic.level} · {steps.done}/{steps.total}단계 완료</span><span>{locked ? '잠김' : done ? '완료' : steps.done > 0 || topic.known > 0 ? '진행 중' : '시작 가능'}</span></span>
+                <span role="progressbar" aria-label={`${topic.category} 진행률`} aria-valuemin={0} aria-valuemax={steps.total} aria-valuenow={steps.done} className="course-home-progress-track"><span style={{ width: `${steps.total ? steps.done / steps.total * 100 : 0}%` }} /></span>
               </button>;
             })}
           </div>
         </section>
       </>}
       {activeTopic && activeTopic.parts.map(({ section: sec, si }, partIndex) => {
-        const pct = sec.course.words.length ? Math.round((sec.knownCount / sec.course.words.length) * 100) : 0;
+        const stepsDone = sec.nodes.filter(isDone).length;
+        const pct = sec.nodes.length ? Math.round((stepsDone / sec.nodes.length) * 100) : 0;
         return (
         <section key={sec.course.id} data-section-index={si} className="scroll-mt-4">
           <div className={`course-topic-summary sticky top-0 z-10 mx-5 mt-3 mb-4 overflow-hidden py-4 ${sec.course.id === focus?.courseId ? 'anim-fade' : ''}`}>
@@ -336,12 +437,12 @@ const CourseScreen = () => {
               </div>
             </div>}
             <div className="mb-2 flex items-center justify-between gap-3 text-xs">
-              <p className="text-[var(--color-ink-3)]"><span className="font-semibold text-[var(--color-ink-2)]">{sec.knownCount}개</span> 확인 / {sec.course.words.length}개 용어</p>
+              <p className="text-[var(--color-ink-3)]"><span className="font-semibold text-[var(--color-ink-2)]">{stepsDone}단계</span> 완료 / {sec.nodes.length}단계</p>
               <span className="tabular-nums text-[var(--color-ink-3)]">{pct}%</span>
             </div>
             <div className="relative flex items-center">
               <div role="progressbar" aria-label={`${sec.course.title} 진행률`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--color-button-secondary)]">
-                <div className={`h-full rounded-full bg-[var(--color-progress)] ${sec.course.id === focus?.courseId ? 'course-progress-reveal' : ''}`} style={{ width: `${sec.course.words.length ? (sec.knownCount / sec.course.words.length) * 100 : 0}%` }} />
+                <div className={`h-full rounded-full bg-[var(--color-progress)] ${sec.course.id === focus?.courseId ? 'course-progress-reveal' : ''}`} style={{ width: `${pct}%` }} />
               </div>
             </div>
           </div>
@@ -356,10 +457,11 @@ const CourseScreen = () => {
             const inProgress = node.type === 'lesson' && !done && node.words.some(word => knownIds.has(word.id));
             // 다음에 할 단계만 카드로 띄우고, 끝났거나 잠긴 단계는 평평한 행으로 둔다
             const nodeCardClass = isFocus && !locked ? 'course-node-current border-[var(--color-line)] bg-[var(--color-card)] px-4' : 'border-transparent bg-transparent px-0';
-            const nodeStatus = done ? node.type === 'lesson' ? '살펴봄' : '풀이 완료' : locked ? '잠김' : inProgress ? '진행 중' : '시작 가능';
+            // 상태어는 완료 / 진행 중 / 시작 가능 / 잠김 4개만 쓴다
+            const nodeStatus = done ? '완료' : locked ? '잠김' : inProgress ? '진행 중' : '시작 가능';
             return (
               <div key={node.id} className="course-step" data-step-state={done ? 'done' : locked ? 'locked' : isFocus ? 'current' : 'open'}>
-                <span className="course-step-marker" aria-hidden="true">{done ? <Check size={14} /> : k + 1}</span>
+                <span className="course-step-marker" aria-hidden="true">{done ? <Check size={16} /> : k + 1}</span>
                 <button ref={isFocus ? focusRef : undefined} type="button" disabled={locked} data-own-sfx data-node-id={node.id}
                   onClick={() => handleNodeTap(node, k, sec.knownCount, sec.course.title)}
                   className={`course-node-card flex w-full items-center gap-3 border py-3 text-left disabled:cursor-default ${nodeCardClass} ${newlyDone.has(node.id) ? 'anim-stamp' : ''}`}

@@ -1,27 +1,18 @@
 /* eslint-disable react-refresh/only-export-components */
-import { BookOpen, Coins, Flame, Lightning, Trophy } from './ui/OtterIcons';
-
-// 재화와 학습 정보는 색 없는 선형 아이콘으로 표시한다. 숫자는 본문색을 쓴다.
+import { BookOpen, Coins, Fire, Star, type Icon } from '@phosphor-icons/react';
+import { Lightning } from './ui/OtterIcons';
+// 상단바·마이페이지 요약 전용 아이콘(연속 학습·XP·코인·배운 단어). 선형 단색이고 글자색을 따른다(포인트 컬러는 보라 하나).
 type Props = { size?: number; className?: string };
-export const STAT_COLOR = {
-  streak: 'var(--color-ink-2)',
-  xp: 'var(--color-ink-2)',
-  points: 'var(--color-ink-2)',
-  words: 'var(--color-ink-2)',
-} as const;
+// 숫자도 아이콘과 같은 색으로 칠할 수 있게 밖으로 꺼내 둔다
+export const STAT_COLOR = { streak: 'var(--color-accent-foreground)', xp: 'var(--color-accent-foreground)', points: 'var(--color-accent-foreground)', words: 'var(--color-accent-foreground)' } as const;
 
-export const StreakIcon = ({ size = 16, className = '' }: Props) => (
-  <Flame size={size} className={`shrink-0 text-[var(--color-stat-streak)] ${className}`} />
+const Line = ({ icon: Glyph, name, size = 16, className }: Props & { icon: Icon; name: string }) => (
+  <Glyph weight="bold" size={size} color="currentColor" aria-hidden="true" focusable="false" data-icon={name} className={`shrink-0 ${className ?? ''}`} />
 );
-export const XpIcon = ({ size = 16, className = '' }: Props) => (
-  <Trophy size={size} className={`shrink-0 text-[var(--color-stat-xp)] ${className}`} />
-);
-export const PointIcon = ({ size = 16, className = '' }: Props) => (
-  <Coins size={size} className={`shrink-0 text-[var(--color-stat-points)] ${className}`} />
-);
-export const EnergyIcon = ({ size = 16, className = '' }: Props) => (
-  <Lightning size={size} className={`shrink-0 text-[var(--color-stat-energy)] ${className}`} />
-);
-export const WordsIcon = ({ size = 16, className = '' }: Props) => (
-  <BookOpen size={size} className={`shrink-0 text-[var(--color-stat-words)] ${className}`} />
-);
+
+export const StreakIcon = (p: Props) => <Line {...p} icon={Fire} name="Streak" />;
+export const XpIcon = (p: Props) => <Line {...p} icon={Star} name="Xp" />;
+export const PointIcon = (p: Props) => <Line {...p} icon={Coins} name="Point" />;
+export const WordsIcon = (p: Props) => <Line {...p} icon={BookOpen} name="Words" />;
+
+export const EnergyIcon = ({ size = 16, className = '' }: Props) => <Lightning size={size} className={`shrink-0 text-[var(--color-accent-foreground)] ${className}`} />;

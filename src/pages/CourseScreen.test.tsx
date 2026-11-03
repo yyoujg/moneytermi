@@ -1,15 +1,20 @@
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Course, Word } from '../types';
 import CourseScreen from './CourseScreen';
 import HomeScreen from './HomeScreen';
+import LessonIntroScreen from './LessonIntroScreen';
 import { MISSION_XP } from '../constants';
 import { showModal } from '../components/AlertModal';
+import { logClick } from '../lib/analytics';
 
 const state = vi.hoisted(() => ({
   ctx: {} as Record<string, unknown>,
+  rpc: vi.fn(),
+  guestClient: vi.fn(),
+  guestToken: null as string | null,
   doneNodes: new Set<string>(),
   openShop: vi.fn(),
   retryContent: vi.fn(),
@@ -33,7 +38,8 @@ vi.mock('../lib/storage', () => ({
 vi.mock('../lib/feedback', () => ({ feedbackNodeTap: vi.fn(), feedbackClaim: vi.fn(), feedbackError: vi.fn() }));
 vi.mock('../lib/analytics', () => ({ logClick: vi.fn() }));
 vi.mock('../components/AlertModal', () => ({ showModal: vi.fn() }));
-vi.mock('../hooks/useAuth', () => ({ useAuth: () => ({ user: { nickname: '테스트' } }) }));
+vi.mock('../hooks/useAuth', () => ({ useAuth: () => ({ user: { nickname: '테스트' }, guestToken: state.guestToken }) }));
+vi.mock('../lib/supabase', () => ({ supabase: { rpc: (...args: unknown[]) => state.rpc(...args) }, getGuestClient: (token: string) => state.guestClient(token) }));
 vi.mock('../components/PointCelebration', () => ({ PointCelebration: () => <div>미션 보상 축하</div> }));
 
 Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { value: true, configurable: true });
@@ -75,6 +81,8 @@ const baseContext = (overrides: Record<string, unknown> = {}) => {
   state.doneNodes = new Set<string>();
   state.ctx = {
     hydrated: true,
+    xp: 0,
+    attendanceDates: [],
     contentStatus: 'ready',
     retryContent: state.retryContent,
     knownIds: new Set<number>(),
@@ -94,6 +102,7 @@ const baseContext = (overrides: Record<string, unknown> = {}) => {
   };
 };
 
+const Location = () => <output data-location>{useLocation().pathname}</output>;
 const mount = async (entry = '/course?topic=0') => {
   const container = document.createElement('div');
   document.body.appendChild(container);
@@ -101,10 +110,14 @@ const mount = async (entry = '/course?topic=0') => {
   await act(async () => {
     root.render(
       <MemoryRouter initialEntries={[entry]}>
+        <Location />
         <Routes>
-          <Route path="/course" element={<CourseScreen />} />
+          <Route path="/course" element={<CourseScreen key="home" />} />
+          <Route path="/course/topics" element={<CourseScreen key="catalog" />} />
+          <Route path="/lesson-intro" element={<LessonIntroScreen />} />
           <Route path="/word-card" element={<div>단어 카드</div>} />
           <Route path="/quiz" element={<div>퀴즈 화면</div>} />
+          <Route path="/review" element={<div>복습 화면</div>} />
         </Routes>
       </MemoryRouter>,
     );
@@ -139,6 +152,10 @@ beforeEach(() => {
     state.storage.set(key, value);
   });
   baseContext();
+  state.guestToken = null;
+  state.rpc.mockReset().mockResolvedValue({ data: { rank: 3, total: 13, points: 120 }, error: null });
+  state.guestClient.mockReset().mockReturnValue({ rpc: state.rpc });
+  vi.mocked(logClick).mockClear();
 });
 
 describe('CourseScreen energy gates', () => {
@@ -172,42 +189,65 @@ describe('CourseScreen energy gates', () => {
     expect(HTMLElement.prototype.scrollIntoView).not.toHaveBeenCalled();
   });
 
-  it('홈은 하나의 주 행동과 평평한 주제 버튼을 표시한다', async () => {
+  it('더보기는 현재 학습을 별도 주제 목록 페이지로 전환한다', async () => {
     baseContext({ courses: [course(), course({ id: 'c2', category: '금융', startId: 5 })] });
-    const { container } = await mount('/course');
+    const { container, clickButtonContaining } = await mount('/course');
     const hero = container.querySelector('.course-home-hero');
     expect(hero).toHaveAttribute('aria-label', '오늘 할 학습');
     expect(hero?.querySelectorAll('button')).toHaveLength(1);
-    expect(hero?.querySelector('img')).toBeNull();
+    // 히어로 그림은 말풍선과 함께 쓰는 장식 캐릭터 하나뿐이다
+    expect(hero?.querySelectorAll('img')).toHaveLength(1);
+    expect(hero?.querySelector('img')).toHaveAttribute('aria-hidden', 'true');
+    expect(hero?.querySelector('.course-home-bubble')).toHaveTextContent('오늘 첫 용어부터 같이 봐요');
+    // 아무 용어도 보지 않았으면 다음 학습까지의 진행은 0이고, 어느 레슨의 용어가 몇 개 남았는지 알려준다
+    expect(hero?.querySelector('[aria-label="다음 학습까지 진행률"]')).toHaveAttribute('aria-valuenow', '0');
+    expect(hero?.querySelector('.course-home-level-label')).toHaveTextContent(/^'.+' 레슨 용어 \d+개 남았어요$/);
     const primary = hero?.querySelector('.course-home-primary');
-    expect(primary).not.toHaveClass('w-full');
+    expect(primary).toHaveClass('w-full');
     expect(primary?.querySelector('img[data-icon]')).toBeNull();
-    const arrow = primary?.querySelector('svg');
-    expect(arrow).toHaveAttribute('width', '20');
-    expect(arrow).toHaveAttribute('height', '20');
-    expect(arrow).toHaveAttribute('fill', 'currentColor');
-    expect(arrow).toHaveAttribute('aria-hidden', 'true');
-    expect(arrow).toHaveAttribute('focusable', 'false');
+    // 히어로 버튼은 글자만 둔다
+    expect(primary?.querySelector('svg')).toBeNull();
+    expect(container.querySelector('[role="tablist"]')).toBeNull();
+    expect(container.querySelector('.course-home-catalog')).toBeNull();
+    await clickButtonContaining('더보기');
+    expect(container.querySelector('[data-location]')).toHaveTextContent('/course/topics');
+    expect(container.querySelector('.course-home-hero')).toBeNull();
+    expect(container.querySelector('.course-home-more')).toBeNull();
+    expect(container.querySelectorAll('[role="tab"]')).toHaveLength(5);
+    expect(document.activeElement).toBe(container.querySelector('#course-catalog-title'));
     expect(container.querySelectorAll('.course-home-topic')).toHaveLength(2);
     expect(container.querySelector('.course-topic-index')).toBeNull();
     for (const button of container.querySelectorAll('.course-home-topic')) {
       expect(button).toHaveAttribute('aria-label', expect.stringMatching(/^(기초|중급) .+ 주제 열기$/));
-      expect(button.querySelector('.course-home-topic-icon')).toBeNull();
+      expect(button.querySelector('.course-home-topic-icon')).toBeInTheDocument();
       expect(button.querySelector('.course-home-topic-heading > svg')).toHaveAttribute('fill', 'currentColor');
       // 주제 행은 제목과 메타 한 줄만 둔다. 진행률은 메타 글자(0/31개)로 충분하다.
-      expect(button.querySelector('[role=progressbar]')).toBeNull();
+      expect(button.querySelector('[role=progressbar]')).toHaveAttribute('aria-valuenow', '0');
       expect(button.querySelector('.course-home-topic-description')).toBeNull();
     }
+    expect(container.querySelector('[aria-label="홈으로 돌아가기"]')).toBeNull();
   });
 
-  it('중급 필터와 전체 필터가 목록을 바꾸고 원래 주제 인덱스로 연다', async () => {
+  it.each(['중급', '잘못된 난이도'])('목록 페이지를 직접 열 때 URL의 난이도를 반영한다: %s', async level => {
+    baseContext({ courses: [course(), { ...course({ id: 'c2', category: '금융', startId: 5 }), level: '중급' }] });
+    const { container } = await mount(`/course/topics?level=${encodeURIComponent(level)}`);
+    expect(container.querySelector('.course-home-hero')).toBeNull();
+    expect(container.querySelector('[role="tab"][aria-selected="true"]')).toHaveTextContent(level === '중급' ? '중급' : '전체');
+    expect(container.querySelectorAll('.course-home-topic')).toHaveLength(level === '중급' ? 1 : 2);
+  });
+
+  it('중급 탭과 전체 탭이 목록을 바꾸고 원래 주제 인덱스로 연다', async () => {
     const advanced = { ...course({ id: 'c2', category: '금융', startId: 5 }), level: '중급' } as Course;
     baseContext({ courses: [course(), advanced] });
-    const { container } = await mount('/course');
-    const filters = [...container.querySelectorAll<HTMLButtonElement>('button[aria-pressed]')];
+    const { container, clickButtonContaining } = await mount('/course');
+    await clickButtonContaining('더보기');
+    const filters = [...container.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    expect(filters.map(button => button.textContent?.trim())).toEqual(['전체', '기초', '중급', '고급', '심화']);
     const intermediate = filters.find(button => button.textContent?.trim() === '중급');
     expect(intermediate).toBeDefined();
     await act(async () => intermediate!.click());
+    expect(intermediate).toHaveAttribute('aria-selected', 'true');
+    expect(container.querySelector('[role="tabpanel"]')).toHaveAttribute('aria-labelledby', intermediate!.id);
     expect(container.querySelectorAll('.course-home-topic')).toHaveLength(1);
     expect(container.querySelector('.course-home-topic')).toHaveAttribute('aria-label', '중급 금융 주제 열기');
     await act(async () => filters.find(button => button.textContent?.trim() === '전체')!.click());
@@ -215,8 +255,32 @@ describe('CourseScreen energy gates', () => {
     await act(async () => intermediate!.click());
     const topic = [...container.querySelectorAll<HTMLButtonElement>('.course-home-topic')].find(button => button.getAttribute('aria-label') === '중급 금융 주제 열기');
     await act(async () => topic!.click());
-    expect(container.textContent).toContain('용어5부터 시작하기');
-    expect(container.textContent).not.toContain('용어1부터 시작하기');
+    expect(container.textContent).toContain('용어5 외 3개');
+    expect(container.textContent).not.toContain('용어1 외 3개');
+  });
+
+  it('키보드로 난이도를 이동하고 빈 난이도도 안내한다', async () => {
+    baseContext({ courses: [course()] });
+    const { container, clickButtonContaining } = await mount('/course');
+    await clickButtonContaining('더보기');
+    const tabs = [...container.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const press = async (index: number, key: string) => {
+      await act(async () => tabs[index].dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true })));
+    };
+    await press(0, 'ArrowRight');
+    expect(document.activeElement).toBe(tabs[1]);
+    expect(tabs[1]).toHaveAttribute('aria-selected', 'true');
+    expect(tabs.filter(tab => tab.tabIndex === 0)).toEqual([tabs[1]]);
+    await press(1, 'End');
+    expect(document.activeElement).toBe(tabs[4]);
+    expect(container.querySelector('[role="tabpanel"]')).toHaveTextContent('이 난이도의 학습을 준비하고 있어요.');
+    await press(4, 'ArrowRight');
+    expect(document.activeElement).toBe(tabs[0]);
+    await press(0, 'ArrowLeft');
+    expect(document.activeElement).toBe(tabs[4]);
+    await press(4, 'Home');
+    expect(document.activeElement).toBe(tabs[0]);
+    expect(container.querySelectorAll('.course-home-topic')).toHaveLength(1);
   });
 
   it.each([0, 3])('복습할 용어가 %d개여도 복습·에너지 요약을 표시하지 않는다', async count => {
@@ -227,7 +291,8 @@ describe('CourseScreen energy gates', () => {
     expect(container.textContent).not.toContain('복습할 용어 없음');
     expect(container.textContent).not.toContain('충전·사용 안내');
     expect(container.querySelector('.course-home-hero')).toBeInTheDocument();
-    expect(container.querySelector('.course-home-catalog')).toBeInTheDocument();
+    expect(container.querySelector('.course-home-catalog')).toBeNull();
+    expect(container.querySelector('.course-home-more')).toBeInTheDocument();
     expect(state.openShop).not.toHaveBeenCalled();
     expect(state.spendEnergy).not.toHaveBeenCalled();
   });
@@ -248,7 +313,7 @@ describe('CourseScreen energy gates', () => {
     await flushScrollEffects();
 
     const scrollIntoView = vi.mocked(HTMLElement.prototype.scrollIntoView);
-    const target = scrollIntoView.mock.contexts.find(el => (el as HTMLElement).textContent?.includes('용어5부터 시작하기'));
+    const target = scrollIntoView.mock.contexts.find(el => (el as HTMLElement).textContent?.includes('용어5 외 3개'));
     expect(target).toBeDefined();
   });
 
@@ -278,7 +343,7 @@ describe('CourseScreen energy gates', () => {
     let resolveSpend!: (value: boolean) => void;
     state.spendEnergy = vi.fn(() => new Promise<boolean>(resolve => { resolveSpend = resolve; }));
     state.ctx = { ...state.ctx, spendEnergy: state.spendEnergy };
-    const { container } = await mount();
+    const { container, clickButtonContaining } = await mount();
     const button = [...container.querySelectorAll('button')].find(el => el.textContent?.includes('용어1'))!;
 
     act(() => {
@@ -288,6 +353,8 @@ describe('CourseScreen energy gates', () => {
     expect(state.spendEnergy).toHaveBeenCalledTimes(1);
 
     await act(async () => { resolveSpend(true); });
+    expect(container.querySelector('[data-location]')).toHaveTextContent('/lesson-intro');
+    await clickButtonContaining('시작하기');
     expect(container.textContent).toContain('단어 카드');
   });
 
@@ -309,6 +376,7 @@ describe('CourseScreen energy gates', () => {
     expect(container.textContent).toContain('코스 1/1');
     expect(container.textContent).not.toContain('코스 2/1');
     await clickButtonContaining('용어5');
+    await clickButtonContaining('시작하기');
     expect(container.textContent).toContain('단어 카드');
     expect(state.spendPoints).not.toHaveBeenCalled();
     expect(state.spendEnergy).toHaveBeenCalledWith(1, 'lesson', 'c2-l0:5,6,7,8');
@@ -317,8 +385,9 @@ describe('CourseScreen energy gates', () => {
   it('복습에서 틀렸어도 열람 진도가 있으면 다음 레슨은 잠기지 않는다', async () => {
     baseContext({ courses: [course({ wordCount: 8 })], knownIds: new Set(), viewedIds: new Set([1, 2, 3, 4]) });
     const { container, clickButtonContaining } = await mount();
-    expect(container.textContent).toContain('살펴봄');
+    expect(container.textContent).toContain('완료');
     await clickButtonContaining('용어5');
+    await clickButtonContaining('시작하기');
     expect(container.textContent).toContain('단어 카드');
   });
 
@@ -327,8 +396,8 @@ describe('CourseScreen energy gates', () => {
     baseContext({ courses: [course({ category: '경제' }), course({ id: 'c2', category: '금융', startId: 5 })], knownIds: new Set([5]) });
     const { container, clickButtonContaining } = await mount('/course');
     await clickButtonContaining('이어 배우기');
-    expect(container.textContent).toContain('용어5부터 시작하기');
-    expect(container.textContent).not.toContain('용어1부터 시작하기');
+    expect(container.textContent).toContain('용어5 외 3개');
+    expect(container.textContent).not.toContain('용어1 외 3개');
   });
 
   it('새 레슨 앞에 과거 용어 인출 문제가 있으면 먼저 퀴즈로 보낸다', async () => {
@@ -340,6 +409,10 @@ describe('CourseScreen energy gates', () => {
 
     expect(state.spendEnergy).toHaveBeenCalledTimes(1);
     expect(state.pickRecallWords).toHaveBeenCalledWith({ excludeIds: [1, 2, 3, 4], count: 3 });
+    // 처음 여는 레슨은 미리보기에서 인출 단계까지 안내한 뒤 퀴즈로 보낸다
+    expect(container.textContent).toContain('가볍게 다시 보기');
+    expect(container.textContent).toContain('지난 용어 2개');
+    await clickButtonContaining('시작하기');
     expect(container.textContent).toContain('퀴즈 화면');
     expect(container.textContent).not.toContain('단어 카드');
   });
@@ -375,6 +448,7 @@ describe('학습 주제의 역할 아이콘', () => {
     const { container, clickButtonContaining } = await mount();
     expect(container.querySelector('.course-node-current [data-learning-status]')).toHaveTextContent('진행 중');
     await clickButtonContaining('용어1');
+    await clickButtonContaining('시작하기');
     expect(container.textContent).toContain('단어 카드');
     expect(state.spendEnergy).toHaveBeenCalledWith(1, 'lesson', 'c1-l0:1,2,3,4');
   });
@@ -415,19 +489,19 @@ describe('학습 주제의 역할 아이콘', () => {
 });
 
 
-describe('홈의 독립 카드와 미션 동작', () => {
+describe('퀘스트의 미션 동작', () => {
   const mountHome = async () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
     const root = createRoot(container);
     await act(async () => {
-      root.render(<MemoryRouter initialEntries={['/']}><Routes><Route path="/" element={<HomeScreen />} /><Route path="/course" element={<div>학습 목록</div>} /></Routes></MemoryRouter>);
+      root.render(<MemoryRouter initialEntries={['/']}><Routes><Route path="/" element={<HomeScreen />} /><Route path="/course" element={<div>학습 목록</div>} /><Route path="/review" element={<div>복습 화면</div>} /></Routes></MemoryRouter>);
     });
     cleanup = () => { act(() => root.unmount()); container.remove(); };
     return container;
   };
 
-  it('미션 정렬·보상·진행률·받기를 유지하며 헤더를 카드 밖에 배치한다', async () => {
+  it('오늘의 미션만 모두 표시하고 보상과 진행률을 유지한다', async () => {
     const claimReward = vi.fn(async () => ({ xpGained: MISSION_XP }));
     baseContext({
       xp: 0, knownWords: [word(1)], unknownWords: [], attendanceDates: [], myEmoji: '🦦', claimReward,
@@ -440,35 +514,38 @@ describe('홈의 독립 카드와 미션 동작', () => {
     const container = await mountHome();
     const card = container.querySelector('.home-missions');
     expect(card).toHaveAttribute('aria-labelledby', 'home-missions-heading');
-    expect(card?.querySelector('h2')).toBeNull();
+    expect(card?.querySelector('h2')).toHaveTextContent('오늘의 미션');
     expect(container.querySelector('.home-mission-heading')).toHaveTextContent('오늘의 미션');
+    expect(container.querySelectorAll('.home-mission-row')).toHaveLength(3);
+    expect(container.querySelector('.home-attendance, .home-mission-more, .home-review-entry')).toBeNull();
     const rows = [...container.querySelectorAll('.home-mission-row')];
-    expect(rows.map(row => row.querySelector('.home-mission-title')?.textContent?.trim())).toEqual(['용어 학습하기', '퀴즈 풀기', '오늘 출석하기']);
-    expect(rows.every(row => row.querySelector('.home-mission-top svg, .home-mission-top img') === null)).toBe(true);
-    expect(rows[0].querySelector('.home-mission-count')).toHaveTextContent('1/3');
-    expect(rows[0].querySelector('.home-mission-reward')).toHaveTextContent('코인 +7개');
-    expect(rows[0]).toHaveTextContent('+' + MISSION_XP + ' XP');
-    expect(rows[1].querySelector('[role=progressbar]')).toHaveAttribute('aria-valuenow', '2');
-    expect(rows[1].querySelector('[role=progressbar]')?.children).toHaveLength(2);
+    // 받을 수 있는 미션 → 진행 중 → 완료 순서(직렬 위치 효과)
+    expect(rows.map(row => row.querySelector('.home-mission-title')?.textContent?.trim())).toEqual(['퀴즈 풀기', '용어 학습하기', '오늘 출석하기']);
+    // 미션 카드에는 보상 XP 선형 아이콘 하나만 둔다
+    expect(rows.every(row => row.querySelector('.home-mission-top img') === null && row.querySelectorAll('.home-mission-top svg').length === 1)).toBe(true);
+    expect(rows[0].querySelector('.home-mission-reward svg')).toHaveAttribute('data-icon', 'Xp');
+    expect(rows[1].querySelector('.home-mission-count')).toHaveTextContent('1/3');
+    expect(rows[1].querySelector('.home-mission-reward')).toHaveTextContent('+' + MISSION_XP + ' XP');
+    expect(rows[1]).not.toHaveTextContent('코인');
+    expect(rows[0].querySelector('[role=progressbar]')).toHaveAttribute('aria-valuenow', '2');
+    expect(rows[0].querySelector('[role=progressbar]')?.children).toHaveLength(2);
     expect(rows[2].querySelector('button')).toBeNull();
     expect(rows[2].querySelector('[data-state=claimed]')).toHaveTextContent('완료');
-    await act(async () => rows[1].querySelector<HTMLButtonElement>('button')!.click());
+    await act(async () => rows[0].querySelector<HTMLButtonElement>('button')!.click());
     expect(claimReward).toHaveBeenCalledExactlyOnceWith('quiz');
     expect(container).toHaveTextContent('미션 보상 축하');
-    expect(container.querySelector('.home-profile')).not.toHaveClass('app-card');
-    expect(container.querySelector('.home-profile-avatar, .profile-avatar')).toBeNull();
-    expect(container.querySelector('[aria-label="이번 주 출석"]')).toBeInTheDocument();
   });
 
-  it('신규 사용자의 학습 시작 이동과 선형 조작 아이콘을 유지한다', async () => {
-    baseContext({ xp: 0, knownWords: [], unknownWords: [], attendanceDates: [], myEmoji: '🦦', missions: {}, claimReward: vi.fn() });
+  it('출석이나 복습이 있어도 퀘스트에는 미션만 표시한다', async () => {
+    baseContext({ attendanceDates: ['2026-10-28'], dueQueue: [word(1)], missions: { m: { id: 'm', title: '학습하기', current: 0, target: 1, reward: 5, isRewarded: false, sortOrder: 1 } }, claimReward: vi.fn() });
     const container = await mountHome();
-    const start = [...container.querySelectorAll<HTMLButtonElement>('button')].find(button => button.textContent?.includes('돈 공부 시작하기'))!;
-    expect(start.querySelector('svg')).toHaveAttribute('fill', 'currentColor');
-    expect(start).toHaveAttribute('data-size', 'lg');
-    await act(async () => start.click());
-    expect(container).toHaveTextContent('학습 목록');
+    expect(container.querySelectorAll('.home-mission-row')).toHaveLength(1);
+    expect(container).not.toHaveTextContent('출석 기록');
+    expect(container).not.toHaveTextContent('다시 볼 용어');
+    expect(container.querySelector('.home-mission-more')).toBeNull();
+    expect(logClick).not.toHaveBeenCalledWith('review_prompt_view', expect.anything());
   });
+
   it('자동 적립 중인 미션 버튼은 잠그고 진행 상태를 표시한다', async () => {
     const claimReward=vi.fn();baseContext({xp:0,knownWords:[word(1)],unknownWords:[],attendanceDates:[],myEmoji:'🍊',claimReward,claimingMissionIds:new Set(['m3']),missions:{m3:{id:'m3',title:'퀴즈 정답',reward:30,current:3,target:3,isRewarded:false,sortOrder:1}}});
     const container=await mountHome();const button=container.querySelector<HTMLButtonElement>('[data-state="pending"]')!;
@@ -480,4 +557,37 @@ describe('홈의 독립 카드와 미션 동작', () => {
     expect(showModal).not.toHaveBeenCalled();expect(container).not.toHaveTextContent('미션 보상 축하');
   });
 
+});
+
+
+describe('홈으로 옮긴 학습 현황', () => {
+  it('홈에서 출석과 복습을 보여주고 주간 순위는 리그로 넘긴다', async () => {
+    baseContext({ attendanceDates: ['2026-10-28'], dueQueue: [word(1)], xp: 3569 });
+    const { container } = await mount('/course');
+    // 연속 학습은 홈 맨 위 카드에서 이번 주 칸과 함께 보여준다
+    expect(container.querySelector('.home-streak-card')).toHaveTextContent('연속 학습');
+    expect(container.querySelectorAll('.home-streak-card .week-strip-day')).toHaveLength(7);
+    expect(container.querySelector('.course-home-hero [aria-label="다음 학습까지 진행률"]')).toBeInTheDocument();
+    expect(container.querySelector('.course-home-tier-chip')).toHaveTextContent('Lv.4 재테크러');
+    // 주간 순위는 리그 화면에서만 보여주므로 홈은 순위를 조회하지 않는다
+    expect(container.querySelector('[aria-labelledby="home-weekly-rank"]')).toBeNull();
+    expect(container.querySelectorAll('[role="progressbar"]')).toHaveLength(1);
+    expect(state.rpc).not.toHaveBeenCalled();
+    expect(logClick).toHaveBeenCalledWith('review_prompt_view', { count: 1 });
+    await act(async () => container.querySelector<HTMLButtonElement>('[aria-label="오늘 다시 볼 용어 1개 복습 시작"]')!.click());
+    expect(container).toHaveTextContent('복습 화면');
+    expect(logClick).toHaveBeenCalledWith('review_start', { count: 1, source: 'home' });
+  });
+
+  it('복습할 용어가 없으면 복습 진입을 숨긴다', async () => {
+    const { container } = await mount('/course');
+    expect(container.querySelector('.home-review-entry')).toBeNull();
+    expect(container.querySelector('.course-home-hero [aria-label="다음 학습까지 진행률"]')).toBeInTheDocument();
+  });
+
+  it.each(['/course/topics', '/course?topic=0'])('%s에는 홈 요약을 반복하지 않는다', async entry => {
+    const { container } = await mount(entry);
+    expect(container.querySelector('.course-home-overview')).toBeNull();
+    expect(state.rpc).not.toHaveBeenCalled();
+  });
 });

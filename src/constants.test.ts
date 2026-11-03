@@ -5,10 +5,10 @@ describe('getGrowthStage', () => {
   it('이름만 성장 단계로 바꾸고 기존 식별자와 기준을 보존한다', () => {
     expect(GROWTH_STAGES.map(({ id, name, minPoints }) => ({ id, name, minPoints }))).toEqual([
       { id: 1, name: '돈알못', minPoints: 0 },
-      { id: 2, name: '짠테크러', minPoints: 20 },
-      { id: 3, name: '갓생러', minPoints: 100 },
-      { id: 4, name: '재테크러', minPoints: 300 },
-      { id: 5, name: '경제고수', minPoints: 800 },
+      { id: 2, name: '짠테크러', minPoints: 200 },
+      { id: 3, name: '갓생러', minPoints: 1000 },
+      { id: 4, name: '재테크러', minPoints: 3000 },
+      { id: 5, name: '경제고수', minPoints: 8000 },
     ]);
   });
 
@@ -24,13 +24,13 @@ describe('getGrowthStage', () => {
   });
 
   it('경계값은 다음 단계 포함', () => {
-    expect(getGrowthStage(19).id).toBe(1);
-    expect(getGrowthStage(20).id).toBe(2);
+    expect(getGrowthStage(199).id).toBe(1);
+    expect(getGrowthStage(200).id).toBe(2);
   });
 
   it('최고 단계는 nextMinPoints가 null', () => {
-    expect(getGrowthStage(800).name).toBe('경제고수');
-    expect(getGrowthStage(800).nextMinPoints).toBeNull();
+    expect(getGrowthStage(8000).name).toBe('경제고수');
+    expect(getGrowthStage(8000).nextMinPoints).toBeNull();
     expect(getGrowthStage(999999).nextMinPoints).toBeNull();
   });
 
@@ -38,7 +38,7 @@ describe('getGrowthStage', () => {
     const ids = GROWTH_STAGES.map(s => getGrowthStage(s.minPoints).id);
     expect(ids).toEqual([1, 2, 3, 4, 5]);
     let prev = 0;
-    for (let xp = 0; xp <= 1000; xp += 7) {
+    for (let xp = 0; xp <= 10000; xp += 7) {
       const id = getGrowthStage(xp).id;
       expect(id).toBeGreaterThanOrEqual(prev);
       prev = id;

@@ -150,32 +150,30 @@ describe('ReviewScreen retry spacing', () => {
 });
 
 
-describe('복습 코인 표시', () => {
-  it.each([0, 1234])('보유 코인은 실제 잔액 %i개를 그대로 표시한다', async points => {
-    state.points = points;
+describe('복습 코인 미표시', () => {
+  it('완료 화면에 보유 코인을 보여주지 않는다', async () => {
+    state.points = 1234;
     const { container, submit } = await mount([word(1)]);
     await submit('용어1');
     await act(async () => { vi.advanceTimersByTime(900); });
-    expect(container.querySelector('.review-complete-wallet')).toHaveAttribute('aria-label', '보유 코인 ' + points + '개');
-    expect(container.querySelector('[data-review-balance]')).toHaveTextContent(points + '개');
-    expect(container.textContent).not.toContain('누적 포인트');
+    expect(container.querySelector('.review-complete-wallet')).toBeNull();
+    expect(container.textContent).not.toContain('코인');
   });
 
-  it('정답 보상을 코인 개수로 표시하고 제출 인수를 유지한다', async () => {
+  it('정답 보상 개수 없이 정답만 알리고 제출 인수를 유지한다', async () => {
     state.submitQuizAnswer.mockResolvedValue(receipt(true, { combo: 3, earned: 28 }));
     const { container, submit } = await mount([word(1)]);
     await submit('용어1');
-    expect(container.textContent).toContain('+28개');
-    expect(container.textContent).not.toContain('+28P');
+    expect(container.textContent).toContain('정답! 바로 맞혔어요');
+    expect(container.textContent).not.toContain('+28개');
     expect(state.submitQuizAnswer).toHaveBeenCalledWith(1, '용어1', 'typed', false, true, expect.any(String));
   });
 
-  it('보상 한도일 때 코인 수치 대신 기존 한도 문구를 유지한다', async () => {
+  it('보상 한도여도 코인 한도 문구를 보여주지 않는다', async () => {
     state.submitQuizAnswer.mockResolvedValue(receipt(true, { capped: true }));
     const { container, submit } = await mount([word(1)]);
     await submit('용어1');
-    expect(container.textContent).toContain('오늘 보상 한도에 도달했어요');
-    expect(container.textContent).not.toContain('+0개');
+    expect(container.textContent).not.toContain('오늘 보상 한도에 도달했어요');
   });
 });
 

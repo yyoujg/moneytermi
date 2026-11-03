@@ -129,7 +129,7 @@ const Flow = ({ steps, caption }: { steps: string[]; caption?: string }) => {
         const right = mine == null || s.includes(mine);
         return (
           <div key={i} className="w-full flex flex-col items-center gap-1 anim-fade-up">
-            {i > 0 && <ArrowDown size={14} className="text-[var(--color-ink-3)]" />}
+            {i > 0 && <ArrowDown size={16} className="text-[var(--color-ink-3)]" />}
             <p className={`w-full py-2 px-3 rounded-chip text-center text-xs font-semibold break-keep ${mine == null ? 'bg-[var(--color-surface)] text-[var(--color-ink-2)]' : right ? 'border border-[var(--color-success-foreground)] text-[var(--color-success-foreground)]' : 'border border-[var(--color-danger-line)] text-[var(--color-danger-foreground)]'}`}>
               {s}{mine != null && (right ? ' · 정답' : ` · 내 답 ${mine}`)}
             </p>
@@ -139,7 +139,7 @@ const Flow = ({ steps, caption }: { steps: string[]; caption?: string }) => {
 
       {!done && (
         <div className="w-full flex flex-col items-center gap-1">
-          <ArrowDown size={14} className="text-[var(--color-ink-3)]" />
+          <ArrowDown size={16} className="text-[var(--color-ink-3)]" />
           {quiz ? (
             <>
               <p className="w-full py-2 px-3 rounded-chip border border-dashed border-[var(--color-line-strong)] text-center text-xs font-semibold text-[var(--color-ink-2)] break-keep">
@@ -293,7 +293,7 @@ const LinkedText = ({ text, terms }: { text: string; terms?: Terms }) => {
           }}
             aria-expanded={open === name}
             aria-controls={open === name ? panelId : undefined}
-            className="word-term-button inline px-1! py-0.5! rounded-[var(--shape-sm)] font-normal">
+            className="word-term-button inline font-normal">
             {part}
           </button>
         );
@@ -308,7 +308,7 @@ const LinkedText = ({ text, terms }: { text: string; terms?: Terms }) => {
             <button type="button" className="word-term-close" aria-label="뜻 설명 닫기" onClick={() => {
               setOpen(null);
               triggerRef.current?.focus({ preventScroll: true });
-            }}><X size={18} strokeWidth={1.75} aria-hidden="true" /></button>
+            }}><X size={20} strokeWidth={1.75} aria-hidden="true" /></button>
           </span>
           <span className="word-term-panel-meaning">{terms.meaningOf(open) || '뜻 설명을 준비 중이에요.'}</span>
           {terms.exampleOf?.(open) && (

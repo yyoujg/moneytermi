@@ -562,7 +562,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       claimReward(m.id).then(res => {
         if (!res || res === 'pending') return;
         feedbackClaim();
-        setMissionRewards(q => [...q, { points: m.reward, xp: res.xpGained, source: 'mission' }]);
+        setMissionRewards(q => [...q, { xp: res.xpGained }]);
       });
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps

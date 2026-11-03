@@ -143,8 +143,8 @@ const ActiveAlert = ({ cur }: { cur: Msg }) => {
       >
         <div className="w-full px-6 pt-6 pb-5 flex flex-col items-center gap-4">
           {error
-            ? <AlertCircle size={28} className="text-[var(--color-danger-foreground)]" />
-            : <Check size={28} className="text-[var(--color-ink-2)]" />}
+            ? <AlertCircle size={24} className="text-[var(--color-danger-foreground)]" />
+            : <Check size={24} className="text-[var(--color-ink-2)]" />}
           <p id={descriptionId} className="text-base font-bold text-[var(--color-ink)] text-center break-keep">{cur.text}</p>
           <button
             ref={confirmRef}

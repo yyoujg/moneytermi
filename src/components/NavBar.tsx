@@ -1,21 +1,21 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LibraryBig, ListChecks, ChartNoAxesColumnIncreasing, UserRound } from './ui/OtterIcons';
 import { useSafeAreaInsets } from '../hooks/useSafeAreaInsets';
 import { useAppContext } from '../context/AppContext';
 import { Storage } from '../lib/storage';
 import { earnedCount } from '../lib/badges';
 import { calcStreak } from '../lib/streak';
 import { weekStart } from '../lib/league';
+import { House, ClipboardText, Trophy, User, type Icon } from '@phosphor-icons/react';
 
 // 코스(패스)가 메인. /home은 경로를 그대로 두고 라벨만 퀘스트로 바꾼다 —
 // 딥링크 allowlist와 푸시 랜딩이 /home을 쓰고 있어 경로를 바꾸면 같이 깨진다.
 const NAV_ITEMS = [
-  { path: '/course', icon: LibraryBig, label: '홈' },
-  { path: '/home', icon: ListChecks, label: '퀘스트' },
-  { path: '/league', icon: ChartNoAxesColumnIncreasing, label: '리그' },
-  { path: '/my', icon: UserRound, label: '마이' },
-];
+  { path: '/course', icon: House, label: '홈' },
+  { path: '/home', icon: ClipboardText, label: '퀘스트' },
+  { path: '/league', icon: Trophy, label: '리그' },
+  { path: '/my', icon: User, label: '마이' },
+] satisfies { path: string; icon: Icon; label: string }[];
 
 const SEEN_LEAGUE_WEEK_KEY = 'moneytermi_nav_seen_league_week_v1';
 const SEEN_BADGE_COUNT_KEY = 'moneytermi_nav_seen_badge_count_v1';
@@ -29,7 +29,7 @@ const NavBar = () => {
   const [seenLeagueWeek, setSeenLeagueWeek] = useState<string | null>(null);
   const [seenBadgeCount, setSeenBadgeCount] = useState<number | null>(null);
 
-  const HIDDEN_PATHS = ['/quiz', '/lesson-check', '/word-card', '/review', '/league/rules', '/welcome'];
+  const HIDDEN_PATHS = ['/quiz', '/lesson-check', '/lesson-intro', '/word-card', '/review', '/league/rules', '/welcome'];
   const hidden = HIDDEN_PATHS.some(p => pathname.startsWith(p));
   const currentLeagueWeek = String(weekStart());
   const earnedBadgeCount = useMemo(
@@ -100,15 +100,17 @@ const NavBar = () => {
   return (
     <div
       ref={wrapRef}
-      className="app-nav-tray absolute bottom-0 w-full flex z-50 border-t border-[var(--color-line)]"
-      style={{ paddingBottom: insets.bottom }}
+      className="absolute bottom-0 w-full flex justify-center z-50 pointer-events-none"
+      style={{ paddingBottom: 24 + insets.bottom }}
     >
-      <div className="flex w-full items-stretch">
+      <div className="app-nav-tray flex w-[90%] max-w-[400px] items-stretch rounded-full px-4 py-2 border border-[var(--color-line)] pointer-events-auto">
         {NAV_ITEMS.map((item) => {
-          const isActive = pathname === item.path;
+          const isActive = pathname === item.path || pathname.startsWith(`${item.path}/`);
           const hasNew = newByPath[item.path] ?? false;
-          const Icon = item.icon;
-          const colorClass = isActive ? 'text-[var(--color-ink)]' : 'text-[var(--color-ink-3)]';
+          // 활성 탭은 메인 주황, 나머지는 옅은 회색 채움 아이콘이다.
+          // 활성 탭은 보라 채움 아이콘과 보라 메뉴명, 나머지는 연한 회색 선형이다.
+          const colorClass = isActive ? 'text-[var(--color-brand-action)]' : 'text-[var(--color-icon-inactive)]';
+          const TabIcon = item.icon;
           return (
             <button
               key={item.path}
@@ -117,10 +119,10 @@ const NavBar = () => {
               aria-current={isActive ? 'page' : undefined}
               className="flex flex-1 flex-col items-center justify-center gap-1 pt-2 pb-2"
             >
-              <div className="relative w-12 h-8 flex items-center justify-center">
-                <Icon size={24} aria-hidden="true" className={colorClass} />
+              <div className={`relative w-12 h-8 flex items-center justify-center ${colorClass}`}>
+                <TabIcon weight={isActive ? 'fill' : 'regular'} size={24} color="currentColor" aria-hidden="true" focusable="false" data-nav-icon={item.label} />
                 {hasNew && (
-                  <span aria-hidden="true" className="absolute right-2 top-0.5 h-1.5 w-1.5 rounded-full bg-[var(--accent-orange)]" />
+                  <span aria-hidden="true" className="absolute right-2 top-0.5 h-1.5 w-1.5 rounded-full bg-[var(--accent-brand)]" />
                 )}
               </div>
               <span className={`text-xs leading-none ${isActive ? 'font-bold' : 'font-medium'} ${colorClass}`}>{item.label}</span>

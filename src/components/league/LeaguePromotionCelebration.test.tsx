@@ -66,7 +66,7 @@ beforeEach(() => {
 
 describe('LeaguePromotionCelebration', () => {
   it('처음 로드한 현재 리그는 기록만 하고 모달을 띄우지 않는다', async () => {
-    baseContext(20);
+    baseContext(200);
     const { container } = await mount();
 
     expect(container.querySelector('[role="dialog"]')).not.toBeInTheDocument();
@@ -76,18 +76,18 @@ describe('LeaguePromotionCelebration', () => {
 
   it('저장된 리그보다 높은 단계가 되면 승급 모달을 띄운다', async () => {
     state.storage.set('league_promotion_seen_stage_v1', '1');
-    baseContext(20);
+    baseContext(200);
     const { container } = await mount();
 
     expect(container.querySelector('[role="dialog"]')?.textContent).toContain('짠테크러 리그에 올라갔어요');
-    expect(container.querySelector('[role="dialog"]')?.textContent).toContain('20XP');
+    expect(container.querySelector('[role="dialog"]')?.textContent).toContain('200XP');
     expect(state.feedbackTierUp).toHaveBeenCalledTimes(1);
-    expect(state.logClick).toHaveBeenCalledWith('league_promotion_modal_view', { from: 1, to: 2, xp: 20 });
+    expect(state.logClick).toHaveBeenCalledWith('league_promotion_modal_view', { from: 1, to: 2, xp: 200 });
   });
 
   it('이름이 바뀌어도 저장된 단계가 같으면 승급을 다시 알리지 않는다', async () => {
     state.storage.set('league_promotion_seen_stage_v1', '3');
-    baseContext(120);
+    baseContext(1200);
     const { container } = await mount();
 
     expect(container.querySelector('[role="dialog"]')).not.toBeInTheDocument();
@@ -96,12 +96,12 @@ describe('LeaguePromotionCelebration', () => {
   });
 
   it('같은 화면 안에서 XP가 승급 기준을 넘으면 모달을 띄운다', async () => {
-    baseContext(19);
+    baseContext(199);
     const { container, render } = await mount();
 
     expect(container.querySelector('[role="dialog"]')).not.toBeInTheDocument();
 
-    baseContext(20);
+    baseContext(200);
     await render();
 
     expect(container.querySelector('[role="dialog"]')?.textContent).toContain('짠테크러 리그에 올라갔어요');

@@ -13,7 +13,7 @@ export const WordMeaningCard = ({ word, sources = [], onDetail }: {
   const example = word.learningExample?.replace(/^\s*학습용 가정\s*:\s*/, '').trim();
   return (
     <section className="word-meaning-card word-study-definition" aria-labelledby={titleId}>
-      <header className="word-meaning-heading"><span>용어 뜻</span><span>{['기초', '중급', '심화'][word.difficulty - 1]}</span></header>
+      <header className="word-meaning-heading"><span>용어 뜻</span></header>
       <h1 id={titleId}>{word.word}</h1>
       <div className="word-meaning-definition"><h2>핵심 뜻</h2><p>{keepShortUnitsTogether(word.meaning)}</p></div>
       {example && <section className="word-meaning-example" aria-label="생활 속 예시">

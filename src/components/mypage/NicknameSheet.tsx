@@ -93,7 +93,7 @@ export const NicknameSheet = ({
             <span id={hintId} className="sr-only">최대 10자, 현재 {value.length}자 입력</span>
             {value.length > 0 && (
               <button type="button" onClick={() => { setValue(''); setError(null); inputRef.current?.focus(); }} aria-label="지우기" className="nickname-clear">
-                <span><X size={14} strokeWidth={2.25} absoluteStrokeWidth aria-hidden="true" focusable="false" /></span>
+                <span><X size={16} strokeWidth={2.25} absoluteStrokeWidth aria-hidden="true" focusable="false" /></span>
               </button>
             )}
           </div>

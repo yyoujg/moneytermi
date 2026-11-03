@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { StreakIcon, WordsIcon, XpIcon, STAT_COLOR } from '../components/StatIcons';
+import { EmojiPickerSheet } from '../components/mypage/EmojiPickerSheet';
 import { ChevronRight, CircleHelp, Settings } from '../components/ui/OtterIcons';
 import { useAppContext } from '../context/AppContext';
 import { DEFAULT_NICKNAME } from '../constants';
@@ -15,17 +17,18 @@ import { Card } from '../components/ui/Card';
 import { IconBox } from '../components/ui/IconBox';
 
 const MENU_ITEMS = [
-  { icon: CircleHelp, label: '앱 사용법', sub: '사용법 및 자주 묻는 질문' },
-  { icon: Settings, label: '앱 설정', sub: '알림, 테마 등' },
+  { icon: CircleHelp, label: '앱 사용법' },
+  { icon: Settings, label: '앱 설정' },
 ];
 
 const MyPageScreen = () => {
-  const { points, xp, knownWords, viewedIds, attendanceDates, openShop } = useAppContext();
+  const { xp, knownWords, viewedIds, attendanceDates, myEmoji, updateMyEmoji } = useAppContext();
   const streak = calcStreak(attendanceDates);
   const badges = buildBadges({ words: knownWords.length, streak, xp });
 
   const earned = badges.filter(b => b.earned).length;
   const { user, updateNickname } = useAuth();
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showGuide, setShowGuide]                 = useState(false);
   const [showSettings, setShowSettings]           = useState(false);
   const [showNicknameSheet, setShowNicknameSheet] = useState(false);
@@ -37,6 +40,7 @@ const MyPageScreen = () => {
 
   return (
     <div className="my-page-screen flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
+      <EmojiPickerSheet open={showEmojiPicker} current={myEmoji} onSelect={updateMyEmoji} onClose={() => setShowEmojiPicker(false)} />
       <GuideSheet open={showGuide} onClose={() => setShowGuide(false)} />
       <SettingsSheet open={showSettings} onClose={() => setShowSettings(false)} />
       <NicknameSheet
@@ -48,63 +52,57 @@ const MyPageScreen = () => {
 
       {/* 프로필 헤더 */}
       <div className="my-page-hero shrink-0 pt-4 px-5 pb-5">
-        <h2 className="text-xl font-bold mb-4! text-[var(--color-ink)]">마이페이지</h2>
+        <h2 className="type-page-title mb-4!">마이페이지</h2>
         <ProfileHeader
           nickname={user?.nickname ?? DEFAULT_NICKNAME}
           xp={xp}
+          emoji={myEmoji}
+          onEditAvatar={() => setShowEmojiPicker(true)}
           onEditNickname={() => setShowNicknameSheet(true)}
         />
 
         <Card pad="lg" className="my-page-stats anim-fade-up">
           <div className="my-page-stats-grid">
             {[
-              { label: '살펴본 용어', value: viewedIds.size.toLocaleString(), unit: '개' },
-              { label: '연속 학습', value: streak.toLocaleString(), unit: '일' },
-              { label: '경험치', value: xp.toLocaleString(), unit: 'XP' },
-              { label: '코인', value: points.toLocaleString(), unit: '개' },
-            ].map(it => {
-              const isShop = it.label === '코인';
+              { icon: <WordsIcon size={24} />, color: STAT_COLOR.words, label: '살펴본 용어', value: viewedIds.size.toLocaleString(), unit: '개' },
+              { icon: <StreakIcon size={24} />, color: STAT_COLOR.streak, label: '연속 학습', value: streak.toLocaleString(), unit: '일' },
+              { icon: <XpIcon size={24} />, color: STAT_COLOR.xp, label: '경험치', value: xp.toLocaleString(), unit: 'XP' },
+            ].map(it => (
               // 긴 값은 열 전체를 사용한다. 숫자를 줄이거나 반올림하지 않는다.
-              const className = `my-page-stat${it.value.length > 7 ? ' is-wide' : ''}${isShop ? ' my-page-shop-entry' : ''}`;
-              const contents = <>
-                <span className="my-page-stat-label">{it.label}{isShop && <span className="my-page-shop-link">상점<ChevronRight size={14} aria-hidden="true" /></span>}</span>
-                <span className="my-page-stat-value"><span data-stat-number>{it.value}</span><span className="my-page-stat-unit">{it.unit}</span></span>
-              </>;
-              return isShop
-                ? <button key={it.label} type="button" className={className} aria-label={`보유 코인 ${it.value}개, 상점 열기`} onClick={() => openShop()}>{contents}</button>
-                : <div key={it.label} className={className}>{contents}</div>;
-            })}
+              <div key={it.label} className={`my-page-stat${it.value.length > 7 ? ' is-wide' : ''}`}>
+                {it.icon}
+                <span className="my-page-stat-label">{it.label}</span>
+                <span className="my-page-stat-value" style={{ color: it.color }}><span data-stat-number>{it.value}</span><span className="my-page-stat-unit">{it.unit}</span></span>
+              </div>
+            ))}
           </div>
         </Card>
 
       </div>
 
-      <div className="shrink-0 px-5 pt-6 flex flex-col gap-8">
+      <div className="my-page-sections shrink-0 px-5">
         {/* 배지 */}
-        <div>
+        <section aria-labelledby="my-badges-title" className="my-page-panel">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-[length:var(--font-size-headline)] font-bold text-[var(--color-ink)]">배지</h3>
-            <span className="text-2xs font-normal text-[var(--color-ink-4)]">{earned} / {badges.length}</span>
+            <h3 id="my-badges-title" className="type-section-title">배지</h3>
+            <span className="text-xs text-[var(--color-ink-3)]">획득 {earned} / {badges.length}</span>
           </div>
-          <Card pad="md">
-            <div className="grid grid-cols-5 gap-y-4">
-              {badges.map(b => (
-                <div key={b.id} className="flex flex-col items-center gap-1">
-                  <BadgeGlyph id={b.id} size={52} earned={b.earned} />
-                  <span className={`min-h-7 text-2xs text-center leading-snug break-keep ${b.earned ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-3)]'}`}>
-                    {b.title}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </Card>
-        </div>
+          <ul aria-label="배지 목록" className="my-page-badges grid grid-cols-5 gap-x-1 gap-y-4">
+            {badges.map(b => (
+              <li key={b.id} className="flex min-w-0 flex-col items-center gap-1">
+                <BadgeGlyph id={b.id} size={44} earned={b.earned} />
+                <span className={`text-2xs text-center leading-snug break-keep ${b.earned ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-3)]'}`}>
+                  {b.title}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
 
         {/* 메뉴 */}
-        <div>
-          <Card pad="none" className="overflow-hidden">
+        <div className="my-page-panel my-page-menu">
             <List>
-              {MENU_ITEMS.map(({ icon: Icon, label, sub }) => (
+              {MENU_ITEMS.map(({ icon: Icon, label }) => (
                 <ListRow
                   key={label}
                   as="button"
@@ -113,15 +111,14 @@ const MyPageScreen = () => {
                   onClick={() => handleMenuClick(label)}
                   left={
                     <IconBox className="text-[var(--color-ink-2)]">
-                      <Icon size={21} strokeWidth={1.7} aria-hidden="true" />
+                      <Icon size={20} strokeWidth={1.7} aria-hidden="true" />
                     </IconBox>
                   }
-                  contents={<ListRow.Texts type="2RowTypeA" top={<span className="text-sm font-semibold">{label}</span>} bottom={<span className="block mt-1! text-2xs text-[var(--color-ink-3)]">{sub}</span>} />}
+                  contents={<span className="text-sm font-semibold">{label}</span>}
                   right={<ChevronRight size={16} className="text-[var(--color-ink-4)]" />}
                 />
               ))}
             </List>
-          </Card>
         </div>
       </div>
     </div>

@@ -62,7 +62,7 @@ export const LessonCheckFeedback = ({ question, selected, number, total, onNext 
           <div className="lesson-feedback-review">
             <button type="button" className="lesson-feedback-disclosure" aria-expanded={showChoices} aria-controls={showChoices ? choicesId : undefined} onClick={() => setShowChoices(value => !value)}>
               {showChoices ? '다른 보기 접기' : '다른 보기 확인하기'}
-              <ChevronDown size={18} className={showChoices ? 'is-open' : ''} aria-hidden="true" />
+              <ChevronDown size={20} className={showChoices ? 'is-open' : ''} aria-hidden="true" />
             </button>
             {showChoices && (
               <ol id={choicesId} className="lesson-feedback-options" aria-label="문제의 모든 보기">
@@ -83,7 +83,7 @@ export const LessonCheckFeedback = ({ question, selected, number, total, onNext 
       </main>
 
       <footer className="lesson-result-footer">
-        <ActionButton fullWidth onClick={onNext}>{number === total ? '결과 보기' : '다음 문제'}<ArrowRight size={18} aria-hidden="true" /></ActionButton>
+        <ActionButton fullWidth onClick={onNext}>{number === total ? '결과 보기' : '다음 문제'}<ArrowRight size={20} aria-hidden="true" /></ActionButton>
       </footer>
     </div>
   );

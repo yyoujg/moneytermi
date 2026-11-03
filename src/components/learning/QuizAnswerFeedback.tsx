@@ -3,10 +3,10 @@ import { ActionButton } from '../ui/ActionButton';
 import { keepShortUnitsTogether } from '../../lib/formatText';
 
 export const QuizAnswerFeedback = ({ correct, title, answerLabel, word, meaning, explanation, example,
-  pending, submissionMessage, earned, capped, combo, nextLabel, onNext }: {
+  pending, submissionMessage, combo, nextLabel, onNext }: {
   correct: boolean; title: string; answerLabel: string; word: string; meaning: string;
   explanation?: string; example?: string; pending: boolean; submissionMessage: string | null;
-  earned: number; capped: boolean; combo: number; nextLabel: string; onNext: () => void;
+  combo: number; nextLabel: string; onNext: () => void;
 }) => {
   const hypothetical = /^\s*학습용 가정\s*:/.test(example ?? '');
   const exampleText = example?.replace(/^\s*학습용 가정\s*:\s*/, '').trim();
@@ -16,9 +16,7 @@ export const QuizAnswerFeedback = ({ correct, title, answerLabel, word, meaning,
       <div className="quiz-answer-heading" role="status" aria-live="polite">
         <span className="quiz-answer-mark">{correct ? <Check size={20} /> : <X size={20} />}</span>
         <h2>{title}</h2>
-        {correct && (capped || earned > 0 || combo >= 3) && <span className="quiz-answer-reward">
-          {capped ? '한도 도달' : earned > 0 ? `+${earned}개` : null}{combo >= 3 && <span>{combo}연속</span>}
-        </span>}
+        {correct && combo >= 3 && <span className="quiz-answer-reward"><span>{combo}연속</span></span>}
       </div>
       <div className="quiz-answer-content">
         {answerLabel && <div className="quiz-answer-result"><span>정답</span><strong>{keepShortUnitsTogether(answerLabel)}</strong></div>}

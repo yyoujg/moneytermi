@@ -1,3 +1,4 @@
+import { StageGlyph } from '../StageGlyph';
 import { getGrowthStage, GROWTH_STAGES } from '../../constants';
 
 // 경험치와 등급 기준은 그대로 두고 현재 등급 구간의 진행만 표시한다.
@@ -11,7 +12,7 @@ export const ProfileGrowth = ({ xp }: { xp: number }) => {
 
   return (
     <div role="group" aria-label="등급 성장" className="profile-growth">
-      <p className="profile-growth-stage">{stage.name}</p>
+      <p className="profile-growth-stage"><StageGlyph id={stage.id} size={24} />{stage.name}</p>
       <p className="profile-growth-detail">
         {next && remaining !== null ? (
           <>{next.name}까지 <span>{remaining.toLocaleString()} XP</span></>

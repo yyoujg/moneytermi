@@ -17,7 +17,7 @@ import {
 // 이전 선 아이콘 호출부가 넘기던 선 굵기 props는 받아서 버린다.
 export type LineIconProps = IconProps & { strokeWidth?: number | string; absoluteStrokeWidth?: boolean };
 
-// 모든 아이콘은 현재 글자색을 따르는 선형 한 벌이다. 듀오톤 채움은 아이콘 뒤 배경처럼 보여서 쓰지 않는다.
+// 일반 아이콘은 현재 글자색을 따르는 보통 굵기 선형이다. 작은 조작 표시만 굵은 선을 쓴다.
 const createIcon = (Icon: PhosphorIcon, name: string, defaultSize = 24, weight: IconWeight = 'regular') => {
   const Line = forwardRef<SVGSVGElement, LineIconProps>(({ strokeWidth, absoluteStrokeWidth, size = defaultSize, ...props }, ref) => {
     void [strokeWidth, absoluteStrokeWidth];
@@ -26,8 +26,8 @@ const createIcon = (Icon: PhosphorIcon, name: string, defaultSize = 24, weight: 
   Line.displayName = name;
   return Line;
 };
-// 작은 조작 표시는 18px에서도 또렷하게 굵은 선으로 그린다.
-const createControl = (Icon: PhosphorIcon, name: string) => createIcon(Icon, name, 18, 'bold');
+// 작은 조작 표시는 크기 토큰 20px에서 굵은 선으로 그린다.
+const createControl = (Icon: PhosphorIcon, name: string) => createIcon(Icon, name, 20, 'bold');
 
 export const BookOpen = createIcon(BookSvg, 'BookOpen');
 export const BookOpenText = createIcon(BookTextSvg, 'BookOpenText');

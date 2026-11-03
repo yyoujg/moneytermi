@@ -1,0 +1,107 @@
+{
+  "revision": "meaning-quiz-v3-20261020",
+  "verifiedAt": "2026-10-20T02:18:33.149Z",
+  "baselineHead": "fbe084a",
+  "status": "applied-and-fully-requeried",
+  "summary": {
+    "reviewedQuizzes": 401,
+    "reviewedPriorityTerms": 47,
+    "changedWords": 84,
+    "changedQuizzes": 86,
+    "changedTermDefinitions": 13,
+    "changedFields": {
+      "meaning": 13,
+      "detailed_meaning": 1,
+      "learning_example": 1,
+      "news_example": 0,
+      "visuals": 82
+    },
+    "nonTargetWords": 1149,
+    "totalWords": 1233,
+    "totalQuizzes": 401,
+    "totalLessonCheckQuizzes": 348,
+    "totalCourses": 78,
+    "totalCourseWords": 1234,
+    "totalLessons": 320,
+    "coveredLessons": 320,
+    "beforeBoilerplateExplanations": 39,
+    "afterBoilerplateExplanations": 0,
+    "beforeAppCompatibleQuizzes": 400,
+    "afterAppCompatibleQuizzes": 401,
+    "deferredCandidates": 21
+  },
+  "dryRun": {
+    "verifiedAt": "2026-10-20T02:16:04.497Z",
+    "expectedAfterFingerprints": {
+      "course_words": "c6cfc41deed6f5b6ad7ce752847d9b1f",
+      "courses": "e468551f7e44194f6148c0f949d06341",
+      "words": "98b80b6a3fe1a4aed7fc2b3294773018"
+    },
+    "originalStateRestored": true
+  },
+  "operation": {
+    "stage": "after-apply",
+    "verifiedAt": "2026-10-20T02:18:33.149Z",
+    "allExpectedRowsMatch": true,
+    "nonTargetWordsPreserved": 1149,
+    "coursesPreserved": 78,
+    "courseLinksPreserved": 1234,
+    "totalWords": 1233,
+    "totalQuizzes": 401,
+    "lessonCheckQuizzes": 348,
+    "changedWords": 84,
+    "changedQuizzes": 86,
+    "privateUserTablesWritten": false
+  },
+  "fingerprints": {
+    "before": {
+      "course_words": "c6cfc41deed6f5b6ad7ce752847d9b1f",
+      "courses": "e468551f7e44194f6148c0f949d06341",
+      "words": "45e613d9a2f9057a76653e724545bc17"
+    },
+    "after": {
+      "course_words": "c6cfc41deed6f5b6ad7ce752847d9b1f",
+      "courses": "e468551f7e44194f6148c0f949d06341",
+      "words": "98b80b6a3fe1a4aed7fc2b3294773018"
+    }
+  },
+  "checks": {
+    "independentReviewPassed": true,
+    "all401QuizzesStructurallyValid": true,
+    "all86ChangedQuizzesUseActualAppBuilder": true,
+    "changedQuizPropertiesRestricted": true,
+    "nonQuizVisualsPreserved": true,
+    "protectedWordColumnsPreserved": true,
+    "all1233ExpectedRowsMatch": true,
+    "all1149NonTargetRowsPreserved": true,
+    "coursesAndLinksPreserved": true,
+    "all320LessonsCovered": true,
+    "transactionRollbackRestoredOriginal": true,
+    "commitResultMatchesDryRun": true,
+    "privateUserTablesWritten": false,
+    "frontendRuntimeCodeChanged": false,
+    "releaseChanged": false
+  },
+  "automatedTests": {
+    "files": 70,
+    "passed": 814,
+    "newTests": 90,
+    "typecheckPassed": true,
+    "lintPassed": true
+  },
+  "sqlHashes": {
+    "applySha256": "b08997726b23d645016bd3459a46de846982563e7b41df8058502c1be52c80e0",
+    "rollbackSha256": "ac6e798236225d7f737163a54fc7488b5d532f83db14f9e8ba62e2ec06d22a37",
+    "verifySha256": "6356e439959f07db9a6f425770d59c66ae0a5669b06ea4d972aca2956e3b58ab"
+  },
+  "limitations": [
+    "후속 검토 후보 21건은 확정 오류 목록이 아니다. 근거 부족·조건 모호성·오답 다양성 후보를 구분해 원문을 유지했다.",
+    "실제 기기 검증은 이번 범위에 포함하지 않았다. 앱 퀴즈 생성·채점·레슨 분할 함수 자동 검사와 운영 원문 대조를 수행했다.",
+    "거래 데이터의 사후 이상 유무를 다시 감사한 것은 아니며, 콘텐츠 수정문은 사용자 테이블·재화·보상 규칙을 쓰거나 변경하지 않는다."
+  ],
+  "postApplyReadOnlyChecks": {
+    "count": 10,
+    "allPassed": true,
+    "resultFile": "운영검증-요약.csv"
+  }
+}

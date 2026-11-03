@@ -21,7 +21,7 @@ export const WeekStrip = ({ attendanceDates }: { attendanceDates: string[] }) =>
               <span className="week-strip-label" aria-hidden="true">{day.isToday ? '오늘' : day.label}</span>
               <span className="week-strip-circle" aria-hidden="true">
                 {day.attended
-                  ? <Check size={18} strokeWidth={2.5} absoluteStrokeWidth aria-hidden="true" focusable="false" />
+                  ? <Check size={20} strokeWidth={2.5} absoluteStrokeWidth aria-hidden="true" focusable="false" />
                   : day.isToday
                     ? <span className="week-strip-today-dot" />
                     : !day.isFuture && <span className="week-strip-empty-mark" />}

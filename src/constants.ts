@@ -36,10 +36,10 @@ export const MISSION_XP = 5;
 // 표시 이름만 학습 성장 단계로 바꾼다. 단계 ID·누적 XP 기준·기존 저장값은 유지한다.
 export const GROWTH_STAGES: Omit<GrowthStage, 'nextMinPoints'>[] = [
   { id: 1, name: '돈알못', emoji: '🌱', minPoints: 0 },
-  { id: 2, name: '짠테크러', emoji: '🚀', minPoints: 20 },
-  { id: 3, name: '갓생러', emoji: '🎯', minPoints: 100 },
-  { id: 4, name: '재테크러', emoji: '🌟', minPoints: 300 },
-  { id: 5, name: '경제고수', emoji: '🏆', minPoints: 800 },
+  { id: 2, name: '짠테크러', emoji: '🚀', minPoints: 200 },
+  { id: 3, name: '갓생러', emoji: '🎯', minPoints: 1000 },
+  { id: 4, name: '재테크러', emoji: '🌟', minPoints: 3000 },
+  { id: 5, name: '경제고수', emoji: '🏆', minPoints: 8000 },
 ];
 
 export const getGrowthStage = (points: number): GrowthStage => {

@@ -16,21 +16,16 @@ const mount = (content: React.ReactNode) => {
   return el;
 };
 
-describe('재화·학습 정보 선형 아이콘', () => {
-  it('코인·에너지·경험치·연속 학습·용어를 선형 아이콘으로 구분한다', () => {
+describe('재화와 학습 그림 아이콘', () => {
+  it('선형 단색 아이콘의 크기와 장식용 접근성 속성을 유지한다', () => {
     const el = mount(<><PointIcon size={24} className="example-point" /><EnergyIcon size={24} /><XpIcon /><StreakIcon /><WordsIcon /></>);
     expect(el.querySelector('img')).toBeNull();
-    const icons = [...el.querySelectorAll('svg')];
-    expect(icons.map(icon => icon.getAttribute('data-icon'))).toEqual(['Coins', 'Lightning', 'Trophy', 'Flame', 'BookOpen']);
-    ['points', 'energy', 'xp', 'streak', 'words'].forEach((stat, index) => {
-      expect(icons[index]).toHaveClass(`text-[var(--color-stat-${stat})]`);
-      expect(icons[index]).toHaveAttribute('fill', 'currentColor');
-      expect(icons[index].querySelector('[opacity="0.2"]')).toBeNull();
-      expect(icons[index]).toHaveAttribute('aria-hidden', 'true');
-    });
+    const icons = ['Point', 'Xp', 'Streak', 'Words'].map(name => el.querySelector(`svg[data-icon="${name}"]`)!);
+    for (const icon of icons) { expect(icon).toHaveAttribute('aria-hidden', 'true'); expect(icon).toHaveAttribute('fill', 'currentColor'); }
     expect(icons[0]).toHaveAttribute('width', '24');
     expect(icons[0]).toHaveClass('example-point');
-    expect(icons[2]).toHaveAttribute('width', '16');
+    expect(icons[1]).toHaveAttribute('width', '16');
+    expect(el.querySelector('svg[data-icon="Lightning"]')).toHaveAttribute('width', '24');
   });
 });
 
@@ -45,7 +40,7 @@ describe('공용 아이콘 export 호환', () => {
     for (const icon of icons) {
       expect(icon).toHaveAttribute('fill', 'currentColor');
       // 모든 아이콘은 채움 레이어 없는 선형이다.
-      expect(icon.querySelector('[opacity=\"0.2\"]')).toBeNull();
+      expect(icon.querySelector('[opacity="0.2"]')).toBeNull();
       expect(icon).toHaveAttribute('aria-hidden', 'true');
       expect(icon).toHaveAttribute('focusable', 'false');
     }
@@ -67,10 +62,10 @@ describe('공용 아이콘 export 호환', () => {
     expect(clicked).toBe(true);
   });
 
-  it('조작 표시는 기본 18픽셀이고 크기를 바꿀 수 있다', () => {
+  it('조작 표시는 기본 20픽셀이고 크기를 바꿀 수 있다', () => {
     const el = mount(<><OtterIcons.ChevronRight /><OtterIcons.ArrowDown size={20} /></>);
     const [chevron, arrow] = el.querySelectorAll('svg');
-    expect(chevron).toHaveAttribute('width', '18');
+    expect(chevron).toHaveAttribute('width', '20');
     expect(arrow).toHaveAttribute('width', '20');
   });
 });
