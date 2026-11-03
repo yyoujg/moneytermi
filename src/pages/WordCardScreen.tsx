@@ -123,11 +123,7 @@ const WordCard = ({
             <p className="text-sm font-semibold text-[var(--color-ink)] break-keep leading-normal line-clamp-2">
               <Highlight text={stripHtml(item.title)} keyword={keyword} />
             </p>
-            {item.description && (
-              <p className="text-xs text-[var(--color-ink-3)] break-keep leading-relaxed line-clamp-2 mt-1!">
-                <Highlight text={stripHtml(item.description)} keyword={keyword} />
-              </p>
-            )}
+            {/* 기사 본문 발췌는 원문 그대로라 싣지 않고 헤드라인과 링크만 둔다 */}
             <p className="text-xs text-[var(--color-ink-3)] mt-1!">
               {new Date(item.pubDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })} · 네이버 뉴스
             </p>

@@ -787,7 +787,9 @@ button.mission-reward-status {
   white-space: nowrap;
 }
 .mission-reward-status[data-state='claimed'] {
-  background: var(--color-surface);
+  gap: var(--space-1);
+  padding: 0;
+  background: transparent;
   color: var(--color-ink-3);
 }
 

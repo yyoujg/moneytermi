@@ -4,7 +4,7 @@ import { generateHapticFeedback } from '@apps-in-toss/web-framework';
 // useSettings는 화면마다 독립 상태라, 설정 시트에서 바꾼 값을 다른 화면이 바로 따르게 하려면 모듈 플래그가 필요하다.
 export const hapticPrefs = { enabled: true };
 export const soundPrefs = { enabled: true };
-export const bgmPrefs = { enabled: true };
+export const bgmPrefs = { enabled: false };
 
 // ── 햅틱 ─────────────────────────────────────────────────────────
 type Haptic = 'tickWeak' | 'tap' | 'tickMedium' | 'softMedium' | 'basicWeak' | 'basicMedium' | 'success' | 'error' | 'wiggle' | 'confetti';

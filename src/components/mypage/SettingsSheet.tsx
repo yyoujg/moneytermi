@@ -57,24 +57,17 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
           <Switch checked={vibrationOn} onChange={toggleVibration} aria-label="진동" />
         </Card>
 
-        {/* 학습 알림 */}
-        <button
-          type="button"
-          onClick={() => requestAgreement('settings')}
-          disabled={agreed}
-          className="press-fade flex min-h-14 items-center justify-between py-4 text-left disabled:opacity-100"
-        >
+        {/* 학습 알림: 다른 설정과 같은 토글. 동의는 토스 약관 동의라 앱에서 되돌릴 수 없어 켜진 뒤에는 잠근다 */}
+        <Card pad="md" className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="flex w-6 shrink-0 justify-center"><Bell size={20} className="text-[var(--color-ink-2)]" /></span>
+            <span className="flex w-6 shrink-0 justify-center"><Bell size={20} className={agreed ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-4)]'} /></span>
             <div>
               <p className="text-sm font-semibold text-[var(--color-ink)]">학습 알림</p>
               <p className="text-xs text-[var(--color-ink-3)]">복습/학습 리마인더 받기</p>
             </div>
           </div>
-          <span className={`text-sm font-semibold ${agreed ? 'text-[var(--color-ink-4)]' : 'text-[var(--color-ink)]'}`}>
-            {agreed ? '동의됨' : '받기'}
-          </span>
-        </button>
+          <Switch checked={agreed} disabled={agreed} onChange={() => { if (!agreed) requestAgreement('settings'); }} aria-label="학습 알림" />
+        </Card>
       </div>
     </BottomSheet>
   );

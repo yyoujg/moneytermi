@@ -43,7 +43,8 @@ const HomeScreen = () => {
         {missionList.length > 0 && <section className="quest-hero" aria-label="오늘의 미션 요약">
           {allMissionsDone && <img className="quest-hero-character" src="/otter/v5/otter-cheer.svg" data-otter="cheer" alt="" aria-hidden="true" width={72} height={72} />}
           <div className="min-w-0 flex-1">
-            <p className="type-supporting">{allMissionsDone ? '오늘 미션을 모두 마쳤어요' : '오늘의 미션'}</p>
+            {/* '오늘의 미션' 제목은 아래 목록에만 둔다 */}
+            {allMissionsDone && <p className="type-supporting">오늘 미션을 모두 마쳤어요</p>}
             <p className="quest-hero-count"><strong>{doneMissions}</strong> / {missionList.length} 완료</p>
             <div role="progressbar" aria-label="오늘의 미션 전체 진행률" aria-valuemin={0} aria-valuemax={missionList.length} aria-valuenow={doneMissions} className="course-home-progress-track mt-2">
               <span style={{ width: `${Math.round(doneMissions / missionList.length * 100)}%` }} />
