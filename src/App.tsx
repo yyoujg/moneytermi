@@ -19,7 +19,7 @@ import { LeagueRankCelebration } from './components/league/LeagueRankCelebration
 import { PointCelebration } from './components/PointCelebration';
 import { SplashScreen } from './components/SplashScreen';
 import { useTapHaptics } from './hooks/useTapHaptics';
-import { ArrowRight, BookOpenText, WalletCards, ListChecks } from './components/ui/OtterIcons';
+import { ArrowRight } from './components/ui/OtterIcons';
 import { Storage } from './lib/storage';
 
 const HomeScreen = React.lazy(() => import('./pages/HomeScreen'));
@@ -67,54 +67,69 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
 const LoadingScreen = SplashScreen;
 
 const WELCOME_KEY = 'welcome_seen_v1';
-const WELCOME_STEPS = [
-  { icon: BookOpenText, color: 'text-[var(--color-ink-2)]', title: '쉬운 상황부터 시작해요', desc: '금리·대출·전월세처럼 자주 마주치는 용어를 예시로 익혀요' },
-  { icon: WalletCards, color: 'text-[var(--color-ink-2)]', title: '생활 속 상황으로 연결해요', desc: '월급, 소비, 대출, 계약서에서 어떻게 쓰이는지 짧게 확인해요' },
-  { icon: ListChecks, color: 'text-[var(--color-ink-2)]', title: '퀴즈와 다시 보기로 남겨요', desc: '오늘 들린 용어를 잊기 전에 다시 꺼내보며 익혀요' },
-];
+// 소개 문구 대신 첫 화면에서 바로 한 문제를 풀어 본다. 기록·XP와 무관한 체험용 문제다
+const WELCOME_QUIZ = {
+  question: '월급명세서에서 세금과 4대 보험료를 빼고 실제로 통장에 들어오는 돈을 뭐라고 할까요?',
+  options: ['연봉', '실수령액', '통상임금'],
+  answer: '실수령액',
+  explain: '연봉은 세금을 빼기 전 1년 치 금액이에요. 실제로 받는 돈은 실수령액이라고 해요.',
+};
 
 const WelcomeScreen = () => {
   const navigate = useNavigate();
+  const [picked, setPicked] = React.useState<string | null>(null);
   const start = async () => {
     await Storage.setItem(WELCOME_KEY, '1').catch(() => {});
-    logClick('welcome_start');
+    logClick('welcome_start', { answered: picked ? 1 : 0, correct: picked === WELCOME_QUIZ.answer ? 1 : 0 });
     navigate('/course', { replace: true });
   };
+  const correct = picked === WELCOME_QUIZ.answer;
 
   return (
     <div className="app-soft-screen flex h-full flex-col">
-      <div className="flex flex-1 flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden">
-        <div className="flex shrink-0 flex-col items-center px-6 pb-4 pt-10 text-center">
-          <h1 className="text-2xl font-bold leading-snug text-[var(--color-ink)] break-keep">
-            경제 공부,<br />쉬운 상황부터 차근차근
-          </h1>
-          <p className="mt-3 text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">뜻은 예시로 익히고, 퀴즈로 다시 떠올려요.</p>
+      <div className="flex flex-1 flex-col overflow-y-auto px-5 pt-8 pb-4 [&::-webkit-scrollbar]:hidden">
+        <img src="/otter/v5/otter-idle.svg" data-otter="idle" alt="" aria-hidden="true" width={96} height={96} className="shrink-0" />
+        <p className="mt-4 text-sm text-[var(--color-ink-3)]">먼저 한 문제 풀어 볼까요?</p>
+        <h1 className="mt-2 text-xl font-bold leading-snug text-[var(--color-ink)] break-keep">{WELCOME_QUIZ.question}</h1>
+
+        <div className="mt-6 flex flex-col gap-3">
+          {WELCOME_QUIZ.options.map(opt => {
+            const graded = picked !== null;
+            const isAnswer = opt === WELCOME_QUIZ.answer;
+            const style = !graded ? 'bg-[var(--color-card)] border-transparent text-[var(--color-ink)] active:bg-[var(--color-surface)]'
+              : isAnswer ? 'bg-[var(--color-success-soft)] border-[var(--color-success-foreground)] text-[var(--color-ink)]'
+              : opt === picked ? 'bg-[var(--color-card)] border-[var(--color-danger-line)] text-[var(--color-ink)]'
+              : 'bg-[var(--color-card)] border-transparent text-[var(--color-ink-3)]';
+            return (
+              <button key={opt} type="button" disabled={graded} aria-pressed={opt === picked} onClick={() => setPicked(opt)}
+                className={`quiz-option flex min-h-[56px] items-center justify-between gap-3 border px-4 py-3 text-left text-base font-semibold ${style}`}>
+                {opt}
+                {graded && isAnswer && <span className="shrink-0 text-xs font-bold text-[var(--color-success-foreground)]">정답</span>}
+                {graded && !isAnswer && opt === picked && <span className="shrink-0 text-xs font-bold text-[var(--color-danger-foreground)]">내 답</span>}
+              </button>
+            );
+          })}
         </div>
 
-        {/* 남는 높이의 가운데에 단계 카드를 둔다. 화면이 작으면 그대로 스크롤된다 */}
-        <div className="flex flex-1 flex-col justify-center px-5 pt-7 pb-4">
-          <p className="mb-5 text-xs text-[var(--color-ink-3)]">이렇게 시작해요</p>
-          <ol className="flex flex-col gap-6">
-            {WELCOME_STEPS.map(({ icon: Icon, color, title, desc }) => (
-              <li key={title} className="flex items-start gap-3">
-                <span aria-hidden="true" className={`flex h-8 w-8 shrink-0 items-center justify-center ${color}`}>
-                  <Icon size={24} />
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-base font-bold text-[var(--color-ink)]">{title}</span>
-                  <span className="mt-1 block text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">{desc}</span>
-                </span>
-              </li>
-            ))}
-          </ol>
-        </div>
+        {picked && (
+          <p role="status" className="mt-5 text-sm leading-relaxed text-[var(--color-ink-2)] break-keep">
+            <strong className="text-[var(--color-ink)]">{correct ? '맞아요! ' : '아쉬워요. '}</strong>{WELCOME_QUIZ.explain}
+          </p>
+        )}
       </div>
 
       <div className="shrink-0 px-5 pb-8 pt-3 text-center">
-        <button type="button" onClick={start}
-          className="flex w-full items-center justify-center gap-2 rounded-button bg-brand-500 py-4 text-base font-bold active:opacity-90">
-          첫 레슨 시작하기<ArrowRight size={20} />
-        </button>
+        {/* 답하기 전에는 문제가 주행동이라 건너뛰기는 글자 버튼으로 약하게 둔다 */}
+        {picked ? (
+          <button type="button" onClick={start}
+            className="flex w-full items-center justify-center gap-2 rounded-button bg-brand-500 py-4 text-base font-bold active:opacity-90">
+            이런 용어부터 배워 볼게요<ArrowRight size={20} />
+          </button>
+        ) : (
+          <button type="button" onClick={start} className="min-h-[44px] w-full text-sm font-semibold text-[var(--color-ink-3)] active:opacity-60">
+            건너뛰고 시작하기
+          </button>
+        )}
         <p className="mt-3! text-xs text-[var(--color-ink-4)]">별도 가입 없이 시작할 수 있어요</p>
       </div>
     </div>

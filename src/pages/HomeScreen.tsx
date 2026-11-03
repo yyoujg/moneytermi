@@ -41,7 +41,7 @@ const HomeScreen = () => {
       <div className="pt-4 px-5 pb-4">
         <h2 className="type-page-title mb-4!">퀘스트</h2>
         {missionList.length > 0 && <section className="quest-hero" aria-label="오늘의 미션 요약">
-          <img className="quest-hero-character" src={`/otter/v5/otter-${allMissionsDone ? 'cheer' : 'idle'}.svg`} data-otter={allMissionsDone ? 'cheer' : 'idle'} alt="" aria-hidden="true" width={72} height={72} />
+          {allMissionsDone && <img className="quest-hero-character" src="/otter/v5/otter-cheer.svg" data-otter="cheer" alt="" aria-hidden="true" width={72} height={72} />}
           <div className="min-w-0 flex-1">
             <p className="type-supporting">{allMissionsDone ? '오늘 미션을 모두 마쳤어요' : '오늘의 미션'}</p>
             <p className="quest-hero-count"><strong>{doneMissions}</strong> / {missionList.length} 완료</p>

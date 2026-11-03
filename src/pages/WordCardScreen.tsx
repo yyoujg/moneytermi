@@ -99,7 +99,7 @@ const WordCard = ({
     {/* 글로 된 '쉽게 설명'은 핵심 뜻과 겹쳐서 자세히 보기 시트로 옮기고, 본문에는 그래프·표만 둔다 */}
     {word.visuals && word.visuals.some(v => v.type !== 'text') && <WordVisuals visuals={word.visuals.filter(v => v.type !== 'text')} terms={visualTerms} />}
 
-    {/* 뉴스 — 사진보다 '이 용어가 기사에서 어떻게 쓰였는지'가 보이게 작은 썸네일 목록. 불러온 뒤 기사가 없으면 섹션째 숨긴다 */}
+    {/* 뉴스 — '이 용어가 기사에서 어떻게 쓰였는지'가 보이게 제목·요약 목록. 불러온 뒤 기사가 없으면 섹션째 숨긴다 */}
     {(newsLoading || newsItems.length > 0) && (
     <Card pad="md" className="flex flex-col">
       <h3 className="pb-1 text-base font-bold text-[var(--color-ink)] break-keep">실제 뉴스에서는 이렇게 나와요</h3>
@@ -110,7 +110,6 @@ const WordCard = ({
               <div className="h-3.5 bg-[var(--color-surface)] rounded animate-pulse" style={{ width: '90%' }} />
               <div className="h-3.5 bg-[var(--color-surface)] rounded animate-pulse" style={{ width: '60%' }} />
             </div>
-            <div className="h-[72px] w-[72px] shrink-0 rounded-chip bg-[var(--color-surface)] animate-pulse" />
           </div>
         ))
       ) : newsItems.map((item, i) => (
@@ -133,16 +132,8 @@ const WordCard = ({
               {new Date(item.pubDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })} · 네이버 뉴스
             </p>
           </div>
-          {item.image ? (
-            // 불러오지 못하면 썸네일 자리만 숨긴다
-            <img
-              src={item.image}
-              alt=""
-              referrerPolicy="no-referrer"
-              onError={e => { e.currentTarget.style.display = 'none'; }}
-              className="h-[72px] w-[72px] shrink-0 rounded-chip object-cover bg-[var(--color-surface)]"
-            />
-          ) : <ExternalLink size={16} className="text-[var(--color-ink-3)] shrink-0 mt-1" />}
+          {/* 기사 사진은 언론사 저작물이라 쓰지 않는다 */}
+          <ExternalLink size={16} className="text-[var(--color-ink-3)] shrink-0 mt-1" />
         </button>
       ))}
     </Card>
