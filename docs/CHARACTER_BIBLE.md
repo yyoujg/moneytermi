@@ -52,7 +52,7 @@
 
 | 자리            | 포즈                | 크기  | 코드                                   |
 | --------------- | ------------------- | ----- | -------------------------------------- |
-| 홈 오늘 할 학습 | 얼굴 아바타(기본)   | 40px  | `DaliAvatar.tsx`(`otter-face-default.svg`: 단순화본 기본 포즈를 viewBox `29 3 49 49`로 얼굴만 자름). 표정은 `mood` prop으로 확장 |
+| 홈 오늘 할 학습 | 흉상 아바타(기본)   | 40px  | `DaliAvatar.tsx`(`public/otter/avatar/avatar-<포즈>-small.svg`). 표정은 `mood` prop: default→idle, happy→explain, celebrate→cheer, sad→defeat |
 | 온보딩 첫 화면  | 기본                | 96px  | `App.tsx` `WelcomeScreen`              |
 | 퀘스트 요약     | 만세(미션을 모두 완료했을 때만) | 72px  | `HomeScreen.tsx`                       |
 | 학습 완료       | 만세                | 128px | `LearningCompletionScreen.tsx`         |
@@ -70,6 +70,12 @@
 
 - 등급 5종도 같은 3색·낙서 선: 새싹(돈알못), 저금통(짠테크러), 자명종(갓생러), 상승 차트(재테크러), 왕관(경제고수). 기준 이미지 `docs/character/league/ref-league.png`, 벡터화 `trace_league.py`.
 - 파일: `public/league/v1/league-tier<번호>-<이름>[-small|-locked].svg`. 쓰는 곳은 `StageGlyph.tsx`(리그 등급 길·마이 프로필·승급 축하). 리그 등급 길에서 아직 못 간 등급은 잠김본, 40px 이하는 단순화본.
+
+## 5-3. 화자 아바타 (2026-11-04)
+
+- 말풍선 옆 원형 아바타용 흉상 5종(idle·cheer·explain·shock·defeat). 새로 그리지 않고 v5 수달을 `docs/character/avatar/make_avatars.py`로 다시 프레이밍했다(턱선 위 머리·귀·팔·효과선이 잘리지 않는 최소 원). 확인 시트 `avatar-preview.png`.
+- 파일: `public/otter/avatar/avatar-<포즈>[-small].svg`, 투명 배경. 원과 배경(primary-tint)은 CSS가 맡는다. 원형 배경이 박힌 `-circle`본과 다크본은 넣지 않았다.
+- 달리(앱 화자) 전용이다. 사용자 프로필 아바타로 쓰지 않는다(7절).
 
 ## 6. 포즈 추가 방법
 
