@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { BottomSheet, TextButton, Spacing } from '@toss/tds-mobile';
-import { GROWTH_STAGES, getGrowthStage, LEAGUE_PROMOTE_TOP } from '../constants';
+import { GROWTH_STAGES, getGrowthStage } from '../constants';
 import { useAppContext } from '../context/AppContext';
 import { useAuth } from '../hooks/useAuth';
 import { supabase, getGuestClient } from '../lib/supabase';
@@ -47,7 +47,6 @@ const LeagueScreen = () => {
   }, [guestToken, reloadKey]);
 
   const stage = getGrowthStage(leagueStage ?? 1);
-  const nextStage = GROWTH_STAGES.find(s => s.id === stage.id + 1);
   const roadRef = useRef<HTMLOListElement>(null);
   useEffect(() => {
     const road = roadRef.current;
@@ -70,17 +69,7 @@ const LeagueScreen = () => {
           </div>
         </div>
 
-        {/* 이번 주 내 순위: 홈에서 옮겨 왔다 */}
-        <section aria-labelledby="league-my-rank" className="league-my-rank">
-          <h3 id="league-my-rank" className="type-supporting">이번 주 내 순위</h3>
-          {failed ? <button type="button" onClick={() => { setFailed(false); setRows(null); setReloadKey(key => key + 1); }} className="min-h-11 text-xs text-[var(--color-ink-2)] underline">순위 다시 불러오기</button> : <>
-            <p className="league-my-rank-value">{mine?.rank ? `${mine.rank}위` : '-'}</p>
-            <p className="type-supporting break-keep">{mine === null ? '순위 불러오는 중' : mine.rank ? `${mine.total.toLocaleString()}명 중 · ${mine.points.toLocaleString()}XP` : 'XP를 모으면 순위에 올라요'}</p>
-          </>}
-          <p className="mt-1! text-2xs text-[var(--color-ink-3)]">리그 종료까지 {timeLeftLabel()} 남았어요</p>
-        </section>
-
-        {/* 티어 로드맵: 테두리·선 없이 큰 등급 그림을 가로로 넘긴다. 현재 등급은 이름 색·굵기로 강조하고 처음에 가운데로 둔다 */}
+        {/* 티어 로드맵: 테두리·선 없이 큰 등급 그림을 가로로 넘기고 처음에 현재 등급을 가운데로 둔다. 규칙 설명은 안내 시트(LeagueRules)에만 둔다 */}
         <ol ref={roadRef} className="league-tier-road anim-fade-up" aria-label="등급 단계" style={{ '--i': 1 } as React.CSSProperties}>
           {GROWTH_STAGES.map(s => {
             const state = s.id < stage.id ? 'done' : s.id === stage.id ? 'current' : 'future';
@@ -91,19 +80,13 @@ const LeagueScreen = () => {
             );
           })}
         </ol>
-        {/* 승급 조건: 지금 순위가 3위 안이면 다음 주 승급 예정이라고 알려 준다 */}
-        {nextStage && <p className="league-promote-note type-supporting break-keep">
-          {mine?.rank && mine.rank <= LEAGUE_PROMOTE_TOP
-            ? <>지금 순위를 지키면 다음 주 <strong>{nextStage.name}</strong> 리그로 올라가요</>
-            : <>이번 주 <strong>{LEAGUE_PROMOTE_TOP}위 안</strong>에 들면 다음 주 {nextStage.name} 리그로 올라가요</>}
-        </p>}
       </div>
 
       {/* 랭킹 */}
       <div className="league-ranking-section px-5 pt-8">
         <div className="flex items-baseline justify-between mb-3">
           <h3 className="type-section-title">이번 주 TOP 10</h3>
-          <span className="text-2xs text-[var(--color-ink-4)]">매주 월요일 초기화</span>
+          <span className="league-time-left">리그 종료까지 {timeLeftLabel()} 남았어요</span>
         </div>
 
         {failed && (
