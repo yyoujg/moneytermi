@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useLayoutEffect, useEffect, useState } from 'react';
-import { Check, LockKeyhole } from '../components/ui/OtterIcons';
+import { LockKeyhole } from '../components/ui/OtterIcons';
 import { BottomSheet, List, ListRow } from '@toss/tds-mobile';
 import { TopicThumb } from '../components/TopicThumb';
 import { COURSE_NAMES } from '../lib/topicImages';
@@ -501,7 +501,6 @@ const CourseScreen = () => {
         const steps = sec.nodes.filter(isStep);
         const stepsDone = steps.filter(isDone).length;
         const pct = steps.length ? Math.round((stepsDone / steps.length) * 100) : 0;
-        let stepNo = 0;
         return (
         <section key={sec.course.id} data-section-index={si} data-course-section={sec.course.id} className="scroll-mt-4">
           <div className={`course-topic-summary sticky top-0 z-10 mx-5 mt-3 mb-4 overflow-hidden py-4 ${sec.course.id === focus?.courseId ? 'anim-fade' : ''}`}>
@@ -533,15 +532,14 @@ const CourseScreen = () => {
             // 상태어는 완료 / 진행 중 / 시작 가능 / 잠김 4개만 쓴다
             const nodeStatus = done ? '완료' : locked ? '잠김' : inProgress ? '진행 중' : '시작 가능';
             const isReview = node.type === 'review';
-            if (!isReview) stepNo += 1;
             return (
               <div key={node.id} className="course-step" data-step-state={done ? 'done' : locked ? 'locked' : isFocus ? 'current' : 'open'}>
                 {/* 곡선이 가장 멀리 휜 돌(8개 중 3·7번째) 반대편 빈자리에 장식 수달을 둔다 */}
                 {k % 4 === 2 && <img className="course-step-buddy" src={`/otter/v5/otter-${['explain', 'cheer', 'idle', 'shock'][Math.floor(k / 4) % 4]}.svg`} alt="" aria-hidden="true" data-step-buddy />}
                 <button type="button" className="course-step-marker" data-step-kind={isReview ? 'review' : 'step'} aria-expanded={bubbleId === node.id}
                   aria-label={`${copy.kind} ${copy.title} ${nodeStatus}, ${bubbleId === node.id ? '닫기' : '보기'}`} onClick={() => setBubbleId(bubbleId === node.id ? null : node.id)}>
-                  {/* 복습은 화살표 아이콘이 '복습'으로 읽히지 않아 글자로 표시한다 */}
-                  {done && !isReview ? <Check size={24} aria-hidden="true" /> : isReview ? <span aria-hidden="true" data-review-mark>복습</span> : stepNo}
+                  {/* 징검다리 돌은 상태별 노드 그림(public/path): 잠김 > 복습 > 완료 > 지금 할 학습 */}
+                  <img src={`/path/node-${locked ? 'locked' : isReview ? 'review' : done ? 'done' : 'current'}.svg`} alt="" aria-hidden="true" width={56} height={56} data-node-icon />
                 </button>
                 <span className="course-step-bubble" data-step-bubble data-open={bubbleId === node.id}><button ref={isFocus ? focusRef : undefined} type="button" disabled={locked} data-own-sfx data-node-id={node.id}
                   onClick={() => handleNodeTap(node, k, sec.knownCount, courseName(sec.course))}

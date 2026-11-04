@@ -1170,11 +1170,7 @@ button.course-home-rail-card:active { background: var(--color-surface); }
 /* 돌 사이 세로 간격(말풍선 높이 64px가 다음 돌과 겹치지 않을 만큼) */
 .course-steps .course-step + .course-step { margin-top: var(--space-6); }
 .course-step[data-step-state='done']:not(:last-child)::before { background: var(--color-progress); }
-.course-step-marker { width: 56px; height: 56px; margin-top: var(--space-2); border: 0; background: var(--color-neutral-soft); color: var(--color-ink-2); font-size: var(--font-size-body); }
-.course-step-marker [data-review-mark] { font-size: var(--font-size-caption); font-weight: var(--font-weight-bold); }
-.course-step[data-step-state='done'] .course-step-marker { background: var(--color-neutral-strong); color: var(--color-card); }
-.course-step[data-step-state='current'] .course-step-marker { border: 3px solid var(--color-neutral-strong); background: var(--color-card); color: var(--color-neutral-strong); font-weight: var(--font-weight-bold); }
-.course-step[data-step-state='locked'] .course-step-marker { background: var(--color-surface); color: var(--color-ink-3); }
+.course-steps .course-step .course-step-marker { width: 56px; height: 56px; margin-top: var(--space-2); padding: 0; border: 0; background: transparent; }
 /* 끝낸 단계 말풍선: 체크 오른쪽에 떠서 아래 줄을 밀지 않는다. 꼬리는 체크를 가리킨다 */
 /* 말풍선은 늘 화면 가운데에 두고(가장자리 돌에서도 잘리지 않게) 꼬리만 돌 위치로 옮긴다 */
 .course-step-bubble { position: absolute; top: 76px; left: 50%; z-index: 5; width: max-content; max-width: calc(100% - 8px); transform: translateX(-50%); }
@@ -1196,7 +1192,7 @@ button.course-step-marker { cursor: pointer; }
 /* 리그: 이번 주 내 순위 카드 */
 
 /* 리그: 등급 단계 로드맵 */
-/* 등급 길: 큰 등급 그림을 가로로 넘겨 본다. 현재 등급은 처음에 가운데로 스크롤한다(LeagueScreen) */
+/* 등급 길: 등급 아이콘을 가로로 넘겨 본다. 현재 등급은 처음에 가운데로 스크롤한다(LeagueScreen) */
 .league-tier-road { position: relative; display: flex; gap: var(--space-2); margin: 0; padding: var(--space-5) var(--space-2) var(--space-4); overflow-x: auto; border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); list-style: none; scroll-snap-type: x mandatory; scroll-padding-inline: var(--space-5); scrollbar-width: none; }
 .league-time-left { padding: 2px var(--space-2); border-radius: var(--shape-sm); background: var(--color-neutral-soft); color: var(--color-ink-2); font-size: var(--font-size-caption); font-weight: var(--font-weight-semibold); font-variant-numeric: tabular-nums; }
 .league-tier-road::-webkit-scrollbar { display: none; }
