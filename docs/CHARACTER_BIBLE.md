@@ -77,6 +77,12 @@
 - 파일: `public/otter/avatar/avatar-<포즈>[-small].svg`, 투명 배경. 원과 배경(primary-tint)은 CSS가 맡는다. 원형 배경이 박힌 `-circle`본과 다크본은 넣지 않았다.
 - 달리(앱 화자) 전용이다. 사용자 프로필 아바타로 쓰지 않는다(7절).
 
+## 5-4. 주제 장면 (2026-11-04)
+
+- `public/topics/scenes/topic-<slug>.svg`(배경 있음)와 `-clear`(투명) 15주제. 240x180, 수달 3색 + 배경 `#EFF5E9`·바닥 `#DCE8D1`.
+- 홈 주제 카드·단어 카드 뉴스의 40px 썸네일에 배경본을 쓴다. 말풍선본(`-bubble`)은 40px에서 글자가 안 읽혀 넣지 않았다.
+- 생성 스크립트·미리보기는 `docs/character/topics/`. 원본 색(`#2B211C`/`#A9774F`/`#FBEBD3`)은 현재 3색으로 바꿔 넣었다.
+
 ## 6. 포즈 추가 방법
 
 1. 기준 이미지(`docs/character/ref.png`)를 만든 것과 같은 프롬프트로 새 포즈 이미지를 생성한다.
