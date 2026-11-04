@@ -380,11 +380,12 @@ svg:is(.text-brand-300, .text-brand-400, .text-brand-500, .text-brand-600, .text
   position: relative;
   z-index: 1;
 }
-.my-page-stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; }
-.my-page-stat { display: flex; min-width: 0; flex-direction: column; align-items: center; text-align: center; gap: var(--space-2); padding: var(--space-1) 2px; }
-.my-page-stat.is-wide { grid-column: 1 / -1; }
-.my-page-stat-label { display: flex; order: 2; min-height: 18px; align-items: center; gap: 2px; color: var(--color-ink-2); font-size: var(--font-size-label); white-space: nowrap; }
-.my-page-stat-value { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 2px; color: var(--color-ink); font-size: clamp(var(--font-size-headline), 5vw, var(--font-size-stat)); font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); font-variant-numeric: tabular-nums; }
+/* 마이 통계: 한 줄에 하나씩(아이콘 · 이름 ··· 값). 긴 값도 오른쪽에 그대로 둔다 */
+.my-page-stats-grid { display: flex; flex-direction: column; gap: var(--space-4); }
+.my-page-stat { display: flex; min-width: 0; align-items: center; gap: var(--space-3); }
+.my-page-stat.is-wide { grid-column: auto; }
+.my-page-stat-label { display: flex; flex: 1; min-width: 0; align-items: center; color: var(--color-ink-2); font-size: var(--font-size-body); white-space: nowrap; }
+.my-page-stat-value { display: flex; align-items: baseline; justify-content: flex-end; gap: 2px; color: var(--color-ink); font-size: var(--font-size-headline); font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); font-variant-numeric: tabular-nums; }
 .my-page-stat-value [data-stat-number] { white-space: nowrap; overflow-wrap: normal; word-break: normal; }
 .my-page-stat-unit { color: var(--color-ink-3); font-size: var(--font-size-label); font-weight: var(--font-weight-regular); }
 button.my-page-shop-entry { min-height: var(--size-touch-min); border-radius: var(--shape-sm); cursor: pointer; }
@@ -1049,7 +1050,6 @@ button.quiz-option:disabled { opacity: 1; cursor: default; }
 button.home-review-entry { margin-bottom: var(--space-3); padding: var(--space-4); border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); }
 .home-status-card { margin-bottom: var(--space-6); padding: var(--space-5) var(--space-5) 0; border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); }
 .my-page-stats.app-card { padding: var(--space-5) 0; }
-.my-page-stat + .my-page-stat { border-left: 1px solid var(--color-line); }
 .my-profile-avatar { display: flex; flex-shrink: 0; border-radius: 50%; }
 /* 프로필 그림 고르기: 3열, 고른 것은 메인 컬러 테두리 */
 .profile-avatar-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4) var(--space-2); list-style: none; }
