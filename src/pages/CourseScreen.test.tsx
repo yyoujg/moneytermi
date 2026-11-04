@@ -204,7 +204,7 @@ describe('필수 단계 순차 잠금', () => {
     expect(container.querySelector('[data-node-id="c1-l3"]')).not.toBeDisabled();
   });
 
-  it('전체 주제 목록에서 잠긴 주제는 눌러도 열리지 않는다', async () => {
+  it('주제 둘러보기 목록에서 잠긴 주제는 눌러도 열리지 않는다', async () => {
     baseContext({ courses: [course({ id: 'c1', category: '경제 기초 개념' }), course({ id: 'c2', category: '가계', startId: 101 })], knownIds: new Set() });
     state.doneNodes = new Set();
     const { container } = await mount('/course/topics');
@@ -273,7 +273,7 @@ describe('CourseScreen energy gates', () => {
     expect(HTMLElement.prototype.scrollIntoView).not.toHaveBeenCalled();
   });
 
-  it('전체 주제 보기는 현재 학습을 별도 주제 목록 페이지로 전환한다', async () => {
+  it('주제 둘러보기는 현재 학습을 별도 주제 목록 페이지로 전환한다', async () => {
     baseContext({ courses: [course(), course({ id: 'c2', category: '금융', startId: 5 })] });
     const { container, clickButtonContaining } = await mount('/course');
     const hero = container.querySelector('.course-home-hero');
@@ -293,7 +293,7 @@ describe('CourseScreen energy gates', () => {
     expect(primary?.querySelector('svg')).toBeNull();
     expect(container.querySelector('[role="tablist"]')).toBeNull();
     expect(container.querySelector('.course-home-catalog')).toBeNull();
-    await clickButtonContaining('전체 주제 보기');
+    await clickButtonContaining('주제 둘러보기');
     expect(container.querySelector('[data-location]')).toHaveTextContent('/course/topics');
     expect(container.querySelector('.course-home-hero')).toBeNull();
     expect(container.querySelector('.course-home-more')).toBeNull();
@@ -325,7 +325,7 @@ describe('CourseScreen energy gates', () => {
     baseContext({ courses: [course(), advanced], knownIds: new Set([1, 2, 3, 4]) });
     state.doneNodes = new Set(['c1-q1']);
     const { container, clickButtonContaining } = await mount('/course');
-    await clickButtonContaining('전체 주제 보기');
+    await clickButtonContaining('주제 둘러보기');
     const filters = [...container.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
     expect(filters.map(button => button.textContent?.trim())).toEqual(['전체', '입문', '기본', '응용', '전문']);
     const intermediate = filters.find(button => button.textContent?.trim() === '기본');
@@ -347,7 +347,7 @@ describe('CourseScreen energy gates', () => {
   it('키보드로 난이도를 이동하고 빈 난이도도 안내한다', async () => {
     baseContext({ courses: [course()] });
     const { container, clickButtonContaining } = await mount('/course');
-    await clickButtonContaining('전체 주제 보기');
+    await clickButtonContaining('주제 둘러보기');
     const tabs = [...container.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
     const press = async (index: number, key: string) => {
       await act(async () => tabs[index].dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true })));

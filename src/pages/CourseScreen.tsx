@@ -360,7 +360,7 @@ const CourseScreen = () => {
         ) : isCatalog ? (
           <div className="flex items-center gap-2">
             {/* 뒤로가기는 토스 내비게이션 바가 맡는다(자체 뒤로가기 중복은 검수 반려 사유) */}
-            <h1 id="course-catalog-title" tabIndex={-1} className="type-page-title">전체 주제</h1>
+            <h1 id="course-catalog-title" tabIndex={-1} className="type-page-title">주제 둘러보기</h1>
           </div>
         ) : (
           // 앱 이름은 토스 내비게이션 바가 보여준다. 화면에는 제목을 숨기고 스크린리더용으로만 남긴다
@@ -436,7 +436,7 @@ const CourseScreen = () => {
           </section>
         ))}
         <div className="px-5 pb-6">
-          <ActionButton fullWidth tone="soft" onClick={() => navigate('/course/topics')} className="course-home-more">전체 주제 보기<ChevronRight size={16} aria-hidden="true" /></ActionButton>
+          <ActionButton fullWidth tone="soft" onClick={() => navigate('/course/topics')} className="course-home-more">주제 둘러보기<ChevronRight size={16} aria-hidden="true" /></ActionButton>
         </div>
       </>}
       {isCatalog && <>
