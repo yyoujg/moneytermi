@@ -538,7 +538,7 @@ describe('학습 주제의 역할 아이콘', () => {
     expect(state.spendEnergy).toHaveBeenCalledWith(1, 'lesson', 'c1-l0:1,2,3,4');
   });
 
-  it('학습·퀴즈는 번호와 역할 글자(아이콘 없이), 복습은 번호 없이 배지로 구분한다', async () => {
+  it('학습·퀴즈는 역할 글자(아이콘 없이), 복습은 배지로 구분하고 돌은 상태별 노드 그림', async () => {
     const { container } = await mount();
     const kinds = [...container.querySelectorAll('[data-learning-kind]')];
     expect(kinds.map(kind => kind.getAttribute('data-learning-kind'))).toEqual(['lesson', 'quiz']);
@@ -546,9 +546,9 @@ describe('학습 주제의 역할 아이콘', () => {
     expect(container.querySelector('[data-review-badge]')).toHaveTextContent('· 선택');
     const markers = [...container.querySelectorAll('.course-step-marker')];
     const review = markers.find(m => m.getAttribute('data-step-kind') === 'review')!;
-    // 번호 없이 '복습' 글자만
-    expect(review.textContent).toBe('복습');
-    expect(review.querySelector('[data-review-mark]')).toHaveTextContent('복습');
+    // 돌은 상태별 노드 그림: 복습은 순환 화살표 그림
+    expect(review.querySelector('img[data-node-icon]')?.getAttribute('src')).toMatch(/^\/path\/node-(review|locked)\.svg$/);
+    expect(markers.every(m => m.querySelector('img[data-node-icon]'))).toBe(true);
   });
 
   it('길에는 돌만 두고, 지금 할 단계 말풍선만 열어 두며, 돌을 누르면 그 단계 말풍선으로 바꾼다', async () => {
@@ -612,9 +612,12 @@ describe('퀘스트의 미션 동작', () => {
     expect(card).toHaveAttribute('aria-labelledby', 'home-missions-heading');
     expect(card?.querySelector('h2')).toHaveTextContent('오늘의 미션');
     expect(container.querySelector('.home-mission-heading')).toHaveTextContent('오늘의 미션');
-    expect(container.querySelectorAll('.home-mission-row')).toHaveLength(3);
+    expect(container.querySelectorAll('#home-mission-list .home-mission-row')).toHaveLength(3);
+    // 주간·월간 미션은 진행도만(보상 버튼 없음)
+    expect([...container.querySelectorAll('[data-period] h2')].map(h => h.textContent)).toEqual(['이번 주 미션', '이번 달 미션']);
+    expect(container.querySelector('[data-period] button')).toBeNull();
     expect(container.querySelector('.home-attendance, .home-mission-more, .home-review-entry')).toBeNull();
-    const rows = [...container.querySelectorAll('.home-mission-row')];
+    const rows = [...container.querySelectorAll('#home-mission-list .home-mission-row')];
     // 받을 수 있는 미션 → 진행 중 → 완료 순서(직렬 위치 효과)
     expect(rows.map(row => row.querySelector('.home-mission-title')?.textContent?.trim())).toEqual(['퀴즈 풀기', '용어 학습하기', '오늘 출석하기']);
     // 미션 카드에는 보상 XP 선형 아이콘 하나만 둔다(받은 미션은 '받음' 앞 체크가 하나 더 붙는다)
@@ -639,7 +642,7 @@ describe('퀘스트의 미션 동작', () => {
   it('출석이나 복습이 있어도 퀘스트에는 미션만 표시한다', async () => {
     baseContext({ attendanceDates: ['2026-10-28'], dueQueue: [word(1)], missions: { m: { id: 'm', title: '학습하기', current: 0, target: 1, reward: 5, isRewarded: false, sortOrder: 1 } }, claimReward: vi.fn() });
     const container = await mountHome();
-    expect(container.querySelectorAll('.home-mission-row')).toHaveLength(1);
+    expect(container.querySelectorAll('#home-mission-list .home-mission-row')).toHaveLength(1);
     expect(container).not.toHaveTextContent('출석 기록');
     expect(container).not.toHaveTextContent('다시 볼 용어');
     expect(container.querySelector('.home-mission-more')).toBeNull();

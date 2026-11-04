@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { MissionRewardStatus } from '../components/home/MissionRewardStatus';
 import { showModal } from '../components/AlertModal';
 import { feedbackClaim, feedbackError } from '../lib/feedback';
@@ -10,9 +10,20 @@ import { Check } from '../components/ui/OtterIcons';
 import { PointCelebration, type PointReward } from '../components/PointCelebration';
 import type { Mission } from '../types';
 import { XpIcon } from '../components/StatIcons';
+import { useAuth } from '../hooks/useAuth';
+import { supabase, getGuestClient } from '../lib/supabase';
+import { daysLeftInMonth, daysLeftInWeek, periodMissions, type PeriodMission } from '../lib/periodMissions';
 
 const HomeScreen = () => {
-  const { missions, claimReward, claimingMissionIds } = useAppContext();
+  const { missions, claimReward, claimingMissionIds, attendanceDates } = useAppContext();
+  const { guestToken } = useAuth();
+  // 이번 주 XP는 리그와 같은 값(my_league_rank). 못 받으면 0으로 둔다
+  const [weeklyXp, setWeeklyXp] = useState(0);
+  useEffect(() => {
+    const db = guestToken ? getGuestClient(guestToken) : supabase;
+    db.rpc('my_league_rank').then(({ data }) => setWeeklyXp((data as { points?: number } | null)?.points ?? 0), () => {});
+  }, [guestToken]);
+  const period = periodMissions(attendanceDates, weeklyXp);
 
   const missionRank = (m: Mission) => (m.isRewarded ? 2 : m.current >= m.target ? 0 : 1);
   const missionList = Object.values(missions).sort((a, b) => missionRank(a) - missionRank(b) || a.sortOrder - b.sortOrder);
@@ -91,10 +102,40 @@ const HomeScreen = () => {
             })}
           </div>
         </Card>
+        <PeriodMissionList id="week" title="이번 주 미션" resetLabel={`${daysLeftInWeek()}일 뒤 초기화`} missions={period.weekly} />
+        <PeriodMissionList id="month" title="이번 달 미션" resetLabel={`${daysLeftInMonth()}일 뒤 초기화`} missions={period.monthly} />
       </div>}
       {celebration && <PointCelebration reward={celebration} onClose={() => setCelebration(null)} />}
     </div>
   );
 };
+
+// 주간·월간 미션은 진행도만 보여준다(보상 수령은 일일 미션만). 행 모양은 일일 미션과 같다
+const PeriodMissionList = ({ id, title, resetLabel, missions }: { id: string; title: string; resetLabel: string; missions: PeriodMission[] }) => (
+  <Card pad="none" className="home-missions mb-4 anim-fade-up" aria-labelledby={`${id}-missions-heading`} data-period={id}>
+    <div className="home-mission-heading">
+      <div><h2 id={`${id}-missions-heading`}>{title}</h2></div>
+      <span className="shrink-0 text-2xs font-normal text-[var(--color-ink-3)]">{resetLabel}</span>
+    </div>
+    <div className="flex flex-col">
+      {missions.map(mission => {
+        const done = mission.current >= mission.target;
+        return (
+          <div key={mission.id} className="home-mission-row" data-done={done || undefined}>
+            <div className="home-mission-top">
+              <span className="home-mission-check" aria-hidden="true">{done && <Check size={16} />}</span>
+              <div className="home-mission-info">
+                <p className={`home-mission-title text-sm ${done ? 'text-[var(--color-ink-3)]' : 'text-[var(--color-ink)]'}`}>{mission.title}</p>
+              </div>
+              {done
+                ? <span className="home-mission-count text-sm font-semibold text-[var(--color-ink-3)]">달성</span>
+                : <span className="home-mission-count text-sm font-semibold text-[var(--color-ink)]">{mission.current}<span className="text-xs text-[var(--color-ink-4)]">/{mission.target}</span></span>}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </Card>
+);
 
 export default HomeScreen;
