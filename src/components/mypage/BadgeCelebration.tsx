@@ -41,7 +41,7 @@ export const BadgeCelebration = () => {
   if (!fresh || !myTurn) return null;
 
   return (
-    <div className="original-modal app-soft-screen fixed inset-0 z-[60] flex flex-col items-center justify-center gap-6 px-6 overflow-hidden">
+    <div className="original-modal bg-[var(--color-canvas)] fixed inset-0 z-[60] flex flex-col items-center justify-center gap-6 px-6 overflow-hidden">
       {CONFETTI.map((c, i) => (
         <span
           key={i}
