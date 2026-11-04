@@ -569,7 +569,7 @@ button.course-home-topic[data-locked]:active { background: var(--color-card); }
 .course-home-topic-heading > svg { flex-shrink: 0; color: var(--color-ink-4); }
 .course-home-topic-title { flex: 1; min-width: 0; color: var(--color-ink); font-size: var(--font-size-item-title); font-weight: var(--font-weight-semibold); line-height: var(--line-height-body); word-break: keep-all; overflow-wrap: anywhere; }
 /* TDS ListRow는 disabled를 버튼에 넘기지 않아 data-locked로 흐리게 한다 */
-button.course-home-topic:is(:disabled, [data-locked]) .course-home-topic-title { color: var(--color-ink-3); font-weight: var(--font-weight-regular); }
+button.course-home-topic:is(:disabled, [data-locked]) .course-home-topic-title { color: var(--color-ink-3); }
 button.course-home-topic:is(:disabled, [data-locked]) .course-home-topic-meta { color: var(--color-ink-4); }
 /* 주제 화면 머리: 눌러서 같은 난이도의 다른 주제로 이동 */
 .course-picker { display: flex; flex-direction: column; list-style: none; }
@@ -837,6 +837,7 @@ button.mission-reward-status {
 /* 리그 순위표: 숫자 순위·기존 수달·이름·경험치를 일정한 열로 정렬한다. */
 /* 작은 글자 버튼도 손가락 크기(44px) 이상 눌리게 한다(피츠). */
 .league-header-action { display: inline-flex !important; min-height: var(--size-touch-min) !important; align-items: center; padding-inline: var(--space-2) !important; }
+.league-header-action, .league-header-action * { color: var(--color-ink-2) !important; font-weight: var(--font-weight-semibold) !important; }
 /* 순위 목록은 화면 폭을 꽉 채우고(좌우 여백 상쇄), 행 안 내용은 제목과 같은 20px 선에 맞춘다 */
 .league-ranking-list { margin-inline: calc(-1 * var(--space-5)); border-radius: 0 !important; }
 .league-ranking-row { display: grid; grid-template-columns: 28px 32px minmax(0, 1fr) auto; align-items: center; column-gap: var(--space-2); min-height: 60px; padding: var(--space-3) var(--space-5); }
@@ -847,7 +848,7 @@ button.mission-reward-status {
 .league-rank-badge[data-podium] { position: relative; min-width: 28px; width: 28px; height: 28px; padding: 0; border: 0; background: transparent; }
 .league-rank-badge[data-podium] { color: var(--color-neutral-strong); font-weight: var(--font-weight-bold); }
 .league-rank-value { position: absolute; inset-inline: 0; top: 7px; text-align: center; color: var(--color-ink); font-size: var(--font-size-caption); line-height: 16px; }
-.league-rank-name { min-width: 0; overflow: hidden; color: var(--color-ink); font-size: var(--font-size-body); font-weight: var(--font-weight-regular); line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
+.league-rank-name { min-width: 0; overflow: hidden; color: var(--color-ink); font-size: var(--font-size-body); font-weight: var(--font-weight-semibold); line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
 .league-ranking-row.is-me .league-rank-name { color: var(--color-brand-text); font-weight: var(--font-weight-bold); }
 .league-rank-xp { display: inline-flex; align-items: baseline; justify-content: flex-end; gap: var(--space-1); color: var(--color-ink-2); font-size: var(--font-size-body); font-weight: var(--font-weight-semibold); line-height: 20px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .league-rank-xp-unit { color: var(--color-ink-3); font-size: var(--font-size-caption); font-weight: var(--font-weight-regular); }
@@ -858,7 +859,6 @@ button.mission-reward-status {
 .league-rank-badge[data-podium='1'] { background: var(--color-league-first-emphasis); color: var(--gold-800); }
 .league-rank-badge[data-podium='2'] { background: var(--color-league-second-emphasis); color: var(--silver-800); }
 .league-rank-badge[data-podium='3'] { background: var(--color-league-third-emphasis); color: var(--bronze-800); }
-.league-ranking-row[data-podium] .league-rank-name { font-size: var(--font-size-body); font-weight: var(--font-weight-bold); }
 .league-ranking-row[data-podium] .league-rank-xp { font-size: var(--font-size-body); }
 
 /* 닉네임 입력의 초점 표시는 안쪽 input이 아니라 둥근 입력 영역 전체에 둔다. */
@@ -1148,7 +1148,7 @@ button.course-home-topic:not(:last-child)::after { content: ''; position: absolu
 .course-home-rail::-webkit-scrollbar { display: none; }
 button.course-home-rail-card { display: flex; width: 132px; flex-shrink: 0; flex-direction: column; align-items: flex-start; gap: var(--space-1); padding: var(--space-4); border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); text-align: left; scroll-snap-align: start; }
 button.course-home-rail-card:active { background: var(--color-surface); }
-.course-home-rail-title { color: var(--color-ink); font-size: var(--font-size-body); font-weight: var(--font-weight-bold); line-height: var(--line-height-title); word-break: keep-all; overflow-wrap: anywhere; }
+.course-home-rail-title { color: var(--color-ink); font-size: var(--font-size-body); font-weight: var(--font-weight-semibold); line-height: var(--line-height-title); word-break: keep-all; overflow-wrap: anywhere; }
 .course-home-rail-meta { color: var(--color-ink-3); font-size: var(--font-size-caption); font-variant-numeric: tabular-nums; }
 
 /* 주제 상세: 보라 챕터 카드와 원형 학습 단계 */
@@ -1303,9 +1303,9 @@ button.course-home-rail-card { width: 128px; flex-direction: column; align-items
 .course-home-hero .course-home-speech .course-home-bubble { flex: 1; min-width: 0; margin: 0 0 0 10px; padding: 12px 14px; border-radius: 18px; background: var(--color-accent-soft); box-shadow: none; }
 /* 말풍선 꼬리: 세로 가운데 맞춘 72px 전신 달리의 입 높이(가운데에서 약 16px 위)를 가리킨다 */
 .course-home-hero .course-home-speech .course-home-bubble::before { content: ''; top: calc(50% - 24px); bottom: auto; left: -10px; width: 12px; height: 16px; margin: 0; background: var(--color-accent-soft); transform: none; clip-path: polygon(0 50%, 100% 0, 100% 100%); }
-.course-home-speech .course-home-bubble-topic { font-size: 11px; }
-.course-home-speech .course-home-bubble-main { margin-top: 2px; color: var(--color-ink); font-size: 14px; font-weight: var(--font-weight-bold); line-height: var(--line-height-body); word-break: keep-all; }
-.course-home-speech .course-home-level-label { font-size: 12px; font-weight: var(--font-weight-regular); }
+.course-home-speech .course-home-bubble-topic { font-size: var(--font-size-caption); font-weight: var(--font-weight-regular); }
+.course-home-speech .course-home-bubble-main { margin-top: 2px; color: var(--color-ink); font-size: var(--font-size-body); font-weight: var(--font-weight-bold); line-height: var(--line-height-body); word-break: keep-all; }
+.course-home-speech .course-home-level-label { color: var(--color-ink-3); font-size: var(--font-size-label); font-weight: var(--font-weight-regular); }
 .course-home-speech .course-home-level { margin-top: 8px; padding-top: 8px; gap: 6px; }
 /* 배지는 일러스트 자체가 모양이라 원 바탕·흐림 처리를 두지 않는다(잠김본은 회색 파일) */
 .badge-glyph, .badge-glyph.is-locked { display: inline-flex; border: 0; border-radius: 0; background: transparent; opacity: 1; }
