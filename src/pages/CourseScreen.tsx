@@ -212,6 +212,13 @@ const CourseScreen = () => {
     const current = rail?.querySelector<HTMLElement>('[data-current]');
     if (rail && current) rail.scrollLeft = current.offsetLeft - rail.offsetLeft - 20;
   }, [focus?.courseId]);
+  // 첫 화면(?resume=1): 지금 할 단계가 있는 주제·코스 화면으로 바꾼다. 다 끝냈으면 홈에 머문다
+  const resume = searchParams.get('resume') !== null;
+  useEffect(() => {
+    if (!resume || !hydrated || !doneNodesLoaded || topics.length === 0) return;
+    const index = focus ? topics.findIndex(topic => topic.parts.some(part => part.section.course.id === focus.courseId)) : -1;
+    setSearchParams(index >= 0 && focus ? { topic: String(index), course: focus.courseId } : {}, { replace: true });
+  }, [resume, hydrated, doneNodesLoaded, topics, focus, setSearchParams]);
   const bubbleId = bubbleChoice === undefined ? focusId : bubbleChoice;
   useEffect(() => {
     if (!bubbleId) return;

@@ -176,7 +176,8 @@ const LandingRoute = () => {
 
   if (target !== '/course' || resolvedLandingIsDirect) return <Navigate to={target} replace />;
   if (seenWelcome === null) return <LoadingScreen />;
-  return <Navigate to={seenWelcome ? '/course' : '/welcome'} replace />;
+  // 첫 화면은 지금 학습 중인 주제 화면(CourseScreen이 ?resume=1을 진행 중 주제·코스로 바꾼다)
+  return <Navigate to={seenWelcome ? '/course?resume=1' : '/welcome'} replace />;
 };
 
 const BackEventHandler = () => {

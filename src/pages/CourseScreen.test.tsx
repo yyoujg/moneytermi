@@ -551,6 +551,12 @@ describe('학습 주제의 역할 아이콘', () => {
     expect(markers.every(m => m.querySelector('img[data-node-icon]'))).toBe(true);
   });
 
+  it('첫 화면(?resume=1)은 지금 할 단계가 있는 주제 화면으로 바뀐다', async () => {
+    const { container } = await mount('/course?resume=1');
+    expect(container.querySelector('.course-steps')).not.toBeNull();
+    expect(container.querySelector('[data-course-section]')).not.toBeNull();
+  });
+
   it('길에는 돌만 두고, 지금 할 단계 말풍선만 열어 두며, 돌을 누르면 그 단계 말풍선으로 바꾼다', async () => {
     baseContext({ knownIds: new Set([1, 2, 3, 4]) });
     const { container } = await mount();
