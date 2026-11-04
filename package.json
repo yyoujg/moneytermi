@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run content && vite build && ait build",
-    "content": "node --env-file=.env scripts/sync-content.mjs",
+    "content": "node scripts/sync-content.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "deploy": "ait deploy",

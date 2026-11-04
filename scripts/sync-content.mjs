@@ -2,6 +2,9 @@
 // 앱이 실행마다 Supabase에서 받으면 egress가 커서 빌드 때 한 번만 받는다.
 import { writeFileSync } from 'node:fs';
 
+// 로컬은 .env, CI는 secrets 환경변수를 쓴다.
+try { process.loadEnvFile(); } catch { /* .env 없음 */ }
+
 const url = process.env.VITE_SUPABASE_URL;
 const key = process.env.VITE_SUPABASE_ANON_KEY;
 if (!url || !key) throw new Error('VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY가 필요합니다');
