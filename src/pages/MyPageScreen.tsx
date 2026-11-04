@@ -65,11 +65,11 @@ const MyPageScreen = () => {
           <div className="my-page-stats-grid">
             {/* 통계 아이콘은 수달 3색 그림(public/icons/stat) */}
             {[
-              { icon: <img src="/icons/stat/icon-terms.svg" alt="" width={28} height={28} data-stat-icon="terms" />, color: STAT_COLOR.words, label: '살펴본 용어', value: viewedIds.size.toLocaleString(), unit: '개' },
-              { icon: <img src="/icons/stat/icon-streak.svg" alt="" width={28} height={28} data-stat-icon="streak" />, color: STAT_COLOR.streak, label: '연속 학습', value: streak.toLocaleString(), unit: '일' },
-              { icon: <img src="/icons/stat/icon-xp.svg" alt="" width={28} height={28} data-stat-icon="xp" />, color: STAT_COLOR.xp, label: '경험치', value: xp.toLocaleString(), unit: 'XP' },
+              { icon: <img src="/icons/stat/icon-terms.svg" alt="" width={24} height={24} data-stat-icon="terms" />, color: STAT_COLOR.words, label: '살펴본 용어', value: viewedIds.size.toLocaleString(), unit: '개' },
+              { icon: <img src="/icons/stat/icon-streak.svg" alt="" width={24} height={24} data-stat-icon="streak" />, color: STAT_COLOR.streak, label: '연속 학습', value: streak.toLocaleString(), unit: '일' },
+              { icon: <img src="/icons/stat/icon-xp.svg" alt="" width={24} height={24} data-stat-icon="xp" />, color: STAT_COLOR.xp, label: '경험치', value: xp.toLocaleString(), unit: 'XP' },
               // 리그 등급도 같은 통계 줄에 둔다(그림 + 이름). 승급 조건은 리그 안내 시트에만 쓴다
-              { icon: <StageFace id={leagueStage ?? 1} size={40} />, color: undefined, label: '리그 등급', value: getGrowthStage(leagueStage ?? 1).name, unit: '' },
+              { icon: <StageFace id={leagueStage ?? 1} size={32} />, color: undefined, label: '리그 등급', value: getGrowthStage(leagueStage ?? 1).name, unit: '' },
             ].map(it => (
               // 긴 값은 열 전체를 사용한다. 숫자를 줄이거나 반올림하지 않는다.
               <div key={it.label} className={`my-page-stat${it.value.length > 7 ? ' is-wide' : ''}`}>

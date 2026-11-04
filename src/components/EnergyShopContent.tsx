@@ -1,7 +1,5 @@
-import { Tv } from './ui/OtterIcons';
 import { ChevronRight } from './ui/ControlIcons';
 import { ENERGY_AD_REWARD, ENERGY_REGEN_MS } from '../constants';
-import { EnergyIcon } from './StatIcons';
 
 type Props = {
   energy: number;
@@ -40,7 +38,7 @@ export const EnergyShopContent = ({
     <div className="energy-shop-content">
       <section className="energy-shop-summary" aria-label="현재 에너지">
         <div className="energy-shop-summary-heading">
-          <EnergyIcon size={24} />
+          <img src="/icons/stat/icon-energy.svg" alt="" width={24} height={24} data-stat-icon="energy" />
           <div className="energy-shop-balance"><h2>학습 에너지</h2><p><strong>{energy}</strong><span>/ {energyMax}</span></p></div>
           <span className="energy-shop-state" data-full={full}>{full ? '충전 완료' : '충전 중'}</span>
         </div>
@@ -53,7 +51,7 @@ export const EnergyShopContent = ({
       <section className="energy-shop-section" aria-label="에너지 충전 방법">
         <h2>충전 방법</h2>
         <button type="button" onClick={onEnergyAd} disabled={full || adDisabled} className="energy-shop-option" data-energy-option="ad">
-          <Tv size={24} />
+          <img src="/icons/stat/icon-energy-ad.svg" alt="" width={24} height={24} data-stat-icon="energy-ad" />
           <span className="energy-shop-option-body"><strong>광고 보고 에너지 받기</strong><span>시청 보상 에너지 +{ENERGY_AD_REWARD}</span></span>
           <span className="energy-shop-option-state">{full ? '가득 찼어요' : adHint}{!(full || adDisabled) && <ChevronRight size={16} />}</span>
         </button>
