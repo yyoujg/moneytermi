@@ -836,7 +836,7 @@ button.mission-reward-status {
 
 /* 리그 순위표: 숫자 순위·기존 수달·이름·경험치를 일정한 열로 정렬한다. */
 /* 작은 글자 버튼도 손가락 크기(44px) 이상 눌리게 한다(피츠). */
-.league-header-action { display: inline-flex !important; min-height: var(--size-touch-min) !important; align-items: center; padding-inline: var(--space-2) !important; }
+.league-header-action { display: inline-flex !important; min-height: var(--size-touch-min) !important; align-items: center; justify-content: center; min-width: var(--size-touch-min) !important; padding-inline: var(--space-2) !important; }
 .league-header-action, .league-header-action * { color: var(--color-ink-2) !important; font-weight: var(--font-weight-semibold) !important; }
 /* 순위 목록은 화면 폭을 꽉 채우고(좌우 여백 상쇄), 행 안 내용은 제목과 같은 20px 선에 맞춘다 */
 .league-ranking-list { margin-inline: calc(-1 * var(--space-5)); border-radius: 0 !important; }
