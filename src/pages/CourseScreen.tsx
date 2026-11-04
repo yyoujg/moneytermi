@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useLayoutEffect, useEffect, useState } from 'react';
-import { Check, LockKeyhole, RotateCcw } from '../components/ui/OtterIcons';
+import { Check, LockKeyhole } from '../components/ui/OtterIcons';
 import { BottomSheet, List, ListRow } from '@toss/tds-mobile';
 import { TopicThumb } from '../components/TopicThumb';
 import { COURSE_NAMES } from '../lib/topicImages';
@@ -539,7 +539,8 @@ const CourseScreen = () => {
               <div key={node.id} className="course-step" data-step-state={done ? 'done' : locked ? 'locked' : isFocus ? 'current' : 'open'}>
                 <button type="button" className="course-step-marker" data-step-kind={isReview ? 'review' : 'step'} aria-expanded={bubbleId === node.id}
                   aria-label={`${copy.kind} ${copy.title} ${nodeStatus}, ${bubbleId === node.id ? '닫기' : '보기'}`} onClick={() => setBubbleId(bubbleId === node.id ? null : node.id)}>
-                  {done && !isReview ? <Check size={16} aria-hidden="true" /> : isReview ? <RotateCcw size={16} aria-hidden="true" /> : stepNo}
+                  {/* 복습은 화살표 아이콘이 '복습'으로 읽히지 않아 글자로 표시한다 */}
+                  {done && !isReview ? <Check size={24} aria-hidden="true" /> : isReview ? <span aria-hidden="true" data-review-mark>복습</span> : stepNo}
                 </button>
                 <span className="course-step-bubble" data-step-bubble data-open={bubbleId === node.id}><button ref={isFocus ? focusRef : undefined} type="button" disabled={locked} data-own-sfx data-node-id={node.id}
                   onClick={() => handleNodeTap(node, k, sec.knownCount, courseName(sec.course))}

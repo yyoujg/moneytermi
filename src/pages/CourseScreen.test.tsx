@@ -546,8 +546,9 @@ describe('학습 주제의 역할 아이콘', () => {
     expect(container.querySelector('[data-review-badge]')).toHaveTextContent('· 선택');
     const markers = [...container.querySelectorAll('.course-step-marker')];
     const review = markers.find(m => m.getAttribute('data-step-kind') === 'review')!;
-    expect(review.textContent).toBe('');
-    expect(review.querySelector('[data-icon="RotateCcw"]')).toBeInTheDocument();
+    // 번호 없이 '복습' 글자만
+    expect(review.textContent).toBe('복습');
+    expect(review.querySelector('[data-review-mark]')).toHaveTextContent('복습');
   });
 
   it('길에는 돌만 두고, 지금 할 단계 말풍선만 열어 두며, 돌을 누르면 그 단계 말풍선으로 바꾼다', async () => {

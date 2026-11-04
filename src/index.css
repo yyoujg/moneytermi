@@ -1128,12 +1128,12 @@ button.course-home-rail-card:active { background: var(--color-surface); }
 
 /* 주제 상세: 보라 챕터 카드와 원형 학습 단계 */
 .course-topic-summary { padding-inline: var(--space-5) !important; border-radius: var(--shape-card); background: var(--color-card) !important; }
-.course-step { grid-template-columns: 40px minmax(0, 1fr); }
+.course-step { grid-template-columns: 56px minmax(0, 1fr); }
 .course-step:not(:last-child)::before { top: 46px; left: 19px; width: 3px; border-radius: 2px; }
 /* 징검다리: 화면 가운데 줄을 기준으로 좌우로 곡선을 그리며 오가게 놓는다. 엇갈린 돌은 선으로 잇지 않는다.
    말풍선은 돌 바로 아래, 글자 길이만큼, 꼬리가 위로 돌을 가리킨다 */
 .course-steps .course-step::before { content: none !important; }
-.course-steps .course-step { --step-offset: 0px; padding-left: calc(50% - 20px + var(--step-offset)); }
+.course-steps .course-step { --step-offset: 0px; padding-left: calc(50% - 28px + var(--step-offset)); }
 /* 8칸 주기 사인 곡선(0 → 40 → 56 → 40 → 0 → -40 → -56 → -40px)으로 부드럽게 휜다 */
 .course-steps .course-step:nth-child(8n + 2), .course-steps .course-step:nth-child(8n + 4) { --step-offset: 40px; }
 .course-steps .course-step:nth-child(8n + 3) { --step-offset: 56px; }
@@ -1142,12 +1142,13 @@ button.course-home-rail-card:active { background: var(--color-surface); }
 /* 돌 사이 세로 간격(말풍선 높이 64px가 다음 돌과 겹치지 않을 만큼) */
 .course-steps .course-step + .course-step { margin-top: var(--space-6); }
 .course-step[data-step-state='done']:not(:last-child)::before { background: var(--color-progress); }
-.course-step-marker { width: 40px; height: 40px; margin-top: var(--space-2); border: 0; background: var(--color-neutral-soft); color: var(--color-ink-2); font-size: var(--font-size-label); }
+.course-step-marker { width: 56px; height: 56px; margin-top: var(--space-2); border: 0; background: var(--color-neutral-soft); color: var(--color-ink-2); font-size: var(--font-size-body); }
+.course-step-marker [data-review-mark] { font-size: var(--font-size-caption); font-weight: var(--font-weight-bold); }
 .course-step[data-step-state='done'] .course-step-marker { background: var(--color-neutral-strong); color: var(--color-card); }
 .course-step[data-step-state='current'] .course-step-marker { border: 3px solid var(--color-neutral-strong); background: var(--color-card); color: var(--color-neutral-strong); font-weight: var(--font-weight-bold); }
 .course-step[data-step-state='locked'] .course-step-marker { background: var(--color-surface); color: var(--color-ink-3); }
 /* 끝낸 단계 말풍선: 체크 오른쪽에 떠서 아래 줄을 밀지 않는다. 꼬리는 체크를 가리킨다 */
-.course-step-bubble { position: absolute; top: 60px; left: calc(50% + var(--step-offset, 0px)); z-index: 5; width: max-content; max-width: calc(100% - 8px); transform: translateX(-50%); }
+.course-step-bubble { position: absolute; top: 76px; left: calc(50% + var(--step-offset, 0px)); z-index: 5; width: max-content; max-width: calc(100% - 8px); transform: translateX(-50%); }
 /* 말풍선 면은 카드 하나만(테두리 두 겹 방지). 지금 할 단계는 기존처럼 옅은 세이지 면 */
 .course-step-bubble > button.course-node-card { border-color: var(--color-line) !important; background: var(--color-card) !important; }
 .course-step[data-step-state='current'] .course-step-bubble > button.course-node-card { background: var(--color-accent-soft) !important; }
