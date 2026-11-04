@@ -55,10 +55,10 @@ for (const [name, values] of [['라이트', light]] as const) {
         expect(contrast(resolve(foreground, values), resolve(background, values))).toBeGreaterThanOrEqual(4.5);
       });
     }
-    it('주행동은 라임 바탕에 진한 글자를 쓰고 글자 대비 4.5:1을 넘는다', () => {
-      expect(resolve('--color-brand-action', values)).toBe('#c6f432');
+    it('주행동은 세이지 바탕에 진한 글자를 쓰고 글자 대비 4.5:1을 넘는다', () => {
+      expect(resolve('--color-brand-action', values)).toBe('#a8c68f');
       expect(resolve('--color-on-brand', values)).toBe('#191f28');
-      expect(resolve('--color-brand-pressed', values)).toBe('#b3e01f');
+      expect(resolve('--color-brand-pressed', values)).toBe('#94b67a');
       expect(contrast(resolve('--color-on-brand', values), resolve('--color-brand-action', values))).toBeGreaterThanOrEqual(4.5);
     });
     it('누름 색은 기본보다 어둡고 보조 버튼의 상태를 유지한다', () => {
@@ -193,8 +193,8 @@ describe('색상 정의의 단일 원본', () => {
     expect(withoutCommentsAndSwitchSelector).not.toMatch(/#[\da-f]{3,8}\b/i);
   });
   it('히어로와 통계의 큰 표면은 공통 중성 역할을 따른다', () => {
-    expect(resolve('--color-hero-start', light)).toBe('#c6f432');
-    expect(resolve('--color-hero-end', light)).toBe('#b3e01f');
+    expect(resolve('--color-hero-start', light)).toBe('#a8c68f');
+    expect(resolve('--color-hero-end', light)).toBe('#94b67a');
     expect(light['--color-xp-soft']).toBe('var(--color-surface)');
     expect(light['--color-points-soft']).toBe('var(--color-surface)');
   });
@@ -319,13 +319,13 @@ describe('원시값과 의미 역할의 2단계 구조', () => {
 });
 
 describe('주황 메인과 따뜻한 보조 팔레트', () => {
-  it('라이트는 옅은 회색 바탕·흰 섹션·라임 행동·진한 라임 강조를 사용한다', () => {
+  it('라이트는 옅은 회색 바탕·흰 섹션·세이지 행동·진한 세이지 강조를 사용한다', () => {
     expect(resolve('--color-canvas', light)).toBe('#f2f4f6');
     expect(resolve('--color-card', light)).toBe('#ffffff');
     expect(resolve('--color-surface', light)).toBe('#f2f4f6');
-    expect(resolve('--color-brand-action', light)).toBe('#c6f432');
-    expect(resolve('--color-brand-decoration', light)).toBe('#4d6b00');
-    expect(resolve('--color-brand-accent', light)).toBe('#c6f432');
+    expect(resolve('--color-brand-action', light)).toBe('#a8c68f');
+    expect(resolve('--color-brand-decoration', light)).toBe('#4f6b3a');
+    expect(resolve('--color-brand-accent', light)).toBe('#a8c68f');
   });
   it('마이페이지·리그의 구분선도 공통 중성·민트 역할을 상속한다', () => {
     for (const selector of [':is(.my-page-screen, .league-screen, .identity-badge, .badge-tone)']) {

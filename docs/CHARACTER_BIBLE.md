@@ -52,7 +52,7 @@
 
 | 자리            | 포즈                | 크기  | 코드                                   |
 | --------------- | ------------------- | ----- | -------------------------------------- |
-| 홈 오늘 할 학습 | 얼굴 아바타(기본)   | 36px  | `DaliAvatar.tsx`(`otter-face-default.svg`: 단순화본 기본 포즈를 viewBox `29 3 49 49`로 얼굴만 자름). 표정은 `mood` prop으로 확장 |
+| 홈 오늘 할 학습 | 얼굴 아바타(기본)   | 40px  | `DaliAvatar.tsx`(`otter-face-default.svg`: 단순화본 기본 포즈를 viewBox `29 3 49 49`로 얼굴만 자름). 표정은 `mood` prop으로 확장 |
 | 온보딩 첫 화면  | 기본                | 96px  | `App.tsx` `WelcomeScreen`              |
 | 퀘스트 요약     | 만세(미션을 모두 완료했을 때만) | 72px  | `HomeScreen.tsx`                       |
 | 학습 완료       | 만세                | 128px | `LearningCompletionScreen.tsx`         |

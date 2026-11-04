@@ -1173,7 +1173,7 @@ button.course-home-rail-card:active { background: transparent; opacity: 0.7; }
 .lesson-intro-step { padding: var(--space-3) 0; border-radius: 0; background: transparent; box-shadow: none; border-bottom: 1px solid var(--color-line); }
 /* 선택 전 보기는 흰 면이라 회색 테두리로 경계를 보인다 */
 button.quiz-option.border-transparent { border-color: var(--color-line-strong) !important; }
-/* 획득 배지 = 라임 틴트 원 + 진한 중립 채움 아이콘, 미획득 = 회색 원 + 흐린 선 아이콘 */
+/* 획득 배지 = 세이지 틴트 원 + 진한 중립 채움 아이콘, 미획득 = 회색 원 + 흐린 선 아이콘 */
 .badge-glyph { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; border: 0; background: var(--color-badge-earned-soft); color: var(--color-badge-earned); }
 .badge-glyph.is-locked { border: 0; background: var(--color-surface); color: var(--color-ink-3); opacity: 0.6; }
 
@@ -1222,8 +1222,8 @@ button.course-home-rail-card { width: 168px; flex-direction: row; align-items: c
 .topic-thumb-fallback { display: inline-flex; align-items: center; justify-content: center; color: var(--color-ink-3); font-size: var(--font-size-label); font-weight: var(--font-weight-bold); }
 /* 홈 화자 아바타 + 말풍선: 아바타 쪽 아래 모서리만 각지게 */
 .course-home-speech { display: flex; align-items: flex-end; gap: 8px; margin-bottom: 16px; }
-.dali-avatar { display: inline-flex; width: 36px; height: 36px; flex-shrink: 0; align-items: center; justify-content: center; overflow: hidden; border-radius: 50%; background: var(--color-accent-soft); }
-.dali-avatar img { width: 36px; height: 36px; }
+.dali-avatar { display: inline-flex; width: 40px; height: 40px; flex-shrink: 0; align-items: center; justify-content: center; overflow: hidden; border-radius: 50%; background: var(--color-accent-soft); }
+.dali-avatar img { width: 40px; height: 40px; }
 .course-home-hero .course-home-speech .course-home-bubble { flex: 1; min-width: 0; margin: 0; padding: 12px 14px; border-radius: 16px 16px 16px 4px; background: var(--color-accent-soft); box-shadow: none; }
 .course-home-hero .course-home-speech .course-home-bubble::before { content: none; }
 .course-home-speech .course-home-bubble-topic { font-size: 11px; }

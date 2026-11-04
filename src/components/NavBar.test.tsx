@@ -74,7 +74,7 @@ beforeEach(() => {
 });
 
 describe('NavBar new badges', () => {
-  it.each(['/course', '/course/topics', '/home', '/league', '/my'])('%s에서 진한 라임 채움 아이콘과 메뉴명·현재 페이지로 선택을 구분한다', async path => {
+  it.each(['/course', '/course/topics', '/home', '/league', '/my'])('%s에서 진한 세이지 채움 아이콘과 메뉴명·현재 페이지로 선택을 구분한다', async path => {
     const container = await mount(path);
     const active = container.querySelector('button[aria-current="page"]');
     expect(active).toBeInTheDocument();
