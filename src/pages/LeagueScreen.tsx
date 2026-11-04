@@ -49,7 +49,7 @@ const LeagueScreen = () => {
   const stage = getGrowthStage(xp);
 
   return (
-    <div className="league-screen app-soft-screen flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
+    <div className="league-screen flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
       <div className="pt-4 px-5 pb-4">
         <div className="flex justify-between items-center mb-4">
           <h2 className="type-page-title">리그</h2>

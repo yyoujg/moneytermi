@@ -1215,3 +1215,7 @@ button.review-aux-button:disabled { color: var(--color-ink-3); }
 .course-home-topic-list .course-home-topic > div { padding-left: 0; padding-right: 0; }
 .course-home-level-heading { padding: var(--space-5) 0 var(--space-1); color: var(--color-ink-3); font-size: var(--font-size-label); font-weight: var(--font-weight-semibold); }
 .course-home-level-heading:first-child { padding-top: var(--space-3); }
+/* 퀘스트·리그·마이는 흰 바탕. 섹션 사이는 라벤더 띠 대신 구분선 */
+.quest-screen, .league-screen, .my-page-screen { background: var(--color-card); }
+.my-page-sections .my-page-panel.my-page-menu { padding-inline: 0; }
+.my-page-menu button > div { padding-inline: var(--space-5); }
