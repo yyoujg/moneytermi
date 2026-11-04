@@ -76,6 +76,7 @@ const WordCard = ({
   keyword,
   visualTerms,
   detailContent,
+  section,
 }: {
   word: Word;
   onDetail?: () => void;
@@ -86,11 +87,18 @@ const WordCard = ({
   keyword: string;
   visualTerms: Terms;
   detailContent?: React.ReactNode;
+  // 'meaning'은 레슨 1페이지(정의+예시), 'extras'는 자세히 보기 시트(그래프·뉴스·관련 용어)
+  section?: 'meaning' | 'extras';
 }) => {
+  if (section === 'meaning') return (
+    <div className="flex flex-col gap-3 px-5 pb-6">
+      <WordMeaningCard word={word} sources={(word.sources ?? []).map(source => SOURCE_NAMES[source] ?? source)} onDetail={onDetail} />
+    </div>
+  );
   return (
-  <div className="flex flex-col gap-3 px-5 pb-6">
+  <div className={`flex flex-col gap-3${section === 'extras' ? '' : ' px-5 pb-6'}`}>
 
-    <WordMeaningCard word={word} sources={(word.sources ?? []).map(source => SOURCE_NAMES[source] ?? source)} onDetail={onDetail} />
+    {section !== 'extras' && <WordMeaningCard word={word} sources={(word.sources ?? []).map(source => SOURCE_NAMES[source] ?? source)} onDetail={onDetail} />}
 
     {detailContent}
 
@@ -490,7 +498,8 @@ const WordCardScreen = () => {
         <div key={word.id}>
           <WordCard
             word={word}
-            onDetail={detail || textVisuals.length > 0 ? () => setDetailOpen(true) : undefined}
+            section="meaning"
+            onDetail={() => setDetailOpen(true)}
             validRelated={related}
             onRelatedClick={handleRelatedWordClick}
             newsItems={newsItems}
@@ -531,6 +540,16 @@ const WordCardScreen = () => {
             <Highlight text={para} keyword={word.word} pattern={termPattern(word.word) ?? undefined} />
           </p>
         ))}
+        <WordCard
+          word={word}
+          section="extras"
+          validRelated={related}
+          onRelatedClick={handleRelatedWordClick}
+          newsItems={newsItems}
+          newsLoading={newsLoading}
+          keyword={word.word}
+          visualTerms={visualTerms}
+        />
         {word.sources && word.sources.length > 0 && (
           <p className="mt-2 border-t border-[var(--color-line)] pt-3 text-xs text-[var(--color-ink-3)]">출처: {word.sources.map(s => SOURCE_NAMES[s] ?? s).join(' · ')}</p>
         )}

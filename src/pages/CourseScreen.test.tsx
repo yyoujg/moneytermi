@@ -159,7 +159,15 @@ beforeEach(() => {
 });
 
 describe('CourseScreen energy gates', () => {
-  it.each(['/course', '/course?topic=0'])('학습 전 에너지 잔량을 표시하고 충전 방법을 연다: %s', async entry => {
+  it('홈에서는 에너지가 넉넉하면 에너지 줄을 숨기고 부족할 때만 보여준다', async () => {
+    baseContext({ energy: 7, energyMax: 25 });
+    expect((await mount('/course')).container.querySelector('.course-energy-entry')).toBeNull();
+    cleanup();
+    baseContext({ energy: 0, energyMax: 25 });
+    expect((await mount('/course')).container.querySelector('[aria-label="학습 에너지 0/25, 충전 방법 보기"]')).toBeInTheDocument();
+  });
+
+  it.each(['/course?topic=0'])('학습 전 에너지 잔량을 표시하고 충전 방법을 연다: %s', async entry => {
     baseContext({ energy: 7, energyMax: 25 });
     const { container } = await mount(entry);
     const button = container.querySelector<HTMLButtonElement>('[aria-label="학습 에너지 7/25, 충전 방법 보기"]')!;
@@ -219,10 +227,9 @@ describe('CourseScreen energy gates', () => {
     expect(container.querySelector('.course-topic-index')).toBeNull();
     for (const button of container.querySelectorAll('.course-home-topic')) {
       expect(button).toHaveAttribute('aria-label', expect.stringMatching(/^(기초|중급) .+ 주제 열기$/));
-      expect(button.querySelector('.course-home-topic-icon')).toBeInTheDocument();
-      expect(button.querySelector('.course-home-topic-heading > svg')).toHaveAttribute('fill', 'currentColor');
-      // 주제 행은 제목과 메타 한 줄만 둔다. 진행률은 메타 글자(0/31개)로 충분하다.
-      expect(button.querySelector('[role=progressbar]')).toHaveAttribute('aria-valuenow', '0');
+      // 주제 행은 같은 아이콘 반복 없이 제목·메타 한 줄과 상태 글자만 둔다
+      expect(button.querySelector('.course-home-topic-icon')).toBeNull();
+      expect(button.querySelector('.course-home-topic-meta')).toHaveTextContent(/단계 완료$/);
       expect(button.querySelector('.course-home-topic-description')).toBeNull();
     }
     expect(container.querySelector('[aria-label="홈으로 돌아가기"]')).toBeNull();
@@ -578,7 +585,7 @@ describe('홈으로 옮긴 학습 현황', () => {
 
   it('복습할 용어가 없으면 복습 진입을 숨긴다', async () => {
     const { container } = await mount('/course');
-    expect(container.querySelector('.home-review-entry')).toBeNull();
+    expect(container.querySelector('[aria-label^="오늘 다시 볼 용어"]')).toBeNull();
     expect(container.querySelector('.course-home-hero [aria-label="다음 학습까지 진행률"]')).toBeInTheDocument();
   });
 

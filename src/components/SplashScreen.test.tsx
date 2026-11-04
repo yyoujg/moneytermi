@@ -41,6 +41,8 @@ describe('SplashScreen', () => {
 
     expect(status).toHaveAttribute('aria-label', '머니터미를 불러오는 중');
     expect(container.textContent).toBe('머니터미');
-    expect(container.querySelector('img')).toBeNull();
+    // 로고는 v5 수달 한 장(장식)
+    expect(container.querySelectorAll('img')).toHaveLength(1);
+    expect(container.querySelector('img')).toHaveAttribute('alt', '');
   });
 });

@@ -244,13 +244,14 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
   color: var(--color-ink);
 }
 .splash-brand {
+  display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
   font-size: var(--font-size-title-2);
   font-weight: var(--font-weight-bold);
 }
 .splash-spinner {
   /* 로고가 정확히 가운데 오도록 흐름에서 빼서 로고 아래에 둔다 */
   position: absolute;
-  top: calc(50% + var(--space-7));
+  top: calc(50% + 72px);
   width: 20px;
   height: 20px;
   border: 2px solid var(--color-line);
@@ -1206,3 +1207,9 @@ button.review-aux-button:disabled { color: var(--color-ink-3); }
 /* 사용자 아바타: 그림 없이 첫 글자. 배경색은 ProfileAvatar가 토큰 중 하나로 정한다 */
 .profile-avatar { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; color: var(--color-ink-2); font-weight: var(--font-weight-bold); line-height: 1; }
 .league-ranking-row.is-me .profile-avatar { background: var(--color-card) !important; }
+/* 복습이 주 버튼일 때 아래 '이어 배우기'와 간격 */
+.course-home-hero button.course-home-primary + button.course-home-primary { margin-top: var(--space-2); }
+/* 전체 주제는 흰 바탕 + TDS ListRow. 예전 경로형 카드 배치를 끈다 */
+.course-home-topic-list { display: block; padding: var(--space-2) 0; }
+.course-home-topic-list .course-home-topic { display: block; width: 100%; margin-left: 0; min-height: 0; padding: 0; border: 0; background: transparent; }
+.course-home-topic-list .course-home-topic > div { padding-left: 0; padding-right: 0; }

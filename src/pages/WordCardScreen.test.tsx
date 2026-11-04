@@ -112,8 +112,11 @@ const mountLesson = (autoAdvance = true) => {
     </Routes>
   </MemoryRouter>));
   cleanup = () => { act(() => root.unmount()); container.remove(); };
+  const find = (text: string, scope: ParentNode) => [...scope.querySelectorAll('button')].find(button => button.textContent?.replace(/^\d+\s*/, '').trim() === text);
   const click = (text: string, scope: ParentNode = container) => {
-    const button = [...scope.querySelectorAll('button')].find(button => button.textContent?.replace(/^\d+\s*/, '').trim() === text);
+    // 관련 용어는 자세히 보기 시트 안에 있다
+    if (!find(text, scope) && scope === container && find('자세히 보기', container)) act(() => find('자세히 보기', container)!.click());
+    const button = find(text, scope);
     expect(button, `${text} 버튼`).toBeDefined();
     act(() => { button!.focus(); button!.click(); });
     return button!;
