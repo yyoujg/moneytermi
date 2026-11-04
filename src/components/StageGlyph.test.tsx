@@ -16,15 +16,16 @@ const mount = (children: ReactNode) => {
 };
 
 describe('리그 등급 표식', () => {
-  it('등급을 선형 단색 아이콘으로 표시하고 그림 파일을 쓰지 않는다', () => {
+  it('등급을 수달 그림체 일러스트로 표시하고, 작으면 단순화본·못 간 등급은 잠김본을 쓴다', () => {
     const container = mount(<StageGlyph id={3} size={40} className="scale-125" />);
     const glyph = container.querySelector('.stage-glyph')!;
-    expect(glyph.tagName.toLowerCase()).toBe('svg');
-    expect(glyph).toHaveAttribute('fill', 'currentColor');
+    expect(glyph.tagName.toLowerCase()).toBe('img');
+    expect(glyph).toHaveAttribute('src', '/league/v1/league-tier3-routine-small.svg');
     expect(glyph).toHaveAttribute('data-stage-id', '3');
     expect(glyph).toHaveAttribute('aria-hidden', 'true');
     expect(glyph).toHaveClass('scale-125');
     expect(glyph).toHaveStyle({ width: '40px', height: '40px' });
-    expect(container.querySelector('img')).toBeNull();
+    expect(mount(<StageGlyph id={5} size={76} />).querySelector('img')).toHaveAttribute('src', '/league/v1/league-tier5-master.svg');
+    expect(mount(<StageGlyph id={4} size={28} locked />).querySelector('img')).toHaveAttribute('src', '/league/v1/league-tier4-investor-locked.svg');
   });
 });

@@ -1,12 +1,11 @@
-import { ChartLineUp, Crown, ListChecks, PiggyBank, Plant, type Icon } from '@phosphor-icons/react';
+// 등급은 수달과 같은 낙서 그림체 일러스트로 구분한다: 새싹 → 저금통 → 자명종 → 상승 차트 → 왕관
+// (public/league/v1, docs/character/league/trace_league.py로 벡터화). 아직 못 간 등급은 회색 잠김본, 40px 이하는 단순화본.
+const STAGE_FILE: Record<number, string> = { 1: 'tier1-moneybeginner', 2: 'tier2-saver', 3: 'tier3-routine', 4: 'tier4-investor', 5: 'tier5-master' };
 
-// 등급은 선형 아이콘으로 구분한다: 씨앗 → 저금통 → 체크리스트 → 상승 차트 → 왕관
-const STAGE_ICON: Record<number, Icon> = { 1: Plant, 2: PiggyBank, 3: ListChecks, 4: ChartLineUp, 5: Crown };
-
-export const StageGlyph = ({ id, size = 20, className = '' }: { id: number; size?: number; className?: string }) => {
-  const Glyph = STAGE_ICON[id] ?? Plant;
+export const StageGlyph = ({ id, size = 20, className = '', locked = false }: { id: number; size?: number; className?: string; locked?: boolean }) => {
+  const variant = locked ? '-locked' : size <= 40 ? '-small' : '';
   return (
-    <Glyph weight="regular" size={size} color="currentColor" aria-hidden="true" focusable="false" data-stage-id={id}
-      className={`stage-glyph shrink-0 ${className}`} style={{ width: size, height: size }} />
+    <img src={`/league/v1/league-${STAGE_FILE[id] ?? STAGE_FILE[1]}${variant}.svg`} alt="" aria-hidden="true" data-stage-id={id}
+      width={size} height={size} className={`stage-glyph shrink-0 ${className}`} style={{ width: size, height: size }} />
   );
 };

@@ -79,7 +79,7 @@ const LeagueScreen = () => {
             const state = s.id < stage.id ? 'done' : s.id === stage.id ? 'current' : 'future';
             return (
               <li key={s.id} className="league-tier-step" data-state={state} aria-current={state === 'current' ? 'step' : undefined}>
-                <span className="league-tier-node"><StageGlyph id={s.id} size={24} /></span>
+                <span className="league-tier-node"><StageGlyph id={s.id} size={28} locked={state === 'future'} /></span>
                 <span className="league-tier-name">{s.name}</span>
                 <span className="league-tier-xp">{s.minPoints.toLocaleString()}XP</span>
               </li>

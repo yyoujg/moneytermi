@@ -66,6 +66,11 @@
 - 파일: `public/badges/v3/badge-<이름>[-small|-locked].svg`. 획득은 일반본(40px 이하는 단순화본), 미획득은 회색 잠김본. 다크본은 쓰지 않아 넣지 않았다.
 - 이름: word1·word10·word50·word100(단어), streak3·streak7·streak30(연속), xp100·xp500·xp1000(XP).
 
+## 5-2. 리그 등급 (2026-11-04)
+
+- 등급 5종도 같은 3색·낙서 선: 새싹(돈알못), 저금통(짠테크러), 자명종(갓생러), 상승 차트(재테크러), 왕관(경제고수). 기준 이미지 `docs/character/league/ref-league.png`, 벡터화 `trace_league.py`.
+- 파일: `public/league/v1/league-tier<번호>-<이름>[-small|-locked].svg`. 쓰는 곳은 `StageGlyph.tsx`(리그 등급 길·마이 프로필·승급 축하). 리그 등급 길에서 아직 못 간 등급은 잠김본, 40px 이하는 단순화본.
+
 ## 6. 포즈 추가 방법
 
 1. 기준 이미지(`docs/character/ref.png`)를 만든 것과 같은 프롬프트로 새 포즈 이미지를 생성한다.
