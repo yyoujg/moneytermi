@@ -19,13 +19,13 @@ const mount = (content: React.ReactNode) => {
 describe('재화와 학습 그림 아이콘', () => {
   it('선형 단색 아이콘의 크기와 장식용 접근성 속성을 유지한다', () => {
     const el = mount(<><PointIcon size={24} className="example-point" /><EnergyIcon size={24} /><XpIcon /><StreakIcon /><WordsIcon /></>);
-    expect(el.querySelector('img')).toBeNull();
     const icons = ['Point', 'Xp', 'Streak', 'Words'].map(name => el.querySelector(`svg[data-icon="${name}"]`)!);
     for (const icon of icons) { expect(icon).toHaveAttribute('aria-hidden', 'true'); expect(icon).toHaveAttribute('fill', 'currentColor'); }
     expect(icons[0]).toHaveAttribute('width', '24');
     expect(icons[0]).toHaveClass('example-point');
     expect(icons[1]).toHaveAttribute('width', '16');
-    expect(el.querySelector('svg[data-icon="Lightning"]')).toHaveAttribute('width', '24');
+    // 에너지만 갈색 번개 그림(img)이다
+    expect(el.querySelector('img[data-stat-icon="energy"]')).toHaveAttribute('width', '24');
   });
 });
 
