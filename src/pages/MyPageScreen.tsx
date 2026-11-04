@@ -21,7 +21,7 @@ const MENU_ITEMS = [
 ];
 
 const MyPageScreen = () => {
-  const { xp, knownWords, viewedIds, attendanceDates } = useAppContext();
+  const { xp, leagueStage, knownWords, viewedIds, attendanceDates } = useAppContext();
   const streak = calcStreak(attendanceDates);
   const badges = buildBadges({ words: knownWords.length, streak, xp });
 
@@ -52,7 +52,7 @@ const MyPageScreen = () => {
         <h2 className="type-page-title mb-4!">마이페이지</h2>
         <ProfileHeader
           nickname={user?.nickname ?? DEFAULT_NICKNAME}
-          xp={xp}
+          stageId={leagueStage ?? 1}
           onEditNickname={() => setShowNicknameSheet(true)}
         />
 

@@ -6,57 +6,37 @@ import { ProfileGrowth } from './ProfileGrowth';
 Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { value: true, configurable: true });
 let cleanup = () => {};
 afterEach(() => cleanup());
-const mount = (xp: number) => {
+const mount = (stageId: number) => {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
-  act(() => root.render(<ProfileGrowth xp={xp} />));
+  act(() => root.render(<ProfileGrowth stageId={stageId} />));
   cleanup = () => { act(() => root.unmount()); container.remove(); };
   return container;
 };
 
-describe('프로필 등급 성장 정보', () => {
+describe('프로필 등급 정보', () => {
   it.each([
-    [0, '돈알못', '짠테크러까지 200 XP'],
-    [199, '돈알못', '짠테크러까지 1 XP'],
-    [200, '짠테크러', '갓생러까지 800 XP'],
-    [1200, '갓생러', '재테크러까지 1,800 XP'],
-    [2999, '갓생러', '재테크러까지 1 XP'],
-    [3000, '재테크러', '경제고수까지 5,000 XP'],
-    [7999, '재테크러', '경제고수까지 1 XP'],
-  ])('%i 경험치에 맞는 현재 등급과 실제 남은 경험치를 보여준다', (xp, name, detail) => {
-    const container = mount(xp as number);
-    const group = container.querySelector('[aria-label="등급 성장"]');
+    [1, '돈알못', '주간 3위 안에 들면 다음 주 짠테크러'],
+    [3, '갓생러', '주간 3위 안에 들면 다음 주 재테크러'],
+    [4, '재테크러', '주간 3위 안에 들면 다음 주 경제고수'],
+  ])('%i단계는 현재 등급과 다음 등급 조건을 보여준다', (stageId, name, detail) => {
+    const group = mount(stageId as number).querySelector('[aria-label="등급 성장"]');
     expect(group?.querySelector('p')).toHaveTextContent(name as string);
     expect(group).toHaveTextContent(detail as string);
   });
 
-  it.each([8000, 90000])('최고 단계 %i에서는 존재하지 않는 다음 등급을 표시하지 않는다', xp => {
-    const group = mount(xp).querySelector('[aria-label="등급 성장"]');
+  it('최고 단계에서는 다음 등급을 표시하지 않는다', () => {
+    const group = mount(5).querySelector('[aria-label="등급 성장"]');
     expect(group).toHaveTextContent('경제고수');
     expect(group).toHaveTextContent('최고 단계에 도달했어요');
-    expect(group).not.toHaveTextContent('까지');
   });
 
-  it('불필요한 테두리 배지와 추상적인 안내 대신 두 줄 정보로 정리한다', () => {
-    const group = mount(1200).querySelector('[aria-label="등급 성장"]');
+  it('누적 XP 진행 막대 없이 두 줄 정보로 정리한다', () => {
+    const group = mount(2).querySelector('[aria-label="등급 성장"]');
     expect(group).toHaveAttribute('role', 'group');
-    expect(group).not.toHaveClass('border', 'rounded-full');
     expect(group?.querySelectorAll('p')).toHaveLength(2);
-    expect(group?.querySelector('button')).toBeNull();
-    expect(group).not.toHaveTextContent('학습 기록을 쌓고 있어요');
-  });
-});
-
-describe('현재 등급 구간의 실제 성장 진행률', () => {
-  it.each([[0, 0, 200, '0%'], [190, 190, 200, '95%'], [200, 0, 800, '0%'], [1200, 200, 2000, '10%'], [2990, 1990, 2000, '99.5%'], [3000, 0, 5000, '0%'], [7990, 4990, 5000, '99.8%']])('%iXP의 현재 등급 구간을 재설정된 기준으로 표시한다', (xp, earned, span, width) => {
-    const bar = mount(xp as number).querySelector('[role="progressbar"]')!;
-    expect(bar).toHaveAttribute('aria-valuemin', '0');
-    expect(bar).toHaveAttribute('aria-valuenow', String(earned));
-    expect(bar).toHaveAttribute('aria-valuemax', String(span));
-    expect(bar.querySelector('span')).toHaveStyle({ width });
-  });
-  it.each([8000, 90000])('최고 단계 %iXP에는 다음 단계 막대를 만들지 않는다', xp => {
-    expect(mount(xp).querySelector('[role="progressbar"]')).toBeNull();
+    expect(group?.querySelector('[role="progressbar"]')).toBeNull();
+    expect(group).not.toHaveTextContent('XP');
   });
 });

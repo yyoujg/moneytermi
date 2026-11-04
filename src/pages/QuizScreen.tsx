@@ -5,8 +5,7 @@ import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
 import { useSettings } from '../hooks/useSettings';
 import { markNodeDone } from '../lib/pathProgress';
-import { getGrowthStage, GROWTH_STAGES } from '../constants';
-import { feedbackCorrect, feedbackWrong, feedbackQuizComplete, feedbackTierUp } from '../lib/feedback';
+import { feedbackCorrect, feedbackWrong, feedbackQuizComplete } from '../lib/feedback';
 import { logClick } from '../lib/analytics';
 import { shareTossLink } from '../lib/share';
 import { ActionButton } from '../components/ui/ActionButton';
@@ -114,9 +113,8 @@ const QuizScreen = () => {
   useEffect(() => {
     if (!finished || completedRef.current) return;
     completedRef.current = true;
-    // 승급이면 웅장하게, 아니면 정답률에 따라
-    if (getGrowthStage(xp).id > getGrowthStage(xpAtStart.current).id) feedbackTierUp();
-    else feedbackQuizComplete(correctCount === quizQueue.length);
+    // 등급은 주간 순위로 오르므로(서버 정산) 퀴즈 중에는 승급이 없다. 정답률에 따라서만 피드백한다
+    feedbackQuizComplete(correctCount === quizQueue.length);
     logClick('quiz_complete', { mode, total: baseQueue.length, correct: firstCorrect, attempts: quizQueue.length, node_id: navState?.nodeId ?? navState?.lessonId, course_id: navState?.courseId });
     if (navState?.nodeId) markNodeDone(navState.nodeId);   // 패스의 퀴즈·복습 노드를 완료 표시
     void refreshWallet();   // m4(퀴즈 N문제)·50XP 보너스는 서버가 올린다 — 세션 끝에 한 번 읽는다
@@ -149,11 +147,6 @@ const QuizScreen = () => {
   // 완료 화면
   if (currentQuizIndex >= quizQueue.length) {
     const accuracy = baseQueue.length > 0 ? Math.round((firstCorrect / baseQueue.length) * 100) : 0;
-    const stageBefore = getGrowthStage(xpAtStart.current);
-    const stageAfter = getGrowthStage(xp);
-    const stageUp = stageAfter.id > stageBefore.id;
-    const nextStage = GROWTH_STAGES.find(stage => stage.id === stageAfter.id + 1);
-    const stageProgress = nextStage ? Math.min(100, Math.round(((xp - stageAfter.minPoints) / (nextStage.minPoints - stageAfter.minPoints)) * 100)) : 100;
     const completionTitle = navState?.mode === 'lesson_warmup'
       ? '준비 완료!'
       : navState?.mode === 'course_review'
@@ -176,19 +169,7 @@ const QuizScreen = () => {
           <p className="mt-3! flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-base font-bold tabular-nums">
             <span className="inline-flex items-center gap-1 text-[var(--color-ink)]"><XpIcon size={20} className="quiz-result-icon" /><span>획득 XP</span><span>+{Math.max(0, xp - xpAtStart.current)}</span></span>
           </p>
-          <p className="mt-1! text-xs text-[var(--color-ink-3)]">최고 {maxCombo}연속{stageUp ? ` · ${stageBefore.name} → ${stageAfter.name} 승급` : ''}</p>
-          {/* 다음 목표까지 남은 거리를 바로 보여줘 다음 학습으로 이어지게 한다(목표 근접 효과) */}
-          {nextStage && (
-            <div className="quiz-result-next mt-4 w-full">
-              <p className="flex items-center justify-between text-xs text-[var(--color-ink-3)]">
-                <span><strong className="text-[var(--color-ink)]">{nextStage.name}</strong>까지 {nextStage.minPoints - xp}XP</span>
-                <span className="tabular-nums">{stageProgress}%</span>
-              </p>
-              <div role="progressbar" aria-label={`${nextStage.name}까지 진행률`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={stageProgress} className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--color-surface)]">
-                <div className="h-full rounded-full bg-[var(--color-progress)]" style={{ width: `${stageProgress}%` }} />
-              </div>
-            </div>
-          )}
+          <p className="mt-1! text-xs text-[var(--color-ink-3)]">최고 {maxCombo}연속</p>
         </section>
         <button
           type="button"

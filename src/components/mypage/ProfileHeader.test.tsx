@@ -11,20 +11,20 @@ const mount = (nickname = '예시 학습자') => {
   document.body.appendChild(container);
   const root = createRoot(container);
   const onEditNickname = vi.fn();
-  act(() => root.render(<ProfileHeader nickname={nickname} xp={1200} onEditNickname={onEditNickname} />));
+  act(() => root.render(<ProfileHeader nickname={nickname} stageId={3} onEditNickname={onEditNickname} />));
   cleanup = () => { act(() => root.unmount()); container.remove(); };
   return { container, onEditNickname };
 };
 
 describe('프로필 머리', () => {
-  it('닉네임 첫 글자 프로필과 이름·경험치를 표시한다', () => {
+  it('닉네임 첫 글자 프로필과 이름·등급을 표시한다', () => {
     const { container } = mount();
     expect(container.querySelector('h3')).toHaveTextContent('예시 학습자');
     // 사용자 아바타는 마스코트 그림이 아니라 닉네임 첫 글자다
     expect(container.querySelector('.my-profile-avatar img')).toBeNull();
     expect(container.querySelector('[data-avatar-initial]')).toHaveTextContent('예');
     expect(container).toHaveTextContent('갓생러');
-    expect(container).toHaveTextContent('재테크러까지 1,800 XP');
+    expect(container).toHaveTextContent('다음 주 재테크러');
   });
   it('편집 버튼은 닉네임 변경 하나만 둔다', () => {
     const { container, onEditNickname } = mount();

@@ -11,13 +11,14 @@ import { useModalTurn } from '../../lib/modalTurn';
 const KEY = 'league_promotion_seen_stage_v1';
 
 export const LeaguePromotionCelebration = () => {
-  const { hydrated, xp } = useAppContext();
-  const currentStage = useMemo(() => getGrowthStage(xp), [xp]);
+  const { hydrated, xp, leagueStage } = useAppContext();
+  const currentStage = useMemo(() => getGrowthStage(leagueStage ?? 1), [leagueStage]);
   const previousStage = useMemo(() => GROWTH_STAGES.find(stage => stage.id === currentStage.id - 1) ?? null, [currentStage.id]);
   const [promotion, setPromotion] = useState<{ from: GrowthStage | null; to: GrowthStage } | null>(null);
 
   useEffect(() => {
-    if (!hydrated) return;
+    // 서버 등급을 읽기 전 기본값(1단계)을 저장하면 다음에 읽은 실제 등급을 승급으로 착각한다
+    if (!hydrated || leagueStage === null) return;
     let cancelled = false;
     Storage.getItem(KEY).catch(() => null).then(raw => {
       if (cancelled) return;
@@ -25,12 +26,12 @@ export const LeaguePromotionCelebration = () => {
       void Storage.setItem(KEY, String(currentStage.id)).catch(() => {});
       if (seenId === null || currentStage.id <= seenId) return;
       const from = GROWTH_STAGES.find(stage => stage.id === seenId) ?? previousStage;
-      setPromotion({ from: from ? { ...from, nextMinPoints: currentStage.minPoints } : null, to: currentStage });
+      setPromotion({ from, to: currentStage });
       feedbackTierUp();
       logClick('league_promotion_modal_view', { from: seenId, to: currentStage.id, xp });
     });
     return () => { cancelled = true; };
-  }, [currentStage, hydrated, previousStage, xp]);
+  }, [currentStage, hydrated, leagueStage, previousStage, xp]);
 
   const myTurn = useModalTurn(!!promotion);
   if (!promotion || !myTurn) return null;
@@ -65,7 +66,7 @@ export const LeaguePromotionCelebration = () => {
             {promotion.to.name} 리그에 올라갔어요
           </h2>
           <p className="mt-2! text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">
-            지금까지 쌓은 XP가 다음 단계에 닿았어요. 꾸준히 이어온 기록이 보여요.
+            지난주 순위 3위 안에 들었어요. 이번 주에도 순위를 지켜 봐요.
           </p>
 
           <p className="mt-4! text-xs text-[var(--color-ink-3)]">현재 누적 <span className="font-semibold text-[var(--color-ink)] tabular-nums">{xp.toLocaleString()}XP</span></p>

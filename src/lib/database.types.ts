@@ -16,6 +16,7 @@ export type Database = {
           email: string | null;
           is_guest: boolean;
           league_tier: string;
+          league_stage: number;
           points: number;
           xp: number;
           boost_until: string | null;
@@ -33,6 +34,7 @@ export type Database = {
           email?: string | null;
           is_guest?: boolean;
           league_tier?: string;
+          league_stage?: number;
           points?: number;
           quiz_combo?: number;
           emoji?: string;
@@ -48,6 +50,7 @@ export type Database = {
           email?: string | null;
           is_guest?: boolean;
           league_tier?: string;
+          league_stage?: number;
           points?: number;
           quiz_combo?: number;
           emoji?: string;
@@ -439,6 +442,10 @@ export type Database = {
           points: number;
           credited: number;
         };
+      };
+      settle_league: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
       };
       is_nickname_taken: {
         Args: {

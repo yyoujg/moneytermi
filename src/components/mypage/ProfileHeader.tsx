@@ -2,9 +2,9 @@ import { ProfileEditIcon } from './ProfileEditIcon';
 import { ProfileGrowth } from './ProfileGrowth';
 import { ProfileAvatar } from '../ProfileAvatar';
 
-export const ProfileHeader = ({ nickname, xp, onEditNickname }: {
+export const ProfileHeader = ({ nickname, stageId, onEditNickname }: {
   nickname: string;
-  xp: number;
+  stageId: number;
   onEditNickname: () => void;
 }) => (
   <section className="my-profile-card" aria-label="내 프로필">
@@ -14,7 +14,7 @@ export const ProfileHeader = ({ nickname, xp, onEditNickname }: {
         <button type="button" onClick={onEditNickname} className="my-profile-name-button" aria-label="닉네임 변경">
           <h3 className="my-profile-name">{nickname}</h3><ProfileEditIcon size={16} />
         </button>
-        <ProfileGrowth xp={xp} />
+        <ProfileGrowth stageId={stageId} />
       </div>
     </div>
   </section>

@@ -176,8 +176,8 @@ describe('QuizScreen review SRS', () => {
     expect(summary).not.toHaveTextContent('코인');
     expect(container).toHaveTextContent('100%');
     expect(container).toHaveTextContent('1연속');
-    expect(summary).toHaveTextContent('짠테크러까지 200XP');
-    expect(summary!.querySelector('[role="progressbar"]')).toHaveAttribute('aria-valuenow', '0');
+    // 등급은 주간 순위로 오르므로 퀴즈 결과에 누적 XP 승급 막대를 두지 않는다
+    expect(summary!.querySelector('[role="progressbar"]')).toBeNull();
     await click('주제로 돌아가기');
     expect(container.textContent).toContain('코스 화면');
   });

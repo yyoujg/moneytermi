@@ -1,54 +1,27 @@
 import { describe, it, expect } from 'vitest';
-import { GROWTH_STAGES, getGrowthStage } from './constants';
+import { GROWTH_STAGES, getGrowthStage, LEAGUE_DEMOTE_BOTTOM, LEAGUE_DEMOTE_MIN_PLAYERS, LEAGUE_PROMOTE_TOP } from './constants';
 
 describe('getGrowthStage', () => {
-  it('이름만 성장 단계로 바꾸고 기존 식별자와 기준을 보존한다', () => {
-    expect(GROWTH_STAGES.map(({ id, name, minPoints }) => ({ id, name, minPoints }))).toEqual([
-      { id: 1, name: '돈알못', minPoints: 0 },
-      { id: 2, name: '짠테크러', minPoints: 200 },
-      { id: 3, name: '갓생러', minPoints: 1000 },
-      { id: 4, name: '재테크러', minPoints: 3000 },
-      { id: 5, name: '경제고수', minPoints: 8000 },
+  it('다섯 단계의 식별자와 이름을 유지한다', () => {
+    expect(GROWTH_STAGES.map(({ id, name }) => ({ id, name }))).toEqual([
+      { id: 1, name: '돈알못' },
+      { id: 2, name: '짠테크러' },
+      { id: 3, name: '갓생러' },
+      { id: 4, name: '재테크러' },
+      { id: 5, name: '경제고수' },
     ]);
   });
 
-  it('다섯 단계의 진입 직전과 진입 시점을 유지한다', () => {
-    for (const stage of GROWTH_STAGES) {
-      expect(getGrowthStage(stage.minPoints).id).toBe(stage.id);
-      if (stage.id > 1) expect(getGrowthStage(stage.minPoints - 1).id).toBe(stage.id - 1);
-    }
+  it('서버 단계 ID로 등급을 찾고, 모르는 값은 1단계로 둔다', () => {
+    expect(getGrowthStage(3).name).toBe('갓생러');
+    expect(getGrowthStage(0).id).toBe(1);
+    expect(getGrowthStage(9).id).toBe(1);
   });
 
-  it('0XP는 돈알못(1단계)', () => {
-    expect(getGrowthStage(0).name).toBe('돈알못');
-  });
-
-  it('경계값은 다음 단계 포함', () => {
-    expect(getGrowthStage(199).id).toBe(1);
-    expect(getGrowthStage(200).id).toBe(2);
-  });
-
-  it('최고 단계는 nextMinPoints가 null', () => {
-    expect(getGrowthStage(8000).name).toBe('경제고수');
-    expect(getGrowthStage(8000).nextMinPoints).toBeNull();
-    expect(getGrowthStage(999999).nextMinPoints).toBeNull();
-  });
-
-  it('모든 구간에서 단조 증가하고 빠지는 단계가 없다', () => {
-    const ids = GROWTH_STAGES.map(s => getGrowthStage(s.minPoints).id);
-    expect(ids).toEqual([1, 2, 3, 4, 5]);
-    let prev = 0;
-    for (let xp = 0; xp <= 10000; xp += 7) {
-      const id = getGrowthStage(xp).id;
-      expect(id).toBeGreaterThanOrEqual(prev);
-      prev = id;
-    }
-  });
-
-  it('nextMinPoints는 다음 단계의 기준선과 같다', () => {
-    for (let i = 0; i < GROWTH_STAGES.length - 1; i++) {
-      expect(getGrowthStage(GROWTH_STAGES[i].minPoints).nextMinPoints)
-        .toBe(GROWTH_STAGES[i + 1].minPoints);
-    }
+  it('승급·강등 기준은 서버 정산(league-weekly-promotion)과 같다', () => {
+    expect(LEAGUE_PROMOTE_TOP).toBe(3);
+    expect(LEAGUE_DEMOTE_BOTTOM).toBe(3);
+    // 승급 3명과 강등 3명이 겹치지 않도록 7명부터 강등한다
+    expect(LEAGUE_DEMOTE_MIN_PLAYERS).toBeGreaterThan(LEAGUE_PROMOTE_TOP + LEAGUE_DEMOTE_BOTTOM);
   });
 });

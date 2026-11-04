@@ -12,13 +12,13 @@ export type GrowthStage = {
   id: number;
   name: string;
   emoji: string;
-  minPoints: number;
-  nextMinPoints: number | null; // null = 최고 단계
 };
 
-// 리그 티어. 누적 XP로 결정된다.
-// 기준선은 포인트 시절의 1/5 — XP는 포인트보다 훨씬 천천히 쌓인다(퀴즈 1정답 = 객관식 10~20P·주관식 5~28P vs 2XP. 보상은 하루 150정답까지).
-// 4000XP는 퀴즈 2000문제라 사실상 도달 불가였다.
+// 리그 티어. 서버가 매주 지난주 주간 순위로 정한다(profiles.league_stage, supabase/content/league-weekly-promotion).
+// 상위 3명 승급, 참여자 7명 이상인 주의 하위 3명 강등.
+export const LEAGUE_PROMOTE_TOP = 3;
+export const LEAGUE_DEMOTE_BOTTOM = 3;
+export const LEAGUE_DEMOTE_MIN_PLAYERS = 7;
 // 포인트 경제 (migration_points_economy.sql). 레슨 시작 비용 / XP 마일스톤 보너스.
 export const LESSON_COST = 10;
 export const XP_BONUS_STEP = 50;
@@ -33,20 +33,15 @@ export const ENERGY_REFILL_COST = 600;
 // 미션 보상 수령 시 서버가 함께 주는 XP (migration_xp.sql STEP 7 claim_mission_reward → add_xp 5)
 export const MISSION_XP = 5;
 
-// 표시 이름만 학습 성장 단계로 바꾼다. 단계 ID·누적 XP 기준·기존 저장값은 유지한다.
-export const GROWTH_STAGES: Omit<GrowthStage, 'nextMinPoints'>[] = [
-  { id: 1, name: '돈알못', emoji: '🌱', minPoints: 0 },
-  { id: 2, name: '짠테크러', emoji: '🚀', minPoints: 200 },
-  { id: 3, name: '갓생러', emoji: '🎯', minPoints: 1000 },
-  { id: 4, name: '재테크러', emoji: '🌟', minPoints: 3000 },
-  { id: 5, name: '경제고수', emoji: '🏆', minPoints: 8000 },
+export const GROWTH_STAGES: GrowthStage[] = [
+  { id: 1, name: '돈알못', emoji: '🌱' },
+  { id: 2, name: '짠테크러', emoji: '🚀' },
+  { id: 3, name: '갓생러', emoji: '🎯' },
+  { id: 4, name: '재테크러', emoji: '🌟' },
+  { id: 5, name: '경제고수', emoji: '🏆' },
 ];
 
-export const getGrowthStage = (points: number): GrowthStage => {
-  const current = [...GROWTH_STAGES].reverse().find(s => points >= s.minPoints) ?? GROWTH_STAGES[0];
-  const next = GROWTH_STAGES.find(s => s.id === current.id + 1) ?? null;
-  return { ...current, nextMinPoints: next?.minPoints ?? null };
-};
+export const getGrowthStage = (stageId: number): GrowthStage => GROWTH_STAGES.find(s => s.id === stageId) ?? GROWTH_STAGES[0];
 
 // 하루 복습 큐 상한 (홈 "오늘 복습할 단어 N개")
 export const DAILY_REVIEW_CAP = 10;

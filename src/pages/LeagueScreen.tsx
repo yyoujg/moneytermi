@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { BottomSheet, TextButton, Spacing } from '@toss/tds-mobile';
-import { GROWTH_STAGES, getGrowthStage } from '../constants';
+import { GROWTH_STAGES, getGrowthStage, LEAGUE_PROMOTE_TOP } from '../constants';
 import { useAppContext } from '../context/AppContext';
 import { useAuth } from '../hooks/useAuth';
 import { supabase, getGuestClient } from '../lib/supabase';
@@ -26,7 +26,7 @@ const shareMessage = (tier: string, weeklyXp: number, rank: number | null | unde
       : `경제 공부, 뭐부터 볼지 모르겠다면 머니터미에서 ${tier} 리그부터 시작해요!`;
 
 const LeagueScreen = () => {
-  const { xp } = useAppContext();
+  const { leagueStage } = useAppContext();
   const { user, guestToken } = useAuth();
   const [rows, setRows] = useState<Row[] | null>(null);
   const [mine, setMine] = useState<MyRank | null>(null);
@@ -46,7 +46,8 @@ const LeagueScreen = () => {
     }).catch(() => setFailed(true));
   }, [guestToken, reloadKey]);
 
-  const stage = getGrowthStage(xp);
+  const stage = getGrowthStage(leagueStage ?? 1);
+  const nextStage = GROWTH_STAGES.find(s => s.id === stage.id + 1);
 
   return (
     <div className="league-screen flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
@@ -81,11 +82,16 @@ const LeagueScreen = () => {
               <li key={s.id} className="league-tier-step" data-state={state} aria-current={state === 'current' ? 'step' : undefined}>
                 <span className="league-tier-node"><StageGlyph id={s.id} size={56} locked={state === 'future'} /></span>
                 <span className="league-tier-name">{s.name}</span>
-                <span className="league-tier-xp">{s.minPoints.toLocaleString()}XP</span>
               </li>
             );
           })}
         </ol>
+        {/* 승급 조건: 지금 순위가 3위 안이면 다음 주 승급 예정이라고 알려 준다 */}
+        {nextStage && <p className="league-promote-note type-supporting break-keep">
+          {mine?.rank && mine.rank <= LEAGUE_PROMOTE_TOP
+            ? <>지금 순위를 지키면 다음 주 <strong>{nextStage.name}</strong> 리그로 올라가요</>
+            : <>이번 주 <strong>{LEAGUE_PROMOTE_TOP}위 안</strong>에 들면 다음 주 {nextStage.name} 리그로 올라가요</>}
+        </p>}
       </div>
 
       {/* 랭킹 */}

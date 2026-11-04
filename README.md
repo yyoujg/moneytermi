@@ -14,7 +14,7 @@
 ## 핵심 기능
 
 - **카드 학습 + 퀴즈 + 간격반복 복습**: `WordCardScreen`(뜻/상세설명/뉴스 예시/연관 단어 슬라이드), `QuizScreen`(4지선다, 콤보 보너스), `ReviewScreen`(주관식 + 초성 힌트, SM-2 기반 출제)이 하나의 학습 사이클로 이어진다.
-- **리그**: 주간 XP 랭킹(월요일 00:00 KST 초기화, `leaderboard_top`/`my_league_rank`). 티어는 `getGrowthStage(xp)`로 누적 XP에서 계산한다. XP는 학습 행동(새 단어 1 · 퀴즈 정답 2 · 출석 3 · 미션 수령 5)으로만 쌓인다. 화면에 보이는 재화는 XP와 에너지 둘뿐이다(코인·XP 부스트 화면은 제거, 서버 함수는 남아 있음).
+- **리그**: 주간 XP 랭킹(월요일 00:00 KST 초기화, `leaderboard_top`/`my_league_rank`). 티어는 서버 `profiles.league_stage`(1~5)다. 매주 지난주 주간 순위로 상위 3명은 한 단계 승급, 참여자 7명 이상인 주의 하위 3명은 한 단계 강등되며 모두 1단계에서 시작한다(`settle_league`, `supabase/content/league-weekly-promotion/`). 앱은 로드 때 `settle_league`를 부르고, 서버가 한 주에 한 번만 정산한다. XP는 학습 행동(새 단어 1 · 퀴즈 정답 2 · 출석 3 · 미션 수령 5)으로만 쌓인다. 화면에 보이는 재화는 XP와 에너지 둘뿐이다(코인·XP 부스트 화면은 제거, 서버 함수는 남아 있음).
 - **데일리 미션 + 출석**: 앱 진입 시 자동 출석 체크(`checkIn`), 퀴즈 정답 3회 미션(m3) 등을 채우면 `claimReward`로 보상(`MISSION_XP`)을 수령한다.
 
 ## 기술적으로 신경 쓴 부분

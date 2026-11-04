@@ -29,6 +29,7 @@ type AppContextValue = {
   points: number;
   setPoints: React.Dispatch<React.SetStateAction<number>>;
   xp: number;
+  leagueStage: number | null;   // null = 서버 등급을 아직 못 읽음(화면은 1단계로 보여 준다)
   boostUntil: number | null;
   buyBoost: () => Promise<'ok' | 'active' | 'points' | 'pending' | 'fail'>;
   energy: number;
@@ -89,6 +90,7 @@ const energyKeyFor = (profileId: string | null) => `${ENERGY_KEY}:${profileId ??
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [points, setPoints]               = useState(0);
   const [xp, setXp]                       = useState(0);
+  const [leagueStage, setLeagueStage]     = useState<number | null>(null);
   const [boostUntil, setBoostUntil]       = useState<number | null>(null);
   const [energyState, setEnergyState]     = useState<EnergyState>(() => ({ current: ENERGY_MAX, updatedAt: Date.now() }));
   const energyStateRef                    = useRef(energyState);
@@ -321,6 +323,14 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
       if (profileErr) console.error('[load] profiles fetch 실패:', profileErr);
+      // 리그 등급: 지난주 순위 정산(주 1회, 서버가 중복을 막는다) 뒤 읽는다. 기다리지 않고, SQL 적용 전이면 1단계로 둔다
+      void (async () => {
+        try {
+          await db.rpc('settle_league');
+          const { data: stageRow } = await db.from('profiles').select('league_stage').eq('id', profileId).single();
+          if (profileIdRef.current === profileId && stageRow?.league_stage) setLeagueStage(stageRow.league_stage);
+        } catch { /* 정산 실패해도 학습은 계속된다 */ }
+      })();
       if (profile) {
         setPoints(profile.points);  // 서버 단일 진실원
         setXp(profile.xp ?? 0);
@@ -770,7 +780,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       points, setPoints,
       knownWords, knownIds, viewedIds, setKnownWords,
       unknownWords, setUnknownWords,
-      xp, boostUntil, buyBoost,
+      xp, leagueStage, boostUntil, buyBoost,
       energy, energyMax: ENERGY_MAX, nextEnergyAt, spendEnergy, claimEnergyAd, buyEnergyRefill,
       spendPoints, claimFirstLesson, refreshWallet, shopReason, shopOpen, openShop, closeShop,
       missions, setMissions,
