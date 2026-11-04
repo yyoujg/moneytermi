@@ -1,9 +1,9 @@
 import React, { useMemo, useRef, useLayoutEffect, useEffect, useState } from 'react';
 import { Check, LockKeyhole, RotateCcw } from '../components/ui/OtterIcons';
-import { BottomSheet, List, ListRow } from '@toss/tds-mobile';
+import { List, ListRow } from '@toss/tds-mobile';
 import { TopicThumb } from '../components/TopicThumb';
 import { COURSE_NAMES } from '../lib/topicImages';
-import { ChevronDown, ChevronRight } from '../components/ui/ControlIcons';
+import { ChevronRight } from '../components/ui/ControlIcons';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
@@ -140,7 +140,7 @@ const CourseScreen = () => {
   const requestedTopic = searchParams.get('topic');
   const topicIndex = requestedTopic !== null && /^\d+$/.test(requestedTopic) ? Number(requestedTopic) : -1;
   const activeTopic = isCatalog ? null : topics[topicIndex] ?? null;
-  // 주제 화면은 코스 하나만 보여준다: 요청한 코스(?course=), 없으면 안 끝낸 첫 코스, 다 끝냈으면 마지막 코스
+  // 학습에서 돌아올 코스(뒤로 경로에 넣어 그 코스 머리로 스크롤): 요청한 코스(?course=), 없으면 안 끝낸 첫 코스, 다 끝냈으면 마지막 코스
   const requestedCourse = searchParams.get('course');
   const shownPart = activeTopic
     ? activeTopic.parts.find(part => part.section.course.id === requestedCourse)
@@ -161,8 +161,6 @@ const CourseScreen = () => {
   // 길에는 돌(체크·번호·복습)만 두고, 돌을 누르면 그 단계(역할·제목·열기)를 옆 말풍선으로 띄운다.
   // 한 번에 하나, 바깥을 누르면 닫힘. 처음엔 지금 할 단계(focus) 말풍선을 열어 둔다(undefined = 기본값)
   const [bubbleChoice, setBubbleId] = useState<string | null | undefined>(undefined);
-  // 주제 화면 코스 요약을 누르면 같은 주제의 다른 코스를 고르는 시트
-  const [coursePicker, setCoursePicker] = useState(false);
   const homeRailRef = useRef<HTMLDivElement>(null);
   const [stampCheckReady, setStampCheckReady] = useState(false);
   const stampedRef = useRef(false);
@@ -196,7 +194,7 @@ const CourseScreen = () => {
   // 진행 중인 노드와 그 노드가 섹션 안에서 몇 번째인지 (계산이 가벼워 memo 없이)
   const findFocus = () => {
     const resumeTopic = topics.find(topic => topic.parts.some(part => part.section.course.id === resumeCourseId));
-    const candidates = shownPart ? [shownPart.section] : [...(resumeTopic?.parts.map(part => part.section) ?? []), ...sections];
+    const candidates = activeTopic ? activeTopic.parts.map(part => part.section) : [...(resumeTopic?.parts.map(part => part.section) ?? []), ...sections];
     for (const sec of candidates) {
       // 지금 할 단계 = 잠기지 않은 첫 미완료 필수 단계(앞 퀴즈를 안 풀었으면 퀴즈)
       const k = sec.nodes.findIndex(node => isStep(node) && !isDone(node) && node.state !== 'locked');
@@ -240,12 +238,14 @@ const CourseScreen = () => {
 
   useEffect(() => {
     if (!hydrated || !stampCheckReady || newlyDoneCount > 0) return;
-    const target = activeTopic ? focusRef.current : null;
+    // 홈 카드로 특정 코스를 지정해 들어왔으면 그 코스 머리로, 아니면 지금 할 단계로 스크롤한다
+    const requested = activeTopic && requestedCourse && requestedCourse !== focus?.courseId ? document.querySelector<HTMLElement>(`[data-course-section="${requestedCourse}"]`) : null;
+    const target = requested ?? (activeTopic ? focusRef.current : null);
     if (!target) return;
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     const t = setTimeout(() => target.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' }), reduce ? 0 : 80);
     return () => clearTimeout(t);
-  }, [hydrated, stampCheckReady, newlyDoneCount, activeTopic, focusId, requestedTopic]);
+  }, [hydrated, stampCheckReady, newlyDoneCount, activeTopic, focusId, focus?.courseId, requestedTopic, requestedCourse]);
 
   const spending = useRef(false);   // 연타로 spend_points가 두 번 나가지 않게
   const handleNodeTap = async (node: PathNode, index: number, courseKnown: number, courseTitle: string) => {
@@ -495,25 +495,20 @@ const CourseScreen = () => {
           </List>
         </section>
       </>}
-      {activeTopic && shownPart && [shownPart].map(({ section: sec, si }) => {
-        const partIndex = activeTopic.parts.indexOf(shownPart);
+      {/* 주제의 코스를 한 페이지에 모두 차례로 보여준다 */}
+      {activeTopic && activeTopic.parts.map(({ section: sec, si }, partIndex) => {
         const steps = sec.nodes.filter(isStep);
         const stepsDone = steps.filter(isDone).length;
         const pct = steps.length ? Math.round((stepsDone / steps.length) * 100) : 0;
         let stepNo = 0;
         return (
-        <section key={sec.course.id} data-section-index={si} className="scroll-mt-4">
-          {/* 코스가 여럿인 주제는 요약 전체를 눌러 다른 코스를 고른다 */}
-          <div role={activeTopic.parts.length > 1 ? 'button' : undefined} tabIndex={activeTopic.parts.length > 1 ? 0 : undefined}
-            aria-haspopup={activeTopic.parts.length > 1 ? 'dialog' : undefined} aria-label={activeTopic.parts.length > 1 ? `${courseName(sec.course)}, 다른 코스 고르기` : undefined}
-            onClick={activeTopic.parts.length > 1 ? () => setCoursePicker(true) : undefined}
-            onKeyDown={activeTopic.parts.length > 1 ? event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setCoursePicker(true); } } : undefined}
-            className={`course-topic-summary sticky top-0 z-10 mx-5 mt-3 mb-4 overflow-hidden py-4 ${activeTopic.parts.length > 1 ? 'is-pickable' : ''} ${sec.course.id === focus?.courseId ? 'anim-fade' : ''}`}>
+        <section key={sec.course.id} data-section-index={si} data-course-section={sec.course.id} className="scroll-mt-4">
+          <div className={`course-topic-summary sticky top-0 z-10 mx-5 mt-3 mb-4 overflow-hidden py-4 ${sec.course.id === focus?.courseId ? 'anim-fade' : ''}`}>
             {/* 코스 이름(COURSE_NAMES)이 주제명과 같으면 반복하지 않고 진행 정도만 보여준다 */}
             {courseName(sec.course) !== activeTopic.category && <div className="relative mb-4 flex items-start gap-3">
               <div className="min-w-0">
                 <p className="course-topic-course-meta"><span className="course-level-badge">{sec.course.level}</span>코스 {partIndex + 1}/{activeTopic.parts.length}</p>
-                <h3 className="mt-1! flex items-center gap-1 text-base font-bold text-[var(--color-ink)] break-keep leading-snug">{courseName(sec.course)}{activeTopic.parts.length > 1 && <ChevronDown size={16} aria-hidden="true" className="shrink-0 text-[var(--color-ink-3)]" />}</h3>
+                <h3 className="mt-1! flex items-center gap-1 text-base font-bold text-[var(--color-ink)] break-keep leading-snug">{courseName(sec.course)}</h3>
               </div>
             </div>}
             {/* 진행은 단계 수 하나로만 말한다(같은 값을 %로 한 번 더 쓰지 않는다) */}
@@ -569,29 +564,6 @@ const CourseScreen = () => {
         </section>
         );
       })}
-      {activeTopic && activeTopic.parts.length > 1 && <BottomSheet open={coursePicker} onDimmerClick={() => setCoursePicker(false)} header={<span className="sheet-title">{activeTopic.category} 코스</span>}>
-        <ul className="course-picker px-5 pb-6" aria-label="코스 고르기">
-          {activeTopic.parts.map(({ section }, i) => {
-            const steps = section.nodes.filter(isStep);
-            const doneCount = steps.filter(isDone).length;
-            const locked = doneCount < steps.length && !steps.some(node => !isDone(node) && node.state !== 'locked');
-            const selected = section.course.id === shownPart?.section.course.id;
-            return (
-              <li key={section.course.id}>
-                <button type="button" className="course-picker-row" aria-current={selected || undefined} data-locked={locked || undefined}
-                  onClick={() => { setCoursePicker(false); setSearchParams({ topic: String(topicIndex), course: section.course.id }); }}>
-                  <span className="min-w-0 flex-1">
-                    <span className="course-topic-course-meta"><span className="course-level-badge">{section.course.level}</span>코스 {i + 1}/{activeTopic.parts.length}</span>
-                    <span className="course-picker-name">{courseName(section.course)}</span>
-                  </span>
-                  {locked ? <span className="course-topic-lock"><LockKeyhole size={16} aria-hidden="true" /><span className="sr-only">잠김</span></span>
-                    : <span className="text-xs text-[var(--color-ink-3)] tabular-nums">{doneCount}/{steps.length}단계</span>}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </BottomSheet>}
     </div>
   );
 };

@@ -163,18 +163,13 @@ beforeEach(() => {
   vi.mocked(logClick).mockClear();
 });
 
-describe('주제 화면 코스 고르기', () => {
-  it('코스 요약을 누르면 같은 주제의 코스를 골라 그 코스로 바꾼다', async () => {
+describe('주제 화면은 코스를 한 페이지에 모두', () => {
+  it('같은 주제의 코스를 차례로 모두 보여준다', async () => {
     baseContext({ courses: [course({ id: 'c1', category: '경제' }), course({ id: 'c2', category: '경제', startId: 5 })] });
     const { container } = await mount('/course?topic=0');
     expect(container.textContent).toContain('코스 1/2');
-    const summary = container.querySelector<HTMLElement>('.course-topic-summary.is-pickable')!;
-    await act(async () => summary.click());
-    const rows = [...document.querySelectorAll<HTMLButtonElement>('.course-picker-row')];
-    expect(rows).toHaveLength(2);
-    expect(rows[0]).toHaveAttribute('aria-current', 'true');
-    await act(async () => rows[1].click());
     expect(container.textContent).toContain('코스 2/2');
+    expect(container.querySelectorAll('[data-course-section]')).toHaveLength(2);
   });
 });
 

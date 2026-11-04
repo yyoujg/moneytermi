@@ -548,14 +548,6 @@ button.course-home-topic[data-locked]:active { background: var(--color-card); }
 /* TDS ListRow는 disabled를 버튼에 넘기지 않아 data-locked로 흐리게 한다 */
 button.course-home-topic:is(:disabled, [data-locked]) .course-home-topic-title { color: var(--color-ink-3); font-weight: var(--font-weight-regular); }
 button.course-home-topic:is(:disabled, [data-locked]) .course-home-topic-meta { color: var(--color-ink-4); }
-/* 주제 화면 코스 고르기 */
-.course-topic-summary.is-pickable { cursor: pointer; }
-.course-picker { display: flex; flex-direction: column; list-style: none; }
-.course-picker-row { display: flex; width: 100%; min-height: var(--size-touch-min); align-items: center; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--color-line); text-align: left; }
-.course-picker li:last-child .course-picker-row { border-bottom: 0; }
-.course-picker-name { display: block; margin-top: var(--space-1); color: var(--color-ink); font-size: var(--font-size-body); font-weight: var(--font-weight-semibold); word-break: keep-all; }
-.course-picker-row[aria-current] .course-picker-name { font-weight: var(--font-weight-bold); color: var(--color-accent-foreground); }
-.course-picker-row[data-locked] .course-picker-name { color: var(--color-ink-3); font-weight: var(--font-weight-regular); }
 .course-topic-lock { display: inline-flex; width: 32px; height: 32px; align-items: center; justify-content: center; border-radius: 50%; background: var(--color-neutral-soft); color: var(--color-ink-3); }
 .course-home-topic-meta { display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--space-1) var(--space-3); margin-top: var(--space-1); color: var(--color-ink-3); font-size: var(--font-size-caption); line-height: var(--line-height-body); }
 @media (max-width: 359px) {
