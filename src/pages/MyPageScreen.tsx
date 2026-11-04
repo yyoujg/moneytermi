@@ -81,12 +81,9 @@ const MyPageScreen = () => {
       </div>
 
       <div className="my-page-sections shrink-0 px-5">
-        {/* 연속 학습: 이번 주 칸(홈에서 옮겨 왔다) */}
+        {/* 이번 주 학습 칸(홈에서 옮겨 왔다). 연속 일수는 위 통계에 있어 제목에서 반복하지 않는다 */}
         <section aria-labelledby="my-streak-title" className="my-page-panel my-streak">
-          <p id="my-streak-title" className="home-streak-title">
-            <StreakIcon size={24} />
-            {streak > 0 ? <span><strong>{streak}일째</strong> 연속 학습 중! 쭉 이어가 볼까요?</span> : <span>오늘 학습하면 연속 학습이 시작돼요</span>}
-          </p>
+          <h3 id="my-streak-title" className="type-section-title mb-3">이번 주 학습</h3>
           <WeekStrip attendanceDates={attendanceDates} />
         </section>
 

@@ -68,7 +68,9 @@ describe('내 정보의 정확한 숫자 표시', () => {
   });
   it('연속 학습 이번 주 칸을 마이에서 보여준다', () => {
     const container = mount();
-    expect(container.querySelector('.my-streak')).toHaveTextContent('연속 학습');
+    expect(container.querySelector('.my-streak')).toHaveTextContent('이번 주 학습');
+    // 연속 일수는 통계 칸에만 둔다(같은 숫자 반복 금지)
+    expect(container.querySelector('.my-streak')).not.toHaveTextContent('일째');
     expect(container.querySelectorAll('.my-streak .week-strip-day')).toHaveLength(7);
   });
   it('살펴본 용어·연속 학습·경험치·리그 등급을 한 줄 네 칸으로 보여준다', () => {
