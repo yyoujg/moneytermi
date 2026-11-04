@@ -175,6 +175,15 @@ describe('필수 단계 순차 잠금', () => {
     ({ container } = await mount('/course?topic=0'));
     expect(container.querySelector('[data-node-id="c1-l3"]')).not.toBeDisabled();
   });
+
+  it('같은 주제의 다음 난이도 코스는 앞 코스를 끝낼 때까지 잠근다', async () => {
+    const basic = course({ id: 'c1', wordCount: 4 });
+    const mid = { ...course({ id: 'c2', wordCount: 4, startId: 101 }), level: '중급' };
+    baseContext({ courses: [basic, mid], knownIds: new Set() });
+    state.doneNodes = new Set();
+    const { container } = await mount('/course?topic=1&course=c2');
+    expect(container.querySelector('[data-node-id="c2-l0"]')).toBeDisabled();
+  });
 });
 
 describe('CourseScreen energy gates', () => {

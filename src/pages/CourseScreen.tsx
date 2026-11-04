@@ -106,11 +106,11 @@ const CourseScreen = () => {
     return () => { cancelled = true; };
   }, []);
 
-  // 필수 단계(학습·퀴즈)는 주제 안에서 순서대로만 연다(다음 코스 포함). 안 끝낸 첫 단계 뒤의 미완료 단계는 잠근다. 복습은 선택이라 잠그지 않는다
+  // 필수 단계(학습·퀴즈)는 같은 주제(카테고리) 안에서 기초→심화 코스 순서대로만 연다. 안 끝낸 첫 단계 뒤의 미완료 단계는 다음 난이도 코스까지 모두 잠근다. 복습은 선택이라 잠그지 않는다
   const sections = useMemo(() => {
     const opened = new Set<string>();
     return buildPath(courses, knownIds).map(sec => {
-      const key = `${sec.course.level}|${sec.course.category}`;
+      const key = sec.course.category;
       return { ...sec, nodes: sec.nodes.map(node => {
         if (node.type === 'review') return node;
         const done = node.state === 'done' || (doneNodes.has(node.id) && node.state === 'available');
@@ -388,8 +388,8 @@ const CourseScreen = () => {
           </ActionButton>}
         </section>
 
-        {/* 열린 주제를 주제명별로 묶고, 그 아래에 난이도별 코스를 가로 카드로 둔다 */}
-        {[...new Set(topics.filter(topic => !topic.locked).map(topic => topic.category))].slice(0, 6).map(category => (
+        {/* 열린 주제 3개를 주제명별로 묶고, 그 아래에 난이도별 코스를 가로 카드로 둔다 */}
+        {[...new Set(topics.filter(topic => !topic.locked).map(topic => topic.category))].slice(0, 3).map(category => (
           <section key={category} aria-label={category}>
             <div className="course-home-section-heading">
               <h2 className="type-section-title">{category}</h2>

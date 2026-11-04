@@ -74,7 +74,7 @@
 
 **주제 썸네일(2026-11-04)**
 
-- 홈은 열린 주제 6개를 주제명 섹션으로 나누고(제목 + 한 줄 설명 `TOPIC_DESCRIPTIONS`), 그 아래에 난이도별 코스 카드(160x120 주제 그림 + 코스 이름 `COURSE_NAMES` + 난이도·단계/잠김)를 가로로 둔다. 맨 아래 "전체 주제 보기". 단어 카드 뉴스는 40px 정사각 그림(`TopicThumb`). 15개 주제는 달리 장면 일러스트(`public/topics/scenes/topic-<slug>.svg`, 240x180, 정사각으로 가운데를 잘라 씀), 장면이 없는 은행·금융제도, 핀테크·디지털·신산업 2개만 Unsplash 사진(`public/topics/SOURCES.md`).
+- 홈은 열린 주제 3개를 주제명 섹션으로 나누고(제목 + 한 줄 설명 `TOPIC_DESCRIPTIONS`), 그 아래에 난이도별 코스 카드(160x120 주제 그림 + 코스 이름 `COURSE_NAMES` + 난이도·단계/잠김)를 가로로 둔다. 맨 아래 "전체 주제 보기". 단어 카드 뉴스는 40px 정사각 그림(`TopicThumb`). 15개 주제는 달리 장면 일러스트(`public/topics/scenes/topic-<slug>.svg`, 240x180, 정사각으로 가운데를 잘라 씀), 장면이 없는 은행·금융제도, 핀테크·디지털·신산업 2개만 Unsplash 사진(`public/topics/SOURCES.md`).
 - 그림이 없는 주제는 회색 바탕에 주제 첫 글자를 둔다. 새 주제는 장면 일러스트로 추가한다(`docs/character/topics/`).
 - 카드는 그림자 없이 그림과 글자만 둔다. 기사 원문 사진은 언론사 저작물이라 쓰지 않는다.
 

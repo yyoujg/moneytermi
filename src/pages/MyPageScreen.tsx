@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { StreakIcon, WordsIcon, XpIcon, STAT_COLOR } from '../components/StatIcons';
-import { ChevronRight, CircleHelp, Settings } from '../components/ui/OtterIcons';
+import { ChevronRight } from '../components/ui/OtterIcons';
 import { useAppContext } from '../context/AppContext';
 import { DEFAULT_NICKNAME, getGrowthStage } from '../constants';
 import { StageGlyph } from '../components/StageGlyph';
@@ -14,12 +14,8 @@ import { SettingsSheet } from '../components/mypage/SettingsSheet';
 import { NicknameSheet } from '../components/mypage/NicknameSheet';
 import { ProfileHeader } from '../components/mypage/ProfileHeader';
 import { Card } from '../components/ui/Card';
-import { IconBox } from '../components/ui/IconBox';
 
-const MENU_ITEMS = [
-  { icon: CircleHelp, label: '앱 사용법' },
-  { icon: Settings, label: '앱 설정' },
-];
+const MENU_ITEMS = ['앱 사용법', '앱 설정'];
 
 const MyPageScreen = () => {
   const { xp, leagueStage, knownWords, viewedIds, attendanceDates } = useAppContext();
@@ -99,18 +95,13 @@ const MyPageScreen = () => {
         {/* 메뉴 */}
         <div className="my-page-panel my-page-menu">
             <List>
-              {MENU_ITEMS.map(({ icon: Icon, label }) => (
+              {MENU_ITEMS.map(label => (
                 <ListRow
                   key={label}
                   as="button"
                   border="none"
                   className="w-full"
                   onClick={() => handleMenuClick(label)}
-                  left={
-                    <IconBox className="text-[var(--color-ink-2)]">
-                      <Icon size={20} strokeWidth={1.7} aria-hidden="true" />
-                    </IconBox>
-                  }
                   contents={<span className="text-sm font-semibold">{label}</span>}
                   right={<ChevronRight size={16} className="text-[var(--color-ink-4)]" />}
                 />
