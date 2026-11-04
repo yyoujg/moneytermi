@@ -6,7 +6,7 @@ trace.py(수달)와 같은 레이어 구조: 실루엣(선) → 몸 → 크림.
 import cv2, numpy as np, potrace
 from pathlib import Path
 
-COL = {'line': '#2B211C', 'body': '#A9774F', 'cream': '#FBEBD3', 'sticker': '#FFFFFF'}
+COL = {'line': '#1F1A17', 'body': '#8C7C6D', 'cream': '#F8EFDE', 'sticker': '#FFFFFF'}
 LOCK = {'line': '#B0B8C1', 'body': '#D1D6DB', 'cream': '#E5E8EB'}
 NAMES = ['tier1-moneybeginner', 'tier2-saver', 'tier3-routine', 'tier4-investor', 'tier5-master']  # 돈알못·짠테크러·갓생러·재테크러·경제고수
 

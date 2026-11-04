@@ -185,7 +185,7 @@
 
 ### 7-2. 캐릭터
 
-- 마스코트는 3색(선 `#2B211C`·몸 `#A9774F`·크림 `#FBEBD3`) 낙서 선 수달이다. 기준은 [docs/CHARACTER_BIBLE.md](docs/CHARACTER_BIBLE.md).
+- 마스코트는 3색(선 `#1F1A17`·몸 `#8C7C6D`·크림 `#F8EFDE`) 낙서 선 수달이다. 기준은 [docs/CHARACTER_BIBLE.md](docs/CHARACTER_BIBLE.md).
 - 그림: `public/otter/v5/`의 `idle`(기본), `cheer`(만세), `explain`(설명), `shock`(놀람), `defeat`(좌절) SVG. 40px 이하는 `-small`.
 - **사용자 아바타는 마스코트가 아니다**: 원 안에 닉네임 첫 글자(`ProfileAvatar.tsx`). 배경은 `--color-accent-soft`·`--color-surface`·`--color-action-soft` 중 닉네임으로 고정한 하나, 리그의 강조된 내 행에서는 `--color-card`. 아바타는 바꿀 수 없고 이모지 선택은 없앴다(서버 `profiles.emoji`는 보존).
 

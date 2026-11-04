@@ -7,7 +7,7 @@
 import cv2, numpy as np, potrace
 from pathlib import Path
 
-COL = {'line': '#2B211C', 'body': '#A9774F', 'cream': '#FBEBD3', 'sticker': '#FFFFFF'}
+COL = {'line': '#1F1A17', 'body': '#8C7C6D', 'cream': '#F8EFDE', 'sticker': '#FFFFFF'}
 NAMES = ['idle', 'cheer', 'explain', 'shock', 'defeat']
 
 im = cv2.imread('ref.png').astype(np.int32)
