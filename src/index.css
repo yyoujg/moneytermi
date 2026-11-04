@@ -1137,6 +1137,9 @@ button.course-home-rail-card:active { background: var(--color-surface); }
 .league-tier-road::-webkit-scrollbar { display: none; }
 .league-tier-step { position: relative; z-index: 1; display: flex; width: 124px; flex-shrink: 0; flex-direction: column; align-items: center; gap: var(--space-1); scroll-snap-align: center; }
 .league-tier-node { display: flex; width: 104px; height: 104px; align-items: center; justify-content: center; border-radius: 50%; }
+/* 현재 등급만 원래 크기, 나머지는 조금 작게(칸 폭은 그대로라 넘기는 위치가 흔들리지 않는다) */
+.league-tier-step { justify-content: center; }
+.league-tier-step:not([data-state='current']) .league-tier-node { transform: scale(0.78); }
 .league-tier-step[data-state='done'] .league-tier-node { color: var(--color-ink-2); }
 .league-tier-step[data-state='current'] .league-tier-node { color: var(--color-accent-foreground); }
 .league-tier-step[data-state='future'] .league-tier-node .stage-glyph { opacity: 1; filter: none; }
