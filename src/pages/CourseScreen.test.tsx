@@ -419,6 +419,8 @@ describe('CourseScreen energy gates', () => {
     baseContext({ knownIds: new Set([1, 2, 3, 4]) });
     const { container, clickButtonContaining } = await mount();
 
+    // 끝낸 레슨은 체크를 눌러 펼친 뒤 다시 연다
+    await act(async () => container.querySelector<HTMLButtonElement>('button.course-step-marker')!.click());
     await clickButtonContaining('용어1');
 
     expect(state.spendEnergy).not.toHaveBeenCalled();
@@ -520,12 +522,19 @@ describe('학습 주제의 역할 아이콘', () => {
     expect(review.querySelector('[data-icon="RotateCcw"]')).toBeInTheDocument();
   });
 
-  it('완료한 단계는 체크만 보이고 완료 글자는 화면 읽기용으로만 둔다', async () => {
+  it('완료한 단계는 체크만 보이고, 체크를 누르면 줄을 펼치고 다시 누르면 접는다', async () => {
     baseContext({ knownIds: new Set([1, 2, 3, 4]) });
     const { container } = await mount();
+    expect(container.querySelector('[data-node-id="c1-l0"]')).toBeNull();
+    const check = container.querySelector<HTMLButtonElement>('button.course-step-marker')!;
+    expect(check).toHaveAttribute('aria-expanded', 'false');
+    await act(async () => check.click());
+    expect(check).toHaveAttribute('aria-expanded', 'true');
     const status = container.querySelector('[data-node-id="c1-l0"] [data-learning-status]');
     expect(status).toHaveTextContent('완료');
     expect(status).toHaveClass('sr-only');
+    await act(async () => check.click());
+    expect(container.querySelector('[data-node-id="c1-l0"]')).toBeNull();
   });
 
   it('잠긴 단계도 역할을 표시하며 잠금과 학습 동작은 유지한다', async () => {
