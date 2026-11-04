@@ -227,10 +227,10 @@ describe('CourseScreen energy gates', () => {
     // 히어로 그림은 말풍선 화자인 달리 얼굴 아바타 하나뿐이다
     expect(hero?.querySelectorAll('img')).toHaveLength(1);
     expect(hero?.querySelector('.dali-avatar img')).toHaveAttribute('alt', '달리');
-    expect(hero?.querySelector('.course-home-bubble')).toHaveTextContent('오늘 첫 용어부터 같이 봐요');
+    expect(hero?.querySelector('.course-home-bubble')).toHaveTextContent('오늘은 첫 용어부터 같이 볼까요?');
     // 아무 용어도 보지 않았으면 다음 학습까지의 진행은 0이고, 어느 레슨의 용어가 몇 개 남았는지 알려준다
     expect(hero?.querySelector('[aria-label="다음 학습까지 진행률"]')).toHaveAttribute('aria-valuenow', '0');
-    expect(hero?.querySelector('.course-home-level-label')).toHaveTextContent(/^'.+' 레슨 용어 \d+개 남았어요$/);
+    expect(hero?.querySelector('.course-home-level-label')).toHaveTextContent(/^'.+' 레슨, 용어 \d+개만 더 보면 돼요$/);
     const primary = hero?.querySelector('.course-home-primary');
     expect(primary).toHaveClass('w-full');
     expect(primary?.querySelector('img[data-icon]')).toBeNull();

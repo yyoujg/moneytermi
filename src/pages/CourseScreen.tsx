@@ -350,14 +350,14 @@ const CourseScreen = () => {
         </section>
 
         <section aria-label="오늘 할 학습" className="course-home-hero">
-          {/* 화자 아바타(달리 얼굴) + 말풍선. 등급은 마이 화면에만 둔다 */}
+          {/* 화자 달리(전신) + 말풍선. 문구는 달리가 말하는 해요체. 등급은 마이 화면에만 둔다 */}
           <div className="course-home-speech">
             <DaliAvatar />
             <div className="course-home-bubble">
                 {focusTopic && <p className="course-home-bubble-topic">{focusTopic.category} · {focusSteps.done}/{focusSteps.total}단계</p>}
-                <p className="course-home-bubble-main">{!focusTopic ? '모두 배웠어요! 가볍게 복습해 볼까요?' : focusSteps.done > 0 || focusTopic.known > 0 ? `${focusStepsLeft}단계만 더 하면 이 주제를 끝내요` : '오늘 첫 용어부터 같이 봐요'}</p>
+                <p className="course-home-bubble-main">{!focusTopic ? '벌써 다 배웠네요! 가볍게 복습해 볼까요?' : focusSteps.done > 0 || focusTopic.known > 0 ? `${focusStepsLeft}단계만 더 가면 이 주제 끝이에요!` : '오늘은 첫 용어부터 같이 볼까요?'}</p>
                 <div className="course-home-level">
-                  <span className="course-home-level-label">{!focus ? '모든 학습을 마쳤어요!' : focus.type === 'quiz' ? '용어 퀴즈를 풀면 다음 레슨이 열려요' : nextRemaining > 0 ? `'${nextWords[0]?.word}' 레슨 용어 ${nextRemaining}개 남았어요` : '다음 학습으로 넘어갈 수 있어요'}</span>
+                  <span className="course-home-level-label">{!focus ? '정말 다 끝냈어요, 대단해요!' : focus.type === 'quiz' ? '퀴즈 하나만 풀면 다음 레슨이 열려요' : nextRemaining > 0 ? `'${nextWords[0]?.word}' 레슨, 용어 ${nextRemaining}개만 더 보면 돼요` : '이제 다음 학습으로 넘어가 볼까요?'}</span>
                   {/* 다음이 퀴즈면 채울 용어가 없어 막대가 늘 꽉 차 보이므로 숨긴다 */}
                   {focus?.type !== 'quiz' && <div role="progressbar" aria-label="다음 학습까지 진행률" aria-valuemin={0} aria-valuemax={100} aria-valuenow={nextProgress} className="course-home-level-track">
                     <span style={{ width: `${nextProgress}%` }} />
