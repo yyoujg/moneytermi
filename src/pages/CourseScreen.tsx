@@ -163,6 +163,7 @@ const CourseScreen = () => {
   const [bubbleChoice, setBubbleId] = useState<string | null | undefined>(undefined);
   // 주제 화면 코스 요약을 누르면 같은 주제의 다른 코스를 고르는 시트
   const [coursePicker, setCoursePicker] = useState(false);
+  const homeRailRef = useRef<HTMLDivElement>(null);
   const [stampCheckReady, setStampCheckReady] = useState(false);
   const stampedRef = useRef(false);
   useEffect(() => {
@@ -205,6 +206,12 @@ const CourseScreen = () => {
   };
   const focus = findFocus();
   const focusId = focus?.id ?? null;
+  // 홈 코스 줄: 지금 학습 중인 코스 카드가 왼쪽에 오게 가로 위치를 맞춘다
+  useEffect(() => {
+    const rail = homeRailRef.current;
+    const current = rail?.querySelector<HTMLElement>('[data-current]');
+    if (rail && current) rail.scrollLeft = current.offsetLeft - rail.offsetLeft - 20;
+  }, [focus?.courseId]);
   const bubbleId = bubbleChoice === undefined ? focusId : bubbleChoice;
   useEffect(() => {
     if (!bubbleId) return;
@@ -394,30 +401,31 @@ const CourseScreen = () => {
           </ActionButton>}
         </section>
 
-        {/* 지금 진행 중인 주제 하나만 두고, 그 아래에 난이도별 코스를 가로 카드로 둔다(잠긴 코스는 자물쇠). 다 배웠으면 첫 주제 */}
-        {[focusTopic?.category ?? topics[0]?.category].filter((c): c is string => !!c).map(category => (
-          <section key={category} aria-label={category}>
+        {/* 지금 난이도(기초·중급 …) 하나를 제목으로 두고, 그 난이도의 코스를 학습 순서대로 가로 카드로 둔다(잠긴 코스는 자물쇠).
+            처음엔 지금 학습 중인 코스가 보이게 가로 위치를 맞춘다. 다 배웠으면 첫 난이도 */}
+        {[focusTopic?.level ?? topics[0]?.level].filter((l): l is string => !!l).map(level => (
+          <section key={level} aria-label={`${level} 코스`}>
             <div className="course-home-section-heading">
-              <h2 className="type-section-title">{category}</h2>
+              <h2 className="type-section-title">{level}</h2>
             </div>
-            <div className="course-home-rail" role="list" aria-label={`${category} 코스`}>
-              {topics.filter(topic => topic.category === category).flatMap(topic => topic.parts.map(({ section }, pi) => {
+            <div ref={homeRailRef} className="course-home-rail" role="list" aria-label={`${level} 코스`}>
+              {topics.filter(topic => topic.level === level).flatMap(topic => topic.parts.map(({ section }, pi) => {
                 const steps = section.nodes.filter(isStep);
                 const done = steps.filter(isDone).length;
                 // 잠김 = 남은 필수 단계가 있는데 지금 할 수 있는 단계가 없음(예전에 일부 푼 코스도 앞 코스를 끝내기 전엔 잠김)
                 const locked = done < steps.length && !steps.some(node => !isDone(node) && node.state !== 'locked');
-                const name = COURSE_NAMES[section.course.id] ?? (topic.parts.length > 1 ? `${topic.level} ${pi + 1}` : topic.level);
+                const name = COURSE_NAMES[section.course.id] ?? (topic.parts.length > 1 ? `${topic.category} ${pi + 1}` : topic.category);
                 return (
                   <button key={section.course.id} type="button" role="listitem" className="course-home-rail-card" data-locked={locked}
-                    onClick={() => navigate(`/course?topic=${topic.index}&course=${section.course.id}`)} aria-label={`${topic.level} ${name} 코스 열기, ${locked ? '잠김' : `${done}/${steps.length}단계 완료`}`}>
+                    data-current={section.course.id === focus?.courseId || undefined}
+                    onClick={() => navigate(`/course?topic=${topic.index}&course=${section.course.id}`)} aria-label={`${topic.category} ${name} 코스 열기, ${locked ? '잠김' : `${done}/${steps.length}단계 완료`}`}>
                     <span className="course-home-rail-thumb">
-                      <TopicThumb category={category} size={160} height={120} />
-                      <span className="course-level-badge course-home-rail-level">{topic.level}</span>
+                      <TopicThumb category={topic.category} size={160} height={120} />
                       {locked && <span className="course-home-rail-lock"><LockKeyhole size={20} aria-hidden="true" /></span>}
                     </span>
                     <span className="course-home-rail-text">
                       <span className="course-home-rail-title">{name}</span>
-                      {!locked && <span className="course-home-rail-meta">{done}/{steps.length}단계</span>}
+                      <span className="course-home-rail-meta">{topic.category}{!locked && ` · ${done}/${steps.length}단계`}</span>
                     </span>
                   </button>
                 );
