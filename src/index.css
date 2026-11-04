@@ -380,7 +380,7 @@ svg:is(.text-brand-300, .text-brand-400, .text-brand-500, .text-brand-600, .text
   position: relative;
   z-index: 1;
 }
-.my-page-stats-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; }
+.my-page-stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; }
 .my-page-stat { display: flex; min-width: 0; flex-direction: column; align-items: center; text-align: center; gap: var(--space-2); padding: var(--space-1) 2px; }
 .my-page-stat.is-wide { grid-column: 1 / -1; }
 .my-page-stat-label { display: flex; order: 2; min-height: 18px; align-items: center; gap: 2px; color: var(--color-ink-2); font-size: var(--font-size-label); white-space: nowrap; }
@@ -914,12 +914,6 @@ button.nickname-clear { display: inline-flex; flex: 0 0 44px; width: 44px; heigh
 .my-profile-identity { display: flex; align-items: center; gap: var(--space-4); }
 .my-profile-details { flex: 1; min-width: 0; }
 .my-profile-name { color: var(--color-ink); font-size: var(--font-size-title-3); font-weight: var(--font-weight-bold); line-height: var(--line-height-title); letter-spacing: var(--letter-spacing-title); word-break: keep-all; overflow-wrap: anywhere; }
-.profile-growth { display: flex; min-width: 0; flex-direction: column; margin-top: var(--space-1); }
-.profile-growth-stage { display: flex; align-items: center; gap: var(--space-2); color: var(--color-ink-2); font-size: var(--font-size-label); font-weight: var(--font-weight-semibold); line-height: var(--line-height-relaxed); }
-.profile-growth-detail { margin-top: 2px; color: var(--color-ink-3); font-size: var(--font-size-label); line-height: var(--line-height-relaxed); word-break: keep-all; }
-.profile-growth-detail > span { white-space: nowrap; font-variant-numeric: tabular-nums; }
-.profile-growth-track { height: 5px; overflow: hidden; margin-top: var(--space-2); border-radius: var(--shape-full); background: var(--color-surface); }
-.profile-growth-track > span { display: block; height: 100%; border-radius: inherit; background: var(--color-progress); }
 .my-profile-actions { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-2); margin-top: var(--space-4); }
 button.my-profile-action { display: inline-flex; min-width: 0; min-height: 44px; align-items: center; justify-content: center; gap: var(--space-2); padding: var(--space-2) var(--space-2); border: 0; border-radius: var(--shape-md); background: var(--color-surface); color: var(--color-ink-2); font-size: var(--font-size-label); font-weight: var(--font-weight-semibold); line-height: 20px; word-break: keep-all; }
 button.my-profile-action > svg { flex-shrink: 0; }
@@ -1045,7 +1039,6 @@ button.quiz-option:disabled { opacity: 1; cursor: default; }
 .home-review-icon { display: flex; width: 40px; height: 40px; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 50%; background: var(--color-accent-soft); color: var(--color-brand-text); }
 button.home-review-entry { margin-bottom: var(--space-3); padding: var(--space-4); border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); }
 .home-status-card { margin-bottom: var(--space-6); padding: var(--space-5) var(--space-5) 0; border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); }
-.home-mission-row + .home-mission-row { border-top: 1px solid var(--color-line); }
 .my-page-stats.app-card { padding: var(--space-5) 0; }
 .my-page-stat + .my-page-stat { border-left: 1px solid var(--color-line); }
 .my-profile-avatar { display: flex; flex-shrink: 0; }
@@ -1148,9 +1141,10 @@ button.home-review-entry { margin-bottom: 0; padding: var(--space-4) 0; border-r
 button.course-home-rail-card { width: 112px; padding: 0; border-radius: 0; background: transparent; box-shadow: none; }
 button.course-home-rail-card:active { background: transparent; opacity: 0.7; }
 .league-tier-road { padding-inline: 0; border-radius: 0; background: transparent; box-shadow: none; }
-.quest-hero { padding: 0 0 var(--space-5); border-radius: 0; background: transparent; box-shadow: none; border-bottom: 1px solid var(--color-line); }
+.quest-hero { padding: 0 0 var(--space-5); border-radius: 0; background: transparent; box-shadow: none; }
 #home-mission-list { gap: 0; margin-top: var(--space-2); }
-.home-mission-row { padding: var(--space-4) 0; border-radius: 0; background: transparent; box-shadow: none; border-bottom: 1px solid var(--color-line); }
+/* 게이지(연회색 막대)와 구분선이 겹쳐 보여 행은 선 없이 여백으로만 나눈다 */
+.home-mission-row { padding: var(--space-4) 0 var(--space-5); border-radius: 0; background: transparent; box-shadow: none; }
 .home-mission-row[data-rewarded] { background: transparent; opacity: 0.55; }
 .my-profile-card { padding: var(--space-2) 0 var(--space-5); border-radius: 0; background: transparent; box-shadow: none; border-bottom: 1px solid var(--color-line); }
 .my-page-panel { margin-bottom: 0; padding: var(--space-5) 0; border-radius: 0; background: transparent; box-shadow: none; border-bottom: 1px solid var(--color-line); }

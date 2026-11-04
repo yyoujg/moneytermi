@@ -13,9 +13,9 @@ export const weekStart = (now: Date = new Date()): number => {
 export const msUntilReset = (now: Date = new Date()): number =>
   weekStart(now) + 7 * 24 * 60 * 60 * 1000 - now.getTime();
 
-// 남은 시간 표시. 하루 이상이면 'n일'(내림), 하루 안이면 'n시간'(올림, 최소 1시간)
+// 리그 남은 기간. 하루 이상이면 'D-n'(남은 일수 내림), 하루 안이면 'n시간 남음'(올림, 최소 1시간)
 export const timeLeftLabel = (now: Date = new Date()): string => {
   const ms = msUntilReset(now);
   const HOUR = 60 * 60 * 1000;
-  return ms >= 24 * HOUR ? `${Math.floor(ms / (24 * HOUR))}일` : `${Math.max(1, Math.ceil(ms / HOUR))}시간`;
+  return ms >= 24 * HOUR ? `D-${Math.floor(ms / (24 * HOUR))}` : `${Math.max(1, Math.ceil(ms / HOUR))}시간 남음`;
 };

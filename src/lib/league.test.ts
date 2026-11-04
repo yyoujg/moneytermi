@@ -40,20 +40,20 @@ describe('msUntilReset', () => {
 });
 
 describe('timeLeftLabel', () => {
-  it('월요일 시작이면 7일', () => {
-    expect(timeLeftLabel(kst('2026-09-21T00:00:00'))).toBe('7일');
+  it('월요일 시작이면 D-7', () => {
+    expect(timeLeftLabel(kst('2026-09-21T00:00:00'))).toBe('D-7');
   });
 
-  it('하루 이상 남으면 일 단위로 내림', () => {
-    expect(timeLeftLabel(kst('2026-09-26T12:00:00'))).toBe('1일');
+  it('하루 이상 남으면 D-n, 일수는 내림', () => {
+    expect(timeLeftLabel(kst('2026-09-26T12:00:00'))).toBe('D-1');
   });
 
   it('하루 안이면 시간 단위로 올림', () => {
-    expect(timeLeftLabel(kst('2026-09-27T00:30:00'))).toBe('24시간');
-    expect(timeLeftLabel(kst('2026-09-27T21:30:00'))).toBe('3시간');
+    expect(timeLeftLabel(kst('2026-09-27T00:30:00'))).toBe('24시간 남음');
+    expect(timeLeftLabel(kst('2026-09-27T21:30:00'))).toBe('3시간 남음');
   });
 
   it('마지막 몇 분에도 0이 아니라 1시간', () => {
-    expect(timeLeftLabel(kst('2026-09-27T23:59:00'))).toBe('1시간');
+    expect(timeLeftLabel(kst('2026-09-27T23:59:00'))).toBe('1시간 남음');
   });
 });

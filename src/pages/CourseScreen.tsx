@@ -137,7 +137,14 @@ const CourseScreen = () => {
   const requestedTopic = searchParams.get('topic');
   const topicIndex = requestedTopic !== null && /^\d+$/.test(requestedTopic) ? Number(requestedTopic) : -1;
   const activeTopic = isCatalog ? null : topics[topicIndex] ?? null;
-  const backPath = activeTopic ? `/course?topic=${topicIndex}` : '/course';
+  // 주제 화면은 코스 하나만 보여준다: 요청한 코스(?course=), 없으면 안 끝낸 첫 코스, 다 끝냈으면 마지막 코스
+  const requestedCourse = searchParams.get('course');
+  const shownPart = activeTopic
+    ? activeTopic.parts.find(part => part.section.course.id === requestedCourse)
+      ?? activeTopic.parts.find(part => part.section.nodes.some(node => node.type !== 'review' && node.state !== 'done' && !(doneNodes.has(node.id) && node.state === 'available')))
+      ?? activeTopic.parts[activeTopic.parts.length - 1]
+    : undefined;
+  const backPath = activeTopic ? `/course?topic=${topicIndex}${shownPart ? `&course=${shownPart.section.course.id}` : ''}` : '/course';
   const focusRef = useRef<HTMLButtonElement>(null);
 
   const isDone = (node: PathNode) => node.state === 'done' || (doneNodes.has(node.id) && node.state === 'available');
@@ -180,7 +187,7 @@ const CourseScreen = () => {
   // 진행 중인 노드와 그 노드가 섹션 안에서 몇 번째인지 (계산이 가벼워 memo 없이)
   const findFocus = () => {
     const resumeTopic = topics.find(topic => topic.parts.some(part => part.section.course.id === resumeCourseId));
-    const candidates = activeTopic ? activeTopic.parts.map(part => part.section) : [...(resumeTopic?.parts.map(part => part.section) ?? []), ...sections];
+    const candidates = shownPart ? [shownPart.section] : [...(resumeTopic?.parts.map(part => part.section) ?? []), ...sections];
     for (const sec of candidates) {
       // 지금 할 단계 = 잠기지 않은 첫 미완료 필수 단계(앞 퀴즈를 안 풀었으면 퀴즈)
       const k = sec.nodes.findIndex(node => isStep(node) && !isDone(node) && node.state !== 'locked');
@@ -324,7 +331,7 @@ const CourseScreen = () => {
             {/* 뒤로가기는 토스 내비게이션 바가 맡는다(자체 뒤로가기 중복은 검수 반려 사유) */}
             <div className="min-w-0 pr-24">
               <h1 className="type-page-title truncate">{activeTopic.category}</h1>
-              <p className="mt-1! text-xs text-[var(--color-ink-3)]">{activeTopic.level} · {activeTopic.parts.length}개 코스 · {topicSteps(activeTopic).done}/{topicSteps(activeTopic).total}단계 완료</p>
+              <p className="mt-1! text-xs text-[var(--color-ink-3)]">{activeTopic.level} · {activeTopic.parts.length}개 코스 · 전체 {topicSteps(activeTopic).done}/{topicSteps(activeTopic).total}단계 완료</p>
             </div>
           </div>
         ) : isCatalog ? (
@@ -375,7 +382,7 @@ const CourseScreen = () => {
             // 다음이 퀴즈면 라벨대로 퀴즈를 바로 연다
             const sec = focus.type === 'quiz' ? sections.find(section => section.course.id === focus.courseId) : undefined;
             if (sec) { void handleNodeTap(sec.nodes[focus.index], focus.index, sec.knownCount, courseName(sec.course)); return; }
-            setSearchParams({ topic: String(focusTopic.index) });
+            setSearchParams({ topic: String(focusTopic.index), course: focus.courseId });
           }} className="course-home-primary">
             {focus.type === 'quiz' ? '용어 퀴즈 풀기' : knownIds.size > 0 ? '이어 배우기' : '첫 주제 시작하기'}
           </ActionButton>}
@@ -396,7 +403,7 @@ const CourseScreen = () => {
                 const name = COURSE_NAMES[section.course.id] ?? (topic.parts.length > 1 ? `${topic.level} ${pi + 1}` : topic.level);
                 return (
                   <button key={section.course.id} type="button" role="listitem" className="course-home-rail-card" data-locked={locked}
-                    onClick={() => navigate(`/course?topic=${topic.index}`)} aria-label={`${topic.level} ${name} 코스 열기, ${locked ? '잠김' : `${done}/${steps.length}단계 완료`}`}>
+                    onClick={() => navigate(`/course?topic=${topic.index}&course=${section.course.id}`)} aria-label={`${topic.level} ${name} 코스 열기, ${locked ? '잠김' : `${done}/${steps.length}단계 완료`}`}>
                     <span className="course-home-rail-thumb">
                       <TopicThumb category={category} size={160} height={120} />
                       {locked && <span className="course-home-rail-lock"><LockKeyhole size={20} aria-hidden="true" /></span>}
@@ -470,7 +477,8 @@ const CourseScreen = () => {
           </List>
         </section>
       </>}
-      {activeTopic && activeTopic.parts.map(({ section: sec, si }, partIndex) => {
+      {activeTopic && shownPart && [shownPart].map(({ section: sec, si }) => {
+        const partIndex = activeTopic.parts.indexOf(shownPart);
         const steps = sec.nodes.filter(isStep);
         const stepsDone = steps.filter(isDone).length;
         const pct = steps.length ? Math.round((stepsDone / steps.length) * 100) : 0;

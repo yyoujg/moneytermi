@@ -86,7 +86,7 @@ const LeagueScreen = () => {
       <div className="league-ranking-section px-5 pt-8">
         <div className="flex items-baseline justify-between mb-3">
           <h3 className="type-section-title">이번 주 TOP 10</h3>
-          <span className="league-time-left">리그 종료까지 {timeLeftLabel()} 남았어요</span>
+          <span className="league-time-left" aria-label={`리그 종료까지 ${timeLeftLabel()}`}>{timeLeftLabel()}</span>
         </div>
 
         {failed && (

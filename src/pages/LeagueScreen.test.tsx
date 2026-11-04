@@ -43,7 +43,7 @@ const mount = async () => {
 describe('리그 화면 순위', () => {
   it('남은 기간은 순위 머리에 두고, 내 순위 카드와 승급 문구는 두지 않는다', async () => {
     const container = await mount();
-    expect(container.querySelector('.league-time-left')).toHaveTextContent(/리그 종료까지 \d+(일|시간) 남았어요/);
+    expect(container.querySelector('.league-time-left')).toHaveTextContent(/^(D-\d+|\d+시간 남음)$/);
     expect(container.querySelector('[aria-labelledby="league-my-rank"]')).toBeNull();
     expect(container).not.toHaveTextContent('리그로 올라가요');
   });
