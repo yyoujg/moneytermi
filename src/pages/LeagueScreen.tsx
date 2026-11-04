@@ -69,13 +69,14 @@ const LeagueScreen = () => {
           </div>
         </div>
 
-        {/* 티어 로드맵: 테두리·선 없이 등급 아이콘(원 안 56px)을 가로로 넘기고 처음에 현재 등급을 가운데로 둔다. 규칙 설명은 안내 시트(LeagueRules)에만 둔다 */}
+        {/* 티어 로드맵: 테두리·선 없이 등급 아이콘(원 안 56px)과 이름을 가로로 넘기고 처음에 현재 등급을 가운데로 둔다. 규칙 설명은 안내 시트(LeagueRules)에만 둔다 */}
         <ol ref={roadRef} className="league-tier-road anim-fade-up" aria-label="등급 단계" style={{ '--i': 1 } as React.CSSProperties}>
           {GROWTH_STAGES.map(s => {
             const state = s.id < stage.id ? 'done' : s.id === stage.id ? 'current' : 'future';
             return (
               <li key={s.id} className="league-tier-step" data-state={state} aria-label={s.name} aria-current={state === 'current' ? 'step' : undefined}>
                 <span className="league-tier-node" style={{ background: state === 'future' ? 'var(--color-neutral-soft)' : `var(--league-bg-${s.id})` }}><StageIcon id={s.id} size={56} locked={state === 'future'} /></span>
+                <span className="league-tier-name" aria-hidden="true">{s.name}</span>
               </li>
             );
           })}
