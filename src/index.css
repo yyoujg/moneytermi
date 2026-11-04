@@ -1187,8 +1187,8 @@ button.course-home-rail-card:active { background: var(--color-surface); }
 .course-step-bubble:not([data-open='true']) { display: none; }
 /* 지금 할 노드: 둘레에 점선 원이 천천히 돈다 */
 .course-step[data-step-state='current'] .course-step-marker { position: relative; }
-/* 점선은 원뿔 그라디언트를 3px 고리 모양으로 오려 만든다(dashed보다 점을 길고 두껍게): 16개 점, 점 15도 + 틈 7.5도 */
-.course-step[data-step-state='current'] .course-step-marker::after { content: ''; position: absolute; inset: -9px; border-radius: 50%; background: repeating-conic-gradient(var(--color-accent-line) 0 15deg, transparent 15deg 22.5deg); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), var(--color-ink) calc(100% - 3px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), var(--color-ink) calc(100% - 3px)); pointer-events: none; animation: course-node-ring 10s linear infinite; }
+/* 점선은 원뿔 그라디언트를 3px 고리 모양으로 오려 만든다(dashed보다 점을 길고 두껍게): 6개 점, 점 45도 + 틈 15도 */
+.course-step[data-step-state='current'] .course-step-marker::after { content: ''; position: absolute; inset: -9px; border-radius: 50%; background: repeating-conic-gradient(var(--color-accent-line) 0 45deg, transparent 45deg 60deg); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), var(--color-ink) calc(100% - 3px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), var(--color-ink) calc(100% - 3px)); pointer-events: none; animation: course-node-ring 10s linear infinite; }
 @keyframes course-node-ring { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .course-step[data-step-state='current'] .course-step-marker::after { animation: none; } }
 button.course-step-marker { cursor: pointer; }
