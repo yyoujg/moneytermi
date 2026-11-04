@@ -11,11 +11,11 @@ import { nextSrs, gradeFromResult, addDays } from '../lib/srs';
 import { DAILY_REVIEW_CAP, ENERGY_AD_REWARD, ENERGY_MAX, ENERGY_REFILL_COST, MISSION_XP } from '../constants';
 import type { PointReward } from '../components/PointCelebration';
 import { feedbackClaim } from '../lib/feedback';
-import { fetchAll, PAGE } from '../lib/fetchAll';
 import { addEnergyState, fillEnergyState, nextEnergyAt as calcNextEnergyAt, normalizeEnergy, spendEnergyState, spendEnergyOnce, type EnergyState } from '../lib/energy';
 import { runEnergyRefill, type EnergyRefillResult } from '../lib/energyRefill';
 import { nextReviewDateFromRows, selectDueReviewWords, selectRecallWords, type ReviewProgressRow } from '../lib/review';
 import { buildCourseContent } from '../lib/courseContent';
+import content from '../content/content.json';
 import { createQuizRequestId, parseQuizAnswerResult, withStudyRequestTimeout, type QuizAnswerResult } from '../lib/quizSubmission';
 
 type WpRow = ReviewProgressRow & { ease: number; interval_d: number; reps: number; due_date: string };
@@ -204,17 +204,11 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const loadContent = async () => {
       try {
-      const [{ data: wordsData }, { data: cwData }, { data: coursesData }] = await Promise.all([
-        fetchAll(from => supabase.from('words').select('*').order('id').range(from, from + PAGE - 1)),
-        fetchAll(from => supabase.from('course_words').select('course_id, word_id, position').order('position').order('course_id').range(from, from + PAGE - 1)),
-        supabase.from('courses').select('*').order('sort_order', { ascending: true }),
-      ]);
-      if (!wordsData || !coursesData || !cwData) throw new Error('학습 콘텐츠 응답 누락');
+      // 콘텐츠는 빌드 때 scripts/sync-content.mjs가 받아 둔 JSON을 쓴다(Supabase egress 절감).
+      const built = buildCourseContent(content.words, content.courseWords, content.courses);
 
-      const content = buildCourseContent(wordsData, cwData, coursesData);
-
-      setCourses(content.courses);
-      setAllWords(content.allWords);
+      setCourses(built.courses);
+      setAllWords(built.allWords);
       setContentStatus('ready');
 
       // 미션 정의는 공개 데이터라 프로필이 없어도 받을 수 있다.

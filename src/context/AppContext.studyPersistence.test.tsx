@@ -32,6 +32,17 @@ const mocks = vi.hoisted(() => ({
 
 type DbResponse = { data: unknown; error: unknown };
 
+vi.mock('../content/content.json', () => ({
+  default: {
+    words: [1, 2].map(id => ({
+      id, word: `용어${id}`, meaning: `뜻${id}`, detailed_meaning: '',
+      news_example: '', hint: '', difficulty: 1,
+    })),
+    courseWords: [],
+    courses: [],
+  },
+}));
+
 vi.mock('../lib/supabase', () => {
   const query = (table: string) => {
     let columns = '';
@@ -40,12 +51,6 @@ vi.mock('../lib/supabase', () => {
     const result = (): Promise<DbResponse> => {
       if (write) return write;
       switch (table) {
-        case 'words': return Promise.resolve({ data: [1, 2].map(id => ({
-          id, word: `용어${id}`, meaning: `뜻${id}`, detailed_meaning: '',
-          news_example: '', hint: '', difficulty: 1,
-        })), error: null });
-        case 'course_words': return Promise.resolve({ data: [], error: null });
-        case 'courses': return Promise.resolve({ data: [], error: null });
         case 'mission_defs': return Promise.resolve({ data: [
           { mission_id: 'm1', title: '출석', target: 999, reward: 10, sort_order: 1 },
           { mission_id: 'm3', title: '정답', target: 999, reward: 30, sort_order: 3 },
