@@ -4,12 +4,12 @@ import { GROWTH_STAGES, getGrowthStage, LEAGUE_DEMOTE_BOTTOM, LEAGUE_DEMOTE_MIN_
 describe('getGrowthStage', () => {
   it('열 단계의 식별자와 이름을 유지한다', () => {
     expect(GROWTH_STAGES.map(({ id, name }) => `${id}:${name}`)).toEqual([
-      '1:텅장', '2:가계부', '3:짠테크', '4:적금', '5:갓생', '6:정보통', '7:재테크', '8:존버', '9:자산가', '10:돈방석',
+      '1:새내기', '2:기록가', '3:절약가', '4:저축가', '5:계획가', '6:분석가', '7:투자가', '8:전략가', '9:자산가', '10:큰손',
     ]);
   });
 
   it('서버 단계 ID로 등급을 찾고, 모르는 값은 1단계로 둔다', () => {
-    expect(getGrowthStage(3).name).toBe('짠테크');
+    expect(getGrowthStage(3).name).toBe('절약가');
     expect(getGrowthStage(0).id).toBe(1);
     expect(getGrowthStage(11).id).toBe(1);
   });

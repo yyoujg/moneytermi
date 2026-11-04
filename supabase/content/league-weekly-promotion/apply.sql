@@ -7,7 +7,7 @@
 BEGIN;
 
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS league_stage smallint NOT NULL DEFAULT 1;
--- 10단계(텅장~돈방석). 5단계로 먼저 적용했어도 다시 실행하면 범위를 10으로 맞춘다
+-- 10단계(새내기~큰손). 5단계로 먼저 적용했어도 다시 실행하면 범위를 10으로 맞춘다
 ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_league_stage_check;
 ALTER TABLE public.profiles ADD CONSTRAINT profiles_league_stage_check CHECK (league_stage BETWEEN 1 AND 10);
 UPDATE public.profiles SET league_stage = 1;

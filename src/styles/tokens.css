@@ -167,7 +167,7 @@
   --color-neutral-soft: var(--neutral-100);
   --color-badge-earned: var(--color-neutral-strong);
   --color-badge-earned-soft: var(--color-accent-soft);
-  /* 리그 등급 그림 배경(1 텅장 ~ 10 돈방석). 단계가 오를수록 회색 → 따뜻한 금색으로 */
+  /* 리그 등급 그림 배경(1 새내기 ~ 10 큰손). 단계가 오를수록 회색 → 따뜻한 금색으로 */
   --league-bg-1: #f6efe6;
   --league-bg-2: #eef3fb;
   --league-bg-3: #eaf6f1;
