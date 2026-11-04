@@ -19,6 +19,14 @@ import { buildPath, type PathNode } from '../lib/path';
 
 const SEEN_KEY = 'path_seen_done';   // 코스 화면에서 마지막으로 본 완료 노드들(도장 연출용)
 const LEVEL_TABS = ['전체', '기초', '중급', '고급', '심화'];
+// 홈 주제 카드 사진(Unsplash 무료 라이선스, 400x260으로 줄여 public/topics에 둠). 출처는 public/topics/SOURCES.md
+const TOPIC_IMAGES: Record<string, string> = {
+  '가계·소비·부동산': 'household', '경기·성장·국민소득': 'growth', '경제 기초 개념': 'basics', '고용·노동·분배': 'labor',
+  '국제기구·세계경제': 'world', '국제수지·무역·통상': 'trade', '금리·통화정책·중앙은행': 'monetary', '금융안정·건전성 규제': 'stability',
+  '기업·산업·회계': 'industry', '물가·인플레이션': 'prices', '외환·환율': 'fx', '은행·금융제도': 'banking',
+  '재정·조세·사회보장': 'fiscal', '주식·채권시장': 'markets', '지급결제·화폐': 'payments', '파생상품·펀드·투자': 'investing',
+  '핀테크·디지털·신산업': 'fintech',
+};
 
 // 노드를 누르면 브랜드색 원이 화면 가득 퍼지고 로고를 보여준 뒤 다음 화면으로 넘어간다.
 // 오버레이를 body에 붙여 화면 전환 뒤에도 남게 한다. 동작 줄이기·WAAPI 미지원이면 바로 넘어간다.
@@ -393,6 +401,7 @@ const CourseScreen = () => {
           {topics.filter(topic => !topic.locked).slice(0, 6).map(topic => (
             <button key={`${topic.level}-${topic.category}`} type="button" role="listitem" className="course-home-rail-card"
               onClick={() => navigate(`/course?topic=${topic.index}`)} aria-label={`${topic.level} ${topic.category} 주제 열기, ${topicSteps(topic).done}/${topicSteps(topic).total}단계 완료`}>
+              {TOPIC_IMAGES[topic.category] && <img className="course-home-rail-image" src={`/topics/${TOPIC_IMAGES[topic.category]}.jpg`} alt="" aria-hidden="true" width={400} height={260} loading="lazy" decoding="async" />}
               <span className="course-home-rail-title">{topic.category}</span>
               <span className="course-home-rail-meta">{topic.level} · {topicSteps(topic).done}/{topicSteps(topic).total}단계</span>
             </button>
