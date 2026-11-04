@@ -536,6 +536,8 @@ const CourseScreen = () => {
             if (!isReview) stepNo += 1;
             return (
               <div key={node.id} className="course-step" data-step-state={done ? 'done' : locked ? 'locked' : isFocus ? 'current' : 'open'}>
+                {/* 곡선이 가장 멀리 휜 돌(8개 중 3·7번째) 반대편 빈자리에 장식 수달을 둔다 */}
+                {k % 4 === 2 && <img className="course-step-buddy" src={`/otter/v5/otter-${['explain', 'cheer', 'idle', 'shock'][Math.floor(k / 4) % 4]}.svg`} alt="" aria-hidden="true" data-step-buddy />}
                 <button type="button" className="course-step-marker" data-step-kind={isReview ? 'review' : 'step'} aria-expanded={bubbleId === node.id}
                   aria-label={`${copy.kind} ${copy.title} ${nodeStatus}, ${bubbleId === node.id ? '닫기' : '보기'}`} onClick={() => setBubbleId(bubbleId === node.id ? null : node.id)}>
                   {/* 복습은 화살표 아이콘이 '복습'으로 읽히지 않아 글자로 표시한다 */}
