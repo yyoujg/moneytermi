@@ -76,8 +76,10 @@ describe('내 정보의 정확한 숫자 표시', () => {
     const container = mount();
     const guide = [...container.querySelectorAll('button')].find(button => button.textContent?.includes('앱 사용법'))!;
     act(() => guide.click());
-    expect(container).toHaveTextContent("퀘스트의 '오늘 다시 볼 용어'");
-    expect(container).not.toHaveTextContent('홈의 오늘 다시 보기');
+    // 복습은 홈의 주 버튼, 에너지는 주제 화면 오른쪽 위에서 연다
+    expect(container).toHaveTextContent("홈의 '오늘 다시 볼 용어' 버튼");
+    expect(container).not.toHaveTextContent("퀘스트의 '오늘 다시 볼 용어'");
+    expect(container).toHaveTextContent('주제 화면 오른쪽 위 에너지');
     // XP·에너지 수치는 리그 안내·에너지 시트에만 둔다
     expect(container).not.toHaveTextContent('1시간마다');
     expect(container).not.toHaveTextContent('퀴즈 정답 2');
