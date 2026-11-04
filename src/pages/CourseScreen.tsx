@@ -360,9 +360,10 @@ const CourseScreen = () => {
                 <p>{!focusTopic ? '모두 배웠어요! 가볍게 복습해 볼까요?' : focusSteps.done > 0 || focusTopic.known > 0 ? `${focusStepsLeft}단계만 더 하면 이 주제를 끝내요` : '오늘 첫 용어부터 같이 봐요'}</p>
                 <div className="course-home-level">
                   <span className="course-home-level-label">{!focus ? '모든 학습을 마쳤어요!' : focus.type === 'quiz' ? '용어 퀴즈를 풀면 다음 레슨이 열려요' : nextRemaining > 0 ? `'${nextWords[0]?.word}' 레슨 용어 ${nextRemaining}개 남았어요` : '다음 학습으로 넘어갈 수 있어요'}</span>
-                  <div role="progressbar" aria-label="다음 학습까지 진행률" aria-valuemin={0} aria-valuemax={100} aria-valuenow={nextProgress} className="course-home-level-track">
+                  {/* 다음이 퀴즈면 채울 용어가 없어 막대가 늘 꽉 차 보이므로 숨긴다 */}
+                  {focus?.type !== 'quiz' && <div role="progressbar" aria-label="다음 학습까지 진행률" aria-valuemin={0} aria-valuemax={100} aria-valuenow={nextProgress} className="course-home-level-track">
                     <span style={{ width: `${nextProgress}%` }} />
-                  </div>
+                  </div>}
                 </div>
               </div>
             </div>
@@ -371,9 +372,12 @@ const CourseScreen = () => {
           <HomeOverview />
           {focus && focusTopic && <ActionButton fullWidth tone={hasDue ? 'soft' : 'primary'} onClick={() => {
             logClick('learning_continue', { course_id: focus.courseId, node_id: focus.id });
+            // 다음이 퀴즈면 라벨대로 퀴즈를 바로 연다
+            const sec = focus.type === 'quiz' ? sections.find(section => section.course.id === focus.courseId) : undefined;
+            if (sec) { void handleNodeTap(sec.nodes[focus.index], focus.index, sec.knownCount, sec.course.title); return; }
             setSearchParams({ topic: String(focusTopic.index) });
           }} className="course-home-primary">
-            {knownIds.size > 0 ? '이어 배우기' : '첫 주제 시작하기'}
+            {focus.type === 'quiz' ? '용어 퀴즈 풀기' : knownIds.size > 0 ? '이어 배우기' : '첫 주제 시작하기'}
           </ActionButton>}
         </section>
 
@@ -439,7 +443,7 @@ const CourseScreen = () => {
                 onClick={() => navigate(`/course?topic=${topic.index}`)} aria-label={`${topic.level} ${topic.category} 주제 열기`} aria-describedby={`topic-summary-${topic.index}`} className="course-home-topic w-full"
                 contents={<span className="flex flex-col">
                   <span className="course-home-topic-title">{topic.category}</span>
-                  <span id={`topic-summary-${topic.index}`} className="course-home-topic-meta">{topic.level} · {steps.done}/{steps.total}단계 완료</span>
+                  <span id={`topic-summary-${topic.index}`} className="course-home-topic-meta">{steps.done}/{steps.total}단계 완료</span>
                 </span>}
                 right={<span className="flex items-center gap-1 text-xs text-[var(--color-ink-3)]">{locked ? '잠김' : done ? '완료' : steps.done > 0 || topic.known > 0 ? '진행 중' : '시작 가능'}{locked ? <LockKeyhole size={16} aria-hidden="true" /> : <ChevronRight size={16} aria-hidden="true" />}</span>}
               />

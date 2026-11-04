@@ -212,7 +212,9 @@ describe('CourseScreen energy gates', () => {
     await flushScrollEffects();
 
     expect(container.querySelector('.course-home-tools')).toBeNull();
-    expect(container.textContent).toContain('이어 배우기');
+    // c1 용어는 다 봤지만 퀴즈를 안 풀었으니 다음은 c1 퀴즈다. 막대는 숨긴다
+    expect(container.querySelector('.course-home-primary')).toHaveTextContent('용어 퀴즈 풀기');
+    expect(container.querySelector('[aria-label="다음 학습까지 진행률"]')).toBeNull();
     expect(HTMLElement.prototype.scrollIntoView).not.toHaveBeenCalled();
   });
 
