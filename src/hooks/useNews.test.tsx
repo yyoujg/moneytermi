@@ -35,11 +35,21 @@ describe('단어 뉴스 상태', () => {
   it('조회 실패 후 다시 시도하면 성공 결과를 표시한다', async () => {
     vi.stubGlobal('fetch', vi.fn()
       .mockResolvedValueOnce({ ok: false, status: 502 })
-      .mockResolvedValueOnce({ ok: true, json: async () => [{ title: '기사', link: 'https://example.com', description: '', pubDate: '' }] }));
+      .mockResolvedValueOnce({ ok: true, json: async () => [{ title: '<b>규모의 경제</b> 기사', link: 'https://example.com', description: '', pubDate: '' }] }));
     const container = mount();
     await act(async () => { await Promise.resolve(); });
     expect(container.textContent).toContain('error:0');
     await act(async () => { container.querySelector('button')!.click(); await Promise.resolve(); });
+    expect(container.textContent).toContain('success:1');
+  });
+
+  it('제목에 용어(띄어쓰기 차이 포함)가 없는 기사는 빼서 왜 나왔는지 모르는 기사가 없게 한다', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => [
+      { title: '유럽 금융시장 통합 촉구', link: 'a', description: '<b>규모의 경제</b>를 살려', pubDate: '' },
+      { title: '<b>규모의경제</b> 노린 합병', link: 'b', description: '', pubDate: '' },
+    ] }));
+    const container = mount();
+    await act(async () => { await Promise.resolve(); });
     expect(container.textContent).toContain('success:1');
   });
 });

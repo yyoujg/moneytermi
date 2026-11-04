@@ -1,7 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import type { Word } from '../types';
+import { termPattern } from '../lib/quiz';
 
 export type NaverNewsItem = { title: string; link: string; description: string; pubDate: string; image?: string; source?: string };
+
+// 제목에 용어가 없는 기사는 본문 발췌 없이 헤드라인만 보여주면 왜 나왔는지 알 수 없다. 제목에 용어가 든 기사만 남긴다
+const plainTitle = (t: string) => t.replace(/<[^>]+>/g, '').replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+export const titleMentions = (item: NaverNewsItem, word: string) => {
+  const pattern = termPattern(word);
+  return pattern ? new RegExp(pattern.source).test(plainTitle(item.title)) : plainTitle(item.title).includes(word);
+};
 
 const fetchNews = async (word: string): Promise<NaverNewsItem[]> => {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
@@ -14,7 +22,7 @@ const fetchNews = async (word: string): Promise<NaverNewsItem[]> => {
   if (!response.ok) throw new Error(`뉴스 조회 실패: ${response.status}`);
   const data: unknown = await response.json();
   if (!Array.isArray(data)) throw new Error('뉴스 응답 형식 오류');
-  return data as NaverNewsItem[];
+  return (data as NaverNewsItem[]).filter(item => titleMentions(item, word));
 };
 
 // 현재 단어의 네이버 뉴스 로드(세션 캐시 우선) + 다음 단어 prefetch
