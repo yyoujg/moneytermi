@@ -57,7 +57,8 @@ describe('내 정보의 정확한 숫자 표시', () => {
     expect(container.querySelector('.my-page-stats button')).toBeNull();
     expect(state.openShop).not.toHaveBeenCalled();
     expect(state.ctx.xp).toBe(120);
-    expect(container.querySelector('.my-profile-avatar [data-avatar-initial]')).toBeInTheDocument();
+    // 예전 기본 캐릭터 값(🍊)은 1번 수달 프로필로 보인다
+    expect(container.querySelector('.my-profile-avatar [data-avatar-otter="basic"]')).toBeInTheDocument();
     expect(container).not.toHaveTextContent('캐릭터 변경');
   });
   it('큰 경험치는 전체 열을 쓰되 숫자를 반올림하거나 자르지 않는다', () => {

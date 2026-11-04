@@ -21,8 +21,15 @@ describe('사용자 프로필 그림', () => {
     expect(mount('otter:happy', 32).querySelector('img')).toHaveAttribute('src', '/profile/profile-happy-small.svg');
   });
 
-  it('고르지 않았거나 예전 이모지·모르는 값이면 닉네임 첫 글자', () => {
-    for (const value of [undefined, '', '🍊', 'otter:unknown']) {
+  it('예전에 고른 캐릭터(n번째)는 n번째 수달 프로필로 보여준다', () => {
+    expect(mount('🍊').querySelector('img')).toHaveAttribute('src', '/profile/profile-basic.svg');
+    expect(mount('🐼').querySelector('img')).toHaveAttribute('src', '/profile/profile-happy.svg');
+    expect(mount('🥰').querySelector('img')).toHaveAttribute('src', '/profile/profile-confident.svg');
+    expect(mount('🦉').querySelector('img')).toHaveAttribute('src', '/profile/profile-surprised.svg');
+  });
+
+  it('값이 없거나 모르는 값이면 닉네임 첫 글자', () => {
+    for (const value of [undefined, '', '🙂', 'otter:unknown']) {
       const container = mount(value);
       expect(container.querySelector('img')).toBeNull();
       expect(container.querySelector('[data-avatar-initial]')).toHaveTextContent('예');
