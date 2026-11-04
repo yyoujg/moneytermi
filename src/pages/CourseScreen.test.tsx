@@ -218,7 +218,7 @@ describe('CourseScreen energy gates', () => {
     expect(HTMLElement.prototype.scrollIntoView).not.toHaveBeenCalled();
   });
 
-  it('더보기는 현재 학습을 별도 주제 목록 페이지로 전환한다', async () => {
+  it('전체 주제 보기는 현재 학습을 별도 주제 목록 페이지로 전환한다', async () => {
     baseContext({ courses: [course(), course({ id: 'c2', category: '금융', startId: 5 })] });
     const { container, clickButtonContaining } = await mount('/course');
     const hero = container.querySelector('.course-home-hero');
@@ -238,7 +238,7 @@ describe('CourseScreen energy gates', () => {
     expect(primary?.querySelector('svg')).toBeNull();
     expect(container.querySelector('[role="tablist"]')).toBeNull();
     expect(container.querySelector('.course-home-catalog')).toBeNull();
-    await clickButtonContaining('더보기');
+    await clickButtonContaining('전체 주제 보기');
     expect(container.querySelector('[data-location]')).toHaveTextContent('/course/topics');
     expect(container.querySelector('.course-home-hero')).toBeNull();
     expect(container.querySelector('.course-home-more')).toBeNull();
@@ -268,7 +268,7 @@ describe('CourseScreen energy gates', () => {
     const advanced = { ...course({ id: 'c2', category: '금융', startId: 5 }), level: '중급' } as Course;
     baseContext({ courses: [course(), advanced] });
     const { container, clickButtonContaining } = await mount('/course');
-    await clickButtonContaining('더보기');
+    await clickButtonContaining('전체 주제 보기');
     const filters = [...container.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
     expect(filters.map(button => button.textContent?.trim())).toEqual(['전체', '기초', '중급', '고급', '심화']);
     const intermediate = filters.find(button => button.textContent?.trim() === '중급');
@@ -290,7 +290,7 @@ describe('CourseScreen energy gates', () => {
   it('키보드로 난이도를 이동하고 빈 난이도도 안내한다', async () => {
     baseContext({ courses: [course()] });
     const { container, clickButtonContaining } = await mount('/course');
-    await clickButtonContaining('더보기');
+    await clickButtonContaining('전체 주제 보기');
     const tabs = [...container.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
     const press = async (index: number, key: string) => {
       await act(async () => tabs[index].dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true })));

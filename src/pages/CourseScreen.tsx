@@ -2,6 +2,7 @@ import React, { useMemo, useRef, useLayoutEffect, useEffect, useState } from 're
 import { BookOpenText, Check, ListChecks, LockKeyhole, RotateCcw } from '../components/ui/OtterIcons';
 import { List, ListRow } from '@toss/tds-mobile';
 import { TopicThumb } from '../components/TopicThumb';
+import { TOPIC_DESCRIPTIONS } from '../lib/topicImages';
 import { ChevronRight } from '../components/ui/ControlIcons';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
@@ -377,24 +378,35 @@ const CourseScreen = () => {
           </ActionButton>}
         </section>
 
-        <div className="course-home-section-heading mx-5 flex shrink-0 items-center justify-between gap-3">
-          <h2 className="type-section-title">주제 둘러보기</h2>
-          <button type="button" onClick={() => navigate('/course/topics')} aria-label="전체 주제 더보기"
-            className="course-home-more inline-flex min-h-11 items-center gap-1 text-xs text-[var(--color-ink-3)] active:opacity-70">더보기<ChevronRight size={16} /></button>
-        </div>
-        {/* 바로 열 수 있는 주제를 가로 카드로 훑어본다 */}
-        <div className="course-home-rail" role="list" aria-label="바로 볼 수 있는 주제">
-          {topics.filter(topic => !topic.locked).slice(0, 6).map(topic => (
-            <button key={`${topic.level}-${topic.category}`} type="button" role="listitem" className="course-home-rail-card"
-              onClick={() => navigate(`/course?topic=${topic.index}`)} aria-label={`${topic.level} ${topic.category} 주제 열기, ${topicSteps(topic).done}/${topicSteps(topic).total}단계 완료`}>
-              <TopicThumb category={topic.category} />
-              <span className="course-home-rail-text">
-                <span className="course-home-rail-title">{topic.category}</span>
-                <span className="course-home-rail-meta">{topic.level} · {topicSteps(topic).done}/{topicSteps(topic).total}단계</span>
-              </span>
-            </button>
-          ))}
-        </div>
+        {/* 열린 주제를 주제명별로 묶고, 그 아래에 난이도별 코스를 가로 카드로 둔다 */}
+        {[...new Set(topics.filter(topic => !topic.locked).map(topic => topic.category))].slice(0, 6).map(category => (
+          <section key={category} aria-label={category}>
+            <div className="course-home-section-heading">
+              <h2 className="type-section-title">{category}</h2>
+              {TOPIC_DESCRIPTIONS[category] && <p className="course-home-section-desc">{TOPIC_DESCRIPTIONS[category]}</p>}
+            </div>
+            <div className="course-home-rail" role="list" aria-label={`${category} 코스`}>
+              {topics.filter(topic => topic.category === category).flatMap(topic => topic.parts.map(({ section }, pi) => {
+                const steps = section.nodes.filter(isStep);
+                const done = steps.filter(isDone).length;
+                const locked = section.nodes.every(node => node.state === 'locked');
+                const label = topic.parts.length > 1 ? `${topic.level} ${pi + 1}` : topic.level;
+                return (
+                  <button key={section.course.id} type="button" role="listitem" className="course-home-rail-card"
+                    onClick={() => navigate(`/course?topic=${topic.index}`)} aria-label={`${category} ${label} 코스 열기, ${locked ? '잠김' : `${done}/${steps.length}단계 완료`}`}>
+                    <TopicThumb category={category} size={160} height={120} />
+                    <span className="course-home-rail-text">
+                      <span className="course-home-rail-title">{label}</span>
+                      <span className="course-home-rail-meta">{locked ? '잠김' : `${done}/${steps.length}단계`}</span>
+                    </span>
+                  </button>
+                );
+              }))}
+            </div>
+          </section>
+        ))}
+        <button type="button" onClick={() => navigate('/course/topics')} aria-label="전체 주제 보기"
+          className="course-home-more mx-5 mb-4 inline-flex min-h-11 items-center gap-1 text-xs text-[var(--color-ink-3)] active:opacity-70">전체 주제 보기<ChevronRight size={16} /></button>
       </>}
       {isCatalog && <>
         <div className="px-5">
