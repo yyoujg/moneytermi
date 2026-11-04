@@ -436,7 +436,7 @@ const CourseScreen = () => {
                     data-current={section.course.id === focus?.courseId || undefined}
                     onClick={() => navigate(`/course?topic=${topic.index}&course=${section.course.id}`)} aria-label={`${topic.category} ${name} 코스 열기, ${locked ? '잠김' : `${done}/${steps.length}단계 완료`}`}>
                     <span className="course-home-rail-thumb">
-                      <TopicThumb category={topic.category} size={160} height={120} />
+                      <TopicThumb category={topic.category} courseId={section.course.id} size={160} height={120} />
                       {locked && <span className="course-home-rail-lock"><LockKeyhole size={20} aria-hidden="true" /></span>}
                     </span>
                     <span className="course-home-rail-text">
