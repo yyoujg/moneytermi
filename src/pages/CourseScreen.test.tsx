@@ -522,20 +522,23 @@ describe('학습 주제의 역할 아이콘', () => {
     expect(review.querySelector('[data-icon="RotateCcw"]')).toBeInTheDocument();
   });
 
-  it('완료한 단계는 체크만 보이고, 체크를 누르면 줄을 펼치고 다시 누르면 접는다', async () => {
+  it('길에는 돌만 두고, 지금 할 단계 말풍선만 열어 두며, 돌을 누르면 그 단계 말풍선으로 바꾼다', async () => {
     baseContext({ knownIds: new Set([1, 2, 3, 4]) });
     const { container } = await mount();
-    expect(container.querySelector('[data-node-id="c1-l0"]')).toBeNull();
+    const bubbleOf = (id: string) => container.querySelector(`[data-node-id="${id}"]`)!.closest('[data-step-bubble]')!;
+    // 끝낸 레슨(c1-l0)은 닫혀 있고, 지금 할 퀴즈(c1-q1) 말풍선이 열려 있다
+    expect(bubbleOf('c1-l0')).toHaveAttribute('data-open', 'false');
+    expect(bubbleOf('c1-q1')).toHaveAttribute('data-open', 'true');
     const check = container.querySelector<HTMLButtonElement>('button.course-step-marker')!;
-    expect(check).toHaveAttribute('aria-expanded', 'false');
     await act(async () => check.click());
     expect(check).toHaveAttribute('aria-expanded', 'true');
-    const status = container.querySelector('[data-node-id="c1-l0"] [data-learning-status]');
-    expect(status).toHaveTextContent('완료');
-    expect(status).toHaveClass('sr-only');
+    expect(bubbleOf('c1-l0')).toHaveAttribute('data-open', 'true');
+    expect(bubbleOf('c1-q1')).toHaveAttribute('data-open', 'false');
+    expect(container.querySelector('[data-node-id="c1-l0"] [data-learning-status]')).toHaveClass('sr-only');
     await act(async () => check.click());
-    expect(container.querySelector('[data-node-id="c1-l0"]')).toBeNull();
+    expect(bubbleOf('c1-l0')).toHaveAttribute('data-open', 'false');
   });
+
 
   it('잠긴 단계도 역할을 표시하며 잠금과 학습 동작은 유지한다', async () => {
     const { container } = await mount();

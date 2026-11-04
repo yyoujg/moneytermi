@@ -158,9 +158,9 @@ const CourseScreen = () => {
 
   // 지난번에 본 뒤 새로 끝낸 노드: 도장 연출 + 들어오는 경로가 색으로 그려진다. 첫 방문(기록 없음)은 연출 없이 기록만.
   const [newlyDone, setNewlyDone] = useState<Map<string, number>>(new Map());
-  // 끝낸 필수 단계는 체크만 보이고, 체크를 누르면 그 줄(역할·제목·다시 보기)을 펼친다
-  const [openDone, setOpenDone] = useState<Set<string>>(new Set());
-  const toggleDone = (id: string) => setOpenDone(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+  // 길에는 돌(체크·번호·복습)만 두고, 돌을 누르면 그 단계(역할·제목·열기)를 옆 말풍선으로 띄운다.
+  // 한 번에 하나, 바깥을 누르면 닫힘. 처음엔 지금 할 단계(focus) 말풍선을 열어 둔다(undefined = 기본값)
+  const [bubbleChoice, setBubbleId] = useState<string | null | undefined>(undefined);
   const [stampCheckReady, setStampCheckReady] = useState(false);
   const stampedRef = useRef(false);
   useEffect(() => {
@@ -203,6 +203,13 @@ const CourseScreen = () => {
   };
   const focus = findFocus();
   const focusId = focus?.id ?? null;
+  const bubbleId = bubbleChoice === undefined ? focusId : bubbleChoice;
+  useEffect(() => {
+    if (!bubbleId) return;
+    const close = (event: PointerEvent) => { if (!(event.target as Element).closest?.('[data-step-bubble], .course-step-marker')) setBubbleId(null); };
+    document.addEventListener('pointerdown', close);
+    return () => document.removeEventListener('pointerdown', close);
+  }, [bubbleId]);
   const newlyDoneCount = newlyDone.size;
   const requestedLevel = searchParams.get('level') ?? '전체';
   const selectedLevel = LEVEL_TABS.includes(requestedLevel) ? requestedLevel : '전체';
@@ -518,10 +525,11 @@ const CourseScreen = () => {
             if (!isReview) stepNo += 1;
             return (
               <div key={node.id} className="course-step" data-step-state={done ? 'done' : locked ? 'locked' : isFocus ? 'current' : 'open'}>
-                {done && !isReview
-                  ? <button type="button" className="course-step-marker" data-step-kind="step" aria-expanded={openDone.has(node.id)} aria-label={`${copy.kind} ${copy.title} 완료, ${openDone.has(node.id) ? '접기' : '펼치기'}`} onClick={() => toggleDone(node.id)}><Check size={16} aria-hidden="true" /></button>
-                  : <span className="course-step-marker" aria-hidden="true" data-step-kind={isReview ? 'review' : 'step'}>{done ? <Check size={16} /> : isReview ? <RotateCcw size={16} /> : stepNo}</span>}
-                {(!done || isReview || openDone.has(node.id)) && <button ref={isFocus ? focusRef : undefined} type="button" disabled={locked} data-own-sfx data-node-id={node.id}
+                <button type="button" className="course-step-marker" data-step-kind={isReview ? 'review' : 'step'} aria-expanded={bubbleId === node.id}
+                  aria-label={`${copy.kind} ${copy.title} ${nodeStatus}, ${bubbleId === node.id ? '닫기' : '보기'}`} onClick={() => setBubbleId(bubbleId === node.id ? null : node.id)}>
+                  {done && !isReview ? <Check size={16} aria-hidden="true" /> : isReview ? <RotateCcw size={16} aria-hidden="true" /> : stepNo}
+                </button>
+                <span className="course-step-bubble" data-step-bubble data-open={bubbleId === node.id}><button ref={isFocus ? focusRef : undefined} type="button" disabled={locked} data-own-sfx data-node-id={node.id}
                   onClick={() => handleNodeTap(node, k, sec.knownCount, courseName(sec.course))}
                   className={`course-node-card flex w-full items-center gap-3 border py-3 text-left disabled:cursor-default ${nodeCardClass} ${newlyDone.has(node.id) ? 'anim-stamp' : ''}`}
                   style={{ borderRadius: 'var(--shape-card)', '--d': `${0.2 + (newlyDone.get(node.id) ?? 0) * 0.15}s` } as React.CSSProperties}>
@@ -538,7 +546,7 @@ const CourseScreen = () => {
                     <span className={`mt-1 block text-sm break-keep ${locked ? 'font-semibold text-[var(--color-ink-3)]' : done ? 'font-semibold text-[var(--color-ink-2)]' : 'font-bold text-[var(--color-ink)]'}`}>{copy.title}</span>
                   </span>
                   {!locked && <ChevronRight size={20} strokeWidth={1.75} aria-hidden="true" data-learning-action className="shrink-0 text-[var(--color-ink-3)]" />}
-                </button>}
+                </button></span>
               </div>
             );
           })}
