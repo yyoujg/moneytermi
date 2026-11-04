@@ -15,7 +15,6 @@ import { Storage } from '../lib/storage';
 import { COURSE_REVIEW_COUNT, LESSON_WARMUP_COUNT, firstUnknownWordIndex, learnedOrFallbackWords, selectCourseQuizWords } from '../lib/coursePractice';
 import { ActionButton } from '../components/ui/ActionButton';
 import { HomeOverview } from '../components/home/HomeOverview';
-import { EnergyIcon } from '../components/StatIcons';
 import { buildPath, type PathNode } from '../lib/path';
 
 const SEEN_KEY = 'path_seen_done';   // 코스 화면에서 마지막으로 본 완료 노드들(도장 연출용)
@@ -382,7 +381,7 @@ const CourseScreen = () => {
         )}
         {/* 홈에서는 에너지가 부족할 때만 보인다. 주제 상세에서는 제목 오른쪽의 작은 칩으로 줄인다 */}
         {!isCatalog && (activeTopic || energy < ENERGY_ACTION_COST) && <button type="button" className={`course-energy-entry${activeTopic ? ' is-compact' : ''}`} aria-label={`학습 에너지 ${energy}/${energyMax}, 충전 방법 보기`} onClick={() => openShop('energy')}>
-          <span><EnergyIcon size={20} /><span><span className="course-energy-label">에너지 </span><strong>{energy}/{energyMax}</strong></span></span>
+          <span><img src="/icons/stat/icon-energy.svg" alt="" aria-hidden="true" width={20} height={20} data-stat-icon="energy" /><span><span className="course-energy-label">에너지 </span><strong>{energy}/{energyMax}</strong></span></span>
           <span className="course-energy-action">충전 방법<ChevronRight size={16} aria-hidden="true" /></span>
         </button>}
       </div>
