@@ -75,7 +75,7 @@ const LeagueScreen = () => {
             const state = s.id < stage.id ? 'done' : s.id === stage.id ? 'current' : 'future';
             return (
               <li key={s.id} className="league-tier-step" data-state={state} aria-label={s.name} aria-current={state === 'current' ? 'step' : undefined}>
-                <span className="league-tier-node" style={{ background: `var(--league-bg-${s.id})` }}><StageGlyph id={s.id} size={88} locked={state === 'future'} /></span>
+                <span className="league-tier-node" style={{ background: state === 'future' ? 'var(--color-neutral-soft)' : `var(--league-bg-${s.id})` }}><StageGlyph id={s.id} size={88} locked={state === 'future'} /></span>
               </li>
             );
           })}
@@ -83,8 +83,9 @@ const LeagueScreen = () => {
       </div>
 
       {/* 랭킹 */}
-      <div className="league-ranking-section px-5 pt-8">
-        <div className="flex items-baseline justify-between mb-3">
+      <div className="league-ranking-section px-5 pt-5">
+        {/* 남은 기간은 제목 바로 옆 뱃지로 */}
+        <div className="flex items-center gap-2 mb-3">
           <h3 className="type-section-title">이번 주 TOP 10</h3>
           <span className="league-time-left" aria-label={`리그 종료까지 ${timeLeftLabel()}`}>{timeLeftLabel()}</span>
         </div>
