@@ -398,7 +398,8 @@ describe('CourseScreen energy gates', () => {
     await flushScrollEffects();
 
     const scrollIntoView = vi.mocked(HTMLElement.prototype.scrollIntoView);
-    const target = scrollIntoView.mock.contexts.find(el => (el as HTMLElement).textContent?.includes('용어5 외 3개'));
+    // 말풍선은 닫혀 있으니 지금 할 단계의 돌로 스크롤한다
+    const target = scrollIntoView.mock.contexts.find(el => (el as HTMLElement).getAttribute('aria-label')?.includes('용어5 외 3개'));
     expect(target).toBeDefined();
   });
 
@@ -557,13 +558,13 @@ describe('학습 주제의 역할 아이콘', () => {
     expect(container.querySelector('[data-course-section]')).not.toBeNull();
   });
 
-  it('길에는 돌만 두고, 지금 할 단계 말풍선만 열어 두며, 돌을 누르면 그 단계 말풍선으로 바꾼다', async () => {
+  it('길에는 돌만 두고, 누르기 전엔 말풍선을 닫아 두며, 돌을 누르면 그 단계 말풍선을 연다', async () => {
     baseContext({ knownIds: new Set([1, 2, 3, 4]) });
     const { container } = await mount();
     const bubbleOf = (id: string) => container.querySelector(`[data-node-id="${id}"]`)!.closest('[data-step-bubble]')!;
-    // 끝낸 레슨(c1-l0)은 닫혀 있고, 지금 할 퀴즈(c1-q1) 말풍선이 열려 있다
+    // 처음엔 지금 할 퀴즈(c1-q1) 말풍선도 닫혀 있다
     expect(bubbleOf('c1-l0')).toHaveAttribute('data-open', 'false');
-    expect(bubbleOf('c1-q1')).toHaveAttribute('data-open', 'true');
+    expect(bubbleOf('c1-q1')).toHaveAttribute('data-open', 'false');
     const check = container.querySelector<HTMLButtonElement>('button.course-step-marker')!;
     await act(async () => check.click());
     expect(check).toHaveAttribute('aria-expanded', 'true');

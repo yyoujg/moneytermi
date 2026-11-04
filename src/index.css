@@ -1187,6 +1187,11 @@ button.course-home-rail-card:active { background: var(--color-surface); }
 .course-step[data-step-state='current'] .course-step-bubble > button.course-node-card { background: var(--color-accent-soft) !important; }
 .course-step[data-step-state='current'] .course-step-bubble::before { background: var(--color-accent-soft); }
 .course-step-bubble:not([data-open='true']) { display: none; }
+/* 지금 할 노드: 둘레에 점선 원이 천천히 돈다 */
+.course-step[data-step-state='current'] .course-step-marker { position: relative; }
+.course-step[data-step-state='current'] .course-step-marker::after { content: ''; position: absolute; inset: -7px; border: 2px dashed var(--color-accent-line); border-radius: 50%; pointer-events: none; animation: course-node-ring 10s linear infinite; }
+@keyframes course-node-ring { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .course-step[data-step-state='current'] .course-step-marker::after { animation: none; } }
 button.course-step-marker { cursor: pointer; }
 .course-step-bubble::before { content: ''; position: absolute; top: -7px; left: calc(50% + var(--step-offset, 0px) / 2 - 6px); width: 12px; height: 12px; border-left: 1px solid var(--color-line); border-top: 1px solid var(--color-line); background: var(--color-card); transform: rotate(45deg); }
 .course-step-bubble > button.course-node-card { padding-inline: var(--space-4) !important; }

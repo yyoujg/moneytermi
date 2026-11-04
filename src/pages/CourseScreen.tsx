@@ -166,7 +166,7 @@ const CourseScreen = () => {
   const [newlyDone, setNewlyDone] = useState<Map<string, number>>(new Map());
   // 길에는 돌(체크·번호·복습)만 두고, 돌을 누르면 그 단계(역할·제목·열기)를 옆 말풍선으로 띄운다.
   // 한 번에 하나, 바깥을 누르면 닫힘. 처음엔 지금 할 단계(focus) 말풍선을 열어 둔다(undefined = 기본값)
-  const [bubbleChoice, setBubbleId] = useState<string | null | undefined>(undefined);
+  const [bubbleId, setBubbleId] = useState<string | null>(null);
   const homeRailRef = useRef<HTMLDivElement>(null);
   // 주제 화면 머리를 누르면 같은 난이도의 다른 주제로 옮기는 시트
   const [topicPicker, setTopicPicker] = useState(false);
@@ -225,7 +225,6 @@ const CourseScreen = () => {
     const index = focus ? topics.findIndex(topic => topic.parts.some(part => part.section.course.id === focus.courseId)) : -1;
     setSearchParams(index >= 0 && focus ? { topic: String(index), course: focus.courseId } : {}, { replace: true });
   }, [resume, hydrated, doneNodesLoaded, topics, focus, setSearchParams]);
-  const bubbleId = bubbleChoice === undefined ? focusId : bubbleChoice;
   useEffect(() => {
     if (!bubbleId) return;
     const close = (event: PointerEvent) => { if (!(event.target as Element).closest?.('[data-step-bubble], .course-step-marker')) setBubbleId(null); };
@@ -549,12 +548,12 @@ const CourseScreen = () => {
               <div key={node.id} className="course-step" data-step-state={done ? 'done' : locked ? 'locked' : isFocus ? 'current' : 'open'}>
                 {/* 곡선이 가장 멀리 휜 돌(8개 중 3·7번째) 반대편 빈자리에 장식 수달을 둔다 */}
                 {k % 4 === 2 && <img className="course-step-buddy" src={STEP_BUDDIES[(partIndex * 3 + Math.floor(k / 4)) % STEP_BUDDIES.length]} alt="" aria-hidden="true" data-step-buddy />}
-                <button type="button" className="course-step-marker" data-step-kind={isReview ? 'review' : 'step'} aria-expanded={bubbleId === node.id}
+                <button ref={isFocus ? focusRef : undefined} type="button" className="course-step-marker" data-step-kind={isReview ? 'review' : 'step'} aria-expanded={bubbleId === node.id}
                   aria-label={`${copy.kind} ${copy.title} ${nodeStatus}, ${bubbleId === node.id ? '닫기' : '보기'}`} onClick={() => setBubbleId(bubbleId === node.id ? null : node.id)}>
                   {/* 징검다리 돌은 상태별 노드 그림(public/path): 잠김 > 복습 > 완료 > 지금 할 학습 */}
                   <img src={`/path/node-${locked ? 'locked' : isReview ? 'review' : done ? 'done' : 'current'}.svg`} alt="" aria-hidden="true" width={56} height={56} data-node-icon />
                 </button>
-                <span className="course-step-bubble" data-step-bubble data-open={bubbleId === node.id}><button ref={isFocus ? focusRef : undefined} type="button" disabled={locked} data-own-sfx data-node-id={node.id}
+                <span className="course-step-bubble" data-step-bubble data-open={bubbleId === node.id}><button type="button" disabled={locked} data-own-sfx data-node-id={node.id}
                   onClick={() => handleNodeTap(node, k, sec.knownCount, courseName(sec.course))}
                   className={`course-node-card flex w-full items-center gap-3 border py-3 text-left disabled:cursor-default ${nodeCardClass} ${newlyDone.has(node.id) ? 'anim-stamp' : ''}`}
                   style={{ borderRadius: 'var(--shape-card)', '--d': `${0.2 + (newlyDone.get(node.id) ?? 0) * 0.15}s` } as React.CSSProperties}>
