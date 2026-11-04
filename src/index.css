@@ -1218,8 +1218,8 @@ button.course-home-rail-card { width: 160px; flex-direction: column; align-items
 .topic-thumb-fallback { display: inline-flex; align-items: center; justify-content: center; color: var(--color-ink-3); font-size: var(--font-size-label); font-weight: var(--font-weight-bold); }
 /* 홈 화자 아바타 + 말풍선: 아바타 쪽 아래 모서리만 각지게 */
 .course-home-speech { display: flex; align-items: flex-end; gap: 8px; margin-bottom: 16px; }
-.dali-avatar { display: inline-flex; width: 40px; height: 40px; flex-shrink: 0; align-items: center; justify-content: center; overflow: hidden; border-radius: 50%; background: var(--color-accent-soft); }
-.dali-avatar img { width: 40px; height: 40px; }
+.dali-avatar { display: inline-flex; width: 72px; height: 72px; flex-shrink: 0; }
+.dali-avatar img { width: 72px; height: 72px; }
 .course-home-hero .course-home-speech .course-home-bubble { flex: 1; min-width: 0; margin: 0 0 0 10px; padding: 12px 14px; border-radius: 18px 18px 18px 0; background: var(--color-accent-soft); box-shadow: none; }
 /* 말풍선 꼬리: 아바타 쪽 아래 모서리에서 바깥으로 뾰족하게 */
 .course-home-hero .course-home-speech .course-home-bubble::before { content: ''; top: auto; bottom: 0; left: -14px; width: 16px; height: 20px; margin: 0; background: var(--color-accent-soft); transform: none; clip-path: path('M16 0 C16 11 10 18 0 20 L16 20 Z'); }
