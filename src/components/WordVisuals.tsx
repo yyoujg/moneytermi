@@ -7,7 +7,7 @@ import { Card } from './ui/Card';
 import { ActionButton } from './ui/ActionButton';
 
 // 단어 설명용 선 그래프·비교표·한국은행 실제 통계. 차트 라이브러리 없이 SVG로 그린다.
-const COLORS = ['var(--color-brand-action)', 'var(--color-ink-3)'];
+const COLORS = ['var(--color-accent-foreground)', 'var(--color-ink-3)'];
 const W = 320;
 const H = 160;
 const PAD = { l: 34, r: 8, t: 10, b: 22 };

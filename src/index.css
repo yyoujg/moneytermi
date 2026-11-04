@@ -226,7 +226,7 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
 }
 .course-node-current {
   border-color: var(--color-line);
-  background: var(--color-card);
+  background: var(--color-accent-soft);
 }
 .course-node-current::before { content: none; }
 /* 스플래시: 가운데 로고만. 로딩이 1초를 넘을 때만 아래 작은 스피너가 나타난다(진행률이 없어 막대는 쓰지 않는다) */
@@ -501,8 +501,8 @@ button.course-energy-entry.is-compact { position: absolute; top: var(--space-4);
 .course-step:not(:last-child)::before { content: ''; position: absolute; top: 40px; bottom: -12px; left: 13px; width: 2px; background: var(--color-line); }
 .course-step[data-step-state='done']:not(:last-child)::before { background: var(--color-ink); }
 .course-step-marker { display: flex; width: 28px; height: 28px; margin-top: var(--space-3); align-items: center; justify-content: center; border: 2px solid var(--color-line); border-radius: var(--shape-full); background: transparent; color: var(--color-ink-3); font-size: var(--font-size-caption); font-weight: var(--font-weight-bold); font-variant-numeric: tabular-nums; }
-.course-step[data-step-state='done'] .course-step-marker { border-color: var(--color-ink); background: transparent; color: var(--color-ink); }
-.course-step[data-step-state='current'] .course-step-marker { border-color: var(--color-ink); color: var(--color-ink); }
+.course-step[data-step-state='done'] .course-step-marker { border-color: var(--color-neutral-strong); background: transparent; color: var(--color-neutral-strong); }
+.course-step[data-step-state='current'] .course-step-marker { border-color: var(--color-neutral-strong); color: var(--color-neutral-strong); }
 .course-step + .course-step { margin-top: var(--space-3); }
 .course-home-header h1 { font-size: var(--font-size-page-title); }
 button.course-energy-entry { display: flex; width: 100%; min-height: var(--size-touch-min); align-items: center; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-1); padding: 0; border: 0; border-radius: var(--shape-sm); background: transparent; color: var(--color-ink-2); font-size: var(--font-size-label); text-align: left; cursor: pointer; }
@@ -537,7 +537,7 @@ button.course-home-primary {
 .course-home-catalog-heading > span { flex-shrink: 0; color: var(--color-ink-3); font-size: var(--font-size-label); }
 .course-home-filters { display: flex; width: 100%; border-bottom: 1px solid var(--color-line); }
 button.course-home-filter { flex: 1 1 0; min-width: 0; min-height: var(--size-touch-min); padding: var(--space-3) 0; border: 0; border-bottom: 3px solid transparent; border-radius: 0 !important; background: transparent; color: var(--color-ink-3); font-size: var(--font-size-body) !important; font-weight: var(--font-weight-semibold) !important; white-space: nowrap; }
-button.course-home-filter[aria-selected='true'] { border-bottom-color: var(--color-brand-500); color: var(--color-ink); }
+button.course-home-filter[aria-selected='true'] { border-bottom-color: var(--color-accent-foreground); color: var(--color-ink); }
 .course-home-topic-list { display: grid; gap: var(--space-7); padding: var(--space-6) 0; }
 button.course-home-topic { position: relative; display: flex; flex-direction: column; justify-content: center; min-height: 124px; margin-left: 88px; width: calc(100% - 88px); padding: var(--space-5); border: 2px solid transparent; border-radius: var(--shape-card) !important; background: var(--color-card); color: var(--color-ink); text-align: left; -webkit-tap-highlight-color: transparent; }
 /* 주제 목록은 카드 대신 구분선으로 나눈다. 강조는 위 추천 학습 카드가 맡는다 */
@@ -809,11 +809,11 @@ button.mission-reward-status {
 .league-ranking-list { margin-inline: 0; }
 .league-ranking-row { display: grid; grid-template-columns: 28px 32px minmax(0, 1fr) auto; align-items: center; column-gap: var(--space-2); min-height: 60px; padding: var(--space-3) var(--space-4); }
 .league-ranking-row + .league-ranking-row { border-top: 1px solid var(--color-surface); }
-.league-ranking-row.is-me { background: var(--color-selection-soft); }
+.league-ranking-row.is-me { background: var(--color-neutral-soft); }
 .league-ranking-row.is-own-separate { border-top: 2px dashed var(--color-surface); }
 .league-rank-badge { display: inline-flex; box-sizing: border-box; min-width: 28px; height: 28px; align-items: center; justify-content: center; padding: 0 var(--space-1); border-radius: var(--shape-sm); color: var(--color-ink-3); font-size: var(--font-size-body); font-weight: var(--font-weight-bold); line-height: 20px; font-variant-numeric: tabular-nums; }
 .league-rank-badge[data-podium] { position: relative; min-width: 28px; width: 28px; height: 28px; padding: 0; border: 0; background: transparent; }
-.league-rank-badge[data-podium] { color: var(--color-ink); font-weight: var(--font-weight-bold); }
+.league-rank-badge[data-podium] { color: var(--color-neutral-strong); font-weight: var(--font-weight-bold); }
 .league-rank-value { position: absolute; inset-inline: 0; top: 7px; text-align: center; color: var(--color-ink); font-size: var(--font-size-caption); line-height: 16px; }
 .league-rank-name { min-width: 0; overflow: hidden; color: var(--color-ink); font-size: var(--font-size-body); font-weight: var(--font-weight-regular); line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
 .league-ranking-row.is-me .league-rank-name { color: var(--color-brand-text); font-weight: var(--font-weight-bold); }
@@ -831,7 +831,7 @@ button.mission-reward-status {
 .nickname-editor { display: flex; flex-direction: column; gap: var(--space-2); }
 .nickname-label-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
 .nickname-label-row label { color: var(--color-ink-2); font-size: var(--font-size-label); font-weight: var(--font-weight-semibold); line-height: 20px; }
-.nickname-field { --nickname-focus-ring: var(--color-ink-3); display: flex; box-sizing: border-box; min-height: 64px; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3) var(--space-2) var(--space-4); border: 0; border-radius: var(--shape-lg); background: var(--color-surface); }
+.nickname-field { --nickname-focus-ring: var(--color-ink-3); display: flex; box-sizing: border-box; min-height: 64px; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3) var(--space-2) var(--space-4); border: 0; border-radius: var(--shape-lg); background: var(--color-neutral-soft); }
 .nickname-field:has(input:focus-visible) { outline: 2px solid var(--nickname-focus-ring); outline-offset: -2px; }
 .nickname-field.has-error { --nickname-focus-ring: var(--color-danger-foreground); outline: 2px solid var(--nickname-focus-ring); outline-offset: -2px; }
 .nickname-field input.nickname-input { flex: 1 1 0%; min-width: 0; width: 0; padding: 0; border: 0; background: transparent; color: var(--color-ink); font-size: var(--font-size-headline) !important; font-weight: var(--font-weight-semibold); line-height: 26px !important; }
@@ -860,7 +860,7 @@ button.nickname-clear { display: inline-flex; flex: 0 0 44px; width: 44px; heigh
 .quest-hero { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-4) var(--space-5); border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); }
 .quest-hero-character { width: 72px; height: auto; flex-shrink: 0; }
 .quest-hero-count { margin-top: var(--space-1); color: var(--color-ink-3); font-size: var(--font-size-body); font-variant-numeric: tabular-nums; }
-.quest-hero-count > strong { color: var(--color-accent-foreground); font-size: var(--font-size-title-2); font-weight: var(--font-weight-bold); }
+.quest-hero-count > strong { color: var(--color-neutral-strong); font-size: var(--font-size-title-2); font-weight: var(--font-weight-bold); }
 .home-mission-top { display: grid; grid-template-columns: minmax(0, 1fr) 64px; align-items: center; gap: var(--space-2); }
 .home-mission-info { min-width: 0; }
 .home-mission-title { font-weight: var(--font-weight-semibold); line-height: var(--line-height-title); word-break: keep-all; overflow-wrap: anywhere; }
@@ -1078,13 +1078,13 @@ button.course-home-topic:not(:last-child)::after { content: ''; position: absolu
 /* 홈 상단: 이번 주 연속 학습 카드 */
 .home-streak-card { flex-shrink: 0; margin: var(--space-1) var(--space-5) var(--space-3); padding: var(--space-4) var(--space-4) var(--space-5); border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); }
 .home-streak-title { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3); color: var(--color-ink); font-size: var(--font-size-body); font-weight: var(--font-weight-semibold); line-height: var(--line-height-body); word-break: keep-all; }
-.home-streak-title strong { color: var(--color-ink); }
+.home-streak-title strong { color: var(--color-neutral-strong); }
 .home-streak-card .week-strip { padding: 0; border: 0; }
 .home-streak-card .week-strip-heading { display: none; }
-.home-streak-card .week-strip-circle { max-width: 44px; background: var(--color-accent-soft); color: var(--color-accent-line); }
-.home-streak-card .week-strip-day[data-state='done'] .week-strip-circle { background: var(--color-progress); color: var(--color-on-progress); }
+.home-streak-card .week-strip-circle { max-width: 44px; background: var(--color-neutral-soft); color: var(--color-ink-3); }
+.home-streak-card .week-strip-day[data-state='done'] .week-strip-circle { background: var(--color-neutral-strong); color: var(--color-card); }
 .home-streak-card .week-strip-day[data-state='today'] .week-strip-circle { border-color: var(--color-progress); background: var(--color-card); color: var(--color-progress); }
-.home-streak-card .week-strip-day[data-state='future'] .week-strip-circle { border-color: transparent; background: var(--color-accent-soft); }
+.home-streak-card .week-strip-day[data-state='future'] .week-strip-circle { border-color: transparent; background: var(--color-neutral-soft); }
 
 /* 홈 히어로: 보라 면 왼쪽에 캐릭터(약 30%), 오른쪽에 등급 진행과 말풍선, 아래 흰 버튼 */
 .course-home-hero { margin-top: 0 !important; padding: var(--space-5) var(--space-5) var(--space-5) var(--space-4) !important; background: var(--color-accent-soft) !important; }
@@ -1117,9 +1117,9 @@ button.course-home-rail-card:active { background: var(--color-surface); }
 .course-step { grid-template-columns: 40px minmax(0, 1fr); }
 .course-step:not(:last-child)::before { top: 46px; left: 19px; width: 3px; border-radius: 2px; }
 .course-step[data-step-state='done']:not(:last-child)::before { background: var(--color-progress); }
-.course-step-marker { width: 40px; height: 40px; margin-top: var(--space-2); border: 0; background: var(--color-accent-soft); color: var(--color-accent-foreground); font-size: var(--font-size-label); }
-.course-step[data-step-state='done'] .course-step-marker { background: var(--color-progress); color: var(--color-on-progress); }
-.course-step[data-step-state='current'] .course-step-marker { border: 3px solid var(--color-progress); background: var(--color-card); color: var(--color-progress); font-weight: var(--font-weight-bold); }
+.course-step-marker { width: 40px; height: 40px; margin-top: var(--space-2); border: 0; background: var(--color-neutral-soft); color: var(--color-ink-2); font-size: var(--font-size-label); }
+.course-step[data-step-state='done'] .course-step-marker { background: var(--color-neutral-strong); color: var(--color-card); }
+.course-step[data-step-state='current'] .course-step-marker { border: 3px solid var(--color-neutral-strong); background: var(--color-card); color: var(--color-neutral-strong); font-weight: var(--font-weight-bold); }
 .course-step[data-step-state='locked'] .course-step-marker { background: var(--color-surface); color: var(--color-ink-3); }
 .course-node-current { border-color: var(--color-accent-line) !important; }
 
@@ -1130,7 +1130,7 @@ button.course-home-rail-card:active { background: var(--color-surface); }
 .course-home-section-heading { margin-top: var(--space-6); }
 /* 리그: 이번 주 내 순위 카드 */
 .league-my-rank { margin-bottom: var(--space-6); padding: var(--space-5); border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); }
-.league-my-rank-value { margin-top: var(--space-1); color: var(--color-ink); font-size: var(--font-size-title-2); font-weight: var(--font-weight-bold); font-variant-numeric: tabular-nums; }
+.league-my-rank-value { margin-top: var(--space-1); color: var(--color-neutral-strong); font-size: var(--font-size-title-2); font-weight: var(--font-weight-bold); font-variant-numeric: tabular-nums; }
 
 /* 리그: 등급 단계 로드맵 */
 .league-tier-road { position: relative; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); margin: 0; padding: var(--space-5) var(--space-2) var(--space-4); border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); list-style: none; }
@@ -1140,7 +1140,7 @@ button.course-home-rail-card:active { background: var(--color-surface); }
 .league-tier-step { position: relative; z-index: 1; display: flex; min-width: 0; flex-direction: column; align-items: center; gap: var(--space-1); }
 .league-tier-node { display: flex; width: 44px; height: 44px; align-items: center; justify-content: center; border: 2px solid var(--color-line); border-radius: 50%; background: var(--color-card); }
 .league-tier-step[data-state='done'] .league-tier-node { border-color: var(--color-line-strong); background: var(--color-card); color: var(--color-ink-2); }
-.league-tier-step[data-state='current'] .league-tier-node { width: 52px; height: 52px; margin-top: calc(var(--space-1) * -1); border: 3px solid var(--color-brand-action); box-shadow: 0 0 0 4px var(--color-accent-soft); color: var(--color-accent-foreground); }
+.league-tier-step[data-state='current'] .league-tier-node { width: 52px; height: 52px; margin-top: calc(var(--space-1) * -1); border: 3px solid var(--color-accent-line-strong); box-shadow: 0 0 0 4px var(--color-accent-soft); color: var(--color-accent-foreground); }
 .league-tier-step[data-state='future'] .league-tier-node .stage-glyph { opacity: 0.45; filter: grayscale(0.6); }
 .league-tier-name { margin-top: var(--space-1); max-width: 100%; overflow: hidden; color: var(--color-ink-3); font-size: var(--font-size-caption); text-overflow: ellipsis; white-space: nowrap; }
 .league-tier-step[data-state='current'] .league-tier-name { color: var(--color-accent-foreground); font-weight: var(--font-weight-bold); }
@@ -1173,7 +1173,7 @@ button.course-home-rail-card:active { background: transparent; opacity: 0.7; }
 .lesson-intro-step { padding: var(--space-3) 0; border-radius: 0; background: transparent; box-shadow: none; border-bottom: 1px solid var(--color-line); }
 /* 선택 전 보기는 흰 면이라 회색 테두리로 경계를 보인다 */
 button.quiz-option.border-transparent { border-color: var(--color-line-strong) !important; }
-/* 획득 배지 = 수달 크림 원 + 갈색 채움 아이콘, 미획득 = 회색 원 + 흐린 선 아이콘 */
+/* 획득 배지 = 라임 틴트 원 + 진한 중립 채움 아이콘, 미획득 = 회색 원 + 흐린 선 아이콘 */
 .badge-glyph { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; border: 0; background: var(--color-badge-earned-soft); color: var(--color-badge-earned); }
 .badge-glyph.is-locked { border: 0; background: var(--color-surface); color: var(--color-ink-3); opacity: 0.6; }
 

@@ -11,17 +11,13 @@
   --orange-500: #f97414;
   --orange-600: #ea580c;
   --orange-700: #b84200;
-  /* 메인 보라: 갈색·주황 수달과 또렷하게 대비하고 흰 글자 4.5:1을 넘는다. */
-  --violet-50: #f1eeff;
-  --violet-100: #ddd6ff;
-  --violet-200: #cbc0ff;
-  --violet-300: #b3a5ff;
-  --violet-400: #9580ff;
-  --violet-500: #6b4eff;
-  --violet-600: #5a3ae6;
-  --violet-700: #4b2fd6;
-  --violet-800: #463f80;
-  --violet-900: #2c2557;
+  /* 메인 라임: 주버튼 배경 전용. 흰 바탕 대비가 낮아 글자·아이콘·진행막대·1px 테두리에는 쓰지 않는다. */
+  --lime-50: #f5fcdd;
+  --lime-500: #c6f432;
+  --lime-600: #b3e01f;
+  --lime-900: #4d6b00;
+  --neutral-100: #f2f4f6;
+  --neutral-900: #191f28;
   --amber-50: #fff1e6;
   --amber-100: #ffd9bd;
   --amber-200: #f5d6ae;
@@ -50,13 +46,10 @@
   --gray-900: #1b1a2b;
 
   /* 메인 보라와 글자용 진한 보라를 구분한다. */
-  --accent-brand: var(--violet-500);
-  --accent-brand-ink: var(--violet-700);
+  --accent-brand: var(--lime-500);
+  --accent-brand-ink: var(--lime-900);
 
   /* 상태색 2개: 정답·완료와 오답·오류 전달에만 쓴다. */
-  /* 수달 캐릭터 색(캐릭터 바이블). 배지 일러스트 안에서만 쓴다 */
-  --otter-brown: #a9774f;
-  --otter-cream: #fbebd3;
   --accent-green: #3fa67e;
   --accent-green-ink: #2a7155;
   --accent-green-soft: #e8f3ee;
@@ -135,16 +128,16 @@
 
   /* 보라가 구조색이다: 강조 글자·선택 면·선은 보라 계열, 중성색도 옅은 보라 기운을 띤다. */
   --color-accent-foreground: var(--accent-brand-ink);
-  --color-accent-soft: var(--violet-50);
-  --color-accent-line: var(--violet-200);
-  --color-accent-line-strong: var(--violet-500);
+  --color-accent-soft: var(--lime-50);
+  --color-accent-line: var(--lime-900);
+  --color-accent-line-strong: var(--lime-900);
   --card-border: 1px solid var(--color-line);
   /* 탭바: 활성은 보라 채움 아이콘, 비활성은 아이콘·메뉴명 모두 연한 회색이다. */
   --color-icon-inactive: var(--gray-300);
 
   /* 행동 버튼은 첨부 스크린샷의 주황색과 흰 글자를 그대로 사용한다. */
-  --color-brand-action: var(--violet-500);
-  --color-brand-pressed: var(--violet-600);
+  --color-brand-action: var(--lime-500);
+  --color-brand-pressed: var(--lime-600);
   --color-brand-accent: var(--accent-brand);
   --color-brand-decoration: var(--color-accent-foreground);
   --color-brand-text: var(--color-accent-foreground);
@@ -152,7 +145,7 @@
   --color-brand-line: var(--color-accent-line);
   --color-brand-line-strong: var(--color-accent-line-strong);
   --color-brand-on-light-surface: var(--color-accent-foreground);
-  --color-on-brand: var(--gray-0);
+  --color-on-brand: var(--neutral-900);
 
   /* 행동: 주요/보조/비활성을 구분하되 모든 채운 버튼의 글자는 흰색. */
   --color-action-secondary: var(--gray-600);
@@ -166,10 +159,13 @@
   --color-action-boundary: var(--color-line-strong);
 
   /* 진행은 비문자 대비 3:1, 보상 글자는 4.5:1 이상으로 구분한다. */
-  /* 보라는 주버튼·현재 위치·링크에만. 진행 막대·완료 체크는 진회색 */
-  --color-progress: var(--color-ink-2);
-  --color-badge-earned: var(--otter-brown);
-  --color-badge-earned-soft: var(--otter-cream);
+  /* 라임은 주버튼 배경에만. 진행 막대·링크·현재 탭·선택 테두리는 진한 라임(primary-strong) */
+  --color-progress: var(--lime-900);
+  /* 스트릭·완료 체크·강조 숫자 */
+  --color-neutral-strong: var(--neutral-900);
+  --color-neutral-soft: var(--neutral-100);
+  --color-badge-earned: var(--color-neutral-strong);
+  --color-badge-earned-soft: var(--color-accent-soft);
   --color-on-progress: var(--gray-0);
   --color-reward-foreground: var(--color-accent-foreground);
   --color-selection-soft: var(--color-accent-soft);
@@ -210,11 +206,11 @@
   --color-wash-top: var(--color-canvas);
   --color-wash-soft: var(--color-card);
   --color-wash-mid: var(--color-surface);
-  --color-hero-start: var(--violet-500);
-  --color-hero-end: var(--violet-400);
+  --color-hero-start: var(--lime-500);
+  --color-hero-end: var(--lime-600);
   --color-hero-deep: var(--color-ink-2);
   --color-hero-ink: var(--gray-0);
-  --color-hero-chip: var(--violet-300);
+  --color-hero-chip: var(--lime-50);
   --hero-empty: rgba(255, 255, 255, 0.15);
   --color-hero-chip-line: var(--color-line-strong);
   --color-hero-complete: var(--color-brand-action);

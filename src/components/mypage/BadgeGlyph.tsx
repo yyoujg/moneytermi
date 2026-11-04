@@ -1,7 +1,7 @@
 import { BookBookmark, BookOpen, Books, Coin, Coins, Diamond, Fire, Lightning, Medal, Plant, type Icon } from '@phosphor-icons/react';
 
 const STAT: Record<string, string> = { w: 'words', s: 'streak', x: 'xp' };
-// 획득 배지는 수달 크림 원 안의 갈색 채움 아이콘, 미획득은 회색 원 안의 흐린 선 아이콘이다.
+// 획득 배지는 라임 틴트 원 안의 진한 중립 채움 아이콘, 미획득은 회색 원 안의 흐린 선 아이콘이다.
 const BADGE_ICON: Record<string, Icon> = {
   w1: Plant, w10: BookOpen, w50: BookBookmark, w100: Books,
   s3: Fire, s7: Lightning, s30: Medal,

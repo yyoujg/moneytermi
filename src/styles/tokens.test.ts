@@ -55,10 +55,10 @@ for (const [name, values] of [['라이트', light]] as const) {
         expect(contrast(resolve(foreground, values), resolve(background, values))).toBeGreaterThanOrEqual(4.5);
       });
     }
-    it('주행동은 두 테마에서 메인 보라와 흰 글자를 쓰고 글자 대비 4.5:1을 넘는다', () => {
-      expect(resolve('--color-brand-action', values)).toBe('#6b4eff');
-      expect(resolve('--color-on-brand', values)).toBe('#ffffff');
-      expect(resolve('--color-brand-pressed', values)).toBe('#5a3ae6');
+    it('주행동은 라임 바탕에 진한 글자를 쓰고 글자 대비 4.5:1을 넘는다', () => {
+      expect(resolve('--color-brand-action', values)).toBe('#c6f432');
+      expect(resolve('--color-on-brand', values)).toBe('#191f28');
+      expect(resolve('--color-brand-pressed', values)).toBe('#b3e01f');
       expect(contrast(resolve('--color-on-brand', values), resolve('--color-brand-action', values))).toBeGreaterThanOrEqual(4.5);
     });
     it('누름 색은 기본보다 어둡고 보조 버튼의 상태를 유지한다', () => {
@@ -104,8 +104,8 @@ for (const [name, values] of [['라이트', light]] as const) {
       expect(resolve('--color-character-stage', values)).toBe(resolve('--color-surface', values));
       expect(resolve('--color-filter-tray', values)).toBe(name === '라이트' ? '#ecebf3' : '#222036');
     });
-    it('주행동 글자는 라이트 흰색·다크 잉크, 중성 채움 버튼 글자는 흰색이다', () => {
-      expect(resolve('--color-on-brand', values)).toBe('#ffffff');
+    it('주행동 글자는 진한 중립색, 중성 채움 버튼 글자는 흰색이다', () => {
+      expect(resolve('--color-on-brand', values)).toBe('#191f28');
       expect(resolve('--color-on-action', values)).toBe('#ffffff');
     });
   });
@@ -193,8 +193,8 @@ describe('색상 정의의 단일 원본', () => {
     expect(withoutCommentsAndSwitchSelector).not.toMatch(/#[\da-f]{3,8}\b/i);
   });
   it('히어로와 통계의 큰 표면은 공통 중성 역할을 따른다', () => {
-    expect(resolve('--color-hero-start', light)).toBe('#6b4eff');
-    expect(resolve('--color-hero-end', light)).toBe('#9580ff');
+    expect(resolve('--color-hero-start', light)).toBe('#c6f432');
+    expect(resolve('--color-hero-end', light)).toBe('#b3e01f');
     expect(light['--color-xp-soft']).toBe('var(--color-surface)');
     expect(light['--color-points-soft']).toBe('var(--color-surface)');
   });
@@ -279,7 +279,7 @@ describe('다른 그림과 통일한 원형 파스텔 순위 표시', () => {
     it(`${name} 숫자는 테마와 관계없이 밝은 그림 안에서 충분히 구분된다`, () => {
       expect(contrast(resolve('--color-league-symbol-ink', values), '#fffbf3')).toBeGreaterThanOrEqual(4.5);
       expect(resolve('--color-league-symbol-ink', values)).toBe('#3d3b52');
-      expect(indexCss).toContain('.league-rank-badge[data-podium] { color: var(--color-ink); font-weight: var(--font-weight-bold); }');
+      expect(indexCss).toContain('.league-rank-badge[data-podium] { color: var(--color-neutral-strong); font-weight: var(--font-weight-bold); }');
       expect(indexCss).toContain('.league-rank-value { position: absolute; inset-inline: 0; top: 7px;');
       expect(indexCss).not.toContain(".league-rank-badge[data-podium='3'] .league-rank-value");
       expect(indexCss).not.toContain(".league-rank-badge[data-podium='1'] { background:");
@@ -319,13 +319,13 @@ describe('원시값과 의미 역할의 2단계 구조', () => {
 });
 
 describe('주황 메인과 따뜻한 보조 팔레트', () => {
-  it('라이트는 옅은 회색 바탕·흰 섹션·보라 행동·진한 보라 강조를 사용한다', () => {
+  it('라이트는 옅은 회색 바탕·흰 섹션·라임 행동·진한 라임 강조를 사용한다', () => {
     expect(resolve('--color-canvas', light)).toBe('#f3f2f8');
     expect(resolve('--color-card', light)).toBe('#ffffff');
     expect(resolve('--color-surface', light)).toBe('#f3f2f8');
-    expect(resolve('--color-brand-action', light)).toBe('#6b4eff');
-    expect(resolve('--color-brand-decoration', light)).toBe('#4b2fd6');
-    expect(resolve('--color-brand-accent', light)).toBe('#6b4eff');
+    expect(resolve('--color-brand-action', light)).toBe('#c6f432');
+    expect(resolve('--color-brand-decoration', light)).toBe('#4d6b00');
+    expect(resolve('--color-brand-accent', light)).toBe('#c6f432');
   });
   it('마이페이지·리그의 구분선도 공통 중성·민트 역할을 상속한다', () => {
     for (const selector of [':is(.my-page-screen, .league-screen, .identity-badge, .badge-tone)']) {

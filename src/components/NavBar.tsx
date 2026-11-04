@@ -82,9 +82,8 @@ const NavBar = () => {
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.path || pathname.startsWith(`${item.path}/`);
           const hasNew = newByPath[item.path] ?? false;
-          // 활성 탭은 메인 주황, 나머지는 옅은 회색 채움 아이콘이다.
-          // 활성 탭은 보라 채움 아이콘과 보라 메뉴명, 나머지는 연한 회색 선형이다.
-          const colorClass = isActive ? 'text-[var(--color-brand-action)]' : 'text-[var(--color-icon-inactive)]';
+          // 활성 탭은 진한 라임(primary-strong) 채움 아이콘과 메뉴명, 나머지는 연한 회색 선형이다.
+          const colorClass = isActive ? 'text-[var(--color-accent-foreground)]' : 'text-[var(--color-icon-inactive)]';
           const TabIcon = item.icon;
           return (
             <button
