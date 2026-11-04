@@ -1198,8 +1198,10 @@ button.review-aux-button:disabled { color: var(--color-ink-3); }
 .course-home-topic-list { display: block; padding: var(--space-2) 0; }
 .course-home-topic-list .course-home-topic { display: block; width: 100%; margin-left: 0; min-height: 0; padding: 0; border: 0; background: transparent; }
 .course-home-topic-list .course-home-topic > div { padding-left: 0; padding-right: 0; }
-.course-home-level-heading { padding: var(--space-5) 0 var(--space-1); color: var(--color-ink-3); font-size: var(--font-size-label); font-weight: var(--font-weight-semibold); }
-.course-home-level-heading:first-child { padding-top: var(--space-3); }
+/* 전체 탭 난이도 구분: 굵은 띠 + 섹션 제목 크기. 첫 난이도는 띠 없이 */
+.course-home-level-heading { display: flex; align-items: baseline; justify-content: space-between; margin: var(--space-4) calc(var(--space-5) * -1) 0; padding: var(--space-5) var(--space-5) var(--space-2); border-top: 8px solid var(--color-neutral-soft); color: var(--color-ink); font-size: var(--font-size-section-title); font-weight: var(--font-weight-bold); }
+.course-home-level-heading > span { color: var(--color-ink-3); font-size: var(--font-size-caption); font-weight: var(--font-weight-regular); }
+.course-home-level-heading:first-child { margin-top: 0; padding-top: var(--space-3); border-top: 0; }
 /* 퀘스트·리그·마이는 흰 바탕. 섹션 사이는 라벤더 띠 대신 구분선 */
 .quest-screen, .league-screen, .my-page-screen { background: var(--color-card); }
 .my-page-sections .my-page-panel.my-page-menu { padding-inline: 0; }
@@ -1214,8 +1216,9 @@ button.course-home-rail-card { width: 160px; flex-direction: column; align-items
 .course-home-rail-card[data-locked='true'] .topic-thumb { opacity: 0.45; filter: grayscale(1); }
 .course-home-rail-lock { position: absolute; top: 50%; left: 50%; display: flex; width: 40px; height: 40px; align-items: center; justify-content: center; border-radius: 50%; background: var(--color-card); color: var(--color-ink-2); transform: translate(-50%, -50%); }
 .course-topic-course-meta { display: flex; align-items: center; gap: var(--space-1); color: var(--color-ink-3); font-size: var(--font-size-caption); }
+/* 홈 코스 카드: 난이도 뱃지는 그림 왼쪽 위에 얹는다 */
+.course-home-rail-level { position: absolute; top: var(--space-2); left: var(--space-2); background: var(--color-card); }
 .course-level-badge { padding: 2px var(--space-2); border-radius: var(--shape-sm); background: var(--color-surface); color: var(--color-ink-2); font-size: var(--font-size-caption); font-weight: var(--font-weight-semibold); }
-.course-home-section-desc { margin: 2px 0 0; color: var(--color-ink-3); font-size: var(--font-size-caption); }
 /* 주제 썸네일(홈 카드·뉴스). 사진이 없으면 회색 바탕 + 첫 글자 */
 .topic-thumb { flex-shrink: 0; border-radius: var(--shape-inset); object-fit: cover; background: var(--color-surface); }
 .topic-thumb-fallback { display: inline-flex; align-items: center; justify-content: center; color: var(--color-ink-3); font-size: var(--font-size-label); font-weight: var(--font-weight-bold); }

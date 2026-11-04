@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useLayoutEffect, useEffect, useState } from 're
 import { BookOpenText, Check, ListChecks, LockKeyhole, RotateCcw } from '../components/ui/OtterIcons';
 import { List, ListRow } from '@toss/tds-mobile';
 import { TopicThumb } from '../components/TopicThumb';
-import { COURSE_NAMES, TOPIC_DESCRIPTIONS } from '../lib/topicImages';
+import { COURSE_NAMES } from '../lib/topicImages';
 import { ChevronRight } from '../components/ui/ControlIcons';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
@@ -104,16 +104,16 @@ const CourseScreen = () => {
     return () => { cancelled = true; };
   }, []);
 
-  // 필수 단계(학습·퀴즈)는 같은 주제(카테고리) 안에서 기초→심화 코스 순서대로만 연다. 안 끝낸 첫 단계 뒤의 미완료 단계는 다음 난이도 코스까지 모두 잠근다. 복습은 선택이라 잠그지 않는다
+  // 필수 단계(학습·퀴즈)는 전체 학습 순서(기초의 모든 주제 → 중급 …, courses의 sort_order)대로만 연다.
+  // 안 끝낸 첫 단계 하나만 열고 그 뒤의 미완료 단계는 다른 주제·다음 난이도까지 모두 잠근다. 복습은 선택이라 잠그지 않는다
   const sections = useMemo(() => {
-    const opened = new Set<string>();
+    let opened = false;
     return buildPath(courses, knownIds).map(sec => {
-      const key = sec.course.category;
       return { ...sec, nodes: sec.nodes.map(node => {
         if (node.type === 'review') return node;
         const done = node.state === 'done' || (doneNodes.has(node.id) && node.state === 'available');
         if (done) return node;
-        if (!opened.has(key)) { opened.add(key); return node; }
+        if (!opened) { opened = true; return node; }
         return { ...node, state: 'locked' as const };
       }) };
     });
@@ -129,9 +129,14 @@ const CourseScreen = () => {
       level: parts[0]!.section.course.level,
       known: parts.reduce((sum, part) => sum + part.section.knownCount, 0),
       total: parts.reduce((sum, part) => sum + part.section.course.words.length, 0),
-      locked: parts[0]!.section.nodes[0]?.state === 'locked',
+      // 잠김 = 남은 필수 단계가 있는데 지금 할 수 있는 단계가 하나도 없음(전체 순서상 앞 코스를 덜 끝냄)
+      locked: (() => {
+        const steps = parts.flatMap(part => part.section.nodes).filter(node => node.type !== 'review');
+        const doneStep = (node: PathNode) => node.state === 'done' || (doneNodes.has(node.id) && node.state === 'available');
+        return steps.some(node => !doneStep(node)) && !steps.some(node => !doneStep(node) && node.state !== 'locked');
+      })(),
     };
-  }), [sections]);
+  }), [sections, doneNodes]);
   const requestedTopic = searchParams.get('topic');
   const topicIndex = requestedTopic !== null && /^\d+$/.test(requestedTopic) ? Number(requestedTopic) : -1;
   const activeTopic = isCatalog ? null : topics[topicIndex] ?? null;
@@ -377,29 +382,30 @@ const CourseScreen = () => {
           </ActionButton>}
         </section>
 
-        {/* 열린 주제 3개를 주제명별로 묶고, 그 아래에 난이도별 코스를 가로 카드로 둔다 */}
-        {[...new Set(topics.filter(topic => !topic.locked).map(topic => topic.category))].slice(0, 3).map(category => (
+        {/* 학습 순서상 앞 주제 3개를 주제명별로 묶고, 그 아래에 난이도별 코스를 가로 카드로 둔다(잠긴 코스는 자물쇠) */}
+        {[...new Set(topics.map(topic => topic.category))].slice(0, 3).map(category => (
           <section key={category} aria-label={category}>
             <div className="course-home-section-heading">
               <h2 className="type-section-title">{category}</h2>
-              {TOPIC_DESCRIPTIONS[category] && <p className="course-home-section-desc">{TOPIC_DESCRIPTIONS[category]}</p>}
             </div>
             <div className="course-home-rail" role="list" aria-label={`${category} 코스`}>
               {topics.filter(topic => topic.category === category).flatMap(topic => topic.parts.map(({ section }, pi) => {
                 const steps = section.nodes.filter(isStep);
                 const done = steps.filter(isDone).length;
-                const locked = section.nodes.every(node => node.state === 'locked');
+                // 잠김 = 남은 필수 단계가 있는데 지금 할 수 있는 단계가 없음(예전에 일부 푼 코스도 앞 코스를 끝내기 전엔 잠김)
+                const locked = done < steps.length && !steps.some(node => !isDone(node) && node.state !== 'locked');
                 const name = COURSE_NAMES[section.course.id] ?? (topic.parts.length > 1 ? `${topic.level} ${pi + 1}` : topic.level);
                 return (
                   <button key={section.course.id} type="button" role="listitem" className="course-home-rail-card" data-locked={locked}
                     onClick={() => navigate(`/course?topic=${topic.index}&course=${section.course.id}`)} aria-label={`${topic.level} ${name} 코스 열기, ${locked ? '잠김' : `${done}/${steps.length}단계 완료`}`}>
                     <span className="course-home-rail-thumb">
                       <TopicThumb category={category} size={160} height={120} />
+                      <span className="course-level-badge course-home-rail-level">{topic.level}</span>
                       {locked && <span className="course-home-rail-lock"><LockKeyhole size={20} aria-hidden="true" /></span>}
                     </span>
                     <span className="course-home-rail-text">
                       <span className="course-home-rail-title">{name}</span>
-                      <span className="course-home-rail-meta"><span className="course-level-badge">{topic.level}</span>{!locked && `${done}/${steps.length}단계`}</span>
+                      {!locked && <span className="course-home-rail-meta">{done}/{steps.length}단계</span>}
                     </span>
                   </button>
                 );
@@ -452,7 +458,7 @@ const CourseScreen = () => {
               const levelHeading = selectedLevel === '전체' && (i === 0 || visibleTopics[i - 1].level !== topic.level);
               // 같은 책 아이콘 반복 대신 상태 글자와 화살표만 둔다
               return <React.Fragment key={`${topic.level}-${topic.category}`}>
-              {levelHeading && <h3 className="course-home-level-heading">{topic.level}</h3>}
+              {levelHeading && <h3 className="course-home-level-heading">{topic.level}<span>{visibleTopics.filter(t => t.level === topic.level).length}개 주제</span></h3>}
               <ListRow as="button" border="none" disabled={locked} data-topic-index={topic.index} data-current={isCurrent || undefined}
                 onClick={() => navigate(`/course?topic=${topic.index}`)} aria-label={`${topic.level} ${topic.category} 주제 열기`} aria-describedby={`topic-summary-${topic.index}`} className="course-home-topic w-full"
                 contents={<span className="flex flex-col">

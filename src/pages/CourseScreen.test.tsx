@@ -176,6 +176,13 @@ describe('필수 단계 순차 잠금', () => {
     expect(container.querySelector('[data-node-id="c1-l3"]')).not.toBeDisabled();
   });
 
+  it('앞 주제를 덜 끝냈으면 다른 주제의 코스도 잠근다', async () => {
+    baseContext({ courses: [course({ id: 'c1', category: '경제 기초 개념' }), course({ id: 'c2', category: '가계', startId: 101 })], knownIds: new Set() });
+    state.doneNodes = new Set();
+    const { container } = await mount('/course?topic=1');
+    expect(container.querySelector('[data-node-id="c2-l0"]')).toBeDisabled();
+  });
+
   it('같은 주제의 다음 난이도 코스는 앞 코스를 끝낼 때까지 잠근다', async () => {
     const basic = course({ id: 'c1', wordCount: 4 });
     const mid = { ...course({ id: 'c2', wordCount: 4, startId: 101 }), level: '중급' };
@@ -407,16 +414,15 @@ describe('CourseScreen energy gates', () => {
     expect(container.textContent).toContain('단어 카드');
   });
 
-  it('포인트가 없어도 다른 주제의 첫 레슨을 시작한다', async () => {
+  it('포인트가 없어도 지금 순서인 첫 레슨을 에너지로 시작한다', async () => {
     baseContext({ points: 0, courses: [course({ category: '경제' }), course({ id: 'c2', category: '금융', startId: 5 })] });
-    const { container, clickButtonContaining } = await mount('/course?topic=1');
+    const { container, clickButtonContaining } = await mount('/course?topic=0');
     expect(container.textContent).toContain('코스 1/1');
-    expect(container.textContent).not.toContain('코스 2/1');
-    await clickButtonContaining('용어5');
+    await clickButtonContaining('용어1');
     await clickButtonContaining('시작하기');
     expect(container.textContent).toContain('단어 카드');
     expect(state.spendPoints).not.toHaveBeenCalled();
-    expect(state.spendEnergy).toHaveBeenCalledWith(1, 'lesson', 'c2-l0:5,6,7,8');
+    expect(state.spendEnergy).toHaveBeenCalledWith(1, 'lesson', 'c1-l0:1,2,3,4');
   });
 
   it('복습에서 틀렸어도 열람 진도가 있으면 다음 레슨은 잠기지 않는다', async () => {
@@ -428,13 +434,13 @@ describe('CourseScreen energy gates', () => {
     expect(container.textContent).toContain('단어 카드');
   });
 
-  it('홈의 이어 배우기는 마지막으로 시작한 주제로 이동한다', async () => {
+  it('홈의 이어 배우기는 다른 주제를 열어 둔 적이 있어도 전체 순서상 지금 할 코스로 이동한다', async () => {
     state.storage.set('learning_resume_course_v1', 'c2');
     baseContext({ courses: [course({ category: '경제' }), course({ id: 'c2', category: '금융', startId: 5 })], knownIds: new Set([5]) });
     const { container, clickButtonContaining } = await mount('/course');
     await clickButtonContaining('이어 배우기');
-    expect(container.textContent).toContain('용어5 외 3개');
-    expect(container.textContent).not.toContain('용어1 외 3개');
+    expect(container.textContent).toContain('용어1 외 3개');
+    expect(container.textContent).not.toContain('용어5 외 3개');
   });
 
   it('새 레슨 앞에 과거 용어 인출 문제가 있으면 먼저 퀴즈로 보낸다', async () => {
