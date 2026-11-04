@@ -285,7 +285,7 @@ export default function App() {
           <AlertModal />
           {/* 상단 인셋은 더하지 않는다 — 토스 웹뷰는 네이티브 내비게이션 바 아래에서 시작해 상태바와 겹치지 않는다.
               하단 인셋은 NavBar가 직접 처리한다. */}
-          <div data-app-shell className="w-full max-w-md mx-auto bg-[var(--color-canvas)] h-[100dvh] overflow-hidden relative font-sans text-[var(--color-ink)] flex flex-col">
+          <div data-app-shell className="w-full max-w-md mx-auto bg-[var(--color-card)] h-[100dvh] overflow-hidden relative font-sans text-[var(--color-ink)] flex flex-col">
             <ErrorBoundary>
               <Layout />
             </ErrorBoundary>

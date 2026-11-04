@@ -214,7 +214,7 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
 }
 .course-topic-summary {
   border: 0;
-  background: var(--color-canvas);
+  background: var(--color-card);
 }
 .course-node-card {
   position: relative;
@@ -357,29 +357,29 @@ svg:is(.text-brand-300, .text-brand-400, .text-brand-500, .text-brand-600, .text
   border: 0;
 }
 
-.app-soft-screen { background: var(--color-canvas); }
+.app-soft-screen { background: var(--color-card); }
 .lesson-intro-check { display: flex; width: 24px; height: 24px; flex-shrink: 0; border-radius: 50%; align-items: center; justify-content: center; background: var(--color-accent-soft); color: var(--color-accent-foreground); }
 .lesson-intro-step { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4); border-radius: var(--shape-inset); background: var(--color-card); box-shadow: var(--shadow-choice); }
 .lesson-intro-step-number { display: flex; width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%; align-items: center; justify-content: center; background: var(--color-progress); color: var(--color-on-progress); font-size: var(--font-size-label); font-weight: var(--font-weight-bold); }
 .learning-completion-card { border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); }
 .learning-completion-mark { display: flex; width: 56px; height: 56px; border-radius: 50%; align-items: center; justify-content: center; background: var(--color-progress); color: var(--color-on-progress); }
 .app-soft-header {
-  background: var(--color-canvas);
+  background: var(--color-card);
   border-bottom: 1px solid var(--color-line);
 }
 .app-soft-sticky {
   /* 고정 필터에서 상단 그라데이션을 다시 시작하지 않는다. */
-  background: var(--color-canvas);
+  background: var(--color-card);
 }
 .app-soft-footer {
-  background: var(--color-canvas);
+  background: var(--color-card);
   border-top-color: var(--color-line);
 }
 
 .my-page-screen {
-  background: var(--color-canvas);
+  background: var(--color-card);
 }
-.my-page-hero { position: relative; flex-shrink: 0; padding-bottom: var(--space-4); background: var(--color-canvas); }
+.my-page-hero { position: relative; flex-shrink: 0; padding-bottom: var(--space-4); background: var(--color-card); }
 .my-page-hero::after {
   content: none;
 }
@@ -477,7 +477,7 @@ button.action-button svg { flex-shrink: 0; }
 }
 .study-action-footer {
   padding-bottom: max(var(--space-7), env(safe-area-inset-bottom));
-  background: var(--color-canvas);
+  background: var(--color-card);
   border-top: 1px solid var(--color-line);
 }
 /* 배경 없는 글자·행 버튼의 공통 눌림 표시(상태 정의). */
@@ -647,7 +647,7 @@ button.word-term-button:active {
   padding: var(--space-4);
   border: 1px solid var(--color-line);
   border-radius: var(--shape-card);
-  background: var(--color-canvas);
+  background: var(--color-card);
   color: var(--color-ink);
   white-space: normal;
   scroll-margin-block: var(--space-4);
@@ -699,7 +699,7 @@ button.lesson-feedback-disclosure { display: flex; width: 100%; min-height: var(
 .lesson-feedback-options li:is(.is-correct, .is-wrong) { background: var(--color-surface); color: var(--color-ink); }
 .lesson-feedback-option-marker { display: flex; width: 18px; flex-shrink: 0; align-items: center; justify-content: center; font-size: var(--font-size-caption); }
 .lesson-feedback-option-state { flex-shrink: 0; font-size: var(--font-size-caption); font-weight: var(--font-weight-semibold); }
-.lesson-result-footer { display: flex; flex-shrink: 0; flex-direction: column; gap: var(--space-2); padding: var(--space-3) var(--space-5) max(var(--space-7), env(safe-area-inset-bottom)); border-top: 1px solid var(--color-line); background: var(--color-canvas); }
+.lesson-result-footer { display: flex; flex-shrink: 0; flex-direction: column; gap: var(--space-2); padding: var(--space-3) var(--space-5) max(var(--space-7), env(safe-area-inset-bottom)); border-top: 1px solid var(--color-line); background: var(--color-card); }
 
 /* 완료 화면: 캐릭터·실제 결과·다음 행동을 각각 한 구역에 둔다. */
 .lesson-complete-content { flex: 1; min-height: 0; overflow-y: auto; padding: var(--space-5) var(--space-5) var(--space-6); scrollbar-width: none; }
@@ -908,7 +908,7 @@ button.nickname-clear { display: inline-flex; flex: 0 0 44px; width: 44px; heigh
 .review-complete-balance { display: flex; flex-shrink: 0; align-items: baseline; gap: var(--space-1); color: var(--color-ink-3); font-size: var(--font-size-label); line-height: var(--line-height-body); font-variant-numeric: tabular-nums; }
 .review-complete-balance strong { color: var(--color-ink); font-size: var(--font-size-title-3); font-weight: var(--font-weight-bold); letter-spacing: var(--letter-spacing-title); }
 .review-complete-extras:empty { display: none; }
-.review-complete-footer { display: flex; flex-shrink: 0; justify-content: center; padding: var(--space-3) var(--space-5) max(var(--space-7), env(safe-area-inset-bottom)); background: var(--color-canvas); }
+.review-complete-footer { display: flex; flex-shrink: 0; justify-content: center; padding: var(--space-3) var(--space-5) max(var(--space-7), env(safe-area-inset-bottom)); background: var(--color-card); }
 .review-complete-footer > button { max-width: 400px; }
 @media (max-width: 350px) {
   .review-complete-content { padding: var(--space-5) var(--space-4) var(--space-3); gap: var(--space-3); }
@@ -1012,7 +1012,7 @@ button.word-meaning-detail:focus-visible { outline: 2px solid var(--color-ink-3)
 .quiz-selection-guide { margin-top: calc(var(--space-1) * -1); color: var(--color-ink-3); font-size: var(--font-size-label); line-height: var(--line-height-relaxed); word-break: keep-all; }
 .quiz-prompt-main:focus { outline: none; }
 button.quiz-option:disabled { opacity: 1; cursor: default; }
-.quiz-confirm-footer { flex-shrink: 0; padding: var(--space-3) var(--space-5) max(var(--space-6), env(safe-area-inset-bottom)); border-top: 1px solid var(--color-line); background: var(--color-canvas); }
+.quiz-confirm-footer { flex-shrink: 0; padding: var(--space-3) var(--space-5) max(var(--space-6), env(safe-area-inset-bottom)); border-top: 1px solid var(--color-line); background: var(--color-card); }
 .quiz-answer-feedback { display: flex; flex-shrink: 0; flex-direction: column; gap: var(--space-3); padding: var(--space-5) var(--space-5) max(var(--space-5), env(safe-area-inset-bottom)); border-radius: var(--shape-card) var(--shape-card) 0 0; background: var(--color-card); box-shadow: 0 -4px 16px rgba(23, 29, 35, 0.06); }
 .quiz-answer-heading { display: flex; align-items: center; gap: var(--space-2); }
 .quiz-answer-heading > h2 { flex: 1; min-width: 0; color: var(--color-ink); font-size: var(--font-size-title-3); font-weight: var(--font-weight-bold); line-height: var(--line-height-body); word-break: keep-all; }
@@ -1131,7 +1131,7 @@ button.course-home-rail-card:active { background: var(--color-surface); }
 .course-node-current { border-color: var(--color-accent-line) !important; }
 
 /* 학습 완료: 보라 바탕 위 기뻐하는 수달과 흰 결과 카드 */
-.learning-completion-screen { background: var(--color-canvas); }
+.learning-completion-screen { background: var(--color-card); }
 .learning-completion-screen .learning-completion-card { margin-top: 72px; padding-top: 44px; }
 .learning-completion-character { position: absolute; top: -96px; left: 50%; width: 128px; height: auto; transform: translateX(-50%); }
 .course-home-section-heading { margin-top: var(--space-6); }
@@ -1176,7 +1176,7 @@ button.course-home-rail-card:active { background: transparent; opacity: 0.7; }
 .my-page-stats.app-card { border-bottom: 1px solid var(--color-line); border-radius: 0; }
 .learning-completion-card { background: transparent; box-shadow: none; }
 /* 스크롤 중 고정되는 코스 머리는 아래 단계 글자와 겹치지 않게 화면과 같은 바탕색을 둔다 */
-.course-topic-summary { padding-inline: 0 !important; border-radius: 0; background: var(--color-canvas) !important; border-bottom: 1px solid var(--color-line); }
+.course-topic-summary { padding-inline: 0 !important; border-radius: 0; background: var(--color-card) !important; border-bottom: 1px solid var(--color-line); }
 .lesson-intro-step { padding: var(--space-3) 0; border-radius: 0; background: transparent; box-shadow: none; border-bottom: 1px solid var(--color-line); }
 /* 선택 전 보기는 흰 면이라 회색 테두리로 경계를 보인다 */
 button.quiz-option.border-transparent { border-color: var(--color-line-strong) !important; }

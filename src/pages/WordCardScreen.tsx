@@ -258,7 +258,7 @@ const RelatedWordPreview = ({ initialWord, lookup, onClose }: {
       }
     }}
     onClick={event => { if (event.target === event.currentTarget) onClose(); }}
-    className="m-auto max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-card border-0 bg-[var(--color-canvas)] p-0 text-[var(--color-ink)] backdrop:bg-black/40"
+    className="m-auto max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-card border-0 bg-[var(--color-card)] p-0 text-[var(--color-ink)] backdrop:bg-black/40"
   >
     <div>
       <header className="sticky top-0 z-10 flex flex-col gap-2 bg-[var(--color-card)] px-5 py-4">

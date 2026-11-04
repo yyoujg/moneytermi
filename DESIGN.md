@@ -45,7 +45,7 @@
 | 옅은 강조 면   | `--color-accent-soft`       | `#F1EEFF` | 선택 면, 말풍선, 아이콘 틀, 배지 원        |
 | 강조 선        | `--color-accent-line`       | `#CBC0FF` | 선택 테두리                                |
 | 진행           | `--color-progress`          | `#6B4EFF` | 진행 막대, 완료 원                         |
-| 페이지 바탕    | `--color-canvas`            | `#F3F2F8` | 흰 섹션 사이                               |
+| 페이지 바탕    | `--color-canvas`            | `#F3F2F8` | 화면 바탕은 흰색(`--color-card`). 스플래시·축하 화면에만 쓴다 |
 | 섹션·카드      | `--color-card`              | `#FFFFFF` | 흰 섹션, 카드, 시트                        |
 | 비활성 면      | `--color-surface`           | `#F3F2F8` | 진행 막대 바탕, 받은 미션 버튼             |
 | 제목           | `--color-ink`               | `#1B1A2B` | 제목, 주요 수치(순검정 대신 짙은 보라검정) |
