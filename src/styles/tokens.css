@@ -25,25 +25,26 @@
   --amber-500: #d96100;
   --amber-900: #352b23;
 
+  /* 중성 회색은 TDS grey 스케일 값(보라 기운 없는 회색) */
   --gray-0: #ffffff;
-  --gray-50: #fafafd;
-  --gray-75: #f3f2f8;
-  --gray-100: #ecebf3;
-  --gray-150: #e7e6ef;
-  --gray-200: #d4d2e0;
-  --gray-300: #b6b4c7;
-  --gray-400: #9a98ad;
-  --gray-450: #8a889e;
-  --gray-500: #6e6c84;
-  --gray-600: #63617a;
-  --gray-650: #55536b;
-  --gray-700: #45435a;
-  --gray-720: #3d3b52;
-  --gray-750: #33314a;
-  --gray-800: #2a2840;
-  --gray-830: #222036;
-  --gray-850: #1c1a2e;
-  --gray-900: #1b1a2b;
+  --gray-50: #f9fafb;
+  --gray-75: #f2f4f6;
+  --gray-100: #e5e8eb;
+  --gray-150: #e5e8eb;
+  --gray-200: #d1d6db;
+  --gray-300: #b0b8c1;
+  --gray-400: #8b95a1;
+  --gray-450: #6b7684;
+  --gray-500: #6b7684;
+  --gray-600: #4e5968;
+  --gray-650: #4e5968;
+  --gray-700: #4e5968;
+  --gray-720: #333d4b;
+  --gray-750: #333d4b;
+  --gray-800: #333d4b;
+  --gray-830: #191f28;
+  --gray-850: #191f28;
+  --gray-900: #191f28;
 
   /* 메인 보라와 글자용 진한 보라를 구분한다. */
   --accent-brand: var(--lime-500);
@@ -149,9 +150,9 @@
 
   /* 행동: 주요/보조/비활성을 구분하되 모든 채운 버튼의 글자는 흰색. */
   --color-action-secondary: var(--gray-600);
-  --color-action-secondary-pressed: var(--gray-650);
+  --color-action-secondary-pressed: var(--gray-750);
   --color-action-soft: var(--gray-100);
-  --color-action-soft-pressed: var(--gray-150);
+  --color-action-soft-pressed: var(--gray-200);
   --color-on-action-soft: var(--color-ink-2);
   --color-button-secondary: var(--color-surface);
   --color-button-disabled: var(--gray-500);

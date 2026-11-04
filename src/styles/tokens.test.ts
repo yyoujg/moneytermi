@@ -76,7 +76,7 @@ for (const [name, values] of [['라이트', light]] as const) {
     });
     it('밝은 보조 버튼은 바탕과 구분되는 중성 면과 짙은 글자로 충분한 대비를 사용한다', () => {
       // 라이트는 surface가 canvas와 거의 같아 한 단계 진한 회색을 쓴다
-      expect(resolve('--color-action-soft', values)).toBe(name === '라이트' ? '#ecebf3' : resolve('--color-surface', values));
+      expect(resolve('--color-action-soft', values)).toBe(name === '라이트' ? '#e5e8eb' : resolve('--color-surface', values));
       expect(resolve('--color-on-action-soft', values)).toBe(resolve('--color-ink-2', values));
       for (const background of ['--color-action-soft', '--color-action-soft-pressed']) {
         expect(contrast(resolve('--color-on-action-soft', values), resolve(background, values))).toBeGreaterThanOrEqual(4.5);
@@ -102,7 +102,7 @@ for (const [name, values] of [['라이트', light]] as const) {
       }
       expect(contrast(resolve('--color-selection-ink', values), resolve('--color-selection-soft', values))).toBeGreaterThanOrEqual(4.5);
       expect(resolve('--color-character-stage', values)).toBe(resolve('--color-surface', values));
-      expect(resolve('--color-filter-tray', values)).toBe(name === '라이트' ? '#ecebf3' : '#222036');
+      expect(resolve('--color-filter-tray', values)).toBe(name === '라이트' ? '#e5e8eb' : '#222036');
     });
     it('주행동 글자는 진한 중립색, 중성 채움 버튼 글자는 흰색이다', () => {
       expect(resolve('--color-on-brand', values)).toBe('#191f28');
@@ -123,7 +123,7 @@ describe('이해 확인의 캐릭터·중성 상태 표현', () => {
     expect(feedbackCss).not.toContain('.lesson-feedback-character');
     expect(feedbackCss).toContain('.lesson-complete-score-track > span { background: var(--color-ink-3); }');
     // 정답은 초록 대신 중립 잉크(✓/✕와 문구로 구분), 빨강은 오류에만 남긴다
-    for (const [values, success, danger] of [[light, '#1b1a2b', '#b23a33']] as const) {
+    for (const [values, success, danger] of [[light, '#191f28', '#b23a33']] as const) {
       expect(resolve('--color-success-foreground', values)).toBe(success);
       expect(resolve('--color-danger-foreground', values)).toBe(danger);
     }
@@ -143,7 +143,7 @@ describe('색상 정의의 단일 원본', () => {
     for (const key of ['canvas', 'card', 'surface']) {
       expect(css.match(new RegExp('--color-' + key + ':', 'g'))).toHaveLength(1);
     }
-    expect(resolve('--color-canvas', light)).toBe('#f3f2f8');
+    expect(resolve('--color-canvas', light)).toBe('#f2f4f6');
     const recap = readFileSync(resolvePath(cwd(), 'src/components/WeeklyRecap.tsx'), 'utf8');
     expect(recap).toContain('bg-[var(--color-canvas)]');
     expect(recap).not.toContain('bg-[var(--color-hero-start)]');
@@ -212,7 +212,7 @@ describe('배지·리그·프로필의 기존 표현 보존', () => {
     expect(identity['--color-brand-ink']).toBe('var(--color-brand-decoration)');
     expect(identity['--color-brand-cream']).toBe('var(--color-brand-soft)');
     expect(identity['--radius-card']).toBe('var(--shape-card)');
-    expect(resolve('--color-canvas', light)).toBe('#f3f2f8');
+    expect(resolve('--color-canvas', light)).toBe('#f2f4f6');
   });
   for (const [name, base, selector] of [['라이트', light, scope]] as const) {
     it(`${name} 마이페이지·리그는 같은 중성 바탕을 사용하고 글자 대비도 유지한다`, () => {
@@ -278,7 +278,7 @@ describe('다른 그림과 통일한 원형 파스텔 순위 표시', () => {
   for (const [name, values] of [['라이트', light]] as const) {
     it(`${name} 숫자는 테마와 관계없이 밝은 그림 안에서 충분히 구분된다`, () => {
       expect(contrast(resolve('--color-league-symbol-ink', values), '#fffbf3')).toBeGreaterThanOrEqual(4.5);
-      expect(resolve('--color-league-symbol-ink', values)).toBe('#3d3b52');
+      expect(resolve('--color-league-symbol-ink', values)).toBe('#333d4b');
       expect(indexCss).toContain('.league-rank-badge[data-podium] { color: var(--color-neutral-strong); font-weight: var(--font-weight-bold); }');
       expect(indexCss).toContain('.league-rank-value { position: absolute; inset-inline: 0; top: 7px;');
       expect(indexCss).not.toContain(".league-rank-badge[data-podium='3'] .league-rank-value");
@@ -320,9 +320,9 @@ describe('원시값과 의미 역할의 2단계 구조', () => {
 
 describe('주황 메인과 따뜻한 보조 팔레트', () => {
   it('라이트는 옅은 회색 바탕·흰 섹션·라임 행동·진한 라임 강조를 사용한다', () => {
-    expect(resolve('--color-canvas', light)).toBe('#f3f2f8');
+    expect(resolve('--color-canvas', light)).toBe('#f2f4f6');
     expect(resolve('--color-card', light)).toBe('#ffffff');
-    expect(resolve('--color-surface', light)).toBe('#f3f2f8');
+    expect(resolve('--color-surface', light)).toBe('#f2f4f6');
     expect(resolve('--color-brand-action', light)).toBe('#c6f432');
     expect(resolve('--color-brand-decoration', light)).toBe('#4d6b00');
     expect(resolve('--color-brand-accent', light)).toBe('#c6f432');
