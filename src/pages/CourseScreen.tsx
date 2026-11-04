@@ -19,6 +19,13 @@ import { EnergyIcon } from '../components/StatIcons';
 import { buildPath, type PathNode } from '../lib/path';
 
 const SEEN_KEY = 'path_seen_done';   // 코스 화면에서 마지막으로 본 완료 노드들(도장 연출용)
+// 징검다리 옆 장식 수달: 수달 포즈와 리그 등급 장면(이전 등급 그림 v3)을 번갈아 쓴다
+const STEP_BUDDIES = [
+  '/otter/v5/otter-explain.svg', '/league/v3/league-02-ledger.svg', '/otter/v5/otter-cheer.svg', '/league/v3/league-04-savings.svg',
+  '/otter/v5/otter-idle.svg', '/league/v3/league-06-news.svg', '/otter/v5/otter-shock.svg', '/league/v3/league-07-investor.svg',
+  '/league/v3/league-01-empty.svg', '/league/v3/league-03-saver.svg', '/league/v3/league-05-routine.svg', '/league/v3/league-08-holder.svg',
+  '/league/v3/league-09-rich.svg', '/league/v3/league-10-master.svg',
+];
 const LEVEL_TABS = ['전체', '기초', '중급', '고급', '심화'];
 
 // 노드를 누르면 브랜드색 원이 화면 가득 퍼지고 로고를 보여준 뒤 다음 화면으로 넘어간다.
@@ -542,7 +549,7 @@ const CourseScreen = () => {
             return (
               <div key={node.id} className="course-step" data-step-state={done ? 'done' : locked ? 'locked' : isFocus ? 'current' : 'open'}>
                 {/* 곡선이 가장 멀리 휜 돌(8개 중 3·7번째) 반대편 빈자리에 장식 수달을 둔다 */}
-                {k % 4 === 2 && <img className="course-step-buddy" src={`/otter/v5/otter-${['explain', 'cheer', 'idle', 'shock'][Math.floor(k / 4) % 4]}.svg`} alt="" aria-hidden="true" data-step-buddy />}
+                {k % 4 === 2 && <img className="course-step-buddy" src={STEP_BUDDIES[(partIndex * 3 + Math.floor(k / 4)) % STEP_BUDDIES.length]} alt="" aria-hidden="true" data-step-buddy />}
                 <button type="button" className="course-step-marker" data-step-kind={isReview ? 'review' : 'step'} aria-expanded={bubbleId === node.id}
                   aria-label={`${copy.kind} ${copy.title} ${nodeStatus}, ${bubbleId === node.id ? '닫기' : '보기'}`} onClick={() => setBubbleId(bubbleId === node.id ? null : node.id)}>
                   {/* 징검다리 돌은 상태별 노드 그림(public/path): 잠김 > 복습 > 완료 > 지금 할 학습 */}
