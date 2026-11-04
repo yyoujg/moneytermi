@@ -8,13 +8,11 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
 import { ENERGY_ACTION_COST, levelLabel } from '../constants';
-import { DaliAvatar } from '../components/DaliAvatar';
 import { feedbackNodeTap } from '../lib/feedback';
 import { loadDoneNodes } from '../lib/pathProgress';
 import { Storage } from '../lib/storage';
 import { COURSE_REVIEW_COUNT, LESSON_WARMUP_COUNT, firstUnknownWordIndex, learnedOrFallbackWords, selectCourseQuizWords } from '../lib/coursePractice';
 import { ActionButton } from '../components/ui/ActionButton';
-import { HomeOverview } from '../components/home/HomeOverview';
 import { buildPath, type PathNode } from '../lib/path';
 
 const SEEN_KEY = 'path_seen_done';   // 코스 화면에서 마지막으로 본 완료 노드들(도장 연출용)
@@ -95,8 +93,7 @@ const CourseScreen = () => {
   const navigate = useNavigate();
   const isCatalog = useLocation().pathname === '/course/topics';
   const [searchParams, setSearchParams] = useSearchParams();
-  const { hydrated, contentStatus, retryContent, viewedIds: knownIds, courses, energy, energyMax, spendEnergy, pickRecallWords, openShop, dueQueue } = useAppContext();
-  const hasDue = hydrated && dueQueue.length > 0;
+  const { hydrated, contentStatus, retryContent, viewedIds: knownIds, courses, energy, energyMax, spendEnergy, pickRecallWords, openShop } = useAppContext();
   // 이 기기에서 끝낸 퀴즈·복습 노드. 화면에 돌아올 때마다 다시 읽는다(퀴즈 끝내고 돌아온 직후 반영).
   const [doneNodes, setDoneNodes] = useState<Set<string>>(new Set());
   const [doneNodesLoaded, setDoneNodesLoaded] = useState(false);
@@ -217,14 +214,14 @@ const CourseScreen = () => {
     const rail = homeRailRef.current;
     const current = rail?.querySelector<HTMLElement>('[data-current]');
     if (rail && current) rail.scrollLeft = current.offsetLeft - rail.offsetLeft - 20;
-  }, [focus?.courseId]);
-  // 첫 화면(?resume=1): 지금 할 단계가 있는 주제·코스 화면으로 바꾼다. 다 끝냈으면 홈에 머문다
-  const resume = searchParams.get('resume') !== null;
+  }, [focus?.courseId, topicPicker]);
+  // 홈 화면은 따로 없다: /course(첫 화면 ?resume=1 포함)는 지금 할 단계가 있는 주제·코스 화면으로 바꾼다. 다 끝냈으면 첫 주제
+  const isHome = !activeTopic && !isCatalog;
   useEffect(() => {
-    if (!resume || !hydrated || !doneNodesLoaded || topics.length === 0) return;
+    if (!isHome || !hydrated || !doneNodesLoaded || topics.length === 0) return;
     const index = focus ? topics.findIndex(topic => topic.parts.some(part => part.section.course.id === focus.courseId)) : -1;
-    setSearchParams(index >= 0 && focus ? { topic: String(index), course: focus.courseId } : {}, { replace: true });
-  }, [resume, hydrated, doneNodesLoaded, topics, focus, setSearchParams]);
+    setSearchParams(index >= 0 && focus ? { topic: String(index), course: focus.courseId } : { topic: '0' }, { replace: true });
+  }, [isHome, hydrated, doneNodesLoaded, topics, focus, setSearchParams]);
   useEffect(() => {
     if (!bubbleId) return;
     const close = (event: PointerEvent) => { if (!(event.target as Element).closest?.('[data-step-bubble], .course-step-marker')) setBubbleId(null); };
@@ -237,13 +234,6 @@ const CourseScreen = () => {
   const setSelectedLevel = (level: string) => setSearchParams(level === '전체' ? {} : { level }, { replace: true });
   const visibleTopics = topics.filter(topic => selectedLevel === '전체' || topic.level === selectedLevel);
   const focusTopic = focus ? topics.find(topic => topic.parts.some(part => part.section.course.id === focus.courseId)) : null;
-  const focusSteps = focusTopic ? topicSteps(focusTopic) : { done: 0, total: 0 };
-  const focusStepsLeft = focusSteps.total - focusSteps.done;
-  // 지금 할 학습(노드)의 용어를 다 보면 다음 학습으로 넘어간다
-  const nextWords = focus?.words ?? [];
-  const nextKnown = nextWords.filter(word => knownIds.has(word.id)).length;
-  const nextRemaining = nextWords.length - nextKnown;
-  const nextProgress = nextWords.length ? Math.round(nextKnown / nextWords.length * 100) : 100;
 
   useLayoutEffect(() => {
     document.querySelector('.course-screen')?.scrollTo({ top: 0 });
@@ -384,72 +374,6 @@ const CourseScreen = () => {
           <span className="course-energy-action">충전 방법<ChevronRight size={16} aria-hidden="true" /></span>
         </button>}
       </div>
-      {!activeTopic && !isCatalog && <>
-        {/* 오늘 할 학습은 캐릭터 말풍선으로 안내한다. 연속 학습(이번 주 칸)은 마이 화면에 있다 */}
-        <section aria-label="오늘 할 학습" className="course-home-hero">
-          {/* 화자 달리(전신) + 말풍선. 문구는 달리가 말하는 해요체. 등급은 마이 화면에만 둔다 */}
-          <div className="course-home-speech">
-            <DaliAvatar />
-            <div className="course-home-bubble">
-                {focusTopic && <p className="course-home-bubble-topic">{focusTopic.category} · {focusSteps.done}/{focusSteps.total}단계</p>}
-                <p className="course-home-bubble-main">{!focusTopic ? '벌써 다 배웠네요! 가볍게 복습해 볼까요?' : focusSteps.done > 0 || focusTopic.known > 0 ? `${focusStepsLeft}단계만 더 가면 이 주제 끝이에요!` : '오늘은 첫 용어부터 같이 볼까요?'}</p>
-                <div className="course-home-level">
-                  <span className="course-home-level-label">{!focus ? '정말 다 끝냈어요, 대단해요!' : focus.type === 'quiz' ? '퀴즈 하나만 풀면 다음 레슨이 열려요' : nextRemaining > 0 ? `'${nextWords[0]?.word}' 레슨, 용어 ${nextRemaining}개만 더 보면 돼요` : '이제 다음 학습으로 넘어가 볼까요?'}</span>
-                  {/* 다음이 퀴즈면 채울 용어가 없어 막대가 늘 꽉 차 보이므로 숨긴다 */}
-                  {focus?.type !== 'quiz' && <div role="progressbar" aria-label="다음 학습까지 진행률" aria-valuemin={0} aria-valuemax={100} aria-valuenow={nextProgress} className="course-home-level-track">
-                    <span style={{ width: `${nextProgress}%` }} />
-                  </div>}
-                </div>
-            </div>
-          </div>
-          {/* 복습할 용어가 있으면 복습이 주 버튼, 이어 배우기는 보조 버튼 */}
-          <HomeOverview />
-          {focus && focusTopic && <ActionButton fullWidth tone={hasDue ? 'soft' : 'primary'} onClick={() => {
-            logClick('learning_continue', { course_id: focus.courseId, node_id: focus.id });
-            // 다음이 퀴즈면 라벨대로 퀴즈를 바로 연다
-            const sec = focus.type === 'quiz' ? sections.find(section => section.course.id === focus.courseId) : undefined;
-            if (sec) { void handleNodeTap(sec.nodes[focus.index], focus.index, sec.knownCount, courseName(sec.course)); return; }
-            setSearchParams({ topic: String(focusTopic.index), course: focus.courseId });
-          }} className="course-home-primary">
-            {focus.type === 'quiz' ? '용어 퀴즈 풀기' : knownIds.size > 0 ? '이어 배우기' : '첫 주제 시작하기'}
-          </ActionButton>}
-        </section>
-
-        {/* 난이도마다 한 줄씩(입문·기본·응용·전문), 그 난이도의 코스를 학습 순서대로 가로 카드로 둔다(잠긴 코스는 자물쇠).
-            지금 학습 중인 난이도 줄은 그 코스가 보이게 가로 위치를 맞춘다 */}
-        {[...new Set(topics.map(topic => topic.level))].map(level => (
-          <section key={level} aria-label={`${levelLabel(level)} 코스`}>
-            <div className="course-home-section-heading">
-              <h2 className="type-section-title">{levelLabel(level)}</h2>
-            </div>
-            <div ref={level === (focusTopic?.level ?? topics[0]?.level) ? homeRailRef : undefined} className="course-home-rail" role="list" aria-label={`${levelLabel(level)} 코스`}>
-              {topics.filter(topic => topic.level === level).flatMap(topic => topic.parts.map(({ section }, pi) => {
-                const steps = section.nodes.filter(isStep);
-                const done = steps.filter(isDone).length;
-                // 잠김 = 남은 필수 단계가 있는데 지금 할 수 있는 단계가 없음(예전에 일부 푼 코스도 앞 코스를 끝내기 전엔 잠김)
-                const locked = done < steps.length && !steps.some(node => !isDone(node) && node.state !== 'locked');
-                const name = COURSE_NAMES[section.course.id] ?? (topic.parts.length > 1 ? `${topic.category} ${pi + 1}` : topic.category);
-                return (
-                  <button key={section.course.id} type="button" role="listitem" className="course-home-rail-card" data-locked={locked}
-                    data-current={section.course.id === focus?.courseId || undefined}
-                    onClick={() => navigate(`/course?topic=${topic.index}&course=${section.course.id}`)} aria-label={`${topic.category} ${name} 코스 열기, ${locked ? '잠김' : `${done}/${steps.length}단계 완료`}`}>
-                    <span className="course-home-rail-thumb">
-                      <TopicThumb category={topic.category} courseId={section.course.id} size={160} height={120} />
-                      {locked && <span className="course-home-rail-lock"><LockKeyhole size={20} aria-hidden="true" /></span>}
-                    </span>
-                    <span className="course-home-rail-text">
-                      <span className="course-home-rail-title">{name}</span>
-                    </span>
-                  </button>
-                );
-              }))}
-            </div>
-          </section>
-        ))}
-        <div className="px-5 pb-6">
-          <ActionButton fullWidth tone="soft" onClick={() => navigate('/course/topics')} className="course-home-more">주제 둘러보기<ChevronRight size={16} aria-hidden="true" /></ActionButton>
-        </div>
-      </>}
       {isCatalog && <>
         <div className="px-5">
           <div role="tablist" aria-label="학습 난이도" className="course-home-filters">
@@ -578,23 +502,38 @@ const CourseScreen = () => {
         </section>
         );
       })}
-      {activeTopic && <BottomSheet open={topicPicker} onDimmerClick={() => setTopicPicker(false)} header={<span className="sheet-title">{levelLabel(activeTopic.level)} 주제</span>}>
-        <ul className="course-picker px-5 pb-6" aria-label="주제 고르기">
-          {topics.filter(topic => topic.level === activeTopic.level).map(topic => {
-            const steps = topicSteps(topic);
-            const selected = topic.index === activeTopic.index;
-            return (
-              <li key={topic.index}>
-                <button type="button" className="course-picker-row" aria-current={selected || undefined} data-locked={topic.locked || undefined} disabled={topic.locked}
-                  onClick={() => { setTopicPicker(false); navigate(`/course?topic=${topic.index}`); }}>
-                  <span className="course-picker-name min-w-0 flex-1">{topic.category}</span>
-                  {topic.locked ? <span className="course-topic-lock"><LockKeyhole size={16} aria-hidden="true" /><span className="sr-only">잠김</span></span>
-                    : <span className="text-xs text-[var(--color-ink-3)] tabular-nums">{steps.done}/{steps.total}단계</span>}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+      {activeTopic && <BottomSheet open={topicPicker} onDimmerClick={() => setTopicPicker(false)} header={<span className="sheet-title">코스 고르기</span>}>
+        <div className="course-picker pb-6">
+          {[...new Set(topics.map(topic => topic.level))].map(level => (
+            <section key={level} aria-label={`${levelLabel(level)} 코스`}>
+              <div className="course-home-section-heading">
+                <h2 className="type-section-title">{levelLabel(level)}</h2>
+              </div>
+              <div ref={level === (focusTopic?.level ?? topics[0]?.level) ? homeRailRef : undefined} className="course-home-rail" role="list" aria-label={`${levelLabel(level)} 코스`}>
+                {topics.filter(topic => topic.level === level).flatMap(topic => topic.parts.map(({ section }, pi) => {
+                  const steps = section.nodes.filter(isStep);
+                  const done = steps.filter(isDone).length;
+                  // 잠김 = 남은 필수 단계가 있는데 지금 할 수 있는 단계가 없음(예전에 일부 푼 코스도 앞 코스를 끝내기 전엔 잠김)
+                  const locked = done < steps.length && !steps.some(node => !isDone(node) && node.state !== 'locked');
+                  const name = COURSE_NAMES[section.course.id] ?? (topic.parts.length > 1 ? `${topic.category} ${pi + 1}` : topic.category);
+                  return (
+                    <button key={section.course.id} type="button" role="listitem" className="course-home-rail-card" data-locked={locked}
+                      data-current={section.course.id === focus?.courseId || undefined}
+                      onClick={() => { setTopicPicker(false); navigate(`/course?topic=${topic.index}&course=${section.course.id}`); }} aria-label={`${topic.category} ${name} 코스 열기, ${locked ? '잠김' : `${done}/${steps.length}단계 완료`}`}>
+                      <span className="course-home-rail-thumb">
+                        <TopicThumb category={topic.category} courseId={section.course.id} size={160} height={120} />
+                        {locked && <span className="course-home-rail-lock"><LockKeyhole size={20} aria-hidden="true" /></span>}
+                      </span>
+                      <span className="course-home-rail-text">
+                        <span className="course-home-rail-title">{name}</span>
+                      </span>
+                    </button>
+                  );
+                }))}
+              </div>
+            </section>
+          ))}
+        </div>
       </BottomSheet>}
     </div>
   );

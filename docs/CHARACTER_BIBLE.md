@@ -52,7 +52,7 @@
 
 | 자리            | 포즈                | 크기  | 코드                                   |
 | --------------- | ------------------- | ----- | -------------------------------------- |
-| 홈 오늘 할 학습 | 전신(기본, 원 배경 없음) | 72px  | `DaliAvatar.tsx`(`public/otter/v5/otter-<포즈>.svg`). 표정은 `mood` prop: default→idle, happy→explain, celebrate→cheer, sad→defeat |
+| 홈 오늘 할 학습 | 없음(2026-11-04 홈 화면 삭제) | - | - |
 | 온보딩 첫 화면  | 기본                | 96px  | `App.tsx` `WelcomeScreen`              |
 | 퀘스트 요약     | 만세(미션을 모두 완료했을 때만) | 72px  | `HomeScreen.tsx`                       |
 | 학습 완료       | 만세                | 128px | `LearningCompletionScreen.tsx`         |
