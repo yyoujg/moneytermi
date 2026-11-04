@@ -12,7 +12,7 @@ import { LeagueRules } from '../components/LeagueRules';
 import { ProfileAvatar } from '../components/ProfileAvatar';
 import { StageGlyph } from '../components/StageGlyph';
 import { LeagueRankBadge } from '../components/league/LeagueRankBadge';
-import { daysUntilReset } from '../lib/league';
+import { timeLeftLabel } from '../lib/league';
 
 type Row = { rank: number; nickname: string; emoji: string; points: number; is_me: boolean };
 type MyRank = { rank: number | null; total: number; points: number };
@@ -77,7 +77,7 @@ const LeagueScreen = () => {
             <p className="league-my-rank-value">{mine?.rank ? `${mine.rank}위` : '-'}</p>
             <p className="type-supporting break-keep">{mine === null ? '순위 불러오는 중' : mine.rank ? `${mine.total.toLocaleString()}명 중 · ${mine.points.toLocaleString()}XP` : 'XP를 모으면 순위에 올라요'}</p>
           </>}
-          <p className="mt-1! text-2xs text-[var(--color-ink-3)]">초기화까지 {daysUntilReset()}일</p>
+          <p className="mt-1! text-2xs text-[var(--color-ink-3)]">리그 종료까지 {timeLeftLabel()} 남았어요</p>
         </section>
 
         {/* 티어 로드맵: 테두리·선 없이 큰 등급 그림을 가로로 넘긴다. 현재 등급은 이름 색·굵기로 강조하고 처음에 가운데로 둔다 */}
@@ -85,9 +85,8 @@ const LeagueScreen = () => {
           {GROWTH_STAGES.map(s => {
             const state = s.id < stage.id ? 'done' : s.id === stage.id ? 'current' : 'future';
             return (
-              <li key={s.id} className="league-tier-step" data-state={state} aria-current={state === 'current' ? 'step' : undefined}>
+              <li key={s.id} className="league-tier-step" data-state={state} aria-label={s.name} aria-current={state === 'current' ? 'step' : undefined}>
                 <span className="league-tier-node"><StageGlyph id={s.id} size={104} locked={state === 'future'} /></span>
-                <span className="league-tier-name">{s.name}</span>
               </li>
             );
           })}

@@ -46,7 +46,7 @@ describe('리그로 옮긴 이번 주 내 순위', () => {
     const card = container.querySelector('[aria-labelledby="league-my-rank"]');
     expect(card).toHaveTextContent('3위');
     expect(card).toHaveTextContent('13명 중 · 120XP');
-    expect(card).toHaveTextContent(/초기화까지 \d일/);
+    expect(card).toHaveTextContent(/리그 종료까지 \d+(일|시간) 남았어요/);
   });
 
   it('아직 XP가 없으면 순위 대신 참여 방법을 알려준다', async () => {

@@ -1138,8 +1138,6 @@ button.course-home-rail-card:active { background: var(--color-surface); }
 .league-tier-step[data-state='future'] .league-tier-node .stage-glyph { opacity: 1; filter: none; }
 .league-promote-note { margin: calc(var(--section-gap) * -1 + var(--space-2)) 0 0; text-align: center; }
 .league-promote-note strong { color: var(--color-accent-foreground); font-weight: var(--font-weight-bold); }
-.league-tier-name { margin-top: var(--space-1); max-width: 100%; overflow: hidden; color: var(--color-ink-3); font-size: var(--font-size-caption); text-overflow: ellipsis; white-space: nowrap; }
-.league-tier-step[data-state='current'] .league-tier-name { color: var(--color-accent-foreground); font-weight: var(--font-weight-bold); }
 .league-tier-xp { color: var(--color-ink-3); font-size: var(--font-size-caption); font-variant-numeric: tabular-nums; }
 
 /* 모노 카드: 그림자 없이 검정 1.5px 테두리로 나눈다 */
