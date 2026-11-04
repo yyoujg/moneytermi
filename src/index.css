@@ -548,6 +548,14 @@ button.course-home-topic[data-locked]:active { background: var(--color-card); }
 /* TDS ListRow는 disabled를 버튼에 넘기지 않아 data-locked로 흐리게 한다 */
 button.course-home-topic:is(:disabled, [data-locked]) .course-home-topic-title { color: var(--color-ink-3); font-weight: var(--font-weight-regular); }
 button.course-home-topic:is(:disabled, [data-locked]) .course-home-topic-meta { color: var(--color-ink-4); }
+/* 주제 화면 머리: 눌러서 같은 난이도의 다른 주제로 이동 */
+.course-picker { display: flex; flex-direction: column; list-style: none; }
+.course-picker-row { display: flex; width: 100%; min-height: var(--size-touch-min); align-items: center; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--color-line); text-align: left; }
+.course-picker li:last-child .course-picker-row { border-bottom: 0; }
+.course-picker-name { color: var(--color-ink); font-size: var(--font-size-body); font-weight: var(--font-weight-semibold); word-break: keep-all; }
+.course-picker-row[aria-current] .course-picker-name { color: var(--color-accent-foreground); font-weight: var(--font-weight-bold); }
+.course-picker-row[data-locked] { cursor: default; }
+.course-picker-row[data-locked] .course-picker-name { color: var(--color-ink-3); font-weight: var(--font-weight-regular); }
 .course-topic-lock { display: inline-flex; width: 32px; height: 32px; align-items: center; justify-content: center; border-radius: 50%; background: var(--color-neutral-soft); color: var(--color-ink-3); }
 .course-home-topic-meta { display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--space-1) var(--space-3); margin-top: var(--space-1); color: var(--color-ink-3); font-size: var(--font-size-caption); line-height: var(--line-height-body); }
 @media (max-width: 359px) {
@@ -1054,9 +1062,15 @@ button.home-review-entry { margin-bottom: var(--space-3); padding: var(--space-4
 /* 프로필 그림 고르기: 3열, 고른 것은 메인 컬러 테두리 */
 .profile-avatar-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4) var(--space-2); list-style: none; }
 .profile-avatar-option { display: flex; width: 100%; min-height: var(--size-touch-min); flex-direction: column; align-items: center; gap: var(--space-2); color: var(--color-ink-2); font-size: var(--font-size-label); }
-.profile-avatar-option .profile-avatar { box-shadow: 0 0 0 2px transparent; }
-.profile-avatar-option[aria-pressed='true'] .profile-avatar { box-shadow: 0 0 0 3px var(--color-accent-line-strong); }
+/* 고른 그림: 버튼 공통 규칙이 box-shadow를 지워서 outline으로 표시 */
+.profile-avatar-option[aria-pressed='true'] .profile-avatar { outline: 3px solid var(--color-accent-line-strong); outline-offset: 2px; }
 .profile-avatar-option[aria-pressed='true'] { color: var(--color-ink); font-weight: var(--font-weight-bold); }
+.profile-avatar-options { margin: 0; padding: 0; }
+.profile-bg-title { margin: var(--space-6) 0 var(--space-3); color: var(--color-ink); font-size: var(--font-size-body); font-weight: var(--font-weight-bold); }
+.profile-bg-options { display: flex; flex-wrap: wrap; gap: var(--space-3); list-style: none; }
+.profile-bg-option { width: 44px; height: 44px; border: 1px solid var(--color-line); border-radius: 50%; }
+/* 버튼 공통 규칙이 box-shadow를 지워서 고른 색은 굵은 테두리로 표시한다 */
+.profile-bg-option[aria-pressed='true'] { border: 3px solid var(--color-accent-line-strong); }
 button.my-profile-name-button { display: flex; align-items: center; gap: var(--space-2); min-height: 44px; text-align: left; }
 .my-profile-name-button > svg { color: var(--color-ink-3); }
 .league-screen > div:first-child { padding-bottom: var(--space-2); background: transparent; }
@@ -1116,11 +1130,11 @@ button.course-home-rail-card:active { background: var(--color-surface); }
 .course-topic-summary { padding-inline: var(--space-5) !important; border-radius: var(--shape-card); background: var(--color-card) !important; }
 .course-step { grid-template-columns: 40px minmax(0, 1fr); }
 .course-step:not(:last-child)::before { top: 46px; left: 19px; width: 3px; border-radius: 2px; }
-/* 징검다리: 단계마다 왼쪽 들여쓰기를 0 → 28 → 56 → 28px로 바꿔 지그재그로 놓는다. 엇갈린 돌은 선으로 잇지 않는다 */
+/* 징검다리: 단계마다 왼쪽 들여쓰기를 0 → 48 → 96 → 48px로 바꿔 지그재그로 놓는다. 엇갈린 돌은 선으로 잇지 않는다. 말풍선은 글자 길이만큼 */
 .course-steps .course-step::before { content: none !important; }
 .course-steps .course-step { padding-left: var(--step-indent, 0px); }
-.course-steps .course-step:nth-child(4n + 2), .course-steps .course-step:nth-child(4n + 4) { --step-indent: 28px; }
-.course-steps .course-step:nth-child(4n + 3) { --step-indent: 56px; }
+.course-steps .course-step:nth-child(4n + 2), .course-steps .course-step:nth-child(4n + 4) { --step-indent: 48px; }
+.course-steps .course-step:nth-child(4n + 3) { --step-indent: 96px; }
 /* 돌 사이 세로 간격(말풍선 높이 64px가 다음 돌과 겹치지 않을 만큼) */
 .course-steps .course-step + .course-step { margin-top: var(--space-6); }
 .course-step[data-step-state='done']:not(:last-child)::before { background: var(--color-progress); }
@@ -1129,7 +1143,7 @@ button.course-home-rail-card:active { background: var(--color-surface); }
 .course-step[data-step-state='current'] .course-step-marker { border: 3px solid var(--color-neutral-strong); background: var(--color-card); color: var(--color-neutral-strong); font-weight: var(--font-weight-bold); }
 .course-step[data-step-state='locked'] .course-step-marker { background: var(--color-surface); color: var(--color-ink-3); }
 /* 끝낸 단계 말풍선: 체크 오른쪽에 떠서 아래 줄을 밀지 않는다. 꼬리는 체크를 가리킨다 */
-.course-step-bubble { position: absolute; top: 0; left: calc(var(--step-indent, 0px) + 52px); right: 0; z-index: 5; }
+.course-step-bubble { position: absolute; top: 0; left: calc(var(--step-indent, 0px) + 52px); z-index: 5; width: max-content; max-width: calc(100% - var(--step-indent, 0px) - 52px); }
 /* 말풍선 면은 카드 하나만(테두리 두 겹 방지). 지금 할 단계는 기존처럼 옅은 세이지 면 */
 .course-step-bubble > button.course-node-card { border-color: var(--color-line) !important; background: var(--color-card) !important; }
 .course-step[data-step-state='current'] .course-step-bubble > button.course-node-card { background: var(--color-accent-soft) !important; }

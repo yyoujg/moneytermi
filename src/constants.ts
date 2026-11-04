@@ -8,6 +8,10 @@ export const isDefaultNickname = (n?: string | null) => {
   return !v || v === DEFAULT_NICKNAME || LEGACY_DEFAULT_NICKNAMES.includes(v);
 };
 
+// 코스 난이도: 데이터 값(기초·중급·고급·심화)은 그대로 두고 화면에 보이는 이름만 바꾼다
+export const LEVEL_LABELS: Record<string, string> = { 기초: '입문', 중급: '기본', 고급: '응용', 심화: '전문' };
+export const levelLabel = (level: string) => LEVEL_LABELS[level] ?? level;
+
 export type GrowthStage = {
   id: number;
   name: string;

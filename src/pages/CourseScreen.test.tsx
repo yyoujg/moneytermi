@@ -173,6 +173,19 @@ describe('주제 화면은 코스를 한 페이지에 모두', () => {
   });
 });
 
+describe('주제 화면 머리에서 다른 주제로 이동', () => {
+  it('머리를 누르면 같은 난이도 주제를 보여주고, 잠긴 주제는 막는다', async () => {
+    baseContext({ courses: [course({ id: 'c1', category: '경제' }), course({ id: 'c2', category: '가계', startId: 5 })] });
+    state.doneNodes = new Set();
+    const { container } = await mount('/course?topic=0');
+    await act(async () => container.querySelector<HTMLButtonElement>('.course-topic-switch')!.click());
+    const rows = [...document.querySelectorAll<HTMLButtonElement>('.course-picker-row')];
+    expect(rows.map(row => row.textContent)).toEqual([expect.stringContaining('경제'), expect.stringContaining('가계')]);
+    expect(rows[0]).toHaveAttribute('aria-current', 'true');
+    expect(rows[1]).toBeDisabled();
+  });
+});
+
 describe('필수 단계 순차 잠금', () => {
   // 16개 용어 = 레슨 4개: l0, l1, 중간 복습, l2, 퀴즈(c1-q4), l3, 마지막 퀴즈, 마지막 복습
   it('앞 퀴즈를 풀기 전에는 다음 레슨을 잠그고, 풀면 연다', async () => {
@@ -289,7 +302,7 @@ describe('CourseScreen energy gates', () => {
     expect(container.querySelectorAll('.course-home-topic')).toHaveLength(2);
     expect(container.querySelector('.course-topic-index')).toBeNull();
     for (const button of container.querySelectorAll('.course-home-topic')) {
-      expect(button).toHaveAttribute('aria-label', expect.stringMatching(/^(기초|중급) .+ 주제 열기$/));
+      expect(button).toHaveAttribute('aria-label', expect.stringMatching(/^(입문|기본) .+ 주제 열기$/));
       // 주제 행은 같은 아이콘 반복 없이 제목·메타 한 줄과 상태 글자만 둔다
       expect(button.querySelector('.course-home-topic-icon')).toBeNull();
       expect(button.querySelector('.course-home-topic-meta')).toHaveTextContent(/단계 완료$/);
@@ -302,7 +315,7 @@ describe('CourseScreen energy gates', () => {
     baseContext({ courses: [course(), { ...course({ id: 'c2', category: '금융', startId: 5 }), level: '중급' }] });
     const { container } = await mount(`/course/topics?level=${encodeURIComponent(level)}`);
     expect(container.querySelector('.course-home-hero')).toBeNull();
-    expect(container.querySelector('[role="tab"][aria-selected="true"]')).toHaveTextContent(level === '중급' ? '중급' : '전체');
+    expect(container.querySelector('[role="tab"][aria-selected="true"]')).toHaveTextContent(level === '중급' ? '기본' : '전체');
     expect(container.querySelectorAll('.course-home-topic')).toHaveLength(level === '중급' ? 1 : 2);
   });
 
@@ -314,18 +327,18 @@ describe('CourseScreen energy gates', () => {
     const { container, clickButtonContaining } = await mount('/course');
     await clickButtonContaining('전체 주제 보기');
     const filters = [...container.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
-    expect(filters.map(button => button.textContent?.trim())).toEqual(['전체', '기초', '중급', '고급', '심화']);
-    const intermediate = filters.find(button => button.textContent?.trim() === '중급');
+    expect(filters.map(button => button.textContent?.trim())).toEqual(['전체', '입문', '기본', '응용', '전문']);
+    const intermediate = filters.find(button => button.textContent?.trim() === '기본');
     expect(intermediate).toBeDefined();
     await act(async () => intermediate!.click());
     expect(intermediate).toHaveAttribute('aria-selected', 'true');
     expect(container.querySelector('[role="tabpanel"]')).toHaveAttribute('aria-labelledby', intermediate!.id);
     expect(container.querySelectorAll('.course-home-topic')).toHaveLength(1);
-    expect(container.querySelector('.course-home-topic')).toHaveAttribute('aria-label', '중급 금융 주제 열기');
+    expect(container.querySelector('.course-home-topic')).toHaveAttribute('aria-label', '기본 금융 주제 열기');
     await act(async () => filters.find(button => button.textContent?.trim() === '전체')!.click());
     expect(container.querySelectorAll('.course-home-topic')).toHaveLength(2);
     await act(async () => intermediate!.click());
-    const topic = [...container.querySelectorAll<HTMLButtonElement>('.course-home-topic')].find(button => button.getAttribute('aria-label') === '중급 금융 주제 열기');
+    const topic = [...container.querySelectorAll<HTMLButtonElement>('.course-home-topic')].find(button => button.getAttribute('aria-label') === '기본 금융 주제 열기');
     await act(async () => topic!.click());
     expect(container.textContent).toContain('용어5 외 3개');
     expect(container.textContent).not.toContain('용어1 외 3개');

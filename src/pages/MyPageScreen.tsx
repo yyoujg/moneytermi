@@ -43,7 +43,7 @@ const MyPageScreen = () => {
       <GuideSheet open={showGuide} onClose={() => setShowGuide(false)} />
       <SettingsSheet open={showSettings} onClose={() => setShowSettings(false)} />
       <ProfileAvatarSheet open={showAvatarSheet} nickname={user?.nickname ?? DEFAULT_NICKNAME} current={myEmoji}
-        onClose={() => setShowAvatarSheet(false)} onSelect={value => { setShowAvatarSheet(false); void updateMyEmoji(value); }} />
+        onClose={() => setShowAvatarSheet(false)} onSelect={value => { void updateMyEmoji(value); }} />
       <NicknameSheet
         open={showNicknameSheet}
         currentNickname={user?.nickname ?? ''}

@@ -28,6 +28,12 @@ describe('사용자 프로필 그림', () => {
     expect(mount('🦉').querySelector('img')).toHaveAttribute('src', '/profile/profile-surprised.svg');
   });
 
+  it('고른 배경색을 그림 뒤에 칠하고, 없으면 기본(세이지)', () => {
+    expect(mount('otter:happy:pink').querySelector('img')).toHaveAttribute('data-avatar-bg', 'pink');
+    expect(mount('otter:happy').querySelector('img')).toHaveAttribute('data-avatar-bg', 'sage');
+    expect(mount('🐼').querySelector('img')).toHaveAttribute('data-avatar-bg', 'sage');
+  });
+
   it('값이 없거나 모르는 값이면 닉네임 첫 글자', () => {
     for (const value of [undefined, '', '🙂', 'otter:unknown']) {
       const container = mount(value);
