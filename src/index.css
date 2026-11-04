@@ -1220,3 +1220,13 @@ button.course-home-rail-card { width: 168px; flex-direction: row; align-items: c
 /* 주제 썸네일(홈 카드·뉴스). 사진이 없으면 회색 바탕 + 첫 글자 */
 .topic-thumb { flex-shrink: 0; border-radius: var(--shape-inset); object-fit: cover; background: var(--color-surface); }
 .topic-thumb-fallback { display: inline-flex; align-items: center; justify-content: center; color: var(--color-ink-3); font-size: var(--font-size-label); font-weight: var(--font-weight-bold); }
+/* 홈 화자 아바타 + 말풍선: 아바타 쪽 아래 모서리만 각지게 */
+.course-home-speech { display: flex; align-items: flex-end; gap: 8px; margin-bottom: 16px; }
+.dali-avatar { display: inline-flex; width: 36px; height: 36px; flex-shrink: 0; align-items: center; justify-content: center; overflow: hidden; border-radius: 50%; background: var(--color-accent-soft); }
+.dali-avatar img { width: 36px; height: 36px; }
+.course-home-hero .course-home-speech .course-home-bubble { flex: 1; min-width: 0; margin: 0; padding: 12px 14px; border-radius: 16px 16px 16px 4px; background: var(--color-accent-soft); box-shadow: none; }
+.course-home-hero .course-home-speech .course-home-bubble::before { content: none; }
+.course-home-speech .course-home-bubble-topic { font-size: 11px; }
+.course-home-speech .course-home-bubble-main { margin-top: 2px; color: var(--color-ink); font-size: 14px; font-weight: var(--font-weight-bold); line-height: var(--line-height-body); word-break: keep-all; }
+.course-home-speech .course-home-level-label { font-size: 12px; font-weight: var(--font-weight-regular); }
+.course-home-speech .course-home-level { margin-top: 8px; padding-top: 8px; gap: 6px; }

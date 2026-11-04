@@ -6,7 +6,8 @@ import { ChevronRight } from '../components/ui/ControlIcons';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
-import { ENERGY_ACTION_COST, getGrowthStage } from '../constants';
+import { ENERGY_ACTION_COST } from '../constants';
+import { DaliAvatar } from '../components/DaliAvatar';
 import { calcStreak } from '../lib/streak';
 import { WeekStrip } from '../components/home/WeekStrip';
 import { feedbackNodeTap } from '../lib/feedback';
@@ -86,7 +87,7 @@ const CourseScreen = () => {
   const navigate = useNavigate();
   const isCatalog = useLocation().pathname === '/course/topics';
   const [searchParams, setSearchParams] = useSearchParams();
-  const { hydrated, contentStatus, retryContent, viewedIds: knownIds, courses, energy, energyMax, spendEnergy, pickRecallWords, openShop, xp, attendanceDates, dueQueue } = useAppContext();
+  const { hydrated, contentStatus, retryContent, viewedIds: knownIds, courses, energy, energyMax, spendEnergy, pickRecallWords, openShop, attendanceDates, dueQueue } = useAppContext();
   const hasDue = hydrated && dueQueue.length > 0;
   // 이 기기에서 끝낸 퀴즈·복습 노드. 화면에 돌아올 때마다 다시 읽는다(퀴즈 끝내고 돌아온 직후 반영).
   const [doneNodes, setDoneNodes] = useState<Set<string>>(new Set());
@@ -194,7 +195,6 @@ const CourseScreen = () => {
   const focusSteps = focusTopic ? topicSteps(focusTopic) : { done: 0, total: 0 };
   const focusStepsLeft = focusSteps.total - focusSteps.done;
   const streak = calcStreak(attendanceDates);
-  const stage = getGrowthStage(xp);
   // 지금 할 학습(노드)의 용어를 다 보면 다음 학습으로 넘어간다
   const nextWords = focus?.words ?? [];
   const nextKnown = nextWords.filter(word => knownIds.has(word.id)).length;
@@ -349,18 +349,12 @@ const CourseScreen = () => {
         </section>
 
         <section aria-label="오늘 할 학습" className="course-home-hero">
-          {/* 등급은 수달의 레벨로 읽히지 않게 캐릭터와 떨어진 텍스트 한 줄로 둔다 */}
-          <p className="course-home-tier-chip">내 등급 <strong>Lv.{stage.id} {stage.name}</strong></p>
-          <div className="course-home-hero-body">
-            <div className="course-home-character-wrap">
-              <img className="course-home-character" src="/otter/v5/otter-explain.svg" data-otter="explain" alt="" aria-hidden="true" width={96} height={96} />
-            </div>
-            <div className="course-home-hero-side">
-              <div className="course-home-bubble">
-                {/* 말풍선의 화자는 수달 달리 */}
-                <p className="course-home-bubble-speaker">달리</p>
+          {/* 화자 아바타(달리 얼굴) + 말풍선. 등급은 마이 화면에만 둔다 */}
+          <div className="course-home-speech">
+            <DaliAvatar />
+            <div className="course-home-bubble">
                 {focusTopic && <p className="course-home-bubble-topic">{focusTopic.category} · {focusSteps.done}/{focusSteps.total}단계</p>}
-                <p>{!focusTopic ? '모두 배웠어요! 가볍게 복습해 볼까요?' : focusSteps.done > 0 || focusTopic.known > 0 ? `${focusStepsLeft}단계만 더 하면 이 주제를 끝내요` : '오늘 첫 용어부터 같이 봐요'}</p>
+                <p className="course-home-bubble-main">{!focusTopic ? '모두 배웠어요! 가볍게 복습해 볼까요?' : focusSteps.done > 0 || focusTopic.known > 0 ? `${focusStepsLeft}단계만 더 하면 이 주제를 끝내요` : '오늘 첫 용어부터 같이 봐요'}</p>
                 <div className="course-home-level">
                   <span className="course-home-level-label">{!focus ? '모든 학습을 마쳤어요!' : focus.type === 'quiz' ? '용어 퀴즈를 풀면 다음 레슨이 열려요' : nextRemaining > 0 ? `'${nextWords[0]?.word}' 레슨 용어 ${nextRemaining}개 남았어요` : '다음 학습으로 넘어갈 수 있어요'}</span>
                   {/* 다음이 퀴즈면 채울 용어가 없어 막대가 늘 꽉 차 보이므로 숨긴다 */}
@@ -368,7 +362,6 @@ const CourseScreen = () => {
                     <span style={{ width: `${nextProgress}%` }} />
                   </div>}
                 </div>
-              </div>
             </div>
           </div>
           {/* 복습할 용어가 있으면 복습이 주 버튼, 이어 배우기는 보조 버튼 */}

@@ -224,9 +224,9 @@ describe('CourseScreen energy gates', () => {
     const hero = container.querySelector('.course-home-hero');
     expect(hero).toHaveAttribute('aria-label', '오늘 할 학습');
     expect(hero?.querySelectorAll('button')).toHaveLength(1);
-    // 히어로 그림은 말풍선과 함께 쓰는 장식 캐릭터 하나뿐이다
+    // 히어로 그림은 말풍선 화자인 달리 얼굴 아바타 하나뿐이다
     expect(hero?.querySelectorAll('img')).toHaveLength(1);
-    expect(hero?.querySelector('img')).toHaveAttribute('aria-hidden', 'true');
+    expect(hero?.querySelector('.dali-avatar img')).toHaveAttribute('alt', '달리');
     expect(hero?.querySelector('.course-home-bubble')).toHaveTextContent('오늘 첫 용어부터 같이 봐요');
     // 아무 용어도 보지 않았으면 다음 학습까지의 진행은 0이고, 어느 레슨의 용어가 몇 개 남았는지 알려준다
     expect(hero?.querySelector('[aria-label="다음 학습까지 진행률"]')).toHaveAttribute('aria-valuenow', '0');
@@ -593,7 +593,8 @@ describe('홈으로 옮긴 학습 현황', () => {
     expect(container.querySelector('.home-streak-card')).toHaveTextContent('연속 학습');
     expect(container.querySelectorAll('.home-streak-card .week-strip-day')).toHaveLength(7);
     expect(container.querySelector('.course-home-hero [aria-label="다음 학습까지 진행률"]')).toBeInTheDocument();
-    expect(container.querySelector('.course-home-tier-chip')).toHaveTextContent('Lv.4 재테크러');
+    // 등급은 마이 화면에만 두고 홈에는 표시하지 않는다
+    expect(container.querySelector('.course-home-tier-chip')).toBeNull();
     // 주간 순위는 리그 화면에서만 보여주므로 홈은 순위를 조회하지 않는다
     expect(container.querySelector('[aria-labelledby="home-weekly-rank"]')).toBeNull();
     expect(container.querySelectorAll('[role="progressbar"]')).toHaveLength(1);
