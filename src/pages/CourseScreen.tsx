@@ -363,7 +363,8 @@ const CourseScreen = () => {
             {/* 뒤로가기는 토스 내비게이션 바가 맡는다(자체 뒤로가기 중복은 검수 반려 사유) */}
             <button type="button" className="course-topic-switch min-w-0 text-left" aria-haspopup="dialog" aria-label={`${activeTopic.category}, 다른 주제로 이동`} onClick={() => setTopicPicker(true)}>
               <h1 className="type-page-title flex items-center gap-1"><span className="truncate">{activeTopic.category}</span><ChevronDown size={20} aria-hidden="true" className="shrink-0 text-[var(--color-ink-3)]" /></h1>
-              <p className="mt-1! text-xs text-[var(--color-ink-3)]">{levelLabel(activeTopic.level)} · {activeTopic.parts.length}개 코스 · 전체 {topicSteps(activeTopic).done}/{topicSteps(activeTopic).total}단계 완료</p>
+              {/* 코스 수·단계 진행은 아래 코스 머리(코스 n/N, n단계 완료)와 겹쳐 난이도만 둔다 */}
+              <p className="mt-1! text-xs text-[var(--color-ink-3)]">{levelLabel(activeTopic.level)}</p>
             </button>
           </div>
         ) : isCatalog ? (

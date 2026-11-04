@@ -409,7 +409,7 @@ svg:is(.text-brand-300, .text-brand-400, .text-brand-500, .text-brand-600, .text
   z-index: 1;
 }
 /* 마이 통계: 한 줄에 하나씩(아이콘 · 이름 ··· 값). 긴 값도 오른쪽에 그대로 둔다 */
-.my-page-stats-grid { display: flex; flex-direction: column; gap: var(--space-4); }
+.my-page-stats-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4) var(--space-3); }
 .my-page-stat { display: flex; min-width: 0; align-items: center; gap: var(--space-3); }
 /* 아이콘(24px)과 등급 원(40px)의 자리를 40px로 맞춰 이름 시작선을 맞춘다 */
 .my-page-stat > svg, .my-page-stat > img { flex: 0 0 32px; width: 32px; object-fit: contain; }
@@ -1195,8 +1195,8 @@ button.course-home-rail-card:active { background: var(--color-surface); }
 .course-step-bubble:not([data-open='true']) { display: none; }
 /* 지금 할 노드: 둘레의 점선 원이 커졌다 작아졌다 한다 */
 .course-step[data-step-state='current'] .course-step-marker { position: relative; }
-/* 점선은 원뿔 그라디언트를 5px 고리 모양으로 오려 만든다(dashed보다 점을 길고 두껍게): 6개 점, 점 45도 + 틈 15도 */
-.course-step[data-step-state='current'] .course-step-marker::after { content: ''; position: absolute; inset: -9px; border-radius: 50%; background: repeating-conic-gradient(var(--color-node-ring) 0 45deg, transparent 45deg 60deg); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), var(--color-ink) calc(100% - 5px)); mask: radial-gradient(farthest-side, transparent calc(100% - 5px), var(--color-ink) calc(100% - 5px)); pointer-events: none; animation: course-node-ring 1.6s ease-in-out infinite; }
+/* 점선은 끝이 둥근 SVG 원을 마스크로 써서 노드 갈색으로 칠한다: 5px 굵기, 점 6개(pathLength 360 기준 점 38 + 틈 22, 둥근 끝 포함 약 45도 + 15도) */
+.course-step[data-step-state='current'] .course-step-marker::after { content: ''; position: absolute; inset: -9px; background: var(--color-node-ring); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 74 74'%3E%3Ccircle cx='37' cy='37' r='34.5' fill='none' stroke='black' stroke-width='5' stroke-linecap='round' pathLength='360' stroke-dasharray='38 22'/%3E%3C/svg%3E") center / 100% 100% no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 74 74'%3E%3Ccircle cx='37' cy='37' r='34.5' fill='none' stroke='black' stroke-width='5' stroke-linecap='round' pathLength='360' stroke-dasharray='38 22'/%3E%3C/svg%3E") center / 100% 100% no-repeat; pointer-events: none; animation: course-node-ring 1.6s ease-in-out infinite; }
 @keyframes course-node-ring { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
 @media (prefers-reduced-motion: reduce) { .course-step[data-step-state='current'] .course-step-marker::after { animation: none; } }
 button.course-step-marker { cursor: pointer; }

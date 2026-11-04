@@ -4,8 +4,6 @@ import { GROWTH_STAGES, getGrowthStage } from '../constants';
 import { useAppContext } from '../context/AppContext';
 import { useAuth } from '../hooks/useAuth';
 import { supabase, getGuestClient } from '../lib/supabase';
-import { logClick } from '../lib/analytics';
-import { shareTossLink } from '../lib/share';
 import { Card } from '../components/ui/Card';
 import { ActionButton } from '../components/ui/ActionButton';
 import { LeagueRules } from '../components/LeagueRules';
@@ -17,14 +15,6 @@ import { timeLeftLabel } from '../lib/league';
 type Row = { rank: number; nickname: string; emoji: string; points: number; is_me: boolean };
 type MyRank = { rank: number | null; total: number; points: number };
 
-// 공유 문구: 이번 주 성과가 있으면 그걸 앞세운다
-const shareMessage = (tier: string, weeklyXp: number, rank: number | null | undefined) =>
-  rank
-    ? `이번 주 ${weeklyXp.toLocaleString()}XP로 리그 ${rank}위!\n머니터미에서 쉬운 상황부터 같이 시작해요`
-    : weeklyXp > 0
-      ? `이번 주 ${weeklyXp.toLocaleString()}XP 모았어요.\n머니터미에서 쉬운 상황부터 같이 시작해요`
-      : `경제 공부, 뭐부터 볼지 모르겠다면 머니터미에서 ${tier} 리그부터 시작해요!`;
-
 const LeagueScreen = () => {
   const { leagueStage, myEmoji } = useAppContext();
   const { user, guestToken } = useAuth();
@@ -32,7 +22,7 @@ const LeagueScreen = () => {
   const [mine, setMine] = useState<MyRank | null>(null);
   const [failed, setFailed] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
-  const [sheet, setSheet] = useState<'share' | 'rules' | null>(null);
+  const [sheet, setSheet] = useState<'rules' | null>(null);
   useEffect(() => {
     // current_profile_id()는 x-guest-token 헤더로 나를 찾는다. 기본 클라이언트면 내 순위가 null이다.
     const db = guestToken ? getGuestClient(guestToken) : supabase;
@@ -60,9 +50,6 @@ const LeagueScreen = () => {
         <div className="flex justify-between items-center mb-4">
           <h2 className="type-page-title">리그</h2>
           <div className="flex items-center gap-1">
-            <TextButton size="small" className="league-header-action" aria-label="리그 공유" onClick={() => setSheet('share')}>
-              공유
-            </TextButton>
             <TextButton size="small" className="league-header-action" aria-label="리그 안내" onClick={() => setSheet('rules')}>
               안내
             </TextButton>
@@ -152,38 +139,6 @@ const LeagueScreen = () => {
         header={<span className="sheet-title">리그 안내</span>}
       >
         <div className="px-5 pb-6"><LeagueRules /></div>
-      </BottomSheet>
-
-      <BottomSheet
-        open={sheet === 'share'}
-        onDimmerClick={() => setSheet(null)}
-        header={<span className="sheet-title">리그 공유</span>}
-      >
-        <div className="px-5 pb-6 flex flex-col gap-3">
-          {/* 받는 사람이 보게 될 내용 미리보기: 내 카드 + 문구. 내부 스킴 주소는 보여주지 않는다 */}
-          <Card pad="md" className="flex flex-col gap-3 anim-fade-up">
-            <div className="flex items-center gap-3">
-              <div className="min-w-0">
-                <p className="text-sm font-bold text-[var(--color-ink)] truncate">{user?.nickname ?? '나'}</p>
-                <p className="text-2xs text-[var(--color-ink-4)]">{stage.name} · 이번 주 {(mine?.points ?? 0).toLocaleString()}XP{mine?.rank ? ` · ${mine.rank}위` : ''}</p>
-              </div>
-            </div>
-            <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep whitespace-pre-line">{shareMessage(stage.name, mine?.points ?? 0, mine?.rank)}</p>
-          </Card>
-          <p className="text-2xs text-[var(--color-ink-4)] px-1 anim-fade-up" style={{ '--i': 1 } as React.CSSProperties}>머니터미로 바로 열리는 토스 링크가 함께 보내져요.</p>
-          <ActionButton
-            fullWidth
-            onClick={() => {
-              logClick('league_share', { rank: mine?.rank ?? null, weekly_xp: mine?.points ?? 0 });
-              shareTossLink('intoss://moneytermi/league', shareMessage(stage.name, mine?.points ?? 0, mine?.rank));
-              setSheet(null);
-            }}
-            className="anim-fade-up"
-            style={{ '--i': 2 } as React.CSSProperties}
-          >
-            토스로 공유하기
-          </ActionButton>
-        </div>
       </BottomSheet>
     </div>
   );
