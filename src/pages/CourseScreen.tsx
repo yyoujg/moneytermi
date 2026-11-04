@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useLayoutEffect, useEffect, useState } from 're
 import { BookOpenText, Check, ListChecks, LockKeyhole, RotateCcw } from '../components/ui/OtterIcons';
 import { List, ListRow } from '@toss/tds-mobile';
 import { TopicThumb } from '../components/TopicThumb';
-import { TOPIC_DESCRIPTIONS } from '../lib/topicImages';
+import { COURSE_NAMES, TOPIC_DESCRIPTIONS } from '../lib/topicImages';
 import { ChevronRight } from '../components/ui/ControlIcons';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
@@ -390,14 +390,14 @@ const CourseScreen = () => {
                 const steps = section.nodes.filter(isStep);
                 const done = steps.filter(isDone).length;
                 const locked = section.nodes.every(node => node.state === 'locked');
-                const label = topic.parts.length > 1 ? `${topic.level} ${pi + 1}` : topic.level;
+                const name = COURSE_NAMES[section.course.id] ?? (topic.parts.length > 1 ? `${topic.level} ${pi + 1}` : topic.level);
                 return (
                   <button key={section.course.id} type="button" role="listitem" className="course-home-rail-card"
-                    onClick={() => navigate(`/course?topic=${topic.index}`)} aria-label={`${category} ${label} 코스 열기, ${locked ? '잠김' : `${done}/${steps.length}단계 완료`}`}>
+                    onClick={() => navigate(`/course?topic=${topic.index}`)} aria-label={`${topic.level} ${name} 코스 열기, ${locked ? '잠김' : `${done}/${steps.length}단계 완료`}`}>
                     <TopicThumb category={category} size={160} height={120} />
                     <span className="course-home-rail-text">
-                      <span className="course-home-rail-title">{label}</span>
-                      <span className="course-home-rail-meta">{locked ? '잠김' : `${done}/${steps.length}단계`}</span>
+                      <span className="course-home-rail-title">{name}</span>
+                      <span className="course-home-rail-meta">{topic.level} · {locked ? '잠김' : `${done}/${steps.length}단계`}</span>
                     </span>
                   </button>
                 );
