@@ -1178,12 +1178,12 @@ button.course-home-rail-card:active { background: var(--color-surface); }
 .course-steps .course-step:nth-child(8n + 6), .course-steps .course-step:nth-child(8n + 8) { --step-offset: -60px; }
 .course-steps .course-step:nth-child(8n + 7) { --step-offset: -84px; }
 /* 수달 포즈(그림 높이 109/120)와 등급 장면(101/120)의 수달 키를 맞춘다: 장면은 8% 키우고 바닥선을 맞춰 4px 올린다 */
-.course-step-buddy { position: absolute; top: -12px; left: calc(50% + var(--buddy-x, 0px)); z-index: 0; width: 120px; transform: translateX(-50%); pointer-events: none; }
-.course-step-buddy[src*='/league/'] { width: 130px; margin-top: -5px; }
+.course-step-buddy { position: absolute; top: -12px; left: calc(50% + var(--buddy-x, 0px)); z-index: 0; width: 150px; transform: translateX(-50%); pointer-events: none; }
+.course-step-buddy[src*='/league/'] { width: 162px; margin-top: -6px; }
 .course-steps .course-step:nth-child(8n + 3) .course-step-buddy { --buddy-x: -100px; }
 .course-steps .course-step:nth-child(8n + 7) .course-step-buddy { --buddy-x: 100px; }
 /* 돌 사이 세로 간격(말풍선 높이 64px가 다음 돌과 겹치지 않을 만큼) */
-.course-steps .course-step + .course-step { margin-top: var(--space-6); }
+.course-steps .course-step + .course-step { margin-top: var(--space-3); }
 .course-step[data-step-state='done']:not(:last-child)::before { background: var(--color-progress); }
 .course-steps .course-step .course-step-marker { width: 72px; height: 72px; margin-top: var(--space-2); padding: 0; border: 0; background: transparent; }
 /* 끝낸 단계 말풍선: 체크 오른쪽에 떠서 아래 줄을 밀지 않는다. 꼬리는 체크를 가리킨다 */
