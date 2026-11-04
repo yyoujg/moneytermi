@@ -876,13 +876,14 @@ button.nickname-clear { display: inline-flex; flex: 0 0 44px; width: 44px; heigh
 .quest-hero-character { width: 72px; height: auto; flex-shrink: 0; }
 .quest-hero-count { margin-top: var(--space-1); color: var(--color-ink-3); font-size: var(--font-size-body); font-variant-numeric: tabular-nums; }
 .quest-hero-count > strong { color: var(--color-neutral-strong); font-size: var(--font-size-title-2); font-weight: var(--font-weight-bold); }
-.home-mission-top { display: grid; grid-template-columns: minmax(0, 1fr) 64px; align-items: center; gap: var(--space-2); }
+.home-mission-top { display: grid; grid-template-columns: 28px minmax(0, 1fr) 64px; align-items: center; gap: var(--space-3); }
+.home-mission-check { display: flex; width: 28px; height: 28px; align-items: center; justify-content: center; border: 2px solid var(--color-line-strong); border-radius: 50%; color: var(--color-card); }
+.home-mission-row[data-done] .home-mission-check { border-color: var(--color-neutral-strong); background: var(--color-neutral-strong); }
 .home-mission-info { min-width: 0; }
 .home-mission-title { font-weight: var(--font-weight-semibold); line-height: var(--line-height-title); word-break: keep-all; overflow-wrap: anywhere; }
 .home-mission-info > p + p { margin-top: var(--space-1); }
 .home-mission-reward { color: var(--color-ink-3); font-weight: var(--font-weight-regular); }
 .home-mission-count { display: inline-flex; width: 64px; min-height: var(--size-touch-min); align-items: center; justify-content: center; font-variant-numeric: tabular-nums; }
-.home-mission-progress { margin-top: var(--space-2); }
 .home-mission-row[data-rewarded='true'] .home-mission-reward { color: var(--color-ink-4); }
 
 /* 복습 완료: 원래 수달·결과·잔액은 유지하고 결과 기록과 행동을 분리한다. */
@@ -1197,8 +1198,8 @@ button.course-home-rail-card:active { background: transparent; opacity: 0.7; }
 .league-tier-road { padding-inline: 0; border-radius: 0; background: transparent; box-shadow: none; }
 .quest-hero { padding: 0 0 var(--space-5); border-radius: 0; background: transparent; box-shadow: none; }
 #home-mission-list { gap: 0; margin-top: var(--space-2); }
-/* 게이지(연회색 막대)와 구분선이 겹쳐 보여 행은 선 없이 여백으로만 나눈다 */
-.home-mission-row { padding: var(--space-4) 0 var(--space-5); border-radius: 0; background: transparent; box-shadow: none; }
+/* 미션 행: 구분선 없이 여백으로만 나눈다 */
+.home-mission-row { padding: var(--space-3) 0; border-radius: 0; background: transparent; box-shadow: none; }
 .home-mission-row[data-rewarded] { background: transparent; opacity: 0.55; }
 .my-profile-card { padding: var(--space-2) 0 var(--space-5); border-radius: 0; background: transparent; box-shadow: none; border-bottom: 1px solid var(--color-line); }
 .my-page-panel { margin-bottom: 0; padding: var(--space-5) 0; border-radius: 0; background: transparent; box-shadow: none; border-bottom: 1px solid var(--color-line); }

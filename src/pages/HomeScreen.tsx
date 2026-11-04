@@ -6,6 +6,7 @@ import { MISSION_XP } from '../constants';
 import { useAppContext } from '../context/AppContext';
 import { msUntilNextSlot } from '../lib/date';
 import { Card } from '../components/ui/Card';
+import { Check } from '../components/ui/OtterIcons';
 import { PointCelebration, type PointReward } from '../components/PointCelebration';
 import type { Mission } from '../types';
 import { XpIcon } from '../components/StatIcons';
@@ -68,8 +69,10 @@ const HomeScreen = () => {
             {missionList.map(mission => {
               const done = mission.current >= mission.target;
               return (
-                <div key={mission.id} className="home-mission-row" data-rewarded={mission.isRewarded || undefined}>
+                // 미션마다 게이지를 두면 한눈에 안 들어와, 왼쪽 원(끝내면 체크)과 오른쪽 숫자로만 보여준다. 게이지는 위 전체 진행 하나
+                <div key={mission.id} className="home-mission-row" data-rewarded={mission.isRewarded || undefined} data-done={done || undefined}>
                   <div className="home-mission-top">
+                    <span className="home-mission-check" aria-hidden="true">{done && <Check size={16} />}</span>
                     <div className="home-mission-info">
                       <p className={`home-mission-title text-sm ${mission.isRewarded ? 'text-[var(--color-ink-3)]' : 'text-[var(--color-ink)]'}`}>
                         {mission.title}
@@ -82,15 +85,6 @@ const HomeScreen = () => {
                       ? <MissionRewardStatus isRewarded={mission.isRewarded} pending={claimingMissionIds?.has(mission.id)} onClaim={() => handleClaim(mission.id)} />
                       : <span className="home-mission-count text-sm font-semibold text-[var(--color-ink)]">{mission.current}<span className="text-xs text-[var(--color-ink-4)]">/{mission.target}</span></span>
                     }
-                  </div>
-                  <div role="progressbar" aria-label={`${mission.title} 진행률`} aria-valuemin={0} aria-valuemax={mission.target} aria-valuenow={Math.min(mission.current, mission.target)} className="home-mission-progress flex gap-1">
-                    {Array.from({ length: mission.target }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="flex-1 h-1 rounded-full transition-all duration-300"
-                        style={{ backgroundColor: mission.isRewarded ? 'var(--color-line-strong)' : i < mission.current ? 'var(--color-progress)' : 'var(--color-surface)' }}
-                      />
-                    ))}
                   </div>
                 </div>
               );

@@ -597,7 +597,7 @@ describe('퀘스트의 미션 동작', () => {
     return container;
   };
 
-  it('오늘의 미션만 모두 표시하고 보상과 진행률을 유지한다', async () => {
+  it('오늘의 미션만 모두 표시하고 보상과 진행 숫자를 유지한다', async () => {
     const claimReward = vi.fn(async () => ({ xpGained: MISSION_XP }));
     baseContext({
       xp: 0, knownWords: [word(1)], unknownWords: [], attendanceDates: [], myEmoji: '🦦', claimReward,
@@ -623,8 +623,10 @@ describe('퀘스트의 미션 동작', () => {
     expect(rows[1].querySelector('.home-mission-count')).toHaveTextContent('1/3');
     expect(rows[1].querySelector('.home-mission-reward')).toHaveTextContent('+' + MISSION_XP + ' XP');
     expect(rows[1]).not.toHaveTextContent('코인');
-    expect(rows[0].querySelector('[role=progressbar]')).toHaveAttribute('aria-valuenow', '2');
-    expect(rows[0].querySelector('[role=progressbar]')?.children).toHaveLength(2);
+    // 미션마다 게이지 대신 왼쪽 원: 끝낸 미션만 체크
+    expect(rows.every(row => row.querySelector('[role=progressbar]') === null)).toBe(true);
+    expect(rows[0]).toHaveAttribute('data-done', 'true');
+    expect(rows[1]).not.toHaveAttribute('data-done');
     expect(rows[2].querySelector('button')).toBeNull();
     expect(rows[2].querySelector('[data-state=claimed]')).toHaveTextContent('받음');
     // '오늘의 미션' 제목은 목록 위 한 곳에만
