@@ -24,16 +24,14 @@ describe('프로필 머리', () => {
     expect(container.querySelector('.my-profile-avatar img')).toBeNull();
     expect(container.querySelector('[data-avatar-initial]')).toHaveTextContent('예');
   });
-  it('편집 버튼은 닉네임 변경 하나만 둔다', () => {
+  it('편집 버튼은 프로필 그림과 닉네임 두 개다', () => {
     const { container, onEditNickname } = mount();
-    const buttons = [...container.querySelectorAll('button')];
-    // 아바타는 바꿀 수 없는 첫 글자 표시라 버튼이 아니다
-    expect(buttons).toHaveLength(1);
+    expect([...container.querySelectorAll('button')]).toHaveLength(2);
+    expect(container.querySelector('[aria-label="프로필 그림 변경"]')).toBeInTheDocument();
     const nicknameButton = container.querySelector<HTMLButtonElement>('[aria-label="닉네임 변경"]')!;
     expect(nicknameButton.type).toBe('button');
     act(() => nicknameButton.click());
     expect(onEditNickname).toHaveBeenCalledOnce();
-    expect(container).not.toHaveTextContent('캐릭터 변경');
   });
   it('긴 닉네임을 데이터 단계에서 줄이지 않는다', () => {
     const nickname = '차근차근배우는수달';

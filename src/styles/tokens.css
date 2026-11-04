@@ -167,6 +167,17 @@
   --color-neutral-soft: var(--neutral-100);
   --color-badge-earned: var(--color-neutral-strong);
   --color-badge-earned-soft: var(--color-accent-soft);
+  /* 리그 등급 그림 배경(1 텅장 ~ 10 돈방석). 단계가 오를수록 회색 → 따뜻한 금색으로 */
+  --league-bg-1: #f2f4f6;
+  --league-bg-2: #eef3fb;
+  --league-bg-3: #eaf6f1;
+  --league-bg-4: #fdf0f2;
+  --league-bg-5: #f2effb;
+  --league-bg-6: #e9f3f5;
+  --league-bg-7: #eff5e9;
+  --league-bg-8: #fff6e5;
+  --league-bg-9: #ffefdd;
+  --league-bg-10: #fff1c7;
   --color-on-progress: var(--gray-0);
   --color-reward-foreground: var(--color-accent-foreground);
   --color-selection-soft: var(--color-accent-soft);

@@ -26,7 +26,7 @@ const shareMessage = (tier: string, weeklyXp: number, rank: number | null | unde
       : `경제 공부, 뭐부터 볼지 모르겠다면 머니터미에서 ${tier} 리그부터 시작해요!`;
 
 const LeagueScreen = () => {
-  const { leagueStage } = useAppContext();
+  const { leagueStage, myEmoji } = useAppContext();
   const { user, guestToken } = useAuth();
   const [rows, setRows] = useState<Row[] | null>(null);
   const [mine, setMine] = useState<MyRank | null>(null);
@@ -75,7 +75,7 @@ const LeagueScreen = () => {
             const state = s.id < stage.id ? 'done' : s.id === stage.id ? 'current' : 'future';
             return (
               <li key={s.id} className="league-tier-step" data-state={state} aria-label={s.name} aria-current={state === 'current' ? 'step' : undefined}>
-                <span className="league-tier-node"><StageGlyph id={s.id} size={104} locked={state === 'future'} /></span>
+                <span className="league-tier-node" style={{ background: `var(--league-bg-${s.id})` }}><StageGlyph id={s.id} size={88} locked={state === 'future'} /></span>
               </li>
             );
           })}
@@ -119,7 +119,7 @@ const LeagueScreen = () => {
                 style={{ '--i': i } as React.CSSProperties}
               >
                 <LeagueRankBadge rank={r.rank} />
-                <ProfileAvatar name={r.is_me ? (user?.nickname ?? r.nickname) : r.nickname} size={32} />
+                <ProfileAvatar name={r.is_me ? (user?.nickname ?? r.nickname) : r.nickname} size={32} avatar={r.is_me ? myEmoji : r.emoji} />
                 <span className="league-rank-name">
                   {r.is_me ? (user?.nickname ?? r.nickname) : r.nickname}
                 </span>
@@ -133,7 +133,7 @@ const LeagueScreen = () => {
                 className="league-ranking-row is-me is-own-separate"
               >
                 <LeagueRankBadge rank={mine.rank} />
-                <ProfileAvatar name={user?.nickname ?? '나'} size={32} />
+                <ProfileAvatar name={user?.nickname ?? '나'} size={32} avatar={myEmoji} />
                 <span className="league-rank-name">{user?.nickname ?? '나'}</span>
                 <span className="league-rank-xp"><span>{mine.points.toLocaleString()}</span><span className="league-rank-xp-unit">XP</span></span>
               </div>

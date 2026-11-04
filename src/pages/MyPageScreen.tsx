@@ -13,12 +13,15 @@ import { GuideSheet } from '../components/mypage/GuideSheet';
 import { SettingsSheet } from '../components/mypage/SettingsSheet';
 import { NicknameSheet } from '../components/mypage/NicknameSheet';
 import { ProfileHeader } from '../components/mypage/ProfileHeader';
+import { ProfileAvatarSheet } from '../components/mypage/ProfileAvatarSheet';
+import { WeekStrip } from '../components/home/WeekStrip';
 import { Card } from '../components/ui/Card';
 
 const MENU_ITEMS = ['앱 사용법', '앱 설정'];
 
 const MyPageScreen = () => {
-  const { xp, leagueStage, knownWords, viewedIds, attendanceDates } = useAppContext();
+  const { xp, leagueStage, knownWords, viewedIds, attendanceDates, myEmoji, updateMyEmoji } = useAppContext();
+  const [showAvatarSheet, setShowAvatarSheet] = useState(false);
   const streak = calcStreak(attendanceDates);
   const badges = buildBadges({ words: knownWords.length, streak, xp });
 
@@ -37,6 +40,8 @@ const MyPageScreen = () => {
     <div className="my-page-screen flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
       <GuideSheet open={showGuide} onClose={() => setShowGuide(false)} />
       <SettingsSheet open={showSettings} onClose={() => setShowSettings(false)} />
+      <ProfileAvatarSheet open={showAvatarSheet} nickname={user?.nickname ?? DEFAULT_NICKNAME} current={myEmoji}
+        onClose={() => setShowAvatarSheet(false)} onSelect={value => { setShowAvatarSheet(false); void updateMyEmoji(value); }} />
       <NicknameSheet
         open={showNicknameSheet}
         currentNickname={user?.nickname ?? ''}
@@ -49,6 +54,8 @@ const MyPageScreen = () => {
         <h2 className="type-page-title mb-4!">마이페이지</h2>
         <ProfileHeader
           nickname={user?.nickname ?? DEFAULT_NICKNAME}
+          avatar={myEmoji}
+          onEditAvatar={() => setShowAvatarSheet(true)}
           onEditNickname={() => setShowNicknameSheet(true)}
         />
 
@@ -74,6 +81,15 @@ const MyPageScreen = () => {
       </div>
 
       <div className="my-page-sections shrink-0 px-5">
+        {/* 연속 학습: 이번 주 칸(홈에서 옮겨 왔다) */}
+        <section aria-labelledby="my-streak-title" className="my-page-panel my-streak">
+          <p id="my-streak-title" className="home-streak-title">
+            <StreakIcon size={24} />
+            {streak > 0 ? <span><strong>{streak}일째</strong> 연속 학습 중! 쭉 이어가 볼까요?</span> : <span>오늘 학습하면 연속 학습이 시작돼요</span>}
+          </p>
+          <WeekStrip attendanceDates={attendanceDates} />
+        </section>
+
         {/* 배지 */}
         <section aria-labelledby="my-badges-title" className="my-page-panel">
           <div className="flex items-center justify-between mb-3">

@@ -282,7 +282,11 @@ describe('다른 그림과 통일한 원형 파스텔 순위 표시', () => {
       expect(indexCss).toContain('.league-rank-badge[data-podium] { color: var(--color-neutral-strong); font-weight: var(--font-weight-bold); }');
       expect(indexCss).toContain('.league-rank-value { position: absolute; inset-inline: 0; top: 7px;');
       expect(indexCss).not.toContain(".league-rank-badge[data-podium='3'] .league-rank-value");
-      expect(indexCss).not.toContain(".league-rank-badge[data-podium='1'] { background:");
+      // 1~3위는 금·은·동 원형 바탕 + 같은 계열 진한 숫자로 강조한다
+      for (const [rank, tone] of [['1', 'gold'], ['2', 'silver'], ['3', 'bronze']]) {
+        expect(indexCss).toMatch(new RegExp(`\\.league-rank-badge\\[data-podium='${rank}'\\] \\{ background: var\\(--color-league-[a-z]+-emphasis\\); color: var\\(--${tone}-800\\); \\}`));
+        expect(contrast(resolve(`--${tone}-800`, values), resolve(`--${tone}-100`, values))).toBeGreaterThanOrEqual(4.5);
+      }
     });
   }
 });

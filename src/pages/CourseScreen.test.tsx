@@ -595,12 +595,11 @@ describe('퀘스트의 미션 동작', () => {
 
 
 describe('홈으로 옮긴 학습 현황', () => {
-  it('홈에서 출석과 복습을 보여주고 주간 순위는 리그로 넘긴다', async () => {
+  it('홈에서 복습을 보여주고 출석은 마이로, 주간 순위는 리그로 넘긴다', async () => {
     baseContext({ attendanceDates: ['2026-10-28'], dueQueue: [word(1)], xp: 3569 });
     const { container } = await mount('/course');
-    // 연속 학습은 홈 맨 위 카드에서 이번 주 칸과 함께 보여준다
-    expect(container.querySelector('.home-streak-card')).toHaveTextContent('연속 학습');
-    expect(container.querySelectorAll('.home-streak-card .week-strip-day')).toHaveLength(7);
+    // 연속 학습(이번 주 칸)은 마이 화면으로 옮겼다
+    expect(container.querySelector('.week-strip-day')).toBeNull();
     expect(container.querySelector('.course-home-hero [aria-label="다음 학습까지 진행률"]')).toBeInTheDocument();
     // 등급은 마이 화면에만 두고 홈에는 표시하지 않는다
     expect(container.querySelector('.course-home-tier-chip')).toBeNull();

@@ -9,15 +9,13 @@ import { useAppContext } from '../context/AppContext';
 import { logClick } from '../lib/analytics';
 import { ENERGY_ACTION_COST } from '../constants';
 import { DaliAvatar } from '../components/DaliAvatar';
-import { calcStreak } from '../lib/streak';
-import { WeekStrip } from '../components/home/WeekStrip';
 import { feedbackNodeTap } from '../lib/feedback';
 import { loadDoneNodes } from '../lib/pathProgress';
 import { Storage } from '../lib/storage';
 import { COURSE_REVIEW_COUNT, LESSON_WARMUP_COUNT, firstUnknownWordIndex, learnedOrFallbackWords, selectCourseQuizWords } from '../lib/coursePractice';
 import { ActionButton } from '../components/ui/ActionButton';
 import { HomeOverview } from '../components/home/HomeOverview';
-import { EnergyIcon, StreakIcon } from '../components/StatIcons';
+import { EnergyIcon } from '../components/StatIcons';
 import { buildPath, type PathNode } from '../lib/path';
 
 const SEEN_KEY = 'path_seen_done';   // 코스 화면에서 마지막으로 본 완료 노드들(도장 연출용)
@@ -91,7 +89,7 @@ const CourseScreen = () => {
   const navigate = useNavigate();
   const isCatalog = useLocation().pathname === '/course/topics';
   const [searchParams, setSearchParams] = useSearchParams();
-  const { hydrated, contentStatus, retryContent, viewedIds: knownIds, courses, energy, energyMax, spendEnergy, pickRecallWords, openShop, attendanceDates, dueQueue } = useAppContext();
+  const { hydrated, contentStatus, retryContent, viewedIds: knownIds, courses, energy, energyMax, spendEnergy, pickRecallWords, openShop, dueQueue } = useAppContext();
   const hasDue = hydrated && dueQueue.length > 0;
   // 이 기기에서 끝낸 퀴즈·복습 노드. 화면에 돌아올 때마다 다시 읽는다(퀴즈 끝내고 돌아온 직후 반영).
   const [doneNodes, setDoneNodes] = useState<Set<string>>(new Set());
@@ -205,7 +203,6 @@ const CourseScreen = () => {
   const focusTopic = focus ? topics.find(topic => topic.parts.some(part => part.section.course.id === focus.courseId)) : null;
   const focusSteps = focusTopic ? topicSteps(focusTopic) : { done: 0, total: 0 };
   const focusStepsLeft = focusSteps.total - focusSteps.done;
-  const streak = calcStreak(attendanceDates);
   // 지금 할 학습(노드)의 용어를 다 보면 다음 학습으로 넘어간다
   const nextWords = focus?.words ?? [];
   const nextKnown = nextWords.filter(word => knownIds.has(word.id)).length;
@@ -350,15 +347,7 @@ const CourseScreen = () => {
         </button>}
       </div>
       {!activeTopic && !isCatalog && <>
-        {/* 연속 학습은 이번 주 칸으로 한눈에 보여주고, 오늘 할 학습은 캐릭터 말풍선으로 안내한다 */}
-        <section aria-labelledby="home-streak-title" className="home-streak-card">
-          <p id="home-streak-title" className="home-streak-title">
-            <StreakIcon size={24} />
-            {streak > 0 ? <span><strong>{streak}일째</strong> 연속 학습 중! 쭉 이어가 볼까요?</span> : <span>오늘 학습하면 연속 학습이 시작돼요</span>}
-          </p>
-          <WeekStrip attendanceDates={attendanceDates} />
-        </section>
-
+        {/* 오늘 할 학습은 캐릭터 말풍선으로 안내한다. 연속 학습(이번 주 칸)은 마이 화면에 있다 */}
         <section aria-label="오늘 할 학습" className="course-home-hero">
           {/* 화자 달리(전신) + 말풍선. 문구는 달리가 말하는 해요체. 등급은 마이 화면에만 둔다 */}
           <div className="course-home-speech">

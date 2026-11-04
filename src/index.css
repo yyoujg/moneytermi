@@ -816,6 +816,11 @@ button.mission-reward-status {
 .league-rank-xp-unit { color: var(--color-ink-3); font-size: var(--font-size-caption); font-weight: var(--font-weight-regular); }
 /* 상위 세 명은 같은 카드 표면을 쓰고 작은 순위 표식과 글자 위계로 구분한다. */
 .league-ranking-row[data-podium] { min-height: 72px; }
+/* 1~3위: 금·은·동 원형 배지로 강조(메달 색 토큰 전용 용도) */
+.league-rank-badge[data-podium] { border-radius: 50%; }
+.league-rank-badge[data-podium='1'] { background: var(--color-league-first-emphasis); color: var(--gold-800); }
+.league-rank-badge[data-podium='2'] { background: var(--color-league-second-emphasis); color: var(--silver-800); }
+.league-rank-badge[data-podium='3'] { background: var(--color-league-third-emphasis); color: var(--bronze-800); }
 .league-ranking-row[data-podium] .league-rank-name { font-size: var(--font-size-body); font-weight: var(--font-weight-bold); }
 .league-ranking-row[data-podium] .league-rank-xp { font-size: var(--font-size-body); }
 
@@ -1041,7 +1046,13 @@ button.home-review-entry { margin-bottom: var(--space-3); padding: var(--space-4
 .home-status-card { margin-bottom: var(--space-6); padding: var(--space-5) var(--space-5) 0; border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); }
 .my-page-stats.app-card { padding: var(--space-5) 0; }
 .my-page-stat + .my-page-stat { border-left: 1px solid var(--color-line); }
-.my-profile-avatar { display: flex; flex-shrink: 0; }
+.my-profile-avatar { display: flex; flex-shrink: 0; border-radius: 50%; }
+/* 프로필 그림 고르기: 3열, 고른 것은 메인 컬러 테두리 */
+.profile-avatar-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4) var(--space-2); list-style: none; }
+.profile-avatar-option { display: flex; width: 100%; min-height: var(--size-touch-min); flex-direction: column; align-items: center; gap: var(--space-2); color: var(--color-ink-2); font-size: var(--font-size-label); }
+.profile-avatar-option .profile-avatar { box-shadow: 0 0 0 2px transparent; }
+.profile-avatar-option[aria-pressed='true'] .profile-avatar { box-shadow: 0 0 0 3px var(--color-accent-line-strong); }
+.profile-avatar-option[aria-pressed='true'] { color: var(--color-ink); font-weight: var(--font-weight-bold); }
 button.my-profile-name-button { display: flex; align-items: center; gap: var(--space-2); min-height: 44px; text-align: left; }
 .my-profile-name-button > svg { color: var(--color-ink-3); }
 .league-screen > div:first-child { padding-bottom: var(--space-2); background: transparent; }
@@ -1064,15 +1075,14 @@ button.course-home-topic:not(:last-child)::after { content: ''; position: absolu
 .home-attendance .week-strip { padding-block: var(--space-3); }
 
 /* 홈 상단: 이번 주 연속 학습 카드 */
-.home-streak-card { flex-shrink: 0; margin: var(--space-1) var(--space-5) var(--space-3); padding: var(--space-4) var(--space-4) var(--space-5); border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); }
 .home-streak-title { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3); color: var(--color-ink); font-size: var(--font-size-body); font-weight: var(--font-weight-semibold); line-height: var(--line-height-body); word-break: keep-all; }
 .home-streak-title strong { color: var(--color-neutral-strong); }
-.home-streak-card .week-strip { padding: 0; border: 0; }
-.home-streak-card .week-strip-heading { display: none; }
-.home-streak-card .week-strip-circle { max-width: 44px; background: var(--color-neutral-soft); color: var(--color-ink-3); }
-.home-streak-card .week-strip-day[data-state='done'] .week-strip-circle { background: var(--color-neutral-strong); color: var(--color-card); }
-.home-streak-card .week-strip-day[data-state='today'] .week-strip-circle { border-color: var(--color-progress); background: var(--color-card); color: var(--color-progress); }
-.home-streak-card .week-strip-day[data-state='future'] .week-strip-circle { border-color: transparent; background: var(--color-neutral-soft); }
+.my-streak .week-strip { padding: 0; border: 0; }
+.my-streak .week-strip-heading { display: none; }
+.my-streak .week-strip-circle { max-width: 44px; background: var(--color-neutral-soft); color: var(--color-ink-3); }
+.my-streak .week-strip-day[data-state='done'] .week-strip-circle { background: var(--color-neutral-strong); color: var(--color-card); }
+.my-streak .week-strip-day[data-state='today'] .week-strip-circle { border-color: var(--color-progress); background: var(--color-card); color: var(--color-progress); }
+.my-streak .week-strip-day[data-state='future'] .week-strip-circle { border-color: transparent; background: var(--color-neutral-soft); }
 
 /* 홈 히어로: 보라 면 왼쪽에 캐릭터(약 30%), 오른쪽에 등급 진행과 말풍선, 아래 흰 버튼 */
 .course-home-hero { margin-top: 0 !important; padding: var(--space-5) var(--space-5) var(--space-5) var(--space-4) !important; background: var(--color-accent-soft) !important; }
@@ -1124,7 +1134,7 @@ button.course-home-rail-card:active { background: var(--color-surface); }
 .league-time-left { color: var(--color-ink-3); font-size: var(--font-size-caption); font-variant-numeric: tabular-nums; }
 .league-tier-road::-webkit-scrollbar { display: none; }
 .league-tier-step { position: relative; z-index: 1; display: flex; width: 124px; flex-shrink: 0; flex-direction: column; align-items: center; gap: var(--space-1); scroll-snap-align: center; }
-.league-tier-node { display: flex; width: 104px; height: 104px; align-items: center; justify-content: center; }
+.league-tier-node { display: flex; width: 104px; height: 104px; align-items: center; justify-content: center; border-radius: var(--shape-card); }
 .league-tier-step[data-state='done'] .league-tier-node { color: var(--color-ink-2); }
 .league-tier-step[data-state='current'] .league-tier-node { color: var(--color-accent-foreground); }
 .league-tier-step[data-state='future'] .league-tier-node .stage-glyph { opacity: 1; filter: none; }
@@ -1136,7 +1146,6 @@ button.course-home-rail-card:active { background: var(--color-surface); }
 .course-home-hero { border: 0 !important; box-shadow: none !important; }
 
 /* 카드는 위 네 곳(오늘 할 학습, 문제, 지금 할 단계, 모달)에만 쓴다. 나머지는 여백·구분선으로 나눈 평면 섹션이다. */
-.home-streak-card { margin: 0 var(--space-5) var(--space-4); padding: 0 0 var(--space-5); border-radius: 0; background: transparent; box-shadow: none; border-bottom: 1px solid var(--color-line); }
 button.home-review-entry { margin-bottom: 0; padding: var(--space-4) 0; border-radius: 0; background: transparent; box-shadow: none; border-bottom: 1px solid var(--color-line); }
 button.course-home-rail-card { width: 112px; padding: 0; border-radius: 0; background: transparent; box-shadow: none; }
 button.course-home-rail-card:active { background: transparent; opacity: 0.7; }
@@ -1161,7 +1170,6 @@ button.quiz-option.border-transparent { border-color: var(--color-line-strong) !
 .badge-glyph.is-locked { border: 0; background: var(--color-surface); color: var(--color-ink-3); opacity: 0.6; }
 
 /* 국내 앱 레이아웃: 회색 바탕 + 흰 섹션 블록(모서리 없음, 12px 간격). 카드 수를 늘리지 않고 영역만 나눈다. */
-.home-streak-card { margin: 0 0 var(--section-gap); padding: var(--space-4) var(--space-5) var(--space-5); background: var(--color-card); border-bottom: 0; }
 .course-home-hero { margin: 0 0 var(--section-gap) !important; border-radius: 0 !important; background: var(--color-card) !important; }
 .course-home-hero .course-home-bubble, .course-home-hero .course-home-bubble::before { background: var(--color-accent-soft); }
 .course-home-section-heading { margin: 0 !important; padding: var(--space-5) var(--space-5) 0; background: var(--color-card); }
@@ -1212,12 +1220,12 @@ button.course-home-rail-card { width: 160px; flex-direction: column; align-items
 .topic-thumb { flex-shrink: 0; border-radius: var(--shape-inset); object-fit: cover; background: var(--color-surface); }
 .topic-thumb-fallback { display: inline-flex; align-items: center; justify-content: center; color: var(--color-ink-3); font-size: var(--font-size-label); font-weight: var(--font-weight-bold); }
 /* 홈 화자 아바타 + 말풍선: 아바타 쪽 아래 모서리만 각지게 */
-.course-home-speech { display: flex; align-items: flex-end; gap: 8px; margin-bottom: 16px; }
-.dali-avatar { display: inline-flex; width: 72px; height: 72px; flex-shrink: 0; }
+.course-home-speech { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.dali-avatar { display: inline-flex; width: 72px; height: 72px; flex-shrink: 0; align-items: center; justify-content: center; }
 .dali-avatar img { width: 72px; height: 72px; }
 .course-home-hero .course-home-speech .course-home-bubble { flex: 1; min-width: 0; margin: 0 0 0 10px; padding: 12px 14px; border-radius: 18px; background: var(--color-accent-soft); box-shadow: none; }
-/* 말풍선 꼬리: 아래를 맞춘 72px 전신 달리의 입 높이(아래에서 약 52px)를 가리킨다 */
-.course-home-hero .course-home-speech .course-home-bubble::before { content: ''; top: auto; bottom: 44px; left: -10px; width: 12px; height: 16px; margin: 0; background: var(--color-accent-soft); transform: none; clip-path: polygon(0 50%, 100% 0, 100% 100%); }
+/* 말풍선 꼬리: 세로 가운데 맞춘 72px 전신 달리의 입 높이(가운데에서 약 16px 위)를 가리킨다 */
+.course-home-hero .course-home-speech .course-home-bubble::before { content: ''; top: calc(50% - 24px); bottom: auto; left: -10px; width: 12px; height: 16px; margin: 0; background: var(--color-accent-soft); transform: none; clip-path: polygon(0 50%, 100% 0, 100% 100%); }
 .course-home-speech .course-home-bubble-topic { font-size: 11px; }
 .course-home-speech .course-home-bubble-main { margin-top: 2px; color: var(--color-ink); font-size: 14px; font-weight: var(--font-weight-bold); line-height: var(--line-height-body); word-break: keep-all; }
 .course-home-speech .course-home-level-label { font-size: 12px; font-weight: var(--font-weight-regular); }
