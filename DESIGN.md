@@ -179,6 +179,7 @@
 - 키보드 포커스 링은 2px 강조 글자색(`--color-accent-foreground`)이다.
 - 채움(`fill`)은 활성 탭 아이콘에만 쓴다. 듀오톤은 쓰지 않는다.
 - 재화·통계(`StatIcons.tsx`): 모두 글자색 단색 선형. 포인트 컬러는 보라 하나라 아이콘에 따로 색을 주지 않는다.
+- 단, 마이 화면 통계 3종(살펴본 용어·연속 학습·경험치)은 수달 3색 그림 아이콘(`public/icons/stat/icon-{terms,streak,xp}.svg`, 28px)을 쓴다.
 - 등급(`StageGlyph.tsx`): 달리 장면 10종. 텅장 빈 지갑 → 가계부 → 짠테크 돈 세기 → 적금 저금통 → 갓생 안경·폰 → 정보통 신문 → 재테크 차트 → 존버 명상 → 자산가 금고 → 돈방석.
 - 배지(`BadgeGlyph.tsx`): 펼친 책·책 두 권·책 더미·학사모(단어), 작은 불꽃·큰 불꽃·체크 달력(연속), 별 동전·동전 더미·별 돈주머니(XP). `docs/character/badges/trace_badges.py`로 벡터화했다.
 - 장식 아이콘은 `aria-hidden`. 의미는 옆 글자나 `aria-label`로 전달한다.

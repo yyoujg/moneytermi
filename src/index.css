@@ -399,7 +399,7 @@ svg:is(.text-brand-300, .text-brand-400, .text-brand-500, .text-brand-600, .text
 .my-page-stats-grid { display: flex; flex-direction: column; gap: var(--space-4); }
 .my-page-stat { display: flex; min-width: 0; align-items: center; gap: var(--space-3); }
 /* 아이콘(24px)과 등급 원(40px)의 자리를 40px로 맞춰 이름 시작선을 맞춘다 */
-.my-page-stat > svg { flex: 0 0 40px; width: 40px; }
+.my-page-stat > svg, .my-page-stat > img { flex: 0 0 40px; width: 40px; object-fit: contain; }
 .my-page-stat.is-wide { grid-column: auto; }
 .my-page-stat-label { display: flex; flex: 1; min-width: 0; align-items: center; color: var(--color-ink-2); font-size: var(--font-size-body); white-space: nowrap; }
 .my-page-stat-value { display: flex; align-items: baseline; justify-content: flex-end; gap: 2px; color: var(--color-ink); font-size: var(--font-size-headline); font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); font-variant-numeric: tabular-nums; }

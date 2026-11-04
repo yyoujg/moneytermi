@@ -26,6 +26,8 @@ describe('목표 숫자 배지', () => {
       expect(glyphs[i].querySelectorAll('img')).toHaveLength(1);
       expect(glyphs[i].querySelector('img')?.getAttribute('src')).toMatch(/^\/badges\/v3\/badge-[a-z]+\d+\.svg$/);
     }
+    // 배지마다 전용 그림(같은 그림을 빌려 쓰지 않는다)
+    expect(new Set(glyphs.map(g => g.querySelector('img')?.getAttribute('src'))).size).toBe(BADGES.length);
     const small = mount(<BadgeGlyph id="w1" size={32} />).querySelector('img');
     expect(small).toHaveAttribute('src', '/badges/v3/badge-word1-small.svg');
   });
