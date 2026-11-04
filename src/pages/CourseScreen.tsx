@@ -460,7 +460,7 @@ const CourseScreen = () => {
               return <React.Fragment key={`${topic.level}-${topic.category}`}>
               {levelHeading && <h3 className="course-home-level-heading">{topic.level}<span>{visibleTopics.filter(t => t.level === topic.level).length}개 주제</span></h3>}
               <ListRow as="button" border="none" disabled={locked} data-locked={locked || undefined} data-topic-index={topic.index} data-current={isCurrent || undefined}
-                onClick={() => navigate(`/course?topic=${topic.index}`)} aria-label={`${topic.level} ${topic.category} 주제 열기`} aria-describedby={`topic-summary-${topic.index}`} className="course-home-topic w-full"
+                onClick={() => { if (!locked) navigate(`/course?topic=${topic.index}`); }} aria-disabled={locked || undefined} aria-label={`${topic.level} ${topic.category} 주제 열기`} aria-describedby={`topic-summary-${topic.index}`} className="course-home-topic w-full"
                 contents={<span className="flex flex-col">
                   <span className="course-home-topic-title">{topic.category}</span>
                   <span id={`topic-summary-${topic.index}`} className="course-home-topic-meta">{steps.done}/{steps.total}단계 완료</span>

@@ -539,7 +539,8 @@ button.course-home-topic { position: relative; display: flex; flex-direction: co
 button.course-home-topic + button.course-home-topic { border-top: 2px solid transparent; }
 button.course-home-topic:not(:disabled):active { background: var(--color-surface); }
 button.course-home-topic:focus-visible { outline-offset: -3px; }
-button.course-home-topic:disabled { cursor: default; opacity: 1; }
+button.course-home-topic:is(:disabled, [data-locked]) { cursor: default; opacity: 1; }
+button.course-home-topic[data-locked]:active { background: var(--color-card); }
 .course-home-topic-heading { display: flex; align-items: center; gap: var(--space-2); }
 .course-home-topic-heading > svg { flex-shrink: 0; color: var(--color-ink-4); }
 .course-home-topic-title { flex: 1; min-width: 0; color: var(--color-ink); font-size: var(--font-size-item-title); font-weight: var(--font-weight-semibold); line-height: var(--line-height-body); word-break: keep-all; overflow-wrap: anywhere; }

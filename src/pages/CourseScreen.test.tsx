@@ -176,6 +176,17 @@ describe('필수 단계 순차 잠금', () => {
     expect(container.querySelector('[data-node-id="c1-l3"]')).not.toBeDisabled();
   });
 
+  it('전체 주제 목록에서 잠긴 주제는 눌러도 열리지 않는다', async () => {
+    baseContext({ courses: [course({ id: 'c1', category: '경제 기초 개념' }), course({ id: 'c2', category: '가계', startId: 101 })], knownIds: new Set() });
+    state.doneNodes = new Set();
+    const { container } = await mount('/course/topics');
+    const lockedRow = container.querySelector<HTMLButtonElement>('[data-topic-index="1"]')!;
+    expect(lockedRow).toHaveAttribute('aria-disabled', 'true');
+    await act(async () => lockedRow.click());
+    expect(container.querySelector('[data-node-id="c2-l0"]')).toBeNull();
+    expect(container.querySelector('[data-topic-index="1"]')).toBeInTheDocument();
+  });
+
   it('앞 주제를 덜 끝냈으면 다른 주제의 코스도 잠근다', async () => {
     baseContext({ courses: [course({ id: 'c1', category: '경제 기초 개념' }), course({ id: 'c2', category: '가계', startId: 101 })], knownIds: new Set() });
     state.doneNodes = new Set();
@@ -282,7 +293,9 @@ describe('CourseScreen energy gates', () => {
 
   it('중급 탭과 전체 탭이 목록을 바꾸고 원래 주제 인덱스로 연다', async () => {
     const advanced = { ...course({ id: 'c2', category: '금융', startId: 5 }), level: '중급' } as Course;
-    baseContext({ courses: [course(), advanced] });
+    // 중급은 기초를 끝내야 열린다: 기초 레슨(용어 1~4)과 퀴즈(c1-q1)를 끝낸 상태
+    baseContext({ courses: [course(), advanced], knownIds: new Set([1, 2, 3, 4]) });
+    state.doneNodes = new Set(['c1-q1']);
     const { container, clickButtonContaining } = await mount('/course');
     await clickButtonContaining('전체 주제 보기');
     const filters = [...container.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
