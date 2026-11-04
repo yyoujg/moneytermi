@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { BottomSheet, TextButton, Spacing } from '@toss/tds-mobile';
 import { GROWTH_STAGES, getGrowthStage, LEAGUE_PROMOTE_TOP } from '../constants';
 import { useAppContext } from '../context/AppContext';
@@ -48,6 +48,12 @@ const LeagueScreen = () => {
 
   const stage = getGrowthStage(leagueStage ?? 1);
   const nextStage = GROWTH_STAGES.find(s => s.id === stage.id + 1);
+  const roadRef = useRef<HTMLOListElement>(null);
+  useEffect(() => {
+    const road = roadRef.current;
+    const current = road?.querySelector<HTMLElement>('[aria-current="step"]');
+    if (road && current) road.scrollLeft = current.offsetLeft - (road.clientWidth - current.offsetWidth) / 2;
+  }, [stage.id]);
 
   return (
     <div className="league-screen flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
@@ -74,13 +80,13 @@ const LeagueScreen = () => {
           <p className="mt-1! text-2xs text-[var(--color-ink-3)]">초기화까지 {daysUntilReset()}일</p>
         </section>
 
-        {/* 티어 로드맵: 테두리·선 없이 등급 그림만 나란히, 현재 등급은 이름 색·굵기로 강조한다 */}
-        <ol className="league-tier-road anim-fade-up" aria-label="등급 단계" style={{ '--i': 1, '--road-progress': (stage.id - 1) / (GROWTH_STAGES.length - 1) } as React.CSSProperties}>
+        {/* 티어 로드맵: 테두리·선 없이 큰 등급 그림을 가로로 넘긴다. 현재 등급은 이름 색·굵기로 강조하고 처음에 가운데로 둔다 */}
+        <ol ref={roadRef} className="league-tier-road anim-fade-up" aria-label="등급 단계" style={{ '--i': 1 } as React.CSSProperties}>
           {GROWTH_STAGES.map(s => {
             const state = s.id < stage.id ? 'done' : s.id === stage.id ? 'current' : 'future';
             return (
               <li key={s.id} className="league-tier-step" data-state={state} aria-current={state === 'current' ? 'step' : undefined}>
-                <span className="league-tier-node"><StageGlyph id={s.id} size={68} locked={state === 'future'} /></span>
+                <span className="league-tier-node"><StageGlyph id={s.id} size={104} locked={state === 'future'} /></span>
                 <span className="league-tier-name">{s.name}</span>
               </li>
             );
