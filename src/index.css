@@ -371,6 +371,9 @@ svg:is(.text-brand-300, .text-brand-400, .text-brand-500, .text-brand-600, .text
 /* 회색 바탕 위에 주제 머리와 코스 머리를 각각 흰 카드로 묶는다(경계는 배경색 하나만) */
 .course-topic-screen .course-topic-header { margin: var(--space-3) var(--space-5) 0; padding: var(--space-4) var(--space-5); border-radius: var(--shape-card); background: var(--color-card); }
 .course-topic-screen .course-topic-summary { padding-inline: var(--space-5) !important; border-bottom: 0; border-radius: var(--shape-card); background: var(--color-card) !important; }
+/* 스크롤 중 위에 고정될 때 화면 끝에 딱 붙지 않게 띄운다 */
+/* 위 틈은 바탕색 띠(그림자 문법)로 덮어 지나가는 노드가 비치지 않게 한다. 전역 그림자 금지(:where(*))를 넘어야 해서 !important */
+.course-topic-screen .course-topic-summary.sticky { top: var(--space-3); box-shadow: 0 calc(-1 * var(--space-3)) 0 var(--color-canvas) !important; }
 .lesson-intro-check { display: flex; width: 24px; height: 24px; flex-shrink: 0; border-radius: 50%; align-items: center; justify-content: center; background: var(--color-accent-soft); color: var(--color-accent-foreground); }
 .lesson-intro-step { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4); border-radius: var(--shape-inset); background: var(--color-card); box-shadow: var(--shadow-choice); }
 .lesson-intro-step-number { display: flex; width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%; align-items: center; justify-content: center; background: var(--color-progress); color: var(--color-on-progress); font-size: var(--font-size-label); font-weight: var(--font-weight-bold); }
