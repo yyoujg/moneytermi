@@ -242,8 +242,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (trimmed.length > 10) return { error: '닉네임은 10자 이내로 입력해주세요' };
     if (trimmed === authState.user?.nickname) return { error: '현재 닉네임과 동일해요' };
     if (isDefaultNickname(trimmed)) return { error: '다른 닉네임을 정해주세요' };
-    // 티어 이름과 같으면 '경제고수 · 재테크러'처럼 닉네임과 등급이 뒤섞여 읽힌다
-    if (GROWTH_STAGES.some(stage => trimmed.includes(stage.name))) return { error: '등급 이름은 닉네임에 쓸 수 없어요' };
+    // 티어 이름과 같으면 '돈방석 · 재테크'처럼 닉네임과 등급이 뒤섞여 읽힌다. '적금'·'존버'처럼 일상어가 많아 포함이 아니라 같을 때만 막는다
+    if (GROWTH_STAGES.some(stage => trimmed === stage.name)) return { error: '등급 이름은 닉네임에 쓸 수 없어요' };
 
     // 서버 프로필이 없으면 로컬 상태만 바꿔 성공으로 처리하지 않는다.
     if (!profileId || !authState.user) return { error: '닉네임 변경에 실패했어요' };

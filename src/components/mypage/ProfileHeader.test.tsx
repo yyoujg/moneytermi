@@ -23,8 +23,8 @@ describe('프로필 머리', () => {
     // 사용자 아바타는 마스코트 그림이 아니라 닉네임 첫 글자다
     expect(container.querySelector('.my-profile-avatar img')).toBeNull();
     expect(container.querySelector('[data-avatar-initial]')).toHaveTextContent('예');
-    expect(container).toHaveTextContent('갓생러');
-    expect(container).toHaveTextContent('다음 주 재테크러');
+    expect(container).toHaveTextContent('짠테크');
+    expect(container).toHaveTextContent('다음 주 적금');
   });
   it('편집 버튼은 닉네임 변경 하나만 둔다', () => {
     const { container, onEditNickname } = mount();
