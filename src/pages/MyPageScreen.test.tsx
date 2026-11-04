@@ -79,8 +79,8 @@ describe('내 정보의 정확한 숫자 표시', () => {
     const container = mount();
     expect(container.querySelectorAll('.my-page-stat')).toHaveLength(4);
     expect(container.querySelector('.my-page-stat.is-wide')).toBeNull();
-    expect([...container.querySelectorAll('[data-stat-number]')].map(item => item.textContent)).toEqual(['2', '0', '120', '새내기']);
-    expect(container.querySelector('.my-profile-card')).not.toHaveTextContent('새내기');
+    expect([...container.querySelectorAll('[data-stat-number]')].map(item => item.textContent)).toEqual(['2', '0', '120', '텅장러']);
+    expect(container.querySelector('.my-profile-card')).not.toHaveTextContent('텅장러');
   });
   it('실제 복습 위치를 안내하고 규칙 수치는 담당 화면으로 넘긴다', () => {
     const container = mount();

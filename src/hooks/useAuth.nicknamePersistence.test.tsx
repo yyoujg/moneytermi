@@ -188,7 +188,7 @@ describe('서버·검증 실패는 성공으로 처리하지 않음', () => {
     expect(current.user?.nickname).toBe('새친구');
   });
 
-  it.each(['큰손', '저축가'])('등급 이름과 같은 닉네임(%s)은 서버 확인 없이 거절한다', async (name) => {
+  it.each(['회장님', '개미'])('등급 이름과 같은 닉네임(%s)은 서버 확인 없이 거절한다', async (name) => {
     await mount();
     expect(await change(name)).toEqual({ error: '등급 이름은 닉네임에 쓸 수 없어요' });
     expect(mocks.rpc).not.toHaveBeenCalledWith('is_nickname_taken', expect.anything());

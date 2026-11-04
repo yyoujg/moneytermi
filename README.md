@@ -8,7 +8,7 @@
 
 - **첫 학습 진입장벽**: 첫 화면(`App.tsx`의 `WelcomeScreen`)은 기능 소개 대신 가입 없이 바로 푸는 문제 1개를 보여준다(답하지 않고 건너뛸 수도 있다). 처음 마주하는 경제 용어 학습에 대한 부담을 줄이려는 설계로 보인다.
 - **한 번 배운 단어를 잊는 문제**: `src/lib/srs.ts`가 SM-2 경량판(ease/interval/reps)으로 정답 여부와 힌트 사용 여부에 따라 다음 복습일을 계산하고, `AppContext`의 `dueQueue`가 "오늘 복습할 단어"만 골라 `DAILY_REVIEW_CAP`(10개)로 제한한다. 학습 후 방치되지 않도록 복습 타이밍을 앱이 대신 관리하는 구조다.
-- **지속 학습 동기부여 부족**: 세로 패스(코스), 주간 XP 리그와 10단계 티어(새내기~큰손, `GROWTH_STAGES` in `constants.ts`), 8시간마다 리셋되는 데일리 미션(`mission_defs`에서 `active`인 것만), 배지가 반복 방문을 유도하는 장치다.
+- **지속 학습 동기부여 부족**: 세로 패스(코스), 주간 XP 리그와 10단계 티어(텅장러~회장님, `GROWTH_STAGES` in `constants.ts`), 8시간마다 리셋되는 데일리 미션(`mission_defs`에서 `active`인 것만), 배지가 반복 방문을 유도하는 장치다.
 - **재설치 시 학습 기록 유실**: 기존에는 `guest_token`(로컬 저장)만으로 유저를 식별해 재설치·기기 변경 시 진행도가 끊기는 문제가 있었다(`docs/RELEASE_NOTES.md` 2026-07-22 항목). `useAuth.tsx`가 토스 `getAnonymousKey()` 해시를 `resolve_profile_by_toss_key` RPC로 서버 조회/승격시켜, 재설치해도 같은 프로필로 복구되도록 되어 있다.
 
 ## 핵심 기능

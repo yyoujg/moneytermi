@@ -39,16 +39,16 @@ export const MISSION_XP = 5;
 
 // 10단계. 그림은 public/league/v3(StageGlyph), 서버 league_stage 1~10과 같은 순서
 export const GROWTH_STAGES: GrowthStage[] = [
-  { id: 1, name: '새내기', emoji: '👛' },
-  { id: 2, name: '기록가', emoji: '📒' },
-  { id: 3, name: '절약가', emoji: '🪙' },
-  { id: 4, name: '저축가', emoji: '🐷' },
-  { id: 5, name: '계획가', emoji: '✨' },
-  { id: 6, name: '분석가', emoji: '📰' },
-  { id: 7, name: '투자가', emoji: '📈' },
-  { id: 8, name: '전략가', emoji: '🧘' },
-  { id: 9, name: '자산가', emoji: '🔑' },
-  { id: 10, name: '큰손', emoji: '💰' },
+  { id: 1, name: '텅장러', emoji: '👛' },
+  { id: 2, name: '꼼꼼이', emoji: '📒' },
+  { id: 3, name: '짠돌이', emoji: '🪙' },
+  { id: 4, name: '꿀꿀이', emoji: '🐷' },
+  { id: 5, name: '갓생러', emoji: '✨' },
+  { id: 6, name: '뉴스광', emoji: '📰' },
+  { id: 7, name: '개미', emoji: '📈' },
+  { id: 8, name: '존버장인', emoji: '🧘' },
+  { id: 9, name: '건물주', emoji: '🔑' },
+  { id: 10, name: '회장님', emoji: '💰' },
 ];
 
 export const getGrowthStage = (stageId: number): GrowthStage => GROWTH_STAGES.find(s => s.id === stageId) ?? GROWTH_STAGES[0];
