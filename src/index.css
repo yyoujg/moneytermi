@@ -1230,3 +1230,6 @@ button.course-home-rail-card { width: 168px; flex-direction: row; align-items: c
 .course-home-speech .course-home-bubble-main { margin-top: 2px; color: var(--color-ink); font-size: 14px; font-weight: var(--font-weight-bold); line-height: var(--line-height-body); word-break: keep-all; }
 .course-home-speech .course-home-level-label { font-size: 12px; font-weight: var(--font-weight-regular); }
 .course-home-speech .course-home-level { margin-top: 8px; padding-top: 8px; gap: 6px; }
+/* 배지는 일러스트 자체가 모양이라 원 바탕·흐림 처리를 두지 않는다(잠김본은 회색 파일) */
+.badge-glyph, .badge-glyph.is-locked { display: inline-flex; border: 0; border-radius: 0; background: transparent; opacity: 1; }
+.badge-glyph img { width: 100%; height: 100%; }

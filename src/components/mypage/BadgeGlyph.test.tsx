@@ -17,20 +17,23 @@ const mount = (children: ReactNode) => {
 };
 
 describe('목표 숫자 배지', () => {
-  it('배지마다 원 안의 선형 단색 아이콘을 하나씩 그린다', () => {
-    const container = mount(<>{BADGES.map(b => <BadgeGlyph key={b.id} id={b.id} />)}</>);
+  it('배지마다 수달 그림체 일러스트 하나를 그리고, 작으면 단순화본을 쓴다', () => {
+    const container = mount(<>{BADGES.map(b => <BadgeGlyph key={b.id} id={b.id} size={44} />)}</>);
     const glyphs = [...container.querySelectorAll('.badge-glyph')];
     expect(glyphs).toHaveLength(BADGES.length);
-    expect(container.querySelector('img')).toBeNull();
     for (const [i, badge] of BADGES.entries()) {
       expect(glyphs[i]).toHaveAttribute('data-badge-stat', badge.stat);
-      expect(glyphs[i].querySelectorAll('svg')).toHaveLength(1);
+      expect(glyphs[i].querySelectorAll('img')).toHaveLength(1);
+      expect(glyphs[i].querySelector('img')?.getAttribute('src')).toMatch(/^\/badges\/v3\/badge-[a-z]+\d+\.svg$/);
     }
+    const small = mount(<BadgeGlyph id="w1" size={32} />).querySelector('img');
+    expect(small).toHaveAttribute('src', '/badges/v3/badge-word1-small.svg');
   });
   it.each(['w1', 'w10'])('%s 미획득 배지는 잠김 표시와 요청한 크기를 유지한다', id => {
     const glyph = mount(<BadgeGlyph id={id} size={96} earned={false} />).querySelector('.badge-glyph')!;
     expect(glyph).toHaveAttribute('data-earned', 'false');
     expect(glyph).toHaveClass('is-locked');
     expect(glyph).toHaveStyle({ width: '96px', height: '96px' });
+    expect(glyph.querySelector('img')?.getAttribute('src')).toMatch(/-locked\.svg$/);
   });
 });

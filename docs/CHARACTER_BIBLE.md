@@ -60,6 +60,12 @@
 
 - 예전 3D PNG(`public/otter/v4/joy·hello·study.png`)는 화면에서 더 쓰지 않는다.
 
+## 5-1. 배지 (2026-11-04)
+
+- 배지 10종도 수달과 같은 3색·낙서 선으로 그렸다. 기준 이미지 `docs/character/badges/ref-badges.png`, 벡터화 `trace_badges.py`, 확인 시트 `badges-preview.png`.
+- 파일: `public/badges/v3/badge-<이름>[-small|-locked].svg`. 획득은 일반본(40px 이하는 단순화본), 미획득은 회색 잠김본. 다크본은 쓰지 않아 넣지 않았다.
+- 이름: word1·word10·word50·word100(단어), streak3·streak7·streak30(연속), xp100·xp500·xp1000(XP).
+
 ## 6. 포즈 추가 방법
 
 1. 기준 이미지(`docs/character/ref.png`)를 만든 것과 같은 프롬프트로 새 포즈 이미지를 생성한다.
