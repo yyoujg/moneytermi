@@ -427,7 +427,6 @@ const CourseScreen = () => {
                     </span>
                     <span className="course-home-rail-text">
                       <span className="course-home-rail-title">{name}</span>
-                      <span className="course-home-rail-meta">{topic.category}{!locked && ` · ${done}/${steps.length}단계`}</span>
                     </span>
                   </button>
                 );
