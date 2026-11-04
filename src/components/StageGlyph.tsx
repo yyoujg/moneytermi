@@ -13,7 +13,7 @@ export const StageGlyph = ({ id, size = 20, className = '', locked = false }: { 
   );
 };
 
-// 마이 통계처럼 작은 자리(24px)는 수달 없이 사물 하나로 그린 등급 아이콘(public/league/icons)을 쓴다
-export const StageIcon = ({ id, size = 24 }: { id: number; size?: number }) => (
-  <img src={`/league/icons/league-icon-${STAGE_FILE[id] ?? STAGE_FILE[1]}.svg`} alt="" aria-hidden="true" data-stage-icon={id} width={size} height={size} />
+// 수달 없이 사물 하나로 그린 등급 아이콘(public/league/icons). 마이 통계·리그 등급 길에 쓴다. 아직 못 간 등급은 회색 잠김본
+export const StageIcon = ({ id, size = 24, locked = false }: { id: number; size?: number; locked?: boolean }) => (
+  <img src={`/league/icons/league-icon-${STAGE_FILE[id] ?? STAGE_FILE[1]}${locked ? '-locked' : ''}.svg`} alt="" aria-hidden="true" data-stage-icon={id} width={size} height={size} />
 );
