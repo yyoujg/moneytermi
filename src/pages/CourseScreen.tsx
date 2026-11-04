@@ -405,8 +405,9 @@ const CourseScreen = () => {
             </div>
           </section>
         ))}
-        <button type="button" onClick={() => navigate('/course/topics')} aria-label="전체 주제 보기"
-          className="course-home-more mx-5 mb-4 inline-flex min-h-11 items-center gap-1 text-xs text-[var(--color-ink-3)] active:opacity-70">전체 주제 보기<ChevronRight size={16} /></button>
+        <div className="px-5 pb-6">
+          <ActionButton fullWidth tone="soft" onClick={() => navigate('/course/topics')} className="course-home-more">전체 주제 보기<ChevronRight size={16} aria-hidden="true" /></ActionButton>
+        </div>
       </>}
       {isCatalog && <>
         <div className="px-5">
