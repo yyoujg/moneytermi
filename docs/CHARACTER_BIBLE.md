@@ -89,6 +89,13 @@
 - `SplashScreen`이 화면 전체에 contain으로 깔고, 남는 여백은 같은 색(`--color-accent-soft`) 배경이 채운다. 로딩이 1초를 넘으면 태그라인 아래에 스피너가 나타난다.
 - 흰 배경본(`splash-white.svg`)과 생성 스크립트는 `docs/character/splash/`. 원본 수달 색은 현재 3색으로 바꿔 넣었다.
 
+## 5-6. 앱 로고 (2026-11-04)
+
+- 세이지(`#A8C68F`) 정사각 바탕에 설명 포즈(손가락) 달리 상반신이 아래에서 올라온 아이콘. 만세 포즈 대안은 `docs/assets/logo/alt-cheer/`.
+- 원본 SVG·워드마크·가로 조합·생성 스크립트는 `docs/assets/logo/`. 48px 이하는 `logo-icon-small.svg`(선 굵게).
+- PNG: `public/logo.png`(600, 파비콘·홈 주제 진입 전환), `docs/assets/app-icon-600.png`(콘솔 앱 로고 업로드), `app-icon-1024.png`. SVG를 헤드리스 Chrome으로 렌더했다.
+- 원본 수달 색은 현재 3색으로 바꿔 넣었다.
+
 ## 6. 포즈 추가 방법
 
 1. 기준 이미지(`docs/character/ref.png`)를 만든 것과 같은 프롬프트로 새 포즈 이미지를 생성한다.
