@@ -366,6 +366,12 @@ svg:is(.text-brand-300, .text-brand-400, .text-brand-500, .text-brand-600, .text
 }
 
 .app-soft-screen { background: var(--color-card); }
+/* 주제 화면(징검다리 노드)은 연회색 바탕 */
+.course-topic-screen { background: var(--color-canvas); }
+/* 코스 머리(스크롤 시 고정)도 같은 바탕으로 이어지게, 진행 막대 빈 칸은 흰색으로 */
+.course-topic-screen .course-topic-summary { background: var(--color-canvas) !important; }
+.course-topic-screen .course-topic-summary [role=progressbar] { background: var(--color-card); }
+.course-topic-screen .course-level-badge { background: var(--color-card); }
 .lesson-intro-check { display: flex; width: 24px; height: 24px; flex-shrink: 0; border-radius: 50%; align-items: center; justify-content: center; background: var(--color-accent-soft); color: var(--color-accent-foreground); }
 .lesson-intro-step { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4); border-radius: var(--shape-inset); background: var(--color-card); box-shadow: var(--shadow-choice); }
 .lesson-intro-step-number { display: flex; width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%; align-items: center; justify-content: center; background: var(--color-progress); color: var(--color-on-progress); font-size: var(--font-size-label); font-weight: var(--font-weight-bold); }

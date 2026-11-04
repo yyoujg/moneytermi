@@ -361,7 +361,7 @@ const CourseScreen = () => {
   );
 
   return (
-    <div className={`course-screen ${isCatalog ? 'bg-[var(--color-card)]' : 'app-soft-screen'} flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden`}>
+    <div className={`course-screen ${isCatalog ? 'bg-[var(--color-card)]' : activeTopic ? 'course-topic-screen' : 'app-soft-screen'} flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden`}>
       <div className={activeTopic ? 'course-topic-header' : 'course-home-header'}>
         {activeTopic ? (
           <div className="flex items-center gap-3">
