@@ -158,6 +158,25 @@ beforeEach(() => {
   vi.mocked(logClick).mockClear();
 });
 
+describe('필수 단계 순차 잠금', () => {
+  // 16개 용어 = 레슨 4개: l0, l1, 중간 복습, l2, 퀴즈(c1-q4), l3, 마지막 퀴즈, 마지막 복습
+  it('앞 퀴즈를 풀기 전에는 다음 레슨을 잠그고, 풀면 연다', async () => {
+    const known = new Set(Array.from({ length: 12 }, (_, i) => i + 1));
+    baseContext({ courses: [course({ wordCount: 16 })], knownIds: known });
+    state.doneNodes = new Set();
+    let { container } = await mount('/course?topic=0');
+    expect(container.querySelector('[data-node-id="c1-q4"]')).not.toBeDisabled();
+    expect(container.querySelector('[data-node-id="c1-l3"]')).toBeDisabled();
+    // 복습은 선택이라 잠그지 않는다
+    expect(container.querySelector('[data-node-id="c1-r2"]')).not.toBeDisabled();
+    cleanup();
+    baseContext({ courses: [course({ wordCount: 16 })], knownIds: known });
+    state.doneNodes = new Set(['c1-q4']);
+    ({ container } = await mount('/course?topic=0'));
+    expect(container.querySelector('[data-node-id="c1-l3"]')).not.toBeDisabled();
+  });
+});
+
 describe('CourseScreen energy gates', () => {
   it('홈에서는 에너지가 넉넉하면 에너지 줄을 숨기고 부족할 때만 보여준다', async () => {
     baseContext({ energy: 7, energyMax: 25 });

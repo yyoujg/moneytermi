@@ -100,7 +100,20 @@ const CourseScreen = () => {
     return () => { cancelled = true; };
   }, []);
 
-  const sections = useMemo(() => buildPath(courses, knownIds), [courses, knownIds]);
+  // 필수 단계(학습·퀴즈)는 주제 안에서 순서대로만 연다(다음 코스 포함). 안 끝낸 첫 단계 뒤의 미완료 단계는 잠근다. 복습은 선택이라 잠그지 않는다
+  const sections = useMemo(() => {
+    const opened = new Set<string>();
+    return buildPath(courses, knownIds).map(sec => {
+      const key = `${sec.course.level}|${sec.course.category}`;
+      return { ...sec, nodes: sec.nodes.map(node => {
+        if (node.type === 'review') return node;
+        const done = node.state === 'done' || (doneNodes.has(node.id) && node.state === 'available');
+        if (done) return node;
+        if (!opened.has(key)) { opened.add(key); return node; }
+        return { ...node, state: 'locked' as const };
+      }) };
+    });
+  }, [courses, knownIds, doneNodes]);
   // 주제 = 레벨 안의 카테고리. courses는 sort_order가 레벨 순이라 첫 등장 순서대로 묶으면 기초→심화로 나열된다
   const topicKey = (sec: { course: { level: string; category: string } }) => `${sec.course.level}|${sec.course.category}`;
   const topics = useMemo(() => [...new Set(sections.map(topicKey))].map((key, index) => {
@@ -163,8 +176,9 @@ const CourseScreen = () => {
     const resumeTopic = topics.find(topic => topic.parts.some(part => part.section.course.id === resumeCourseId));
     const candidates = activeTopic ? activeTopic.parts.map(part => part.section) : [...(resumeTopic?.parts.map(part => part.section) ?? []), ...sections];
     for (const sec of candidates) {
-      const k = sec.nodes.findIndex(node => node.state === 'current');
-      if (k >= 0) return { id: sec.nodes[k].id, index: k, courseId: sec.course.id, words: sec.nodes[k].words };
+      // 지금 할 단계 = 잠기지 않은 첫 미완료 필수 단계(앞 퀴즈를 안 풀었으면 퀴즈)
+      const k = sec.nodes.findIndex(node => isStep(node) && !isDone(node) && node.state !== 'locked');
+      if (k >= 0) return { id: sec.nodes[k].id, type: sec.nodes[k].type, index: k, courseId: sec.course.id, words: sec.nodes[k].words };
     }
     return null;
   };
@@ -345,7 +359,7 @@ const CourseScreen = () => {
                 {focusTopic && <p className="course-home-bubble-topic">{focusTopic.category} · {focusSteps.done}/{focusSteps.total}단계</p>}
                 <p>{!focusTopic ? '모두 배웠어요! 가볍게 복습해 볼까요?' : focusSteps.done > 0 || focusTopic.known > 0 ? `${focusStepsLeft}단계만 더 하면 이 주제를 끝내요` : '오늘 첫 용어부터 같이 봐요'}</p>
                 <div className="course-home-level">
-                  <span className="course-home-level-label">{!focus ? '모든 학습을 마쳤어요!' : nextRemaining > 0 ? `'${nextWords[0]?.word}' 레슨 용어 ${nextRemaining}개 남았어요` : '다음 학습으로 넘어갈 수 있어요'}</span>
+                  <span className="course-home-level-label">{!focus ? '모든 학습을 마쳤어요!' : focus.type === 'quiz' ? '용어 퀴즈를 풀면 다음 레슨이 열려요' : nextRemaining > 0 ? `'${nextWords[0]?.word}' 레슨 용어 ${nextRemaining}개 남았어요` : '다음 학습으로 넘어갈 수 있어요'}</span>
                   <div role="progressbar" aria-label="다음 학습까지 진행률" aria-valuemin={0} aria-valuemax={100} aria-valuenow={nextProgress} className="course-home-level-track">
                     <span style={{ width: `${nextProgress}%` }} />
                   </div>
