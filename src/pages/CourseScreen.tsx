@@ -25,6 +25,9 @@ const LEVEL_TABS = ['전체', '기초', '중급', '고급', '심화'];
 
 // 노드를 누르면 브랜드색 원이 화면 가득 퍼지고 로고를 보여준 뒤 다음 화면으로 넘어간다.
 // 오버레이를 body에 붙여 화면 전환 뒤에도 남게 한다. 동작 줄이기·WAAPI 미지원이면 바로 넘어간다.
+// 코스 표시 이름: 용어로 지은 이름(COURSE_NAMES), 없으면 원래 제목
+const courseName = (course: { id: string; title: string }) => COURSE_NAMES[course.id] ?? course.title;
+
 const expandFromNode = (nodeId: string, courseTitle: string) => new Promise<void>(resolve => {
   const el = document.querySelector<HTMLElement>(`[data-node-id="${nodeId}"]`);
   if (!el || typeof el.animate !== 'function' || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { resolve(); return; }
@@ -371,7 +374,7 @@ const CourseScreen = () => {
             logClick('learning_continue', { course_id: focus.courseId, node_id: focus.id });
             // 다음이 퀴즈면 라벨대로 퀴즈를 바로 연다
             const sec = focus.type === 'quiz' ? sections.find(section => section.course.id === focus.courseId) : undefined;
-            if (sec) { void handleNodeTap(sec.nodes[focus.index], focus.index, sec.knownCount, sec.course.title); return; }
+            if (sec) { void handleNodeTap(sec.nodes[focus.index], focus.index, sec.knownCount, courseName(sec.course)); return; }
             setSearchParams({ topic: String(focusTopic.index) });
           }} className="course-home-primary">
             {focus.type === 'quiz' ? '용어 퀴즈 풀기' : knownIds.size > 0 ? '이어 배우기' : '첫 주제 시작하기'}
@@ -475,17 +478,17 @@ const CourseScreen = () => {
         return (
         <section key={sec.course.id} data-section-index={si} className="scroll-mt-4">
           <div className={`course-topic-summary sticky top-0 z-10 mx-5 mt-3 mb-4 overflow-hidden py-4 ${sec.course.id === focus?.courseId ? 'anim-fade' : ''}`}>
-            {/* 코스 제목이 화면 제목(주제명)과 같으면 반복하지 않고 진행 정도만 보여준다 */}
-            {sec.course.title !== activeTopic.category && <div className="relative mb-4 flex items-start gap-3">
+            {/* 코스 이름(COURSE_NAMES)이 주제명과 같으면 반복하지 않고 진행 정도만 보여준다 */}
+            {courseName(sec.course) !== activeTopic.category && <div className="relative mb-4 flex items-start gap-3">
               <div className="min-w-0">
-                <p className="text-2xs text-[var(--color-ink-3)]">{sec.course.level} · 코스 {partIndex + 1}/{activeTopic.parts.length}</p>
-                <h3 className="mt-1! text-base font-bold text-[var(--color-ink)] break-keep leading-snug">{sec.course.title}</h3>
+                <p className="course-topic-course-meta"><span className="course-level-badge">{sec.course.level}</span>코스 {partIndex + 1}/{activeTopic.parts.length}</p>
+                <h3 className="mt-1! text-base font-bold text-[var(--color-ink)] break-keep leading-snug">{courseName(sec.course)}</h3>
               </div>
             </div>}
             {/* 진행은 단계 수 하나로만 말한다(같은 값을 %로 한 번 더 쓰지 않는다) */}
             <p className="mb-2 text-xs text-[var(--color-ink-3)]"><span className="font-semibold text-[var(--color-ink-2)]">{stepsDone}단계</span> 완료 / {steps.length}단계</p>
             <div className="relative flex items-center">
-              <div role="progressbar" aria-label={`${sec.course.title} 진행률`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--color-button-secondary)]">
+              <div role="progressbar" aria-label={`${courseName(sec.course)} 진행률`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--color-button-secondary)]">
                 <div className={`h-full rounded-full bg-[var(--color-progress)] ${sec.course.id === focus?.courseId ? 'course-progress-reveal' : ''}`} style={{ width: `${pct}%` }} />
               </div>
             </div>
@@ -509,7 +512,7 @@ const CourseScreen = () => {
               <div key={node.id} className="course-step" data-step-state={done ? 'done' : locked ? 'locked' : isFocus ? 'current' : 'open'}>
                 <span className="course-step-marker" aria-hidden="true" data-step-kind={isReview ? 'review' : 'step'}>{done ? <Check size={16} /> : isReview ? <RotateCcw size={16} /> : stepNo}</span>
                 <button ref={isFocus ? focusRef : undefined} type="button" disabled={locked} data-own-sfx data-node-id={node.id}
-                  onClick={() => handleNodeTap(node, k, sec.knownCount, sec.course.title)}
+                  onClick={() => handleNodeTap(node, k, sec.knownCount, courseName(sec.course))}
                   className={`course-node-card flex w-full items-center gap-3 border py-3 text-left disabled:cursor-default ${nodeCardClass} ${newlyDone.has(node.id) ? 'anim-stamp' : ''}`}
                   style={{ borderRadius: 'var(--shape-card)', '--d': `${0.2 + (newlyDone.get(node.id) ?? 0) * 0.15}s` } as React.CSSProperties}>
                   <span className="min-w-0 flex-1">

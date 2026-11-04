@@ -1219,6 +1219,7 @@ button.course-home-rail-card { width: 160px; flex-direction: column; align-items
 .course-home-rail-thumb { position: relative; display: block; }
 .course-home-rail-card[data-locked='true'] .topic-thumb { opacity: 0.45; filter: grayscale(1); }
 .course-home-rail-lock { position: absolute; top: 50%; left: 50%; display: flex; width: 40px; height: 40px; align-items: center; justify-content: center; border-radius: 50%; background: var(--color-card); color: var(--color-ink-2); transform: translate(-50%, -50%); }
+.course-topic-course-meta { display: flex; align-items: center; gap: var(--space-1); color: var(--color-ink-3); font-size: var(--font-size-caption); }
 .course-level-badge { padding: 2px var(--space-2); border-radius: var(--shape-sm); background: var(--color-surface); color: var(--color-ink-2); font-size: var(--font-size-caption); font-weight: var(--font-weight-semibold); }
 .course-home-section-desc { margin: 2px 0 0; color: var(--color-ink-3); font-size: var(--font-size-caption); }
 /* 주제 썸네일(홈 카드·뉴스). 사진이 없으면 회색 바탕 + 첫 글자 */
