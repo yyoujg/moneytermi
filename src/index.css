@@ -1213,6 +1213,10 @@ button.review-aux-button:disabled { color: var(--color-ink-3); }
 .quest-screen, .league-screen, .my-page-screen { background: var(--color-card); }
 .my-page-sections .my-page-panel.my-page-menu { padding-inline: 0; }
 .my-page-menu button > div { padding-inline: var(--space-5); }
-/* 홈 주제 카드: 위에 주제 사진, 아래 제목·단계 */
-button.course-home-rail-card { width: 148px; }
-.course-home-rail-image { width: 100%; height: auto; aspect-ratio: 400 / 260; margin-bottom: var(--space-1); border-radius: var(--shape-inset); object-fit: cover; background: var(--color-surface); }
+/* 홈 주제 카드: 작은 주제 썸네일 + 제목·단계를 한 줄로. 주버튼보다 가볍게 */
+button.course-home-rail-card { width: 168px; flex-direction: row; align-items: center; gap: var(--space-2); }
+.course-home-rail-text { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
+.course-home-rail-card .course-home-rail-title { font-size: var(--font-size-label); }
+/* 주제 썸네일(홈 카드·뉴스). 사진이 없으면 회색 바탕 + 첫 글자 */
+.topic-thumb { flex-shrink: 0; border-radius: var(--shape-inset); object-fit: cover; background: var(--color-surface); }
+.topic-thumb-fallback { display: inline-flex; align-items: center; justify-content: center; color: var(--color-ink-3); font-size: var(--font-size-label); font-weight: var(--font-weight-bold); }

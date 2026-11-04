@@ -6,6 +6,8 @@ import { BottomSheet } from '@toss/tds-mobile';
 import { showModal } from '../components/AlertModal';
 import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
+import { topicOfWord } from '../lib/topicImages';
+import { TopicThumb } from '../components/TopicThumb';
 import { logClick } from '../lib/analytics';
 import { openExternalUrl } from '../lib/external';
 import { claimPromotion } from '../lib/promotion';
@@ -90,6 +92,9 @@ const WordCard = ({
   // 'meaning'은 레슨 1페이지(정의+예시), 'extras'는 자세히 보기 시트(그래프·뉴스·관련 용어)
   section?: 'meaning' | 'extras';
 }) => {
+  // 기사 원문 사진은 언론사 저작물이라 쓰지 않고, 용어가 속한 주제의 Unsplash 사진을 둔다
+  const { courses } = useAppContext();
+  const newsTopic = topicOfWord(word.id, courses);
   if (section === 'meaning') return (
     <div className="flex flex-col gap-3 px-5 pb-6">
       {/* 출처는 자세히 보기 시트 맨 아래에만 둔다 */}
@@ -133,6 +138,7 @@ const WordCard = ({
           onClick={() => { logClick('news_link_click', { word: word.word }); openExternalUrl(item.link); }}
           className="flex items-start gap-3 py-3 border-b border-[var(--color-line)] last:border-0 active:opacity-60 text-left"
         >
+          {newsTopic && <TopicThumb category={newsTopic} />}
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-[var(--color-ink)] break-keep leading-normal line-clamp-2">
               <Highlight text={stripHtml(item.title)} keyword={keyword} />
@@ -142,7 +148,6 @@ const WordCard = ({
               {new Date(item.pubDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })} · 네이버 뉴스
             </p>
           </div>
-          {/* 기사 사진은 언론사 저작물이라 쓰지 않는다 */}
           <ExternalLink size={16} className="text-[var(--color-ink-3)] shrink-0 mt-1" />
         </button>
       ))}
