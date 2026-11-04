@@ -173,11 +173,13 @@ describe('색상 정의의 단일 원본', () => {
     const normal = indexCss.match(/button\.action-button\[data-tone='soft'\]\s*\{([^}]+)\}/)?.[1] ?? '';
     const disabled = indexCss.match(/button\.action-button\[data-tone='soft'\]:disabled\s*\{([^}]+)\}/)?.[1] ?? '';
     const pressed = indexCss.match(/button\.action-button\[data-tone='soft'\]:not\(:disabled\):active\s*\{([^}]+)\}/)?.[1] ?? '';
-    expect(normal).toContain('background: var(--color-action-soft)');
+    // 보조는 흰 바탕 + 테두리, 꺼짐은 회색 채움 + 흐린 글자(테두리 없음)로 서로 다르게 보인다
+    expect(normal).toContain('background: var(--color-card)');
     expect(normal).toContain('color: var(--color-on-action-soft) !important');
-    expect(normal).toContain('border-color: transparent');
+    expect(normal).toContain('border-color: var(--color-line-strong)');
     expect(disabled).toContain('color: var(--color-ink-4) !important');
     expect(disabled).toContain('background: var(--color-surface) !important');
+    expect(disabled).toContain('border-color: transparent !important');
     expect(pressed).toContain('background-color: var(--color-action-soft-pressed) !important');
   });
   it('채운 버튼의 눌림에 투명도나 필터를 겹치지 않는다', () => {
