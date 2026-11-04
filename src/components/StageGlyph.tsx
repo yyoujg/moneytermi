@@ -18,6 +18,6 @@ export const StageGlyph = ({ id, size = 20, className = '', locked = false }: { 
 export const StageFace = ({ id, size = 40 }: { id: number; size?: number }) => (
   <span aria-hidden="true" data-stage-face={id} className="stage-face shrink-0" style={{
     width: size, height: size, backgroundColor: `var(--league-bg-${id})`,
-    backgroundImage: `url(/league/v3/league-${STAGE_FILE[id] ?? STAGE_FILE[1]}.svg)`, backgroundPosition: '50% 35%',
+    backgroundImage: `url(/league/v3/league-${STAGE_FILE[id] ?? STAGE_FILE[1]}.svg)`, backgroundPosition: '50% 22%',
   }} />
 );

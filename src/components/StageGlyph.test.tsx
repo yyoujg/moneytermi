@@ -35,7 +35,7 @@ describe('리그 등급 얼굴 원', () => {
     const face = mount(<StageFace id={3} size={40} />).querySelector<HTMLElement>('[data-stage-face]')!;
     expect(face.style.backgroundImage).toContain('/league/v3/league-03-saver.svg');
     expect(face.style.backgroundColor).toBe('var(--league-bg-3)');
-    expect(face.style.backgroundPosition).toBe('50% 35%');
+    expect(face.style.backgroundPosition).toBe('50% 22%');
   });
 
 });
