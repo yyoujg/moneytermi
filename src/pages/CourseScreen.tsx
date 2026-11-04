@@ -362,9 +362,9 @@ const CourseScreen = () => {
           <div className="flex items-center gap-3">
             {/* 뒤로가기는 토스 내비게이션 바가 맡는다(자체 뒤로가기 중복은 검수 반려 사유) */}
             <button type="button" className="course-topic-switch min-w-0 text-left" aria-haspopup="dialog" aria-label={`${activeTopic.category}, 다른 주제로 이동`} onClick={() => setTopicPicker(true)}>
+              {/* 난이도는 제목 위 작은 글자(코스 머리의 '코스 n/N'과 같은 자리). 코스 수·진행은 코스 머리와 겹쳐 두지 않는다 */}
+              <p className="course-topic-level">{levelLabel(activeTopic.level)}</p>
               <h1 className="type-page-title flex items-center gap-1"><span className="truncate">{activeTopic.category}</span><ChevronDown size={20} aria-hidden="true" className="shrink-0 text-[var(--color-ink-3)]" /></h1>
-              {/* 코스 수·단계 진행은 아래 코스 머리(코스 n/N, n단계 완료)와 겹쳐 난이도만 둔다 */}
-              <p className="mt-1! text-xs text-[var(--color-ink-3)]">{levelLabel(activeTopic.level)}</p>
             </button>
           </div>
         ) : isCatalog ? (
@@ -450,12 +450,12 @@ const CourseScreen = () => {
                 <h3 className="mt-1! flex items-center gap-1 text-base font-semibold text-[var(--color-ink)] break-keep leading-snug">{courseName(sec.course)}</h3>
               </div>
             </div>}
-            {/* 진행은 단계 수 하나로만 말한다(같은 값을 %로 한 번 더 쓰지 않는다) */}
-            <p className="mb-2 text-xs text-[var(--color-ink-3)]"><span className="font-semibold text-[var(--color-ink-2)]">{stepsDone}단계</span> 완료 / {steps.length}단계</p>
-            <div className="relative flex items-center">
+            {/* 진행은 막대 + 오른쪽 단계 수 한 줄(같은 값을 %로 한 번 더 쓰지 않는다) */}
+            <div className="relative flex items-center gap-3">
               <div role="progressbar" aria-label={`${courseName(sec.course)} 진행률`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--color-button-secondary)]">
                 <div className={`h-full rounded-full bg-[var(--color-progress)] ${sec.course.id === focus?.courseId ? 'course-progress-reveal' : ''}`} style={{ width: `${pct}%` }} />
               </div>
+              <p className="course-topic-steps"><strong>{stepsDone}</strong>/{steps.length}단계</p>
             </div>
           </div>
 
