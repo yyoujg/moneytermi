@@ -338,8 +338,6 @@ button.bg-brand-500 {
 .text-brand-ink { color: var(--color-brand-text) !important; }
 /* 작은 브랜드 선 표시는 민트 선택 역할, 일반 글자는 중성 위계를 따른다. */
 svg:is(.text-brand-300, .text-brand-400, .text-brand-500, .text-brand-600, .text-brand-ink) { color: var(--color-brand-decoration) !important; }
-.dark .text-success-500 { color: var(--color-success-400) !important; }
-.dark .text-danger-500 { color: var(--color-danger-400) !important; }
 
 .original-modal {
   --adaptiveBackground: var(--color-card);
@@ -472,10 +470,6 @@ button.action-button[data-tone='soft'] {
 }
 button.action-button.justify-between { justify-content: space-between; }
 button.action-button svg { flex-shrink: 0; }
-/* 어두운 카드 위에서도 평평한 채움 버튼의 경계를 색 대비로 구분한다. */
-.dark :is(button.action-button, button.action-secondary, button.bg-brand-500):not([data-tone='soft']):not(:disabled) {
-  border: 1px solid var(--color-action-boundary) !important;
-}
 .study-action-footer {
   padding-bottom: max(var(--space-7), env(safe-area-inset-bottom));
   background: var(--color-card);
@@ -519,10 +513,6 @@ button.course-energy-entry:active { opacity: 0.7; }
 .course-home-hero { flex-shrink: 0; margin: var(--space-1) var(--space-5) 0; padding: var(--space-5); border: 0; border-radius: var(--shape-card); background: var(--color-card); }
 .course-home-greeting { display: flex; align-items: flex-end; gap: var(--space-2); margin-bottom: var(--space-4); }
 .course-home-character { width: 88px; height: auto; flex-shrink: 0; }
-/* 다크 바탕에서는 흰 외곽선이 깔린 수달로 바꾼다 */
-.dark img[data-otter='idle'] { content: url('/otter/v5/otter-idle-dark.svg'); }
-.dark img[data-otter='cheer'] { content: url('/otter/v5/otter-cheer-dark.svg'); }
-.dark img[data-otter='explain'] { content: url('/otter/v5/otter-explain-dark.svg'); }
 .course-home-bubble { position: relative; flex: 1; min-width: 0; margin-bottom: var(--space-6); padding: var(--space-3) var(--space-4); border-radius: var(--shape-inset); background: var(--color-card); color: var(--color-ink); font-size: var(--font-size-label); font-weight: var(--font-weight-semibold); line-height: var(--line-height-body); word-break: keep-all; box-shadow: var(--shadow-choice); }
 .course-home-bubble::before { content: ''; position: absolute; left: -6px; bottom: 14px; width: 12px; height: 12px; background: var(--color-card); transform: rotate(45deg); }
 .course-home-book { display: flex; flex-shrink: 0; width: 56px; height: 56px; align-items: center; justify-content: center; border-radius: var(--shape-card); background: var(--color-accent-soft); color: var(--color-accent-foreground); }

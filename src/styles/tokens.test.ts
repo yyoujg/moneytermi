@@ -12,7 +12,6 @@ const declarations = (selector: string) => {
   return Object.fromEntries([...body.matchAll(/(--[\w-]+):\s*([^;]+);/g)].map(([, key, value]) => [key, value.trim().replace(/\s*!important$/, '')]));
 };
 const light = declarations(':root');
-const dark = { ...light, ...declarations('.dark') };
 const resolve = (name: string, values: Record<string, string>, seen: string[] = []): string => {
   if (seen.includes(name)) throw new Error(`순환 참조: ${name}`);
   const value = values[name];
@@ -31,7 +30,7 @@ const contrast = (a: string, b: string) => {
   return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
 };
 
-for (const [name, values] of [['라이트', light], ['다크', dark]] as const) {
+for (const [name, values] of [['라이트', light]] as const) {
   describe(`${name} 디자인 시스템`, () => {
     for (const [foreground, background] of [
       ['--color-on-action', '--color-action-secondary'],
@@ -97,7 +96,7 @@ for (const [name, values] of [['라이트', light], ['다크', dark]] as const) 
     it('새 여섯 역할은 두 테마에서 해석되고 페이지별로 덮어쓰지 않는다', () => {
       for (const key of ['--color-progress', '--color-reward-foreground', '--color-selection-soft', '--color-selection-ink', '--color-character-stage', '--color-filter-tray']) {
         expect(resolve(key, values)).toMatch(/^#[\da-f]{6}$/i);
-        for (const selector of [':is(.my-page-screen, .league-screen, .identity-badge, .badge-tone)', '.dark :is(.my-page-screen, .league-screen, .identity-badge, .badge-tone)', '.league-screen', '.dark .league-screen']) {
+        for (const selector of [':is(.my-page-screen, .league-screen, .identity-badge, .badge-tone)', '.league-screen']) {
           expect(declarations(selector)[key], selector + key).toBeUndefined();
         }
       }
@@ -123,7 +122,7 @@ describe('이해 확인의 캐릭터·중성 상태 표현', () => {
     expect(feedbackCss).not.toMatch(/--color-(answer|danger|success)-/);
     expect(feedbackCss).not.toContain('.lesson-feedback-character');
     expect(feedbackCss).toContain('.lesson-complete-score-track > span { background: var(--color-ink-3); }');
-    for (const [values, success, danger] of [[light, '#2a7155', '#b23a33'], [dark, '#6cc9a0', '#f08a97']] as const) {
+    for (const [values, success, danger] of [[light, '#2a7155', '#b23a33']] as const) {
       expect(resolve('--color-success-foreground', values)).toBe(success);
       expect(resolve('--color-danger-foreground', values)).toBe(danger);
     }
@@ -139,12 +138,11 @@ describe('이해 확인의 캐릭터·중성 상태 표현', () => {
 });
 
 describe('색상 정의의 단일 원본', () => {
-  it('페이지 바탕·일반 표면은 라이트와 다크에서만 정의한다', () => {
+  it('페이지 바탕·일반 표면은 라이트 한 곳에서만 정의한다', () => {
     for (const key of ['canvas', 'card', 'surface']) {
-      expect(css.match(new RegExp('--color-' + key + ':', 'g'))).toHaveLength(2);
+      expect(css.match(new RegExp('--color-' + key + ':', 'g'))).toHaveLength(1);
     }
     expect(resolve('--color-canvas', light)).toBe('#f3f2f8');
-    expect(resolve('--color-canvas', dark)).toBe('#1b1a2b');
     const recap = readFileSync(resolvePath(cwd(), 'src/components/WeeklyRecap.tsx'), 'utf8');
     expect(recap).toContain('bg-[var(--color-canvas)]');
     expect(recap).not.toContain('bg-[var(--color-hero-start)]');
@@ -159,7 +157,7 @@ describe('색상 정의의 단일 원본', () => {
     expect(definition).not.toContain('3px');
   });
   it('보라가 구조색이고 브랜드 장식·글자 역할은 진한 보라 하나로 모은다', () => {
-    for (const values of [light, dark]) {
+    for (const values of [light]) {
       expect(resolve('--color-brand-text', values)).toBe(resolve('--accent-brand-ink', values));
       expect(resolve('--color-brand-on-light-surface', values)).toBe(resolve('--accent-brand-ink', values));
       expect(resolve('--color-brand-decoration', values)).toBe(resolve('--accent-brand-ink', values));
@@ -215,16 +213,7 @@ describe('배지·리그·프로필의 기존 표현 보존', () => {
     expect(identity['--radius-card']).toBe('var(--shape-card)');
     expect(resolve('--color-canvas', light)).toBe('#f3f2f8');
   });
-  it('다크 모드도 공통 바탕·카드와 등급 장식색을 분리한다', () => {
-    const identity = declarations(`.dark ${scope}`);
-    expect(identity['--color-canvas']).toBeUndefined();
-    expect(identity['--color-card']).toBeUndefined();
-    expect(identity['--color-surface']).toBeUndefined();
-    expect(identity['--color-brand-ink']).toBeUndefined();
-    expect(identity['--color-brand-soft']).toBeUndefined();
-    expect(identity['--color-brand-line']).toBeUndefined();
-  });
-  for (const [name, base, selector] of [['라이트', light, scope], ['다크', dark, `.dark ${scope}`]] as const) {
+  for (const [name, base, selector] of [['라이트', light, scope]] as const) {
     it(`${name} 마이페이지·리그는 같은 중성 바탕을 사용하고 글자 대비도 유지한다`, () => {
       const identity = declarations(selector);
       const values = { ...base, ...identity };
@@ -246,7 +235,6 @@ describe('배지·리그·프로필의 기존 표현 보존', () => {
     const league = declarations('.league-screen');
     expect(league['--radius-card']).toBe('var(--shape-card)');
     expect(league['--color-league-hero']).toBeUndefined();
-    expect(declarations('.dark .league-screen')['--color-league-hero']).toBeUndefined();
     expect(league['--color-league-first']).toBe('var(--color-card)');
     expect(league['--color-league-second']).toBe('var(--color-card)');
     expect(league['--color-league-third']).toBe('var(--color-card)');
@@ -258,7 +246,7 @@ describe('배지·리그·프로필의 기존 표현 보존', () => {
 
 describe('그림자 없는 테두리 카드와 평면 버튼 표면', () => {
   it('모든 테마와 화면이 같은 둥근 모서리 원본을 사용한다', () => {
-    for (const values of [light, dark]) {
+    for (const values of [light]) {
       expect(values['--shape-card']).toBe('16px');
       expect(values['--shape-button']).toBe('12px');
       expect(values['--shape-chip']).toBe('12px');
@@ -270,9 +258,6 @@ describe('그림자 없는 테두리 카드와 평면 버튼 표면', () => {
     for (const key of ['--shadow-action', '--shadow-action-secondary', '--shadow-action-soft', '--shadow-action-pressed']) expect(light[key], key).toBe('none');
     for (const key of ['--shadow-card', '--shadow-card-pressed', '--shadow-choice']) expect(light[key], key).toBe('none');
     expect(light['--card-border']).toBe('1px solid var(--color-line)');
-    for (const [key, value] of Object.entries(declarations('.dark')).filter(([key]) => key.startsWith('--shadow-'))) {
-      expect(value, key).toBe('none');
-    }
   });
   it('카드·버튼은 평면 역할을 참조하고 누를 때 위치를 이동하지 않는다', () => {
     expect(indexCss).toContain('box-shadow: var(--shadow-card) !important');
@@ -289,7 +274,7 @@ describe('그림자 없는 테두리 카드와 평면 버튼 표면', () => {
 });
 
 describe('다른 그림과 통일한 원형 파스텔 순위 표시', () => {
-  for (const [name, values] of [['라이트', light], ['다크', dark]] as const) {
+  for (const [name, values] of [['라이트', light]] as const) {
     it(`${name} 숫자는 테마와 관계없이 밝은 그림 안에서 충분히 구분된다`, () => {
       expect(contrast(resolve('--color-league-symbol-ink', values), '#fffbf3')).toBeGreaterThanOrEqual(4.5);
       expect(resolve('--color-league-symbol-ink', values)).toBe('#3d3b52');
@@ -305,7 +290,7 @@ describe('닉네임 입력의 둥근 초점 표시', () => {
   it('기본 초점은 중성 회색이며 오류 상태는 기존 빨강을 유지한다', () => {
     expect(indexCss).toContain('.nickname-field { --nickname-focus-ring: var(--color-ink-3);');
     expect(indexCss).toContain('.nickname-field.has-error { --nickname-focus-ring: var(--color-danger-foreground);');
-    for (const values of [light, dark]) {
+    for (const values of [light]) {
       expect(contrast(resolve('--color-ink-3', values), resolve('--color-surface', values))).toBeGreaterThanOrEqual(3);
     }
   });
@@ -317,7 +302,7 @@ describe('닉네임 입력의 둥근 초점 표시', () => {
 
 describe('원시값과 의미 역할의 2단계 구조', () => {
   it('의미 색 역할은 원시 팔레트만 참조하고 직접 색값을 갖지 않는다', () => {
-    for (const selector of [':root', '.dark']) {
+    for (const selector of [':root']) {
       for (const [key, value] of Object.entries(declarations(selector)).filter(([key]) => key.startsWith('--color-') && key !== '--color-overlay')) {
         expect(value, key).toMatch(/^var\(--/);
       }
@@ -341,12 +326,8 @@ describe('주황 메인과 따뜻한 보조 팔레트', () => {
     expect(resolve('--color-brand-decoration', light)).toBe('#4b2fd6');
     expect(resolve('--color-brand-accent', light)).toBe('#6b4eff');
   });
-  it('다크에서도 행동 버튼과 바탕의 비문자 대비를 확보한다', () => {
-    expect(contrast(resolve('--color-brand-action', dark), resolve('--color-canvas', dark))).toBeGreaterThanOrEqual(3);
-    expect(resolve('--color-canvas', dark)).toBe('#1b1a2b');
-  });
   it('마이페이지·리그의 구분선도 공통 중성·민트 역할을 상속한다', () => {
-    for (const selector of [':is(.my-page-screen, .league-screen, .identity-badge, .badge-tone)', '.dark :is(.my-page-screen, .league-screen, .identity-badge, .badge-tone)']) {
+    for (const selector of [':is(.my-page-screen, .league-screen, .identity-badge, .badge-tone)']) {
       expect(declarations(selector)['--color-line']).toBeUndefined();
       expect(declarations(selector)['--color-line-strong']).toBeUndefined();
     }
@@ -355,7 +336,7 @@ describe('주황 메인과 따뜻한 보조 팔레트', () => {
 
 describe('보상 장식과 실제 재화·배지 역할의 분리', () => {
   it('수치 글자와 통계 아이콘은 색 없이 중성색을 쓴다', () => {
-    for (const values of [light, dark]) {
+    for (const values of [light]) {
       for (const role of ['--color-xp', '--color-points', '--color-info']) {
         expect(values[role], role).toBe('var(--color-ink-2)');
       }
@@ -369,7 +350,7 @@ describe('보상 장식과 실제 재화·배지 역할의 분리', () => {
       expect(resolve('--color-danger-action', values)).toBe(resolve('--accent-rose-ink', values));
     }
   });
-  for (const [name, base, prefix] of [['라이트', light, ''], ['다크', dark, '.dark ']] as const) {
+  for (const [name, base, prefix] of [['라이트', light, '']] as const) {
     it(name + ' 배지의 의미·미획득 조건과 글자 대비를 보존한다', () => {
       for (const stat of ['words', 'streak', 'xp']) {
         const selector = '.badge-tone[data-badge-stat]';
@@ -388,13 +369,9 @@ describe('보상 장식과 실제 재화·배지 역할의 분리', () => {
 
 describe('어두운 카드 위 채움 버튼의 평면 경계', () => {
   it('밝은 화면과 어두운 화면의 경계선이 카드와 3:1 이상 구분된다', () => {
-    for (const values of [light, dark]) {
+    for (const values of [light]) {
       expect(contrast(resolve('--color-action-boundary', values), resolve('--color-card', values))).toBeGreaterThanOrEqual(3);
     }
-  });
-  it('어두운 채움 버튼에 선을 사용하고 밝은 soft·비활성 상태와 분리한다', () => {
-    expect(indexCss).toContain(".dark :is(button.action-button, button.action-secondary, button.bg-brand-500):not([data-tone='soft']):not(:disabled)");
-    expect(indexCss).toContain('border: 1px solid var(--color-action-boundary) !important');
   });
 });
 
@@ -402,7 +379,7 @@ describe('어두운 카드 위 채움 버튼의 평면 경계', () => {
 describe('컬러와 타이포그래피 역할 계층', () => {
   it('팔레트 정리 후에도 모든 색상 참조가 두 테마에서 연결된다', () => {
     expect(css).not.toContain('--restore-');
-    for (const values of [light, dark]) {
+    for (const values of [light]) {
       for (const name of ['--color-brand-action', '--color-accent-foreground', '--color-accent-soft', '--color-progress', '--color-ink', '--color-ink-2', '--color-ink-3']) {
         expect(resolve(name, values)).toMatch(/^#[\da-f]{6}$/i);
       }
@@ -411,7 +388,7 @@ describe('컬러와 타이포그래피 역할 계층', () => {
     }
   });
   it('두 테마에서 채운 책 아이콘과 배경을 3:1 이상으로 구분한다', () => {
-    for (const values of [light, dark]) {
+    for (const values of [light]) {
       expect(contrast(resolve('--color-on-progress', values), resolve('--color-progress', values))).toBeGreaterThanOrEqual(3);
     }
   });
