@@ -351,7 +351,8 @@ const VisualCard = ({ v, className = '', terms }: { v: Exclude<WordVisual, { typ
       </>
     ) : <>
     <div className="flex flex-col gap-1">
-      <p className="text-2xs text-[var(--color-ink-3)]">{v.type === 'table' ? '한눈에 비교' : v.type === 'flow' ? '맞혀 보기' : '그래프로 보기'}</p>
+      {/* 표는 제목만으로 충분해 '한눈에 비교' 라벨을 두지 않는다 */}
+      {v.type !== 'table' && <p className="text-2xs text-[var(--color-ink-3)]">{v.type === 'flow' ? '맞혀 보기' : '그래프로 보기'}</p>}
       <h3 className="text-base font-bold text-[var(--color-ink)] break-keep">{v.title}</h3>
     </div>
     {v.type === 'line' && <LineChart x={v.x} series={v.series} unit={v.unit} />}

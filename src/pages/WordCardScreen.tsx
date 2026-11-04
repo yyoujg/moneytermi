@@ -92,7 +92,8 @@ const WordCard = ({
 }) => {
   if (section === 'meaning') return (
     <div className="flex flex-col gap-3 px-5 pb-6">
-      <WordMeaningCard word={word} sources={(word.sources ?? []).map(source => SOURCE_NAMES[source] ?? source)} onDetail={onDetail} />
+      {/* 출처는 자세히 보기 시트 맨 아래에만 둔다 */}
+      <WordMeaningCard word={word} onDetail={onDetail} />
     </div>
   );
   return (
@@ -105,7 +106,12 @@ const WordCard = ({
     {/* 순서: 단어+뜻 → 그래프·표 → 뉴스 → 관련 용어. 자세히 알아보기는 단어 카드의 버튼으로 여는 시트 */}
     {/* 그래프·표 — 뜻 바로 아래에서 그림으로 이해시킨다 */}
     {/* 글로 된 '쉽게 설명'은 핵심 뜻과 겹쳐서 자세히 보기 시트로 옮기고, 본문에는 그래프·표만 둔다 */}
-    {word.visuals && word.visuals.some(v => v.type !== 'text') && <WordVisuals visuals={word.visuals.filter(v => v.type !== 'text')} terms={visualTerms} />}
+    {/* 비교 표: 시트·카드 제목이 이미 용어라 'OO와 비슷한 개념'은 '비슷한 개념'으로, 카드 뜻과 겹치는 자기 자신 행은 뺀다 */}
+    {word.visuals && word.visuals.some(v => v.type !== 'text') && <WordVisuals visuals={word.visuals.filter(v => v.type !== 'text').map(v => v.type !== 'table' ? v : {
+      ...v,
+      title: [`${word.word}와 `, `${word.word}과 `].reduce((t, p) => t.startsWith(p) ? t.slice(p.length) : t, v.title),
+      rows: v.rows.filter(row => row[0] !== word.word),
+    })} terms={visualTerms} />}
 
     {/* 뉴스 — '이 용어가 기사에서 어떻게 쓰였는지'가 보이게 제목·요약 목록. 불러온 뒤 기사가 없으면 섹션째 숨긴다 */}
     {(newsLoading || newsItems.length > 0) && (

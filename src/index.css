@@ -1213,3 +1213,5 @@ button.review-aux-button:disabled { color: var(--color-ink-3); }
 .course-home-topic-list { display: block; padding: var(--space-2) 0; }
 .course-home-topic-list .course-home-topic { display: block; width: 100%; margin-left: 0; min-height: 0; padding: 0; border: 0; background: transparent; }
 .course-home-topic-list .course-home-topic > div { padding-left: 0; padding-right: 0; }
+.course-home-level-heading { padding: var(--space-5) 0 var(--space-1); color: var(--color-ink-3); font-size: var(--font-size-label); font-weight: var(--font-weight-semibold); }
+.course-home-level-heading:first-child { padding-top: var(--space-3); }

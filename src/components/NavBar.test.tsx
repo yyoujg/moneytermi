@@ -23,7 +23,6 @@ vi.mock('../lib/storage', () => ({
 Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { value: true, configurable: true });
 
 const SEEN_LEAGUE_WEEK_KEY = 'moneytermi_nav_seen_league_week_v1';
-const SEEN_BADGE_COUNT_KEY = 'moneytermi_nav_seen_badge_count_v1';
 
 let cleanup = () => {};
 afterEach(() => cleanup());
@@ -119,22 +118,9 @@ describe('NavBar new badges', () => {
     expect(container.querySelector('button[aria-label="리그, 새 내용 있음"]')).not.toBeInTheDocument();
   });
 
-  it('새로 얻은 배지가 있으면 마이 탭에 NEW를 표시하고 방문하면 저장한다', async () => {
-    state.storage.set(SEEN_BADGE_COUNT_KEY, '0');
-    baseContext({
-      knownWords: [{ id: 1, word: '복리' }],
-    });
+  it('새 배지가 있어도 마이 탭에는 점을 표시하지 않는다(획득 축하 창이 알려준다)', async () => {
+    baseContext({ knownWords: [{ id: 1, word: '복리' }] });
     const container = await mount();
-
-    const myButton = container.querySelector('button[aria-label="마이, 새 내용 있음"]') as HTMLButtonElement | null;
-    expect(myButton).toBeInTheDocument();
-
-    await act(async () => {
-      myButton!.click();
-    });
-    await flush();
-
-    expect(state.setItem).toHaveBeenCalledWith(SEEN_BADGE_COUNT_KEY, '1');
     expect(container.querySelector('button[aria-label="마이, 새 내용 있음"]')).not.toBeInTheDocument();
   });
 });

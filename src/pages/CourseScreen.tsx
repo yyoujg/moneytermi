@@ -411,20 +411,25 @@ const CourseScreen = () => {
 
           <List className="course-home-topic-list">
             {visibleTopics.length === 0 && <p className="type-supporting py-5 text-center">이 난이도의 학습을 준비하고 있어요.</p>}
-            {visibleTopics.map(topic => {
+            {visibleTopics.map((topic, i) => {
               const locked = topic.locked;
               const steps = topicSteps(topic);
               const done = topicStepsDone(topic);
               const isCurrent = topic.index === focusTopic?.index;
+              // 전체 탭은 같은 주제명이 레벨마다 있어서 레벨이 바뀔 때 소제목을 넣는다
+              const levelHeading = selectedLevel === '전체' && (i === 0 || visibleTopics[i - 1].level !== topic.level);
               // 같은 책 아이콘 반복 대신 상태 글자와 화살표만 둔다
-              return <ListRow key={`${topic.level}-${topic.category}`} as="button" border="none" disabled={locked} data-topic-index={topic.index} data-current={isCurrent || undefined}
+              return <React.Fragment key={`${topic.level}-${topic.category}`}>
+              {levelHeading && <h3 className="course-home-level-heading">{topic.level}</h3>}
+              <ListRow as="button" border="none" disabled={locked} data-topic-index={topic.index} data-current={isCurrent || undefined}
                 onClick={() => navigate(`/course?topic=${topic.index}`)} aria-label={`${topic.level} ${topic.category} 주제 열기`} aria-describedby={`topic-summary-${topic.index}`} className="course-home-topic w-full"
                 contents={<span className="flex flex-col">
                   <span className="course-home-topic-title">{topic.category}</span>
                   <span id={`topic-summary-${topic.index}`} className="course-home-topic-meta">{topic.level} · {steps.done}/{steps.total}단계 완료</span>
                 </span>}
                 right={<span className="flex items-center gap-1 text-xs text-[var(--color-ink-3)]">{locked ? '잠김' : done ? '완료' : steps.done > 0 || topic.known > 0 ? '진행 중' : '시작 가능'}{locked ? <LockKeyhole size={16} aria-hidden="true" /> : <ChevronRight size={16} aria-hidden="true" />}</span>}
-              />;
+              />
+              </React.Fragment>;
             })}
           </List>
         </section>
