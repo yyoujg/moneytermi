@@ -27,7 +27,7 @@ export const TopBar = () => {
   const [rewardedAdPending, setRewardedAdPending] = useState(false);
   // 학습 중에는 각 화면의 레슨명과 진행 단계에 집중한다. 에너지 시트는 계속 마운트한다.
   const pathname = useLocation().pathname;
-  const hideBar = ['/', '/course', '/course/topics', '/home', '/league', '/league/rules', '/my', '/welcome', '/word-card', '/quiz', '/lesson-check', '/lesson-intro', '/review'].includes(pathname);
+  const hideBar = ['/', '/course', '/course/topics', '/home', '/league', '/league/rules', '/my', '/my/badges', '/welcome', '/word-card', '/quiz', '/lesson-check', '/lesson-intro', '/review'].includes(pathname);
   const compactBar = pathname === '/course';
   const [tipPos, setTipPos] = useState({ left: 16, tail: 0 });   // 말풍선 위치: 아이콘 아래 가운데, 화면 밖으로 안 나가게 16px 안쪽에서 멈춘다
 

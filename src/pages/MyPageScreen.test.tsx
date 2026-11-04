@@ -34,15 +34,16 @@ const mount = () => {
 };
 
 describe('내 정보의 정확한 숫자 표시', () => {
-  it('배지를 접지 않고 가로 스크롤 없이 5열 격자로 모두 보여준다', () => {
+  it('배지는 받은 것부터 한 줄(5개)만 보여주고 전체는 더보기로 연다', () => {
     const container = mount();
-    expect(container.querySelector('details')).toBeNull();
     const badges = container.querySelector('[aria-label="배지 목록"]');
-    expect(badges?.querySelectorAll('li')).toHaveLength(10);
-    expect(badges?.querySelectorAll('[data-earned="true"]')).toHaveLength(2);
+    expect(badges?.querySelectorAll('li')).toHaveLength(5);
+    // 받은 배지(2개)가 앞, 높은 단계부터
+    const ids = [...badges!.querySelectorAll('[data-badge-id]')].map(el => el.getAttribute('data-badge-id'));
+    expect(ids.slice(0, 2)).toEqual(['x100', 'w1']);
     expect(badges).toHaveClass('grid', 'grid-cols-5');
-    expect(badges).not.toHaveClass('overflow-x-auto');
-    expect(container).toHaveTextContent('획득 2 / 10');
+    expect(container.querySelector('#my-badges-title')).toHaveTextContent('2 / 19');
+    expect(container.querySelector('[aria-label="배지 전체 보기"]')).toBeInTheDocument();
   });
   it('설정에 한 번에 진입한다', () => {
     const container = mount();

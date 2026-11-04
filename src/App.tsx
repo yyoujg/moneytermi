@@ -31,6 +31,7 @@ const LessonIntroScreen = React.lazy(() => import('./pages/LessonIntroScreen'));
 const WordCardScreen = React.lazy(() => import('./pages/WordCardScreen'));
 const LeagueScreen = React.lazy(() => import('./pages/LeagueScreen'));
 const LeagueRulesScreen = React.lazy(() => import('./pages/LeagueRulesScreen'));
+const BadgesScreen = React.lazy(() => import('./pages/BadgesScreen'));
 const MyPageScreen = React.lazy(() => import('./pages/MyPageScreen'));
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
@@ -256,6 +257,7 @@ const Layout = () => {
         <Route path="/league" element={<LeagueScreen />} />
         <Route path="/review" element={<ReviewScreen />} />
         <Route path="/my" element={<MyPageScreen />} />
+        <Route path="/my/badges" element={<BadgesScreen />} />
         {/* 관련 용어 클릭처럼 같은 라우트로 다시 navigate해도 새로 마운트 — 이전 index/단계가 새 단어 목록에 남지 않게 */}
         <Route path="/word-card" element={<WordCardScreen key={location.key} />} />
         <Route path="/league/rules" element={<LeagueRulesScreen />} />
