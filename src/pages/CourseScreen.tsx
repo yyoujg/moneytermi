@@ -392,12 +392,15 @@ const CourseScreen = () => {
                 const locked = section.nodes.every(node => node.state === 'locked');
                 const name = COURSE_NAMES[section.course.id] ?? (topic.parts.length > 1 ? `${topic.level} ${pi + 1}` : topic.level);
                 return (
-                  <button key={section.course.id} type="button" role="listitem" className="course-home-rail-card"
+                  <button key={section.course.id} type="button" role="listitem" className="course-home-rail-card" data-locked={locked}
                     onClick={() => navigate(`/course?topic=${topic.index}`)} aria-label={`${topic.level} ${name} 코스 열기, ${locked ? '잠김' : `${done}/${steps.length}단계 완료`}`}>
-                    <TopicThumb category={category} size={160} height={120} />
+                    <span className="course-home-rail-thumb">
+                      <TopicThumb category={category} size={160} height={120} />
+                      {locked && <span className="course-home-rail-lock"><LockKeyhole size={20} aria-hidden="true" /></span>}
+                    </span>
                     <span className="course-home-rail-text">
                       <span className="course-home-rail-title">{name}</span>
-                      <span className="course-home-rail-meta"><span className="course-level-badge">{topic.level}</span>{locked ? '잠김' : `${done}/${steps.length}단계`}</span>
+                      <span className="course-home-rail-meta"><span className="course-level-badge">{topic.level}</span>{!locked && `${done}/${steps.length}단계`}</span>
                     </span>
                   </button>
                 );

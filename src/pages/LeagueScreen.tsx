@@ -73,13 +73,13 @@ const LeagueScreen = () => {
           <p className="mt-1! text-2xs text-[var(--color-ink-3)]">초기화까지 {daysUntilReset()}일</p>
         </section>
 
-        {/* 티어 로드맵: 굵은 진행 트랙 위에 등급 노드를 올리고, 현재 등급은 테두리로 강조한다 */}
+        {/* 티어 로드맵: 테두리·선 없이 등급 그림만 나란히, 현재 등급은 이름 색·굵기로 강조한다 */}
         <ol className="league-tier-road anim-fade-up" aria-label="등급 단계" style={{ '--i': 1, '--road-progress': (stage.id - 1) / (GROWTH_STAGES.length - 1) } as React.CSSProperties}>
           {GROWTH_STAGES.map(s => {
             const state = s.id < stage.id ? 'done' : s.id === stage.id ? 'current' : 'future';
             return (
               <li key={s.id} className="league-tier-step" data-state={state} aria-current={state === 'current' ? 'step' : undefined}>
-                <span className="league-tier-node"><StageGlyph id={s.id} size={28} locked={state === 'future'} /></span>
+                <span className="league-tier-node"><StageGlyph id={s.id} size={56} locked={state === 'future'} /></span>
                 <span className="league-tier-name">{s.name}</span>
                 <span className="league-tier-xp">{s.minPoints.toLocaleString()}XP</span>
               </li>
