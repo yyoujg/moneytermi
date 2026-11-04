@@ -1138,7 +1138,7 @@ button.course-home-rail-card:active { background: var(--color-surface); }
 .league-time-left { color: var(--color-ink-3); font-size: var(--font-size-caption); font-variant-numeric: tabular-nums; }
 .league-tier-road::-webkit-scrollbar { display: none; }
 .league-tier-step { position: relative; z-index: 1; display: flex; width: 124px; flex-shrink: 0; flex-direction: column; align-items: center; gap: var(--space-1); scroll-snap-align: center; }
-.league-tier-node { display: flex; width: 104px; height: 104px; align-items: center; justify-content: center; border-radius: var(--shape-card); }
+.league-tier-node { display: flex; width: 104px; height: 104px; align-items: center; justify-content: center; border-radius: 50%; }
 .league-tier-step[data-state='done'] .league-tier-node { color: var(--color-ink-2); }
 .league-tier-step[data-state='current'] .league-tier-node { color: var(--color-accent-foreground); }
 .league-tier-step[data-state='future'] .league-tier-node .stage-glyph { opacity: 1; filter: none; }
