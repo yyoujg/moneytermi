@@ -1121,6 +1121,8 @@ button.course-home-rail-card:active { background: var(--color-surface); }
 .course-steps .course-step { padding-left: var(--step-indent, 0px); }
 .course-steps .course-step:nth-child(4n + 2), .course-steps .course-step:nth-child(4n + 4) { --step-indent: 28px; }
 .course-steps .course-step:nth-child(4n + 3) { --step-indent: 56px; }
+/* 돌 사이 세로 간격(말풍선 높이 64px가 다음 돌과 겹치지 않을 만큼) */
+.course-steps .course-step + .course-step { margin-top: var(--space-6); }
 .course-step[data-step-state='done']:not(:last-child)::before { background: var(--color-progress); }
 .course-step-marker { width: 40px; height: 40px; margin-top: var(--space-2); border: 0; background: var(--color-neutral-soft); color: var(--color-ink-2); font-size: var(--font-size-label); }
 .course-step[data-step-state='done'] .course-step-marker { background: var(--color-neutral-strong); color: var(--color-card); }
