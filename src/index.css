@@ -543,7 +543,10 @@ button.course-home-topic:disabled { cursor: default; opacity: 1; }
 .course-home-topic-heading { display: flex; align-items: center; gap: var(--space-2); }
 .course-home-topic-heading > svg { flex-shrink: 0; color: var(--color-ink-4); }
 .course-home-topic-title { flex: 1; min-width: 0; color: var(--color-ink); font-size: var(--font-size-item-title); font-weight: var(--font-weight-semibold); line-height: var(--line-height-body); word-break: keep-all; overflow-wrap: anywhere; }
-button.course-home-topic:disabled .course-home-topic-title { color: var(--color-ink-3); }
+/* TDS ListRow는 disabled를 버튼에 넘기지 않아 data-locked로 흐리게 한다 */
+button.course-home-topic:is(:disabled, [data-locked]) .course-home-topic-title { color: var(--color-ink-3); font-weight: var(--font-weight-regular); }
+button.course-home-topic:is(:disabled, [data-locked]) .course-home-topic-meta { color: var(--color-ink-4); }
+.course-topic-lock { display: inline-flex; width: 32px; height: 32px; align-items: center; justify-content: center; border-radius: 50%; background: var(--color-neutral-soft); color: var(--color-ink-3); }
 .course-home-topic-meta { display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--space-1) var(--space-3); margin-top: var(--space-1); color: var(--color-ink-3); font-size: var(--font-size-caption); line-height: var(--line-height-body); }
 @media (max-width: 359px) {
   .course-home-hero-title { font-size: var(--font-size-title-3); }

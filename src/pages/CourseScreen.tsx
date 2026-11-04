@@ -459,13 +459,16 @@ const CourseScreen = () => {
               // 같은 책 아이콘 반복 대신 상태 글자와 화살표만 둔다
               return <React.Fragment key={`${topic.level}-${topic.category}`}>
               {levelHeading && <h3 className="course-home-level-heading">{topic.level}<span>{visibleTopics.filter(t => t.level === topic.level).length}개 주제</span></h3>}
-              <ListRow as="button" border="none" disabled={locked} data-topic-index={topic.index} data-current={isCurrent || undefined}
+              <ListRow as="button" border="none" disabled={locked} data-locked={locked || undefined} data-topic-index={topic.index} data-current={isCurrent || undefined}
                 onClick={() => navigate(`/course?topic=${topic.index}`)} aria-label={`${topic.level} ${topic.category} 주제 열기`} aria-describedby={`topic-summary-${topic.index}`} className="course-home-topic w-full"
                 contents={<span className="flex flex-col">
                   <span className="course-home-topic-title">{topic.category}</span>
                   <span id={`topic-summary-${topic.index}`} className="course-home-topic-meta">{steps.done}/{steps.total}단계 완료</span>
                 </span>}
-                right={<span className="flex items-center gap-1 text-xs text-[var(--color-ink-3)]">{locked ? '잠김' : done ? '완료' : steps.done > 0 || topic.known > 0 ? '진행 중' : '시작 가능'}{locked ? <LockKeyhole size={16} aria-hidden="true" /> : <ChevronRight size={16} aria-hidden="true" />}</span>}
+                right={locked
+                  // 잠김은 글자 대신 회색 원 안 자물쇠로 보여 준다(글자는 화면 읽기용)
+                  ? <span className="course-topic-lock"><LockKeyhole size={16} aria-hidden="true" /><span className="sr-only">잠김</span></span>
+                  : <span className="flex items-center gap-1 text-xs text-[var(--color-ink-3)]">{done ? '완료' : steps.done > 0 || topic.known > 0 ? '진행 중' : '시작 가능'}<ChevronRight size={16} aria-hidden="true" /></span>}
               />
               </React.Fragment>;
             })}
