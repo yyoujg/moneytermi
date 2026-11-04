@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useLayoutEffect, useEffect, useState } from 'react';
-import { BookOpenText, Check, ListChecks, LockKeyhole, RotateCcw } from '../components/ui/OtterIcons';
+import { Check, LockKeyhole, RotateCcw } from '../components/ui/OtterIcons';
 import { List, ListRow } from '@toss/tds-mobile';
 import { TopicThumb } from '../components/TopicThumb';
 import { COURSE_NAMES } from '../lib/topicImages';
@@ -503,7 +503,6 @@ const CourseScreen = () => {
             const done = isDone(node);
             const locked = node.state === 'locked';
             const copy = nodeCopy(node);
-            const Icon = node.type === 'quiz' ? ListChecks : node.type === 'review' ? RotateCcw : BookOpenText;
             const inProgress = node.type === 'lesson' && !done && node.words.some(word => knownIds.has(word.id));
             // 다음에 할 단계만 카드로 띄우고, 끝났거나 잠긴 단계는 평평한 행으로 둔다
             const nodeCardClass = isFocus && !locked ? 'course-node-current border-[var(--color-line)] bg-[var(--color-card)] px-4' : 'border-transparent bg-transparent px-0';
@@ -523,12 +522,10 @@ const CourseScreen = () => {
                       {isReview ? (
                         <span data-review-badge className="inline-flex items-center rounded-chip border border-[var(--color-line-strong)] px-1.5 py-0.5 font-semibold text-[var(--color-ink-2)]">{copy.kind} · 선택</span>
                       ) : (
-                        <span className="inline-flex items-center gap-1">
-                          <Icon size={16} strokeWidth={1.75} aria-hidden="true" data-learning-icon={node.type} className="shrink-0" />
-                          {copy.kind}
-                        </span>
+                        <span data-learning-kind={node.type}>{copy.kind}</span>
                       )}
-                      <span data-learning-status className={`font-normal ${locked ? 'text-[var(--color-ink-4)]' : isFocus ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-3)]'}`}>{nodeStatus}</span>
+                      {/* 완료는 왼쪽 체크로 보이므로 글자는 화면 읽기용으로만 둔다 */}
+                      <span data-learning-status className={done ? 'sr-only' : `font-normal ${locked ? 'text-[var(--color-ink-4)]' : isFocus ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-3)]'}`}>{nodeStatus}</span>
                     </span>
                     <span className={`mt-1 block text-sm break-keep ${locked ? 'font-semibold text-[var(--color-ink-3)]' : done ? 'font-semibold text-[var(--color-ink-2)]' : 'font-bold text-[var(--color-ink)]'}`}>{copy.title}</span>
                   </span>

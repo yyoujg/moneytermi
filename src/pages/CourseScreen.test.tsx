@@ -478,7 +478,6 @@ describe('학습 주제의 역할 아이콘', () => {
     const current = container.querySelector('.course-node-current');
     expect(current).toBeInTheDocument();
     expect(current).not.toHaveClass('border-brand-200');
-    expect(current?.querySelector('[data-learning-icon]')?.parentElement).not.toHaveClass('bg-[var(--color-brand-soft)]');
     expect(current?.querySelector('[data-learning-status]')).toHaveTextContent('시작 가능');
     expect(current?.querySelector('[data-learning-status]')).not.toHaveClass('rounded-full');
     expect(current?.textContent).not.toContain('지금 할 일');
@@ -496,14 +495,11 @@ describe('학습 주제의 역할 아이콘', () => {
     expect(state.spendEnergy).toHaveBeenCalledWith(1, 'lesson', 'c1-l0:1,2,3,4');
   });
 
-  it('학습·퀴즈는 번호와 역할 그림, 복습은 번호 없이 배지로 구분한다', async () => {
+  it('학습·퀴즈는 번호와 역할 글자(아이콘 없이), 복습은 번호 없이 배지로 구분한다', async () => {
     const { container } = await mount();
-    const icons = [...container.querySelectorAll('[data-learning-icon]')];
-    expect(icons.map(icon => icon.getAttribute('data-learning-icon'))).toEqual(['lesson', 'quiz']);
-    for (const icon of icons) {
-      expect(icon).toHaveAttribute('width', '16');
-      expect(icon).toHaveAttribute('aria-hidden', 'true');
-    }
+    const kinds = [...container.querySelectorAll('[data-learning-kind]')];
+    expect(kinds.map(kind => kind.getAttribute('data-learning-kind'))).toEqual(['lesson', 'quiz']);
+    expect(container.querySelector('[data-learning-icon]')).toBeNull();
     expect(container.querySelector('[data-review-badge]')).toHaveTextContent('· 선택');
     const markers = [...container.querySelectorAll('.course-step-marker')];
     const review = markers.find(m => m.getAttribute('data-step-kind') === 'review')!;
@@ -511,11 +507,19 @@ describe('학습 주제의 역할 아이콘', () => {
     expect(review.querySelector('[data-icon="RotateCcw"]')).toBeInTheDocument();
   });
 
+  it('완료한 단계는 체크만 보이고 완료 글자는 화면 읽기용으로만 둔다', async () => {
+    baseContext({ knownIds: new Set([1, 2, 3, 4]) });
+    const { container } = await mount();
+    const status = container.querySelector('[data-node-id="c1-l0"] [data-learning-status]');
+    expect(status).toHaveTextContent('완료');
+    expect(status).toHaveClass('sr-only');
+  });
+
   it('잠긴 단계도 역할을 표시하며 잠금과 학습 동작은 유지한다', async () => {
     const { container } = await mount();
     const locked = [...container.querySelectorAll<HTMLButtonElement>('button[data-node-id]:disabled')];
     expect(locked).toHaveLength(2);
-    expect(locked[0].querySelector('[data-learning-icon="quiz"]')).toBeInTheDocument();
+    expect(locked[0].querySelector('[data-learning-kind="quiz"]')).toBeInTheDocument();
     expect(locked[1].querySelector('[data-review-badge]')).toBeInTheDocument();
     for (const button of locked) {
       expect(button.textContent).toContain('잠김');
