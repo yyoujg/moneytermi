@@ -383,6 +383,8 @@ svg:is(.text-brand-300, .text-brand-400, .text-brand-500, .text-brand-600, .text
 /* 마이 통계: 한 줄에 하나씩(아이콘 · 이름 ··· 값). 긴 값도 오른쪽에 그대로 둔다 */
 .my-page-stats-grid { display: flex; flex-direction: column; gap: var(--space-4); }
 .my-page-stat { display: flex; min-width: 0; align-items: center; gap: var(--space-3); }
+/* 아이콘(24px)과 등급 얼굴 원(32px)의 자리를 32px로 맞춰 이름 시작선을 맞춘다 */
+.my-page-stat > svg { flex: 0 0 32px; width: 32px; }
 .my-page-stat.is-wide { grid-column: auto; }
 .my-page-stat-label { display: flex; flex: 1; min-width: 0; align-items: center; color: var(--color-ink-2); font-size: var(--font-size-body); white-space: nowrap; }
 .my-page-stat-value { display: flex; align-items: baseline; justify-content: flex-end; gap: 2px; color: var(--color-ink); font-size: var(--font-size-headline); font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); font-variant-numeric: tabular-nums; }
@@ -1170,6 +1172,7 @@ button.course-step-marker { cursor: pointer; }
 /* 리그: 등급 단계 로드맵 */
 /* 등급 길: 큰 등급 그림을 가로로 넘겨 본다. 현재 등급은 처음에 가운데로 스크롤한다(LeagueScreen) */
 .league-tier-road { position: relative; display: flex; gap: var(--space-2); margin: 0; padding: var(--space-5) var(--space-2) var(--space-4); overflow-x: auto; border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); list-style: none; scroll-snap-type: x mandatory; scroll-padding-inline: var(--space-5); scrollbar-width: none; }
+.stage-face { display: inline-block; border-radius: 50%; background-repeat: no-repeat; background-size: 220%; }
 .league-time-left { padding: 2px var(--space-2); border-radius: var(--shape-sm); background: var(--color-neutral-soft); color: var(--color-ink-2); font-size: var(--font-size-caption); font-weight: var(--font-weight-semibold); font-variant-numeric: tabular-nums; }
 .league-tier-road::-webkit-scrollbar { display: none; }
 .league-tier-step { position: relative; z-index: 1; display: flex; width: 124px; flex-shrink: 0; flex-direction: column; align-items: center; gap: var(--space-1); scroll-snap-align: center; }

@@ -12,3 +12,13 @@ export const StageGlyph = ({ id, size = 20, className = '', locked = false }: { 
       width={size} height={size} className={`stage-glyph shrink-0 ${className}`} style={{ width: size, height: size }} />
   );
 };
+
+// 등급 그림에서 얼굴 쪽만 원으로 잘라 보여준다(마이 통계처럼 작은 자리). 배경은 등급 색.
+// 머리가 가운데에서 비켜 있는 그림은 가로 위치를 보정한다(나머지는 50%)
+const FACE_X: Record<number, number> = { 1: 40, 7: 38, 9: 40 };
+export const StageFace = ({ id, size = 32 }: { id: number; size?: number }) => (
+  <span aria-hidden="true" data-stage-face={id} className="stage-face shrink-0" style={{
+    width: size, height: size, backgroundColor: `var(--league-bg-${id})`,
+    backgroundImage: `url(/league/v3/league-${STAGE_FILE[id] ?? STAGE_FILE[1]}.svg)`, backgroundPosition: `${FACE_X[id] ?? 50}% 8%`,
+  }} />
+);

@@ -1,7 +1,7 @@
 import { act, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it } from 'vitest';
-import { StageGlyph } from './StageGlyph';
+import { StageFace, StageGlyph } from './StageGlyph';
 
 Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { value: true, configurable: true });
 let cleanup = () => {};
@@ -27,5 +27,15 @@ describe('리그 등급 표식', () => {
     expect(glyph).toHaveStyle({ width: '40px', height: '40px' });
     expect(mount(<StageGlyph id={10} size={76} />).querySelector('img')).toHaveAttribute('src', '/league/v3/league-10-master.svg');
     expect(mount(<StageGlyph id={4} size={28} locked />).querySelector('img')).toHaveAttribute('src', '/league/v3/league-04-savings-locked.svg');
+  });
+});
+
+describe('리그 등급 얼굴 원', () => {
+  it('등급 그림을 원 안에 얼굴 위주로 자르고 배경은 등급 색, 비켜 있는 머리는 가로 위치를 보정한다', () => {
+    const face = mount(<StageFace id={3} size={32} />).querySelector<HTMLElement>('[data-stage-face]')!;
+    expect(face.style.backgroundImage).toContain('/league/v3/league-03-saver.svg');
+    expect(face.style.backgroundColor).toBe('var(--league-bg-3)');
+    expect(face.style.backgroundPosition).toBe('50% 8%');
+    expect(mount(<StageFace id={1} />).querySelector<HTMLElement>('[data-stage-face]')!.style.backgroundPosition).toBe('40% 8%');
   });
 });
