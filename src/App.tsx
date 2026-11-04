@@ -18,6 +18,7 @@ import { LeaguePromotionCelebration } from './components/league/LeaguePromotionC
 import { LeagueRankCelebration } from './components/league/LeagueRankCelebration';
 import { PointCelebration } from './components/PointCelebration';
 import { SplashScreen } from './components/SplashScreen';
+import { LoadingScreen as StudyLoading } from './components/LoadingScreen';
 import { useTapHaptics } from './hooks/useTapHaptics';
 import { ArrowRight } from './components/ui/OtterIcons';
 import { Storage } from './lib/storage';
@@ -65,6 +66,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
   }
 }
 
+// 앱 첫 진입(데이터 준비)은 스플래시, 화면 전환 대기는 달리 로딩 화면
 const LoadingScreen = SplashScreen;
 
 const WELCOME_KEY = 'welcome_seen_v1';
@@ -245,7 +247,7 @@ const Layout = () => {
       <LeaguePromotionCelebration />
       <LeagueRankCelebration />
       <TopBar />
-      <React.Suspense fallback={<LoadingScreen />}>
+      <React.Suspense fallback={<StudyLoading />}>
       {/* 경로가 바뀌면 래퍼가 다시 마운트되며 페이드인. (transform 전환은 기기에서 무거워 opacity만) */}
       <div key={pathname} className="flex-1 min-h-0 flex flex-col anim-fade">
       <Routes>
