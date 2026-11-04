@@ -397,7 +397,7 @@ const CourseScreen = () => {
                     <TopicThumb category={category} size={160} height={120} />
                     <span className="course-home-rail-text">
                       <span className="course-home-rail-title">{name}</span>
-                      <span className="course-home-rail-meta">{topic.level} · {locked ? '잠김' : `${done}/${steps.length}단계`}</span>
+                      <span className="course-home-rail-meta"><span className="course-level-badge">{topic.level}</span>{locked ? '잠김' : `${done}/${steps.length}단계`}</span>
                     </span>
                   </button>
                 );

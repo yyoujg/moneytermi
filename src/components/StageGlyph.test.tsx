@@ -20,12 +20,12 @@ describe('리그 등급 표식', () => {
     const container = mount(<StageGlyph id={3} size={40} className="scale-125" />);
     const glyph = container.querySelector('.stage-glyph')!;
     expect(glyph.tagName.toLowerCase()).toBe('img');
-    expect(glyph).toHaveAttribute('src', '/league/v1/league-tier3-routine-small.svg');
+    expect(glyph).toHaveAttribute('src', '/league/v2/league-tier3-routine.svg');
     expect(glyph).toHaveAttribute('data-stage-id', '3');
     expect(glyph).toHaveAttribute('aria-hidden', 'true');
     expect(glyph).toHaveClass('scale-125');
     expect(glyph).toHaveStyle({ width: '40px', height: '40px' });
-    expect(mount(<StageGlyph id={5} size={76} />).querySelector('img')).toHaveAttribute('src', '/league/v1/league-tier5-master.svg');
-    expect(mount(<StageGlyph id={4} size={28} locked />).querySelector('img')).toHaveAttribute('src', '/league/v1/league-tier4-investor-locked.svg');
+    expect(mount(<StageGlyph id={5} size={76} />).querySelector('img')).toHaveAttribute('src', '/league/v2/league-tier5-master.svg');
+    expect(mount(<StageGlyph id={4} size={28} locked />).querySelector('img')).toHaveAttribute('src', '/league/v2/league-tier4-investor-locked.svg');
   });
 });

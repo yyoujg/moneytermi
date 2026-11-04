@@ -1212,6 +1212,8 @@ button.review-aux-button:disabled { color: var(--color-ink-3); }
 button.course-home-rail-card { width: 160px; flex-direction: column; align-items: stretch; gap: var(--space-2); }
 .course-home-rail-text { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
 .course-home-rail-card .course-home-rail-title { font-size: var(--font-size-label); }
+.course-home-rail-card .course-home-rail-meta { display: flex; align-items: center; gap: var(--space-1); }
+.course-level-badge { padding: 2px var(--space-2); border-radius: var(--shape-sm); background: var(--color-surface); color: var(--color-ink-2); font-size: var(--font-size-caption); font-weight: var(--font-weight-semibold); }
 .course-home-section-desc { margin: 2px 0 0; color: var(--color-ink-3); font-size: var(--font-size-caption); }
 /* 주제 썸네일(홈 카드·뉴스). 사진이 없으면 회색 바탕 + 첫 글자 */
 .topic-thumb { flex-shrink: 0; border-radius: var(--shape-inset); object-fit: cover; background: var(--color-surface); }
@@ -1220,9 +1222,9 @@ button.course-home-rail-card { width: 160px; flex-direction: column; align-items
 .course-home-speech { display: flex; align-items: flex-end; gap: 8px; margin-bottom: 16px; }
 .dali-avatar { display: inline-flex; width: 72px; height: 72px; flex-shrink: 0; }
 .dali-avatar img { width: 72px; height: 72px; }
-.course-home-hero .course-home-speech .course-home-bubble { flex: 1; min-width: 0; margin: 0 0 0 10px; padding: 12px 14px; border-radius: 18px 18px 18px 0; background: var(--color-accent-soft); box-shadow: none; }
-/* 말풍선 꼬리: 아바타 쪽 아래 모서리에서 바깥으로 뾰족하게 */
-.course-home-hero .course-home-speech .course-home-bubble::before { content: ''; top: auto; bottom: 0; left: -14px; width: 16px; height: 20px; margin: 0; background: var(--color-accent-soft); transform: none; clip-path: path('M16 0 C16 11 10 18 0 20 L16 20 Z'); }
+.course-home-hero .course-home-speech .course-home-bubble { flex: 1; min-width: 0; margin: 0 0 0 10px; padding: 12px 14px; border-radius: 18px; background: var(--color-accent-soft); box-shadow: none; }
+/* 말풍선 꼬리: 아래를 맞춘 72px 전신 달리의 입 높이(아래에서 약 52px)를 가리킨다 */
+.course-home-hero .course-home-speech .course-home-bubble::before { content: ''; top: auto; bottom: 44px; left: -10px; width: 12px; height: 16px; margin: 0; background: var(--color-accent-soft); transform: none; clip-path: polygon(0 50%, 100% 0, 100% 100%); }
 .course-home-speech .course-home-bubble-topic { font-size: 11px; }
 .course-home-speech .course-home-bubble-main { margin-top: 2px; color: var(--color-ink); font-size: 14px; font-weight: var(--font-weight-bold); line-height: var(--line-height-body); word-break: keep-all; }
 .course-home-speech .course-home-level-label { font-size: 12px; font-weight: var(--font-weight-regular); }
