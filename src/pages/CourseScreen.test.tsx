@@ -27,6 +27,11 @@ const state = vi.hoisted(() => ({
   setItem: vi.fn(),
 }));
 
+// TDS BottomSheet는 jsdom에서 닫힐 때 지원하지 않는 셀렉터를 써서, 열림/닫힘만 흉내 낸다
+vi.mock('@toss/tds-mobile', async importOriginal => ({
+  ...(await importOriginal<typeof import('@toss/tds-mobile')>()),
+  BottomSheet: ({ open, header, children }: { open: boolean; header?: React.ReactNode; children?: React.ReactNode }) => open ? <div role="dialog">{header}{children}</div> : null,
+}));
 vi.mock('../context/AppContext', () => ({ useAppContext: () => state.ctx }));
 vi.mock('../lib/pathProgress', () => ({ loadDoneNodes: vi.fn(() => Promise.resolve(state.doneNodes)) }));
 vi.mock('../lib/storage', () => ({
@@ -156,6 +161,21 @@ beforeEach(() => {
   state.rpc.mockReset().mockResolvedValue({ data: { rank: 3, total: 13, points: 120 }, error: null });
   state.guestClient.mockReset().mockReturnValue({ rpc: state.rpc });
   vi.mocked(logClick).mockClear();
+});
+
+describe('주제 화면 코스 고르기', () => {
+  it('코스 요약을 누르면 같은 주제의 코스를 골라 그 코스로 바꾼다', async () => {
+    baseContext({ courses: [course({ id: 'c1', category: '경제' }), course({ id: 'c2', category: '경제', startId: 5 })] });
+    const { container } = await mount('/course?topic=0');
+    expect(container.textContent).toContain('코스 1/2');
+    const summary = container.querySelector<HTMLElement>('.course-topic-summary.is-pickable')!;
+    await act(async () => summary.click());
+    const rows = [...document.querySelectorAll<HTMLButtonElement>('.course-picker-row')];
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toHaveAttribute('aria-current', 'true');
+    await act(async () => rows[1].click());
+    expect(container.textContent).toContain('코스 2/2');
+  });
 });
 
 describe('필수 단계 순차 잠금', () => {
