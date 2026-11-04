@@ -19,7 +19,7 @@ export const ProfileAvatarSheet = ({ open, nickname, current, onClose, onSelect 
           {PROFILE_AVATARS.map(a => (
             <li key={a.id}>
               <button type="button" className="profile-avatar-option" aria-pressed={avatarId(current) === a.id} onClick={() => onSelect(avatarValue(a.id, currentBg))}>
-                <ProfileAvatar name={nickname} size={64} avatar={avatarValue(a.id, currentBg)} />
+                <ProfileAvatar name={nickname} size={56} avatar={avatarValue(a.id, currentBg)} />
                 <span>{a.label}</span>
               </button>
             </li>
