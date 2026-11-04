@@ -348,11 +348,11 @@ const CourseScreen = () => {
         </section>
 
         <section aria-label="오늘 할 학습" className="course-home-hero">
-          {/* 왼쪽은 캐릭터, 오른쪽은 등급 진행과 말풍선을 쌓는다 */}
+          {/* 등급은 수달의 레벨로 읽히지 않게 캐릭터와 떨어진 텍스트 한 줄로 둔다 */}
+          <p className="course-home-tier-chip">내 등급 <strong>Lv.{stage.id} {stage.name}</strong></p>
           <div className="course-home-hero-body">
             <div className="course-home-character-wrap">
               <img className="course-home-character" src="/otter/v5/otter-explain.svg" data-otter="explain" alt="" aria-hidden="true" width={96} height={96} />
-              <span className="course-home-tier-chip">Lv.{stage.id} {stage.name}</span>
             </div>
             <div className="course-home-hero-side">
               <div className="course-home-bubble">

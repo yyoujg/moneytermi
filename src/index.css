@@ -813,7 +813,7 @@ button.mission-reward-status {
 .league-ranking-row.is-own-separate { border-top: 2px dashed var(--color-surface); }
 .league-rank-badge { display: inline-flex; box-sizing: border-box; min-width: 28px; height: 28px; align-items: center; justify-content: center; padding: 0 var(--space-1); border-radius: var(--shape-sm); color: var(--color-ink-3); font-size: var(--font-size-body); font-weight: var(--font-weight-bold); line-height: 20px; font-variant-numeric: tabular-nums; }
 .league-rank-badge[data-podium] { position: relative; min-width: 28px; width: 28px; height: 28px; padding: 0; border: 0; background: transparent; }
-.league-rank-badge[data-podium] { color: var(--color-accent-foreground); font-weight: var(--font-weight-bold); }
+.league-rank-badge[data-podium] { color: var(--color-ink); font-weight: var(--font-weight-bold); }
 .league-rank-value { position: absolute; inset-inline: 0; top: 7px; text-align: center; color: var(--color-ink); font-size: var(--font-size-caption); line-height: 16px; }
 .league-rank-name { min-width: 0; overflow: hidden; color: var(--color-ink); font-size: var(--font-size-body); font-weight: var(--font-weight-regular); line-height: 20px; text-overflow: ellipsis; white-space: nowrap; }
 .league-ranking-row.is-me .league-rank-name { color: var(--color-brand-text); font-weight: var(--font-weight-bold); }
@@ -1007,7 +1007,7 @@ button.quiz-option:disabled { opacity: 1; cursor: default; }
 .quiz-answer-feedback { display: flex; flex-shrink: 0; flex-direction: column; gap: var(--space-3); padding: var(--space-5) var(--space-5) max(var(--space-5), env(safe-area-inset-bottom)); border-radius: var(--shape-card) var(--shape-card) 0 0; background: var(--color-card); box-shadow: 0 -4px 16px rgba(23, 29, 35, 0.06); }
 .quiz-answer-heading { display: flex; align-items: center; gap: var(--space-2); }
 .quiz-answer-heading > h2 { flex: 1; min-width: 0; color: var(--color-ink); font-size: var(--font-size-title-3); font-weight: var(--font-weight-bold); line-height: var(--line-height-body); word-break: keep-all; }
-.quiz-answer-mark { display: flex; width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; align-items: center; justify-content: center; background: var(--color-danger-soft); color: var(--color-danger-foreground); }
+.quiz-answer-mark { display: flex; width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; align-items: center; justify-content: center; background: var(--color-surface); color: var(--color-ink-3); }
 .quiz-answer-feedback[data-correct='true'] .quiz-answer-mark { background: var(--color-success-soft); color: var(--color-success-foreground); }
 .quiz-answer-reward { display: flex; flex-shrink: 0; align-items: center; gap: var(--space-2); color: var(--color-reward-foreground); font-size: var(--font-size-label); font-weight: var(--font-weight-bold); line-height: var(--line-height-body); }
 .quiz-answer-reward > span { color: var(--color-ink-3); font-size: var(--font-size-caption); }
@@ -1078,7 +1078,7 @@ button.course-home-topic:not(:last-child)::after { content: ''; position: absolu
 /* 홈 상단: 이번 주 연속 학습 카드 */
 .home-streak-card { flex-shrink: 0; margin: var(--space-1) var(--space-5) var(--space-3); padding: var(--space-4) var(--space-4) var(--space-5); border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); }
 .home-streak-title { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3); color: var(--color-ink); font-size: var(--font-size-body); font-weight: var(--font-weight-semibold); line-height: var(--line-height-body); word-break: keep-all; }
-.home-streak-title strong { color: var(--color-accent-foreground); }
+.home-streak-title strong { color: var(--color-ink); }
 .home-streak-card .week-strip { padding: 0; border: 0; }
 .home-streak-card .week-strip-heading { display: none; }
 .home-streak-card .week-strip-circle { max-width: 44px; background: var(--color-accent-soft); color: var(--color-accent-line); }
@@ -1098,7 +1098,8 @@ button.course-home-topic:not(:last-child)::after { content: ''; position: absolu
 .course-home-level-track > span { display: block; height: 100%; border-radius: inherit; background: var(--color-progress); }
 .course-home-hero .course-home-bubble { margin-bottom: 0; padding: var(--space-4); background: var(--color-card); box-shadow: none; }
 .course-home-hero .course-home-bubble::before { top: 50%; bottom: auto; margin-top: calc(var(--space-2) * -1); background: var(--color-card); }
-.course-home-tier-chip { position: relative; z-index: 1; max-width: 100%; overflow: hidden; text-overflow: ellipsis; padding: 2px var(--space-2); border-radius: var(--shape-full); background: var(--violet-700); color: var(--color-on-brand); font-size: var(--font-size-caption); font-weight: var(--font-weight-bold); line-height: var(--line-height-body); white-space: nowrap; }
+.course-home-tier-chip { margin: 0 0 var(--space-3); color: var(--color-ink-3); font-size: var(--font-size-label); line-height: var(--line-height-body); }
+.course-home-tier-chip strong { color: var(--color-ink); font-weight: var(--font-weight-semibold); }
 .course-home-bubble-topic { color: var(--color-ink-3); font-size: var(--font-size-caption); font-weight: var(--font-weight-semibold); }
 .course-home-hero button.course-home-primary { min-height: 48px; margin-top: 0; font-size: var(--font-size-body) !important; font-weight: var(--font-weight-bold); }
 
@@ -1128,7 +1129,7 @@ button.course-home-rail-card:active { background: var(--color-surface); }
 .course-home-section-heading { margin-top: var(--space-6); }
 /* 리그: 이번 주 내 순위 카드 */
 .league-my-rank { margin-bottom: var(--space-6); padding: var(--space-5); border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); }
-.league-my-rank-value { margin-top: var(--space-1); color: var(--color-accent-foreground); font-size: var(--font-size-title-2); font-weight: var(--font-weight-bold); font-variant-numeric: tabular-nums; }
+.league-my-rank-value { margin-top: var(--space-1); color: var(--color-ink); font-size: var(--font-size-title-2); font-weight: var(--font-weight-bold); font-variant-numeric: tabular-nums; }
 
 /* 리그: 등급 단계 로드맵 */
 .league-tier-road { position: relative; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); margin: 0; padding: var(--space-5) var(--space-2) var(--space-4); border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); list-style: none; }
@@ -1137,8 +1138,8 @@ button.course-home-rail-card:active { background: var(--color-surface); }
 .league-tier-road::after { width: calc(80% * var(--road-progress)); background: var(--color-progress); }
 .league-tier-step { position: relative; z-index: 1; display: flex; min-width: 0; flex-direction: column; align-items: center; gap: var(--space-1); }
 .league-tier-node { display: flex; width: 44px; height: 44px; align-items: center; justify-content: center; border: 2px solid var(--color-line); border-radius: 50%; background: var(--color-card); }
-.league-tier-step[data-state='done'] .league-tier-node { border-color: var(--color-accent-line); background: var(--color-accent-soft); color: var(--color-accent-foreground); }
-.league-tier-step[data-state='current'] .league-tier-node { width: 52px; height: 52px; margin-top: calc(var(--space-1) * -1); border: 3px solid var(--color-progress); box-shadow: 0 0 0 4px var(--color-accent-soft); color: var(--color-accent-foreground); }
+.league-tier-step[data-state='done'] .league-tier-node { border-color: var(--color-line-strong); background: var(--color-card); color: var(--color-ink-2); }
+.league-tier-step[data-state='current'] .league-tier-node { width: 52px; height: 52px; margin-top: calc(var(--space-1) * -1); border: 3px solid var(--color-brand-action); box-shadow: 0 0 0 4px var(--color-accent-soft); color: var(--color-accent-foreground); }
 .league-tier-step[data-state='future'] .league-tier-node .stage-glyph { opacity: 0.45; filter: grayscale(0.6); }
 .league-tier-name { margin-top: var(--space-1); max-width: 100%; overflow: hidden; color: var(--color-ink-3); font-size: var(--font-size-caption); text-overflow: ellipsis; white-space: nowrap; }
 .league-tier-step[data-state='current'] .league-tier-name { color: var(--color-accent-foreground); font-weight: var(--font-weight-bold); }
@@ -1171,8 +1172,9 @@ button.course-home-rail-card:active { background: transparent; opacity: 0.7; }
 .lesson-intro-step { padding: var(--space-3) 0; border-radius: 0; background: transparent; box-shadow: none; border-bottom: 1px solid var(--color-line); }
 /* 선택 전 보기는 흰 면이라 회색 테두리로 경계를 보인다 */
 button.quiz-option.border-transparent { border-color: var(--color-line-strong) !important; }
-.badge-glyph { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--color-accent-soft); color: var(--color-accent-foreground); }
-.badge-glyph.is-locked { border: 1px dashed var(--color-line-strong); background: transparent; color: var(--color-ink-3); }
+/* 획득 배지 = 수달 크림 원 + 갈색 채움 아이콘, 미획득 = 회색 원 + 흐린 선 아이콘 */
+.badge-glyph { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; border: 0; background: var(--color-badge-earned-soft); color: var(--color-badge-earned); }
+.badge-glyph.is-locked { border: 0; background: var(--color-surface); color: var(--color-ink-3); opacity: 0.6; }
 
 /* 국내 앱 레이아웃: 회색 바탕 + 흰 섹션 블록(모서리 없음, 12px 간격). 카드 수를 늘리지 않고 영역만 나눈다. */
 .home-streak-card { margin: 0 0 var(--section-gap); padding: var(--space-4) var(--space-5) var(--space-5); background: var(--color-card); border-bottom: 0; }

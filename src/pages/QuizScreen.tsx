@@ -323,7 +323,7 @@ const QuizScreen = () => {
             if (!showGrading && isSelected) optionStyle = 'bg-[var(--color-accent-soft)] border-[var(--color-progress)] text-[var(--color-ink)]';
             if (showGrading) {
               optionStyle = isCorrectOption ? 'bg-[var(--color-success-soft)] border-[var(--color-success-foreground)] text-[var(--color-ink)]'
-                : isSelected ? 'bg-[var(--color-card)] border-[var(--color-danger-line)] text-[var(--color-ink)]'
+                : isSelected ? 'bg-[var(--color-card)] border-[var(--color-line-strong)] border-dashed text-[var(--color-ink)]'
                 : 'bg-[var(--color-card)] border-transparent text-[var(--color-ink-3)]';
             }
             const tag = !showGrading ? (isSelected ? (status === 'idle' ? '선택' : '내 답') : null) : isCorrectOption ? '정답' : isSelected ? '내 답' : null;
@@ -333,7 +333,7 @@ const QuizScreen = () => {
               : isCorrectOption
                 ? 'text-[var(--color-success-foreground)]'
                 : isSelected
-                  ? 'text-[var(--color-danger-foreground)]'
+                  ? 'text-[var(--color-ink-3)]'
                   : 'border border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-ink-4)]';
 
             return (

@@ -54,6 +54,9 @@
   --accent-brand-ink: var(--violet-700);
 
   /* 상태색 2개: 정답·완료와 오답·오류 전달에만 쓴다. */
+  /* 수달 캐릭터 색(캐릭터 바이블). 배지 일러스트 안에서만 쓴다 */
+  --otter-brown: #a9774f;
+  --otter-cream: #fbebd3;
   --accent-green: #3fa67e;
   --accent-green-ink: #2a7155;
   --accent-green-soft: #e8f3ee;
@@ -163,7 +166,10 @@
   --color-action-boundary: var(--color-line-strong);
 
   /* 진행은 비문자 대비 3:1, 보상 글자는 4.5:1 이상으로 구분한다. */
-  --color-progress: var(--violet-500);
+  /* 보라는 주버튼·현재 위치·링크에만. 진행 막대·완료 체크는 진회색 */
+  --color-progress: var(--color-ink-2);
+  --color-badge-earned: var(--otter-brown);
+  --color-badge-earned-soft: var(--otter-cream);
   --color-on-progress: var(--gray-0);
   --color-reward-foreground: var(--color-accent-foreground);
   --color-selection-soft: var(--color-accent-soft);
@@ -172,9 +178,10 @@
   --color-filter-tray: var(--gray-100);
 
   /* 의미색: 정답·완료·오류 등 상태 전달에만 사용한다. */
-  --color-success-foreground: var(--accent-green-ink);
-  --color-success-action: var(--accent-green-ink);
-  --color-success-soft: var(--accent-green-soft);
+  /* 정답은 초록·빨강 대신 중립색 + ✓/✕ 문구로 구분한다(국내 시세의 빨강=상승과 겹치지 않게). 빨강은 오류에만 */
+  --color-success-foreground: var(--color-ink);
+  --color-success-action: var(--color-ink);
+  --color-success-soft: var(--color-surface);
   --color-success-mark: var(--gray-0);
   --color-danger-foreground: var(--accent-rose-ink);
   --color-danger-action: var(--accent-rose-ink);

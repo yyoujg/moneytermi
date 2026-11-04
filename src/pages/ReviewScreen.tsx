@@ -227,16 +227,16 @@ const QuizPage = () => {
               autoComplete="off"
               className={`w-full px-4 py-4 rounded-button text-sm font-normal outline-none border transition-colors
                 ${status === 'correct' ? 'bg-[var(--color-card)] border-[var(--color-success-foreground)] text-[var(--color-ink)]' :
-                  status === 'wrong' ? 'bg-[var(--color-card)] border-[var(--color-danger-line)] text-[var(--color-ink)]' :
+                  status === 'wrong' ? 'bg-[var(--color-card)] border-dashed border-[var(--color-line-strong)] text-[var(--color-ink)]' :
                   'bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink)] focus:border-[var(--color-ink-3)]'}
               `}
               style={{ caretColor: 'var(--color-ink)' }}
             />
             {status === 'correct' && (
-              <p className="text-xs font-bold text-[var(--color-success-foreground)] mt-1! px-1">정답! 바로 맞혔어요</p>
+              <p className="text-xs font-bold text-[var(--color-success-foreground)] mt-1! px-1">✓ 정답! 바로 맞혔어요</p>
             )}
             {status === 'wrong' && (
-              <p className="text-xs font-bold text-[var(--color-danger-foreground)] mt-1! px-1">틀렸어요. 정답: {word.word}</p>
+              <p className="text-xs font-bold text-[var(--color-ink-2)] mt-1! px-1">✕ 틀렸어요. 정답: {word.word}</p>
             )}
           </div>
 

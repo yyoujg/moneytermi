@@ -122,7 +122,8 @@ describe('이해 확인의 캐릭터·중성 상태 표현', () => {
     expect(feedbackCss).not.toMatch(/--color-(answer|danger|success)-/);
     expect(feedbackCss).not.toContain('.lesson-feedback-character');
     expect(feedbackCss).toContain('.lesson-complete-score-track > span { background: var(--color-ink-3); }');
-    for (const [values, success, danger] of [[light, '#2a7155', '#b23a33']] as const) {
+    // 정답은 초록 대신 중립 잉크(✓/✕와 문구로 구분), 빨강은 오류에만 남긴다
+    for (const [values, success, danger] of [[light, '#1b1a2b', '#b23a33']] as const) {
       expect(resolve('--color-success-foreground', values)).toBe(success);
       expect(resolve('--color-danger-foreground', values)).toBe(danger);
     }
@@ -278,7 +279,7 @@ describe('다른 그림과 통일한 원형 파스텔 순위 표시', () => {
     it(`${name} 숫자는 테마와 관계없이 밝은 그림 안에서 충분히 구분된다`, () => {
       expect(contrast(resolve('--color-league-symbol-ink', values), '#fffbf3')).toBeGreaterThanOrEqual(4.5);
       expect(resolve('--color-league-symbol-ink', values)).toBe('#3d3b52');
-      expect(indexCss).toContain('.league-rank-badge[data-podium] { color: var(--color-accent-foreground); font-weight: var(--font-weight-bold); }');
+      expect(indexCss).toContain('.league-rank-badge[data-podium] { color: var(--color-ink); font-weight: var(--font-weight-bold); }');
       expect(indexCss).toContain('.league-rank-value { position: absolute; inset-inline: 0; top: 7px;');
       expect(indexCss).not.toContain(".league-rank-badge[data-podium='3'] .league-rank-value");
       expect(indexCss).not.toContain(".league-rank-badge[data-podium='1'] { background:");
@@ -346,7 +347,7 @@ describe('보상 장식과 실제 재화·배지 역할의 분리', () => {
       for (const role of ['--color-xp-soft', '--color-points-soft', '--color-info-soft']) {
         expect(values[role], role).toBe('var(--color-surface)');
       }
-      expect(resolve('--color-success-action', values)).toBe(resolve('--accent-green-ink', values));
+      expect(resolve('--color-success-action', values)).toBe(resolve('--color-ink', values));
       expect(resolve('--color-danger-action', values)).toBe(resolve('--accent-rose-ink', values));
     }
   });
