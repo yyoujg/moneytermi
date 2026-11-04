@@ -1234,6 +1234,8 @@ button.quiz-option.border-transparent { border-color: var(--color-line-strong) !
 .course-home-hero { margin: 0 0 var(--section-gap) !important; border-radius: 0 !important; background: var(--color-card) !important; }
 .course-home-hero .course-home-bubble, .course-home-hero .course-home-bubble::before { background: var(--color-accent-soft); }
 .course-home-section-heading { margin: 0 !important; padding: var(--space-5) var(--space-5) 0; background: var(--color-card); }
+/* 홈 난이도 제목(입문·기본 …)은 코스 이름(15px)보다 확실히 크게 */
+.course-home-section-heading h2 { font-size: var(--font-size-title-3); font-weight: var(--font-weight-bold); }
 .course-home-rail { margin: 0 0 var(--section-gap); padding-top: var(--space-3); padding-bottom: var(--space-5); background: var(--color-card); }
 .course-home-overview { margin: 0 0 var(--section-gap) !important; padding: 0 var(--space-5); background: var(--color-card); }
 button.home-review-entry { border-bottom: 0; }
