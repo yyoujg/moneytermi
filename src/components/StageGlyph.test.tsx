@@ -31,11 +31,11 @@ describe('리그 등급 표식', () => {
 });
 
 describe('리그 등급 얼굴 원', () => {
-  it('등급 그림을 원 안에 얼굴 위주로 자르고 배경은 등급 색, 비켜 있는 머리는 가로 위치를 보정한다', () => {
-    const face = mount(<StageFace id={3} size={32} />).querySelector<HTMLElement>('[data-stage-face]')!;
+  it('등급 그림을 원 안에 상반신(소품 포함) 위주로 자르고 배경은 등급 색', () => {
+    const face = mount(<StageFace id={3} size={40} />).querySelector<HTMLElement>('[data-stage-face]')!;
     expect(face.style.backgroundImage).toContain('/league/v3/league-03-saver.svg');
     expect(face.style.backgroundColor).toBe('var(--league-bg-3)');
-    expect(face.style.backgroundPosition).toBe('50% 8%');
-    expect(mount(<StageFace id={1} />).querySelector<HTMLElement>('[data-stage-face]')!.style.backgroundPosition).toBe('40% 8%');
+    expect(face.style.backgroundPosition).toBe('50% 35%');
   });
+
 });
