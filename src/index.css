@@ -1133,7 +1133,7 @@ button.course-home-rail-card:active { background: var(--color-surface); }
 .league-tier-road::before { right: 10%; background: var(--color-surface); }
 .league-tier-road::after { width: calc(80% * var(--road-progress)); background: var(--color-progress); }
 .league-tier-step { position: relative; z-index: 1; display: flex; min-width: 0; flex-direction: column; align-items: center; gap: var(--space-1); }
-.league-tier-node { display: flex; width: 60px; height: 60px; align-items: center; justify-content: center; }
+.league-tier-node { display: flex; width: 68px; height: 68px; align-items: center; justify-content: center; }
 .league-tier-step[data-state='done'] .league-tier-node { color: var(--color-ink-2); }
 .league-tier-step[data-state='current'] .league-tier-node { color: var(--color-accent-foreground); }
 .league-tier-step[data-state='future'] .league-tier-node .stage-glyph { opacity: 1; filter: none; }
