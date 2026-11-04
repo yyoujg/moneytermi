@@ -350,11 +350,18 @@ const CourseScreen = () => {
 
   return (
     <div className={`course-screen ${isCatalog ? 'bg-[var(--color-card)]' : activeTopic ? 'course-topic-screen' : 'app-soft-screen'} flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden`}>
+      {/* 에너지 칩은 주제 카드와 따로 화면 위에 고정한다 */}
+      {activeTopic && <div className="course-energy-bar">
+        <button type="button" className="course-energy-entry is-compact" aria-label={`학습 에너지 ${energy}/${energyMax}, 충전 방법 보기`} onClick={() => openShop('energy')}>
+          <span><img src="/icons/stat/icon-energy.svg" alt="" aria-hidden="true" width={20} height={20} data-stat-icon="energy" /><span><span className="course-energy-label">에너지 </span><strong>{energy}/{energyMax}</strong></span></span>
+          <span className="course-energy-action">충전 방법<ChevronRight size={16} aria-hidden="true" /></span>
+        </button>
+      </div>}
       <div className={activeTopic ? 'course-topic-header' : 'course-home-header'}>
         {activeTopic ? (
           <div className="flex items-center gap-3">
             {/* 뒤로가기는 토스 내비게이션 바가 맡는다(자체 뒤로가기 중복은 검수 반려 사유) */}
-            <button type="button" className="course-topic-switch min-w-0 pr-24 text-left" aria-haspopup="dialog" aria-label={`${activeTopic.category}, 다른 주제로 이동`} onClick={() => setTopicPicker(true)}>
+            <button type="button" className="course-topic-switch min-w-0 text-left" aria-haspopup="dialog" aria-label={`${activeTopic.category}, 다른 주제로 이동`} onClick={() => setTopicPicker(true)}>
               <h1 className="type-page-title flex items-center gap-1"><span className="truncate">{activeTopic.category}</span><ChevronDown size={20} aria-hidden="true" className="shrink-0 text-[var(--color-ink-3)]" /></h1>
               <p className="mt-1! text-xs text-[var(--color-ink-3)]">{levelLabel(activeTopic.level)} · {activeTopic.parts.length}개 코스 · 전체 {topicSteps(activeTopic).done}/{topicSteps(activeTopic).total}단계 완료</p>
             </button>
@@ -368,11 +375,6 @@ const CourseScreen = () => {
           // 앱 이름은 토스 내비게이션 바가 보여준다. 화면에는 제목을 숨기고 스크린리더용으로만 남긴다
           <h1 className="sr-only">홈</h1>
         )}
-        {/* 홈에서는 에너지가 부족할 때만 보인다. 주제 상세에서는 제목 오른쪽의 작은 칩으로 줄인다 */}
-        {!isCatalog && (activeTopic || energy < ENERGY_ACTION_COST) && <button type="button" className={`course-energy-entry${activeTopic ? ' is-compact' : ''}`} aria-label={`학습 에너지 ${energy}/${energyMax}, 충전 방법 보기`} onClick={() => openShop('energy')}>
-          <span><img src="/icons/stat/icon-energy.svg" alt="" aria-hidden="true" width={20} height={20} data-stat-icon="energy" /><span><span className="course-energy-label">에너지 </span><strong>{energy}/{energyMax}</strong></span></span>
-          <span className="course-energy-action">충전 방법<ChevronRight size={16} aria-hidden="true" /></span>
-        </button>}
       </div>
       {isCatalog && <>
         <div className="px-5">

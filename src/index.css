@@ -369,11 +369,16 @@ svg:is(.text-brand-300, .text-brand-400, .text-brand-500, .text-brand-600, .text
 /* 주제 화면(징검다리 노드)은 연회색 바탕 */
 .course-topic-screen { background: var(--color-canvas); }
 /* 회색 바탕 위에 주제 머리와 코스 머리를 각각 흰 카드로 묶는다(경계는 배경색 하나만) */
-.course-topic-screen .course-topic-header { margin: var(--space-3) var(--space-5) 0; padding: var(--space-4) var(--space-5); border-radius: var(--shape-card); background: var(--color-card); }
+.course-topic-screen .course-topic-header { margin: 0 var(--space-5); padding: var(--space-4) var(--space-5); border-radius: var(--shape-card); background: var(--color-card); }
 .course-topic-screen .course-topic-summary { padding-inline: var(--space-5) !important; border-bottom: 0; border-radius: var(--shape-card); background: var(--color-card) !important; }
-/* 스크롤 중 위에 고정될 때 화면 끝에 딱 붙지 않게 띄운다 */
-/* 위 틈은 바탕색 띠(그림자 문법)로 덮어 지나가는 노드가 비치지 않게 한다. 전역 그림자 금지(:where(*))를 넘어야 해서 !important */
-.course-topic-screen .course-topic-summary.sticky { top: var(--space-3); box-shadow: 0 calc(-1 * var(--space-3)) 0 var(--color-canvas) !important; }
+/* 에너지 칩은 카드와 따로 화면 위 바탕색 줄에 고정한다. 코스 머리는 스크롤 중 그 줄 바로 아래에 고정된다 */
+.course-energy-bar { position: sticky; top: 0; z-index: 20; display: flex; justify-content: flex-end; padding: var(--space-2) var(--space-5); background: var(--color-canvas); }
+.course-energy-bar button.course-energy-entry.is-compact { position: static; background: var(--color-card); }
+.course-topic-screen .course-topic-summary.sticky { top: calc(var(--size-touch-min) + var(--space-2) * 2); }
+/* 주제 머리와 첫 코스 머리는 한 카드로 잇는다. 주제 머리 흰 면을 코스 머리 둥근 윗모서리 뒤까지 늘려 평소엔 이음매가 안 보이고,
+   스크롤로 코스 머리만 위에 고정되면 둥근 카드로 보인다 */
+.course-topic-screen .course-topic-header { padding-bottom: calc(var(--space-4) + var(--shape-card)); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.course-topic-screen section:first-of-type > .course-topic-summary { margin-top: calc(-1 * var(--shape-card)) !important; padding-top: var(--space-2) !important; }
 .lesson-intro-check { display: flex; width: 24px; height: 24px; flex-shrink: 0; border-radius: 50%; align-items: center; justify-content: center; background: var(--color-accent-soft); color: var(--color-accent-foreground); }
 .lesson-intro-step { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4); border-radius: var(--shape-inset); background: var(--color-card); box-shadow: var(--shadow-choice); }
 .lesson-intro-step-number { display: flex; width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%; align-items: center; justify-content: center; background: var(--color-progress); color: var(--color-on-progress); font-size: var(--font-size-label); font-weight: var(--font-weight-bold); }
@@ -848,7 +853,7 @@ button.mission-reward-status {
 .league-header-action, .league-header-action * { color: var(--color-ink-2) !important; font-weight: var(--font-weight-semibold) !important; }
 /* 순위 목록은 화면 폭을 꽉 채우고(좌우 여백 상쇄), 행 안 내용은 제목과 같은 20px 선에 맞춘다 */
 .league-ranking-list { margin-inline: calc(-1 * var(--space-5)); border-radius: 0 !important; }
-.league-ranking-row { display: grid; grid-template-columns: 28px 56px minmax(0, 1fr) auto; align-items: center; column-gap: var(--space-2); min-height: 60px; padding: var(--space-3) var(--space-5); }
+.league-ranking-row { display: grid; grid-template-columns: 28px 56px minmax(0, 1fr) auto; align-items: center; column-gap: var(--space-3); min-height: 60px; padding: var(--space-3) var(--space-5); }
 .league-ranking-row + .league-ranking-row { border-top: 1px solid var(--color-surface); }
 .league-ranking-row.is-me { background: var(--color-neutral-soft); }
 .league-ranking-row.is-own-separate { border-top: 2px dashed var(--color-surface); }

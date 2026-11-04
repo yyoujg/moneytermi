@@ -74,7 +74,8 @@ const MyPageScreen = () => {
               // 긴 값은 열 전체를 사용한다. 숫자를 줄이거나 반올림하지 않는다.
               <div key={it.label} className={`my-page-stat${it.value.length > 7 ? ' is-wide' : ''}`}>
                 {it.icon}
-                <span className="my-page-stat-label">{it.label}</span>
+                {/* 이름은 아이콘으로 알 수 있어 화면에서 숨기고 스크린리더용으로만 둔다 */}
+                <span className="my-page-stat-label sr-only">{it.label}</span>
                 <span className="my-page-stat-value" style={{ color: it.color }}><span data-stat-number>{it.value}</span><span className="my-page-stat-unit">{it.unit}</span></span>
               </div>
             ))}
