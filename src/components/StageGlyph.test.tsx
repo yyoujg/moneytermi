@@ -1,7 +1,7 @@
 import { act, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it } from 'vitest';
-import { StageFace, StageGlyph } from './StageGlyph';
+import { StageGlyph, StageIcon } from './StageGlyph';
 
 Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { value: true, configurable: true });
 let cleanup = () => {};
@@ -30,12 +30,8 @@ describe('리그 등급 표식', () => {
   });
 });
 
-describe('리그 등급 얼굴 원', () => {
-  it('등급 그림을 원 안에 상반신(소품 포함) 위주로 자르고 배경은 등급 색', () => {
-    const face = mount(<StageFace id={3} size={40} />).querySelector<HTMLElement>('[data-stage-face]')!;
-    expect(face.style.backgroundImage).toContain('/league/v3/league-03-saver.svg');
-    expect(face.style.backgroundColor).toBe('var(--league-bg-3)');
-    expect(face.style.backgroundPosition).toBe('50% 22%');
+describe('리그 등급 작은 아이콘', () => {
+  it('등급마다 사물 아이콘 파일을 쓴다', () => {
+    expect(mount(<StageIcon id={3} />).querySelector('img')).toHaveAttribute('src', '/league/icons/league-icon-03-saver.svg');
   });
-
 });

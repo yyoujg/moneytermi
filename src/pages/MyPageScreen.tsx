@@ -4,7 +4,7 @@ import { STAT_COLOR } from '../components/StatIcons';
 import { ChevronRight } from '../components/ui/OtterIcons';
 import { useAppContext } from '../context/AppContext';
 import { DEFAULT_NICKNAME, getGrowthStage } from '../constants';
-import { StageFace } from '../components/StageGlyph';
+import { StageIcon } from '../components/StageGlyph';
 import { calcStreak } from '../lib/streak';
 import { buildBadges } from '../lib/badges';
 import { BadgeGlyph } from '../components/mypage/BadgeGlyph';
@@ -69,7 +69,7 @@ const MyPageScreen = () => {
               { icon: <img src="/icons/stat/icon-streak.svg" alt="" width={24} height={24} data-stat-icon="streak" />, color: STAT_COLOR.streak, label: '연속 학습', value: streak.toLocaleString(), unit: '일' },
               { icon: <img src="/icons/stat/icon-xp.svg" alt="" width={24} height={24} data-stat-icon="xp" />, color: STAT_COLOR.xp, label: '경험치', value: xp.toLocaleString(), unit: 'XP' },
               // 리그 등급도 같은 통계 줄에 둔다(그림 + 이름). 승급 조건은 리그 안내 시트에만 쓴다
-              { icon: <StageFace id={leagueStage ?? 1} size={32} />, color: undefined, label: '리그 등급', value: getGrowthStage(leagueStage ?? 1).name, unit: '' },
+              { icon: <StageIcon id={leagueStage ?? 1} />, color: undefined, label: '리그 등급', value: getGrowthStage(leagueStage ?? 1).name, unit: '' },
             ].map(it => (
               // 긴 값은 열 전체를 사용한다. 숫자를 줄이거나 반올림하지 않는다.
               <div key={it.label} className={`my-page-stat${it.value.length > 7 ? ' is-wide' : ''}`}>
