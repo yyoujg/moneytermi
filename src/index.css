@@ -845,7 +845,7 @@ button.mission-reward-status {
 .league-header-action, .league-header-action * { color: var(--color-ink-2) !important; font-weight: var(--font-weight-semibold) !important; }
 /* 순위 목록은 화면 폭을 꽉 채우고(좌우 여백 상쇄), 행 안 내용은 제목과 같은 20px 선에 맞춘다 */
 .league-ranking-list { margin-inline: calc(-1 * var(--space-5)); border-radius: 0 !important; }
-.league-ranking-row { display: grid; grid-template-columns: 28px 44px minmax(0, 1fr) auto; align-items: center; column-gap: var(--space-2); min-height: 60px; padding: var(--space-3) var(--space-5); }
+.league-ranking-row { display: grid; grid-template-columns: 28px 56px minmax(0, 1fr) auto; align-items: center; column-gap: var(--space-2); min-height: 60px; padding: var(--space-3) var(--space-5); }
 .league-ranking-row + .league-ranking-row { border-top: 1px solid var(--color-surface); }
 .league-ranking-row.is-me { background: var(--color-neutral-soft); }
 .league-ranking-row.is-own-separate { border-top: 2px dashed var(--color-surface); }
