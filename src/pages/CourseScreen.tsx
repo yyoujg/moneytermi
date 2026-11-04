@@ -382,8 +382,8 @@ const CourseScreen = () => {
           </ActionButton>}
         </section>
 
-        {/* 학습 순서상 앞 주제 3개를 주제명별로 묶고, 그 아래에 난이도별 코스를 가로 카드로 둔다(잠긴 코스는 자물쇠) */}
-        {[...new Set(topics.map(topic => topic.category))].slice(0, 3).map(category => (
+        {/* 지금 진행 중인 주제 하나만 두고, 그 아래에 난이도별 코스를 가로 카드로 둔다(잠긴 코스는 자물쇠). 다 배웠으면 첫 주제 */}
+        {[focusTopic?.category ?? topics[0]?.category].filter((c): c is string => !!c).map(category => (
           <section key={category} aria-label={category}>
             <div className="course-home-section-heading">
               <h2 className="type-section-title">{category}</h2>
