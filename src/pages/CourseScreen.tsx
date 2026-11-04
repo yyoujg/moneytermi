@@ -521,8 +521,8 @@ const CourseScreen = () => {
             {/* 코스 이름(COURSE_NAMES)이 주제명과 같으면 반복하지 않고 진행 정도만 보여준다 */}
             {courseName(sec.course) !== activeTopic.category && <div className="relative mb-4 flex items-start gap-3">
               <div className="min-w-0">
-                <p className="course-topic-course-meta"><span className="course-level-badge">{levelLabel(sec.course.level)}</span>코스 {partIndex + 1}/{activeTopic.parts.length}</p>
-                <h3 className="mt-1! flex items-center gap-1 text-base font-bold text-[var(--color-ink)] break-keep leading-snug">{courseName(sec.course)}</h3>
+                <p className="course-topic-course-meta">코스 {partIndex + 1}/{activeTopic.parts.length}</p>
+                <h3 className="mt-1! flex items-center gap-1 text-base font-semibold text-[var(--color-ink)] break-keep leading-snug">{courseName(sec.course)}</h3>
               </div>
             </div>}
             {/* 진행은 단계 수 하나로만 말한다(같은 값을 %로 한 번 더 쓰지 않는다) */}
