@@ -229,7 +229,7 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
   background: var(--color-accent-soft);
 }
 .course-node-current::before { content: none; }
-/* 스플래시: 가운데 로고만. 로딩이 1초를 넘을 때만 아래 작은 스피너가 나타난다(진행률이 없어 막대는 쓰지 않는다) */
+/* 스플래시: 달리 그림 한 장. 로딩이 1초를 넘을 때만 문구 아래 작은 스피너가 나타난다(진행률이 없어 막대는 쓰지 않는다) */
 @keyframes splash-spin { to { transform: rotate(360deg); } }
 @keyframes splash-reveal { to { opacity: 1; } }
 .splash-screen {
@@ -240,18 +240,13 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
   align-items: center;
   position: relative;
   justify-content: center;
-  background: var(--color-canvas);
-  color: var(--color-ink);
+  background: var(--color-accent-soft);
 }
-.splash-brand {
-  display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
-  font-size: var(--font-size-title-2);
-  font-weight: var(--font-weight-bold);
-}
+.splash-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
 .splash-spinner {
-  /* 로고가 정확히 가운데 오도록 흐름에서 빼서 로고 아래에 둔다 */
+  /* 그림 속 태그라인과 하단 문구 사이 */
   position: absolute;
-  top: calc(50% + 72px);
+  top: calc(50% + 200px);
   width: 20px;
   height: 20px;
   border: 2px solid var(--color-line);

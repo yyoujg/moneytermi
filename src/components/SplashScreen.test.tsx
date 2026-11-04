@@ -21,10 +21,10 @@ const mount = () => {
 };
 
 describe('SplashScreen', () => {
-  it('배경은 단색이고 로고만 가운데 둔다', () => {
+  it('배경은 그림과 같은 단색 세이지 틴트다', () => {
     const css = readFileSync(resolve(process.cwd(), 'src/index.css'), 'utf8');
     const background = css.match(/\.splash-screen\s*\{([^}]+)\}/)?.[1] ?? '';
-    expect(background).toContain('background: var(--color-canvas)');
+    expect(background).toContain('background: var(--color-accent-soft)');
     expect(background).toContain('justify-content: center');
     expect(background).not.toMatch(/gradient|background-image/);
   });
@@ -40,9 +40,10 @@ describe('SplashScreen', () => {
     const status = container.querySelector('[role="status"]');
 
     expect(status).toHaveAttribute('aria-label', '머니터미를 불러오는 중');
-    expect(container.textContent).toBe('머니터미');
-    // 로고는 v5 수달 한 장(장식)
+    expect(container.textContent).toBe('');
+    // 글자까지 들어간 스플래시 그림 한 장(장식)
     expect(container.querySelectorAll('img')).toHaveLength(1);
+    expect(container.querySelector('img')).toHaveAttribute('src', '/splash/splash.svg');
     expect(container.querySelector('img')).toHaveAttribute('alt', '');
   });
 });
