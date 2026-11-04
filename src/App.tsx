@@ -89,7 +89,7 @@ const WelcomeScreen = () => {
     <div className="app-soft-screen flex h-full flex-col">
       <div className="flex flex-1 flex-col overflow-y-auto px-5 pt-8 pb-4 [&::-webkit-scrollbar]:hidden">
         <img src="/otter/v5/otter-idle.svg" data-otter="idle" alt="" aria-hidden="true" width={96} height={96} className="shrink-0" />
-        <p className="mt-4 text-sm text-[var(--color-ink-3)]">먼저 한 문제 풀어 볼까요?</p>
+        <p className="mt-4 text-sm text-[var(--color-ink-3)]">달리와 먼저 한 문제 풀어 볼까요?</p>
         <h1 className="mt-2 text-xl font-bold leading-snug text-[var(--color-ink)] break-keep">{WELCOME_QUIZ.question}</h1>
 
         <div className="mt-6 flex flex-col gap-3">

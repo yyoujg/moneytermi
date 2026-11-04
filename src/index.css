@@ -1100,6 +1100,7 @@ button.course-home-topic:not(:last-child)::after { content: ''; position: absolu
 .course-home-hero .course-home-bubble::before { top: 50%; bottom: auto; margin-top: calc(var(--space-2) * -1); background: var(--color-card); }
 .course-home-tier-chip { margin: 0 0 var(--space-3); color: var(--color-ink-3); font-size: var(--font-size-label); line-height: var(--line-height-body); }
 .course-home-tier-chip strong { color: var(--color-ink); font-weight: var(--font-weight-semibold); }
+.course-home-bubble-speaker { margin-bottom: var(--space-1); color: var(--color-ink); font-size: var(--font-size-caption); font-weight: var(--font-weight-bold); }
 .course-home-bubble-topic { color: var(--color-ink-3); font-size: var(--font-size-caption); font-weight: var(--font-weight-semibold); }
 .course-home-hero button.course-home-primary { min-height: 48px; margin-top: 0; font-size: var(--font-size-body) !important; font-weight: var(--font-weight-bold); }
 

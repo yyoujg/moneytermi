@@ -356,6 +356,8 @@ const CourseScreen = () => {
             </div>
             <div className="course-home-hero-side">
               <div className="course-home-bubble">
+                {/* 말풍선의 화자는 수달 달리 */}
+                <p className="course-home-bubble-speaker">달리</p>
                 {focusTopic && <p className="course-home-bubble-topic">{focusTopic.category} · {focusSteps.done}/{focusSteps.total}단계</p>}
                 <p>{!focusTopic ? '모두 배웠어요! 가볍게 복습해 볼까요?' : focusSteps.done > 0 || focusTopic.known > 0 ? `${focusStepsLeft}단계만 더 하면 이 주제를 끝내요` : '오늘 첫 용어부터 같이 봐요'}</p>
                 <div className="course-home-level">
