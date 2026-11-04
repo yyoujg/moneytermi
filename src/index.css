@@ -423,7 +423,13 @@ body {
   color: var(--color-ink-2);
   font-size: var(--font-size-body);
   line-height: var(--line-height-body);
+  /* 줄바꿈은 어절 단위로, 줄 길이는 고르게(마지막 줄에 한두 어절만 남지 않게). 긴 글은 아래에서 pretty로 되돌린다 */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  text-wrap: balance;
 }
+/* 여러 줄 읽는 설명은 줄을 꽉 채우고 마지막 줄 고아 어절만 막는다 */
+.word-term-panel-meaning, .word-term-example-copy, .lesson-feedback-reason > p { text-wrap: pretty; }
 /* 전체 폰트 Pretendard로 통일. TDS가 body에, Tailwind가 button·input에 각자 폰트를 넣어서 !important로 덮는다.
    폰트를 못 받으면 기기 기본 폰트, 이모지는 Tossface/시스템 이모지. */
 body, body * {
@@ -1191,7 +1197,6 @@ button.course-step-marker { cursor: pointer; }
 /* 리그: 등급 단계 로드맵 */
 /* 등급 길: 큰 등급 그림을 가로로 넘겨 본다. 현재 등급은 처음에 가운데로 스크롤한다(LeagueScreen) */
 .league-tier-road { position: relative; display: flex; gap: var(--space-2); margin: 0; padding: var(--space-5) var(--space-2) var(--space-4); overflow-x: auto; border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); list-style: none; scroll-snap-type: x mandatory; scroll-padding-inline: var(--space-5); scrollbar-width: none; }
-.stage-face { display: inline-block; border-radius: 50%; background-repeat: no-repeat; background-size: 140%; }
 .league-time-left { padding: 2px var(--space-2); border-radius: var(--shape-sm); background: var(--color-neutral-soft); color: var(--color-ink-2); font-size: var(--font-size-caption); font-weight: var(--font-weight-semibold); font-variant-numeric: tabular-nums; }
 .league-tier-road::-webkit-scrollbar { display: none; }
 .league-tier-step { position: relative; z-index: 1; display: flex; width: 124px; flex-shrink: 0; flex-direction: column; align-items: center; gap: var(--space-1); scroll-snap-align: center; }

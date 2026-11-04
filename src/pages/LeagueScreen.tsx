@@ -20,9 +20,9 @@ type MyRank = { rank: number | null; total: number; points: number };
 // 공유 문구: 이번 주 성과가 있으면 그걸 앞세운다
 const shareMessage = (tier: string, weeklyXp: number, rank: number | null | undefined) =>
   rank
-    ? `이번 주 ${weeklyXp.toLocaleString()}XP로 리그 ${rank}위! 머니터미에서 쉬운 상황부터 같이 시작해요`
+    ? `이번 주 ${weeklyXp.toLocaleString()}XP로 리그 ${rank}위!\n머니터미에서 쉬운 상황부터 같이 시작해요`
     : weeklyXp > 0
-      ? `이번 주 ${weeklyXp.toLocaleString()}XP 모았어요. 머니터미에서 쉬운 상황부터 같이 시작해요`
+      ? `이번 주 ${weeklyXp.toLocaleString()}XP 모았어요.\n머니터미에서 쉬운 상황부터 같이 시작해요`
       : `경제 공부, 뭐부터 볼지 모르겠다면 머니터미에서 ${tier} 리그부터 시작해요!`;
 
 const LeagueScreen = () => {
@@ -167,7 +167,7 @@ const LeagueScreen = () => {
                 <p className="text-2xs text-[var(--color-ink-4)]">{stage.name} · 이번 주 {(mine?.points ?? 0).toLocaleString()}XP{mine?.rank ? ` · ${mine.rank}위` : ''}</p>
               </div>
             </div>
-            <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep">{shareMessage(stage.name, mine?.points ?? 0, mine?.rank)}</p>
+            <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep whitespace-pre-line">{shareMessage(stage.name, mine?.points ?? 0, mine?.rank)}</p>
           </Card>
           <p className="text-2xs text-[var(--color-ink-4)] px-1 anim-fade-up" style={{ '--i': 1 } as React.CSSProperties}>머니터미로 바로 열리는 토스 링크가 함께 보내져요.</p>
           <ActionButton
