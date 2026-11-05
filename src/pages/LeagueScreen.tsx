@@ -49,7 +49,8 @@ const LeagueScreen = () => {
       <div className="pt-4 px-5 pb-4">
         <div className="flex justify-between items-center mb-4">
           <h2 className="type-page-title">리그</h2>
-          <div className="flex items-center gap-1">
+          {/* 44px 버튼이 제목 줄을 키워 제목이 다른 탭보다 내려가지 않게, 버튼 칸 높이를 제목 줄(34px)에 맞춘다 */}
+          <div className="flex h-[34px] items-center gap-1">
             <TextButton size="small" className="league-header-action" aria-label="리그 안내" onClick={() => setSheet('rules')}>
               안내
             </TextButton>
@@ -71,7 +72,7 @@ const LeagueScreen = () => {
       </div>
 
       {/* 랭킹 */}
-      <div className="league-ranking-section px-5 pt-5">
+      <div className="league-ranking-section px-5 pt-8">
         {/* 남은 기간은 제목 바로 옆 뱃지로 */}
         <div className="flex items-center gap-2 mb-3">
           <h3 className="type-section-title">이번 주 TOP 10</h3>

@@ -96,7 +96,7 @@ const MyPageScreen = () => {
         <section aria-labelledby="my-badges-title" className="my-page-panel">
           <div className="flex items-center justify-between mb-3">
             <h3 id="my-badges-title" className="type-section-title">배지 <span className="text-xs font-normal text-[var(--color-ink-3)]">{earned} / {badges.length}</span></h3>
-            <button type="button" onClick={() => navigate('/my/badges')} className="inline-flex min-h-11 items-center gap-1 text-xs text-[var(--color-ink-3)] active:opacity-70" aria-label="배지 전체 보기">더보기<ChevronRight size={16} aria-hidden="true" /></button>
+            <button type="button" onClick={() => navigate('/my/badges')} className="-my-3 inline-flex min-h-11 items-center gap-1 text-xs text-[var(--color-ink-3)] active:opacity-70" aria-label="배지 전체 보기">더보기<ChevronRight size={16} aria-hidden="true" /></button>
           </div>
           {/* 마이에는 받은 배지(높은 단계부터)를 먼저, 그다음 가까운 목표 순으로 한 줄(5개)만. 전체는 더보기 */}
           <ul aria-label="배지 목록" className="my-page-badges grid grid-cols-5 gap-x-1 gap-y-4">
