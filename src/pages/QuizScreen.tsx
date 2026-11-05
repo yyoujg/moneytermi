@@ -277,10 +277,13 @@ const QuizScreen = () => {
       {/* 콘텐츠 — 뜻 보기 4개가 길면 작은 화면에서 넘치므로 이 영역만 스크롤 */}
       <div ref={questionContentRef} className="quiz-question-content flex-1 min-h-0 overflow-y-auto flex flex-col px-5 pt-3 pb-5 gap-4 [&::-webkit-scrollbar]:hidden">
         {/* 문제 카드 */}
-        <div key={currentQuizIndex} className={`quiz-question-card anim-slide-in rounded-card bg-[var(--color-card)] px-5 py-5 flex flex-col items-start text-left gap-3
+        <div key={currentQuizIndex} className={`quiz-question-card anim-slide-in rounded-card bg-[var(--color-card)] px-5 py-5 flex items-start text-left gap-3
           ${status === 'correct' ? 'anim-answer-wash' : ''}
           ${shake ? 'anim-soft-nudge' : ''}
         `}>
+          {/* 문제 왼쪽에 설명하는 수달 */}
+          <img src="/otter/v5/otter-explain.svg" alt="" aria-hidden="true" height={88} className="quiz-question-otter h-[88px] w-auto shrink-0 self-start" data-otter="explain" />
+          <div className="flex min-w-0 flex-1 flex-col items-start gap-3">
           <span className="text-xs text-[var(--color-ink-3)]">{quizItem?.promptLabel}</span>
 
           <h2 ref={questionHeadingRef} tabIndex={-1} className="quiz-prompt-main w-full text-xl font-semibold text-[var(--color-ink)] leading-normal break-keep">
@@ -292,7 +295,7 @@ const QuizScreen = () => {
               <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep">{keepShortUnitsTogether(quizItem.promptSub)}</p>
             </div>
           )}
-
+          </div>
         </div>
 
         <p className="quiz-selection-guide">{status === 'idle' ? answerPending ? '답안 저장을 확인하고 있어요.' : submissionMessage ? '선택한 답안 그대로 다시 저장할 수 있어요.' : '' : gradingConflict ? '서버 채점 결과로 기록했어요. 문제 정보를 다시 확인해 주세요.' : '내 답과 정답을 비교해 보세요.'}</p>
