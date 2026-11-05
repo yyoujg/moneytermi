@@ -244,7 +244,7 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
   align-items: center;
   position: relative;
   justify-content: center;
-  background: var(--color-accent-soft);
+  background: var(--color-splash-bg);
 }
 /* 로딩 화면(화면 전환 대기): 흰 바탕 가운데 달리 + 세 점 + 문구 */
 .loading-screen { display: flex; flex: 1; min-height: 100%; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: var(--color-card); }

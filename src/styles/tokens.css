@@ -14,6 +14,7 @@
   /* 메인 갈색(수달 캐릭터 색): 주버튼 배경 전용. 흰 바탕 대비가 낮아 글자·아이콘·진행막대·1px 테두리에는 쓰지 않는다. */
   --brown-25: #fcf8f1;
   --brown-50: #f8efde;
+  --brown-75: #f1eae1;
   --brown-500: #a39382;
   --brown-600: #8c7c6d;
   --brown-900: #5e5248;
@@ -136,6 +137,8 @@
   /* 보라가 구조색이다: 강조 글자·선택 면·선은 보라 계열, 중성색도 옅은 보라 기운을 띤다. */
   --color-accent-foreground: var(--accent-brand-ink);
   --color-accent-soft: var(--brown-50);
+  /* 스플래시 그림(public/splash/splash.svg) 바탕색. 그림이 화면 폭을 다 채우지 못할 때 양옆이 같은 색으로 이어지게 */
+  --color-splash-bg: var(--brown-75);
   /* 퀴즈·이해 확인 보기 면: 테두리 없이 아주 연한 갈색 */
   --color-choice: var(--brown-25);
   /* 문제 말풍선 테두리: 보기 면(--color-surface)과 같은 계열의 따뜻한 회색 */

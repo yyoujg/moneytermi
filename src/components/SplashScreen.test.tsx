@@ -21,12 +21,19 @@ const mount = () => {
 };
 
 describe('SplashScreen', () => {
-  it('배경은 그림과 같은 단색 세이지 틴트다', () => {
+  it('배경은 그림 바탕과 같은 단색이라 넓은 화면에서도 양옆 색이 갈리지 않는다', () => {
     const css = readFileSync(resolve(process.cwd(), 'src/index.css'), 'utf8');
     const background = css.match(/\.splash-screen\s*\{([^}]+)\}/)?.[1] ?? '';
-    expect(background).toContain('background: var(--color-accent-soft)');
+    expect(background).toContain('background: var(--color-splash-bg)');
     expect(background).toContain('justify-content: center');
     expect(background).not.toMatch(/gradient|background-image/);
+    // 토큰 색 = 스플래시 그림 첫 사각형(바탕) 색
+    const tokens = readFileSync(resolve(process.cwd(), 'src/styles/tokens.css'), 'utf8');
+    const ref = tokens.match(/--color-splash-bg:\s*var\((--[a-z0-9-]+)\)/)?.[1];
+    const tokenHex = tokens.match(new RegExp(`${ref}:\\s*(#[0-9a-fA-F]{6})`))?.[1];
+    const svg = readFileSync(resolve(process.cwd(), 'public/splash/splash.svg'), 'utf8');
+    const artHex = svg.match(/<rect[^>]*fill="(#[0-9A-Fa-f]{6})"/)?.[1];
+    expect(tokenHex?.toLowerCase()).toBe(artHex?.toLowerCase());
   });
 
   it('진행률이 없으니 막대 대신 1초 뒤에 나타나는 스피너만 둔다', () => {
