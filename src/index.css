@@ -1364,3 +1364,5 @@ div[open][tabindex='0'] { border-radius: var(--shape-card) !important; }
 /* 둥근 상자 안쪽 여백은 --box-pad-y/x 한 쌍(20/24)으로 통일. 퀴즈·상황 문제 말풍선과 보기 */
 .quiz-bubble.quiz-bubble { padding: var(--box-pad-y) var(--box-pad-x) !important; }
 .quiz-option.quiz-option { padding: var(--box-pad-y) var(--box-pad-x); }
+/* iOS 사파리(토스 웹뷰)는 button 안 내용을 글자 폭만큼 줄여 가운데에 둔다. TDS 목록 행 버튼의 안쪽 칸을 행 전체 폭으로 편다 */
+button.tds-mobile-list-row > div { width: 100%; box-sizing: border-box; }
