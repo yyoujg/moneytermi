@@ -360,7 +360,7 @@ const CourseScreen = () => {
     <div className={`course-screen ${isCatalog ? 'bg-[var(--color-card)]' : activeTopic ? 'course-topic-screen' : 'app-soft-screen'} flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden`}>
       {/* 에너지 칩은 주제 카드와 따로 화면 위에 고정한다 */}
       {activeTopic && <div className="course-energy-bar">
-        {/* 마이의 학습 기록 중 리그를 뺀 세 가지를 홈 위에 한 줄로(마이와 같은 그림·단위) */}
+        {/* 마이의 학습 기록 중 리그를 뺀 세 가지와 에너지를 같은 모양으로 한 줄에 고르게 둔다. 에너지만 눌러서 충전 방법을 연다 */}
         <ul className="course-home-stats" aria-label="학습 기록">
           {[
             { icon: 'terms', label: '살펴본 용어', value: knownIds.size, unit: '개' },
@@ -372,11 +372,13 @@ const CourseScreen = () => {
               <strong aria-hidden="true">{stat.value.toLocaleString()}</strong><span aria-hidden="true">{stat.unit}</span>
             </li>
           ))}
+          <li>
+            <button type="button" className="course-home-stat-button" aria-label={`학습 에너지 ${energy}/${energyMax}, 충전 방법 보기`} onClick={() => openShop('energy')}>
+              <img src="/icons/stat/icon-energy.svg" alt="" aria-hidden="true" width={20} height={20} data-stat-icon="energy" />
+              <strong aria-hidden="true">{energy}/{energyMax}</strong>
+            </button>
+          </li>
         </ul>
-        <button type="button" className="course-energy-entry is-compact" aria-label={`학습 에너지 ${energy}/${energyMax}, 충전 방법 보기`} onClick={() => openShop('energy')}>
-          <span><img src="/icons/stat/icon-energy.svg" alt="" aria-hidden="true" width={20} height={20} data-stat-icon="energy" /><span><span className="course-energy-label">에너지 </span><strong>{energy}/{energyMax}</strong></span></span>
-          <span className="course-energy-action">충전 방법<ChevronRight size={16} aria-hidden="true" /></span>
-        </button>
       </div>}
       {/* 주제 화면은 따로 머리를 두지 않고 코스 카드(이름 + 주제 목록 버튼)만 둔다. 주제 이름은 스크린리더용 제목으로만 */}
       {activeTopic && <h1 className="sr-only">{activeTopic.category}</h1>}

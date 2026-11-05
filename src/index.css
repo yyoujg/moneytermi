@@ -375,11 +375,15 @@ svg:is(.text-brand-300, .text-brand-400, .text-brand-500, .text-brand-600, .text
 .course-topic-screen .course-topic-summary { padding-inline: var(--space-4) !important; border-bottom: 0; border-radius: var(--shape-card); background: var(--color-card) !important; }
 /* 에너지 칩은 카드와 따로 화면 위 바탕색 줄에 고정한다. 코스 머리는 스크롤 중 그 줄 바로 아래에 고정된다 */
 .course-energy-bar { position: sticky; top: 0; z-index: 20; display: flex; justify-content: flex-end; padding: var(--space-2) var(--space-5); background: var(--color-canvas); }
-.course-energy-bar button.course-energy-entry.is-compact { position: static; background: var(--color-card); }
-.course-topic-screen .course-energy-bar { justify-content: space-between; align-items: center; gap: var(--space-2); }
-.course-home-stats { display: flex; min-width: 0; align-items: center; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+.course-topic-screen .course-energy-bar { align-items: center; }
+/* 네 값을 화면 폭에 고르게 펼친다(양 끝은 화면 여백에 맞춤) */
+.course-home-stats { display: flex; flex: 1; min-width: 0; min-height: var(--size-touch-min); align-items: center; justify-content: space-between; margin: 0; padding: 0; list-style: none; }
 .course-home-stats li { display: flex; align-items: baseline; gap: var(--space-1); white-space: nowrap; }
 .course-home-stats img { align-self: center; }
+/* 에너지도 다른 값과 같은 모양. 누르는 영역만 44px로 넓힌다 */
+button.course-home-stat-button { display: flex; min-height: var(--size-touch-min); align-items: center; gap: var(--space-1); margin: calc(var(--space-2) * -1) calc(var(--space-2) * -1) calc(var(--space-2) * -1) 0; padding: var(--space-2); white-space: nowrap; }
+button.course-home-stat-button:active { opacity: 0.7; }
+.course-home-stat-button strong { color: var(--color-ink); font-size: var(--font-size-body); font-weight: var(--font-weight-semibold); font-variant-numeric: tabular-nums; }
 .course-home-stats strong { color: var(--color-ink); font-size: var(--font-size-body); font-weight: var(--font-weight-semibold); font-variant-numeric: tabular-nums; }
 .course-home-stats span { color: var(--color-ink-3); font-size: var(--font-size-caption); }
 .course-topic-screen .course-topic-summary.sticky { top: calc(var(--size-touch-min) + var(--space-2) * 2); }
@@ -530,8 +534,6 @@ button.word-meaning-detail:not(:disabled):active { opacity: 0.6; }
 .course-home-header { padding: var(--space-4) var(--space-5) var(--space-3); }
 /* 주제 상세: 홈과 달리 제목 옆 에너지 칩 + 단계 타임라인으로 구성한다. */
 .course-topic-header { position: relative; padding: var(--space-5) var(--space-5) var(--space-2); }
-button.course-energy-entry.is-compact { position: absolute; top: var(--space-4); right: var(--space-5); width: auto; margin: 0; padding: 0 var(--space-3); border-radius: var(--shape-full); background: var(--color-surface); }
-.course-energy-entry.is-compact :is(.course-energy-label, .course-energy-action) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .course-steps { position: relative; margin: 0 var(--space-5) var(--space-4); }
 .course-step { position: relative; display: grid; grid-template-columns: 28px minmax(0, 1fr); column-gap: var(--space-3); align-items: start; }
 .course-step:not(:last-child)::before { content: ''; position: absolute; top: 40px; bottom: -12px; left: 13px; width: 2px; background: var(--color-line); }
@@ -541,11 +543,7 @@ button.course-energy-entry.is-compact { position: absolute; top: var(--space-4);
 .course-step[data-step-state='current'] .course-step-marker { border-color: var(--color-neutral-strong); color: var(--color-neutral-strong); }
 .course-step + .course-step { margin-top: var(--space-3); }
 .course-home-header h1 { font-size: var(--font-size-page-title); }
-button.course-energy-entry { display: flex; width: 100%; min-height: var(--size-touch-min); align-items: center; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-1); padding: 0; border: 0; border-radius: var(--shape-sm); background: transparent; color: var(--color-ink-2); font-size: var(--font-size-label); text-align: left; cursor: pointer; }
-.course-energy-entry > span { display: inline-flex; align-items: center; gap: var(--space-1); }
-.course-energy-entry strong { font-weight: var(--font-weight-semibold); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .course-energy-action { flex-shrink: 0; color: var(--color-ink-3); font-size: var(--font-size-label); }
-button.course-energy-entry:active { opacity: 0.7; }
 .course-home-hero { flex-shrink: 0; margin: var(--space-1) var(--space-5) 0; padding: var(--space-5); border: 0; border-radius: var(--shape-card); background: var(--color-card); }
 .course-home-greeting { display: flex; align-items: flex-end; gap: var(--space-2); margin-bottom: var(--space-4); }
 .course-home-character { width: 88px; height: auto; flex-shrink: 0; }

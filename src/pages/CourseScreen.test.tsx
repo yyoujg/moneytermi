@@ -243,8 +243,9 @@ describe('CourseScreen energy gates', () => {
     baseContext({ energy: 7, energyMax: 25 });
     const { container } = await mount(entry);
     const button = container.querySelector<HTMLButtonElement>('[aria-label="학습 에너지 7/25, 충전 방법 보기"]')!;
-    expect(button).toHaveTextContent('에너지 7/25');
-    expect(button).toHaveTextContent('충전 방법');
+    // 다른 학습 기록과 같은 모양(그림 + 숫자). '에너지'·'충전 방법'은 스크린리더 이름에만
+    expect(button).toHaveTextContent('7/25');
+    expect(button).toHaveClass('course-home-stat-button');
     await act(async () => button.click());
     expect(state.openShop).toHaveBeenCalledExactlyOnceWith('energy');
     expect(state.spendEnergy).not.toHaveBeenCalled();
