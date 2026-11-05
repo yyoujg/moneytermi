@@ -25,7 +25,9 @@ export const PointCelebration = ({ reward, onClose }: { reward: PointReward; onC
       ))}
 
       <div role="dialog" aria-label="미션 완료" onClick={e => e.stopPropagation()}
-        className="app-card flex w-full max-w-xs flex-col items-center rounded-card bg-[var(--color-card)] px-6 pb-6 pt-8 text-center anim-pop-in">
+        className="app-card flex w-full max-w-xs flex-col items-center rounded-card bg-[var(--color-card)] px-6 pb-6 pt-6 text-center anim-pop-in">
+        {/* 미션을 마친 기쁨은 응원하는 수달로 */}
+        <img src="/otter/v5/otter-cheer.svg" alt="" aria-hidden="true" width={120} height={120} className="mb-2 h-[120px] w-[120px]" data-otter="cheer" />
         <h2 className="text-xl font-bold text-[var(--color-ink)]">
           미션 완료!
         </h2>

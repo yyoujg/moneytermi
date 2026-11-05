@@ -27,7 +27,7 @@ describe('수달과 미션 보상 안내', () => {
     expect(container).toHaveTextContent('+10 XP');
     expect(container.querySelector('[role="dialog"]')).toHaveAttribute('aria-label', '미션 완료');
     expect(container).not.toHaveTextContent(/코인|포인트/);
-    expect(container.querySelector('img[src*="/characters/"]')).toBeNull();
+    expect(container.querySelector('img[data-otter="cheer"]')).toHaveAttribute('src', '/otter/v5/otter-cheer.svg');
     expect(container.querySelector('button')).toHaveTextContent('확인');
     act(() => container.querySelector('button')!.click());
     expect(onClose).toHaveBeenCalledOnce();
