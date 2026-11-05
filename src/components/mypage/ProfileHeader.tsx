@@ -1,9 +1,12 @@
+import type { ReactNode } from 'react';
 import { ProfileEditIcon } from './ProfileEditIcon';
 import { ProfileAvatar } from '../ProfileAvatar';
 
-export const ProfileHeader = ({ nickname, avatar, onEditAvatar, onEditNickname }: {
+export const ProfileHeader = ({ nickname, avatar, subtitle, onEditAvatar, onEditNickname }: {
   nickname: string;
   avatar?: string;
+  // 닉네임 아래 한 줄(예: 리그 등급)
+  subtitle?: ReactNode;
   onEditAvatar?: () => void;
   onEditNickname: () => void;
 }) => (
@@ -14,6 +17,7 @@ export const ProfileHeader = ({ nickname, avatar, onEditAvatar, onEditNickname }
         <button type="button" onClick={onEditNickname} className="my-profile-name-button" aria-label="닉네임 변경">
           <h3 className="my-profile-name">{nickname}</h3><ProfileEditIcon size={16} />
         </button>
+        {subtitle && <p className="my-profile-subtitle">{subtitle}</p>}
       </div>
     </div>
   </section>

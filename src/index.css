@@ -417,7 +417,7 @@ button.course-home-stat-button:active { opacity: 0.7; }
   z-index: 1;
 }
 /* 마이 통계: 한 줄에 하나씩(아이콘 · 이름 ··· 값). 긴 값도 오른쪽에 그대로 둔다 */
-.my-page-stats-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4) var(--space-3); }
+.my-page-stats-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4) var(--space-3); }
 .my-page-stat { display: flex; min-width: 0; align-items: center; gap: var(--space-3); }
 /* 아이콘(24px)과 등급 원(40px)의 자리를 40px로 맞춰 이름 시작선을 맞춘다 */
 .my-page-stat > svg, .my-page-stat > img { flex: 0 0 32px; width: 32px; object-fit: contain; }
@@ -971,6 +971,7 @@ button.nickname-clear { display: inline-flex; flex: 0 0 44px; width: 44px; heigh
 .my-page-panel.my-page-menu { padding: var(--space-2) 0; overflow: hidden; }
 .my-profile-identity { display: flex; align-items: center; gap: var(--space-4); }
 .my-profile-details { flex: 1; min-width: 0; }
+.my-profile-subtitle { display: flex; align-items: center; gap: var(--space-1); margin-top: calc(var(--space-1) * -1); color: var(--color-ink-2); font-size: var(--font-size-label); font-weight: var(--font-weight-semibold); }
 .my-profile-name { color: var(--color-ink); font-size: var(--font-size-title-3); font-weight: var(--font-weight-bold); line-height: var(--line-height-title); letter-spacing: var(--letter-spacing-title); word-break: keep-all; overflow-wrap: anywhere; }
 .my-profile-actions { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-2); margin-top: var(--space-4); }
 button.my-profile-action { display: inline-flex; min-width: 0; min-height: 44px; align-items: center; justify-content: center; gap: var(--space-2); padding: var(--space-2) var(--space-2); border: 0; border-radius: var(--shape-md); background: var(--color-surface); color: var(--color-ink-2); font-size: var(--font-size-label); font-weight: var(--font-weight-semibold); line-height: 20px; word-break: keep-all; }
