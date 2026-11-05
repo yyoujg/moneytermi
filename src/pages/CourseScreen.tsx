@@ -2,7 +2,6 @@ import React, { useMemo, useRef, useLayoutEffect, useEffect, useState } from 're
 import { LockKeyhole } from '../components/ui/OtterIcons';
 import { List, ListRow } from '@toss/tds-mobile';
 import { COURSE_NAMES } from '../lib/topicImages';
-import { TopicThumb } from '../components/TopicThumb';
 import { ChevronRight } from '../components/ui/ControlIcons';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
@@ -459,7 +458,6 @@ const CourseScreen = () => {
           <div className={`course-topic-summary sticky top-0 z-10 mx-5 mt-3 mb-4 overflow-hidden py-3 ${sec.course.id === focus?.courseId ? 'anim-fade' : ''}`}>
             {/* 코스 카드 전체가 주제 고르기 버튼. 아이콘만 두면 앱 메뉴로 읽혀 '다른 주제'를 글자로 적는다. 진행은 아래 단계 노드로 보인다 */}
             <button type="button" className="course-topic-list-button" aria-label={`${courseName(sec.course)}, 다른 주제 고르기`} onClick={() => navigate('/course/topics')}>
-              <TopicThumb category={activeTopic.category} courseId={sec.course.id} size={52} />
               <span className="min-w-0 flex-1">
                 <span className="course-topic-card-eyebrow">{activeTopic.category}</span>
                 <h3 className="course-topic-card-title">{courseName(sec.course)}</h3>

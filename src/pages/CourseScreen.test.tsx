@@ -174,7 +174,7 @@ describe('주제 화면은 코스를 한 페이지에 모두', () => {
     baseContext({ courses: [course({ id: 'c1', category: '경제' }), course({ id: 'c2', category: '경제', startId: 5 })] });
     const { container } = await mount('/course?topic=0');
     expect(container.querySelectorAll('[data-course-section]')).toHaveLength(2);
-    // 코스 카드는 그림·주제 이름·코스 이름과 주제 목록 버튼만(코스 번호·진행 막대 없음)
+    // 코스 카드는 주제 이름·코스 이름과 주제 목록 버튼만(코스 번호·진행 막대 없음)
     expect(container.textContent).not.toContain('코스 1/2');
     expect(container.querySelector('.course-topic-summary [role="progressbar"]')).toBeNull();
   });
