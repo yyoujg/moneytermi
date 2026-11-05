@@ -83,13 +83,15 @@ const LessonCheckScreen = () => {
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto px-5 py-5 [&::-webkit-scrollbar]:hidden">
         <h1 className="mb-4! text-xs text-[var(--color-ink-3)]">{attempt === 1 ? '상황을 읽고 골라보세요' : '틀린 문제 다시 풀기'}</h1>
-        <Card pad="sm" className="mb-5 flex items-start gap-3">
-          {/* 문제 왼쪽에 설명하는 수달 */}
+        {/* 설명하는 수달은 문제 카드 밖 왼쪽에 둔다 */}
+        <div className="mb-5 flex items-start gap-2">
           <img src="/otter/v5/otter-explain.svg" alt="" aria-hidden="true" height={88} className="quiz-question-otter h-[88px] w-auto shrink-0 self-start" data-otter="explain" />
-          <h2 className="min-w-0 flex-1 quiz-prompt-main text-lg font-bold text-[var(--color-ink)] leading-relaxed break-keep">
-            {keepShortUnitsTogether(question.promptMain)}
-          </h2>
-        </Card>
+          <Card pad="sm" className="min-w-0 flex-1">
+            <h2 className="quiz-prompt-main text-lg font-bold text-[var(--color-ink)] leading-relaxed break-keep">
+              {keepShortUnitsTogether(question.promptMain)}
+            </h2>
+          </Card>
+        </div>
         <div className="flex flex-col gap-2">
           {question.options.map((option, optionIndex) => (
             <button
