@@ -6,7 +6,7 @@ import type { Course, Word } from '../types';
 import CourseScreen from './CourseScreen';
 import { weekStart } from '../lib/periodMissions';
 import HomeScreen from './HomeScreen';
-import LessonIntroScreen from './LessonIntroScreen';
+import LessonIntroScreen, { LESSON_INTRO_MS } from './LessonIntroScreen';
 import { MISSION_XP } from '../constants';
 import { showModal } from '../components/AlertModal';
 import { logClick } from '../lib/analytics';
@@ -51,6 +51,11 @@ vi.mock('../lib/supabase', () => ({ supabase: { rpc: (...args: unknown[]) => sta
 vi.mock('../components/PointCelebration', () => ({ PointCelebration: () => <div>미션 보상 축하</div> }));
 
 Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { value: true, configurable: true });
+
+// 레슨 시작 로딩(LessonIntroScreen)이 끝나 다음 화면으로 넘어갈 때까지 기다린다
+const passLessonIntro = async () => {
+  await act(async () => { await new Promise(resolve => setTimeout(resolve, LESSON_INTRO_MS + 50)); });
+};
 
 const word = (id: number): Word => ({
   id,
@@ -375,7 +380,7 @@ describe('CourseScreen energy gates', () => {
     let resolveSpend!: (value: boolean) => void;
     state.spendEnergy = vi.fn(() => new Promise<boolean>(resolve => { resolveSpend = resolve; }));
     state.ctx = { ...state.ctx, spendEnergy: state.spendEnergy };
-    const { container, clickButtonContaining } = await mount();
+    const { container } = await mount();
     const button = [...container.querySelectorAll('button')].find(el => el.textContent?.includes('용어1'))!;
 
     act(() => {
@@ -386,7 +391,7 @@ describe('CourseScreen energy gates', () => {
 
     await act(async () => { resolveSpend(true); });
     expect(container.querySelector('[data-location]')).toHaveTextContent('/lesson-intro');
-    await clickButtonContaining('시작하기');
+    await passLessonIntro();
     expect(container.textContent).toContain('단어 카드');
   });
 
@@ -409,7 +414,7 @@ describe('CourseScreen energy gates', () => {
     const { container, clickButtonContaining } = await mount('/course?topic=0');
     expect(container.textContent).toContain('코스 1/1');
     await clickButtonContaining('용어1');
-    await clickButtonContaining('시작하기');
+    await passLessonIntro();
     expect(container.textContent).toContain('단어 카드');
     expect(state.spendPoints).not.toHaveBeenCalled();
     expect(state.spendEnergy).toHaveBeenCalledWith(1, 'lesson', 'c1-l0:1,2,3,4');
@@ -420,7 +425,7 @@ describe('CourseScreen energy gates', () => {
     const { container, clickButtonContaining } = await mount();
     expect(container.textContent).toContain('완료');
     await clickButtonContaining('용어5');
-    await clickButtonContaining('시작하기');
+    await passLessonIntro();
     expect(container.textContent).toContain('단어 카드');
   });
 
@@ -433,10 +438,9 @@ describe('CourseScreen energy gates', () => {
 
     expect(state.spendEnergy).toHaveBeenCalledTimes(1);
     expect(state.pickRecallWords).toHaveBeenCalledWith({ excludeIds: [1, 2, 3, 4], count: 3 });
-    // 처음 여는 레슨은 미리보기에서 인출 단계까지 안내한 뒤 퀴즈로 보낸다
-    expect(container.textContent).toContain('가볍게 다시 보기');
-    expect(container.textContent).toContain('지난 용어 2개');
-    await clickButtonContaining('시작하기');
+    // 처음 여는 레슨은 수달 로딩을 잠깐 보여준 뒤 인출 퀴즈로 보낸다
+    expect(container.textContent).toContain('새 용어 4개를 준비하고 있어요');
+    await passLessonIntro();
     expect(container.textContent).toContain('퀴즈 화면');
     expect(container.textContent).not.toContain('단어 카드');
   });
@@ -471,7 +475,7 @@ describe('학습 주제의 역할 아이콘', () => {
     const { container, clickButtonContaining } = await mount();
     expect(container.querySelector('.course-node-current [data-learning-status]')).toHaveTextContent('진행 중');
     await clickButtonContaining('용어1');
-    await clickButtonContaining('시작하기');
+    await passLessonIntro();
     expect(container.textContent).toContain('단어 카드');
     expect(state.spendEnergy).toHaveBeenCalledWith(1, 'lesson', 'c1-l0:1,2,3,4');
   });

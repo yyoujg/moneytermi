@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Word } from '../types';
 import { logClick } from '../lib/analytics';
-import LessonIntroScreen from './LessonIntroScreen';
+import LessonIntroScreen, { LESSON_INTRO_MS } from './LessonIntroScreen';
 
 vi.mock('../lib/analytics', () => ({ logClick: vi.fn() }));
 Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { value: true, configurable: true });
@@ -36,24 +36,18 @@ const mount = (state: unknown) => {
   return container;
 };
 
-describe('레슨 미리보기', () => {
-  it('배울 용어와 진행 순서를 보여주고 시작하면 다음 단계로 넘어간다', () => {
+describe('레슨 시작 로딩', () => {
+  it('수달 로딩과 새 용어 수를 잠깐 보여준 뒤 다음 단계로 넘어간다', () => {
+    vi.useFakeTimers();
     const container = mount({ courseTitle: '경제 기초 개념 1', words: [word(1), word(2)], warmupCount: 3, courseId: 'c1', nodeId: 'c1-l0', next: { pathname: '/quiz', state: { mode: 'lesson_warmup' } } });
-    expect(container).toHaveTextContent('경제 기초 개념 1');
-    expect(container).toHaveTextContent('새 용어 2개를 배워요');
-    expect([...container.querySelectorAll('ul li')].map(li => li.textContent)).toEqual(['용어1', '용어2']);
-    expect([...container.querySelectorAll('.lesson-intro-step .type-item-title')].map(el => el.textContent)).toEqual(['가볍게 다시 보기', '용어 살펴보기', '용어 퀴즈로 확인']);
-    expect(container).toHaveTextContent('지난 용어 3개');
-    expect(container.querySelector('[aria-label*="돌아가기"]')).toBeNull();
-    act(() => [...container.querySelectorAll('button')].find(b => b.textContent === '시작하기')!.click());
+    expect(container.querySelector('.loading-screen')).not.toBeNull();
+    expect(container).toHaveTextContent('새 용어 2개를 준비하고 있어요');
+    expect(container.querySelector('button')).toBeNull();
+    expect(container.querySelector('[data-location]')).toBeNull();
+    act(() => { vi.advanceTimersByTime(LESSON_INTRO_MS); });
     expect(container.querySelector('[data-location]')).toHaveTextContent('/quiz {"mode":"lesson_warmup"}');
     expect(logClick).toHaveBeenCalledWith('lesson_intro_start', { course_id: 'c1', node_id: 'c1-l0', total: 2 });
-  });
-
-  it('복습 단계가 없으면 용어 살펴보기부터 시작한다', () => {
-    const container = mount({ words: [word(1)], next: { pathname: '/quiz', state: null } });
-    expect([...container.querySelectorAll('.lesson-intro-step-number')].map(el => el.textContent)).toEqual(['1', '2']);
-    expect(container.querySelector('.lesson-intro-step .type-item-title')).toHaveTextContent('용어 살펴보기');
+    vi.useRealTimers();
   });
 
   it('상태 없이 열면 코스로 보낸다', () => {

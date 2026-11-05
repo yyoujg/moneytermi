@@ -44,10 +44,11 @@ const expandFromNode = (nodeId: string, courseTitle: string) => new Promise<void
   const ov = document.createElement('div');
   ov.setAttribute('aria-hidden', 'true');
   Object.assign(ov.style, { position: 'fixed', left: `${left}px`, top: `${top}px`, width: `${app?.width ?? window.innerWidth}px`, height: `${app?.height ?? window.innerHeight}px`, zIndex: '2000', pointerEvents: 'none', overflow: 'hidden', background: 'var(--color-card)', display: 'flex', alignItems: 'center', justifyContent: 'center' });
+  // 가운데 그림은 로딩 화면과 같은 수달(용어 카드를 보는 애니메이션). 초록 바탕 앱 아이콘(logo.png)은 쓰지 않는다
   const logo = document.createElement('img');
-  logo.src = '/logo.png';
+  logo.src = '/loading/otter-study.svg';
   logo.alt = '';
-  Object.assign(logo.style, { width: '180px', height: '180px', objectFit: 'contain', transform: 'translateY(-32px)', opacity: '0', transition: 'opacity 180ms ease-out' });
+  Object.assign(logo.style, { width: 'auto', height: '150px', transform: 'translateY(-32px)', opacity: '0', transition: 'opacity 180ms ease-out' });
   ov.appendChild(logo);
   const title = document.createElement('span');
   title.textContent = courseTitle;
