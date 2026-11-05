@@ -64,7 +64,7 @@ const MyPageScreen = () => {
         />
 
         <Card pad="lg" className="my-page-stats anim-fade-up" aria-labelledby="my-stats-title">
-          <h3 id="my-stats-title" className="type-section-title mb-3">학습 기록</h3>
+          <h3 id="my-stats-title" className="type-section-title mb-4">학습 기록</h3>
           <div className="my-page-stats-grid">
             {/* 통계 아이콘은 수달 3색 그림(public/icons/stat) */}
             {[
@@ -88,13 +88,13 @@ const MyPageScreen = () => {
       <div className="my-page-sections shrink-0 px-5">
         {/* 이번 주 학습 칸(홈에서 옮겨 왔다). 연속 일수는 위 통계에 있어 제목에서 반복하지 않는다 */}
         <section aria-labelledby="my-streak-title" className="my-page-panel my-streak">
-          <h3 id="my-streak-title" className="type-section-title mb-3">이번 주 학습</h3>
+          <h3 id="my-streak-title" className="type-section-title mb-4">이번 주 학습</h3>
           <WeekStrip attendanceDates={attendanceDates} />
         </section>
 
         {/* 배지 */}
         <section aria-labelledby="my-badges-title" className="my-page-panel">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-4">
             <h3 id="my-badges-title" className="type-section-title">배지 <span className="text-xs font-normal text-[var(--color-ink-3)]">{earned} / {badges.length}</span></h3>
             <button type="button" onClick={() => navigate('/my/badges')} className="-my-3 inline-flex min-h-11 items-center gap-1 text-xs text-[var(--color-ink-3)] active:opacity-70" aria-label="배지 전체 보기">더보기<ChevronRight size={16} aria-hidden="true" /></button>
           </div>
