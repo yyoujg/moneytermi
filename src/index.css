@@ -991,15 +991,12 @@ button.my-profile-action:focus-visible { outline: 2px solid var(--color-brand-de
 .energy-shop-summary { padding: 0; }
 .energy-shop-summary-heading { display: flex; align-items: center; gap: var(--space-3); }
 .energy-shop-balance { flex: 1; min-width: 0; }
-.energy-shop-balance h2 { color: var(--color-ink-3); font-size: var(--font-size-label); font-weight: var(--font-weight-semibold); line-height: var(--line-height-body); }
 .energy-shop-balance p { display: flex; align-items: baseline; gap: var(--space-1); margin-top: 2px; color: var(--color-ink-3); font-size: var(--font-size-headline); font-variant-numeric: tabular-nums; }
 .energy-shop-balance strong { color: var(--color-ink); font-size: var(--font-size-title-1); font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); letter-spacing: var(--letter-spacing-display); }
 .energy-shop-state { flex-shrink: 0; color: var(--color-ink-3); font-size: var(--font-size-label); font-weight: var(--font-weight-semibold); }
-.energy-shop-state[data-full='true'] { color: var(--color-ink-2); }
 .energy-shop-progress { height: 5px; overflow: hidden; margin-top: var(--space-2); border-radius: var(--shape-full); background: var(--color-surface); }
 .energy-shop-progress > span { display: block; height: 100%; border-radius: inherit; background: var(--color-progress); }
 .energy-shop-progress[data-full='true'] > span { background: var(--color-progress); }
-.energy-shop-timer { margin-top: var(--space-2); color: var(--color-ink-3); font-size: var(--font-size-label); line-height: var(--line-height-relaxed); word-break: keep-all; }
 .energy-shop-wallet { display: flex; align-items: center; gap: var(--space-2); padding: 0 2px; color: var(--color-ink-3); font-size: var(--font-size-label); line-height: 24px; }
 .energy-shop-wallet > strong { display: flex; align-items: baseline; gap: var(--space-1); margin-left: auto; color: var(--color-ink); font-size: var(--font-size-headline); font-weight: var(--font-weight-bold); font-variant-numeric: tabular-nums; }
 .energy-shop-wallet > strong > span { color: var(--color-ink-3); font-size: var(--font-size-label); font-weight: var(--font-weight-regular); }
@@ -1016,13 +1013,9 @@ button.energy-shop-option:focus-visible { outline: 2px solid var(--color-ink-3);
 .energy-shop-option-body > span { color: var(--color-ink-3); font-size: var(--font-size-label); line-height: var(--line-height-body); word-break: keep-all; }
 .energy-shop-option-state { display: flex; max-width: 90px; flex-shrink: 0; align-items: center; justify-content: flex-end; gap: var(--space-1); color: var(--color-ink-3); font-size: var(--font-size-caption); font-weight: var(--font-weight-semibold); line-height: var(--line-height-relaxed); text-align: right; word-break: keep-all; }
 .energy-shop-option-state > svg { flex-shrink: 0; }
-.energy-shop-caption { padding-inline: 2px; color: var(--color-ink-3); font-size: var(--font-size-label); line-height: var(--line-height-relaxed); word-break: keep-all; overflow-wrap: anywhere; }
 .energy-shop-notice { padding: var(--space-3); border: 1px solid var(--color-line); border-radius: var(--shape-lg); background: var(--color-surface); color: var(--color-ink-2); font-size: var(--font-size-label); line-height: var(--line-height-relaxed); word-break: keep-all; }
 .energy-shop-notice[data-tone='network'] { border-color: var(--color-danger-line); background: var(--color-danger-soft); color: var(--color-danger-foreground); }
-.energy-shop-info { padding: var(--space-4) 0 0; border-top: 1px solid var(--color-line); }
-.energy-shop-info h2, .energy-shop-info h3 { color: var(--color-ink); font-size: var(--font-size-body); font-weight: var(--font-weight-semibold); line-height: var(--line-height-relaxed); }
-.energy-shop-info h3 { margin-top: var(--space-3); }
-.energy-shop-info p { margin-top: var(--space-1); color: var(--color-ink-3); font-size: var(--font-size-label); line-height: var(--line-height-relaxed); word-break: keep-all; overflow-wrap: anywhere; }
+.energy-shop-info { color: var(--color-ink-3); font-size: var(--font-size-label); line-height: var(--line-height-relaxed); word-break: keep-all; }
 @media (max-width: 350px) {
   .energy-shop-content { padding-inline: var(--space-4); }
   button.energy-shop-option { gap: var(--space-2); padding: var(--space-3); }

@@ -102,7 +102,7 @@ describe('TopBar energy shop', () => {
   it('에너지 시트에는 광고 충전만 있고 코인 완충·부스트는 보이지 않는다', async () => {
     const { container } = await mount();
 
-    expect(container.querySelector('[role="dialog"]')).toHaveTextContent('광고 보고 에너지 받기');
+    expect(container.querySelector('[role="dialog"]')).toHaveTextContent('광고 보고 +5');
     expect(container.textContent).not.toMatch(/코인|부스트|에너지 모두 충전/);
   });
 
@@ -118,11 +118,11 @@ describe('TopBar energy shop', () => {
     state.ads.enabled = true;
     state.ads.preload = vi.fn(() => new Promise(() => {}));
     const { container } = await mount();
-    const adButton = [...container.querySelectorAll('button')].find(el => el.textContent?.includes('광고 보고 에너지 받기')) as HTMLButtonElement | undefined;
+    const adButton = [...container.querySelectorAll('button')].find(el => el.textContent?.includes('광고 보고 +5')) as HTMLButtonElement | undefined;
 
     expect(adButton).toBeDefined();
     expect(adButton!.disabled).toBe(true);
-    expect(container.textContent).toContain('광고를 미리 준비하고 있어요');
+    expect(adButton!.textContent).toContain('준비 중');
 
     await act(async () => { adButton!.click(); });
 
@@ -141,7 +141,7 @@ describe('TopBar energy shop', () => {
     });
     const { container } = await mount();
     await act(async () => { await Promise.resolve(); });
-    const adButton = [...container.querySelectorAll('button')].find(el => el.textContent?.includes('광고 보고 에너지 받기')) as HTMLButtonElement;
+    const adButton = [...container.querySelectorAll('button')].find(el => el.textContent?.includes('광고 보고 +5')) as HTMLButtonElement;
 
     act(() => {
       adButton.click();
@@ -170,7 +170,7 @@ describe('TopBar energy shop', () => {
     });
     const { container } = await mount();
     await act(async () => { await Promise.resolve(); });
-    const adButton = [...container.querySelectorAll('button')].find(el => el.textContent?.includes('광고 보고 에너지 받기')) as HTMLButtonElement;
+    const adButton = [...container.querySelectorAll('button')].find(el => el.textContent?.includes('광고 보고 +5')) as HTMLButtonElement;
 
     await act(async () => { adButton.click(); });
 
