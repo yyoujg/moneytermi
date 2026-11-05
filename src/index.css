@@ -583,7 +583,7 @@ button.course-home-primary {
 .course-home-catalog-heading h2 { color: var(--color-ink); font-size: var(--font-size-section-title); font-weight: var(--font-weight-bold); line-height: var(--line-height-body); }
 .course-home-catalog-heading > span { flex-shrink: 0; color: var(--color-ink-3); font-size: var(--font-size-label); }
 /* 난이도 탭: 밑줄·구분선 없이 글자만. 고른 탭은 진하게, 나머지는 연한 회색(20px 굵게라 큰 글자 대비 3:1 기준) */
-.course-home-filters { display: flex; width: 100%; gap: var(--space-4); }
+.course-home-filters { display: flex; width: 100%; gap: var(--space-6); }
 button.course-home-filter { flex: none; min-width: 0; min-height: var(--size-touch-min); padding: 0; border: 0; border-radius: 0 !important; background: transparent; color: var(--color-tab-inactive); font-size: var(--font-size-title-3) !important; font-weight: var(--font-weight-bold) !important; white-space: nowrap; }
 button.course-home-filter[aria-selected='true'] { color: var(--color-brand-text); }
 .course-home-topic-list { display: grid; gap: var(--space-7); padding: var(--space-6) 0; }
