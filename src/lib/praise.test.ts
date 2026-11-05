@@ -13,7 +13,7 @@ describe('praise copy', () => {
   });
 
   it('uses a light retry message for missed quiz results', () => {
-    expect(praiseForQuiz({ accuracy: 40, maxCombo: 1, total: 5 })).toBe('헷갈린 문제까지 다시 봤어요. 차근차근 한 번 더 확인해요.');
+    expect(praiseForQuiz({ accuracy: 40, maxCombo: 1, total: 5 })).toBe('해설을 보고 틀린 문제를 한 번 더 풀어봐요.');
   });
 
   it('uses a clear correct-answer message', () => {

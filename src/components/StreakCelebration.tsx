@@ -76,8 +76,8 @@ export const StreakCelebration = () => {
               className="w-9 h-9 flex items-center justify-center"
               style={{
                 borderRadius: 9999,
-                background: d.attended ? 'var(--color-ink)' : 'var(--color-surface)',
-                border: d.isToday && !d.attended ? '2px solid var(--color-ink)' : 'none',
+                background: d.attended ? 'var(--color-progress)' : 'var(--color-surface)',
+                border: d.isToday && !d.attended ? '2px solid var(--color-progress)' : 'none',
                 opacity: d.isFuture ? 0.5 : 1,
               }}
             >

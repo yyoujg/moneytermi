@@ -9,6 +9,7 @@ import { ActionButton } from '../components/ui/ActionButton';
 import { LessonCheckFeedback } from '../components/learning/LessonCheckFeedback';
 import { LessonCheckSummary, type LessonCheckRoundResult } from '../components/learning/LessonCheckSummary';
 import { keepShortUnitsTogether } from '../lib/formatText';
+import { shuffle } from '../lib/random';
 
 const LessonCheckScreen = () => {
   const navigate = useNavigate();
@@ -48,8 +49,8 @@ const LessonCheckScreen = () => {
       <LessonCheckSummary
         results={roundResults}
         reviewCount={mistakes.length}
-        onRetry={() => { setQuestions(mistakes); setMistakes([]); setIndex(0); setSelected(null); setAttempt(value => value + 1); }}
-        onBack={() => navigate(backPath)}
+        onRetry={() => { setQuestions(mistakes.map(item => ({ ...item, options: shuffle(item.options) }))); setMistakes([]); setIndex(0); setSelected(null); setAttempt(value => value + 1); }}
+        onBack={() => navigate(backPath, { state: { openFocus: true } })}
       />
     );
   }
@@ -74,16 +75,15 @@ const LessonCheckScreen = () => {
     <div className="lesson-check-screen app-soft-screen flex h-full flex-col">
       <div className="app-soft-header px-5 pb-4 pt-4">
         <div className="flex items-center gap-3">
-          <div role="progressbar" aria-label="이해 확인 진행률" aria-valuemin={0} aria-valuemax={questions.length} aria-valuenow={index + 1} className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--color-button-secondary)]">
-            <div className="h-full rounded-full bg-[var(--color-progress)]" style={{ width: ((index + 1) / questions.length * 100) + '%' }} />
+          <div role="progressbar" aria-label="이해 확인 진행률" aria-valuemin={0} aria-valuemax={questions.length} aria-valuenow={index} className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--color-button-secondary)]">
+            <div className="h-full rounded-full bg-[var(--color-progress)]" style={{ width: (index / questions.length * 100) + '%' }} />
           </div>
           <p className="text-xs tabular-nums text-[var(--color-ink-3)]">{index + 1}/{questions.length}</p>
         </div>
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto px-5 py-5 [&::-webkit-scrollbar]:hidden">
-        <h1 className="mb-4! text-xs text-[var(--color-ink-3)]">{attempt === 1 ? '이해 확인 · 첫 풀이' : `틀린 문제 재도전 ${attempt - 1}차`}</h1>
+        <h1 className="mb-4! text-xs text-[var(--color-ink-3)]">{attempt === 1 ? '상황을 읽고 골라보세요' : '틀린 문제 다시 풀기'}</h1>
         <Card pad="sm" className="mb-5">
-          <p className="mb-2! text-xs text-[var(--color-ink-3)]">상황을 읽고 골라보세요</p>
           <h2 className="quiz-prompt-main text-lg font-bold text-[var(--color-ink)] leading-relaxed break-keep">
             {keepShortUnitsTogether(question.promptMain)}
           </h2>

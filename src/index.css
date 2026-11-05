@@ -711,7 +711,7 @@ button.action-button.word-term-card-link { min-height: var(--size-touch-min); ma
 .lesson-feedback-progress { height: 4px; margin-top: var(--space-3); }
 .lesson-feedback-progress > span, .lesson-complete-score-track > span { display: block; height: 100%; border-radius: inherit; }
 .lesson-feedback-progress > span { background: var(--color-progress); }
-.lesson-complete-score-track > span { background: var(--color-ink-3); }
+.lesson-complete-score-track > span { background: var(--color-progress); }
 .lesson-feedback-content { flex: 1; min-height: 0; overflow-y: auto; padding: var(--space-3) var(--space-5) var(--space-6); scrollbar-width: none; }
 .lesson-feedback-content::-webkit-scrollbar, .lesson-complete-content::-webkit-scrollbar { display: none; }
 .lesson-feedback-intro { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-5); }
@@ -721,10 +721,10 @@ button.action-button.word-term-card-link { min-height: var(--size-touch-min); ma
 .lesson-feedback-card { padding: var(--space-2) 0; }
 .lesson-feedback-label { color: var(--color-ink-3); font-size: var(--font-size-label); font-weight: var(--font-weight-semibold); line-height: var(--line-height-body); }
 .lesson-feedback-question { margin-top: var(--space-2); color: var(--color-ink); font-size: var(--font-size-headline); font-weight: var(--font-weight-semibold); line-height: var(--line-height-relaxed); word-break: keep-all; overflow-wrap: anywhere; }
-.lesson-feedback-answer { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-5); padding: var(--space-4); border-radius: var(--shape-inset); background: var(--color-surface); color: var(--color-ink); }
+.lesson-feedback-answer { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-5); padding: var(--space-4); border-radius: var(--shape-inset); background: var(--accent-green-soft); color: var(--color-ink); }
 .lesson-feedback-answer-value { margin-top: var(--space-1); color: var(--color-ink); font-size: var(--font-size-title-3); font-weight: var(--font-weight-bold); line-height: var(--line-height-title); word-break: keep-all; overflow-wrap: anywhere; }
-.lesson-feedback-answer .lesson-feedback-label { color: var(--color-ink-2); font-weight: var(--font-weight-bold); }
-.lesson-feedback-my-answer { display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-2); padding: var(--space-3); border-radius: var(--shape-md); background: var(--color-surface); color: var(--color-ink-2); font-size: var(--font-size-label); line-height: var(--line-height-relaxed); word-break: keep-all; overflow-wrap: anywhere; }
+.lesson-feedback-answer .lesson-feedback-label { color: var(--accent-green-ink); font-weight: var(--font-weight-bold); }
+.lesson-feedback-my-answer { display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-2); padding: var(--space-3); border-radius: var(--shape-md); background: var(--color-danger-soft); color: var(--color-danger-foreground); font-size: var(--font-size-label); line-height: var(--line-height-relaxed); word-break: keep-all; overflow-wrap: anywhere; }
 .lesson-feedback-my-answer > strong { min-width: 0; margin-left: auto; font-weight: var(--font-weight-semibold); }
 .lesson-feedback-reason { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--color-line); }
 .lesson-feedback-reason h3 { color: var(--color-ink); font-size: var(--font-size-body); font-weight: var(--font-weight-bold); line-height: var(--line-height-body); }

@@ -6,10 +6,10 @@ export const praiseForMission = ({ ready, completed }: { ready: number; complete
 
 export const praiseForQuiz = ({ accuracy, maxCombo, total }: { accuracy: number; maxCombo: number; total: number }) => {
   if (total === 0) return '퀴즈가 준비되면 오늘 확인한 내용이 기록돼요.';
-  if (accuracy === 100) return `${total}문제를 모두 맞혔어요. 바로 다음 단계로 가도 좋아요.`;
+  if (accuracy === 100) return `${total}문제를 모두 맞혔어요. 코스에서 다음 단계를 이어가요.`;
   if (accuracy >= 80) return `정답률 ${accuracy}%. 헷갈리는 부분만 조금 더 보면 돼요.`;
   if (maxCombo >= 3) return `${maxCombo}문제를 연속으로 맞혔어요. 흐름을 잘 이어갔어요.`;
-  return '헷갈린 문제까지 다시 봤어요. 차근차근 한 번 더 확인해요.';
+  return '해설을 보고 틀린 문제를 한 번 더 풀어봐요.';
 };
 
 export const praiseForAnswer = (combo: number) => {

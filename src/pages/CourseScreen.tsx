@@ -164,6 +164,8 @@ const CourseScreen = () => {
   // 길에는 돌(체크·번호·복습)만 두고, 돌을 누르면 그 단계(역할·제목·열기)를 옆 말풍선으로 띄운다.
   // 한 번에 하나, 바깥을 누르면 닫힘. 처음엔 지금 할 단계(focus) 말풍선을 열어 둔다(undefined = 기본값)
   const [bubbleId, setBubbleId] = useState<string | null>(null);
+  // 학습 결과에서 '코스에서 이어 하기'로 오면 다음 할 단계 말풍선을 바로 열어 둔다
+  const openFocusOnReturn = useRef((useLocation().state as { openFocus?: boolean } | null)?.openFocus === true);
   const homeRailRef = useRef<HTMLDivElement>(null);
   // 주제 화면 머리를 누르면 같은 난이도의 다른 주제로 옮기는 시트
   const [topicPicker, setTopicPicker] = useState(false);
@@ -209,6 +211,12 @@ const CourseScreen = () => {
   };
   const focus = findFocus();
   const focusId = focus?.id ?? null;
+  useEffect(() => {
+    // 완료 기록이 다 오기 전엔 focus가 이미 끝낸 단계를 가리킬 수 있다
+    if (!openFocusOnReturn.current || !focusId || !hydrated || !doneNodesLoaded) return;
+    openFocusOnReturn.current = false;
+    setBubbleId(focusId);
+  }, [focusId, hydrated, doneNodesLoaded]);
   // 홈 코스 줄: 지금 학습 중인 코스 카드가 왼쪽에 오게 가로 위치를 맞춘다
   useEffect(() => {
     const rail = homeRailRef.current;
@@ -495,6 +503,7 @@ const CourseScreen = () => {
                       <span data-learning-status className={done || nodeStatus === '시작 가능' ? 'sr-only' : `font-normal ${locked ? 'text-[var(--color-ink-4)]' : isFocus ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-3)]'}`}>{nodeStatus}</span>
                     </span>
                     <span className={`mt-1 block text-sm break-keep ${locked ? 'font-semibold text-[var(--color-ink-3)]' : done ? 'font-semibold text-[var(--color-ink-2)]' : 'font-bold text-[var(--color-ink)]'}`}>{copy.title}</span>
+                    {locked && <span className="mt-1 block text-xs text-[var(--color-ink-3)]">앞 단계를 끝내면 열려요</span>}
                   </span>
                   {!locked && <ChevronRight size={20} strokeWidth={1.75} aria-hidden="true" data-learning-action className="shrink-0 text-[var(--color-ink-3)]" />}
                 </button></span>

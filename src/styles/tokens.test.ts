@@ -111,30 +111,21 @@ for (const [name, values] of [['라이트', light]] as const) {
   });
 }
 
-describe('이해 확인의 캐릭터·중성 상태 표현', () => {
-  it('이해 확인 전용 파랑 역할을 제거하고 기존 퀴즈 상태색은 보존한다', () => {
+describe('이해 확인의 정답·오답 표현', () => {
+  it('이해 확인 전용 파랑 역할 없이 결과 막대는 진행색을 쓴다', () => {
     expect(css).not.toContain('--color-answer-');
-    // 파일 뒤에 추가된 다른 화면의 오류색이 아니라 이해 확인 선택자의 선언만 검사한다.
-    const feedbackCss = [...indexCss.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
-      .filter(([, selector]) => /\.lesson-(feedback|complete)/.test(selector))
-      .map(([rule]) => rule)
-      .join('\n');
-    expect(feedbackCss).not.toMatch(/--color-(answer|danger|success)-/);
-    expect(feedbackCss).not.toContain('.lesson-feedback-character');
-    expect(feedbackCss).toContain('.lesson-complete-score-track > span { background: var(--color-ink-3); }');
-    // 정답은 초록 대신 중립 잉크(✓/✕와 문구로 구분), 빨강은 오류에만 남긴다
+    expect(indexCss).not.toContain('.lesson-feedback-character');
+    expect(indexCss).toContain('.lesson-complete-score-track > span { background: var(--color-progress); }');
     for (const [values, success, danger] of [[light, '#191f28', '#b23a33']] as const) {
       expect(resolve('--color-success-foreground', values)).toBe(success);
       expect(resolve('--color-danger-foreground', values)).toBe(danger);
     }
   });
-  it('정답·내 선택·펼친 보기의 상태 표면은 모두 중성 역할이다', () => {
-    for (const selector of ['.lesson-feedback-answer', '.lesson-feedback-my-answer', '.lesson-feedback-options li:is(.is-correct, .is-wrong)']) {
-      const start = indexCss.indexOf(selector + ' {');
-      const body = indexCss.slice(start, indexCss.indexOf('}', start));
-      expect(body, selector).toContain('background: var(--color-surface)');
-      expect(body, selector).toMatch(/color: var\(--color-ink(?:-2)?\)/);
-    }
+  it('정답 칸은 초록, 내 선택(오답) 칸은 빨강 바탕으로 한눈에 구분한다', () => {
+    const body = (selector: string) => { const start = indexCss.indexOf(selector + ' {'); return indexCss.slice(start, indexCss.indexOf('}', start)); };
+    expect(body('.lesson-feedback-answer')).toContain('background: var(--accent-green-soft)');
+    expect(body('.lesson-feedback-my-answer')).toContain('background: var(--color-danger-soft)');
+    expect(body('.lesson-feedback-my-answer')).toContain('color: var(--color-danger-foreground)');
   });
 });
 

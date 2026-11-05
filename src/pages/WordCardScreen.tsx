@@ -384,10 +384,9 @@ const WordCardScreen = () => {
             <h2 className="text-xl font-bold text-[var(--color-ink)] mb-1!">용어를 살펴봤어요</h2>
             {/* 끝 화면의 핵심 숫자 하나를 크게(피크엔드) */}
             <p className="mt-3! text-4xl font-bold text-[var(--color-ink)] tabular-nums">{words.length}<span className="ml-1 text-base font-semibold text-[var(--color-ink-3)]">개 용어</span></p>
-            <p className="mt-1! text-sm text-[var(--color-ink-3)]">설명을 끝까지 확인했어요</p>
           </div>
           <div className="w-full text-center anim-fade-up" style={{ '--i': 2 } as React.CSSProperties}>
-            <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep mb-3!">{lessonChecks(words).length > 0 ? '상황 문제를 풀며 어떤 변화가 생기는지 확인해요.' : '이번에는 용어의 뜻을 확인해요. 상황 적용 문제는 아직 준비 중이에요.'}</p>
+            {lessonChecks(words).length === 0 && <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep mb-3!">상황 적용 문제는 아직 준비 중이에요.</p>}
             <div className="flex flex-wrap justify-center gap-1">
               {words.slice(0, 5).map(w => (
                 <span key={w.id} className="text-xs px-2 py-1 rounded-chip border border-[var(--color-line)] text-[var(--color-ink-2)]">{w.word}</span>
@@ -524,7 +523,8 @@ const WordCardScreen = () => {
       {/* 하단: 이전 · 다음 */}
       <div className="study-action-footer px-5 pt-3">
         <div className="flex gap-3">
-          <ActionButton tone="soft" onClick={() => slide(-1)} disabled={!canPrev} className="flex-1">
+          {/* 첫 장에서는 이전 버튼을 숨긴다(비활성 회색 버튼이 눌릴 것처럼 보여서). 자리는 남겨 다음 버튼 폭을 유지 */}
+          <ActionButton tone="soft" onClick={() => slide(-1)} disabled={!canPrev} aria-hidden={!canPrev || undefined} className={`flex-1${canPrev ? '' : ' invisible'}`}>
             <ChevronLeft size={20} />이전
           </ActionButton>
           <ActionButton onClick={() => slide(1)} disabled={lastWord && !autoAdvance} className="flex-[2]">
