@@ -6,6 +6,7 @@ import { COURSE_NAMES } from '../lib/topicImages';
 import { ChevronDown, ChevronRight } from '../components/ui/ControlIcons';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
+import { useAuth } from '../hooks/useAuth';
 import { logClick } from '../lib/analytics';
 import { ENERGY_ACTION_COST, levelLabel } from '../constants';
 import { feedbackNodeTap } from '../lib/feedback';
@@ -98,14 +99,15 @@ const CourseScreen = () => {
   const [doneNodes, setDoneNodes] = useState<Set<string>>(new Set());
   const [doneNodesLoaded, setDoneNodesLoaded] = useState(false);
   const [resumeCourseId, setResumeCourseId] = useState<string | null>(null);
+  const profileId = useAuth().user?.id;
   useEffect(() => {
     let cancelled = false;
     Storage.getItem('learning_resume_course_v1').then(id => { if (!cancelled) setResumeCourseId(id); }).catch(() => {});
-    loadDoneNodes()
+    loadDoneNodes(profileId)
       .then(nodes => { if (!cancelled) setDoneNodes(nodes); })
       .finally(() => { if (!cancelled) setDoneNodesLoaded(true); });
     return () => { cancelled = true; };
-  }, []);
+  }, [profileId]);
 
   // 필수 단계(학습·퀴즈)는 전체 학습 순서(기초의 모든 주제 → 중급 …, courses의 sort_order)대로만 연다.
   // 안 끝낸 첫 단계 하나만 열고 그 뒤의 미완료 단계는 다른 주제·다음 난이도까지 모두 잠근다. 복습은 선택이라 잠그지 않는다

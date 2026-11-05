@@ -3,6 +3,7 @@ import { Check, X } from '../components/ui/OtterIcons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
+import { useAuth } from '../hooks/useAuth';
 import { useSettings } from '../hooks/useSettings';
 import { markNodeDone } from '../lib/pathProgress';
 import { feedbackCorrect, feedbackWrong, feedbackQuizComplete } from '../lib/feedback';
@@ -32,6 +33,7 @@ const QuizScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { xp, allWords, knownWords, courses, submitQuizAnswer, recordReview, refreshWallet } = useAppContext();
+  const { user } = useAuth();
 
   // 단어 id → 코스 카테고리 (오답 보기를 같은 주제로 뽑기 위함)
   const categoryOf = useMemo(() => {
@@ -116,7 +118,7 @@ const QuizScreen = () => {
     // 등급은 주간 순위로 오르므로(서버 정산) 퀴즈 중에는 승급이 없다. 정답률에 따라서만 피드백한다
     feedbackQuizComplete(correctCount === quizQueue.length);
     logClick('quiz_complete', { mode, total: baseQueue.length, correct: firstCorrect, attempts: quizQueue.length, node_id: navState?.nodeId ?? navState?.lessonId, course_id: navState?.courseId });
-    if (navState?.nodeId) markNodeDone(navState.nodeId);   // 패스의 퀴즈·복습 노드를 완료 표시
+    if (navState?.nodeId) markNodeDone(navState.nodeId, user?.id);   // 패스의 퀴즈·복습 노드를 완료 표시
     void refreshWallet();   // m4(퀴즈 N문제)·50XP 보너스는 서버가 올린다 — 세션 끝에 한 번 읽는다
   }, [correctCount, firstCorrect, finished, navState?.nodeId, navState?.lessonId, navState?.courseId, mode, baseQueue.length, quizQueue.length, refreshWallet, xp]);
 
