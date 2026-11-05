@@ -1128,7 +1128,9 @@ button.course-home-topic[data-current='true'] { border-color: var(--color-accent
 button.course-home-topic[data-current='true'] .course-home-topic-icon:has([data-icon='BookOpenText']) { background: var(--color-progress); color: var(--color-on-progress); }
 button.course-home-topic:not(:last-child)::after { content: ''; position: absolute; left: -59px; top: calc(50% + 32px); height: 94px; border-left: 3px dotted var(--color-line); }
 .course-home-topic .course-home-progress-track { width: 100%; height: 6px; margin-top: var(--space-3); }
-@media (max-width: 359px) { .my-page-stats.app-card { padding-inline: var(--space-1); } .my-page-stat-label { font-size: var(--font-size-caption); } }
+@media (max-width: 359px) { .my-page-stats.app-card { padding-inline: var(--space-1); } .my-page-stat-label { font-size: var(--font-size-caption); }
+  /* 좁은 화면에선 아이콘 옆에 숫자가 안 들어가(3,817 XP가 잘림) 아이콘 아래로 내린다 */
+  .my-page-stat { flex-direction: column; align-items: flex-start; gap: var(--space-1); } }
 
 .course-home-catalog-heading { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 
