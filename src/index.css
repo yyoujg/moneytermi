@@ -868,7 +868,7 @@ button.mission-reward-status {
 .league-header-action, .league-header-action * { color: var(--color-ink-2) !important; font-weight: var(--font-weight-semibold) !important; }
 /* 순위 목록은 화면 폭을 꽉 채우고(좌우 여백 상쇄), 행 안 내용은 제목과 같은 20px 선에 맞춘다 */
 .league-ranking-list { margin-inline: calc(-1 * var(--space-5)); border-radius: 0 !important; }
-.league-ranking-row { display: grid; grid-template-columns: 28px 56px minmax(0, 1fr) auto; align-items: center; column-gap: var(--space-3); min-height: 60px; padding: var(--space-3) var(--space-5); }
+.league-ranking-row { display: grid; grid-template-columns: 28px 56px minmax(0, 1fr) auto; align-items: center; column-gap: var(--space-3); min-height: 60px; padding: var(--space-4) var(--space-5); }
 .league-ranking-row + .league-ranking-row { border-top: 1px solid var(--color-surface); }
 .league-ranking-row.is-me { background: var(--color-neutral-soft); }
 .league-ranking-row.is-own-separate { border-top: 2px dashed var(--color-surface); }
@@ -1249,9 +1249,9 @@ button.home-review-entry { margin-bottom: 0; padding: var(--space-4) 0; border-r
 button.course-home-rail-card { width: 112px; padding: 0; border-radius: 0; background: transparent; box-shadow: none; }
 button.course-home-rail-card:active { background: transparent; opacity: 0.7; }
 .league-tier-road { padding-inline: 0; border-radius: 0; background: transparent; box-shadow: none; }
-#home-mission-list { gap: 0; margin-top: var(--space-2); }
+#home-mission-list { gap: 0; margin-top: 0; }
 /* 미션 행: 구분선 없이 여백으로만 나눈다 */
-.home-mission-row { padding: var(--space-3) 0; border-radius: 0; background: transparent; box-shadow: none; }
+.home-mission-row { padding: var(--space-4) 0; border-radius: 0; background: transparent; box-shadow: none; }
 .home-mission-row[data-rewarded] { background: transparent; }
 .home-mission-row[data-rewarded] :is(.home-mission-info, .mission-reward-status) { opacity: 0.55; }
 .my-profile-card { margin-bottom: 0; padding: 0 0 var(--space-8); border-radius: 0; background: transparent; box-shadow: none; border-bottom: 1px solid var(--color-line); }
@@ -1298,11 +1298,11 @@ button.review-aux-button:disabled { color: var(--color-ink-3); }
 /* 주제 둘러보기는 흰 바탕 + TDS ListRow. 예전 경로형 카드 배치를 끈다 */
 .course-home-topic-list { display: block; padding: var(--space-2) 0; }
 .course-home-topic-list .course-home-topic { display: block; width: 100%; margin-left: 0; min-height: 0; padding: 0; border: 0; background: transparent; }
-.course-home-topic-list .course-home-topic > div { padding-left: var(--space-3); padding-right: var(--space-3); }
+.course-home-topic-list .course-home-topic > div { padding: var(--space-4) var(--space-3); }
 /* 전체 탭 난이도 구분: 굵은 띠 + 섹션 제목 크기. 첫 난이도는 띠 없이 */
 .course-home-level-heading { display: flex; align-items: baseline; justify-content: space-between; margin: var(--space-4) calc(var(--space-5) * -1) 0; padding: var(--space-5) var(--space-5) var(--space-2); border-top: 8px solid var(--color-neutral-soft); color: var(--color-ink); font-size: var(--font-size-section-title); font-weight: var(--font-weight-bold); }
 .course-home-level-heading > span { color: var(--color-ink-3); font-size: var(--font-size-caption); font-weight: var(--font-weight-regular); }
-.course-home-level-heading:first-child { margin-top: 0; padding-top: var(--space-3); border-top: 0; }
+.course-home-level-heading:first-child { margin-top: 0; padding-top: var(--space-6); border-top: 0; }
 /* 퀘스트·리그·마이는 흰 바탕. 섹션 사이는 라벤더 띠 대신 구분선 */
 .quest-screen, .league-screen, .my-page-screen { background: var(--color-card); }
 .my-page-sections .my-page-panel.my-page-menu { padding-inline: 0; }
@@ -1344,7 +1344,7 @@ button.course-home-rail-card { width: 160px; flex-direction: column; align-items
 .badge-glyph img { width: 100%; height: 100%; }
 /* 퀘스트: 지금·이번 주·이번 달 미션 사이에 구분선. 선 위아래 여백은 같게(24px) */
 .quest-missions-section > .home-missions { margin-bottom: 0 !important; }
-.quest-missions-section > .home-missions + .home-missions { margin-top: var(--space-2); padding-top: var(--space-6); border-top: 1px solid var(--color-line); }
+.quest-missions-section > .home-missions + .home-missions { margin-top: 0; padding-top: var(--space-8); border-top: 1px solid var(--color-line); }
 /* 코스 카드: 주제 이름 + 코스 이름(20 굵게). 주제 고르기 난이도 제목은 주제 이름(15)보다 확실히 크게 */
 .course-topic-card-eyebrow { display: block; color: var(--color-ink-3); font-size: var(--font-size-caption); line-height: var(--line-height-body); word-break: keep-all; }
 .course-topic-card-title { margin-top: 2px; color: var(--color-ink); font-size: var(--font-size-title-3); font-weight: var(--font-weight-bold); line-height: var(--line-height-title); word-break: keep-all; }

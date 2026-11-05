@@ -74,7 +74,7 @@ const LeagueScreen = () => {
       {/* 랭킹 */}
       <div className="league-ranking-section px-5 pt-8">
         {/* 남은 기간은 제목 바로 옆 뱃지로 */}
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-2 mb-4">
           <h3 className="type-section-title">이번 주 TOP 10</h3>
           <span className="league-time-left" aria-label={`리그 종료까지 ${timeLeftLabel()}`}>{timeLeftLabel()}</span>
         </div>
