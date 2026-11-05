@@ -325,7 +325,7 @@ const QuizScreen = () => {
                 onClick={() => { if (status === 'idle' && !answerPending && !submissionMessage) setSelected(opt.answer); }}
                 aria-pressed={isSelected}
                 disabled={status !== 'idle' || answerPending || submissionMessage !== null}
-                className={`quiz-option anim-fade-up ${feedbackMotion} flex items-center gap-3 min-h-[64px] py-4 px-4 border text-base font-semibold leading-relaxed text-left break-keep transition-colors duration-150 ${optionStyle}`}
+                className={`quiz-option anim-fade-up ${feedbackMotion} flex items-center gap-3 min-h-[64px] py-4 px-4 border text-base font-normal leading-relaxed text-left break-keep transition-colors duration-150 ${optionStyle}`}
                 style={{ '--i': i + 1, borderRadius: 'var(--shape-button)' } as React.CSSProperties}
               >
                 {/* 채점 전 번호는 수달 3색 번호 그림(고르면 갈색 채움), 채점 뒤엔 체크·엑스 */}
