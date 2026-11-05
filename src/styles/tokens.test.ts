@@ -56,9 +56,9 @@ for (const [name, values] of [['라이트', light]] as const) {
       });
     }
     it('주행동은 세이지 바탕에 진한 글자를 쓰고 글자 대비 4.5:1을 넘는다', () => {
-      expect(resolve('--color-brand-action', values)).toBe('#a8c68f');
+      expect(resolve('--color-brand-action', values)).toBe('#a39382');
       expect(resolve('--color-on-brand', values)).toBe('#191f28');
-      expect(resolve('--color-brand-pressed', values)).toBe('#94b67a');
+      expect(resolve('--color-brand-pressed', values)).toBe('#8c7c6d');
       expect(contrast(resolve('--color-on-brand', values), resolve('--color-brand-action', values))).toBeGreaterThanOrEqual(4.5);
     });
     it('누름 색은 기본보다 어둡고 보조 버튼의 상태를 유지한다', () => {
@@ -193,8 +193,8 @@ describe('색상 정의의 단일 원본', () => {
     expect(withoutCommentsAndSwitchSelector).not.toMatch(/#[\da-f]{3,8}\b/i);
   });
   it('히어로와 통계의 큰 표면은 공통 중성 역할을 따른다', () => {
-    expect(resolve('--color-hero-start', light)).toBe('#a8c68f');
-    expect(resolve('--color-hero-end', light)).toBe('#94b67a');
+    expect(resolve('--color-hero-start', light)).toBe('#a39382');
+    expect(resolve('--color-hero-end', light)).toBe('#8c7c6d');
     expect(light['--color-xp-soft']).toBe('var(--color-surface)');
     expect(light['--color-points-soft']).toBe('var(--color-surface)');
   });
@@ -327,9 +327,9 @@ describe('주황 메인과 따뜻한 보조 팔레트', () => {
     expect(resolve('--color-canvas', light)).toBe('#f2f4f6');
     expect(resolve('--color-card', light)).toBe('#ffffff');
     expect(resolve('--color-surface', light)).toBe('#f2f4f6');
-    expect(resolve('--color-brand-action', light)).toBe('#a8c68f');
-    expect(resolve('--color-brand-decoration', light)).toBe('#4f6b3a');
-    expect(resolve('--color-brand-accent', light)).toBe('#a8c68f');
+    expect(resolve('--color-brand-action', light)).toBe('#a39382');
+    expect(resolve('--color-brand-decoration', light)).toBe('#5e5248');
+    expect(resolve('--color-brand-accent', light)).toBe('#a39382');
   });
   it('마이페이지·리그의 구분선도 공통 중성·민트 역할을 상속한다', () => {
     for (const selector of [':is(.my-page-screen, .league-screen, .identity-badge, .badge-tone)']) {
