@@ -372,7 +372,7 @@ svg:is(.text-brand-300, .text-brand-400, .text-brand-500, .text-brand-600, .text
 .app-soft-screen { background: var(--color-card); }
 /* 주제 화면(징검다리 노드)은 연회색 바탕 */
 .course-topic-screen { background: var(--color-canvas); }
-.course-topic-screen .course-topic-summary { padding-inline: var(--space-8) !important; border-bottom: 0; border-radius: var(--shape-card); background: var(--color-card) !important; }
+.course-topic-screen .course-topic-summary { padding-inline: var(--box-pad-x) !important; border-bottom: 0; border-radius: var(--shape-card); background: var(--color-card) !important; }
 /* 에너지 칩은 카드와 따로 화면 위 바탕색 줄에 고정한다. 코스 머리는 스크롤 중 그 줄 바로 아래에 고정된다 */
 .course-energy-bar { position: sticky; top: 0; z-index: 20; display: flex; justify-content: flex-end; padding: var(--space-2) var(--space-5); background: var(--color-canvas); }
 .course-topic-screen .course-energy-bar { align-items: center; }
@@ -709,7 +709,7 @@ button.word-term-button:active {
 .word-term-panel-meaning { display: block; margin-top: var(--space-3); color: var(--color-ink-2); font-size: var(--font-size-body); line-height: var(--line-height-relaxed); word-break: keep-all; overflow-wrap: anywhere; white-space: pre-line; }
 button.word-term-close { display: flex; width: var(--size-touch-min); height: var(--size-touch-min); flex-shrink: 0; align-items: center; justify-content: center; margin: calc(var(--space-2) * -1) calc(var(--space-2) * -1) 0 0; padding: 0; border: 0; border-radius: var(--shape-inset); background: transparent; color: var(--color-ink-3); cursor: pointer; }
 button.word-term-close:active { opacity: 0.6; }
-.word-term-example { display: block; margin-top: var(--space-3); padding: var(--space-4) var(--space-6); border-radius: var(--shape-inset); background: var(--color-card); }
+.word-term-example { display: block; margin-top: var(--space-3); padding: var(--box-pad-y) var(--box-pad-x); border-radius: var(--shape-inset); background: var(--color-card); }
 .word-term-example-label { display: block; color: var(--color-ink-2); font-size: var(--font-size-label); font-weight: var(--font-weight-semibold); line-height: var(--line-height-body); }
 .word-term-example-copy { display: block; margin-top: var(--space-1); color: var(--color-ink-2); font-size: var(--font-size-label); line-height: var(--line-height-relaxed); word-break: keep-all; overflow-wrap: anywhere; white-space: pre-line; }
 button.action-button.word-term-card-link { min-height: var(--size-touch-min); margin-top: var(--space-3); padding: var(--space-2) var(--space-3); font-size: var(--font-size-body) !important; line-height: var(--line-height-body) !important; }
@@ -733,10 +733,10 @@ button.action-button.word-term-card-link { min-height: var(--size-touch-min); ma
 .lesson-feedback-card { padding: var(--space-2) 0; }
 .lesson-feedback-label { color: var(--color-ink-3); font-size: var(--font-size-label); font-weight: var(--font-weight-semibold); line-height: var(--line-height-body); }
 .lesson-feedback-question { margin-top: var(--space-2); color: var(--color-ink); font-size: var(--font-size-headline); font-weight: var(--font-weight-semibold); line-height: var(--line-height-relaxed); word-break: keep-all; overflow-wrap: anywhere; }
-.lesson-feedback-answer { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-5); padding: var(--space-4) var(--space-6); border-radius: var(--shape-inset); background: var(--accent-green-soft); color: var(--color-ink); }
+.lesson-feedback-answer { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-5); padding: var(--box-pad-y) var(--box-pad-x); border-radius: var(--shape-inset); background: var(--accent-green-soft); color: var(--color-ink); }
 .lesson-feedback-answer-value { margin-top: var(--space-1); color: var(--color-ink); font-size: var(--font-size-title-3); font-weight: var(--font-weight-bold); line-height: var(--line-height-title); word-break: keep-all; overflow-wrap: anywhere; }
 .lesson-feedback-answer .lesson-feedback-label { color: var(--accent-green-ink); font-weight: var(--font-weight-bold); }
-.lesson-feedback-my-answer { display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-2); padding: var(--space-4) var(--space-6); border-radius: var(--shape-inset); background: var(--color-danger-soft); color: var(--color-danger-foreground); font-size: var(--font-size-label); line-height: var(--line-height-relaxed); word-break: keep-all; overflow-wrap: anywhere; }
+.lesson-feedback-my-answer { display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-2); padding: var(--box-pad-y) var(--box-pad-x); border-radius: var(--shape-inset); background: var(--color-danger-soft); color: var(--color-danger-foreground); font-size: var(--font-size-label); line-height: var(--line-height-relaxed); word-break: keep-all; overflow-wrap: anywhere; }
 .lesson-feedback-my-answer > strong { min-width: 0; margin-left: auto; font-weight: var(--font-weight-semibold); }
 .lesson-feedback-reason { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--color-line); }
 .lesson-feedback-reason h3 { color: var(--color-ink); font-size: var(--font-size-body); font-weight: var(--font-weight-bold); line-height: var(--line-height-body); }
@@ -897,7 +897,7 @@ button.mission-reward-status {
 .nickname-editor { display: flex; flex-direction: column; gap: var(--space-2); }
 .nickname-label-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
 .nickname-label-row label { color: var(--color-ink-2); font-size: var(--font-size-label); font-weight: var(--font-weight-semibold); line-height: 20px; }
-.nickname-field { --nickname-focus-ring: var(--color-ink-3); display: flex; box-sizing: border-box; min-height: 64px; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4) var(--space-2) var(--space-6); border: 0; border-radius: var(--shape-inset); background: var(--color-neutral-soft); }
+.nickname-field { --nickname-focus-ring: var(--color-ink-3); display: flex; box-sizing: border-box; min-height: 64px; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--box-pad-x); border: 0; border-radius: var(--shape-inset); background: var(--color-neutral-soft); }
 .nickname-field:has(input:focus-visible) { outline: 2px solid var(--nickname-focus-ring); outline-offset: -2px; }
 .nickname-field.has-error { --nickname-focus-ring: var(--color-danger-foreground); outline: 2px solid var(--nickname-focus-ring); outline-offset: -2px; }
 .nickname-field input.nickname-input { flex: 1 1 0%; min-width: 0; width: 0; padding: 0; border: 0; background: transparent; color: var(--color-ink); font-size: var(--font-size-headline) !important; font-weight: var(--font-weight-semibold); line-height: 26px !important; }
@@ -1014,7 +1014,7 @@ button.my-profile-action:focus-visible { outline: 2px solid var(--color-brand-de
 .energy-shop-wallet > strong > span { color: var(--color-ink-3); font-size: var(--font-size-label); font-weight: var(--font-weight-regular); }
 .energy-shop-section { display: flex; flex-direction: column; gap: var(--space-2); }
 .energy-shop-section > h2 { color: var(--color-ink); font-size: var(--font-size-headline); font-weight: var(--font-weight-bold); line-height: var(--line-height-title); }
-button.energy-shop-option { display: flex; width: 100%; min-height: 72px; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-6); border: 1px solid var(--color-line); border-radius: var(--shape-inset); background: var(--color-card); color: var(--color-ink-2); text-align: left; }
+button.energy-shop-option { display: flex; width: 100%; min-height: 72px; align-items: center; gap: var(--space-3); padding: var(--box-pad-y) var(--box-pad-x); border: 1px solid var(--color-line); border-radius: var(--shape-inset); background: var(--color-card); color: var(--color-ink-2); text-align: left; }
 button.energy-shop-option > img { flex-shrink: 0; }
 button.energy-shop-option:disabled { opacity: 1; background: var(--color-surface); cursor: not-allowed; }
 button.energy-shop-option:disabled > img { opacity: .72; }
@@ -1025,7 +1025,7 @@ button.energy-shop-option:focus-visible { outline: 2px solid var(--color-ink-3);
 .energy-shop-option-body > span { color: var(--color-ink-3); font-size: var(--font-size-label); line-height: var(--line-height-body); word-break: keep-all; }
 .energy-shop-option-state { display: flex; max-width: 90px; flex-shrink: 0; align-items: center; justify-content: flex-end; gap: var(--space-1); color: var(--color-ink-3); font-size: var(--font-size-caption); font-weight: var(--font-weight-semibold); line-height: var(--line-height-relaxed); text-align: right; word-break: keep-all; }
 .energy-shop-option-state > svg { flex-shrink: 0; }
-.energy-shop-notice { padding: var(--space-4) var(--space-6); border: 1px solid var(--color-line); border-radius: var(--shape-inset); background: var(--color-surface); color: var(--color-ink-2); font-size: var(--font-size-label); line-height: var(--line-height-relaxed); word-break: keep-all; }
+.energy-shop-notice { padding: var(--box-pad-y) var(--box-pad-x); border: 1px solid var(--color-line); border-radius: var(--shape-inset); background: var(--color-surface); color: var(--color-ink-2); font-size: var(--font-size-label); line-height: var(--line-height-relaxed); word-break: keep-all; }
 .energy-shop-notice[data-tone='network'] { border-color: var(--color-danger-line); background: var(--color-danger-soft); color: var(--color-danger-foreground); }
 .energy-shop-info { color: var(--color-ink-3); font-size: var(--font-size-label); line-height: var(--line-height-relaxed); word-break: keep-all; }
 @media (max-width: 350px) {
@@ -1035,7 +1035,7 @@ button.energy-shop-option:focus-visible { outline: 2px solid var(--color-ink-3);
 }
 
 /* 뜻은 핵심 정의·생활 예시·출처를 분리하고 원문은 생략하지 않는다. */
-.word-meaning-card { padding: var(--space-5) var(--space-6); border: 1px solid var(--color-line); border-radius: var(--shape-card); background: var(--color-card); }
+.word-meaning-card { padding: var(--box-pad-y) var(--box-pad-x); border: 1px solid var(--color-line); border-radius: var(--shape-card); background: var(--color-card); }
 .word-meaning-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); color: var(--color-ink-3); font-size: var(--font-size-label); line-height: var(--line-height-relaxed); }
 .word-meaning-heading > span:last-child { padding: var(--space-1) var(--space-2); border-radius: var(--shape-inset); background: var(--color-surface); font-size: var(--font-size-caption); }
 .word-meaning-card > h1 { margin-top: var(--space-3); color: var(--color-ink); font-size: var(--font-size-content-title); font-weight: var(--font-weight-bold); line-height: var(--line-height-title); letter-spacing: var(--letter-spacing-title); word-break: keep-all; overflow-wrap: anywhere; }
@@ -1058,7 +1058,7 @@ button.word-meaning-detail:focus-visible { outline: 2px solid var(--color-ink-3)
 .quiz-prompt-main:focus { outline: none; }
 button.quiz-option:disabled { opacity: 1; cursor: default; }
 .quiz-confirm-footer { flex-shrink: 0; padding: var(--space-3) var(--space-5) max(var(--space-6), env(safe-area-inset-bottom)); border-top: 1px solid var(--color-line); background: var(--color-card); }
-.quiz-answer-feedback { display: flex; flex-shrink: 0; flex-direction: column; gap: var(--space-3); padding: var(--space-5) var(--space-6) max(var(--space-5), env(safe-area-inset-bottom)); border-radius: var(--shape-card) var(--shape-card) 0 0; background: var(--color-card); box-shadow: 0 -4px 16px rgba(31, 26, 23, 0.06); }
+.quiz-answer-feedback { display: flex; flex-shrink: 0; flex-direction: column; gap: var(--space-3); padding: var(--box-pad-y) var(--box-pad-x) max(var(--box-pad-y), env(safe-area-inset-bottom)); border-radius: var(--shape-card) var(--shape-card) 0 0; background: var(--color-card); box-shadow: 0 -4px 16px rgba(31, 26, 23, 0.06); }
 .quiz-answer-heading { display: flex; align-items: center; gap: var(--space-2); }
 .quiz-answer-heading > h2 { flex: 1; min-width: 0; color: var(--color-ink); font-size: var(--font-size-title-3); font-weight: var(--font-weight-bold); line-height: var(--line-height-body); word-break: keep-all; }
 .quiz-answer-mark { display: flex; width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; align-items: center; justify-content: center; background: var(--color-danger-soft); color: var(--color-danger-foreground); }
@@ -1354,12 +1354,12 @@ button.course-home-rail-card { width: 160px; flex-direction: column; align-items
 .home-missions[data-period] > .home-mission-heading + div { margin-top: var(--space-2); }
 /* 주제 고르기: 지금 배우는 주제 한 줄만 회베이지 둥근 면 + 진행 막대로 강조(화면 좌우 여백 20px 안쪽) */
 .course-home-topic-list .course-home-topic[data-current] { margin: var(--space-2) 0; border-radius: var(--shape-card) !important; background: var(--color-surface); }
-.course-home-topic-list .course-home-topic[data-current] > div { padding: var(--space-5) var(--space-6); }
+.course-home-topic-list .course-home-topic[data-current] > div { padding: var(--box-pad-y) var(--box-pad-x); }
 .course-home-topic[data-current] .course-home-progress-track { width: 100%; height: 6px; margin-top: var(--space-3); background: var(--color-card); }
 .course-home-topic[data-current] .course-home-topic-status { color: var(--color-brand-text); font-weight: var(--font-weight-bold); }
 /* TDS 기본 모서리(바텀시트 28·목록 행 눌림 12·글자 버튼 눌림 8px)도 앱 공통 한 값(--shape-card)으로 */
 div[open][tabindex='0'] { border-radius: var(--shape-card) !important; }
 .tds-mobile-list-row > div, .tds-mobile-list-row > div > div, .tds-mobile-text-button, .tds-mobile-text-button__dimmer { border-radius: var(--shape-card) !important; }
-/* 40px 둥근 상자 안쪽 여백: 좌우 24px 이상(곡선 안으로 글자가 붙지 않게). 퀴즈·상황 문제 말풍선과 보기 */
-.quiz-bubble.quiz-bubble { padding: var(--space-5) var(--space-6) !important; }
-.quiz-option.quiz-option { padding-left: var(--space-6); padding-right: var(--space-6); }
+/* 둥근 상자 안쪽 여백은 --box-pad-y/x 한 쌍(20/24)으로 통일. 퀴즈·상황 문제 말풍선과 보기 */
+.quiz-bubble.quiz-bubble { padding: var(--box-pad-y) var(--box-pad-x) !important; }
+.quiz-option.quiz-option { padding: var(--box-pad-y) var(--box-pad-x); }

@@ -253,6 +253,9 @@
   --shape-button: var(--shape-card);
   --shape-chip: var(--shape-card);
   --shape-inset: var(--shape-card);
+  /* 둥근 상자 안쪽 여백은 한 쌍으로 통일: 위아래 20, 좌우 24 */
+  --box-pad-y: var(--space-5);
+  --box-pad-x: var(--space-6);
 
   /* 카드·선택지는 그림자 대신 검정 테두리(--card-border)로 나눈다. */
   --shadow-card: none;
