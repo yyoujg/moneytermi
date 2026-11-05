@@ -12,25 +12,18 @@ const mount = (size?: number) => {
   const root = createRoot(container);
   act(() => root.render(<ProfileEditIcon size={size} />));
   cleanup = () => { act(() => root.unmount()); container.remove(); };
-  return container.querySelector('svg')!;
+  return container.querySelector('img')!;
 };
 
-describe('잘 보이는 프로필 편집 표시', () => {
-  it('기본 크기 16픽셀의 선형 표시를 사용한다', () => {
+describe('프로필 편집 표시', () => {
+  it('수달 3색 연필 그림을 기본 20픽셀로, 장식으로만 쓴다', () => {
     const icon = mount();
-    expect(icon).toHaveAttribute('width', '16');
-    expect(icon).toHaveAttribute('height', '16');
-    expect(icon.querySelector('[opacity="0.2"]')).toBeNull();
-  });
-  it('닉네임 옆의 16픽셀 크기도 전달한다', () => {
-    const icon = mount(16);
-    expect(icon).toHaveAttribute('width', '16');
-  });
-  it('라이트·다크 모두 본문색을 따르고 중복 조작 이름을 만들지 않는다', () => {
-    const icon = mount();
-    expect(icon).toHaveClass('text-[var(--color-ink)]');
-    expect(icon).toHaveAttribute('fill', 'currentColor');
+    expect(icon).toHaveAttribute('src', '/icons/stat/icon-edit.svg');
+    expect(icon).toHaveAttribute('width', '20');
+    expect(icon).toHaveAttribute('alt', '');
     expect(icon).toHaveAttribute('aria-hidden', 'true');
-    expect(icon).toHaveAttribute('focusable', 'false');
+  });
+  it('크기를 바꿀 수 있다', () => {
+    expect(mount(16)).toHaveAttribute('width', '16');
   });
 });

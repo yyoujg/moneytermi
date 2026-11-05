@@ -1,14 +1,5 @@
-import { Pencil } from '../ui/OtterIcons';
-
-// 작은 조작 표시는 베이지 입체 이미지 대신 테마의 본문색과 선명한 선을 사용한다.
+// 닉네임 수정 표시: 수달 3색 연필 그림(public/icons/stat/icon-edit.svg).
 // 접근성 이름과 터치 영역은 바깥 버튼이 제공한다.
-export const ProfileEditIcon = ({ size = 16 }: { size?: number }) => (
-  <Pencil
-    size={size}
-    strokeWidth={2.25}
-    absoluteStrokeWidth
-    aria-hidden="true"
-    focusable="false"
-    className="shrink-0 text-[var(--color-ink)]"
-  />
+export const ProfileEditIcon = ({ size = 20 }: { size?: number }) => (
+  <img src="/icons/stat/icon-edit.svg" alt="" aria-hidden="true" width={size} height={size} className="shrink-0" data-stat-icon="edit" />
 );

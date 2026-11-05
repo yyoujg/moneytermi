@@ -181,11 +181,11 @@ describe('주제 화면은 코스를 한 페이지에 모두', () => {
 });
 
 describe('코스 카드의 주제 목록 버튼', () => {
-  it('오른쪽 목록 버튼을 누르면 주제 고르기 화면으로 간다', async () => {
+  it('코스 카드를 누르면 주제 고르기 화면으로 간다', async () => {
     baseContext({ courses: [course({ id: 'c1', category: '경제' }), course({ id: 'c2', category: '가계', startId: 5 })] });
     const { container } = await mount('/course?topic=0');
     const button = container.querySelector<HTMLButtonElement>('.course-topic-list-button')!;
-    expect(button).toHaveAttribute('aria-label', '주제 고르기');
+    expect(button).toHaveAttribute('aria-label', expect.stringContaining('다른 주제 고르기'));
     await act(async () => button.click());
     expect(container.textContent).toContain('주제 고르기');
     expect(container.querySelector('[data-course-section]')).toBeNull();

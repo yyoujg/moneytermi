@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useLayoutEffect, useEffect, useState } from 're
 import { LockKeyhole } from '../components/ui/OtterIcons';
 import { List, ListRow } from '@toss/tds-mobile';
 import { COURSE_NAMES } from '../lib/topicImages';
-import { ChevronRight, ListIcon } from '../components/ui/ControlIcons';
+import { ChevronRight } from '../components/ui/ControlIcons';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { useAuth } from '../hooks/useAuth';
@@ -456,13 +456,11 @@ const CourseScreen = () => {
         return (
         <section key={sec.course.id} data-section-index={si} data-course-section={sec.course.id} className="scroll-mt-4">
           <div className={`course-topic-summary sticky top-0 z-10 mx-5 mt-3 mb-4 overflow-hidden py-3 ${sec.course.id === focus?.courseId ? 'anim-fade' : ''}`}>
-            {/* 코스 카드는 이름 한 줄과 오른쪽 주제 목록 버튼만. 진행은 아래 단계 노드로 보인다 */}
-            <div className="flex items-center gap-3">
+            {/* 코스 카드 전체가 주제 고르기 버튼. 아이콘만 두면 앱 메뉴로 읽혀 '다른 주제'를 글자로 적는다. 진행은 아래 단계 노드로 보인다 */}
+            <button type="button" className="course-topic-list-button" aria-label={`${courseName(sec.course)}, 다른 주제 고르기`} onClick={() => navigate('/course/topics')}>
               <h3 className="min-w-0 flex-1 text-[length:var(--font-size-headline)] font-bold text-[var(--color-ink)] break-keep leading-snug">{courseName(sec.course)}</h3>
-              <button type="button" className="course-topic-list-button" aria-label="주제 고르기" onClick={() => navigate('/course/topics')}>
-                <ListIcon size={24} aria-hidden="true" />
-              </button>
-            </div>
+              <span className="course-topic-list-hint" aria-hidden="true">다른 주제<ChevronRight size={16} /></span>
+            </button>
           </div>
 
           <div className="course-steps">
