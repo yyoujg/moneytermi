@@ -14,6 +14,7 @@ import { Storage } from '../lib/storage';
 import { COURSE_REVIEW_COUNT, LESSON_WARMUP_COUNT, firstUnknownWordIndex, learnedOrFallbackWords, selectCourseQuizWords } from '../lib/coursePractice';
 import { ActionButton } from '../components/ui/ActionButton';
 import { buildPath, type PathNode } from '../lib/path';
+import { m } from 'motion/react';
 
 const SEEN_KEY = 'path_seen_done';   // 코스 화면에서 마지막으로 본 완료 노드들(도장 연출용)
 // 징검다리 옆 장식 수달: 수달 포즈와 리그 등급 장면(이전 등급 그림 v3)을 번갈아 쓴다
@@ -503,11 +504,11 @@ const CourseScreen = () => {
                 {/* 곡선이 가장 멀리 휜 돌(8개 중 3·7번째) 반대편 빈자리에 장식 수달을 둔다 */}
                 {k % 4 === 2 && <img className="course-step-buddy" src={STEP_BUDDIES[(partIndex * 3 + Math.floor(k / 4)) % STEP_BUDDIES.length]} alt="" aria-hidden="true" data-step-buddy />}
                 {/* 잠긴 단계는 눌러도 말풍선을 열지 않는다(자물쇠 돌만으로 잠김을 알 수 있다) */}
-                <button ref={isFocus ? focusRef : undefined} type="button" className="course-step-marker" data-step-kind={isReview ? 'review' : 'step'} aria-expanded={locked ? undefined : bubbleId === node.id} aria-disabled={locked || undefined}
+                <m.button whileTap={{ scale: 0.9, transition: { type: 'spring', stiffness: 600, damping: 15 } }} ref={isFocus ? focusRef : undefined} type="button" className="course-step-marker" data-step-kind={isReview ? 'review' : 'step'} aria-expanded={locked ? undefined : bubbleId === node.id} aria-disabled={locked || undefined}
                   aria-label={locked ? `${copy.kind} ${copy.title} 잠김` : `${copy.kind} ${copy.title} ${nodeStatus}, ${bubbleId === node.id ? '닫기' : '보기'}`} onClick={() => { if (!locked) setBubbleId(bubbleId === node.id ? null : node.id); }}>
                   {/* 징검다리 돌은 상태별 노드 그림(public/path): 잠김 > 복습 > 완료 > 지금 할 학습 */}
                   <img src={`/path/node-${locked ? 'locked' : isReview ? 'review' : done ? 'done' : 'current'}.svg`} alt="" aria-hidden="true" width={72} height={72} data-node-icon />
-                </button>
+                </m.button>
                 <span className="course-step-bubble" data-step-bubble data-open={bubbleId === node.id}><button type="button" disabled={locked} data-own-sfx data-node-id={node.id}
                   onClick={() => handleNodeTap(node, k, sec.knownCount, courseName(sec.course))}
                   className={`course-node-card flex w-full items-center gap-3 border py-3 text-left disabled:cursor-default ${nodeCardClass} ${newlyDone.has(node.id) ? 'anim-stamp' : ''}`}

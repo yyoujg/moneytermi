@@ -38,6 +38,7 @@
 - **백엔드**: Supabase (`@supabase/supabase-js`) - DB, RPC, Edge Functions
 - **플랫폼 프레임워크**: `@apps-in-toss/web-framework` (Apps in Toss)
 - **모니터링**: `@sentry/react`
+- **애니메이션**: `motion` (화면 전환·카드 끌기·스프링, `LazyMotion` + `domMax`, 기기 동작 줄이기 설정 따름)
 - **기타**: `sonner`(토스트)
 - **테스트**: Vitest, Testing Library(jest-dom), jsdom
 - **린트**: ESLint 9 + typescript-eslint

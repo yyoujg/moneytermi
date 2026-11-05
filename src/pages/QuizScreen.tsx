@@ -21,6 +21,7 @@ import { praiseForAnswer } from '../lib/praise';
 import { keepShortUnitsTogether } from '../lib/formatText';
 import { QuizAnswerFeedback } from '../components/learning/QuizAnswerFeedback';
 import { createQuizRequestId, type QuizAnswerResult } from '../lib/quizSubmission';
+import { m } from 'motion/react';
 
 const quizShareMessage = (modeLabel: string, total: number, accuracy: number, maxCombo: number, words: Word[]) => {
   const learned = words.slice(0, 3).map(word => word.word).join(' · ');
@@ -166,7 +167,7 @@ const QuizScreen = () => {
       >
         {/* 끝 화면은 한 문장(위)과 보상 한 줄만. 정답률·연속 기록은 문장과 겹쳐 뺐다 */}
         <section className="quiz-result-stats anim-fade-up" role="group" aria-label="퀴즈 결과 요약" style={{ '--i': 2 } as React.CSSProperties}>
-          <p className="quiz-result-xp"><XpIcon size={20} className="quiz-result-icon" /><span>획득 XP</span><strong>+{Math.max(0, xp - xpAtStart.current)}</strong></p>
+          <p className="quiz-result-xp"><XpIcon size={20} className="quiz-result-icon" /><span>획득 XP</span><m.strong initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 12, delay: 0.2 }}>+{Math.max(0, xp - xpAtStart.current)}</m.strong></p>
         </section>
         <ActionButton
           tone="soft"
@@ -310,8 +311,7 @@ const QuizScreen = () => {
                 : 'bg-[var(--color-surface)] border-transparent text-[var(--color-brand-text)]';
             }
             const tag = !showGrading ? (isSelected && status !== 'idle' ? '내 답' : null) : isCorrectOption ? '정답' : isSelected ? '내 답' : null;
-            const feedbackMotion = showGrading && (isCorrectOption || isSelected) ? 'anim-choice-lock' : '';
-            const markerClass = !showGrading
+                        const markerClass = !showGrading
               ? isSelected ? 'bg-[var(--color-brand-action)] text-[var(--color-on-brand)]' : 'border border-[var(--color-line-strong)] bg-[var(--color-card)] text-[var(--color-ink-3)]'
               : isCorrectOption
                 ? 'text-[var(--accent-green-ink)]'
@@ -320,27 +320,33 @@ const QuizScreen = () => {
                   : 'border border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-ink-4)]';
 
             return (
-              <button
+              <m.button
                 key={`${i}-${opt.answer}`}
+                initial={{ opacity: 0, y: 6 }}
+                // 채점되면 정답·내 선택이 살짝 튕긴다. 누를 땐 스프링으로 눌린다
+                animate={{ opacity: 1, y: 0, scale: showGrading && (isCorrectOption || isSelected) ? [0.98, 1.025, 1] : 1 }}
+                transition={{ opacity: { delay: (i + 1) * 0.03, duration: 0.24 }, y: { delay: (i + 1) * 0.03, duration: 0.24 }, scale: { duration: 0.32, ease: 'easeOut' } }}
+                whileTap={{ scale: 0.97, transition: { type: 'spring', stiffness: 700, damping: 30 } }}
                 onClick={() => { if (status === 'idle' && !answerPending && !submissionMessage) setSelected(opt.answer); }}
                 aria-pressed={isSelected}
                 disabled={status !== 'idle' || answerPending || submissionMessage !== null}
-                className={`quiz-option anim-fade-up ${feedbackMotion} flex items-center gap-3 min-h-[64px] py-4 px-4 border-2 text-base font-semibold leading-relaxed text-left break-keep transition-colors duration-150 ${optionStyle}`}
-                style={{ '--i': i + 1, borderRadius: 'var(--shape-button)' } as React.CSSProperties}
+                className={`quiz-option flex items-center gap-3 min-h-[64px] py-4 px-4 border-2 text-base font-semibold leading-relaxed text-left break-keep transition-colors duration-150 ${optionStyle}`}
+                style={{ borderRadius: 'var(--shape-button)' }}
               >
                 {/* 번호는 흰 원 번호 그림(고르면 진한 갈색 채움). 채점 뒤 정답·내 오답만 체크·엑스 */}
                 {(!showGrading || (!isCorrectOption && !isSelected)) && i < 4
                   ? <img src={`/icons/num/num-${i + 1}${isSelected ? '-selected' : ''}.svg`} alt="" aria-hidden="true" width={28} height={28} className="shrink-0" data-num-icon />
-                  : <span className={`w-7 h-7 shrink-0 flex items-center justify-center text-xs font-semibold ${markerClass}`} style={{ borderRadius: 9999 }}>
+                  : <m.span initial={showGrading ? { scale: 0.4 } : false} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 600, damping: 14 }}
+                    className={`w-7 h-7 shrink-0 flex items-center justify-center text-xs font-semibold ${markerClass}`} style={{ borderRadius: 9999 }}>
                     {showGrading && isCorrectOption ? <Check size={16} strokeWidth={3} /> : showGrading && isSelected ? <X size={16} strokeWidth={3} /> : i + 1}
-                  </span>}
+                  </m.span>}
                 <span className="min-w-0 flex-1">{keepShortUnitsTogether(opt.label)}</span>
                 {tag && (
                   <span className={`shrink-0 text-xs font-bold ${showGrading && isCorrectOption ? 'text-[var(--accent-green-ink)]' : showGrading && isSelected ? 'text-[var(--color-danger-foreground)]' : 'text-[var(--color-brand-text)]'}`}>
                     {tag}
                   </span>
                 )}
-              </button>
+              </m.button>
             );
           })}
         </div>

@@ -22,6 +22,7 @@ import { LoadingScreen as StudyLoading } from './components/LoadingScreen';
 import { useTapHaptics } from './hooks/useTapHaptics';
 import { ArrowRight } from './components/ui/OtterIcons';
 import { Storage } from './lib/storage';
+import { LazyMotion, MotionConfig, domMax, m, useReducedMotion } from 'motion/react';
 
 const HomeScreen = React.lazy(() => import('./pages/HomeScreen'));
 const CourseScreen = React.lazy(() => import('./pages/CourseScreen'));
@@ -238,6 +239,11 @@ const Layout = () => {
   const { ready, missionRewards, dismissMissionReward } = useAppContext();
   // 문제를 풀거나 읽는 중엔 미션 축하로 흐름을 끊지 않는다. 학습 화면을 나가면 대기열을 보여준다
   const learning = ['/quiz', '/word-card', '/review', '/lesson-check', '/lesson-intro'].some(p => pathname.startsWith(p));
+  // 학습 화면은 오른쪽에서 들어오고, 학습을 끝내고 탭으로 돌아올 땐 왼쪽에서 들어온다. 탭끼리는 페이드만
+  const [nav, setNav] = React.useState({ pathname, learning, slide: 0 });
+  if (nav.pathname !== pathname) setNav({ pathname, learning, slide: learning ? 1 : nav.learning ? -1 : 0 });
+  const { slide } = nav;
+  const reduceMotion = useReducedMotion();
 
   if (!ready) return <LoadingScreen />;
 
@@ -249,8 +255,14 @@ const Layout = () => {
       <LeagueRankCelebration />
       <TopBar />
       <React.Suspense fallback={<StudyLoading />}>
-      {/* 경로가 바뀌면 래퍼가 다시 마운트되며 페이드인. (transform 전환은 기기에서 무거워 opacity만) */}
-      <div key={pathname} className="flex-1 min-h-0 flex flex-col anim-fade">
+      {/* 경로가 바뀌면 래퍼가 다시 마운트되며 등장. 끝나면 transform: none이라 안쪽 fixed 오버레이가 갇히지 않는다 */}
+      <m.div
+        key={pathname}
+        className="flex-1 min-h-0 flex flex-col"
+        initial={reduceMotion ? false : { opacity: 0, x: slide * 32 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: slide ? 0.26 : 0.16, ease: [0.22, 1, 0.36, 1] }}
+      >
       <Routes>
         <Route path="/" element={<LandingRoute />} />
         <Route path="/welcome" element={<WelcomeScreen />} />
@@ -268,7 +280,7 @@ const Layout = () => {
         <Route path="/lesson-check" element={<LessonCheckScreen />} />
         <Route path="/lesson-intro" element={<LessonIntroScreen />} />
       </Routes>
-      </div>
+      </m.div>
       </React.Suspense>
       <NavBar />
       {!learning && missionRewards[0] && (
@@ -284,6 +296,9 @@ export default function App() {
     <ErrorBoundary>
       <AuthProvider>
       <AppProvider>
+        {/* 끌기(단어 카드 그림)·순서 이동(미션)까지 쓰니 domAnimation이 아닌 domMax */}
+        <LazyMotion features={domMax} strict>
+        <MotionConfig reducedMotion="user">
         <BrowserRouter>
           <BackEventHandler />
           <ScreenLogger />
@@ -296,6 +311,8 @@ export default function App() {
             </ErrorBoundary>
           </div>
         </BrowserRouter>
+        </MotionConfig>
+        </LazyMotion>
       </AppProvider>
       </AuthProvider>
     </ErrorBoundary>

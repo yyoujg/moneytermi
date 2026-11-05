@@ -5,6 +5,7 @@ import type { WordVisual } from '../types';
 import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
 import { Card } from './ui/Card';
 import { ActionButton } from './ui/ActionButton';
+import { animate, m, useMotionValue } from 'motion/react';
 
 // 단어 설명용 선 그래프·비교표·한국은행 실제 통계. 차트 라이브러리 없이 SVG로 그린다.
 const COLORS = ['var(--color-accent-foreground)', 'var(--color-ink-3)'];
@@ -366,13 +367,39 @@ const VisualCard = ({ v, className = '', terms }: { v: Exclude<WordVisual, { typ
 // 맞혀 보기가 여러 개면 첫 번째 자리에서 가로로 넘기는 카드 묶음으로 보여준다(뉴스와 같은 방식)
 const FlowCarousel = ({ flows }: { flows: Extract<WordVisual, { type: 'flow' }>[] }) => {
   const [page, setPage] = useState(0);
+  const track = useRef<HTMLDivElement>(null);
+  const dragged = useRef(false);
+  const x = useMotionValue(0);
+  // 손가락을 따라 끌리고, 놓으면 가까운 카드로 스프링처럼 붙는다. 마지막 카드는 오른쪽 끝에 맞춘다
+  const go = (next: number) => {
+    const el = track.current;
+    if (!el) return;
+    const n = Math.max(0, Math.min(flows.length - 1, next));
+    const step = (el.firstElementChild as HTMLElement).offsetWidth + 12;
+    setPage(n);
+    animate(x, -Math.min(n * step, el.scrollWidth - el.clientWidth), { type: 'spring', stiffness: 380, damping: 38 });
+  };
   return (
     <div className="flex flex-col gap-2">
-      <div
-        className="-mx-5 px-5 scroll-px-5 flex items-start gap-3 overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden"
-        onScroll={e => { const el = e.currentTarget; setPage(Math.round(el.scrollLeft / ((el.firstElementChild as HTMLElement)?.offsetWidth + 12 || 1))); }}
-      >
-        {flows.map((v, i) => <VisualCard key={i} v={v} className="w-[88%] shrink-0 snap-start" />)}
+      <div className="-mx-5 px-5 overflow-hidden">
+        <m.div
+          ref={track}
+          className="flex items-start gap-3"
+          style={{ x }}
+          drag="x"
+          dragDirectionLock
+          dragMomentum={false}
+          onDragStart={() => { dragged.current = true; }}
+          onDragEnd={(_, info) => {
+            const swipe = Math.abs(info.offset.x) > 40 || Math.abs(info.velocity.x) > 400 ? -Math.sign(info.offset.x || info.velocity.x) : 0;
+            go(page + swipe);
+          }}
+          // 끈 직후의 클릭은 카드 안 버튼(맞혀 보기 단계)을 누른 걸로 치지 않는다
+          onClickCapture={e => { if (dragged.current) { e.stopPropagation(); dragged.current = false; } }}
+          onPointerDown={() => { dragged.current = false; }}
+        >
+          {flows.map((v, i) => <VisualCard key={i} v={v} className="w-[88%] shrink-0" />)}
+        </m.div>
       </div>
       <div className="flex justify-center gap-1">
         {flows.map((_, i) => (

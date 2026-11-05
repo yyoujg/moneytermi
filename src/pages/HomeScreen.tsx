@@ -10,6 +10,7 @@ import { PointCelebration, type PointReward } from '../components/PointCelebrati
 import type { Mission } from '../types';
 import { XpIcon } from '../components/StatIcons';
 import { useAuth } from '../hooks/useAuth';
+import { m } from 'motion/react';
 import { supabase, getGuestClient } from '../lib/supabase';
 import { daysLeftInMonth, daysLeftInWeek, periodMissions, type PeriodMission } from '../lib/periodMissions';
 
@@ -69,7 +70,8 @@ const HomeScreen = () => {
               const done = mission.current >= mission.target;
               return (
                 // 미션마다 게이지를 두면 한눈에 안 들어와, 왼쪽 원(끝내면 체크)과 오른쪽 숫자로만 보여준다. 게이지는 위 전체 진행 하나
-                <div key={mission.id} className="home-mission-row" data-rewarded={mission.isRewarded || undefined} data-done={done || undefined}>
+                // 보상을 받으면 아래로 내려가는 순서 변화를 미끄러지듯 보여준다
+                <m.div layout="position" transition={{ type: 'spring', stiffness: 420, damping: 36 }} key={mission.id} className="home-mission-row" data-rewarded={mission.isRewarded || undefined} data-done={done || undefined}>
                   <div className="home-mission-top">
                     <MissionRing current={mission.current} target={mission.target} />
                     <div className="home-mission-info">
@@ -85,7 +87,7 @@ const HomeScreen = () => {
                       : <span className="home-mission-count text-sm font-semibold text-[var(--color-ink)]">{mission.current}<span className="text-xs font-normal text-[var(--color-ink-4)]">/{mission.target}</span></span>
                     }
                   </div>
-                </div>
+                </m.div>
               );
             })}
           </div>

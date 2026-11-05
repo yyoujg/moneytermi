@@ -2,6 +2,7 @@ import { CELEBRATION_COLORS } from '../lib/visualPalette';
 import { XpIcon } from './StatIcons';
 import { logClick } from '../lib/analytics';
 import { useModalTurn } from '../lib/modalTurn';
+import { m } from 'motion/react';
 
 // 미션을 마쳤을 때 토스트 대신 띄우는 축하 모달. 받은 XP를 보여준다.
 // 색종이·등장 애니메이션은 StreakCelebration/BadgeCelebration과 같은 클래스.
@@ -36,7 +37,8 @@ export const PointCelebration = ({ reward, onClose }: { reward: PointReward; onC
         </p>
         {/* 보상은 박스 없이 한 줄로 */}
         <div className="mt-5 flex items-center justify-center gap-4 text-lg font-bold tabular-nums">
-          <span className="inline-flex items-center gap-1 text-[var(--color-reward-foreground)]"><XpIcon size={20} />+{reward.xp} XP</span>
+          <m.span initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 12, delay: 0.25 }}
+            className="inline-flex items-center gap-1 text-[var(--color-reward-foreground)]"><XpIcon size={20} />+{reward.xp} XP</m.span>
         </div>
         <button onClick={close} className="action-button mt-6 w-full">
           확인

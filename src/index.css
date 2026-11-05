@@ -151,7 +151,6 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
 @keyframes answer-wash { 0%, 100% { background-color: var(--color-card); } 30% { background-color: var(--color-success-soft); } }
 @keyframes reward-rise { 0% { opacity: 0; transform: translateY(6px) scale(0.94); } 24% { opacity: 1; } 100% { opacity: 0; transform: translateY(-18px) scale(1.04); } }
 @keyframes reward-pop { 0% { opacity: 0; transform: translateY(8px) scale(0.94); } 58% { opacity: 1; transform: translateY(-2px) scale(1.02); } 100% { opacity: 1; transform: none; } }
-@keyframes choice-lock { 0% { transform: scale(0.992); } 56% { transform: scale(1.012); } 100% { transform: none; } }
 @keyframes feedback-panel { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 @keyframes course-node-focus { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-1px) scale(1.006); } }
 @keyframes sweep { 0%, 100% { transform: scale(1); } 45% { transform: scale(1.02); } }
@@ -177,7 +176,6 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
 .anim-answer-wash { animation: answer-wash var(--dur-feedback) var(--ease-settle) both; }
 .anim-reward-rise { animation: reward-rise 760ms var(--ease-settle) both; }
 .anim-reward-pop { animation: reward-pop var(--dur-emph) var(--ease-settle) both; }
-.anim-choice-lock { animation: choice-lock var(--dur-feedback) var(--ease-snap) both; }
 .anim-feedback-panel { animation: feedback-panel var(--dur-feedback) var(--ease-settle) both; }
 .course-node-focus { animation: course-node-focus 1.8s var(--ease-soft) infinite; }
 .anim-stamp    { animation: stamp var(--dur-slow) var(--ease-spring) both; animation-delay: var(--d, 0s); }
@@ -208,10 +206,8 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
 .quiz-option {
   position: relative;
   overflow: hidden;
-  transition: transform var(--dur-tactile) ease-out, border-color var(--dur-fast) ease-out, background-color var(--dur-fast) ease-out;
-}
-.quiz-option:active {
-  transform: scale(0.99);
+  /* 누름·채점 튕김은 Motion 스프링(QuizScreen). transform을 CSS로 전환하면 둘이 부딪친다 */
+  transition: border-color var(--dur-fast) ease-out, background-color var(--dur-fast) ease-out;
 }
 .quiz-feedback-sheet,
 .quiz-feedback-inline {
@@ -291,7 +287,7 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
 /* TDS 리셋의 button:focus 포커스 링이 터치/클릭 뒤에도 남는다. 키보드 포커스(:focus-visible)만 링을 유지 */
 button:focus:not(:focus-visible) { outline: none !important; }
 @media (prefers-reduced-motion: reduce) {
-  .anim-fade, .anim-fade-up, .anim-pop-in, .anim-slide-in, .anim-slide-up, .anim-bump, .anim-confetti, .anim-draw, .anim-drop, .anim-glow-ok, .anim-shake, .anim-soft-nudge, .anim-answer-wash, .anim-reward-rise, .anim-reward-pop, .anim-choice-lock, .anim-feedback-panel, .anim-sweep, .anim-stamp, .anim-gate-l, .anim-gate-r, .anim-flip, .anim-flicker,
+  .anim-fade, .anim-fade-up, .anim-pop-in, .anim-slide-in, .anim-slide-up, .anim-bump, .anim-confetti, .anim-draw, .anim-drop, .anim-glow-ok, .anim-shake, .anim-soft-nudge, .anim-answer-wash, .anim-reward-rise, .anim-reward-pop, .anim-feedback-panel, .anim-sweep, .anim-stamp, .anim-gate-l, .anim-gate-r, .anim-flip, .anim-flicker,
   .animate-node-hop, .animate-node-ground, .course-focus-tip, .course-progress-reveal, .course-node-focus, .quiz-choice-reveal { animation: none !important; }
   .splash-spinner { animation: splash-reveal 0s linear 1s forwards !important; }
   .animate-pulse, .animate-bounce-up, .animate-bounce-down { animation: none !important; }
