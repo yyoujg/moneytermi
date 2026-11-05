@@ -1212,7 +1212,7 @@ button.course-home-rail-card:active { background: var(--color-surface); }
 @media (prefers-reduced-motion: reduce) { .course-step[data-step-state='current'] .course-step-marker::after { animation: none; } }
 button.course-step-marker { cursor: pointer; }
 .course-step-bubble::before { content: ''; position: absolute; top: -7px; left: calc(50% + var(--step-offset, 0px) / 2 - 6px); width: 12px; height: 12px; border-left: 1px solid var(--color-line); border-top: 1px solid var(--color-line); background: var(--color-card); transform: rotate(45deg); }
-.course-step-bubble > button.course-node-card { padding-inline: var(--space-4) !important; }
+.course-step-bubble > button.course-node-card { padding: var(--box-pad-y) var(--box-pad-x) !important; gap: var(--space-4); }
 .course-node-current { border-color: var(--color-accent-line) !important; }
 
 /* 학습 완료: 보라 바탕 위 기뻐하는 수달과 흰 결과 카드 */
