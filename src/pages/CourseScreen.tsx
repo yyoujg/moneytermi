@@ -448,14 +448,16 @@ const CourseScreen = () => {
               {levelHeading && <h3 className="course-home-level-heading">{levelLabel(topic.level)}<span>{visibleTopics.filter(t => t.level === topic.level).length}개 주제</span></h3>}
               <ListRow as="button" border="none" disabled={locked} data-locked={locked || undefined} data-topic-index={topic.index} data-current={isCurrent || undefined}
                 onClick={() => { if (!locked) navigate(`/course?topic=${topic.index}`); }} aria-disabled={locked || undefined} aria-label={`${levelLabel(topic.level)} ${topic.category} 주제 열기`} aria-describedby={`topic-summary-${topic.index}`} className="course-home-topic w-full"
-                contents={<span className="flex flex-col">
+                contents={<span className="flex w-full flex-col">
                   <span className="course-home-topic-title">{topic.category}</span>
                   <span id={`topic-summary-${topic.index}`} className="course-home-topic-meta">{steps.done}/{steps.total}단계 완료</span>
+                  {/* 지금 배우는 주제만 진행 막대로 강조한다(숫자는 바로 위 글자가 맡고 막대는 그림으로만) */}
+                  {isCurrent && !locked && steps.total > 0 && <span className="course-home-progress-track" aria-hidden="true"><span style={{ width: `${Math.round(steps.done / steps.total * 100)}%` }} /></span>}
                 </span>}
                 right={locked
                   // 잠김은 글자 대신 회색 원 안 자물쇠로 보여 준다(글자는 화면 읽기용)
                   ? <span className="course-topic-lock"><LockKeyhole size={16} aria-hidden="true" /><span className="sr-only">잠김</span></span>
-                  : <span className="flex items-center gap-1 text-xs text-[var(--color-ink-3)]">{done ? '완료' : steps.done > 0 || topic.known > 0 ? '진행 중' : '시작 가능'}<ChevronRight size={16} aria-hidden="true" /></span>}
+                  : <span className="course-home-topic-status flex items-center gap-1 text-xs text-[var(--color-ink-3)]">{done ? '완료' : isCurrent ? '이어 배우기' : steps.done > 0 || topic.known > 0 ? '진행 중' : '시작 가능'}<ChevronRight size={16} aria-hidden="true" /></span>}
               />
               </React.Fragment>;
             })}

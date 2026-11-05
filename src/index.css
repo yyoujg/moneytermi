@@ -1352,3 +1352,8 @@ button.course-home-rail-card { width: 160px; flex-direction: column; align-items
 .course-home-level-heading { font-size: var(--font-size-title-3); }
 /* 퀘스트 섹션 제목 아래 첫 미션까지 24px(행 위 여백 16 + 8). 주간·월간 목록도 지금 미션(#home-mission-list)과 같게 */
 .home-missions[data-period] > .home-mission-heading + div { margin-top: var(--space-2); }
+/* 주제 고르기: 지금 배우는 주제 한 줄만 회베이지 둥근 면 + 진행 막대로 강조(화면 좌우 여백 20px 안쪽) */
+.course-home-topic-list .course-home-topic[data-current] { margin: var(--space-2) 0; border-radius: var(--shape-card) !important; background: var(--color-surface); }
+.course-home-topic-list .course-home-topic[data-current] > div { padding: var(--space-5) var(--space-5); }
+.course-home-topic[data-current] .course-home-progress-track { width: 100%; height: 6px; margin-top: var(--space-3); background: var(--color-card); }
+.course-home-topic[data-current] .course-home-topic-status { color: var(--color-brand-text); font-weight: var(--font-weight-bold); }
