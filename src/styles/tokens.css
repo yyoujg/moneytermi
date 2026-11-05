@@ -248,8 +248,8 @@
   --color-league-second: var(--color-surface);
   --color-league-third: var(--color-surface);
 
-  /* 모서리는 한 값으로 통일(하단 내비 포함): 카드·버튼·선택지·안쪽 상자·칩 모두 32px. 낮은 칸은 알약처럼 보인다. 원은 50%·--shape-full */
-  --shape-card: 32px;
+  /* 모서리는 한 값으로 통일(하단 내비 포함): 카드·버튼·선택지·안쪽 상자·칩 모두 40px. 낮은 칸은 알약처럼 보인다. 원은 50%·--shape-full */
+  --shape-card: 40px;
   --shape-button: var(--shape-card);
   --shape-chip: var(--shape-card);
   --shape-inset: var(--shape-card);

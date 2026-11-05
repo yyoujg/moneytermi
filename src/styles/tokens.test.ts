@@ -239,7 +239,7 @@ describe('배지·리그·프로필의 기존 표현 보존', () => {
 describe('그림자 없는 테두리 카드와 평면 버튼 표면', () => {
   it('모든 테마와 화면이 같은 둥근 모서리 원본을 사용한다', () => {
     for (const values of [light]) {
-      expect(values['--shape-card']).toBe('32px');
+      expect(values['--shape-card']).toBe('40px');
       expect(values['--shape-button']).toBe('var(--shape-card)');
       expect(values['--shape-chip']).toBe('var(--shape-card)');
       expect(values['--shape-inset']).toBe('var(--shape-card)');
