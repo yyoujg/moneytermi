@@ -369,8 +369,8 @@ svg:is(.text-brand-300, .text-brand-400, .text-brand-500, .text-brand-600, .text
 /* 주제 화면(징검다리 노드)은 연회색 바탕 */
 .course-topic-screen { background: var(--color-canvas); }
 /* 회색 바탕 위에 주제 머리와 코스 머리를 각각 흰 카드로 묶는다(경계는 배경색 하나만) */
-.course-topic-screen .course-topic-header { margin: 0 var(--space-5); padding: var(--space-4) var(--space-5); border-radius: var(--shape-card); background: var(--color-card); }
-.course-topic-screen .course-topic-summary { padding-inline: var(--space-5) !important; border-bottom: 0; border-radius: var(--shape-card); background: var(--color-card) !important; }
+.course-topic-screen .course-topic-header { margin: 0 var(--space-5); padding: var(--space-3) var(--space-4); border-radius: var(--shape-card); background: var(--color-card); }
+.course-topic-screen .course-topic-summary { padding-inline: var(--space-4) !important; border-bottom: 0; border-radius: var(--shape-card); background: var(--color-card) !important; }
 /* 에너지 칩은 카드와 따로 화면 위 바탕색 줄에 고정한다. 코스 머리는 스크롤 중 그 줄 바로 아래에 고정된다 */
 .course-energy-bar { position: sticky; top: 0; z-index: 20; display: flex; justify-content: flex-end; padding: var(--space-2) var(--space-5); background: var(--color-canvas); }
 .course-energy-bar button.course-energy-entry.is-compact { position: static; background: var(--color-card); }
@@ -380,8 +380,9 @@ svg:is(.text-brand-300, .text-brand-400, .text-brand-500, .text-brand-600, .text
 .course-topic-screen .course-topic-header { padding-bottom: var(--shape-card); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
 /* 한 카드 안에서 주제와 코스는 구분선 한 줄로 나눈다 */
 .course-topic-screen .course-topic-header > div, .course-topic-screen .course-topic-switch { width: 100%; }
-.course-topic-screen .course-topic-switch { padding-bottom: var(--space-4); border-bottom: 1px solid var(--color-line); }
-.course-topic-screen section:first-of-type > .course-topic-summary { margin-top: calc(-1 * var(--shape-card)) !important; padding-top: var(--space-4) !important; }
+.course-topic-screen .course-topic-switch { padding-bottom: var(--space-3); border-bottom: 1px solid var(--color-line); }
+.course-topic-screen .course-topic-switch h1 { font-size: var(--font-size-headline); }
+.course-topic-screen section:first-of-type > .course-topic-summary { margin-top: calc(-1 * var(--shape-card)) !important; padding-top: var(--space-3) !important; }
 .lesson-intro-check { display: flex; width: 24px; height: 24px; flex-shrink: 0; border-radius: 50%; align-items: center; justify-content: center; background: var(--color-accent-soft); color: var(--color-accent-foreground); }
 .lesson-intro-step { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4); border-radius: var(--shape-inset); background: var(--color-card); box-shadow: var(--shadow-choice); }
 .lesson-intro-step-number { display: flex; width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%; align-items: center; justify-content: center; background: var(--color-progress); color: var(--color-on-progress); font-size: var(--font-size-label); font-weight: var(--font-weight-bold); }
@@ -1312,7 +1313,7 @@ button.course-home-rail-card { width: 160px; flex-direction: column; align-items
 .course-home-rail-lock { position: absolute; top: 50%; left: 50%; display: flex; width: 40px; height: 40px; align-items: center; justify-content: center; border-radius: 50%; background: var(--color-card); color: var(--color-ink-2); transform: translate(-50%, -50%); }
 /* 주제 제목(24 굵게 검정)과 구분: 코스는 초록 '코스 n/N' 라벨 + 17 semibold 제목 */
 /* 주제 난이도(제목 위 작은 글자)와 코스 진행 단계 수(막대 오른쪽) */
-.course-topic-level { margin-bottom: var(--space-1); color: var(--color-ink-3); font-size: var(--font-size-label); font-weight: var(--font-weight-semibold); }
+.course-topic-level { color: var(--color-ink-3); font-size: var(--font-size-label); font-weight: var(--font-weight-semibold); }
 .course-topic-steps { flex-shrink: 0; color: var(--color-ink-3); font-size: var(--font-size-label); font-variant-numeric: tabular-nums; }
 .course-topic-steps strong { color: var(--color-ink); font-weight: var(--font-weight-bold); }
 .course-topic-course-meta { display: flex; align-items: center; gap: var(--space-1); color: var(--color-brand-text); font-size: var(--font-size-label); font-weight: var(--font-weight-semibold); }

@@ -364,7 +364,7 @@ const CourseScreen = () => {
             <button type="button" className="course-topic-switch min-w-0 text-left" aria-haspopup="dialog" aria-label={`${activeTopic.category}, 다른 주제로 이동`} onClick={() => setTopicPicker(true)}>
               {/* 난이도는 제목 위 작은 글자(코스 머리의 '코스 n/N'과 같은 자리). 코스 수·진행은 코스 머리와 겹쳐 두지 않는다 */}
               <p className="course-topic-level">{levelLabel(activeTopic.level)}</p>
-              <h1 className="type-page-title flex items-center gap-1"><span className="truncate">{activeTopic.category}</span><ChevronDown size={20} aria-hidden="true" className="shrink-0 text-[var(--color-ink-3)]" /></h1>
+              <h1 className="type-page-title flex items-center gap-1"><span className="truncate">{activeTopic.category}</span><ChevronDown size={16} aria-hidden="true" className="shrink-0 text-[var(--color-ink-3)]" /></h1>
             </button>
           </div>
         ) : isCatalog ? (
@@ -442,12 +442,12 @@ const CourseScreen = () => {
         const pct = steps.length ? Math.round((stepsDone / steps.length) * 100) : 0;
         return (
         <section key={sec.course.id} data-section-index={si} data-course-section={sec.course.id} className="scroll-mt-4">
-          <div className={`course-topic-summary sticky top-0 z-10 mx-5 mt-3 mb-4 overflow-hidden py-4 ${sec.course.id === focus?.courseId ? 'anim-fade' : ''}`}>
+          <div className={`course-topic-summary sticky top-0 z-10 mx-5 mt-3 mb-4 overflow-hidden py-3 ${sec.course.id === focus?.courseId ? 'anim-fade' : ''}`}>
             {/* 코스 이름(COURSE_NAMES)이 주제명과 같으면 반복하지 않고 진행 정도만 보여준다 */}
-            {courseName(sec.course) !== activeTopic.category && <div className="relative mb-4 flex items-start gap-3">
+            {courseName(sec.course) !== activeTopic.category && <div className="relative mb-3 flex items-start gap-3">
               <div className="min-w-0">
                 <p className="course-topic-course-meta">코스 {partIndex + 1}/{activeTopic.parts.length}</p>
-                <h3 className="mt-1! flex items-center gap-1 text-base font-semibold text-[var(--color-ink)] break-keep leading-snug">{courseName(sec.course)}</h3>
+                <h3 className="flex items-center gap-1 text-[length:var(--font-size-body)] font-semibold text-[var(--color-ink)] break-keep leading-snug">{courseName(sec.course)}</h3>
               </div>
             </div>}
             {/* 진행은 막대 + 오른쪽 단계 수 한 줄(같은 값을 %로 한 번 더 쓰지 않는다) */}
