@@ -15,7 +15,6 @@ import { addEnergyState, fillEnergyState, nextEnergyAt as calcNextEnergyAt, norm
 import { runEnergyRefill, type EnergyRefillResult } from '../lib/energyRefill';
 import { nextReviewDateFromRows, selectDueReviewWords, selectRecallWords, type ReviewProgressRow } from '../lib/review';
 import { buildCourseContent } from '../lib/courseContent';
-import content from '../content/content.json';
 import { createQuizRequestId, parseQuizAnswerResult, withStudyRequestTimeout, type QuizAnswerResult } from '../lib/quizSubmission';
 
 type WpRow = ReviewProgressRow & { ease: number; interval_d: number; reps: number; due_date: string };
@@ -178,8 +177,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     return persistEnergy(next);
   }, [persistEnergy]);
 
-  const recoverEnergyRefill = useCallback(async (profileId: string) => runEnergyRefill({
+  const recoverEnergyRefill = useCallback(async (profileId: string, pendingOnly = false) => runEnergyRefill({
     profileId,
+    pendingOnly,
     storage: Storage,
     rpc: async idempotencyKey => {
       const { data, error } = await dbRef.current.rpc('buy_energy_refill_once', { p_idempotency_key: idempotencyKey });
@@ -207,11 +207,17 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     const loadContent = async () => {
       try {
       // 콘텐츠는 빌드 때 scripts/sync-content.mjs가 받아 둔 JSON을 쓴다(Supabase egress 절감).
-      const built = buildCourseContent(content.words, content.courseWords, content.courses);
-
-      setCourses(built.courses);
-      setAllWords(built.allWords);
-      setContentStatus('ready');
+      // 1.6MB라 첫 번들에서 빼서 따로 받는다(첫 화면 JS 파싱 시간 절감). 미션 정의 요청은 기다리지 않고 같이 보낸다
+      const contentLoaded = import('../content/content.json').then(({ default: content }) => {
+        const built = buildCourseContent(content.words, content.courseWords, content.courses);
+        setCourses(built.courses);
+        setAllWords(built.allWords);
+        setContentStatus('ready');
+      }).catch(e => {
+        // 여기서 바로 잡지 않으면 미션 정의를 기다리는 동안 unhandledrejection으로 잡혀 index.html 오류 화면이 뜬다
+        console.error('[AppContext] 콘텐츠 로드 실패:', e);
+        setContentStatus('error');
+      });
 
       // 미션 정의는 공개 데이터라 프로필이 없어도 받을 수 있다.
       const { data: defs } = await supabase
@@ -235,6 +241,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
           }];
         })));
       }
+      await contentLoaded;
       } catch (e) {
         console.error('[AppContext] 콘텐츠 로드 실패:', e);
         setContentStatus('error');
@@ -303,7 +310,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       dbRef.current = p?.guestToken ? getGuestClient(p.guestToken) : supabase;
       const db = dbRef.current;
       await loadEnergyForProfile(profileId);
-      await recoverEnergyRefill(profileId);
+      // 실행 시엔 결제가 끝나지 않은 충전만 마무리한다(대기 키가 없으면 새 충전을 시작하지 않는다)
+      await recoverEnergyRefill(profileId, true);
 
       try {
       // 1. points — DB값과 로컬값 중 큰 값 유지 (로딩 중 적립 포인트 보존)

@@ -84,3 +84,14 @@ describe('runEnergyRefill', () => {
     expect(storage.map.has(keyName)).toBe(false);
   });
 });
+
+describe('앱 실행 시 복구', () => {
+  it('대기 키가 없으면 새 충전 요청을 보내지 않는다', async () => {
+    const rpc = vi.fn();
+    const storage = { getItem: vi.fn(async () => null), setItem: vi.fn(async () => {}), removeItem: vi.fn(async () => {}) };
+    const result = await runEnergyRefill({ profileId: 'p1', storage, rpc, persistFilledEnergy: vi.fn(async () => true), applyPoints: vi.fn(), pendingOnly: true });
+    expect(result).toBe('fail');
+    expect(rpc).not.toHaveBeenCalled();
+    expect(storage.setItem).not.toHaveBeenCalled();
+  });
+});

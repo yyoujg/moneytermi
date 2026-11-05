@@ -22,6 +22,8 @@ type RunEnergyRefillOptions = {
   persistFilledEnergy: () => Promise<boolean>;
   applyPoints: (points: number) => void;
   keyFactory?: () => string;
+  // true면 남은 대기 키만 마무리하고, 없으면 새 충전을 시작하지 않는다(앱 실행 시 복구용)
+  pendingOnly?: boolean;
 };
 
 export const energyRefillPendingKeyFor = (profileId: string) => `moneytermi_energy_v1:pending_refill:${profileId}`;
@@ -51,10 +53,12 @@ export const runEnergyRefill = async ({
   persistFilledEnergy,
   applyPoints,
   keyFactory = newEnergyRefillIdempotencyKey,
+  pendingOnly = false,
 }: RunEnergyRefillOptions): Promise<EnergyRefillResult> => {
   const pendingKeyName = energyRefillPendingKeyFor(profileId);
   let idempotencyKey = await storage.getItem(pendingKeyName).catch(() => null);
   if (!idempotencyKey) {
+    if (pendingOnly) return 'fail';
     idempotencyKey = keyFactory();
     try {
       await storage.setItem(pendingKeyName, idempotencyKey);

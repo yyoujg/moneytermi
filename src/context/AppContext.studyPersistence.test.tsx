@@ -146,6 +146,8 @@ async function mount() {
   document.body.appendChild(container);
   root = createRoot(container);
   await act(async () => { root!.render(<AppProvider><Probe /></AppProvider>); });
+  // 콘텐츠 JSON은 동적 import라 한 번 더 기다린다
+  await act(async () => { await vi.dynamicImportSettled(); });
   expect(current.contentStatus).toBe('ready');
   expect(current.hydrated).toBe(true);
 }
