@@ -1348,5 +1348,5 @@ button.course-home-rail-card { width: 160px; flex-direction: column; align-items
 .quest-missions-section > .home-missions + .home-missions { margin-top: 0; padding-top: var(--space-8); border-top: 1px solid var(--color-line); }
 /* 코스 카드: 주제 이름 + 코스 이름(20 굵게). 주제 고르기 난이도 제목은 주제 이름(15)보다 확실히 크게 */
 .course-topic-card-eyebrow { display: block; color: var(--color-ink-3); font-size: var(--font-size-caption); line-height: var(--line-height-body); word-break: keep-all; }
-.course-topic-card-title { margin-top: 2px; color: var(--color-ink); font-size: var(--font-size-title-3); font-weight: var(--font-weight-bold); line-height: var(--line-height-title); word-break: keep-all; }
+.course-topic-card-title { margin-top: var(--space-2); color: var(--color-ink); font-size: var(--font-size-title-3); font-weight: var(--font-weight-bold); line-height: var(--line-height-title); word-break: keep-all; }
 .course-home-level-heading { font-size: var(--font-size-title-3); }
