@@ -338,24 +338,21 @@ const CourseScreen = () => {
 
   // 글자 한 줄 대신 실제 화면 모양을 먼저 보여줘 기다림을 짧게 느끼게 한다(도허티 임계)
   if (contentStatus === 'loading') return (
-    <div className="course-screen app-soft-screen flex h-full flex-col overflow-hidden" role="status" aria-live="polite">
+    // 뼈대는 지금 주제 화면 모양(에너지 칩, 주제·코스 카드, 지그재그 노드)을 그대로 따른다
+    <div className="course-screen course-topic-screen flex h-full flex-col overflow-hidden" role="status" aria-live="polite">
       <span className="sr-only">학습 내용을 불러오는 중이에요</span>
-      <div aria-hidden="true" className="course-home-header">
-        <div className="h-6 w-32 rounded-chip bg-[var(--color-surface)] animate-pulse" />
-        <div className="mt-4 h-4 w-24 rounded-chip bg-[var(--color-surface)] animate-pulse" />
+      <div aria-hidden="true" className="flex justify-end px-5 py-2">
+        <div className="h-11 w-24 rounded-full bg-[var(--color-card)] animate-pulse" />
       </div>
-      <div aria-hidden="true" className="course-home-hero">
-        <div className="h-3 w-20 rounded-chip bg-[var(--color-surface)] animate-pulse" />
-        <div className="mt-3 h-6 w-40 rounded-chip bg-[var(--color-surface)] animate-pulse" />
-        <div className="mt-5 h-1 w-full rounded-full bg-[var(--color-surface)] animate-pulse" />
-        <div className="mt-6 h-[var(--size-action)] w-full rounded-button bg-[var(--color-surface)] animate-pulse" />
+      <div aria-hidden="true" className="mx-5 rounded-[var(--shape-card)] bg-[var(--color-card)] px-4 py-3">
+        <div className="h-3 w-10 rounded-chip bg-[var(--color-surface)] animate-pulse" />
+        <div className="mt-2 h-5 w-36 rounded-chip bg-[var(--color-surface)] animate-pulse" />
+        <div className="mt-3 h-4 w-44 rounded-chip bg-[var(--color-surface)] animate-pulse" />
+        <div className="mt-3 h-2 w-full rounded-full bg-[var(--color-surface)] animate-pulse" />
       </div>
-      <div aria-hidden="true" className="course-home-catalog flex flex-col gap-5">
-        {[1, 2, 3].map(i => (
-          <div key={i} className="flex flex-col gap-2">
-            <div className="h-5 w-36 rounded-chip bg-[var(--color-surface)] animate-pulse" />
-            <div className="h-3 w-24 rounded-chip bg-[var(--color-surface)] animate-pulse" />
-          </div>
+      <div aria-hidden="true" className="mt-8 flex flex-col items-center gap-3">
+        {[0, 36, 0, -36].map((x, i) => (
+          <div key={i} className="h-[72px] w-[72px] rounded-full bg-[var(--color-card)] animate-pulse" style={{ transform: `translateX(${x}px)` }} />
         ))}
       </div>
     </div>
