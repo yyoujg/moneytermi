@@ -8,7 +8,6 @@ import { StageIcon } from '../components/StageGlyph';
 import { calcStreak } from '../lib/streak';
 import { buildBadges } from '../lib/badges';
 import { BadgeGlyph } from '../components/mypage/BadgeGlyph';
-import { List, ListRow } from '@toss/tds-mobile';
 import { useAuth } from '../hooks/useAuth';
 import { GuideSheet } from '../components/mypage/GuideSheet';
 import { SettingsSheet } from '../components/mypage/SettingsSheet';
@@ -113,19 +112,13 @@ const MyPageScreen = () => {
 
         {/* 메뉴 */}
         <div className="my-page-panel my-page-menu">
-            <List>
-              {MENU_ITEMS.map(label => (
-                <ListRow
-                  key={label}
-                  as="button"
-                  border="none"
-                  className="w-full"
-                  onClick={() => handleMenuClick(label)}
-                  contents={<span className="text-sm font-semibold">{label}</span>}
-                  right={<ChevronRight size={16} className="text-[var(--color-ink-4)]" />}
-                />
-              ))}
-            </List>
+            {/* TDS ListRow 대신 직접 그린 행(TDS 버튼의 가운데 정렬이 iOS 웹뷰에서 내용을 가운데로 몰았다) */}
+            {MENU_ITEMS.map(label => (
+              <button key={label} type="button" className="my-page-menu-row" onClick={() => handleMenuClick(label)}>
+                <span className="text-sm font-semibold">{label}</span>
+                <ChevronRight size={16} className="text-[var(--color-ink-4)]" />
+              </button>
+            ))}
         </div>
       </div>
     </div>

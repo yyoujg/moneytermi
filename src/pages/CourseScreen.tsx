@@ -1,6 +1,5 @@
 import React, { useMemo, useRef, useLayoutEffect, useEffect, useState } from 'react';
 import { LockKeyhole } from '../components/ui/OtterIcons';
-import { List, ListRow } from '@toss/tds-mobile';
 import { COURSE_NAMES } from '../lib/topicImages';
 import { ChevronRight } from '../components/ui/ControlIcons';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
@@ -434,7 +433,8 @@ const CourseScreen = () => {
             <h2>주제 고르기</h2><span>{visibleTopics.length}개 주제</span>
           </div>
 
-          <List className="course-home-topic-list">
+          {/* 주제 행은 TDS ListRow 대신 직접 그린 버튼(TDS 버튼의 가운데 정렬이 iOS 웹뷰에서 내용을 가운데로 몰았다) */}
+          <div className="course-home-topic-list">
             {visibleTopics.length === 0 && <p className="type-supporting py-5 text-center">이 난이도의 학습을 준비하고 있어요.</p>}
             {visibleTopics.map((topic, i) => {
               const locked = topic.locked;
@@ -446,22 +446,22 @@ const CourseScreen = () => {
               // 같은 책 아이콘 반복 대신 상태 글자와 화살표만 둔다
               return <React.Fragment key={`${topic.level}-${topic.category}`}>
               {levelHeading && <h3 className="course-home-level-heading">{levelLabel(topic.level)}<span>{visibleTopics.filter(t => t.level === topic.level).length}개 주제</span></h3>}
-              <ListRow as="button" border="none" disabled={locked} data-locked={locked || undefined} data-topic-index={topic.index} data-current={isCurrent || undefined}
-                onClick={() => { if (!locked) navigate(`/course?topic=${topic.index}`); }} aria-disabled={locked || undefined} aria-label={`${levelLabel(topic.level)} ${topic.category} 주제 열기`} aria-describedby={`topic-summary-${topic.index}`} className="course-home-topic w-full"
-                contents={<span className="flex w-full flex-col">
+              <button type="button" disabled={locked} data-locked={locked || undefined} data-topic-index={topic.index} data-current={isCurrent || undefined}
+                onClick={() => { if (!locked) navigate(`/course?topic=${topic.index}`); }} aria-disabled={locked || undefined} aria-label={`${levelLabel(topic.level)} ${topic.category} 주제 열기`} aria-describedby={`topic-summary-${topic.index}`} className="course-home-topic">
+                <span className="course-home-topic-body">
                   <span className="course-home-topic-title">{topic.category}</span>
                   <span id={`topic-summary-${topic.index}`} className="course-home-topic-meta">{steps.done}/{steps.total}단계 완료</span>
                   {/* 지금 배우는 주제만 진행 막대로 강조한다(숫자는 바로 위 글자가 맡고 막대는 그림으로만) */}
                   {isCurrent && !locked && steps.total > 0 && <span className="course-home-progress-track" aria-hidden="true"><span style={{ width: `${Math.round(steps.done / steps.total * 100)}%` }} /></span>}
-                </span>}
-                right={locked
+                </span>
+                {locked
                   // 잠김은 글자 대신 회색 원 안 자물쇠로 보여 준다(글자는 화면 읽기용)
                   ? <span className="course-topic-lock"><LockKeyhole size={16} aria-hidden="true" /><span className="sr-only">잠김</span></span>
                   : <span className="course-home-topic-status flex items-center gap-1 text-xs text-[var(--color-ink-3)]">{done ? '완료' : isCurrent ? '이어 배우기' : steps.done > 0 || topic.known > 0 ? '진행 중' : '시작 가능'}<ChevronRight size={16} aria-hidden="true" /></span>}
-              />
+              </button>
               </React.Fragment>;
             })}
-          </List>
+          </div>
         </section>
       </>}
       {/* 코스 카드는 하나만 위에 고정한다. 스크롤해서 다음 코스가 카드 아래까지 오면 그 코스 이름으로 바뀐다 */}

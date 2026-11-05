@@ -1299,8 +1299,11 @@ button.review-aux-button:disabled { color: var(--color-ink-3); }
 .course-home-hero button.course-home-primary + button.course-home-primary { margin-top: var(--space-2); }
 /* 주제 둘러보기는 흰 바탕 + TDS ListRow. 예전 경로형 카드 배치를 끈다 */
 .course-home-topic-list { display: block; padding: var(--space-2) 0; }
-.course-home-topic-list .course-home-topic { display: block; width: 100%; margin-left: 0; min-height: 0; padding: 0; border: 0; background: transparent; }
-.course-home-topic-list .course-home-topic > div { padding: var(--space-4) var(--space-3); }
+/* 주제 행(직접 그린 버튼): 왼쪽 이름·단계는 남는 폭 전체, 오른쪽 상태·자물쇠. 예전 경로형 카드의 세로 정렬·점선은 끈다 */
+.course-home-topic-list .course-home-topic { display: flex; width: 100%; flex-direction: row; align-items: center; justify-content: flex-start; gap: var(--space-3); margin-left: 0; min-height: 0; padding: var(--space-4) var(--space-3); border: 0; border-radius: var(--shape-card) !important; background: transparent; text-align: left; }
+.course-home-topic-list button.course-home-topic:not(:last-child)::after { content: none; }
+.course-home-topic-body { display: flex; min-width: 0; flex: 1 1 auto; flex-direction: column; }
+.course-home-topic-list .course-home-topic > :last-child:not(.course-home-topic-body) { flex-shrink: 0; }
 /* 전체 탭 난이도 구분: 굵은 띠 + 섹션 제목 크기. 첫 난이도는 띠 없이 */
 .course-home-level-heading { display: flex; align-items: baseline; justify-content: space-between; margin: var(--space-4) calc(var(--space-5) * -1) 0; padding: var(--space-5) var(--space-5) var(--space-2); border-top: 8px solid var(--color-neutral-soft); color: var(--color-ink); font-size: var(--font-size-section-title); font-weight: var(--font-weight-bold); }
 .course-home-level-heading > span { color: var(--color-ink-3); font-size: var(--font-size-caption); font-weight: var(--font-weight-regular); }
@@ -1354,15 +1357,15 @@ button.course-home-rail-card { width: 160px; flex-direction: column; align-items
 /* 퀘스트 섹션 제목 아래 첫 미션까지 32px(행 위 여백 16 + 16). 주간·월간 목록도 지금 미션(#home-mission-list)과 같게 */
 .home-missions[data-period] > .home-mission-heading + div { margin-top: var(--space-4); }
 /* 주제 고르기: 지금 배우는 주제 한 줄만 회베이지 둥근 면 + 진행 막대로 강조(화면 좌우 여백 20px 안쪽) */
-.course-home-topic-list .course-home-topic[data-current] { margin: var(--space-2) 0; border-radius: var(--shape-card) !important; background: var(--color-surface); }
-.course-home-topic-list .course-home-topic[data-current] > div { padding: var(--box-pad-y) var(--box-pad-x); }
+.course-home-topic-list .course-home-topic[data-current] { margin: var(--space-2) 0; padding: var(--box-pad-y) var(--box-pad-x); background: var(--color-surface); }
 .course-home-topic[data-current] .course-home-progress-track { width: 100%; height: 6px; margin-top: var(--space-3); background: var(--color-card); }
 .course-home-topic[data-current] .course-home-topic-status { color: var(--color-brand-text); font-weight: var(--font-weight-bold); }
-/* TDS 기본 모서리(바텀시트 28·목록 행 눌림 12·글자 버튼 눌림 8px)도 앱 공통 한 값(--shape-card)으로 */
+/* TDS 기본 모서리(바텀시트 28·글자 버튼 눌림 8px)도 앱 공통 한 값(--shape-card)으로 */
 div[open][tabindex='0'] { border-radius: var(--shape-card) !important; }
-.tds-mobile-list-row > div, .tds-mobile-list-row > div > div, .tds-mobile-text-button, .tds-mobile-text-button__dimmer { border-radius: var(--shape-card) !important; }
+.tds-mobile-text-button, .tds-mobile-text-button__dimmer { border-radius: var(--shape-card) !important; }
 /* 둥근 상자 안쪽 여백은 --box-pad-y/x 한 쌍(20/24)으로 통일. 퀴즈·상황 문제 말풍선과 보기 */
 .quiz-bubble.quiz-bubble { padding: var(--box-pad-y) var(--box-pad-x) !important; }
 .quiz-option.quiz-option { padding: var(--box-pad-y) var(--box-pad-x); }
-/* iOS 사파리(토스 웹뷰)는 button 안 내용을 글자 폭만큼 줄여 가운데에 둔다. TDS 목록 행 버튼의 안쪽 칸을 행 전체 폭으로 편다 */
-button.tds-mobile-list-row > div { width: 100%; box-sizing: border-box; }
+/* 마이 메뉴 행(직접 그린 버튼): 글자는 왼쪽, 화살표는 오른쪽 끝. 높이는 TDS 목록 행과 같은 47px */
+button.my-page-menu-row { display: flex; width: 100%; min-height: 47px; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) 0; border: 0; border-radius: 0; background: transparent; color: var(--color-ink); text-align: left; }
+button.my-page-menu-row:active { opacity: 0.7; }
