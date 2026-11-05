@@ -61,7 +61,8 @@ const MyPageScreen = () => {
           onEditNickname={() => setShowNicknameSheet(true)}
         />
 
-        <Card pad="lg" className="my-page-stats anim-fade-up">
+        <Card pad="lg" className="my-page-stats anim-fade-up" aria-labelledby="my-stats-title">
+          <h3 id="my-stats-title" className="type-section-title mb-3">학습 기록</h3>
           <div className="my-page-stats-grid">
             {/* 통계 아이콘은 수달 3색 그림(public/icons/stat) */}
             {[

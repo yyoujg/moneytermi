@@ -164,6 +164,11 @@ const CourseScreen = () => {
   // 길에는 돌(체크·번호·복습)만 두고, 돌을 누르면 그 단계(역할·제목·열기)를 옆 말풍선으로 띄운다.
   // 한 번에 하나, 바깥을 누르면 닫힘. 처음엔 지금 할 단계(focus) 말풍선을 열어 둔다(undefined = 기본값)
   const [bubbleId, setBubbleId] = useState<string | null>(null);
+  // 주제 머리도 스크롤 중 고정한다. 코스 머리는 그 높이만큼 아래에 붙는다(CSS --topic-header-h)
+  const topicHeaderRef = useRef<HTMLDivElement>(null);
+  const [topicHeaderH, setTopicHeaderH] = useState(0);
+  // 내용이 로딩 화면일 땐 머리가 없어 0이 되므로 로딩 상태도 다시 잰다
+  useLayoutEffect(() => { setTopicHeaderH(topicHeaderRef.current?.offsetHeight ?? 0); }, [activeTopic?.category, contentStatus]);
   // 학습 결과에서 '코스에서 이어 하기'로 오면 다음 할 단계 말풍선을 바로 열어 둔다
   const openFocusOnReturn = useRef((useLocation().state as { openFocus?: boolean } | null)?.openFocus === true);
   const homeRailRef = useRef<HTMLDivElement>(null);
@@ -357,7 +362,7 @@ const CourseScreen = () => {
   );
 
   return (
-    <div className={`course-screen ${isCatalog ? 'bg-[var(--color-card)]' : activeTopic ? 'course-topic-screen' : 'app-soft-screen'} flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden`}>
+    <div className={`course-screen ${isCatalog ? 'bg-[var(--color-card)]' : activeTopic ? 'course-topic-screen' : 'app-soft-screen'} flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden`} style={{ '--topic-header-h': `${topicHeaderH}px` } as React.CSSProperties}>
       {/* 에너지 칩은 주제 카드와 따로 화면 위에 고정한다 */}
       {activeTopic && <div className="course-energy-bar">
         <button type="button" className="course-energy-entry is-compact" aria-label={`학습 에너지 ${energy}/${energyMax}, 충전 방법 보기`} onClick={() => openShop('energy')}>
@@ -365,7 +370,7 @@ const CourseScreen = () => {
           <span className="course-energy-action">충전 방법<ChevronRight size={16} aria-hidden="true" /></span>
         </button>
       </div>}
-      <div className={activeTopic ? 'course-topic-header' : 'course-home-header'}>
+      <div ref={activeTopic ? topicHeaderRef : undefined} className={activeTopic ? 'course-topic-header' : 'course-home-header'}>
         {activeTopic ? (
           <div className="flex items-center gap-3">
             {/* 뒤로가기는 토스 내비게이션 바가 맡는다(자체 뒤로가기 중복은 검수 반려 사유) */}

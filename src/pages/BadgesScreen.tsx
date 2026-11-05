@@ -26,9 +26,6 @@ const BadgesScreen = () => {
                 <li key={b.id} className="flex min-w-0 flex-col items-center gap-1 text-center">
                   <BadgeGlyph id={b.id} size={64} earned={b.earned} />
                   <span className={`text-xs font-semibold break-keep ${b.earned ? 'text-[var(--color-ink)]' : 'text-[var(--color-ink-3)]'}`}>{b.title}</span>
-                  <span className="text-2xs text-[var(--color-ink-3)] tabular-nums">
-                    {b.earned ? '획득' : `${Math.min(stats[b.stat], b.need).toLocaleString()} / ${b.need.toLocaleString()}${group.unit}`}
-                  </span>
                 </li>
               ))}
             </ul>

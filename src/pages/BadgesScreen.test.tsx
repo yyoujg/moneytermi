@@ -19,12 +19,11 @@ const mount = () => {
 };
 
 describe('배지 더보기', () => {
-  it('계열별로 모든 배지를 보여주고 못 받은 배지는 지금 값/목표를 적는다', () => {
+  it('계열별로 모든 배지를 보여주고 받음 여부는 그림으로만 보여준다(상태 글자 없음)', () => {
     const container = mount();
     expect(container.querySelectorAll('section h3')).toHaveLength(3);
     expect(container.querySelectorAll('li')).toHaveLength(19);
-    const words200 = container.querySelector('[data-badge-id="w200"]')!.closest('li')!;
-    expect(words200).toHaveTextContent('120 / 200개');
-    expect(container.querySelector('[data-badge-id="w100"]')!.closest('li')).toHaveTextContent('획득');
+    expect(container.querySelector('[data-badge-id="w200"]')!.closest('li')).not.toHaveTextContent('120 / 200개');
+    expect(container.querySelector('[data-badge-id="w100"]')!.closest('li')).not.toHaveTextContent('획득');
   });
 });
