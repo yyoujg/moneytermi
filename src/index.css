@@ -372,7 +372,7 @@ svg:is(.text-brand-300, .text-brand-400, .text-brand-500, .text-brand-600, .text
 .app-soft-screen { background: var(--color-card); }
 /* 주제 화면(징검다리 노드)은 연회색 바탕 */
 .course-topic-screen { background: var(--color-canvas); }
-.course-topic-screen .course-topic-summary { padding-inline: var(--space-6) !important; border-bottom: 0; border-radius: var(--shape-card); background: var(--color-card) !important; }
+.course-topic-screen .course-topic-summary { padding-inline: var(--space-8) !important; border-bottom: 0; border-radius: var(--shape-full); background: var(--color-card) !important; }
 /* 에너지 칩은 카드와 따로 화면 위 바탕색 줄에 고정한다. 코스 머리는 스크롤 중 그 줄 바로 아래에 고정된다 */
 .course-energy-bar { position: sticky; top: 0; z-index: 20; display: flex; justify-content: flex-end; padding: var(--space-2) var(--space-5); background: var(--color-canvas); }
 .course-topic-screen .course-energy-bar { align-items: center; }
