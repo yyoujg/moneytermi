@@ -101,7 +101,7 @@ const LessonCheckScreen = () => {
                 if (option.isCorrect) feedbackCorrect();
                 else { feedbackWrong(); setMistakes(prev => [...prev, question]); }
               }}
-              className="quiz-option w-full flex items-center gap-3 min-h-[64px] border border-transparent bg-[var(--color-card)] px-4 py-4 text-left text-base font-semibold leading-relaxed text-[var(--color-ink)] break-keep"
+              className="quiz-option w-full flex items-center gap-3 min-h-[64px] border border-transparent bg-[var(--color-choice)] active:opacity-80 px-4 py-4 text-left text-base font-semibold leading-relaxed text-[var(--color-ink)] break-keep"
               style={{ borderRadius: 'var(--shape-button)' }}
             >
               <span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[var(--color-line-strong)] bg-[var(--color-card)] text-xs font-semibold text-[var(--color-ink-3)]">{optionIndex + 1}</span>

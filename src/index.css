@@ -1245,8 +1245,6 @@ button.course-home-rail-card:active { background: transparent; opacity: 0.7; }
 .learning-completion-card { background: transparent; box-shadow: none; }
 /* 스크롤 중 고정되는 코스 머리는 아래 단계 글자와 겹치지 않게 화면과 같은 바탕색을 둔다 */
 .course-topic-summary { padding-inline: 0 !important; border-radius: 0; background: var(--color-card) !important; border-bottom: 1px solid var(--color-line); }
-/* 선택 전 보기는 흰 면이라 회색 테두리로 경계를 보인다 */
-button.quiz-option.border-transparent { border-color: var(--color-line-strong) !important; }
 /* 획득 배지 = 세이지 틴트 원 + 진한 중립 채움 아이콘, 미획득 = 회색 원 + 흐린 선 아이콘 */
 .badge-glyph { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; border: 0; background: var(--color-badge-earned-soft); color: var(--color-badge-earned); }
 .badge-glyph.is-locked { border: 0; background: var(--color-surface); color: var(--color-ink-3); opacity: 0.6; }

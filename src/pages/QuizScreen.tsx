@@ -301,13 +301,13 @@ const QuizScreen = () => {
           {(quizItem?.options ?? []).map((opt, i) => {
             const isSelected = selected === opt.answer;
             const isCorrectOption = opt.isCorrect;
-            // 색은 배경·테두리·아이콘에만. 보기 글자는 어떤 상태에서도 진하게 둔다
-            let optionStyle = 'bg-[var(--color-card)] border-transparent text-[var(--color-ink)] active:bg-[var(--color-surface)]';
+            // 보기는 테두리 없는 연한 갈색 면. 고른 보기만 갈색 테두리로 표시한다. 보기 글자는 어떤 상태에서도 진하게 둔다
+            let optionStyle = 'bg-[var(--color-choice)] border-transparent text-[var(--color-ink)] active:opacity-80';
             if (!showGrading && isSelected) optionStyle = 'bg-[var(--color-accent-soft)] border-[var(--color-progress)] text-[var(--color-ink)]';
             if (showGrading) {
               optionStyle = isCorrectOption ? 'bg-[var(--color-success-soft)] border-[var(--color-success-foreground)] text-[var(--color-ink)]'
                 : isSelected ? 'bg-[var(--color-card)] border-[var(--color-line-strong)] border-dashed text-[var(--color-ink)]'
-                : 'bg-[var(--color-card)] border-transparent text-[var(--color-ink-3)]';
+                : 'bg-[var(--color-choice)] border-transparent text-[var(--color-ink-3)]';
             }
             const tag = !showGrading ? (isSelected ? (status === 'idle' ? '선택' : '내 답') : null) : isCorrectOption ? '정답' : isSelected ? '내 답' : null;
             const feedbackMotion = showGrading && (isCorrectOption || isSelected) ? 'anim-choice-lock' : '';
