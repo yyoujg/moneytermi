@@ -305,9 +305,9 @@ const QuizScreen = () => {
           {(quizItem?.options ?? []).map((opt, i) => {
             const isSelected = selected === opt.answer;
             const isCorrectOption = opt.isCorrect;
-            // 보기는 테두리 없는 연한 갈색 면에 진한 갈색 굵은 글자. 고른 보기만 갈색 테두리로 표시한다
+            // 보기는 테두리 없는 연한 갈색 면에 진한 갈색 굵은 글자. 고른 보기만 주버튼과 같은 진한 갈색 테두리로 표시한다
             let optionStyle = 'bg-[var(--color-choice)] border-transparent text-[var(--color-brand-text)] active:opacity-80';
-            if (!showGrading && isSelected) optionStyle = 'bg-[var(--color-accent-soft)] border-[var(--color-progress)] text-[var(--color-brand-text)]';
+            if (!showGrading && isSelected) optionStyle = 'bg-[var(--color-accent-soft)] border-[var(--color-brand-action)] text-[var(--color-brand-text)]';
             if (showGrading) {
               // 채점 뒤: 정답은 연한 초록, 내가 고른 오답은 연한 빨강(이해 확인 피드백과 같은 색)
               optionStyle = isCorrectOption ? 'bg-[var(--accent-green-soft)] border-[var(--accent-green-ink)] text-[var(--accent-green-ink)]'
@@ -317,7 +317,7 @@ const QuizScreen = () => {
             const tag = !showGrading ? (isSelected ? (status === 'idle' ? '선택' : '내 답') : null) : isCorrectOption ? '정답' : isSelected ? '내 답' : null;
             const feedbackMotion = showGrading && (isCorrectOption || isSelected) ? 'anim-choice-lock' : '';
             const markerClass = !showGrading
-              ? isSelected ? 'bg-[var(--color-progress)] text-[var(--color-on-progress)]' : 'border border-[var(--color-line-strong)] bg-[var(--color-card)] text-[var(--color-ink-3)]'
+              ? isSelected ? 'bg-[var(--color-brand-action)] text-[var(--color-on-brand)]' : 'border border-[var(--color-line-strong)] bg-[var(--color-card)] text-[var(--color-ink-3)]'
               : isCorrectOption
                 ? 'text-[var(--accent-green-ink)]'
                 : isSelected
