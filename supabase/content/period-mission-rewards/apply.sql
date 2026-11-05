@@ -5,6 +5,7 @@
 --   mo-attend 이번 달 20일 출석     +50 XP
 -- 주는 월요일 0시(KST), 달은 1일 0시(KST)에 시작한다. 같은 기간에는 한 번만 받는다(기본키로 중복 차단).
 -- XP는 add_xp로 넣어 다른 보상과 같은 경로(리그 주간 XP 포함)를 탄다.
+-- 여러 번 실행해도 된다(테이블·정책·함수 모두 덮어쓰기). 2026-11-05: 출석 직접 쓰기 회수, 미래 날짜 출석 제외 추가.
 BEGIN;
 
 CREATE TABLE IF NOT EXISTS public.period_mission_rewards (
@@ -21,6 +22,9 @@ CREATE POLICY period_mission_rewards_read_own ON public.period_mission_rewards
   FOR SELECT TO anon, authenticated USING (user_id = public.current_profile_id());
 -- 쓰기는 아래 함수만 한다
 REVOKE ALL ON public.period_mission_rewards FROM anon, authenticated;
+-- 보상이 출석 수로 정해지므로 출석도 checkin RPC(서버 날짜)로만 쓰게 한다.
+-- migration_points_integrity.sql에서 이미 회수했지만, 빠진 DB에서도 출석을 직접 넣어 보상을 받지 못하게 다시 회수한다
+REVOKE INSERT, UPDATE, DELETE ON public.attendance FROM anon, authenticated;
 GRANT SELECT ON public.period_mission_rewards TO anon, authenticated;
 
 CREATE OR REPLACE FUNCTION public.claim_period_mission(p_mission_id text)
@@ -34,6 +38,7 @@ DECLARE
   v_kst     timestamp := now() AT TIME ZONE 'Asia/Seoul';
   v_week    date := date_trunc('week', v_kst)::date;    -- ISO 주: 월요일
   v_month   date := date_trunc('month', v_kst)::date;
+  v_today   date := v_kst::date;
   v_start   date;
   v_target  integer;
   v_reward  integer;
@@ -45,14 +50,14 @@ BEGIN
   CASE p_mission_id
     WHEN 'w-attend' THEN
       v_start := v_week; v_target := 5; v_reward := 20;
-      SELECT count(*) INTO v_current FROM public.attendance WHERE user_id = v_uid AND date >= v_start;
+      SELECT count(*) INTO v_current FROM public.attendance WHERE user_id = v_uid AND date >= v_start AND date <= v_today;
     WHEN 'w-xp' THEN
       v_start := v_week; v_target := 100; v_reward := 20;
       SELECT coalesce(sum(delta), 0) INTO v_current FROM public.xp_events
       WHERE user_id = v_uid AND delta > 0 AND created_at >= (v_start::timestamp AT TIME ZONE 'Asia/Seoul');
     WHEN 'mo-attend' THEN
       v_start := v_month; v_target := 20; v_reward := 50;
-      SELECT count(*) INTO v_current FROM public.attendance WHERE user_id = v_uid AND date >= v_start;
+      SELECT count(*) INTO v_current FROM public.attendance WHERE user_id = v_uid AND date >= v_start AND date <= v_today;
     ELSE
       RAISE EXCEPTION 'unknown mission %', p_mission_id;
   END CASE;
