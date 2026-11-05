@@ -1255,10 +1255,10 @@ button.course-home-rail-card:active { background: transparent; opacity: 0.7; }
 .home-mission-row { padding: var(--space-4) 0; border-radius: 0; background: transparent; box-shadow: none; }
 .home-mission-row[data-rewarded] { background: transparent; }
 .home-mission-row[data-rewarded] :is(.home-mission-info, .mission-reward-status) { opacity: 0.55; }
-.my-profile-card { margin-bottom: 0; padding: 0 0 var(--space-8); border-radius: 0; background: transparent; box-shadow: none; border-bottom: 1px solid var(--color-line); }
-.my-page-panel { margin-bottom: 0; padding: var(--space-5) 0; border-radius: 0; background: transparent; box-shadow: none; border-bottom: 1px solid var(--color-line); }
+.my-profile-card { margin-bottom: 0; padding: 0 0 var(--space-8); border-radius: 0; background: transparent; box-shadow: none; }
+.my-page-panel { margin-bottom: 0; padding: var(--space-5) 0; border-radius: 0; background: transparent; box-shadow: none; }
 .my-page-panel.my-page-menu { padding: var(--space-2) 0; border-bottom: 0; }
-.my-page-stats.app-card { border-bottom: 1px solid var(--color-line); border-radius: 0; }
+.my-page-stats.app-card { border-radius: 0; }
 .learning-completion-card { background: transparent; box-shadow: none; }
 /* 스크롤 중 고정되는 코스 머리는 아래 단계 글자와 겹치지 않게 화면과 같은 바탕색을 둔다 */
 .course-topic-summary { padding-inline: 0 !important; border-radius: 0; background: var(--color-card) !important; border-bottom: 1px solid var(--color-line); }
@@ -1284,7 +1284,7 @@ button.home-review-entry { border-bottom: 0; }
 .quest-missions-section { padding-bottom: var(--space-3); background: var(--color-card); }
 /* 마이: 흰 바탕에서 여백만으로는 섹션이 안 나뉘어, 프로필·통계와 같은 1px 구분선으로 통일한다 */
 .my-page-hero { margin-bottom: 0; padding-bottom: 0; background: var(--color-card); }
-.my-page-sections .my-page-panel { margin: 0; padding: var(--space-8) 0; background: var(--color-card); border-bottom: 1px solid var(--color-line); }
+.my-page-sections .my-page-panel { margin: 0; padding: var(--space-8) 0; background: var(--color-card); }
 .my-page-sections .my-page-panel.my-page-menu { padding: var(--space-2) 0; border-bottom: 0; }
 /* 목록 행 아이콘은 옅은 보라 둥근 사각 틀에 넣는다 */
 .home-review-icon { border-radius: var(--shape-inset); }
