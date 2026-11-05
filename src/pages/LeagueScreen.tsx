@@ -50,7 +50,7 @@ const LeagueScreen = () => {
         {/* 화면 제목은 하단 탭 이름과 겹쳐 스크린리더용으로만 둔다. 안내 버튼은 TOP 10 줄 오른쪽 */}
         <h2 className="sr-only">리그</h2>
 
-        {/* 티어 로드맵: 테두리·선 없이 등급 아이콘(84px 원 안 44px)과 이름을 가로로 넘기고 처음에 현재 등급을 가운데로 둔다. 규칙 설명은 안내 시트(LeagueRules)에만 둔다 */}
+        {/* 티어 로드맵: 테두리·선 없이 등급 아이콘(80px 원 안 44px)과 이름을 가로로 넘기고 처음에 현재 등급을 가운데로 둔다. 규칙 설명은 안내 시트(LeagueRules)에만 둔다 */}
         <ol ref={roadRef} className="league-tier-road anim-fade-up" aria-label="등급 단계" style={{ '--i': 1 } as React.CSSProperties}>
           {GROWTH_STAGES.map(s => {
             const state = s.id < stage.id ? 'done' : s.id === stage.id ? 'current' : 'future';
