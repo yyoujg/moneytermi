@@ -6,7 +6,6 @@ import { MISSION_XP } from '../constants';
 import { useAppContext } from '../context/AppContext';
 import { msUntilNextSlot } from '../lib/date';
 import { Card } from '../components/ui/Card';
-import { Check } from '../components/ui/OtterIcons';
 import { PointCelebration, type PointReward } from '../components/PointCelebration';
 import type { Mission } from '../types';
 import { XpIcon } from '../components/StatIcons';
@@ -135,16 +134,11 @@ const PeriodMissionList = ({ id, title, resetLabel, missions, claimed }: {
   </Card>
 );
 
-// 미션 왼쪽 원: 진행만큼 갈색 고리가 차고, 다 채우면 갈색 원 + 체크
-const MissionRing = ({ current, target }: { current: number; target: number }) => {
-  if (current >= target) return <span className="home-mission-check" aria-hidden="true"><Check size={16} /></span>;
-  const pct = target > 0 ? Math.round(current / target * 100) : 0;
-  return (
-    <svg className="home-mission-ring" width={28} height={28} viewBox="0 0 28 28" aria-hidden="true">
-      <circle cx={14} cy={14} r={12} fill="none" stroke="var(--color-line)" strokeWidth={3} />
-      {pct > 0 && <circle cx={14} cy={14} r={12} fill="none" stroke="var(--color-progress)" strokeWidth={3} strokeLinecap="round" pathLength={100} strokeDasharray={`${pct} 100`} transform="rotate(-90 14 14)" />}
-    </svg>
-  );
-};
+// 미션 왼쪽 원: 마이 '이번 주 학습'과 같은 모양. 끝내면 갈색 원 + 크림색 별, 아니면 연한 원
+const MissionRing = ({ current, target }: { current: number; target: number }) => (
+  <span className="home-mission-mark" data-done={current >= target || undefined} aria-hidden="true">
+    {current >= target && <img src="/icons/week/week-done-star.svg" alt="" width={18} height={18} />}
+  </span>
+);
 
 export default HomeScreen;

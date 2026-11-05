@@ -913,7 +913,8 @@ button.nickname-clear { display: inline-flex; flex: 0 0 44px; width: 44px; heigh
 .home-mission-top { display: grid; grid-template-columns: 28px minmax(0, 1fr) 64px; align-items: center; gap: var(--space-3); }
 .home-mission-check { display: flex; width: 28px; height: 28px; align-items: center; justify-content: center; border: 2px solid var(--color-line-strong); border-radius: 50%; color: var(--color-card); }
 .home-mission-row[data-done] .home-mission-check { border-color: var(--color-progress); background: var(--color-progress); }
-.home-mission-ring { flex-shrink: 0; }
+.home-mission-mark { display: flex; width: 32px; height: 32px; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 50%; background: var(--color-neutral-soft); }
+.home-mission-mark[data-done] { background: var(--color-progress); }
 .home-mission-total { margin-left: var(--space-1); color: var(--color-brand-text); font-variant-numeric: tabular-nums; }
 .home-mission-info { min-width: 0; }
 .home-mission-title { font-weight: var(--font-weight-semibold); line-height: var(--line-height-title); word-break: keep-all; overflow-wrap: anywhere; }
@@ -1239,7 +1240,8 @@ button.course-home-rail-card:active { background: transparent; opacity: 0.7; }
 #home-mission-list { gap: 0; margin-top: var(--space-2); }
 /* 미션 행: 구분선 없이 여백으로만 나눈다 */
 .home-mission-row { padding: var(--space-3) 0; border-radius: 0; background: transparent; box-shadow: none; }
-.home-mission-row[data-rewarded] { background: transparent; opacity: 0.55; }
+.home-mission-row[data-rewarded] { background: transparent; }
+.home-mission-row[data-rewarded] :is(.home-mission-info, .mission-reward-status) { opacity: 0.55; }
 .my-profile-card { margin-bottom: 0; padding: 0 0 var(--space-6); border-radius: 0; background: transparent; box-shadow: none; border-bottom: 1px solid var(--color-line); }
 .my-page-panel { margin-bottom: 0; padding: var(--space-5) 0; border-radius: 0; background: transparent; box-shadow: none; border-bottom: 1px solid var(--color-line); }
 .my-page-panel.my-page-menu { padding: var(--space-2) 0; border-bottom: 0; }
