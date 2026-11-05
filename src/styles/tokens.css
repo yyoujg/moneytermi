@@ -141,6 +141,7 @@
   --color-choice: var(--brown-25);
   /* 문제 말풍선 테두리: 보기 번호 원과 같은 연한 베이지 */
   --color-bubble-line: var(--brown-100);
+  --color-bubble-bg: var(--brown-50);
   --color-accent-line: var(--brown-900);
   --color-node-ring: var(--otter-brown);
   --color-accent-line-strong: var(--brown-900);
