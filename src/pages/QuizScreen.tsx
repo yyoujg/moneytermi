@@ -17,7 +17,7 @@ import { takeShuffled } from '../lib/random';
 import { LearningCompletionScreen } from '../components/learning/LearningCompletionScreen';
 import { LearningEmptyState } from '../components/learning/LearningEmptyState';
 import { QuizProgressHeader } from '../components/learning/QuizProgressHeader';
-import { praiseForAnswer, praiseForQuiz } from '../lib/praise';
+import { praiseForAnswer } from '../lib/praise';
 import { keepShortUnitsTogether } from '../lib/formatText';
 import { QuizAnswerFeedback } from '../components/learning/QuizAnswerFeedback';
 import { createQuizRequestId, type QuizAnswerResult } from '../lib/quizSubmission';
@@ -158,17 +158,15 @@ const QuizScreen = () => {
     return (
       <LearningCompletionScreen
         title={completionTitle}
-        subtitle={<>{`${baseQueue.length}문제 완료${retryQueue.length > 0 ? ` · 틀린 문제 다시 풀기 ${retryQueue.length}번` : ''}`}<br />{praiseForQuiz({ accuracy, maxCombo, total: baseQueue.length })}</>}
+        subtitle={`${baseQueue.length}문제 중 ${firstCorrect}문제를 한 번에 맞혔어요`}
         actionLabel={navState?.nextRoute?.label ?? (backPath.startsWith('/course') ? '주제로 돌아가기' : '퀘스트로')}
         onAction={() => navState?.nextRoute
           ? navigate(navState.nextRoute.pathname, { replace: true, state: navState.nextRoute.state })
           : navigate(backPath, { replace: true, state: { openFocus: true } })}
       >
-        {/* 끝 화면 숫자 세 개를 한 줄에 같은 크기로(마이 학습 기록과 같은 모양, 상자 없이) */}
+        {/* 끝 화면은 한 문장(위)과 보상 한 줄만. 정답률·연속 기록은 문장과 겹쳐 뺐다 */}
         <section className="quiz-result-stats anim-fade-up" role="group" aria-label="퀴즈 결과 요약" style={{ '--i': 2 } as React.CSSProperties}>
-          <div className="quiz-result-stat"><strong>{accuracy}%</strong><span>첫 시도 정답률</span></div>
-          <div className="quiz-result-stat"><XpIcon size={20} className="quiz-result-icon" /><strong>+{Math.max(0, xp - xpAtStart.current)}</strong><span>획득 XP</span></div>
-          <div className="quiz-result-stat"><strong>{maxCombo}연속</strong><span>최고 기록</span></div>
+          <p className="quiz-result-xp"><XpIcon size={20} className="quiz-result-icon" /><span>획득 XP</span><strong>+{Math.max(0, xp - xpAtStart.current)}</strong></p>
         </section>
         <ActionButton
           tone="soft"

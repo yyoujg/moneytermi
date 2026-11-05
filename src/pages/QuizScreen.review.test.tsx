@@ -144,7 +144,7 @@ describe('QuizScreen review SRS', () => {
     await click('다음 문제');
     await click('용어1');
     await click('결과 보기');
-    expect(container.textContent).toContain('50%');
+    expect(container.textContent).toContain('2문제 중 1문제를 한 번에 맞혔어요');
     expect(logClick).toHaveBeenCalledWith('quiz_complete', expect.objectContaining({ mode: 'lesson_warmup', total: 2, correct: 1, attempts: 3, node_id: 'c1-l0', course_id: 'c1' }));
   });
   it('첫 오답만 SRS에 기록하고 재정답은 같은 세션에서 다시 성공 기록하지 않는다', async () => {
@@ -179,8 +179,9 @@ describe('QuizScreen review SRS', () => {
     expect(icon.parentElement).toHaveTextContent('획득 XP');
     expect(icon.parentElement).toHaveTextContent('+0');
     expect(summary).not.toHaveTextContent('코인');
-    expect(container).toHaveTextContent('100%');
-    expect(container).toHaveTextContent('1연속');
+    // 결과는 한 문장과 보상 한 줄만(정답률·연속 기록 칸 없음)
+    expect(container).toHaveTextContent('문제를 한 번에 맞혔어요');
+    expect(container).not.toHaveTextContent('연속');
     // 등급은 주간 순위로 오르므로 퀴즈 결과에 누적 XP 승급 막대를 두지 않는다
     expect(summary!.querySelector('[role="progressbar"]')).toBeNull();
     await click('주제로 돌아가기');
@@ -376,7 +377,7 @@ describe('서버 채점과 저장 확정 회귀', () => {
     expect(container.querySelector('.quiz-prompt-main')).toHaveTextContent('뜻1');
     await click('용어1');
     await click('결과 보기');
-    expect(container.querySelector('[aria-label="퀴즈 결과 요약"]')).toHaveTextContent('50%');
+    expect(container).toHaveTextContent('2문제 중 1문제를 한 번에 맞혔어요');
     expect(logClick).toHaveBeenCalledWith('quiz_complete', expect.objectContaining({ total: 2, correct: 1, attempts: 3 }));
     expect(state.recordReview).toHaveBeenCalledTimes(2);
   });
@@ -393,7 +394,7 @@ describe('서버 채점과 저장 확정 회귀', () => {
     await click('다음 문제');
     await click('용어2');
     await click('결과 보기');
-    expect(container.querySelector('[aria-label="퀴즈 결과 요약"]')).toHaveTextContent('100%');
+    expect(container).toHaveTextContent('2문제 중 2문제를 한 번에 맞혔어요');
     expect(state.submitQuizAnswer).toHaveBeenCalledTimes(2);
     expect(logClick).toHaveBeenCalledWith('quiz_complete', expect.objectContaining({ total: 2, correct: 2, attempts: 2 }));
   });
@@ -425,7 +426,7 @@ describe('서버 채점과 저장 확정 회귀', () => {
     await click('다음 문제');
     await click('용어1');
     await click('결과 보기');
-    expect(container.querySelector('[aria-label="퀴즈 결과 요약"]')).toHaveTextContent('50%');
+    expect(container).toHaveTextContent('2문제 중 1문제를 한 번에 맞혔어요');
     expect(state.recordReview.mock.calls.filter(([id]) => id === 1)).toEqual([[1, false, false], [1, false, false]]);
   });
 
@@ -467,7 +468,7 @@ describe('서버 채점과 저장 확정 회귀', () => {
     }
     await click('용어3');
     await click('결과 보기');
-    expect(container.querySelector('[aria-label="퀴즈 결과 요약"]')).toHaveTextContent('100%');
+    expect(container).toHaveTextContent('3문제 중 3문제를 한 번에 맞혔어요');
     expect(logClick).toHaveBeenCalledWith('quiz_complete', expect.objectContaining({ total: 3, correct: 3, attempts: 3 }));
   });
 
