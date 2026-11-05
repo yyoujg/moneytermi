@@ -1112,7 +1112,8 @@ button.my-profile-name-button { display: flex; align-items: center; gap: var(--s
 .my-profile-name-button > svg { color: var(--color-ink-3); }
 .league-screen > div:first-child { padding-bottom: var(--space-2); background: transparent; }
 .quiz-answer-feedback[data-correct='true'] .quiz-answer-heading > h2 { color: var(--accent-green-ink); }
-.quiz-question-card .quiz-prompt-main { font-size: var(--font-size-title-3); }
+/* 말풍선이 수달 옆이라 폭이 좁아, 문제는 한 단계 작게(줄 수 줄이기) */
+.quiz-question-card .quiz-prompt-main { font-size: var(--font-size-headline); line-height: var(--line-height-relaxed); }
 button.course-home-topic[data-current='true'] { border-color: var(--color-accent-line-strong); }
 .course-home-topic-icon { position: absolute; left: -88px; top: calc(50% - 30px); display: flex; align-items: center; justify-content: center; width: 60px; height: 60px; border-radius: 50%; background: transparent; color: var(--color-ink-2); }
 .course-home-topic-icon:has([data-icon='BookOpenText']) { background: var(--color-card); }

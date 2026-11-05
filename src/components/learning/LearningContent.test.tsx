@@ -45,7 +45,7 @@ describe('정답과 풀이', () => {
   const props = { correct: false, title: '정답을 확인해요', answerLabel: '포기한 것 중 가장 큰 가치', word: '기회비용', meaning: word.meaning, explanation: '선택 때문에 포기한 가치 중 가장 큰 것을 비교해요.', example: word.learningExample, pending: false, submissionMessage: null, combo: 0, nextLabel: '다음 문제', onNext: vi.fn() };
   it('직접 작성 문제의 정답 보기와 기존 풀이를 보여준다', async () => {
     const container = await mount(<QuizAnswerFeedback {...props} />);
-    expect(container.querySelector('.quiz-answer-result')).toHaveTextContent(`정답${props.answerLabel}`);
+    expect(container.querySelector('.quiz-answer-result')).toBeNull();
     expect(container.querySelector('.quiz-answer-explanation')).toHaveTextContent(`풀이${props.explanation}`);
     expect(container.querySelector('summary')).toHaveTextContent('예시로 다시 보기학습용 가정');
     expect(container.querySelector('.quiz-answer-reward')).toBeNull();

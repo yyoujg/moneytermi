@@ -19,7 +19,7 @@ export const QuizAnswerFeedback = ({ correct, title, answerLabel, word, meaning,
         {correct && combo >= 3 && <span className="quiz-answer-reward"><span>{combo}연속</span></span>}
       </div>
       <div className="quiz-answer-content">
-        {answerLabel && <div className="quiz-answer-result"><span>정답</span><strong>{keepShortUnitsTogether(answerLabel)}</strong></div>}
+        {/* 정답은 위 보기에 초록으로 표시되므로 여기서 다시 쓰지 않는다 */}
         {answerLabel && answerLabel !== word && <p className="quiz-answer-term">확인한 용어 · {word}</p>}
         {copy && <div className="quiz-answer-explanation"><h3>{explanation?.trim() ? '풀이' : '핵심 뜻'}</h3><p>{keepShortUnitsTogether(copy)}</p></div>}
         {exampleText && <details className="quiz-answer-example" onToggle={event => { if (event.currentTarget.open) event.currentTarget.scrollIntoView?.({ block: 'nearest' }); }}><summary>예시로 다시 보기{hypothetical && <span>학습용 가정</span>}</summary><p>{keepShortUnitsTogether(exampleText)}</p></details>}

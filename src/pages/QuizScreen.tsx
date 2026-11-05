@@ -264,6 +264,7 @@ const QuizScreen = () => {
   const correctOption = quizItem?.options.find(option => option.isCorrect);
   const answerLabel = gradingConflict ? '' : quizItem?.type === 'word_to_meaning' ? currentWord.meaning : correctOption?.label ?? currentWord.word;
   const showGrading = status !== 'idle' && !gradingConflict;
+  const otterPose = !showGrading ? 'explain' : answeredCorrectly ? 'cheer' : 'defeat';
 
   return (
     <div className="quiz-screen app-soft-screen flex flex-col h-full">
@@ -278,8 +279,9 @@ const QuizScreen = () => {
       <div ref={questionContentRef} className="quiz-question-content flex-1 min-h-0 overflow-y-auto flex flex-col px-5 pt-3 pb-5 gap-4 [&::-webkit-scrollbar]:hidden">
         {/* 문제는 카드 밖 왼쪽 아래 수달이 말하는 말풍선 */}
         <div className="flex items-start gap-2">
-        <img src="/otter/v5/otter-explain.svg" alt="" aria-hidden="true" height={112} className="quiz-question-otter h-[112px] w-auto shrink-0 self-end" data-otter="explain" />
-        <div key={currentQuizIndex} className={`quiz-question-card quiz-bubble anim-slide-in min-w-0 flex-1 rounded-card bg-[var(--color-card)] px-5 py-5 flex flex-col items-start text-left gap-3
+        {/* 수달 표정은 채점 결과를 따라간다: 문제 설명 → 정답이면 응원, 오답이면 시무룩 */}
+        <img src={`/otter/v5/otter-${otterPose}.svg`} alt="" aria-hidden="true" height={112} className="quiz-question-otter h-[112px] w-auto shrink-0 self-end" data-otter={otterPose} />
+        <div key={currentQuizIndex} className={`quiz-question-card quiz-bubble anim-slide-in min-w-0 flex-1 rounded-card bg-[var(--color-card)] px-4 py-5 flex flex-col items-start text-left gap-3
           ${status === 'correct' ? 'anim-answer-wash' : ''}
           ${shake ? 'anim-soft-nudge' : ''}
         `}>
@@ -297,7 +299,7 @@ const QuizScreen = () => {
         </div>
         </div>
 
-        <p className="quiz-selection-guide">{status === 'idle' ? answerPending ? '답안 저장을 확인하고 있어요.' : submissionMessage ? '선택한 답안 그대로 다시 저장할 수 있어요.' : '' : gradingConflict ? '서버 채점 결과로 기록했어요. 문제 정보를 다시 확인해 주세요.' : '내 답과 정답을 비교해 보세요.'}</p>
+        <p className="quiz-selection-guide">{status === 'idle' ? answerPending ? '답안 저장을 확인하고 있어요.' : submissionMessage ? '선택한 답안 그대로 다시 저장할 수 있어요.' : '' : gradingConflict ? '서버 채점 결과로 기록했어요. 문제 정보를 다시 확인해 주세요.' : ''}</p>
         {/* 객관식 선택지는 채점 뒤에도 숨기지 않는다. */}
         <div className="grid grid-cols-1 gap-2">
           {(quizItem?.options ?? []).map((opt, i) => {
@@ -310,7 +312,7 @@ const QuizScreen = () => {
               // 채점 뒤: 정답은 연한 초록, 내가 고른 오답은 연한 빨강(이해 확인 피드백과 같은 색)
               optionStyle = isCorrectOption ? 'bg-[var(--accent-green-soft)] border-[var(--accent-green-ink)] text-[var(--accent-green-ink)]'
                 : isSelected ? 'bg-[var(--color-danger-soft)] border-[var(--color-danger-line)] text-[var(--color-danger-foreground)]'
-                : 'bg-[var(--color-choice)] border-transparent text-[var(--color-brand-text)] opacity-60';
+                : 'bg-[var(--color-choice)] border-transparent text-[var(--color-brand-text)]';
             }
             const tag = !showGrading ? (isSelected ? (status === 'idle' ? '선택' : '내 답') : null) : isCorrectOption ? '정답' : isSelected ? '내 답' : null;
             const feedbackMotion = showGrading && (isCorrectOption || isSelected) ? 'anim-choice-lock' : '';
