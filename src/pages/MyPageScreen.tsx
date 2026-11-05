@@ -102,7 +102,7 @@ const MyPageScreen = () => {
           <ul aria-label="배지 목록" className="my-page-badges grid grid-cols-5 gap-x-1 gap-y-4">
             {[...badges.filter(b => b.earned).reverse(), ...badges.filter(b => !b.earned).sort((a, b) => b.progress - a.progress)].slice(0, 5).map(b => (
               <li key={b.id} className="flex min-w-0 flex-col items-center gap-1">
-                <BadgeGlyph id={b.id} size={44} earned={b.earned} />
+                <BadgeGlyph id={b.id} size={56} earned={b.earned} />
                 {/* 이름은 그림으로 알 수 있어 화면에서 숨기고 스크린리더용으로만 둔다 */}
                 <span className="sr-only">{b.title}</span>
               </li>
