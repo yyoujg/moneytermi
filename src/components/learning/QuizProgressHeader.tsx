@@ -16,9 +16,9 @@ export const QuizProgressHeader = ({
 }) => (
   <div className="px-5 pt-3 pb-3 flex flex-col gap-3">
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-      <span className="min-w-0 text-sm font-semibold leading-relaxed text-[var(--color-ink-2)]">{label}</span>
+      <span className="min-w-0 text-sm font-semibold leading-relaxed text-[var(--color-brand-text)]">{label}</span>
       {streakText && (
-        <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-[var(--color-ink-3)]">
+        <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-[var(--color-brand-text)]">
           <Flame size={16} />{streakText}
         </span>
       )}
@@ -30,7 +30,7 @@ export const QuizProgressHeader = ({
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={Math.max(0, Math.min(100, Math.round(progress)))}
-      className="h-2 rounded-full bg-[var(--color-line)] overflow-hidden"
+      className="h-2 rounded-full bg-[var(--color-accent-soft)] overflow-hidden"
     >
       <div className={`h-full rounded-full bg-[var(--color-progress)] transition-all ${durationClass}`} style={{ width: `${progress}%` }} />
     </div>

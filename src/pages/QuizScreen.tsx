@@ -283,7 +283,7 @@ const QuizScreen = () => {
           ${status === 'correct' ? 'anim-answer-wash' : ''}
           ${shake ? 'anim-soft-nudge' : ''}
         `}>
-          <span className="text-xs text-[var(--color-ink-3)]">{quizItem?.promptLabel}</span>
+          <span className="text-xs text-[var(--color-brand-text)]">{quizItem?.promptLabel}</span>
 
           <h2 ref={questionHeadingRef} tabIndex={-1} className="quiz-prompt-main w-full text-xl font-semibold text-[var(--color-ink)] leading-normal break-keep">
             {keepShortUnitsTogether(quizItem?.promptMain ?? '')}
@@ -307,18 +307,19 @@ const QuizScreen = () => {
             let optionStyle = 'bg-[var(--color-choice)] border-transparent text-[var(--color-brand-text)] active:opacity-80';
             if (!showGrading && isSelected) optionStyle = 'bg-[var(--color-accent-soft)] border-[var(--color-progress)] text-[var(--color-brand-text)]';
             if (showGrading) {
-              optionStyle = isCorrectOption ? 'bg-[var(--color-success-soft)] border-[var(--color-success-foreground)] text-[var(--color-ink)]'
-                : isSelected ? 'bg-[var(--color-card)] border-[var(--color-line-strong)] border-dashed text-[var(--color-ink)]'
-                : 'bg-[var(--color-choice)] border-transparent text-[var(--color-ink-3)]';
+              // 채점 뒤: 정답은 연한 초록, 내가 고른 오답은 연한 빨강(이해 확인 피드백과 같은 색)
+              optionStyle = isCorrectOption ? 'bg-[var(--accent-green-soft)] border-[var(--accent-green-ink)] text-[var(--accent-green-ink)]'
+                : isSelected ? 'bg-[var(--color-danger-soft)] border-[var(--color-danger-line)] text-[var(--color-danger-foreground)]'
+                : 'bg-[var(--color-choice)] border-transparent text-[var(--color-brand-text)] opacity-60';
             }
             const tag = !showGrading ? (isSelected ? (status === 'idle' ? '선택' : '내 답') : null) : isCorrectOption ? '정답' : isSelected ? '내 답' : null;
             const feedbackMotion = showGrading && (isCorrectOption || isSelected) ? 'anim-choice-lock' : '';
             const markerClass = !showGrading
               ? isSelected ? 'bg-[var(--color-progress)] text-[var(--color-on-progress)]' : 'border border-[var(--color-line-strong)] bg-[var(--color-card)] text-[var(--color-ink-3)]'
               : isCorrectOption
-                ? 'text-[var(--color-success-foreground)]'
+                ? 'text-[var(--accent-green-ink)]'
                 : isSelected
-                  ? 'text-[var(--color-ink-3)]'
+                  ? 'text-[var(--color-danger-foreground)]'
                   : 'border border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-ink-4)]';
 
             return (
@@ -330,15 +331,15 @@ const QuizScreen = () => {
                 className={`quiz-option anim-fade-up ${feedbackMotion} flex items-center gap-3 min-h-[64px] py-4 px-4 border text-base font-semibold leading-relaxed text-left break-keep transition-colors duration-150 ${optionStyle}`}
                 style={{ '--i': i + 1, borderRadius: 'var(--shape-button)' } as React.CSSProperties}
               >
-                {/* 채점 전 번호는 수달 3색 번호 그림(고르면 갈색 채움), 채점 뒤엔 체크·엑스 */}
-                {!showGrading && i < 4
+                {/* 번호는 수달 3색 번호 그림(고르면 갈색 채움). 채점 뒤 정답·내 오답만 체크·엑스 */}
+                {(!showGrading || (!isCorrectOption && !isSelected)) && i < 4
                   ? <img src={`/icons/num/num-${i + 1}${isSelected ? '-selected' : ''}.svg`} alt="" aria-hidden="true" width={28} height={28} className="shrink-0" data-num-icon />
                   : <span className={`w-7 h-7 shrink-0 flex items-center justify-center text-xs font-semibold ${markerClass}`} style={{ borderRadius: 9999 }}>
                     {showGrading && isCorrectOption ? <Check size={16} strokeWidth={3} /> : showGrading && isSelected ? <X size={16} strokeWidth={3} /> : i + 1}
                   </span>}
                 <span className="min-w-0 flex-1">{keepShortUnitsTogether(opt.label)}</span>
                 {tag && (
-                  <span className={`shrink-0 text-xs font-bold ${showGrading && isCorrectOption ? 'text-[var(--color-success-foreground)]' : 'text-[var(--color-ink-3)]'}`}>
+                  <span className={`shrink-0 text-xs font-bold ${showGrading && isCorrectOption ? 'text-[var(--accent-green-ink)]' : showGrading && isSelected ? 'text-[var(--color-danger-foreground)]' : 'text-[var(--color-brand-text)]'}`}>
                     {tag}
                   </span>
                 )}
