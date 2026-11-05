@@ -475,12 +475,13 @@ describe('학습 주제의 역할 아이콘', () => {
     expect(state.spendEnergy).toHaveBeenCalledWith(1, 'lesson', 'c1-l0:1,2,3,4');
   });
 
-  it('학습·퀴즈는 역할 글자(아이콘 없이), 복습은 배지로 구분하고 돌은 상태별 노드 그림', async () => {
+  it('학습·퀴즈·복습은 역할 글자(아이콘·배지 없이)로 구분하고 돌은 상태별 노드 그림', async () => {
     const { container } = await mount();
     const kinds = [...container.querySelectorAll('[data-learning-kind]')];
-    expect(kinds.map(kind => kind.getAttribute('data-learning-kind'))).toEqual(['lesson', 'quiz']);
+    expect(kinds.map(kind => kind.getAttribute('data-learning-kind'))).toEqual(['lesson', 'quiz', 'review']);
     expect(container.querySelector('[data-learning-icon]')).toBeNull();
-    expect(container.querySelector('[data-review-badge]')).toHaveTextContent('· 선택');
+    expect(container.querySelector('[data-review-badge]')).toBeNull();
+    expect(container.querySelector('[data-learning-kind="review"]')).not.toHaveTextContent('선택');
     const markers = [...container.querySelectorAll('.course-step-marker')];
     const review = markers.find(m => m.getAttribute('data-step-kind') === 'review')!;
     // 돌은 상태별 노드 그림: 복습은 순환 화살표 그림
@@ -517,7 +518,7 @@ describe('학습 주제의 역할 아이콘', () => {
     const locked = [...container.querySelectorAll<HTMLButtonElement>('button[data-node-id]:disabled')];
     expect(locked).toHaveLength(2);
     expect(locked[0].querySelector('[data-learning-kind="quiz"]')).toBeInTheDocument();
-    expect(locked[1].querySelector('[data-review-badge]')).toBeInTheDocument();
+    expect(locked[1].querySelector('[data-learning-kind="review"]')).toBeInTheDocument();
     for (const button of locked) {
       expect(button.textContent).toContain('잠김');
       expect(button.querySelector('[data-icon="LockKeyhole"]')).toBeNull();

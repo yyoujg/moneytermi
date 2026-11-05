@@ -513,11 +513,8 @@ const CourseScreen = () => {
                   style={{ borderRadius: 'var(--shape-card)', '--d': `${0.2 + (newlyDone.get(node.id) ?? 0) * 0.15}s` } as React.CSSProperties}>
                   <span className="min-w-0 flex-1">
                     <span className={`flex flex-wrap items-center gap-x-2 gap-y-1 text-2xs ${locked ? 'text-[var(--color-ink-4)]' : 'text-[var(--color-ink-3)]'}`}>
-                      {isReview ? (
-                        <span data-review-badge className="inline-flex items-center rounded-chip border border-[var(--color-line-strong)] px-1.5 py-0.5 font-semibold text-[var(--color-ink-2)]">{copy.kind} · 선택</span>
-                      ) : (
-                        <span data-learning-kind={node.type}>{copy.kind}</span>
-                      )}
+                      {/* 복습도 학습·퀴즈처럼 역할 글자만(테두리 배지·'선택' 표시 없음) */}
+                      <span data-learning-kind={node.type}>{copy.kind}</span>
                       {/* 완료는 왼쪽 체크로 보이므로 글자는 화면 읽기용으로만 둔다 */}
                       <span data-learning-status className={done || nodeStatus === '시작 가능' ? 'sr-only' : `font-normal ${locked ? 'text-[var(--color-ink-4)]' : isFocus ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-3)]'}`}>{nodeStatus}</span>
                     </span>
