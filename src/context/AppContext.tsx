@@ -15,6 +15,7 @@ import { addEnergyState, fillEnergyState, nextEnergyAt as calcNextEnergyAt, norm
 import { runEnergyRefill, type EnergyRefillResult } from '../lib/energyRefill';
 import { nextReviewDateFromRows, selectDueReviewWords, selectRecallWords, type ReviewProgressRow } from '../lib/review';
 import { buildCourseContent } from '../lib/courseContent';
+import { monthStart, periodMissions, weekStart } from '../lib/periodMissions';
 import { createQuizRequestId, parseQuizAnswerResult, withStudyRequestTimeout, type QuizAnswerResult } from '../lib/quizSubmission';
 
 type WpRow = ReviewProgressRow & { ease: number; interval_d: number; reps: number; due_date: string };
@@ -73,6 +74,8 @@ type AppContextValue = {
   updateMyEmoji: (emoji: string) => Promise<boolean>;
   // 자동 수령한 미션 보상 축하 대기열. 학습 화면 중엔 Layout이 보류했다가 나가면 보여준다
   missionRewards: PointReward[];
+  // 받은 주간·월간 보상('미션id:기간 시작일'). null이면 서버에 보상 기능이 없어 진행도만 보여준다
+  periodClaimed: Set<string> | null;
   dismissMissionReward: () => void;
 };
 
@@ -598,6 +601,42 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [missions, ready]);
 
+  // ── 주간·월간 미션도 달성하면 자동으로 받는다(서버가 출석·XP 기록으로 다시 세서 기간마다 한 번만 준다) ──
+  const [periodClaimed, setPeriodClaimed] = useState<Set<string> | null>(null);
+  const periodClaimingRef = useRef(new Set<string>());
+  useEffect(() => {
+    if (!ready || !profileIdRef.current) return;
+    const since = [weekStart(), monthStart()].sort()[0]!;
+    Promise.resolve().then(() => dbRef.current.from('period_mission_rewards').select('mission_id, period_start').gte('period_start', since))
+      .then(({ data, error }) => setPeriodClaimed(error ? null : new Set((data ?? []).map(row => `${row.mission_id}:${row.period_start}`))))
+      .catch(() => setPeriodClaimed(null));
+  }, [ready]);
+  useEffect(() => {
+    if (!ready || !periodClaimed) return;
+    const pending = (weeklyXp: number) => {
+      const { weekly, monthly } = periodMissions(attendanceDates, weeklyXp);
+      return [...weekly, ...monthly].filter(m => m.current >= m.target && !periodClaimed.has(`${m.id}:${m.periodStart}`) && !periodClaimingRef.current.has(m.id));
+    };
+    // 출석만으로 판정되는 미션이 없고 XP 미션도 이미 받았으면 순위 조회 없이 끝낸다
+    if (pending(Number.MAX_SAFE_INTEGER).length === 0) return;
+    // 퀴즈마다 XP가 바뀌므로 잠깐 모아서 한 번만 확인한다
+    const timer = setTimeout(async () => {
+      const db = dbRef.current;
+      const { data: rank } = await db.rpc('my_league_rank').then(res => res, () => ({ data: null }));
+      for (const mission of pending((rank as { points?: number } | null)?.points ?? 0)) {
+        periodClaimingRef.current.add(mission.id);
+        const { data } = await db.rpc('claim_period_mission', { p_mission_id: mission.id }).then(res => res, () => ({ data: null }));
+        periodClaimingRef.current.delete(mission.id);
+        if (!data) continue;
+        setPeriodClaimed(prev => new Set(prev).add(`${mission.id}:${data.period_start}`));
+        setXp(data.xp);
+        feedbackClaim();
+        setMissionRewards(q => [...q, { xp: data.reward }]);
+      }
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [ready, periodClaimed, attendanceDates, xp]);
+
   // ── claimPromotionReward — 프로모션(grantPromotionReward), 유저당 1회만 서버가 적립 ──
   const claimPromotionReward = async (amount: number) => {
     const { data, error } = await dbRef.current.rpc('claim_promotion_reward', {
@@ -828,6 +867,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       myEmoji,
       updateMyEmoji,
       missionRewards,
+      periodClaimed,
       dismissMissionReward: () => setMissionRewards(q => q.slice(1)),
     }}>
       {children}
