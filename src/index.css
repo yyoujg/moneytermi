@@ -421,7 +421,7 @@ svg:is(.text-brand-300, .text-brand-400, .text-brand-500, .text-brand-600, .text
 .my-page-stat > svg, .my-page-stat > img { flex: 0 0 32px; width: 32px; object-fit: contain; }
 .my-page-stat.is-wide { grid-column: auto; }
 .my-page-stat-label { display: flex; flex: 1; min-width: 0; align-items: center; color: var(--color-ink-2); font-size: var(--font-size-label); white-space: nowrap; }
-.my-page-stat-value { display: flex; align-items: baseline; justify-content: flex-end; gap: 2px; color: var(--color-ink); font-size: var(--font-size-headline); font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); font-variant-numeric: tabular-nums; }
+.my-page-stat-value { display: flex; align-items: baseline; justify-content: flex-end; gap: 2px; color: var(--color-ink); font-size: var(--font-size-headline); font-weight: var(--font-weight-semibold); line-height: var(--line-height-tight); font-variant-numeric: tabular-nums; }
 .my-page-stat-value [data-stat-number] { white-space: nowrap; overflow-wrap: normal; word-break: normal; }
 .my-page-stat-unit { color: var(--color-ink-3); font-size: var(--font-size-label); font-weight: var(--font-weight-regular); }
 button.my-page-shop-entry { min-height: var(--size-touch-min); border-radius: var(--shape-sm); cursor: pointer; }

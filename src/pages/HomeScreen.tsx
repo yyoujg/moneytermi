@@ -99,7 +99,7 @@ const HomeScreen = () => {
             {/* 완료 수는 위 요약에 있으므로 받을 보상이 있을 때만 알려준다 */}
             {readyMissions > 0 && <p className="mt-1! text-xs text-[var(--color-ink-3)] break-keep">받을 수 있는 보상 {readyMissions}개</p>}
           </div>
-          <span className="shrink-0 text-2xs font-normal text-[var(--color-ink-3)]">{resetLabel}</span>
+          <span className="shrink-0 text-xs font-normal text-[var(--color-ink-3)]">{resetLabel}</span>
         </div>
           <div id="home-mission-list" className="flex flex-col">
             {missionList.map(mission => {
@@ -119,7 +119,7 @@ const HomeScreen = () => {
                     </div>
                     {mission.isRewarded || done
                       ? <MissionRewardStatus isRewarded={mission.isRewarded} pending={claimingMissionIds?.has(mission.id)} onClaim={() => handleClaim(mission.id)} />
-                      : <span className="home-mission-count text-sm font-semibold text-[var(--color-ink)]">{mission.current}<span className="text-xs text-[var(--color-ink-4)]">/{mission.target}</span></span>
+                      : <span className="home-mission-count text-sm font-semibold text-[var(--color-ink)]">{mission.current}<span className="text-xs font-normal text-[var(--color-ink-4)]">/{mission.target}</span></span>
                     }
                   </div>
                 </div>
@@ -143,7 +143,7 @@ const PeriodMissionList = ({ id, title, resetLabel, missions, claimed, claimingI
   <Card pad="none" className="home-missions mb-4 anim-fade-up" aria-labelledby={`${id}-missions-heading`} data-period={id}>
     <div className="home-mission-heading">
       <div><h2 id={`${id}-missions-heading`}>{title}</h2></div>
-      <span className="shrink-0 text-2xs font-normal text-[var(--color-ink-3)]">{resetLabel}</span>
+      <span className="shrink-0 text-xs font-normal text-[var(--color-ink-3)]">{resetLabel}</span>
     </div>
     <div className="flex flex-col">
       {missions.map(mission => {
@@ -161,7 +161,7 @@ const PeriodMissionList = ({ id, title, resetLabel, missions, claimed, claimingI
               </div>
               {done
                 ? <MissionRewardStatus isRewarded={rewarded} pending={claimingId === mission.id} onClaim={() => onClaim(mission)} />
-                : <span className="home-mission-count text-sm font-semibold text-[var(--color-ink)]">{mission.current}<span className="text-xs text-[var(--color-ink-4)]">/{mission.target}</span></span>}
+                : <span className="home-mission-count text-sm font-semibold text-[var(--color-ink)]">{mission.current}<span className="text-xs font-normal text-[var(--color-ink-4)]">/{mission.target}</span></span>}
             </div>
           </div>
         );

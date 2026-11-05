@@ -102,7 +102,7 @@
 | Headline | 섹션 제목        | 17 / 700     | `type-section-title`                   | 오늘의 미션, 배지  |
 | Body     | 항목 제목·본문   | 15 / 600·400 | `type-item-title`, `type-body`         | 미션 이름, 뜻      |
 | Label    | 보조 설명        | 13 / 400     | `type-supporting`                      | 진행 설명          |
-| Caption  | 메타 정보        | 11 / 400     | `type-caption`                         | 출처, 필요 XP      |
+| Caption  | 메타 정보        | 12 / 400     | `type-caption`                         | 출처, 필요 XP      |
 
 - 색은 단계에 묶는다: 제목·항목 제목·숫자 `--color-ink`, 본문·보조 버튼 `--color-ink-2`, 보조 설명·메타 `--color-ink-3`. 토큰 밖 회색(TDS 기본 `#6b7684` 등)은 덮어쓴다.
 - 같은 단계는 화면이 달라도 같은 굵기다(코스 카드 이름·주제 이름·미션 이름·리그 닉네임 모두 15 / 600). 강조는 '나'처럼 한 항목에만 700.

@@ -305,7 +305,7 @@ describe('원시값과 의미 역할의 2단계 구조', () => {
     }
   });
   it('글자·간격·곡률은 정해진 단계만 정의한다', () => {
-    expect(['caption', 'label', 'body', 'headline', 'title-3', 'title-2', 'title-1', 'display'].map(step => light[`--font-size-${step}`])).toEqual(['11px', '13px', '15px', '17px', '20px', '24px', '28px', '34px']);
+    expect(['caption', 'label', 'body', 'headline', 'title-3', 'title-2', 'title-1', 'display'].map(step => light[`--font-size-${step}`])).toEqual(['12px', '13px', '15px', '17px', '20px', '24px', '28px', '34px']);
     expect(['regular', 'semibold', 'bold'].map(step => light[`--font-weight-${step}`])).toEqual(['400', '600', '700']);
     for (const [key, value] of Object.entries(light).filter(([key]) => key.startsWith('--space-'))) {
       expect(parseInt(value) % 4, key).toBe(0);
