@@ -924,7 +924,7 @@ button.nickname-clear { display: inline-flex; flex: 0 0 44px; width: 44px; heigh
 #home-mission-list { gap: var(--space-3); margin-top: var(--space-4); }
 .home-mission-row { padding: var(--space-4); border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); }
 .home-mission-row[data-rewarded] { box-shadow: none; background: var(--color-surface); }
-.home-mission-top { display: grid; grid-template-columns: 28px minmax(0, 1fr) 64px; align-items: center; gap: var(--space-3); }
+.home-mission-top { display: grid; grid-template-columns: 32px minmax(0, 1fr) 64px; align-items: center; gap: var(--space-4); }
 .home-mission-check { display: flex; width: 28px; height: 28px; align-items: center; justify-content: center; border: 2px solid var(--color-line-strong); border-radius: 50%; color: var(--color-card); }
 .home-mission-row[data-done] .home-mission-check { border-color: var(--color-progress); background: var(--color-progress); }
 .home-mission-mark { display: flex; width: 32px; height: 32px; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 50%; background: var(--color-neutral-soft); }
