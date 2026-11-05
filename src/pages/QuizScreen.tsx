@@ -303,9 +303,9 @@ const QuizScreen = () => {
           {(quizItem?.options ?? []).map((opt, i) => {
             const isSelected = selected === opt.answer;
             const isCorrectOption = opt.isCorrect;
-            // 보기는 테두리 없는 연한 갈색 면. 고른 보기만 갈색 테두리로 표시한다. 보기 글자는 어떤 상태에서도 진하게 둔다
-            let optionStyle = 'bg-[var(--color-choice)] border-transparent text-[var(--color-ink)] active:opacity-80';
-            if (!showGrading && isSelected) optionStyle = 'bg-[var(--color-accent-soft)] border-[var(--color-progress)] text-[var(--color-ink)]';
+            // 보기는 테두리 없는 연한 갈색 면에 진한 갈색 굵은 글자. 고른 보기만 갈색 테두리로 표시한다
+            let optionStyle = 'bg-[var(--color-choice)] border-transparent text-[var(--color-brand-text)] active:opacity-80';
+            if (!showGrading && isSelected) optionStyle = 'bg-[var(--color-accent-soft)] border-[var(--color-progress)] text-[var(--color-brand-text)]';
             if (showGrading) {
               optionStyle = isCorrectOption ? 'bg-[var(--color-success-soft)] border-[var(--color-success-foreground)] text-[var(--color-ink)]'
                 : isSelected ? 'bg-[var(--color-card)] border-[var(--color-line-strong)] border-dashed text-[var(--color-ink)]'
@@ -327,7 +327,7 @@ const QuizScreen = () => {
                 onClick={() => { if (status === 'idle' && !answerPending && !submissionMessage) setSelected(opt.answer); }}
                 aria-pressed={isSelected}
                 disabled={status !== 'idle' || answerPending || submissionMessage !== null}
-                className={`quiz-option anim-fade-up ${feedbackMotion} flex items-center gap-3 min-h-[64px] py-4 px-4 border text-base font-normal leading-relaxed text-left break-keep transition-colors duration-150 ${optionStyle}`}
+                className={`quiz-option anim-fade-up ${feedbackMotion} flex items-center gap-3 min-h-[64px] py-4 px-4 border text-base font-semibold leading-relaxed text-left break-keep transition-colors duration-150 ${optionStyle}`}
                 style={{ '--i': i + 1, borderRadius: 'var(--shape-button)' } as React.CSSProperties}
               >
                 {/* 채점 전 번호는 수달 3색 번호 그림(고르면 갈색 채움), 채점 뒤엔 체크·엑스 */}
