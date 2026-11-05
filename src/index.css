@@ -1103,7 +1103,7 @@ button.quiz-option:disabled { opacity: 1; cursor: default; }
 .home-review-icon { display: flex; width: 40px; height: 40px; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 50%; background: var(--color-accent-soft); color: var(--color-brand-text); }
 button.home-review-entry { margin-bottom: var(--space-3); padding: var(--space-4); border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); }
 .home-status-card { margin-bottom: var(--space-6); padding: var(--space-5) var(--space-5) 0; border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); }
-.my-page-stats.app-card { padding: var(--space-6) 0; }
+.my-page-stats.app-card { padding: var(--space-8) 0; }
 .my-profile-avatar { display: flex; flex-shrink: 0; border-radius: 50%; }
 /* 프로필 그림 고르기: 3열, 고른 것은 메인 컬러 테두리 */
 .profile-avatar-options { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--space-2); padding-top: var(--space-2) !important; list-style: none; }
@@ -1254,7 +1254,7 @@ button.course-home-rail-card:active { background: transparent; opacity: 0.7; }
 .home-mission-row { padding: var(--space-3) 0; border-radius: 0; background: transparent; box-shadow: none; }
 .home-mission-row[data-rewarded] { background: transparent; }
 .home-mission-row[data-rewarded] :is(.home-mission-info, .mission-reward-status) { opacity: 0.55; }
-.my-profile-card { margin-bottom: 0; padding: 0 0 var(--space-6); border-radius: 0; background: transparent; box-shadow: none; border-bottom: 1px solid var(--color-line); }
+.my-profile-card { margin-bottom: 0; padding: 0 0 var(--space-8); border-radius: 0; background: transparent; box-shadow: none; border-bottom: 1px solid var(--color-line); }
 .my-page-panel { margin-bottom: 0; padding: var(--space-5) 0; border-radius: 0; background: transparent; box-shadow: none; border-bottom: 1px solid var(--color-line); }
 .my-page-panel.my-page-menu { padding: var(--space-2) 0; border-bottom: 0; }
 .my-page-stats.app-card { border-bottom: 1px solid var(--color-line); border-radius: 0; }
@@ -1283,7 +1283,7 @@ button.home-review-entry { border-bottom: 0; }
 .quest-missions-section { padding-bottom: var(--space-3); background: var(--color-card); }
 /* 마이: 흰 바탕에서 여백만으로는 섹션이 안 나뉘어, 프로필·통계와 같은 1px 구분선으로 통일한다 */
 .my-page-hero { margin-bottom: 0; padding-bottom: 0; background: var(--color-card); }
-.my-page-sections .my-page-panel { margin: 0; padding: var(--space-6) 0; background: var(--color-card); border-bottom: 1px solid var(--color-line); }
+.my-page-sections .my-page-panel { margin: 0; padding: var(--space-8) 0; background: var(--color-card); border-bottom: 1px solid var(--color-line); }
 .my-page-sections .my-page-panel.my-page-menu { padding: var(--space-2) 0; border-bottom: 0; }
 /* 목록 행 아이콘은 옅은 보라 둥근 사각 틀에 넣는다 */
 .home-review-icon { border-radius: var(--shape-inset); }
