@@ -328,9 +328,12 @@ const QuizScreen = () => {
                 className={`quiz-option anim-fade-up ${feedbackMotion} flex items-center gap-3 min-h-[64px] py-4 px-4 border text-base font-semibold leading-relaxed text-left break-keep transition-colors duration-150 ${optionStyle}`}
                 style={{ '--i': i + 1, borderRadius: 'var(--shape-button)' } as React.CSSProperties}
               >
-                <span className={`w-7 h-7 shrink-0 flex items-center justify-center text-xs font-semibold ${markerClass}`} style={{ borderRadius: 9999 }}>
-                  {showGrading && isCorrectOption ? <Check size={16} strokeWidth={3} /> : showGrading && isSelected ? <X size={16} strokeWidth={3} /> : i + 1}
-                </span>
+                {/* 채점 전 번호는 수달 3색 번호 그림(고르면 갈색 채움), 채점 뒤엔 체크·엑스 */}
+                {!showGrading && i < 4
+                  ? <img src={`/icons/num/num-${i + 1}${isSelected ? '-selected' : ''}.svg`} alt="" aria-hidden="true" width={28} height={28} className="shrink-0" data-num-icon />
+                  : <span className={`w-7 h-7 shrink-0 flex items-center justify-center text-xs font-semibold ${markerClass}`} style={{ borderRadius: 9999 }}>
+                    {showGrading && isCorrectOption ? <Check size={16} strokeWidth={3} /> : showGrading && isSelected ? <X size={16} strokeWidth={3} /> : i + 1}
+                  </span>}
                 <span className="min-w-0 flex-1">{keepShortUnitsTogether(opt.label)}</span>
                 {tag && (
                   <span className={`shrink-0 text-xs font-bold ${showGrading && isCorrectOption ? 'text-[var(--color-success-foreground)]' : 'text-[var(--color-ink-3)]'}`}>

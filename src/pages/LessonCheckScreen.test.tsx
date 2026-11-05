@@ -56,7 +56,7 @@ const mount = (entry: string | { pathname: string; state: unknown }) => {
 describe('레슨 이해 확인', () => {
   it('답변 전에는 캐릭터·정답을 노출하지 않고 선택·채점·로그·복귀를 유지한다', () => {
     const { container, click } = mount({ pathname: '/lesson-check', state: { words: [word(1, [check])], backPath: '/course', courseId: 'example-course', nodeId: 'example-node' } });
-    expect(container.querySelector('img')).toBeNull();
+    expect(container.querySelector('img:not([data-num-icon])')).toBeNull();
     expect(container.querySelector('[data-lesson-check-result]')).toBeNull();
     expect(container.querySelectorAll('button[data-own-sfx]')).toHaveLength(4);
     expect(logClick).toHaveBeenCalledWith('lesson_check_start', { course_id: 'example-course', node_id: 'example-node', total: 1 });
@@ -67,7 +67,7 @@ describe('레슨 이해 확인', () => {
     click('결과 보기');
     expect(logClick).toHaveBeenCalledWith('lesson_check_complete', { course_id: 'example-course', node_id: 'example-node', total: 1, correct: 0, attempt: 1 });
     click('틀린 문제 다시 풀기');
-    expect(container.querySelector('img')).toBeNull();
+    expect(container.querySelector('img:not([data-num-icon])')).toBeNull();
     click('오른다');
     expect(feedbackCorrect).toHaveBeenCalledTimes(1);
     expect(logClick).toHaveBeenCalledWith('lesson_check_answer', { course_id: 'example-course', node_id: 'example-node', word_id: 1, correct: true, attempt: 2 });
