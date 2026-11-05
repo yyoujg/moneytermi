@@ -457,6 +457,18 @@ body {
 body, body * {
   font-family: var(--font-family-sans) !important;
 }
+/* 제목용 둥근 글꼴: 나눔스퀘어라운드 ExtraBold 한 굵기만 받는다(약 240KB, 처음 한 번).
+   배포처에 버전 태그가 없어 커밋으로 고정. 본문 Pretendard 규칙보다 구체적인 선택자로 덮는다 */
+@font-face {
+  font-family: 'NanumSquareRound';
+  font-style: normal;
+  font-weight: 700 800;
+  font-display: swap;
+  src: url('https://cdn.jsdelivr.net/gh/innks/NanumSquareRound@1c6bf0ee5e0e17e2552311aac31ba157dcb805e8/NanumSquareRoundEB.woff2') format('woff2');
+}
+body :is(.type-page-title, .type-result-title, .original-modal h2) {
+  font-family: var(--font-family-display) !important;
+}
 
 /* 제목, 항목, 본문, 보조 정보의 공통 계층. 여백은 각 화면이 관리한다. */
 .type-page-title, .type-section-title, .type-content-title, .type-result-title {
