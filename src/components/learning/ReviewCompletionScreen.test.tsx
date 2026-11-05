@@ -8,12 +8,12 @@ vi.mock('../StreakCelebration', () => ({ StreakCelebration: () => <div>출석 �
 Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { value: true, configurable: true });
 let cleanup = () => {};
 afterEach(() => cleanup());
-const mount = (firstCorrect: number, points = 180) => {
+const mount = (firstCorrect: number) => {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
   const onAction = vi.fn();
-  act(() => root.render(<ReviewCompletionScreen initialTotal={2} firstCorrect={firstCorrect} points={points} note="기존 복습 안내" onAction={onAction} />));
+  act(() => root.render(<ReviewCompletionScreen initialTotal={2} firstCorrect={firstCorrect} note="기존 복습 안내" onAction={onAction} />));
   cleanup = () => { act(() => root.unmount()); container.remove(); };
   return { container, onAction };
 };
@@ -26,16 +26,16 @@ describe('복습 완료 전용 화면', () => {
     expect(container.querySelector('.review-complete-summary')).toHaveAttribute('aria-label', `첫 시도 2문제 중 ${correct}개 정답`);
     expect(container).toHaveTextContent('기존 복습 안내');
   });
-  it.each([0, 1234])('보유 조개 %i개를 획득 보상으로 바꾸지 않는다', points => {
-    const { container } = mount(1, points);
-    expect(container.querySelector('.review-complete-wallet')).toHaveAttribute('aria-label', `보유 조개 ${points}개`);
-    expect(container.querySelector('[data-review-balance]')).toHaveTextContent(`${points}개`);
+  it('보유 코인 영역 없이 복습 기록만 보여준다', () => {
+    const { container } = mount(1);
+    expect(container.querySelector('.review-complete-wallet')).toBeNull();
+    expect(container).not.toHaveTextContent('코인');
     expect(container).not.toHaveTextContent('획득');
     expect(container).not.toHaveTextContent('보너스');
   });
-  it('기존 수달과 알림·출석 안내를 유지하고 완료 제목으로 초점을 옮긴다', () => {
+  it('캐릭터 없이 알림·출석 안내를 유지하고 완료 제목으로 초점을 옮긴다', () => {
     const { container } = mount(0);
-    expect(container.querySelector('.review-complete-mascot img')).toHaveAttribute('src', '/otter/v3/characters/joy.png');
+    expect(container.querySelector('.review-complete-mascot')).toBeNull();
     expect(container).toHaveTextContent('알림 안내');
     expect(container).toHaveTextContent('출석 안내');
     expect(document.activeElement).toBe(container.querySelector('h1'));

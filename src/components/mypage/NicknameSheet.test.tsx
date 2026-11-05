@@ -34,7 +34,7 @@ describe('둥근 영역에 초점을 표시하는 닉네임 입력', () => {
     expect(input).toHaveValue('예시 학습자');
     expect(container.querySelector('.nickname-counter')).toHaveTextContent('6 / 10');
     expect(save()).toBeDisabled();
-    expect(container.querySelector('.nickname-clear svg')).toHaveAttribute('stroke', 'currentColor');
+    expect(container.querySelector('.nickname-clear svg')).toHaveAttribute('fill', 'currentColor');
   });
   it('지우면 글자 수와 오류를 초기화하고 입력칸으로 초점을 돌린다', () => {
     const { container, input, save, onSave } = mount();

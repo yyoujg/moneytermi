@@ -1,6 +1,3 @@
-/// <reference types="node" />
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { act, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -19,37 +16,26 @@ const mount = (children: ReactNode) => {
   return container;
 };
 
-describe('새 수달 그림체 배지', () => {
-  it('배지 10개를 같은 새 수달 그림체의 개별 이미지로 표시한다', () => {
-    const container = mount(<>{BADGES.map(b => <BadgeGlyph key={b.id} id={b.id} />)}</>);
-    expect(container.querySelectorAll('img')).toHaveLength(BADGES.length);
-    expect([...container.querySelectorAll('img')].map(el => el.getAttribute('src')))
-      .toEqual(BADGES.map(b => `/otter/v3/badges/${b.id}.png`));
-    expect(container.querySelector('svg')).toBeNull();
-  });
-  it('미획득 배지는 기존처럼 흑백·흐림으로 구분한다', () => {
-    const container = mount(<BadgeGlyph id="w10" earned={false} />);
-    const image = container.querySelector('img')!;
-    expect(image.getAttribute('data-earned')).toBe('false');
-    expect(image.classList.contains('grayscale')).toBe(true);
-    expect(image.classList.contains('opacity-40')).toBe(true);
-  });
-  it('축하 화면은 선명한 새 그림과 요청한 크기를 유지한다', () => {
-    const container = mount(<BadgeGlyph id="x1000" size={140} className="celebration" />);
-    const image = container.querySelector('img')!;
-    expect(image.getAttribute('data-earned')).toBe('true');
-    expect(image.getAttribute('width')).toBe('140');
-    expect(image.classList.contains('celebration')).toBe(true);
-    expect(image.classList.contains('grayscale')).toBe(false);
-    expect(image.getAttribute('aria-hidden')).toBe('true');
-  });
-  it('새 배지 10개가 512픽셀 투명 PNG로 존재한다', () => {
-    for (const badge of BADGES) {
-      const bytes = readFileSync(resolve(process.cwd(), `public/otter/v3/badges/${badge.id}.png`));
-      expect([...bytes.subarray(0, 8)]).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
-      expect(bytes.readUInt32BE(16)).toBe(512);
-      expect(bytes.readUInt32BE(20)).toBe(512);
-      expect(bytes[25]).toBe(6);
+describe('목표 숫자 배지', () => {
+  it('배지마다 수달 그림체 일러스트 하나를 그리고, 작으면 단순화본을 쓴다', () => {
+    const container = mount(<>{BADGES.map(b => <BadgeGlyph key={b.id} id={b.id} size={44} />)}</>);
+    const glyphs = [...container.querySelectorAll('.badge-glyph')];
+    expect(glyphs).toHaveLength(BADGES.length);
+    for (const [i, badge] of BADGES.entries()) {
+      expect(glyphs[i]).toHaveAttribute('data-badge-stat', badge.stat);
+      expect(glyphs[i].querySelectorAll('img')).toHaveLength(1);
+      expect(glyphs[i].querySelector('img')?.getAttribute('src')).toMatch(/^\/badges\/v3\/badge-[a-z]+\d+\.svg$/);
     }
+    // 배지마다 전용 그림(같은 그림을 빌려 쓰지 않는다)
+    expect(new Set(glyphs.map(g => g.querySelector('img')?.getAttribute('src'))).size).toBe(BADGES.length);
+    const small = mount(<BadgeGlyph id="w1" size={32} />).querySelector('img');
+    expect(small).toHaveAttribute('src', '/badges/v3/badge-word1-small.svg');
+  });
+  it.each(['w1', 'w10'])('%s 미획득 배지는 잠김 표시와 요청한 크기를 유지한다', id => {
+    const glyph = mount(<BadgeGlyph id={id} size={96} earned={false} />).querySelector('.badge-glyph')!;
+    expect(glyph).toHaveAttribute('data-earned', 'false');
+    expect(glyph).toHaveClass('is-locked');
+    expect(glyph).toHaveStyle({ width: '96px', height: '96px' });
+    expect(glyph.querySelector('img')?.getAttribute('src')).toMatch(/-locked\.svg$/);
   });
 });

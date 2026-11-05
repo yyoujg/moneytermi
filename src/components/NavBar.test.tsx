@@ -23,7 +23,6 @@ vi.mock('../lib/storage', () => ({
 Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { value: true, configurable: true });
 
 const SEEN_LEAGUE_WEEK_KEY = 'moneytermi_nav_seen_league_week_v1';
-const SEEN_BADGE_COUNT_KEY = 'moneytermi_nav_seen_badge_count_v1';
 
 let cleanup = () => {};
 afterEach(() => cleanup());
@@ -75,17 +74,16 @@ beforeEach(() => {
 });
 
 describe('NavBar new badges', () => {
-  it.each(['/course', '/home', '/league', '/my'])('%s에서 역할 그림과 진한 메뉴명·현재 페이지로 선택을 구분한다', async path => {
+  it.each(['/course', '/course/topics', '/home', '/league', '/my'])('%s에서 진한 세이지 채움 아이콘과 메뉴명·현재 페이지로 선택을 구분한다', async path => {
     const container = await mount(path);
     const active = container.querySelector('button[aria-current="page"]');
     expect(active).toBeInTheDocument();
-    expect(active?.querySelector('img[data-icon]')).toHaveAttribute('src', expect.stringMatching(/^\/otter\/v3\/icons\/(library|checklist|chart|profile)\.png$/));
-    expect(active?.querySelector('img[data-icon]')).not.toHaveClass('app-nav-muted');
-    expect(active?.querySelector('img[data-icon]')).toHaveClass('text-[var(--color-ink)]');
-    expect(active?.querySelector(':scope > span')).toHaveClass('text-[var(--color-ink)]');
+    expect(active?.querySelector('img')).toBeNull();
+    expect(active?.querySelector('svg[data-nav-icon]')?.parentElement).toHaveClass('text-[var(--color-accent-foreground)]');
+    expect(active?.querySelector(':scope > span')).toHaveClass('text-[var(--color-accent-foreground)]');
     for (const inactive of container.querySelectorAll('button:not([aria-current])')) {
-      expect(inactive.querySelector('img[data-icon]')).toHaveClass('app-nav-muted');
-      expect(inactive.querySelector(':scope > span')).toHaveClass('app-nav-muted');
+      expect(inactive.querySelector('svg[data-nav-icon]')?.parentElement).toHaveClass('text-[var(--color-icon-inactive)]');
+      expect(inactive.querySelector(':scope > span')).toHaveClass('text-[var(--color-icon-inactive)]');
     }
   });
 
@@ -99,7 +97,8 @@ describe('NavBar new badges', () => {
     const container = await mount();
 
     expect(container.querySelector('button[aria-label="퀘스트, 새 내용 있음"]')).toBeInTheDocument();
-    expect(navButton(container, '퀘스트')?.textContent).toContain('NEW');
+    // 새 내용은 글자 대신 작은 점으로 보이고, 읽기 프로그램에는 aria-label로 전달한다.
+    expect(navButton(container, '퀘스트')?.querySelector('span[aria-hidden="true"].rounded-full')).toBeInTheDocument();
   });
 
   it('이번 주 리그를 아직 확인하지 않았으면 NEW를 표시하고 방문하면 저장한다', async () => {
@@ -119,22 +118,9 @@ describe('NavBar new badges', () => {
     expect(container.querySelector('button[aria-label="리그, 새 내용 있음"]')).not.toBeInTheDocument();
   });
 
-  it('새로 얻은 배지가 있으면 마이 탭에 NEW를 표시하고 방문하면 저장한다', async () => {
-    state.storage.set(SEEN_BADGE_COUNT_KEY, '0');
-    baseContext({
-      knownWords: [{ id: 1, word: '복리' }],
-    });
+  it('새 배지가 있어도 마이 탭에는 점을 표시하지 않는다(획득 축하 창이 알려준다)', async () => {
+    baseContext({ knownWords: [{ id: 1, word: '복리' }] });
     const container = await mount();
-
-    const myButton = container.querySelector('button[aria-label="마이, 새 내용 있음"]') as HTMLButtonElement | null;
-    expect(myButton).toBeInTheDocument();
-
-    await act(async () => {
-      myButton!.click();
-    });
-    await flush();
-
-    expect(state.setItem).toHaveBeenCalledWith(SEEN_BADGE_COUNT_KEY, '1');
     expect(container.querySelector('button[aria-label="마이, 새 내용 있음"]')).not.toBeInTheDocument();
   });
 });

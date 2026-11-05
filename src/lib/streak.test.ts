@@ -77,3 +77,13 @@ describe('streakMilestone', () => {
     for (const n of [0, 1, 6, 8, 13, 29, 31]) expect(streakMilestone(n)).toBeNull();
   });
 });
+
+describe('weekDays 시간대', () => {
+  it('기기 시간대와 상관없이 KST 월요일 기준 이번 주를 만든다', () => {
+    // 2026-11-02(월) 03:00 KST = 2026-11-01(일) 18:00 UTC
+    const days = weekDays([], new Date('2026-11-01T18:00:00Z'));
+    expect(days[0].dateStr).toBe('2026-11-02');
+    expect(days[0].isToday).toBe(true);
+    expect(days[6].dateStr).toBe('2026-11-08');
+  });
+});

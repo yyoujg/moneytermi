@@ -15,7 +15,7 @@ import { addEnergyState, fillEnergyState, nextEnergyAt as calcNextEnergyAt, norm
 import { runEnergyRefill, type EnergyRefillResult } from '../lib/energyRefill';
 import { nextReviewDateFromRows, selectDueReviewWords, selectRecallWords, type ReviewProgressRow } from '../lib/review';
 import { buildCourseContent } from '../lib/courseContent';
-import content from '../content/content.json';
+import { monthStart, periodMissions, weekStart } from '../lib/periodMissions';
 import { createQuizRequestId, parseQuizAnswerResult, withStudyRequestTimeout, type QuizAnswerResult } from '../lib/quizSubmission';
 
 type WpRow = ReviewProgressRow & { ease: number; interval_d: number; reps: number; due_date: string };
@@ -29,6 +29,7 @@ type AppContextValue = {
   points: number;
   setPoints: React.Dispatch<React.SetStateAction<number>>;
   xp: number;
+  leagueStage: number | null;   // null = 서버 등급을 아직 못 읽음(화면은 1단계로 보여 준다)
   boostUntil: number | null;
   buyBoost: () => Promise<'ok' | 'active' | 'points' | 'pending' | 'fail'>;
   energy: number;
@@ -73,6 +74,8 @@ type AppContextValue = {
   updateMyEmoji: (emoji: string) => Promise<boolean>;
   // 자동 수령한 미션 보상 축하 대기열. 학습 화면 중엔 Layout이 보류했다가 나가면 보여준다
   missionRewards: PointReward[];
+  // 받은 주간·월간 보상('미션id:기간 시작일'). null이면 서버에 보상 기능이 없어 진행도만 보여준다
+  periodClaimed: Set<string> | null;
   dismissMissionReward: () => void;
 };
 
@@ -89,6 +92,7 @@ const energyKeyFor = (profileId: string | null) => `${ENERGY_KEY}:${profileId ??
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [points, setPoints]               = useState(0);
   const [xp, setXp]                       = useState(0);
+  const [leagueStage, setLeagueStage]     = useState<number | null>(null);
   const [boostUntil, setBoostUntil]       = useState<number | null>(null);
   const [energyState, setEnergyState]     = useState<EnergyState>(() => ({ current: ENERGY_MAX, updatedAt: Date.now() }));
   const energyStateRef                    = useRef(energyState);
@@ -176,8 +180,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     return persistEnergy(next);
   }, [persistEnergy]);
 
-  const recoverEnergyRefill = useCallback(async (profileId: string) => runEnergyRefill({
+  const recoverEnergyRefill = useCallback(async (profileId: string, pendingOnly = false) => runEnergyRefill({
     profileId,
+    pendingOnly,
     storage: Storage,
     rpc: async idempotencyKey => {
       const { data, error } = await dbRef.current.rpc('buy_energy_refill_once', { p_idempotency_key: idempotencyKey });
@@ -205,11 +210,17 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     const loadContent = async () => {
       try {
       // 콘텐츠는 빌드 때 scripts/sync-content.mjs가 받아 둔 JSON을 쓴다(Supabase egress 절감).
-      const built = buildCourseContent(content.words, content.courseWords, content.courses);
-
-      setCourses(built.courses);
-      setAllWords(built.allWords);
-      setContentStatus('ready');
+      // 1.6MB라 첫 번들에서 빼서 따로 받는다(첫 화면 JS 파싱 시간 절감). 미션 정의 요청은 기다리지 않고 같이 보낸다
+      const contentLoaded = import('../content/content.json').then(({ default: content }) => {
+        const built = buildCourseContent(content.words, content.courseWords, content.courses);
+        setCourses(built.courses);
+        setAllWords(built.allWords);
+        setContentStatus('ready');
+      }).catch(e => {
+        // 여기서 바로 잡지 않으면 미션 정의를 기다리는 동안 unhandledrejection으로 잡혀 index.html 오류 화면이 뜬다
+        console.error('[AppContext] 콘텐츠 로드 실패:', e);
+        setContentStatus('error');
+      });
 
       // 미션 정의는 공개 데이터라 프로필이 없어도 받을 수 있다.
       const { data: defs } = await supabase
@@ -233,6 +244,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
           }];
         })));
       }
+      await contentLoaded;
       } catch (e) {
         console.error('[AppContext] 콘텐츠 로드 실패:', e);
         setContentStatus('error');
@@ -301,7 +313,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       dbRef.current = p?.guestToken ? getGuestClient(p.guestToken) : supabase;
       const db = dbRef.current;
       await loadEnergyForProfile(profileId);
-      await recoverEnergyRefill(profileId);
+      // 실행 시엔 결제가 끝나지 않은 충전만 마무리한다(대기 키가 없으면 새 충전을 시작하지 않는다)
+      await recoverEnergyRefill(profileId, true);
 
       try {
       // 1. points — DB값과 로컬값 중 큰 값 유지 (로딩 중 적립 포인트 보존)
@@ -321,6 +334,14 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
       if (profileErr) console.error('[load] profiles fetch 실패:', profileErr);
+      // 리그 등급: 지난주 순위 정산(주 1회, 서버가 중복을 막는다) 뒤 읽는다. 기다리지 않고, SQL 적용 전이면 1단계로 둔다
+      void (async () => {
+        try {
+          await db.rpc('settle_league');
+          const { data: stageRow } = await db.from('profiles').select('league_stage').eq('id', profileId).single();
+          if (profileIdRef.current === profileId && stageRow?.league_stage) setLeagueStage(stageRow.league_stage);
+        } catch { /* 정산 실패해도 학습은 계속된다 */ }
+      })();
       if (profile) {
         setPoints(profile.points);  // 서버 단일 진실원
         setXp(profile.xp ?? 0);
@@ -475,7 +496,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     const scheduleReset = () => {
       timer = setTimeout(() => {
         if (stopped) return;
-        lastMissionDate.current = `${toDateStr(new Date())}#${missionSlot()}`;
+        lastMissionDate.current = slotKey = `${toDateStr(new Date())}#${missionSlot()}`;
         setMissions(missionBaseRef.current);
         void checkInRef.current();
         scheduleReset();
@@ -483,7 +504,21 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     scheduleReset();
-    return () => { stopped = true; if (timer !== undefined) clearTimeout(timer); };
+    // 기기가 잠들면 타이머가 멈춘다. 다시 보일 때 슬롯이 바뀌었으면 타이머와 같은 초기화를 바로 하고 다시 예약한다
+    let slotKey = `${toDateStr(new Date())}#${missionSlot()}`;
+    const onVisible = () => {
+      if (stopped || document.visibilityState !== 'visible') return;
+      const key = `${toDateStr(new Date())}#${missionSlot()}`;
+      if (key === slotKey) return;
+      slotKey = key;
+      lastMissionDate.current = key;
+      setMissions(missionBaseRef.current);
+      void checkInRef.current();
+      if (timer !== undefined) clearTimeout(timer);
+      scheduleReset();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => { stopped = true; if (timer !== undefined) clearTimeout(timer); document.removeEventListener('visibilitychange', onVisible); };
   }, [ready]);
 
   // ── toggleKnown ───────────────────────────────────────────────
@@ -519,6 +554,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   // ── claimReward — 서버가 자격 검증 후 적립 ─────────────────────
   // 성공 여부를 돌려줘 화면이 토스트/햅틱을 결정한다
+  // 같은 틱에 여러 미션을 받으면 렌더 시점 xp가 옛 값이라 지급량이 겹쳐 보인다. 최신 잔고는 ref로 따로 들고 간다
+  const latestXpRef = useRef(xp);
+  useEffect(() => { latestXpRef.current = xp; }, [xp]);
   const claimReward = async (missionId: keyof Missions): Promise<{ xpGained: number } | 'pending' | null> => {
     if (claimingRef.current.has(missionId)) return 'pending';
     const mission = missions[missionId];
@@ -530,7 +568,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       const { data, error } = await dbRef.current.rpc('claim_mission_reward', { p_mission_id: missionId, p_date: today });
       if (error || !data) { console.error('[claimReward] 실패:', error); return null; }
       // 기존 서버 최종 잔고와 지급 규칙을 그대로 사용한다.
-      const xpGained = typeof data.xp === 'number' ? Math.max(data.xp - xp, 0) : MISSION_XP;
+      const xpGained = typeof data.xp === 'number' ? Math.max(data.xp - latestXpRef.current, 0) : MISSION_XP;
+      if (typeof data.xp === 'number') latestXpRef.current = data.xp; else latestXpRef.current += MISSION_XP;
       setPoints(data.points);
       if (typeof data.xp === 'number') setXp(data.xp); else setXp(x => x + MISSION_XP);
       setMissions(prev => ({ ...prev, [missionId]: { ...prev[missionId], isRewarded: true } }));
@@ -556,11 +595,47 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       claimReward(m.id).then(res => {
         if (!res || res === 'pending') return;
         feedbackClaim();
-        setMissionRewards(q => [...q, { points: m.reward, xp: res.xpGained, source: 'mission' }]);
+        setMissionRewards(q => [...q, { xp: res.xpGained }]);
       });
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [missions, ready]);
+
+  // ── 주간·월간 미션도 달성하면 자동으로 받는다(서버가 출석·XP 기록으로 다시 세서 기간마다 한 번만 준다) ──
+  const [periodClaimed, setPeriodClaimed] = useState<Set<string> | null>(null);
+  const periodClaimingRef = useRef(new Set<string>());
+  useEffect(() => {
+    if (!ready || !profileIdRef.current) return;
+    const since = [weekStart(), monthStart()].sort()[0]!;
+    Promise.resolve().then(() => dbRef.current.from('period_mission_rewards').select('mission_id, period_start').gte('period_start', since))
+      .then(({ data, error }) => setPeriodClaimed(error ? null : new Set((data ?? []).map(row => `${row.mission_id}:${row.period_start}`))))
+      .catch(() => setPeriodClaimed(null));
+  }, [ready]);
+  useEffect(() => {
+    if (!ready || !periodClaimed) return;
+    const pending = (weeklyXp: number) => {
+      const { weekly, monthly } = periodMissions(attendanceDates, weeklyXp);
+      return [...weekly, ...monthly].filter(m => m.current >= m.target && !periodClaimed.has(`${m.id}:${m.periodStart}`) && !periodClaimingRef.current.has(m.id));
+    };
+    // 출석만으로 판정되는 미션이 없고 XP 미션도 이미 받았으면 순위 조회 없이 끝낸다
+    if (pending(Number.MAX_SAFE_INTEGER).length === 0) return;
+    // 퀴즈마다 XP가 바뀌므로 잠깐 모아서 한 번만 확인한다
+    const timer = setTimeout(async () => {
+      const db = dbRef.current;
+      const { data: rank } = await db.rpc('my_league_rank').then(res => res, () => ({ data: null }));
+      for (const mission of pending((rank as { points?: number } | null)?.points ?? 0)) {
+        periodClaimingRef.current.add(mission.id);
+        const { data } = await db.rpc('claim_period_mission', { p_mission_id: mission.id }).then(res => res, () => ({ data: null }));
+        periodClaimingRef.current.delete(mission.id);
+        if (!data) continue;
+        setPeriodClaimed(prev => new Set(prev).add(`${mission.id}:${data.period_start}`));
+        setXp(data.xp);
+        feedbackClaim();
+        setMissionRewards(q => [...q, { xp: data.reward }]);
+      }
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [ready, periodClaimed, attendanceDates, xp]);
 
   // ── claimPromotionReward — 프로모션(grantPromotionReward), 유저당 1회만 서버가 적립 ──
   const claimPromotionReward = async (amount: number) => {
@@ -739,6 +814,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     const profileId = profileIdRef.current;
     if (!profileId) return false;
     const existing = wpRows.find(r => r.word_id === wordId);
+    // 아직 복습할 때가 안 된 단어를 맞히면 일정을 당겨 늘리지 않는다(10일 뒤 단어를 오늘 맞혀 25일로 뛰는 것 방지). 틀리면 그대로 리셋
+    if (correct && existing && existing.status === 'known' && existing.last_grade !== 0 && existing.due_date > toDateStr(new Date())) return true;
     const base = existing ?? { ease: 2.5, interval_d: 0, reps: 0 };
     const grade = gradeFromResult(correct, usedHint);
     const ns = nextSrs(base, grade);
@@ -770,7 +847,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       points, setPoints,
       knownWords, knownIds, viewedIds, setKnownWords,
       unknownWords, setUnknownWords,
-      xp, boostUntil, buyBoost,
+      xp, leagueStage, boostUntil, buyBoost,
       energy, energyMax: ENERGY_MAX, nextEnergyAt, spendEnergy, claimEnergyAd, buyEnergyRefill,
       spendPoints, claimFirstLesson, refreshWallet, shopReason, shopOpen, openShop, closeShop,
       missions, setMissions,
@@ -790,6 +867,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       myEmoji,
       updateMyEmoji,
       missionRewards,
+      periodClaimed,
       dismissMissionReward: () => setMissionRewards(q => q.slice(1)),
     }}>
       {children}

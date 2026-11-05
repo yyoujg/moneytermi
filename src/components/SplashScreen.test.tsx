@@ -21,41 +21,29 @@ const mount = () => {
 };
 
 describe('SplashScreen', () => {
-  it('스플래시 글자는 중성색으로 구분하고 주황은 진행 표시에 유지한다', () => {
+  it('배경은 그림과 같은 단색 세이지 틴트다', () => {
     const css = readFileSync(resolve(process.cwd(), 'src/index.css'), 'utf8');
-    const brand = css.match(/\.splash-brand\s*\{([^}]+)\}/)?.[1] ?? '';
-    const subtitle = css.match(/\.splash-copy p\s*\{([^}]+)\}/)?.[1] ?? '';
-    const title = css.match(/\.splash-copy h1\s*\{([^}]+)\}/)?.[1] ?? '';
-    expect(brand).toContain('color: var(--color-ink)');
-    expect(subtitle).toContain('color: var(--color-ink-3)');
-    expect(title).toContain('color: var(--color-ink)');
-    expect(brand + subtitle).not.toContain('--color-brand-ink');
-    expect(css.match(/\.splash-progress span\s*\{([^}]+)\}/)?.[1]).toContain('background: var(--color-brand-action)');
-  });
-
-  it('배경에 점무늬나 하단 장식 색면을 추가하지 않는다', () => {
-    const css = readFileSync(resolve(process.cwd(), 'src/index.css'), 'utf8');
-    expect(css).toMatch(/\.splash-screen::before,\s*\.splash-screen::after\s*\{\s*content:\s*none;\s*\}/);
     const background = css.match(/\.splash-screen\s*\{([^}]+)\}/)?.[1] ?? '';
-    expect(background).toContain('background: var(--color-canvas)');
+    expect(background).toContain('background: var(--color-accent-soft)');
+    expect(background).toContain('justify-content: center');
     expect(background).not.toMatch(/gradient|background-image/);
   });
 
-  it('로딩 상태를 접근 가능한 상태 영역으로 보여준다', () => {
+  it('진행률이 없으니 막대 대신 1초 뒤에 나타나는 스피너만 둔다', () => {
+    const css = readFileSync(resolve(process.cwd(), 'src/index.css'), 'utf8');
+    expect(css).not.toContain('.splash-progress');
+    expect(css.match(/\.splash-spinner\s*\{([^}]+)\}/)?.[1]).toMatch(/opacity: 0;[\s\S]*splash-reveal 0s linear 1s forwards/);
+  });
+
+  it('로딩 상태를 접근 가능한 상태 영역으로 보여주고 안내 문구는 두지 않는다', () => {
     const container = mount();
     const status = container.querySelector('[role="status"]');
 
-    expect(status).toBeInTheDocument();
     expect(status).toHaveAttribute('aria-label', '머니터미를 불러오는 중');
-    expect(container.textContent).toContain('곧 시작해요');
-    expect(container.textContent).toContain('오늘의 학습을 준비하고 있어요');
-  });
-
-  it('머니터미 캐릭터 이미지를 사용한다', () => {
-    const container = mount();
-    const image = container.querySelector('img');
-
-    expect(image).toHaveAttribute('src', '/otter/v3/characters/hello.png');
-    expect(container.querySelector('.splash-dash')).toBeNull();
+    expect(container.textContent).toBe('');
+    // 글자까지 들어간 스플래시 그림 한 장(장식)
+    expect(container.querySelectorAll('img')).toHaveLength(1);
+    expect(container.querySelector('img')).toHaveAttribute('src', '/splash/splash.svg');
+    expect(container.querySelector('img')).toHaveAttribute('alt', '');
   });
 });

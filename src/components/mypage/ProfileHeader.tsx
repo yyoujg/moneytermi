@@ -1,30 +1,24 @@
-import { Smile } from 'lucide-react';
-import { ProfileAvatar } from '../ProfileAvatar';
+import type { ReactNode } from 'react';
 import { ProfileEditIcon } from './ProfileEditIcon';
-import { ProfileGrowth } from './ProfileGrowth';
+import { ProfileAvatar } from '../ProfileAvatar';
 
-export const ProfileHeader = ({ nickname, emoji, xp, onEditAvatar, onEditNickname }: {
+export const ProfileHeader = ({ nickname, avatar, subtitle, onEditAvatar, onEditNickname }: {
   nickname: string;
-  emoji: string;
-  xp: number;
-  onEditAvatar: () => void;
+  avatar?: string;
+  // 닉네임 아래 한 줄(예: 리그 등급)
+  subtitle?: ReactNode;
+  onEditAvatar?: () => void;
   onEditNickname: () => void;
 }) => (
   <section className="my-profile-card" aria-label="내 프로필">
     <div className="my-profile-identity">
-      <div className="my-profile-avatar"><ProfileAvatar emoji={emoji} size={76} /></div>
+      <button type="button" className="my-profile-avatar" onClick={onEditAvatar} aria-label="프로필 그림 변경"><ProfileAvatar name={nickname} size={64} avatar={avatar} /></button>
       <div className="my-profile-details">
-        <h3 className="my-profile-name">{nickname}</h3>
-        <ProfileGrowth xp={xp} />
+        <button type="button" onClick={onEditNickname} className="my-profile-name-button" aria-label="닉네임 변경">
+          <h3 className="my-profile-name">{nickname}</h3><ProfileEditIcon size={20} />
+        </button>
+        {subtitle && <p className="my-profile-subtitle">{subtitle}</p>}
       </div>
-    </div>
-    <div className="my-profile-actions">
-      <button type="button" onClick={onEditAvatar} className="my-profile-action">
-        <Smile size={17} strokeWidth={2.25} absoluteStrokeWidth aria-hidden="true" focusable="false" />캐릭터 변경
-      </button>
-      <button type="button" onClick={onEditNickname} className="my-profile-action">
-        <ProfileEditIcon size={16} />닉네임 변경
-      </button>
     </div>
   </section>
 );

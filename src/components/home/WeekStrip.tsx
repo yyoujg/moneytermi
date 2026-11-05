@@ -1,4 +1,3 @@
-import { Check } from 'lucide-react';
 import { weekDays } from '../../lib/streak';
 
 // 실제 출석 기록을 월~일로 표시한다. 오늘·완료·지난 날·예정일은 색뿐 아니라 표시로도 구분한다.
@@ -21,7 +20,7 @@ export const WeekStrip = ({ attendanceDates }: { attendanceDates: string[] }) =>
               <span className="week-strip-label" aria-hidden="true">{day.isToday ? '오늘' : day.label}</span>
               <span className="week-strip-circle" aria-hidden="true">
                 {day.attended
-                  ? <Check size={18} strokeWidth={2.5} absoluteStrokeWidth aria-hidden="true" focusable="false" />
+                  ? <img src="/icons/week/week-done-star.svg" alt="" aria-hidden="true" width={22} height={22} data-week-icon="star" />
                   : day.isToday
                     ? <span className="week-strip-today-dot" />
                     : !day.isFuture && <span className="week-strip-empty-mark" />}

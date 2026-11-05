@@ -6,28 +6,39 @@ import { ProfileAvatar } from './ProfileAvatar';
 Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { value: true, configurable: true });
 let cleanup = () => {};
 afterEach(() => cleanup());
-const mount = (emoji: string) => {
+const mount = (avatar: string | undefined, size = 64) => {
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
-  act(() => root.render(<ProfileAvatar emoji={emoji} size={32} />));
+  act(() => root.render(<ProfileAvatar name="예시" size={size} avatar={avatar} />));
   cleanup = () => { act(() => root.unmount()); container.remove(); };
-  return container.querySelector('img')!;
+  return container;
 };
 
-describe('새 수달 프로필', () => {
-  it('기본 프로필은 작은 크기에 맞춘 새 얼굴 그림을 사용한다', () => {
-    const image = mount('🍊');
-    expect(image).toHaveAttribute('src', '/otter/v3/avatar/hello.png');
-    expect(image).toHaveAttribute('width', '32');
-    expect(image).toHaveAttribute('height', '32');
-    expect(image).toHaveClass('rounded-full');
-    expect(image).not.toHaveClass('bg-white');
+describe('사용자 프로필 그림', () => {
+  it('고른 수달은 그림으로, 40px 이하는 단순화본으로 보여준다', () => {
+    expect(mount('otter:happy').querySelector('img')).toHaveAttribute('src', '/profile/profile-happy.svg');
+    expect(mount('otter:happy', 32).querySelector('img')).toHaveAttribute('src', '/profile/profile-happy-small.svg');
   });
-  it('예전 저장값은 보존한 채 대응하는 새 얼굴을 표시한다', () => {
-    expect(mount('🚀')).toHaveAttribute('src', '/otter/v3/avatar/joy.png');
+
+  it('예전에 고른 캐릭터(n번째)는 n번째 수달 프로필로 보여준다', () => {
+    expect(mount('🍊').querySelector('img')).toHaveAttribute('src', '/profile/profile-basic.svg');
+    expect(mount('🐼').querySelector('img')).toHaveAttribute('src', '/profile/profile-happy.svg');
+    expect(mount('🥰').querySelector('img')).toHaveAttribute('src', '/profile/profile-confident.svg');
+    expect(mount('🦉').querySelector('img')).toHaveAttribute('src', '/profile/profile-surprised.svg');
   });
-  it('미등록 값도 깨진 그림 없이 기본 얼굴을 표시한다', () => {
-    expect(mount('')).toHaveAttribute('src', '/otter/v3/avatar/hello.png');
+
+  it('고른 배경색을 그림 뒤에 칠하고, 없으면 기본(세이지)', () => {
+    expect(mount('otter:happy:pink').querySelector('img')).toHaveAttribute('data-avatar-bg', 'pink');
+    expect(mount('otter:happy').querySelector('img')).toHaveAttribute('data-avatar-bg', 'sage');
+    expect(mount('🐼').querySelector('img')).toHaveAttribute('data-avatar-bg', 'sage');
+  });
+
+  it('값이 없거나 모르는 값이면 닉네임 첫 글자', () => {
+    for (const value of [undefined, '', '🙂', 'otter:unknown']) {
+      const container = mount(value);
+      expect(container.querySelector('img')).toBeNull();
+      expect(container.querySelector('[data-avatar-initial]')).toHaveTextContent('예');
+    }
   });
 });

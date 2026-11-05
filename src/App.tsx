@@ -18,9 +18,9 @@ import { LeaguePromotionCelebration } from './components/league/LeaguePromotionC
 import { LeagueRankCelebration } from './components/league/LeagueRankCelebration';
 import { PointCelebration } from './components/PointCelebration';
 import { SplashScreen } from './components/SplashScreen';
+import { LoadingScreen as StudyLoading } from './components/LoadingScreen';
 import { useTapHaptics } from './hooks/useTapHaptics';
-import { ArrowRight, BookOpenText, WalletCards, ListChecks } from './components/ui/OtterIcons';
-import { Mascot } from './components/Mascot';
+import { ArrowRight } from './components/ui/OtterIcons';
 import { Storage } from './lib/storage';
 
 const HomeScreen = React.lazy(() => import('./pages/HomeScreen'));
@@ -28,9 +28,11 @@ const CourseScreen = React.lazy(() => import('./pages/CourseScreen'));
 const ReviewScreen = React.lazy(() => import('./pages/ReviewScreen'));
 const QuizScreen = React.lazy(() => import('./pages/QuizScreen'));
 const LessonCheckScreen = React.lazy(() => import('./pages/LessonCheckScreen'));
+const LessonIntroScreen = React.lazy(() => import('./pages/LessonIntroScreen'));
 const WordCardScreen = React.lazy(() => import('./pages/WordCardScreen'));
 const LeagueScreen = React.lazy(() => import('./pages/LeagueScreen'));
 const LeagueRulesScreen = React.lazy(() => import('./pages/LeagueRulesScreen'));
+const BadgesScreen = React.lazy(() => import('./pages/BadgesScreen'));
 const MyPageScreen = React.lazy(() => import('./pages/MyPageScreen'));
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
@@ -49,12 +51,11 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
     if (this.state.error) {
       return (
         <div className="flex flex-col items-center justify-center h-full gap-4 px-6 text-center">
-          <Mascot name="error" size={120} />
           <p className="text-lg font-bold text-[var(--color-ink)]">앗, 문제가 생겼어요</p>
           <p className="text-sm text-[var(--color-ink-3)]">앱을 다시 시작해 주세요.</p>
           <button
             onClick={() => closeView()}
-            className="mt-2 px-5 py-2.5 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-80"
+            className="mt-2 px-5 py-2 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-80"
           >
             다시 시작
           </button>
@@ -65,58 +66,73 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
   }
 }
 
+// 앱 첫 진입(데이터 준비)은 스플래시, 화면 전환 대기는 달리 로딩 화면
 const LoadingScreen = SplashScreen;
 
 const WELCOME_KEY = 'welcome_seen_v1';
-const WELCOME_STEPS = [
-  { icon: BookOpenText, title: '쉬운 상황부터 시작해요', desc: '금리·대출·전월세처럼 자주 마주치는 용어를 예시로 익혀요' },
-  { icon: WalletCards, title: '생활 속 상황으로 연결해요', desc: '월급, 소비, 대출, 계약서에서 어떻게 쓰이는지 짧게 확인해요' },
-  { icon: ListChecks, title: '퀴즈와 다시 보기로 남겨요', desc: '오늘 들린 용어를 잊기 전에 다시 꺼내보며 익혀요' },
-];
+// 소개 문구 대신 첫 화면에서 바로 한 문제를 풀어 본다. 기록·XP와 무관한 체험용 문제다
+const WELCOME_QUIZ = {
+  question: '월급명세서에서 세금과 4대 보험료를 빼고 실제로 통장에 들어오는 돈을 뭐라고 할까요?',
+  options: ['연봉', '실수령액', '통상임금'],
+  answer: '실수령액',
+  explain: '연봉은 세금을 빼기 전 1년 치 금액이에요. 실제로 받는 돈은 실수령액이라고 해요.',
+};
 
 const WelcomeScreen = () => {
   const navigate = useNavigate();
+  const [picked, setPicked] = React.useState<string | null>(null);
   const start = async () => {
     await Storage.setItem(WELCOME_KEY, '1').catch(() => {});
-    logClick('welcome_start');
+    logClick('welcome_start', { answered: picked ? 1 : 0, correct: picked === WELCOME_QUIZ.answer ? 1 : 0 });
     navigate('/course', { replace: true });
   };
+  const correct = picked === WELCOME_QUIZ.answer;
 
   return (
     <div className="app-soft-screen flex h-full flex-col">
-      <div className="flex flex-1 flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden">
-        <div className="app-soft-header flex shrink-0 flex-col items-center rounded-b-[32px] px-6 pb-8 pt-8 text-center">
-          <Mascot name="hello" size={150} />
-          <h1 className="mt-4 text-2xl font-extrabold leading-snug tracking-tight text-[var(--color-ink)] break-keep">
-            경제 공부,<br />수달과 차근차근
-          </h1>
-          <p className="mt-3 text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">뜻은 예시로 익히고, 조개는 차곡차곡 모아요.</p>
+      <div className="flex flex-1 flex-col overflow-y-auto px-5 pt-8 pb-4 [&::-webkit-scrollbar]:hidden">
+        <img src="/otter/v5/otter-idle.svg" data-otter="idle" alt="" aria-hidden="true" width={96} height={96} className="shrink-0" />
+        <p className="mt-4 text-sm text-[var(--color-ink-3)]">달리와 먼저 한 문제 풀어 볼까요?</p>
+        <h1 className="mt-2 text-xl font-bold leading-snug text-[var(--color-ink)] break-keep">{WELCOME_QUIZ.question}</h1>
+
+        <div className="mt-6 flex flex-col gap-3">
+          {WELCOME_QUIZ.options.map(opt => {
+            const graded = picked !== null;
+            const isAnswer = opt === WELCOME_QUIZ.answer;
+            const style = !graded ? 'bg-[var(--color-card)] border-transparent text-[var(--color-ink)] active:bg-[var(--color-surface)]'
+              : isAnswer ? 'bg-[var(--color-success-soft)] border-[var(--color-success-foreground)] text-[var(--color-ink)]'
+              : opt === picked ? 'bg-[var(--color-card)] border-[var(--color-danger-line)] text-[var(--color-ink)]'
+              : 'bg-[var(--color-card)] border-transparent text-[var(--color-ink-3)]';
+            return (
+              <button key={opt} type="button" disabled={graded} aria-pressed={opt === picked} onClick={() => setPicked(opt)}
+                className={`quiz-option rounded-button flex min-h-[56px] items-center justify-between gap-3 border px-4 py-3 text-left text-base font-semibold ${style}`}>
+                {opt}
+                {graded && isAnswer && <span className="shrink-0 text-xs font-bold text-[var(--color-success-foreground)]">정답</span>}
+                {graded && !isAnswer && opt === picked && <span className="shrink-0 text-xs font-bold text-[var(--color-danger-foreground)]">내 답</span>}
+              </button>
+            );
+          })}
         </div>
 
-        {/* 남는 높이의 가운데에 단계 카드를 둔다. 화면이 작으면 그대로 스크롤된다 */}
-        <div className="flex flex-1 flex-col justify-center px-5 pt-7 pb-4">
-          <p className="mb-3 px-1 text-sm font-bold text-[var(--color-ink-2)]">이렇게 시작해요</p>
-          <ol className="flex flex-col gap-3">
-            {WELCOME_STEPS.map(({ icon: Icon, title, desc }) => (
-              <li key={title} className="app-card flex items-start gap-3 rounded-card bg-[var(--color-card)] px-4 py-4">
-                <span aria-hidden="true" className="flex h-8 w-8 shrink-0 items-center justify-center text-[var(--color-ink-2)]">
-                  <Icon size={22} strokeWidth={1.75} />
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-[15px] font-bold text-[var(--color-ink)]">{title}</span>
-                  <span className="mt-0.5 block text-xs leading-relaxed text-[var(--color-ink-3)] break-keep">{desc}</span>
-                </span>
-              </li>
-            ))}
-          </ol>
-        </div>
+        {picked && (
+          <p role="status" className="mt-5 text-sm leading-relaxed text-[var(--color-ink-2)] break-keep">
+            <strong className="text-[var(--color-ink)]">{correct ? '맞아요! ' : '아쉬워요. '}</strong>{WELCOME_QUIZ.explain}
+          </p>
+        )}
       </div>
 
       <div className="shrink-0 px-5 pb-8 pt-3 text-center">
-        <button type="button" onClick={start}
-          className="flex w-full items-center justify-center gap-2 rounded-button bg-brand-500 py-4 text-base font-bold active:opacity-90">
-          첫 레슨 시작하기<ArrowRight size={18} />
-        </button>
+        {/* 답하기 전에는 문제가 주행동이라 건너뛰기는 글자 버튼으로 약하게 둔다 */}
+        {picked ? (
+          <button type="button" onClick={start}
+            className="flex w-full items-center justify-center gap-2 rounded-button bg-brand-500 py-4 text-base font-bold active:opacity-90">
+            이런 용어부터 배워 볼게요<ArrowRight size={20} />
+          </button>
+        ) : (
+          <button type="button" onClick={start} className="min-h-[44px] w-full text-sm font-semibold text-[var(--color-ink-3)] active:opacity-60">
+            건너뛰고 시작하기
+          </button>
+        )}
         <p className="mt-3! text-xs text-[var(--color-ink-4)]">별도 가입 없이 시작할 수 있어요</p>
       </div>
     </div>
@@ -160,7 +176,8 @@ const LandingRoute = () => {
 
   if (target !== '/course' || resolvedLandingIsDirect) return <Navigate to={target} replace />;
   if (seenWelcome === null) return <LoadingScreen />;
-  return <Navigate to={seenWelcome ? '/course' : '/welcome'} replace />;
+  // 첫 화면은 지금 학습 중인 주제 화면(CourseScreen이 ?resume=1을 진행 중 주제·코스로 바꾼다)
+  return <Navigate to={seenWelcome ? '/course?resume=1' : '/welcome'} replace />;
 };
 
 const BackEventHandler = () => {
@@ -220,7 +237,7 @@ const Layout = () => {
   const { pathname } = location;
   const { ready, missionRewards, dismissMissionReward } = useAppContext();
   // 문제를 풀거나 읽는 중엔 미션 축하로 흐름을 끊지 않는다. 학습 화면을 나가면 대기열을 보여준다
-  const learning = ['/quiz', '/word-card', '/review', '/lesson-check'].some(p => pathname.startsWith(p));
+  const learning = ['/quiz', '/word-card', '/review', '/lesson-check', '/lesson-intro'].some(p => pathname.startsWith(p));
 
   if (!ready) return <LoadingScreen />;
 
@@ -231,7 +248,7 @@ const Layout = () => {
       <LeaguePromotionCelebration />
       <LeagueRankCelebration />
       <TopBar />
-      <React.Suspense fallback={<LoadingScreen />}>
+      <React.Suspense fallback={<StudyLoading />}>
       {/* 경로가 바뀌면 래퍼가 다시 마운트되며 페이드인. (transform 전환은 기기에서 무거워 opacity만) */}
       <div key={pathname} className="flex-1 min-h-0 flex flex-col anim-fade">
       <Routes>
@@ -239,14 +256,17 @@ const Layout = () => {
         <Route path="/welcome" element={<WelcomeScreen />} />
         <Route path="/home" element={<HomeScreen />} />
         <Route path="/course" element={<CourseScreen />} />
+        <Route path="/course/topics" element={<CourseScreen />} />
         <Route path="/league" element={<LeagueScreen />} />
         <Route path="/review" element={<ReviewScreen />} />
         <Route path="/my" element={<MyPageScreen />} />
+        <Route path="/my/badges" element={<BadgesScreen />} />
         {/* 관련 용어 클릭처럼 같은 라우트로 다시 navigate해도 새로 마운트 — 이전 index/단계가 새 단어 목록에 남지 않게 */}
         <Route path="/word-card" element={<WordCardScreen key={location.key} />} />
         <Route path="/league/rules" element={<LeagueRulesScreen />} />
         <Route path="/quiz" element={<QuizScreen />} />
         <Route path="/lesson-check" element={<LessonCheckScreen />} />
+        <Route path="/lesson-intro" element={<LessonIntroScreen />} />
       </Routes>
       </div>
       </React.Suspense>
@@ -270,7 +290,7 @@ export default function App() {
           <AlertModal />
           {/* 상단 인셋은 더하지 않는다 — 토스 웹뷰는 네이티브 내비게이션 바 아래에서 시작해 상태바와 겹치지 않는다.
               하단 인셋은 NavBar가 직접 처리한다. */}
-          <div data-app-shell className="w-full max-w-md mx-auto bg-[var(--color-canvas)] h-[100dvh] overflow-hidden relative font-sans text-[var(--color-ink)] flex flex-col">
+          <div data-app-shell className="w-full max-w-md mx-auto bg-[var(--color-card)] h-[100dvh] overflow-hidden relative font-sans text-[var(--color-ink)] flex flex-col">
             <ErrorBoundary>
               <Layout />
             </ErrorBoundary>

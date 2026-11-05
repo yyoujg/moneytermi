@@ -15,7 +15,7 @@ describe('buildBadges', () => {
   });
 
   it('기준을 넘겨도 획득 상태를 유지한다', () => {
-    expect(buildBadges(S(999, 0, 0)).filter(x => x.stat === 'words').every(x => x.earned)).toBe(true);
+    expect(buildBadges(S(1500, 0, 0)).filter(x => x.stat === 'words').every(x => x.earned)).toBe(true);
   });
 
   it('진행률은 0~1로 자른다', () => {

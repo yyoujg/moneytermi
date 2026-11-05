@@ -5,10 +5,9 @@ import { LeagueRules } from '../components/LeagueRules';
 const LeagueRulesScreen = () => (
   <div className="app-soft-screen flex flex-col h-full">
     <div className="app-soft-header pt-4 px-5 pb-4">
-      <h2 className="text-base font-bold text-[var(--color-ink)]">리그 안내</h2>
+      <h2 className="type-page-title">리그 안내</h2>
     </div>
     <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">
-      <Spacing size={20} />
       <div className="px-5">
         <LeagueRules />
       </div>

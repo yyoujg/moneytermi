@@ -1,89 +1,77 @@
 import { forwardRef } from 'react';
-import type { ImgHTMLAttributes } from 'react';
 import {
-  Pencil as PencilSvg, LockKeyhole as LockSvg, ArrowRight as ArrowRightSvg,
-  ArrowDown as ArrowDownSvg, ChevronRight as ChevronRightSvg,
-  ChevronLeft as ChevronLeftSvg, ChevronDown as ChevronDownSvg,
-  ChevronsUp as ChevronsUpSvg, RotateCcw as RotateCcwSvg,
-  ExternalLink as ExternalLinkSvg, Link2 as LinkSvg, Share2 as ShareSvg,
-  Check as CheckSvg, X as CrossSvg, TrendingUp as TrendingSvg,
-  Sparkles as SparklesSvg, BadgeCheck as BadgeCheckSvg,
-  Info as InfoSvg, CircleAlert as AlertSvg, CircleHelp as HelpSvg,
-  type LucideIcon, type LucideProps,
-} from 'lucide-react';
+  BookOpen as BookSvg, BookOpenText as BookTextSvg, Books as BooksSvg, ListChecks as ListChecksSvg,
+  ChartBar as ChartSvg, User as UserSvg, Trophy as TrophySvg, CalendarBlank as CalendarSvg,
+  Wallet as WalletSvg, Newspaper as NewspaperSvg, Gear as GearSvg, Bell as BellSvg, Moon as MoonSvg,
+  SpeakerHigh as SpeakerSvg, MusicNotes as MusicSvg, Vibrate as VibrateSvg, Lightbulb as BulbSvg,
+  Target as TargetSvg, Flame as FlameSvg, Television as TvSvg, SpeakerX as MuteSvg,
+  PencilSimple as PencilSvg, Lock as LockSvg, ArrowRight as ArrowRightSvg, ArrowDown as ArrowDownSvg,
+  CaretRight as CaretRightSvg, CaretLeft as CaretLeftSvg, CaretDown as CaretDownSvg,
+  CaretDoubleUp as CaretDoubleUpSvg, ArrowCounterClockwise as RotateSvg, ArrowSquareOut as ExternalSvg,
+  LinkSimple as LinkSvg, ShareNetwork as ShareSvg, Check as CheckSvg, X as CrossSvg, TrendUp as TrendSvg,
+  Sparkle as SparkleSvg, SealCheck as SealCheckSvg, Info as InfoSvg, WarningCircle as AlertSvg,
+  Question as HelpSvg, Coins as CoinsSvg, Lightning as LightningSvg,
+  type Icon as PhosphorIcon, type IconProps, type IconWeight,
+} from '@phosphor-icons/react';
 
-type OtterIconProps = Omit<ImgHTMLAttributes<HTMLImageElement>, 'src' | 'width' | 'height' | 'color'> & {
-  size?: number | string; strokeWidth?: number | string; color?: string;
-  fill?: string; absoluteStrokeWidth?: boolean;
-};
+// 이전 선 아이콘 호출부가 넘기던 선 굵기 props는 받아서 버린다.
+export type LineIconProps = IconProps & { strokeWidth?: number | string; absoluteStrokeWidth?: boolean };
 
-// 역할 그림은 연한 원형 바탕과 윤곽선 없는 단순한 파스텔 사물 그림을 공유한다.
-const createIcon = (name: string, key: string) => {
-  const Icon = forwardRef<HTMLImageElement, OtterIconProps>(({
-    size = 24, className = '', style, alt = '',
-    strokeWidth, color, fill, absoluteStrokeWidth, ...props
-  }, ref) => {
-    void [strokeWidth, color, fill, absoluteStrokeWidth];
-    return <img aria-hidden="true" draggable={false} {...props} ref={ref}
-      src={`/otter/v3/icons/${key}.png`} alt={alt} data-icon={name}
-      width={size} height={size} className={`otter-icon ${className}`}
-      style={{ width: size, height: size, objectFit: 'contain', ...style }} />;
+// 일반 아이콘은 현재 글자색을 따르는 보통 굵기 선형이다. 작은 조작 표시만 굵은 선을 쓴다.
+const createIcon = (Icon: PhosphorIcon, name: string, defaultSize = 24, weight: IconWeight = 'regular') => {
+  const Line = forwardRef<SVGSVGElement, LineIconProps>(({ strokeWidth, absoluteStrokeWidth, size = defaultSize, ...props }, ref) => {
+    void [strokeWidth, absoluteStrokeWidth];
+    return <Icon weight={weight} color="currentColor" aria-hidden="true" focusable="false" size={size} data-icon={name} {...props} ref={ref} />;
   });
-  Icon.displayName = name;
-  return Icon;
+  Line.displayName = name;
+  return Line;
 };
+// 작은 조작 표시는 크기 토큰 20px에서 굵은 선으로 그린다.
+const createControl = (Icon: PhosphorIcon, name: string) => createIcon(Icon, name, 20, 'bold');
 
-// 작은 조작 표시는 색이 고정된 그림 대신 현재 글자색을 따르는 선으로 읽히게 한다.
-const createControl = (Icon: LucideIcon, name: string) => {
-  const Control = forwardRef<SVGSVGElement, LucideProps>(({ className = '', ...props }, ref) => (
-    <Icon size={18} strokeWidth={2.25} absoluteStrokeWidth aria-hidden="true" focusable="false"
-      {...props} ref={ref} data-icon={name} className={`otter-control ${className}`} />
-  ));
-  Control.displayName = name;
-  return Control;
-};
-
-export const BookOpen = createIcon('BookOpen', 'book');
-export const BookOpenText = createIcon('BookOpenText', 'book');
-export const LibraryBig = createIcon('LibraryBig', 'library');
-export const ListChecks = createIcon('ListChecks', 'checklist');
-export const BarChart3 = createIcon('BarChart3', 'chart');
-export const ChartNoAxesColumnIncreasing = createIcon('ChartNoAxesColumnIncreasing', 'chart');
-export const UserRound = createIcon('UserRound', 'profile');
-export const Trophy = createIcon('Trophy', 'trophy');
-export const CalendarDays = createIcon('CalendarDays', 'calendar');
-export const WalletCards = createIcon('WalletCards', 'wallet');
-export const Newspaper = createIcon('Newspaper', 'newspaper');
-export const Settings = createIcon('Settings', 'settings');
-export const Bell = createIcon('Bell', 'bell');
-export const Moon = createIcon('Moon', 'moon');
-export const Volume2 = createIcon('Volume2', 'speaker');
-export const Music2 = createIcon('Music2', 'music');
-export const Vibrate = createIcon('Vibrate', 'vibrate');
-export const Lightbulb = createIcon('Lightbulb', 'bulb');
-export const Target = createIcon('Target', 'target');
-export const Flame = createIcon('Flame', 'flame');
-export const Tv = createIcon('Tv', 'tv');
-export const VolumeX = createIcon('VolumeX', 'mute');
+export const BookOpen = createIcon(BookSvg, 'BookOpen');
+export const BookOpenText = createIcon(BookTextSvg, 'BookOpenText');
+export const LibraryBig = createIcon(BooksSvg, 'LibraryBig');
+export const ListChecks = createIcon(ListChecksSvg, 'ListChecks');
+export const BarChart3 = createIcon(ChartSvg, 'BarChart3');
+export const ChartNoAxesColumnIncreasing = createIcon(ChartSvg, 'ChartNoAxesColumnIncreasing');
+export const UserRound = createIcon(UserSvg, 'UserRound');
+export const Trophy = createIcon(TrophySvg, 'Trophy');
+export const CalendarDays = createIcon(CalendarSvg, 'CalendarDays');
+export const WalletCards = createIcon(WalletSvg, 'WalletCards');
+export const Newspaper = createIcon(NewspaperSvg, 'Newspaper');
+export const Settings = createIcon(GearSvg, 'Settings');
+export const Bell = createIcon(BellSvg, 'Bell');
+export const Moon = createIcon(MoonSvg, 'Moon');
+export const Volume2 = createIcon(SpeakerSvg, 'Volume2');
+export const Music2 = createIcon(MusicSvg, 'Music2');
+export const Vibrate = createIcon(VibrateSvg, 'Vibrate');
+export const Lightbulb = createIcon(BulbSvg, 'Lightbulb');
+export const Target = createIcon(TargetSvg, 'Target');
+export const Flame = createIcon(FlameSvg, 'Flame');
+export const Tv = createIcon(TvSvg, 'Tv');
+export const VolumeX = createIcon(MuteSvg, 'VolumeX');
+export const Coins = createIcon(CoinsSvg, 'Coins');
+export const Lightning = createIcon(LightningSvg, 'Lightning');
 
 export const Pencil = createControl(PencilSvg, 'Pencil');
 export const Lock = createControl(LockSvg, 'Lock');
 export const LockKeyhole = createControl(LockSvg, 'LockKeyhole');
 export const ArrowRight = createControl(ArrowRightSvg, 'ArrowRight');
 export const ArrowDown = createControl(ArrowDownSvg, 'ArrowDown');
-export const ChevronRight = createControl(ChevronRightSvg, 'ChevronRight');
-export const ChevronLeft = createControl(ChevronLeftSvg, 'ChevronLeft');
-export const ChevronDown = createControl(ChevronDownSvg, 'ChevronDown');
-export const ChevronsUp = createControl(ChevronsUpSvg, 'ChevronsUp');
-export const RotateCcw = createControl(RotateCcwSvg, 'RotateCcw');
-export const ExternalLink = createControl(ExternalLinkSvg, 'ExternalLink');
+export const ChevronRight = createControl(CaretRightSvg, 'ChevronRight');
+export const ChevronLeft = createControl(CaretLeftSvg, 'ChevronLeft');
+export const ChevronDown = createControl(CaretDownSvg, 'ChevronDown');
+export const ChevronsUp = createControl(CaretDoubleUpSvg, 'ChevronsUp');
+export const RotateCcw = createControl(RotateSvg, 'RotateCcw');
+export const ExternalLink = createControl(ExternalSvg, 'ExternalLink');
 export const Link2 = createControl(LinkSvg, 'Link2');
 export const Share2 = createControl(ShareSvg, 'Share2');
 export const Check = createControl(CheckSvg, 'Check');
 export const X = createControl(CrossSvg, 'X');
-export const TrendingUp = createControl(TrendingSvg, 'TrendingUp');
-export const Sparkles = createControl(SparklesSvg, 'Sparkles');
-export const BadgeCheck = createControl(BadgeCheckSvg, 'BadgeCheck');
+export const TrendingUp = createControl(TrendSvg, 'TrendingUp');
+export const Sparkles = createControl(SparkleSvg, 'Sparkles');
+export const BadgeCheck = createControl(SealCheckSvg, 'BadgeCheck');
 export const Info = createControl(InfoSvg, 'Info');
 export const AlertCircle = createControl(AlertSvg, 'AlertCircle');
 export const CircleHelp = createControl(HelpSvg, 'CircleHelp');

@@ -1,5 +1,5 @@
 import { memo, useEffect, useId, useRef, useState } from 'react';
-import { BarChart3, ArrowDown, X } from './ui/OtterIcons';
+import { ArrowDown, X } from './ui/OtterIcons';
 import { ArrowRight } from './ui/ControlIcons';
 import type { WordVisual } from '../types';
 import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
@@ -7,7 +7,7 @@ import { Card } from './ui/Card';
 import { ActionButton } from './ui/ActionButton';
 
 // 단어 설명용 선 그래프·비교표·한국은행 실제 통계. 차트 라이브러리 없이 SVG로 그린다.
-const COLORS = ['var(--color-brand-action)', 'var(--color-ink-3)'];
+const COLORS = ['var(--color-accent-foreground)', 'var(--color-ink-3)'];
 const W = 320;
 const H = 160;
 const PAD = { l: 34, r: 8, t: 10, b: 22 };
@@ -69,31 +69,40 @@ const LineChart = ({ x, series, unit }: { x: string[]; series: { name: string; v
 const textWeight = (value: string) =>
   Array.from(value).reduce((sum, ch) => sum + (/[a-zA-Z0-9%.,+-]/.test(ch) ? 0.65 : 1), 0);
 
-const tableColumnLayout = (columns: string[], rows: string[][]) => {
+// 열 너비는 고정 비율 대신 브라우저 자동 배치에 맡겨 글자 길이에 맞춘다. 열이 많거나 아주 긴 칸만 가로 스크롤.
+const tableMinWidth = (columns: string[], rows: string[][]) => {
   const count = columns.length;
-  const firstColumn = rows.map(row => row[0] ?? '');
-  const maxByColumn = columns.map((column, i) => Math.max(textWeight(column), ...rows.map(row => textWeight(row[i] ?? ''))));
-  const maxCell = Math.max(...maxByColumn, 0);
-  const hasLongRowLabels = firstColumn.some(cell => textWeight(cell) >= 9 || /[\s()]/.test(cell));
-  const minWidth = count >= 4 ? Math.max(520, count * 128) : maxCell >= 30 ? 430 : undefined;
-
-  if (count === 3 && hasLongRowLabels) return { widths: ['34%', '30%', '36%'], minWidth };
-  if (count === 3 && maxByColumn[2] > maxByColumn[1] + 4) return { widths: ['22%', '38%', '40%'], minWidth };
-  if (count === 3) return { widths: ['22%', '45%', '33%'], minWidth };
-  if (count === 2) return { widths: ['38%', '62%'], minWidth };
-  return { widths: null, minWidth };
+  const maxCell = Math.max(0, ...columns.map((column, i) => Math.max(textWeight(column), ...rows.map(row => textWeight(row[i] ?? '')))));
+  return count >= 4 ? Math.max(520, count * 128) : maxCell >= 30 ? 430 : undefined;
 };
 
 const Table = ({ columns, rows }: { columns: string[]; rows: string[][] }) => {
-  const { widths, minWidth } = tableColumnLayout(columns, rows);
+  // 3열 이하 비교는 390px에서 열이 비좁아 행마다 '항목 → 열 이름: 값' 목록으로 보여준다. 4열 이상 계산표만 표로 둔다.
+  if (columns.length <= 3) return (
+    <dl className="word-visual-rows text-xs">
+      {rows.map((r, ri) => (
+        <div key={ri} className="border-b border-[var(--color-surface)] py-3 last:border-0">
+          <dt className="font-bold text-[var(--color-ink)] break-keep leading-normal">{r[0]}</dt>
+          {r.slice(1).map((cell, ci) => (
+            <dd key={ci} className="mt-1 flex gap-2 leading-normal break-keep">
+              <span className="shrink-0 text-[var(--color-ink-3)]">{columns[ci + 1]}</span>
+              <span className="text-[var(--color-ink-2)]">{cell}</span>
+            </dd>
+          ))}
+        </div>
+      ))}
+    </dl>
+  );
+  const minWidth = tableMinWidth(columns, rows);
+  // 짧은 항목명은 한 줄로 두어 뜻 칸에 자리를 넘긴다.
+  const keepLabelsOnOneLine = rows.every(row => textWeight(row[0] ?? '') <= 8);
   return (
     <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden">
-      <table className={`w-full text-xs border-collapse ${widths ? 'table-fixed' : ''}`} style={minWidth ? { minWidth } : undefined}>
-        {widths && <colgroup>{widths.map((width, i) => <col key={i} style={{ width }} />)}</colgroup>}
+      <table className="w-full text-xs border-collapse" style={minWidth ? { minWidth } : undefined}>
         <thead>
           <tr>
             {columns.map((c, i) => (
-              <th key={i} className={`py-2 px-2 text-left font-bold break-keep ${i === 0 ? 'text-[var(--color-ink-4)]' : 'text-brand-500'} bg-[var(--color-surface)] first:rounded-l-md last:rounded-r-md`}>{c}</th>
+              <th key={i} className={`py-2 px-2 text-left font-bold break-keep ${i === 0 ? 'text-[var(--color-ink-3)]' : 'text-[var(--color-ink-2)]'} bg-[var(--color-surface)] first:rounded-l-[var(--shape-inset)] last:rounded-r-[var(--shape-inset)]`}>{c}</th>
             ))}
           </tr>
         </thead>
@@ -101,7 +110,7 @@ const Table = ({ columns, rows }: { columns: string[]; rows: string[][] }) => {
           {rows.map((r, ri) => (
             <tr key={ri} className="border-b border-[var(--color-surface)] last:border-0">
               {r.map((cell, ci) => (
-                <td key={ci} className={`py-2.5 px-2 align-top break-keep leading-[1.5] ${ci === 0 ? 'font-bold text-[var(--color-ink-2)]' : 'text-[var(--color-ink-2)]'}`}>{cell}</td>
+                <td key={ci} className={`py-2 px-2 align-top break-keep leading-normal ${ci === 0 ? `font-bold text-[var(--color-ink-2)]${keepLabelsOnOneLine ? ' whitespace-nowrap' : ''}` : 'text-[var(--color-ink-2)]'}`}>{cell}</td>
               ))}
             </tr>
           ))}
@@ -136,8 +145,8 @@ const Flow = ({ steps, caption }: { steps: string[]; caption?: string }) => {
         const right = mine == null || s.includes(mine);
         return (
           <div key={i} className="w-full flex flex-col items-center gap-1 anim-fade-up">
-            {i > 0 && <ArrowDown size={14} className="text-brand-500" />}
-            <p className={`w-full py-2.5 px-3 rounded-chip text-center text-[13px] font-semibold break-keep ${mine == null ? 'bg-[var(--color-surface)] text-[var(--color-ink-2)]' : right ? 'bg-success-500/10 text-success-500' : 'bg-danger-500/10 text-danger-500'}`}>
+            {i > 0 && <ArrowDown size={16} className="text-[var(--color-ink-3)]" />}
+            <p className={`w-full py-2 px-3 rounded-chip text-center text-xs font-semibold break-keep ${mine == null ? 'bg-[var(--color-surface)] text-[var(--color-ink-2)]' : right ? 'border border-[var(--color-success-foreground)] text-[var(--color-success-foreground)]' : 'border border-[var(--color-danger-line)] text-[var(--color-danger-foreground)]'}`}>
               {s}{mine != null && (right ? ' · 정답' : ` · 내 답 ${mine}`)}
             </p>
           </div>
@@ -146,26 +155,26 @@ const Flow = ({ steps, caption }: { steps: string[]; caption?: string }) => {
 
       {!done && (
         <div className="w-full flex flex-col items-center gap-1">
-          <ArrowDown size={14} className="text-brand-500" />
+          <ArrowDown size={16} className="text-[var(--color-ink-3)]" />
           {quiz ? (
             <>
-              <p className="w-full py-2.5 px-3 rounded-chip border border-dashed border-brand-500/50 text-center text-[13px] font-semibold text-[var(--color-ink-2)] break-keep">
+              <p className="w-full py-2 px-3 rounded-chip border border-dashed border-[var(--color-line-strong)] text-center text-xs font-semibold text-[var(--color-ink-2)] break-keep">
                 {next.replace(ARROW, '?')}
               </p>
               <div className="w-full grid grid-cols-2 gap-2 mt-1">
-                <button type="button" onClick={() => pick('↑')} className="py-2.5 rounded-button bg-brand-500/10 text-sm font-bold text-brand-500 active:opacity-70">↑ 오른다</button>
-                <button type="button" onClick={() => pick('↓')} className="py-2.5 rounded-button bg-brand-500/10 text-sm font-bold text-brand-500 active:opacity-70">↓ 내린다</button>
+                <button type="button" onClick={() => pick('↑')} className="action-secondary py-2 rounded-button text-sm font-semibold">오른다</button>
+                <button type="button" onClick={() => pick('↓')} className="action-secondary py-2 rounded-button text-sm font-semibold">내린다</button>
               </div>
             </>
           ) : (
-            <button type="button" onClick={() => setShown(n => n + 1)} className="w-full py-2.5 rounded-chip border border-dashed border-brand-500/50 text-[13px] font-bold text-brand-500 active:opacity-70">
+            <button type="button" onClick={() => setShown(n => n + 1)} className="w-full py-2 rounded-chip border border-dashed border-[var(--color-line-strong)] text-xs font-semibold text-[var(--color-ink-2)] active:opacity-70">
               다음은 무엇일까요? 눌러서 보기
             </button>
           )}
         </div>
       )}
 
-      {done && caption && <p className="w-full mt-2 text-xs text-[var(--color-ink-3)] break-keep leading-[1.6] whitespace-pre-line anim-fade-up">{caption}</p>}
+      {done && caption && <p className="w-full mt-2 text-xs text-[var(--color-ink-3)] break-keep leading-relaxed whitespace-pre-line anim-fade-up">{caption}</p>}
     </div>
   );
 };
@@ -232,13 +241,13 @@ const EcosCard = ({ v }: { v: Extract<WordVisual, { type: 'ecos' }> }) => {
   const [failed, setFailed] = useState(false);
   if (failed || ecosDown) return null;
   return (
-    <Card pad="none" className="px-5 pt-4 pb-5 flex flex-col gap-3">
+    <Card pad="none" className="pt-4 pb-5 flex flex-col gap-3">
       <div className="flex flex-col gap-1">
-        <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><BarChart3 size={13} />실제 통계</p>
-        <p className="text-sm font-bold text-[var(--color-ink)] break-keep">{v.title}</p>
+        <p className="text-2xs text-[var(--color-ink-3)]">실제 통계</p>
+        <h3 className="text-base font-bold text-[var(--color-ink)] break-keep">{v.title}</h3>
       </div>
       <EcosChart v={v} onFail={down => { if (down) ecosDown = true; setFailed(true); }} />
-      {v.caption && <p className="text-xs text-[var(--color-ink-3)] break-keep leading-[1.6] whitespace-pre-line">{v.caption}</p>}
+      {v.caption && <p className="text-xs text-[var(--color-ink-3)] break-keep leading-relaxed whitespace-pre-line">{v.caption}</p>}
     </Card>
   );
 };
@@ -300,7 +309,7 @@ const LinkedText = ({ text, terms }: { text: string; terms?: Terms }) => {
           }}
             aria-expanded={open === name}
             aria-controls={open === name ? panelId : undefined}
-            className="word-term-button inline px-1! py-0.5! rounded-md font-medium">
+            className="word-term-button inline font-normal">
             {part}
           </button>
         );
@@ -315,7 +324,7 @@ const LinkedText = ({ text, terms }: { text: string; terms?: Terms }) => {
             <button type="button" className="word-term-close" aria-label="뜻 설명 닫기" onClick={() => {
               setOpen(null);
               triggerRef.current?.focus({ preventScroll: true });
-            }}><X size={18} strokeWidth={1.75} aria-hidden="true" /></button>
+            }}><X size={20} strokeWidth={1.75} aria-hidden="true" /></button>
           </span>
           <span className="word-term-panel-meaning">{terms.meaningOf(open) || '뜻 설명을 준비 중이에요.'}</span>
           {terms.exampleOf?.(open) && (
@@ -334,22 +343,23 @@ const LinkedText = ({ text, terms }: { text: string; terms?: Terms }) => {
 };
 
 const VisualCard = ({ v, className = '', terms }: { v: Exclude<WordVisual, { type: 'ecos' | 'quiz' }>; className?: string; terms?: Terms }) => (
-  <Card pad="none" className={`px-5 pt-4 pb-5 flex flex-col gap-3 ${className}`}>
+  <Card pad="none" className={`pt-4 pb-5 flex flex-col gap-3 ${className}`}>
     {v.type === 'text' ? (
       <>
-        <p className="text-sm font-bold text-[var(--color-ink)] break-keep">{v.title}</p>
-        <p className="text-sm text-[var(--color-ink-2)] break-keep leading-[1.7] whitespace-pre-line"><LinkedText text={v.body} terms={terms} /></p>
+        {v.title && <h3 className="text-base font-bold text-[var(--color-ink)] break-keep">{v.title}</h3>}
+        <p className="text-sm text-[var(--color-ink-2)] break-keep leading-relaxed whitespace-pre-line"><LinkedText text={v.body} terms={terms} /></p>
       </>
     ) : <>
     <div className="flex flex-col gap-1">
-      <p className="flex items-center gap-1.5 text-xs font-bold text-[var(--color-ink-4)] tracking-[0.02em]"><BarChart3 size={13} />{v.type === 'table' ? '한눈에 비교' : v.type === 'flow' ? '맞혀 보기' : '그래프로 보기'}</p>
-      <p className="text-sm font-bold text-[var(--color-ink)] break-keep">{v.title}</p>
+      {/* 표는 제목만으로 충분해 '한눈에 비교' 라벨을 두지 않는다 */}
+      {v.type !== 'table' && <p className="text-2xs text-[var(--color-ink-3)]">{v.type === 'flow' ? '맞혀 보기' : '그래프로 보기'}</p>}
+      <h3 className="text-base font-bold text-[var(--color-ink)] break-keep">{v.title}</h3>
     </div>
     {v.type === 'line' && <LineChart x={v.x} series={v.series} unit={v.unit} />}
     {v.type === 'table' && <Table columns={v.columns} rows={v.rows} />}
     {v.type === 'flow' && <Flow steps={v.steps} caption={v.caption} />}
     </>}
-    {v.caption && v.type !== 'flow' && <p className="text-xs text-[var(--color-ink-3)] break-keep leading-[1.6] whitespace-pre-line">{v.caption}</p>}
+    {v.caption && v.type !== 'flow' && <p className="text-xs text-[var(--color-ink-3)] break-keep leading-relaxed whitespace-pre-line">{v.caption}</p>}
   </Card>
 );
 
@@ -364,9 +374,9 @@ const FlowCarousel = ({ flows }: { flows: Extract<WordVisual, { type: 'flow' }>[
       >
         {flows.map((v, i) => <VisualCard key={i} v={v} className="w-[88%] shrink-0 snap-start" />)}
       </div>
-      <div className="flex justify-center gap-1.5">
+      <div className="flex justify-center gap-1">
         {flows.map((_, i) => (
-          <span key={i} style={{ borderRadius: 9999 }} className={`h-1.5 transition-all ${i === page ? 'w-4 bg-brand-500' : 'w-1.5 bg-[var(--color-line)]'}`} />
+          <span key={i} style={{ borderRadius: 9999 }} className={`h-1.5 transition-all ${i === page ? 'w-4 bg-[var(--color-ink)]' : 'w-1.5 bg-[var(--color-line)]'}`} />
         ))}
       </div>
     </div>

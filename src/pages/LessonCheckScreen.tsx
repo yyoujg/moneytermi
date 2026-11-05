@@ -5,10 +5,11 @@ import { buildCustomQuizItem, lessonChecks } from '../lib/quiz';
 import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
 import { logClick } from '../lib/analytics';
 import { Card } from '../components/ui/Card';
-import { Mascot } from '../components/Mascot';
+import { ActionButton } from '../components/ui/ActionButton';
 import { LessonCheckFeedback } from '../components/learning/LessonCheckFeedback';
 import { LessonCheckSummary, type LessonCheckRoundResult } from '../components/learning/LessonCheckSummary';
 import { keepShortUnitsTogether } from '../lib/formatText';
+import { shuffle } from '../lib/random';
 
 const LessonCheckScreen = () => {
   const navigate = useNavigate();
@@ -34,12 +35,11 @@ const LessonCheckScreen = () => {
     const hasLesson = Boolean(state?.words?.length);
     return (
       <div className="lesson-check-screen app-soft-screen flex h-full flex-col items-center justify-center gap-4 px-5 text-center">
-        <Mascot name="empty" size={110} />
         <h1 className="mt-1 text-xl font-bold text-[var(--color-ink)]">{hasLesson ? '이번 레슨에는 이해 확인 문제가 없어요' : '자주 마주치는 용어부터 시작해요'}</h1>
-        <p className="text-[15px] text-[var(--color-ink-2)] break-keep">{hasLesson ? '다음 학습을 선택할 수 있어요.' : '용어를 하나 익히면 이해 확인 문제를 풀 수 있어요.'}</p>
-        <button onClick={() => navigate(backPath, { replace: true })} className="mt-3 w-full min-h-[52px] rounded-button bg-brand-500 text-base font-bold text-white">
+        <p className="text-sm text-[var(--color-ink-2)] break-keep">{hasLesson ? '다음 학습을 선택할 수 있어요.' : '용어를 하나 익히면 이해 확인 문제를 풀 수 있어요.'}</p>
+        <ActionButton fullWidth onClick={() => navigate(backPath, { replace: true })} className="mt-3">
           {hasLesson ? '다음 학습 선택하기' : '학습 시작하기'}
-        </button>
+        </ActionButton>
       </div>
     );
   }
@@ -49,8 +49,8 @@ const LessonCheckScreen = () => {
       <LessonCheckSummary
         results={roundResults}
         reviewCount={mistakes.length}
-        onRetry={() => { setQuestions(mistakes); setMistakes([]); setIndex(0); setSelected(null); setAttempt(value => value + 1); }}
-        onBack={() => navigate(backPath)}
+        onRetry={() => { setQuestions(mistakes.map(item => ({ ...item, options: shuffle(item.options) }))); setMistakes([]); setIndex(0); setSelected(null); setAttempt(value => value + 1); }}
+        onBack={() => navigate(backPath, { replace: true, state: { openFocus: true } })}
       />
     );
   }
@@ -75,21 +75,24 @@ const LessonCheckScreen = () => {
     <div className="lesson-check-screen app-soft-screen flex h-full flex-col">
       <div className="app-soft-header px-5 pb-4 pt-4">
         <div className="flex items-center gap-3">
-          <div role="progressbar" aria-label="이해 확인 진행률" aria-valuemin={0} aria-valuemax={questions.length} aria-valuenow={index + 1} className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--color-button-secondary)]">
-            <div className="h-full rounded-full bg-brand-500" style={{ width: ((index + 1) / questions.length * 100) + '%' }} />
+          <div role="progressbar" aria-label="이해 확인 진행률" aria-valuemin={0} aria-valuemax={questions.length} aria-valuenow={index} className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--color-button-secondary)]">
+            <div className="h-full rounded-full bg-[var(--color-progress)]" style={{ width: (index / questions.length * 100) + '%' }} />
           </div>
-          <p className="text-xs font-semibold tabular-nums text-[var(--color-ink-3)]">{index + 1}/{questions.length}</p>
+          <p className="text-xs tabular-nums text-[var(--color-ink-3)]">{index + 1}/{questions.length}</p>
         </div>
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto px-5 py-5 [&::-webkit-scrollbar]:hidden">
-        <h1 className="mb-4! text-sm font-bold text-[var(--color-ink-2)]">{attempt === 1 ? '이해 확인 · 첫 풀이' : `틀린 문제 재도전 ${attempt - 1}차`}</h1>
-        <Card pad="lg" className="mb-5 bg-[var(--color-surface)]" style={{ border: 0 }}>
-          <p className="mb-2! text-xs font-bold text-[var(--color-ink-3)]">상황을 읽고 골라보세요</p>
-          <h2 className="quiz-prompt-main text-lg font-bold text-[var(--color-ink)] leading-relaxed break-keep">
-            {keepShortUnitsTogether(question.promptMain)}
-          </h2>
-        </Card>
-        <div className="flex flex-col gap-2">
+        <h1 className="mb-4! text-xs text-[var(--color-ink-3)]">{attempt === 1 ? '상황을 읽고 골라보세요' : '틀린 문제 다시 풀기'}</h1>
+        {/* 문제는 카드 밖 왼쪽 아래 수달이 말하는 말풍선 */}
+        <div className="mb-8 flex items-start gap-2">
+          <img src="/otter/v5/otter-explain.svg" alt="" aria-hidden="true" height={112} className="quiz-question-otter h-[112px] w-auto shrink-0 self-end" data-otter="explain" />
+          <Card pad="sm" className="quiz-bubble min-w-0 flex-1">
+            <h2 className="quiz-prompt-main text-lg font-bold text-[var(--color-ink)] leading-relaxed break-keep">
+              {keepShortUnitsTogether(question.promptMain)}
+            </h2>
+          </Card>
+        </div>
+        <div className="flex flex-col gap-3">
           {question.options.map((option, optionIndex) => (
             <button
               key={optionIndex}
@@ -102,9 +105,12 @@ const LessonCheckScreen = () => {
                 if (option.isCorrect) feedbackCorrect();
                 else { feedbackWrong(); setMistakes(prev => [...prev, question]); }
               }}
-              className="w-full flex items-center gap-3 rounded-card border border-[var(--color-line)] bg-[var(--color-card)] px-4 py-4 text-left text-sm font-semibold text-[var(--color-ink)] break-keep active:opacity-80"
+              className="quiz-option w-full flex items-center gap-3 min-h-[64px] border border-transparent bg-[var(--color-surface)] active:opacity-80 px-4 py-4 text-left text-base font-semibold leading-relaxed text-[var(--color-brand-text)] break-keep"
+              style={{ borderRadius: 'var(--shape-button)' }}
             >
-              <span aria-hidden="true" className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--color-surface)] text-xs text-[var(--color-ink-3)]">{optionIndex + 1}</span>
+              {optionIndex < 4
+                ? <img src={`/icons/num/num-${optionIndex + 1}.svg`} alt="" aria-hidden="true" width={28} height={28} className="shrink-0" data-num-icon />
+                : <span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[var(--color-line-strong)] bg-[var(--color-card)] text-xs font-semibold text-[var(--color-ink-3)]">{optionIndex + 1}</span>}
               <span data-lesson-check-label className="min-w-0 flex-1">{keepShortUnitsTogether(option.label)}</span>
             </button>
           ))}

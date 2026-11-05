@@ -7,6 +7,7 @@ import { Storage } from '../../lib/storage';
 import { logClick } from '../../lib/analytics';
 import { feedbackBadge } from '../../lib/feedback';
 import { BadgeGlyph } from './BadgeGlyph';
+import { useModalTurn } from '../../lib/modalTurn';
 
 // 새로 획득한 배지 축하. 배지는 서버 기록 없이 통계에서 파생되므로, "이미 보여준 배지" 목록을 기기에 남겨 차이만 축하한다.
 // 여러 개를 한 번에 얻었으면 한 화면에 같이 보여준다. 유실돼도 축하가 한 번 더 뜰 뿐이다.
@@ -24,10 +25,13 @@ export const BadgeCelebration = () => {
     // 로딩 중 일부 통계만 채워진 상태로 판정하면 나머지 배지가 새로 딴 것처럼 뜬다
     if (!hydrated || !earnedIds) return;
     Storage.getItem(KEY).catch(() => null).then(raw => {
-      const seen = new Set<string>(raw ? JSON.parse(raw) : []);
+      // 저장값이 깨져 있으면 빈 기록으로 보고 덮어쓴다(안 그러면 이 기기에선 축하가 영영 안 뜬다)
+      let seen = new Set<string>();
+      try { seen = new Set<string>(raw ? JSON.parse(raw) : []); } catch { /* 깨진 값 */ }
       const earned = badges.filter(b => b.earned);
       const news = earned.filter(b => !seen.has(b.id));
-      Storage.setItem(KEY, JSON.stringify(earned.map(b => b.id))).catch(() => {});
+      // 덮어쓰면 단어 목록이 늦게 채워질 때 단어 배지가 기록에서 빠져 앱을 열 때마다 다시 뜬다
+      Storage.setItem(KEY, JSON.stringify([...new Set([...seen, ...earned.map(b => b.id)])])).catch(() => {});
       if (news.length === 0) return;
       setFresh(news);
       feedbackBadge();
@@ -36,10 +40,11 @@ export const BadgeCelebration = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated, earnedIds]);
 
-  if (!fresh) return null;
+  const myTurn = useModalTurn(!!fresh);
+  if (!fresh || !myTurn) return null;
 
   return (
-    <div className="original-modal app-soft-screen fixed inset-0 z-[60] flex flex-col items-center justify-center gap-6 px-6 overflow-hidden">
+    <div className="original-modal bg-[var(--color-canvas)] fixed inset-0 z-[60] flex flex-col items-center justify-center gap-6 px-6 overflow-hidden">
       {CONFETTI.map((c, i) => (
         <span
           key={i}
@@ -49,7 +54,7 @@ export const BadgeCelebration = () => {
         />
       ))}
 
-      <p className="flex items-center gap-2 text-2xl font-black text-[var(--color-ink)] anim-pop-in"><img src="/otter/v3/celebrations/badge-earned.png" width={24} height={24} alt="" aria-hidden="true" className="shrink-0" />새 배지 획득!</p>
+      <h2 className="text-xl font-bold text-[var(--color-ink)] anim-pop-in">새 배지 획득!</h2>
 
       <div className={`flex flex-wrap justify-center gap-5 ${fresh.length === 1 ? '' : 'max-w-xs'}`}>
         {fresh.map((b, i) => (
@@ -66,7 +71,7 @@ export const BadgeCelebration = () => {
 
       <button
         onClick={() => { logClick('badge_earned_close', { count: fresh.length }); setFresh(null); }}
-        className="w-full max-w-xs py-4 rounded-button text-sm font-bold text-white bg-brand-500 active:opacity-90 anim-fade-up"
+        className="action-button w-full max-w-xs anim-fade-up"
         style={{ '--i': 5 } as React.CSSProperties}
       >
         확인

@@ -2,69 +2,224 @@
 :root {
   color-scheme: light;
 
-  /* 연회색 바탕과 흰 카드 위에 중성 본문을 사용한다. */
-  --color-canvas: #f4f4f6;
-  --color-card: #ffffff;
-  --color-surface: #f3f3f5;
-  --color-ink: #202124;
-  --color-ink-2: #45484f;
-  --color-ink-3: #60646c;
-  --color-ink-4: #686a70;
-  --color-line: #e7e8ed;
-  --color-line-strong: #858893;
+  /* 1단계 원시값: 실제 색·크기는 여기에만 둔다. 화면과 의미 역할은 이 값을 참조만 한다. */
+  /* 브랜드 원색과 보조 팔레트. 화면에서는 아래 의미 역할을 참조한다. */
+  --orange-200: #ff8a61;
+  --orange-300: #ff9e52;
+  --orange-400: #ff9134;
+  --orange-450: #ff7910;
+  --orange-500: #f97414;
+  --orange-600: #ea580c;
+  --orange-700: #b84200;
+  /* 메인 갈색(수달 캐릭터 색): 주버튼 배경 전용. 흰 바탕 대비가 낮아 글자·아이콘·진행막대·1px 테두리에는 쓰지 않는다. */
+  --brown-25: #fcf8f1;
+  --brown-50: #f8efde;
+  --brown-500: #a39382;
+  --brown-600: #8c7c6d;
+  --brown-900: #5e5248;
+  --brown-950: #4a4039;
+  /* 징검다리 노드 그림(public/path)의 갈색 */
+  --otter-brown: #8c7c6d;
+  --neutral-100: #f4f1ec;
+  --neutral-900: #1f1a17;
+  --amber-50: #fff1e6;
+  --amber-100: #ffd9bd;
+  --amber-200: #f5d6ae;
+  --amber-300: #ffc078;
+  --amber-500: #d96100;
+  --amber-900: #352b23;
 
-  /* 주행동은 차콜, 선택과 작은 장식은 민트 계열로 분리한다. */
-  --color-brand-action: #3d3e44;
-  --color-brand-pressed: #38393f;
-  --color-brand-accent: #8ecaa9;
-  --color-brand-decoration: #287a58;
-  --color-brand-text: var(--color-ink-2);
-  --color-brand-soft: #e5f4eb;
-  --color-brand-line: #c5e4d1;
-  --color-brand-line-strong: #4f9679;
-  --color-brand-on-light-surface: var(--color-ink-2);
-  --color-on-brand: #ffffff;
+  /* 중성 회색은 수달 캐릭터에 맞춘 따뜻한 회갈색(2026-11-05, 예전 TDS 청회색과 같은 밝기 단계) */
+  --gray-0: #ffffff;
+  --gray-50: #faf8f5;
+  --gray-75: #f4f1ec;
+  --gray-100: #e9e3da;
+  --gray-150: #e9e3da;
+  --gray-200: #d8d0c5;
+  --gray-300: #bcb2a6;
+  --gray-400: #988c80;
+  --gray-450: #7a6e63;
+  --gray-500: #7a6e63;
+  --gray-600: #5a5048;
+  --gray-650: #5a5048;
+  --gray-700: #5a5048;
+  --gray-720: #3d3530;
+  --gray-750: #3d3530;
+  --gray-800: #3d3530;
+  --gray-830: #1f1a17;
+  --gray-850: #1f1a17;
+  --gray-900: #1f1a17;
+
+  /* 메인 보라와 글자용 진한 보라를 구분한다. */
+  --accent-brand: var(--brown-500);
+  --accent-brand-ink: var(--brown-900);
+
+  /* 상태색 2개: 정답·완료와 오답·오류 전달에만 쓴다. */
+  --accent-green: #3fa67e;
+  --accent-green-ink: #2a7155;
+  --accent-green-soft: #e8f3ee;
+  --accent-rose: #f0625c;
+  --accent-rose-ink: #b23a33;
+  --accent-rose-soft: #fdeceb;
+
+  /* 리그 순위 장식 전용 팔레트. 일반 화면의 강조색으로 사용하지 않는다. */
+  --gray-40: #f4f5f7;
+  --gold-100: #f1e7c9;
+  --gold-800: #4a4434;
+  --silver-100: #e9ecf1;
+  --silver-800: #3c4048;
+  --bronze-100: #f0e0d3;
+  --bronze-800: #4b3e36;
+
+  /* 글자 크기 8단계. 화면은 아래 역할 이름만 쓴다. */
+  --font-family-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif, Tossface, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';
+  /* 페이지 제목·결과·축하 제목에만 쓰는 둥근 글꼴(수달 그림의 둥근 윤곽선과 맞춤). 못 받으면 본문 글꼴 */
+  --font-family-display: 'NanumSquareRound', var(--font-family-sans);
+  --font-size-caption: 12px;
+  --font-size-label: 13px;
+  --font-size-body: 15px;
+  --font-size-headline: 17px;
+  --font-size-title-3: 20px;
+  --font-size-title-2: 24px;
+  --font-size-title-1: 28px;
+  --font-size-display: 34px;
+  /* 화면의 글자 역할. 크기 단계와 별개로 제목의 용도를 고정한다. */
+  --font-size-page-title: var(--font-size-title-2);
+  --font-size-section-title: var(--font-size-headline);
+  --font-size-item-title: var(--font-size-body);
+  --font-size-content-title: var(--font-size-title-1);
+  --font-size-result-title: var(--font-size-title-2);
+  --font-size-stat: var(--font-size-title-2);
+  --font-weight-regular: 400;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --line-height-tight: 1.25;
+  --line-height-title: 1.4;
+  --line-height-body: 1.5;
+  --line-height-relaxed: 1.6;
+  /* 자간 2단계: 제목(20~28px)과 큰 숫자(34px). 본문은 0. */
+  --letter-spacing-title: -0.025em;
+  --letter-spacing-display: -0.03em;
+
+  /* 간격은 4px 격자. 2px는 아이콘·글자 사이 미세 조정에만 쓴다. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* 곡률 4단계와 완전한 원. */
+  --shape-sm: 4px;
+  --shape-md: 6px;
+  --shape-lg: 8px;
+  --shape-xl: 12px;
+  --shape-full: 9999px;
+
+  /* 2단계 의미 역할: 연회색 바탕과 흰 카드 위에 중성 본문을 사용한다. 글자는 ink > ink-2 > ink-3 세 단계다. */
+  /* 토스·국내 금융 앱처럼 옅은 회색 바탕 위에 흰 섹션을 12px 간격으로 쌓는다. */
+  --color-canvas: var(--gray-75);
+  --section-gap: 12px;
+  --color-card: var(--gray-0);
+  --color-surface: var(--gray-75);
+  --color-ink: var(--gray-900);
+  --color-ink-2: var(--gray-720);
+  --color-ink-3: var(--gray-600);
+  --color-ink-4: var(--color-ink-3);
+  --color-line: var(--gray-150);
+  --color-line-strong: var(--gray-450);
+
+  /* 보라가 구조색이다: 강조 글자·선택 면·선은 보라 계열, 중성색도 옅은 보라 기운을 띤다. */
+  --color-accent-foreground: var(--accent-brand-ink);
+  --color-accent-soft: var(--brown-50);
+  /* 퀴즈·이해 확인 보기 면: 테두리 없이 아주 연한 갈색 */
+  --color-choice: var(--brown-25);
+  /* 문제 말풍선 테두리: 보기 면(--color-surface)과 같은 계열의 따뜻한 회색 */
+  --color-bubble-line: var(--gray-200);
+  --color-accent-line: var(--brown-900);
+  --color-node-ring: var(--otter-brown);
+  --color-accent-line-strong: var(--brown-900);
+  --card-border: 1px solid var(--color-line);
+  /* 탭바: 활성은 보라 채움 아이콘, 비활성은 아이콘·메뉴명 모두 연한 회색이다. */
+  --color-icon-inactive: var(--gray-500); /* 흰 바탕 대비 4.8:1(글자 AA) */
+  --color-tab-inactive: var(--gray-200); /* 고르지 않은 글자 탭(17px 굵게): 사용자 요청으로 아주 연하게. 흰 바탕 대비 약 1.5:1이라 큰 글자 기준 3:1에는 못 미침 */
+
+  /* 주버튼은 진한 갈색 바탕에 흰 글자(흰 글자 대비 7.6:1) */
+  --color-brand-action: var(--brown-900);
+  --color-brand-pressed: var(--brown-950);
+  --color-brand-accent: var(--accent-brand);
+  --color-brand-decoration: var(--color-accent-foreground);
+  --color-brand-text: var(--color-accent-foreground);
+  --color-brand-soft: var(--color-accent-soft);
+  --color-brand-line: var(--color-accent-line);
+  --color-brand-line-strong: var(--color-accent-line-strong);
+  --color-brand-on-light-surface: var(--color-accent-foreground);
+  --color-on-brand: var(--gray-0);
 
   /* 행동: 주요/보조/비활성을 구분하되 모든 채운 버튼의 글자는 흰색. */
-  --color-action-secondary: #60646c;
-  --color-action-secondary-pressed: #565a62;
-  --color-action-soft: #f3f3f5;
-  --color-action-soft-pressed: #e9e9ee;
+  --color-action-secondary: var(--gray-600);
+  --color-action-secondary-pressed: var(--gray-750);
+  --color-action-soft: var(--gray-100);
+  --color-action-soft-pressed: var(--gray-200);
   --color-on-action-soft: var(--color-ink-2);
   --color-button-secondary: var(--color-surface);
-  --color-button-disabled: #70747c;
-  --color-on-action: #ffffff;
+  --color-button-disabled: var(--gray-500);
+  --color-on-action: var(--gray-0);
   --color-action-boundary: var(--color-line-strong);
 
-
   /* 진행은 비문자 대비 3:1, 보상 글자는 4.5:1 이상으로 구분한다. */
-  --color-progress: #c27915;
-  --color-reward-foreground: #a45a00;
-  --color-selection-soft: var(--color-brand-soft);
-  --color-selection-ink: #1d684b;
-  --color-character-stage: #f8f0df;
-  --color-filter-tray: #e9eaee;
+  /* 갈색은 주버튼 배경에만. 링크·현재 탭·선택 테두리는 진한 갈색, 진행 막대는 캐릭터 갈색 */
+  --color-progress: var(--otter-brown);
+  /* 스트릭·완료 체크·강조 숫자 */
+  --color-neutral-strong: var(--neutral-900);
+  --color-neutral-soft: var(--neutral-100);
+  --color-badge-earned: var(--color-neutral-strong);
+  --color-badge-earned-soft: var(--color-accent-soft);
+  /* 리그 등급 그림 배경(1 텅장러 ~ 10 회장님). 단계가 오를수록 회색 → 따뜻한 금색으로 */
+  --league-bg-1: #f6efe6;
+  --league-bg-2: #eef3fb;
+  --league-bg-3: #eaf6f1;
+  --league-bg-4: #fdf0f2;
+  --league-bg-5: #f2effb;
+  --league-bg-6: #e9f3f5;
+  --league-bg-7: #f8efde;
+  --league-bg-8: #fff6e5;
+  --league-bg-9: #ffefdd;
+  --league-bg-10: #fff1c7;
+  --color-on-progress: var(--gray-0);
+  --color-reward-foreground: var(--color-accent-foreground);
+  --color-selection-soft: var(--color-accent-soft);
+  --color-selection-ink: var(--color-accent-foreground);
+  --color-character-stage: var(--color-surface);
+  --color-filter-tray: var(--gray-100);
 
   /* 의미색: 정답·완료·오류 등 상태 전달에만 사용한다. */
-  --color-success-foreground: #18794e;
-  --color-success-action: #18794e;
-  --color-success-soft: #eaf5ee;
-  --color-success-mark: #ffffff;
-  --color-danger-foreground: #cc3340;
-  --color-danger-action: #cc3340;
-  --color-danger-line: #eb929a;
-  --color-danger-soft: #ffedef;
-  --color-warning-foreground: #8a5a00;
+  /* 정답은 초록·빨강 대신 중립색 + ✓/✕ 문구로 구분한다(국내 시세의 빨강=상승과 겹치지 않게). 빨강은 오류에만 */
+  --color-success-foreground: var(--color-ink);
+  --color-success-action: var(--color-ink);
+  --color-success-soft: var(--color-surface);
+  --color-success-mark: var(--gray-0);
+  --color-danger-foreground: var(--accent-rose-ink);
+  --color-danger-action: var(--accent-rose-ink);
+  --color-danger-line: var(--accent-rose);
+  --color-danger-soft: var(--accent-rose-soft);
+  --color-warning-foreground: var(--orange-700);
   --color-info: var(--color-ink-2);
   --color-info-soft: var(--color-surface);
   --color-info-line: var(--color-line);
 
   /* 실제 경험치·재화는 중성 역할을 보존하고 일반 진행·보상 장식과 분리한다. */
   --color-stat-ink: var(--color-ink);
-  --color-stat-streak: var(--color-brand-decoration);
+  /* 아이콘은 색 없이 본문색을 쓴다. */
+  --color-stat-streak: var(--color-ink-2);
   --color-stat-xp: var(--color-ink-2);
   --color-stat-points: var(--color-ink-2);
   --color-stat-words: var(--color-ink-2);
+  --color-stat-energy: var(--color-ink-2);
   --color-xp: var(--color-ink-2);
   --color-xp-soft: var(--color-surface);
   --color-points: var(--color-ink-2);
@@ -75,29 +230,34 @@
   --color-wash-top: var(--color-canvas);
   --color-wash-soft: var(--color-card);
   --color-wash-mid: var(--color-surface);
-  --color-hero-start: var(--color-card);
-  --color-hero-end: var(--color-card);
-  --color-hero-deep: var(--color-brand-decoration);
-  --color-hero-ink: var(--color-ink);
-  --color-hero-chip: var(--color-surface);
-  --color-hero-chip-line: var(--color-brand-decoration);
+  --color-hero-start: var(--brown-500);
+  --color-hero-end: var(--brown-600);
+  --color-hero-deep: var(--color-ink-2);
+  --color-hero-ink: var(--gray-0);
+  --color-hero-chip: var(--brown-50);
+  --hero-empty: rgba(255, 255, 255, 0.15);
+  --color-hero-chip-line: var(--color-line-strong);
   --color-hero-complete: var(--color-brand-action);
   --color-hero-complete-ink: var(--color-on-brand);
-  --color-tooltip: #3d3e44;
-  --color-tooltip-ink: #ffffff;
+  --color-tooltip: var(--gray-750);
+  --color-tooltip-ink: var(--gray-0);
   --color-overlay: rgba(20, 23, 29, 0.5);
-  --color-league-symbol-ink: #45484f;
+  --color-league-symbol-ink: var(--gray-720);
   --color-league-hero: var(--color-card);
-  --color-league-first: var(--color-brand-soft);
+  --color-league-first: var(--color-surface);
   --color-league-second: var(--color-surface);
   --color-league-third: var(--color-surface);
 
-  --shape-card: 24px;
-  --shape-button: 18px;
-  --shape-chip: 14px;
-  --shape-inset: 16px;
+  /* 모서리는 한 값으로 통일(하단 내비 포함): 카드·버튼·선택지·안쪽 상자·칩 모두 40px. 낮은 칸은 알약처럼 보인다. 원은 50%·--shape-full */
+  --shape-card: 40px;
+  --shape-button: var(--shape-card);
+  --shape-chip: var(--shape-card);
+  --shape-inset: var(--shape-card);
+  /* 둥근 상자 안쪽 여백은 한 쌍으로 통일: 위아래 20, 좌우 24 */
+  --box-pad-y: var(--space-5);
+  --box-pad-x: var(--space-6);
 
-  /* 카드·선택·버튼의 모든 상태는 그림자 없는 평면 표면이다. */
+  /* 카드·선택지는 그림자 대신 검정 테두리(--card-border)로 나눈다. */
   --shadow-card: none;
   --shadow-card-pressed: none;
   --shadow-choice: none;
@@ -108,9 +268,9 @@
   --size-action: 52px;
   --size-action-large: 56px;
   --size-touch-min: 44px;
-  --font-size-action: 17px;
-  --font-size-action-secondary: 16px;
-  --font-weight-action: 600;
+  --font-size-action: var(--font-size-headline);
+  --font-size-action-secondary: var(--font-size-body);
+  --font-weight-action: var(--font-weight-semibold);
 
   /* TDS 바텀시트·리스트도 같은 표면을 따른다. */
   --adaptiveBackground: var(--color-card) !important;
@@ -124,61 +284,11 @@
   --adaptiveCardBgGrey: var(--color-surface) !important;
 }
 
-.dark {
-  color-scheme: dark;
-  --color-canvas: #202126;
-  --color-card: #2b2c31;
-  --color-surface: #38393f;
-  --color-ink: #f4f5f7;
-  --color-ink-2: #d7dae0;
-  --color-ink-3: #b5bac3;
-  --color-ink-4: #a4aab4;
-  --color-line: #4b4d56;
-  --color-line-strong: #9499a6;
-  /* 흰 글자와 중성 바탕의 대비를 모두 확보하는 중성 주행동. */
-  --color-brand-action: #6c717b;
-  --color-brand-pressed: #676d77;
-  --color-brand-accent: #9ed8b6;
-  --color-brand-decoration: #91cfae;
-  --color-brand-soft: #253e33;
-  --color-brand-line: #4b6c5b;
-  --color-brand-line-strong: #8cc6a7;
-  --color-action-secondary: #60646c;
-  --color-action-secondary-pressed: #565a62;
-  --color-action-soft: #38393f;
-  --color-action-soft-pressed: #303137;
-  --color-progress: #e8a950;
-  --color-reward-foreground: #f3bc72;
-  --color-selection-ink: #bce7ce;
-  --color-character-stage: #40382f;
-  --color-filter-tray: #303138;
-  --color-success-foreground: #75d7a5;
-  --color-success-soft: #20382d;
-  --color-danger-foreground: #ff9ca5;
-  --color-danger-line: #ba6670;
-  --color-danger-soft: #3c252c;
-  --color-warning-foreground: #e7c277;
-  --color-tooltip: #f4f4f6;
-  --color-tooltip-ink: #2b2c31;
-  --color-overlay: rgba(0, 0, 0, 0.65);
-  --shadow-card: none;
-  --shadow-card-pressed: none;
-  --shadow-choice: none;
-  --shadow-action: none;
-  --shadow-action-secondary: none;
-  --shadow-action-soft: none;
-  --shadow-action-pressed: none;
-}
-
 /* 페이지 바탕·일반 표면·글자는 공통 중성 역할을 상속하고, 그림·등급 장식만 보존한다. */
 :is(.my-page-screen, .league-screen, .identity-badge, .badge-tone) {
   --color-brand-ink: var(--color-brand-decoration);
   --color-brand-on-light-surface: var(--color-ink-2);
   --color-brand-cream: var(--color-brand-soft);
-  --color-stat-streak: var(--color-brand-decoration);
-  --color-stat-xp: var(--color-ink-2);
-  --color-stat-points: var(--color-ink-2);
-  --color-stat-words: var(--color-ink-2);
   --color-xp-soft: var(--color-surface);
   --color-points-soft: var(--color-surface);
   --radius-card: var(--shape-card);
@@ -192,60 +302,11 @@
   --color-league-first: var(--color-card);
   --color-league-second: var(--color-card);
   --color-league-third: var(--color-card);
-  --color-league-first-emphasis: #f1e7c9;
-  --color-league-second-emphasis: #e9ecf1;
-  --color-league-third-emphasis: #f0e0d3;
-  --color-league-podium-ink: #45484f;
+  --color-league-first-emphasis: var(--gold-100);
+  --color-league-second-emphasis: var(--silver-100);
+  --color-league-third-emphasis: var(--bronze-100);
+  --color-league-podium-ink: var(--gray-720);
 }
-.dark .league-screen {
-  --color-league-first: var(--color-card);
-  --color-league-second: var(--color-card);
-  --color-league-third: var(--color-card);
-  --color-league-first-emphasis: #4a4434;
-  --color-league-second-emphasis: #3c4048;
-  --color-league-third-emphasis: #4b3e36;
-  --color-league-podium-ink: #f4f5f7;
-}
-.badge-tone[data-badge-stat='words'] {
-  --badge-bg: #e7f1ec;
-  --badge-ink: #496557;
-  --badge-line: #bfd3c8;
-  --badge-ring: rgba(73, 101, 87, 0.12);
-}
-.badge-tone[data-badge-stat='streak'] {
-  --badge-bg: #fff0df;
-  --badge-ink: #995100;
-  --badge-line: #ebc69b;
-  --badge-ring: rgba(153, 81, 0, 0.14);
-}
-.badge-tone[data-badge-stat='xp'] {
-  --badge-bg: #eeeaf8;
-  --badge-ink: #51456f;
-  --badge-line: #d9d1ed;
-  --badge-ring: rgba(81, 69, 111, 0.14);
-}
-.dark .badge-tone[data-badge-stat='words'] {
-  --badge-bg: #2d3c34;
-  --badge-ink: #b6d4c2;
-  --badge-line: #4e695a;
-}
-.dark .badge-tone[data-badge-stat='streak'] {
-  --badge-bg: #40382f;
-  --badge-ink: #f3bc72;
-  --badge-line: #776247;
-}
-.dark .badge-tone[data-badge-stat='xp'] {
-  --badge-bg: #3c354c;
-  --badge-ink: #d9c9f1;
-  --badge-line: #635573;
-}
-.badge-tone[data-earned='false'] {
-  --badge-bg: var(--color-surface);
-  --badge-ink: var(--color-ink-3);
-  --badge-line: var(--color-line);
-}
-.dark .badge-tone[data-earned='false'] {
-  --badge-bg: var(--color-surface);
-  --badge-ink: var(--color-ink-3);
-  --badge-line: var(--color-line);
-}
+/* 배지는 바탕 없이 테두리·글자로만 구분한다. 획득은 진한 중성색. */
+.badge-tone[data-badge-stat] { --badge-ink: var(--color-ink); --badge-line: var(--color-ink-2); --badge-ring: var(--color-ink-2); }
+.badge-tone[data-earned='false'] { --badge-ink: var(--color-ink-3); --badge-line: var(--color-line); }

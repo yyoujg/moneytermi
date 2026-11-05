@@ -36,14 +36,14 @@ describe('구분하기 쉬운 주간 출석', () => {
     expect(container.querySelectorAll('[data-state="future"]')).toHaveLength(4);
     expect(container.querySelector('button')).toBeNull();
   });
-  it('출석한 오늘에도 오늘 표시를 유지하고 흰 글자색을 따르는 체크를 사용한다', () => {
+  it('출석한 오늘에도 오늘 표시를 유지하고 크림색 별 그림으로 출석을 표시한다', () => {
     const container = mount(['2026-10-14']);
     const today = container.querySelector('[aria-current="date"]')!;
     expect(today).toHaveAttribute('data-state', 'done');
     expect(today).toHaveTextContent('오늘');
-    expect(today.querySelector('svg')).toHaveAttribute('stroke', 'currentColor');
-    expect(today.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
-    expect(today.querySelector('img')).toBeNull();
+    expect(today.querySelector('img[data-week-icon="star"]')).toHaveAttribute('src', '/icons/week/week-done-star.svg');
+    expect(today.querySelector('img[data-week-icon="star"]')).toHaveAttribute('aria-hidden', 'true');
+    expect(today.querySelector('img:not([data-week-icon])')).toBeNull();
   });
   it('일요일도 월요일부터 시작하는 일곱 칸의 마지막 오늘로 표시한다', () => {
     vi.setSystemTime(new Date('2026-10-18T12:00:00+09:00'));

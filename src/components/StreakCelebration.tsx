@@ -8,7 +8,7 @@ import { toDateStr } from '../lib/date';
 import { calcStreak, streakMessage, streakMilestone, weekDays } from '../lib/streak';
 import { feedbackCelebrate, feedbackStreak } from '../lib/feedback';
 import { Storage } from '../lib/storage';
-import { OTTER_FACE } from '../lib/otter';
+import { useModalTurn } from '../lib/modalTurn';
 
 // 학습을 끝낸 뒤 하루 1회 뜨는 연속 출석 축하 모달.
 // DailyAlarmPromptCard와 같은 자기완결 패턴 — 완료 화면에 그냥 놓으면 알아서 판단한다.
@@ -33,7 +33,8 @@ export const StreakCelebration = () => {
     });
   }, [hydrated, attendanceDates]);
 
-  if (!show) return null;
+  const myTurn = useModalTurn(show);
+  if (!show || !myTurn) return null;
 
   const streak = calcStreak(attendanceDates);
   const week = weekDays(attendanceDates);
@@ -57,51 +58,47 @@ export const StreakCelebration = () => {
         />
       ))}
       {milestone && (
-        <p className="text-2xl font-black text-[var(--color-hero-ink)] anim-pop-in tracking-tight">🎉 {milestone}</p>
+        <p className="text-xl font-bold text-[var(--color-hero-ink)] anim-pop-in">{milestone}</p>
       )}
 
       {/* 학습 달력 + 실제 연속 일수 */}
       <div className="flex flex-col items-center">
         <StreakIcon size={milestone ? 88 : 72} className="anim-pop-in" />
-        <p className={`text-5xl font-black ${ink} mt-1! anim-pop-in`} style={{ '--i': 2 } as React.CSSProperties}>{streak}</p>
-        <p className={`text-sm font-medium ${sub} mt-2! anim-fade-up`} style={{ '--i': 3 } as React.CSSProperties}>일 연속 출석 성공</p>
+        <p className={`text-4xl font-bold ${ink} mt-1! anim-pop-in`} style={{ '--i': 2 } as React.CSSProperties}>{streak}</p>
+        <p className={`text-sm font-normal ${sub} mt-2! anim-fade-up`} style={{ '--i': 3 } as React.CSSProperties}>일 연속 출석 성공</p>
       </div>
 
       {/* 이번 주 */}
       <div className="flex gap-2">
         {week.map((d, i) => (
-          <div key={d.label} className="flex flex-col items-center gap-1.5 anim-pop-in" style={{ '--i': 4 + i } as React.CSSProperties}>
+          <div key={d.label} className="flex flex-col items-center gap-1 anim-pop-in" style={{ '--i': 4 + i } as React.CSSProperties}>
             <div
               className="w-9 h-9 flex items-center justify-center"
               style={{
                 borderRadius: 9999,
-                background: d.attended ? (milestone ? 'var(--color-hero-complete)' : 'var(--color-brand-action)') : (milestone ? 'var(--color-hero-chip)' : 'var(--color-surface)'),
-                border: d.isToday && !d.attended ? `2px solid ${milestone ? 'var(--color-hero-chip-line)' : 'var(--color-brand-action)'}` : 'none',
+                background: d.attended ? 'var(--color-progress)' : 'var(--color-surface)',
+                border: d.isToday && !d.attended ? '2px solid var(--color-progress)' : 'none',
                 opacity: d.isFuture ? 0.5 : 1,
               }}
             >
-              {d.attended && <Check size={18} strokeWidth={3} className={milestone ? 'text-[var(--color-hero-complete-ink)]' : 'text-[var(--color-on-brand)]'} />}
+              {d.attended && <Check size={20} className="text-[var(--color-card)]" />}
             </div>
-            <span className={`text-2xs font-medium ${d.isToday ? (milestone ? 'text-[var(--color-hero-ink)] font-bold' : 'text-brand-ink font-bold') : (milestone ? 'text-[var(--color-hero-ink)]' : 'text-[var(--color-ink-4)]')}`}>
+            <span className={`text-2xs font-normal ${d.isToday ? (milestone ? 'text-[var(--color-hero-ink)] font-bold' : 'text-[var(--color-ink)] font-bold') : (milestone ? 'text-[var(--color-hero-ink)]' : 'text-[var(--color-ink-4)]')}`}>
               {d.label}
             </span>
           </div>
         ))}
       </div>
 
-      {/* 캐릭터(수달)가 건네는 말풍선 */}
       <div className="flex items-center gap-3 anim-fade-up" style={{ '--i': 8 } as React.CSSProperties}>
-        <img src={OTTER_FACE} alt="" aria-hidden="true" className="h-12 w-12 shrink-0 rounded-full bg-[var(--color-card)] object-cover" />
-        <div className={`rounded-card px-4 py-3 max-w-[220px] ${milestone ? 'bg-[var(--color-hero-complete)]' : 'bg-[var(--color-card)]'}`}>
-          <p className={`text-sm font-medium break-keep leading-relaxed ${milestone ? 'text-[var(--color-hero-complete-ink)]' : 'text-[var(--color-ink-2)]'}`}>
-            {streak === 1 ? '오늘 출석이 기록됐어요.' : streakMessage(streak)}
-          </p>
-        </div>
+        <p className="max-w-[240px] text-center text-sm font-normal break-keep leading-relaxed text-[var(--color-ink-2)]">
+          {streak === 1 ? '오늘 출석이 기록됐어요.' : streakMessage(streak)}
+        </p>
       </div>
 
       <button
         onClick={() => { logClick('streak_close', { streak }); setShow(false); }}
-        className="w-full max-w-xs py-4 rounded-button text-sm font-bold text-[var(--color-on-brand)] active:opacity-90 anim-fade-up bg-brand-500"
+        className="action-button w-full max-w-xs anim-fade-up"
         style={{ '--i': 9 } as React.CSSProperties}
       >
         확인

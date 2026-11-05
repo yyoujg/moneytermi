@@ -16,6 +16,7 @@ export type Database = {
           email: string | null;
           is_guest: boolean;
           league_tier: string;
+          league_stage: number;
           points: number;
           xp: number;
           boost_until: string | null;
@@ -33,6 +34,7 @@ export type Database = {
           email?: string | null;
           is_guest?: boolean;
           league_tier?: string;
+          league_stage?: number;
           points?: number;
           quiz_combo?: number;
           emoji?: string;
@@ -48,6 +50,7 @@ export type Database = {
           email?: string | null;
           is_guest?: boolean;
           league_tier?: string;
+          league_stage?: number;
           points?: number;
           quiz_combo?: number;
           emoji?: string;
@@ -114,6 +117,18 @@ export type Database = {
           current?: number;
           is_rewarded?: boolean;
         };
+        Relationships: [];
+      };
+      period_mission_rewards: {
+        Row: {
+          user_id: string;
+          mission_id: string;
+          period_start: string;
+          xp: number;
+          claimed_at: string;
+        };
+        Insert: never;
+        Update: never;
         Relationships: [];
       };
       mission_defs: {
@@ -439,6 +454,14 @@ export type Database = {
           points: number;
           credited: number;
         };
+      };
+      claim_period_mission: {
+        Args: { p_mission_id: string };
+        Returns: { xp: number; reward: number; period_start: string };
+      };
+      settle_league: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
       };
       is_nickname_taken: {
         Args: {

@@ -46,14 +46,14 @@ export const WeeklyRecap = ({ snap, onClose }: { snap: WeekSnapshot; onClose: ()
         {!last ? (
           <>
             <p className="text-base font-bold anim-fade-up">{s.label}</p>
-            <p className="mt-3! text-6xl font-black anim-pop-in" style={{ '--i': 2 } as React.CSSProperties}>
+            <p className="mt-3! text-6xl font-bold anim-pop-in" style={{ '--i': 2 } as React.CSSProperties}>
               <RollingNumber value={s.value} /><span className="text-3xl ml-1">{s.unit}</span>
             </p>
             <p className="mt-5! text-sm font-semibold anim-fade-up" style={{ '--i': 6 } as React.CSSProperties}>{s.note}</p>
           </>
         ) : (
           <>
-            <p className="text-2xl font-black anim-pop-in">새로운 한 주가 시작됐어요</p>
+            <p className="text-2xl font-bold anim-pop-in">새로운 한 주가 시작됐어요</p>
             <p className="mt-3! text-sm anim-fade-up" style={{ '--i': 3 } as React.CSSProperties}>리그가 초기화됐어요. 이번 주도 함께 올라가 봐요.</p>
             <button type="button" onClick={e => { e.stopPropagation(); onClose(); }}
               className="action-secondary mt-8! w-full py-4 rounded-button text-sm font-bold active:opacity-90 anim-fade-up" style={{ '--i': 6 } as React.CSSProperties}>

@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { praiseForAnswer, praiseForMission, praiseForQuiz, praiseForReview } from './praise';
 
 describe('praise copy', () => {
-  it('connects claimable mission rewards to points without promising extra rewards', () => {
-    expect(praiseForMission({ ready: 2, completed: 3 })).toBe('2개 미션 보상을 받을 수 있어요. 완료한 미션의 조개를 챙겨요.');
+  it('connects claimable mission rewards to XP without promising extra rewards', () => {
+    expect(praiseForMission({ ready: 2, completed: 3 })).toBe('2개 미션 보상을 받을 수 있어요. 완료한 미션의 경험치를 챙겨요.');
     expect(praiseForMission({ ready: 0, completed: 3 })).toBe('3개 미션 완료. 작게 보여도 꾸준함이 쌓이고 있어요.');
     expect(praiseForMission({ ready: 0, completed: 0 })).toBe('하나씩 채우면 오늘의 성과가 바로 보여요.');
   });
@@ -13,7 +13,7 @@ describe('praise copy', () => {
   });
 
   it('uses a light retry message for missed quiz results', () => {
-    expect(praiseForQuiz({ accuracy: 40, maxCombo: 1, total: 5 })).toBe('헷갈린 문제까지 다시 봤어요. 차근차근 한 번 더 확인해요.');
+    expect(praiseForQuiz({ accuracy: 40, maxCombo: 1, total: 5 })).toBe('해설을 보고 틀린 문제를 한 번 더 풀어봐요.');
   });
 
   it('uses a clear correct-answer message', () => {

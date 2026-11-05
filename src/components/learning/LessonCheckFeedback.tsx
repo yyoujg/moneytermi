@@ -2,7 +2,6 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { ArrowRight, ChevronDown } from '../ui/ControlIcons';
 import type { QuizItem } from '../../lib/quiz';
 import { keepShortUnitsTogether } from '../../lib/formatText';
-import { OTTER_FEEDBACK_IMAGES } from '../../lib/otter';
 import { ActionButton } from '../ui/ActionButton';
 
 export const LessonCheckFeedback = ({ question, selected, number, total, onNext }: {
@@ -31,13 +30,6 @@ export const LessonCheckFeedback = ({ question, selected, number, total, onNext 
 
       <main className="lesson-feedback-content">
         <div className="lesson-feedback-intro">
-          <img
-            className="lesson-feedback-character"
-            src={correct ? OTTER_FEEDBACK_IMAGES.correct : OTTER_FEEDBACK_IMAGES.wrong}
-            alt={correct ? '정답을 알리는 O 포즈 수달' : '오답을 알리는 X 포즈 수달'}
-            width={96}
-            height={96}
-          />
           <div>
             <h1 ref={headingRef} tabIndex={-1}>{correct ? '맞았어요!' : '아쉬워요, 오답이에요'}</h1>
             <p>{correct ? '정답을 고른 이유도 확인해 보세요.' : '내 선택과 정답을 비교해 보세요.'}</p>
@@ -70,7 +62,7 @@ export const LessonCheckFeedback = ({ question, selected, number, total, onNext 
           <div className="lesson-feedback-review">
             <button type="button" className="lesson-feedback-disclosure" aria-expanded={showChoices} aria-controls={showChoices ? choicesId : undefined} onClick={() => setShowChoices(value => !value)}>
               {showChoices ? '다른 보기 접기' : '다른 보기 확인하기'}
-              <ChevronDown size={18} className={showChoices ? 'is-open' : ''} aria-hidden="true" />
+              <ChevronDown size={20} className={showChoices ? 'is-open' : ''} aria-hidden="true" />
             </button>
             {showChoices && (
               <ol id={choicesId} className="lesson-feedback-options" aria-label="문제의 모든 보기">
@@ -91,7 +83,7 @@ export const LessonCheckFeedback = ({ question, selected, number, total, onNext 
       </main>
 
       <footer className="lesson-result-footer">
-        <ActionButton fullWidth onClick={onNext}>{number === total ? '결과 보기' : '다음 문제'}<ArrowRight size={18} aria-hidden="true" /></ActionButton>
+        <ActionButton fullWidth onClick={onNext}>{number === total ? '결과 보기' : '다음 문제'}<ArrowRight size={20} aria-hidden="true" /></ActionButton>
       </footer>
     </div>
   );

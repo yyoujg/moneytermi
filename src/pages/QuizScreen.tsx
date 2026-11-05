@@ -1,33 +1,26 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { Check, X, Flame, Share2, Target, TrendingUp } from '../components/ui/OtterIcons';
+import { Check, X } from '../components/ui/OtterIcons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
+import { useAuth } from '../hooks/useAuth';
 import { useSettings } from '../hooks/useSettings';
-import { useCountUp } from '../hooks/useCountUp';
 import { markNodeDone } from '../lib/pathProgress';
-import { getGrowthStage } from '../constants';
-import { feedbackCorrect, feedbackWrong, feedbackQuizComplete, feedbackTierUp } from '../lib/feedback';
+import { feedbackCorrect, feedbackWrong, feedbackQuizComplete } from '../lib/feedback';
 import { logClick } from '../lib/analytics';
 import { shareTossLink } from '../lib/share';
-import { Card } from '../components/ui/Card';
 import { ActionButton } from '../components/ui/ActionButton';
-import { PointIcon, XpIcon } from '../components/StatIcons';
+import { XpIcon } from '../components/StatIcons';
 import { buildQuizItem, pickQuizType, type QuizOption } from '../lib/quiz';
 import { shouldScheduleRetry } from '../lib/review';
 import { takeShuffled } from '../lib/random';
 import { LearningCompletionScreen } from '../components/learning/LearningCompletionScreen';
 import { LearningEmptyState } from '../components/learning/LearningEmptyState';
-import { LearningStatRow } from '../components/learning/LearningStatRow';
 import { QuizProgressHeader } from '../components/learning/QuizProgressHeader';
-import { PraiseNote } from '../components/PraiseNote';
 import { praiseForAnswer, praiseForQuiz } from '../lib/praise';
 import { keepShortUnitsTogether } from '../lib/formatText';
 import { QuizAnswerFeedback } from '../components/learning/QuizAnswerFeedback';
 import { createQuizRequestId, type QuizAnswerResult } from '../lib/quizSubmission';
-
-// 결과의 장식 아이콘은 숫자와 분리하고 항목명 왼쪽에 같은 규격으로 둔다.
-const resultIconProps = { size: 18, strokeWidth: 1.8, className: 'quiz-result-icon', 'aria-hidden': true } as const;
 
 const quizShareMessage = (modeLabel: string, total: number, accuracy: number, maxCombo: number, words: Word[]) => {
   const learned = words.slice(0, 3).map(word => word.word).join(' · ');
@@ -40,6 +33,7 @@ const QuizScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { xp, allWords, knownWords, courses, submitQuizAnswer, recordReview, refreshWallet } = useAppContext();
+  const { user } = useAuth();
 
   // 단어 id → 코스 카테고리 (오답 보기를 같은 주제로 뽑기 위함)
   const categoryOf = useMemo(() => {
@@ -96,10 +90,6 @@ const QuizScreen = () => {
   useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false; }; }, []);
   const questionHeadingRef = useRef<HTMLHeadingElement>(null);
   const questionContentRef = useRef<HTMLDivElement>(null);
-  const [totalEarned, setTotalEarned] = useState(0);
-  const [lastEarned, setLastEarned] = useState(0);
-  const [capped, setCapped] = useState(false);   // 하루 보상 한도(서버) 도달
-  const [showPointPop, setShowPointPop] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
   const [firstCorrect, setFirstCorrect] = useState(0);
   const [shake, setShake] = useState(false);
@@ -114,31 +104,21 @@ const QuizScreen = () => {
   }, [baseQueue.length, mode, navState?.nodeId, navState?.lessonId, navState?.courseId]);
 
   const currentWord = quizQueue[currentQuizIndex];
-  const earnedShown = useCountUp(totalEarned);
   const quizItem = useMemo(() => {
     if (!currentWord) return null;
     return buildQuizItem(pickQuizType(currentWord), currentWord, knownWords, allWords, categoryOf);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentWord?.id, allWords, knownWords, categoryOf]);
 
-  // +P 팝업 트리거
-  useEffect(() => {
-    if (showPointPop) {
-      const t = setTimeout(() => setShowPointPop(false), 700);
-      return () => clearTimeout(t);
-    }
-  }, [showPointPop]);
-
   // 퀴즈 완료 시 앱 리뷰 요청 (플랫폼이 노출 제어)
   const finished = quizQueue.length > 0 && currentQuizIndex >= quizQueue.length;
   useEffect(() => {
     if (!finished || completedRef.current) return;
     completedRef.current = true;
-    // 승급이면 웅장하게, 아니면 정답률에 따라
-    if (getGrowthStage(xp).id > getGrowthStage(xpAtStart.current).id) feedbackTierUp();
-    else feedbackQuizComplete(correctCount === quizQueue.length);
+    // 등급은 주간 순위로 오르므로(서버 정산) 퀴즈 중에는 승급이 없다. 정답률에 따라서만 피드백한다
+    feedbackQuizComplete(correctCount === quizQueue.length);
     logClick('quiz_complete', { mode, total: baseQueue.length, correct: firstCorrect, attempts: quizQueue.length, node_id: navState?.nodeId ?? navState?.lessonId, course_id: navState?.courseId });
-    if (navState?.nodeId) markNodeDone(navState.nodeId);   // 패스의 퀴즈·복습 노드를 완료 표시
+    if (navState?.nodeId) markNodeDone(navState.nodeId, user?.id);   // 패스의 퀴즈·복습 노드를 완료 표시
     void refreshWallet();   // m4(퀴즈 N문제)·50XP 보너스는 서버가 올린다 — 세션 끝에 한 번 읽는다
   }, [correctCount, firstCorrect, finished, navState?.nodeId, navState?.lessonId, navState?.courseId, mode, baseQueue.length, quizQueue.length, refreshWallet, xp]);
 
@@ -161,7 +141,7 @@ const QuizScreen = () => {
         title="아직 풀 문제가 없어요"
         description="자주 마주치는 용어를 먼저 보면 퀴즈를 풀 수 있어요."
         actionLabel="시작하러 가기"
-        onAction={() => navigate('/course')}
+        onAction={() => navigate('/course', { replace: true })}
       />
     );
   }
@@ -169,9 +149,6 @@ const QuizScreen = () => {
   // 완료 화면
   if (currentQuizIndex >= quizQueue.length) {
     const accuracy = baseQueue.length > 0 ? Math.round((firstCorrect / baseQueue.length) * 100) : 0;
-    const stageBefore = getGrowthStage(xpAtStart.current);
-    const stageAfter = getGrowthStage(xp);
-    const stageUp = stageAfter.id > stageBefore.id;
     const completionTitle = navState?.mode === 'lesson_warmup'
       ? '준비 완료!'
       : navState?.mode === 'course_review'
@@ -180,63 +157,33 @@ const QuizScreen = () => {
 
     return (
       <LearningCompletionScreen
-        mascot="great"
         title={completionTitle}
-        subtitle={`${baseQueue.length}문제 완료${retryQueue.length > 0 ? ` · 다시 푼 문제 ${retryQueue.length}개` : ''}`}
+        subtitle={<>{`${baseQueue.length}문제 완료${retryQueue.length > 0 ? ` · 다시 푼 문제 ${retryQueue.length}개` : ''}`}<br />{praiseForQuiz({ accuracy, maxCombo, total: baseQueue.length })}</>}
         actionLabel={navState?.nextRoute?.label ?? (backPath.startsWith('/course') ? '주제로 돌아가기' : '퀘스트로')}
         onAction={() => navState?.nextRoute
-          ? navigate(navState.nextRoute.pathname, navState.nextRoute.state === undefined ? undefined : { state: navState.nextRoute.state })
-          : navigate(backPath)}
+          ? navigate(navState.nextRoute.pathname, { replace: true, state: navState.nextRoute.state })
+          : navigate(backPath, { replace: true, state: { openFocus: true } })}
       >
-        <Card pad="lg" className="quiz-result-stats w-full flex flex-col gap-4 anim-fade-up" role="group" aria-label="퀴즈 결과 요약" style={{ '--i': 2 } as React.CSSProperties}>
-          <LearningStatRow label="모은 조개" icon={<PointIcon size={18} className="quiz-result-icon" />} withDivider={false}>
-            <span className="shrink-0 text-xl font-bold text-brand-500">+{earnedShown}개</span>
-          </LearningStatRow>
-          <LearningStatRow label="획득 XP" icon={<XpIcon size={18} className="quiz-result-icon" />}>
-            <span className="shrink-0 text-xl font-bold text-[var(--color-ink)]">+{Math.max(0, xp - xpAtStart.current)}</span>
-          </LearningStatRow>
-          <LearningStatRow label="첫 시도 정답률" icon={<Target {...resultIconProps} />}>
-            <span className="text-xl font-bold text-[var(--color-ink)]">{accuracy}%</span>
-          </LearningStatRow>
-          <LearningStatRow label="최고 연속 정답" icon={<Flame {...resultIconProps} />}>
-            <span className="shrink-0 text-xl font-bold text-[var(--color-ink)]">{maxCombo}연속</span>
-          </LearningStatRow>
-          {stageUp && (
-            <LearningStatRow label="단계 변화" icon={<TrendingUp {...resultIconProps} />}>
-              <span className="text-sm font-bold text-[var(--color-ink)]">{stageBefore.name} → {stageAfter.name} 승급!</span>
-            </LearningStatRow>
-          )}
-        </Card>
-        <PraiseNote
-          title="오늘 확인한 내용"
-          body={praiseForQuiz({ accuracy, maxCombo, total: baseQueue.length })}
-          className="w-full anim-fade-up"
+        {/* 끝 화면은 핵심 숫자 하나와 보상 한 줄만 크게 보여준다(피크엔드) */}
+        <section className="quiz-result-stats w-full flex flex-col items-center gap-1 text-center anim-fade-up" role="group" aria-label="퀴즈 결과 요약" style={{ '--i': 2 } as React.CSSProperties}>
+          <p className="text-xs text-[var(--color-ink-3)]">첫 시도 정답률</p>
+          <p className="text-4xl font-bold text-[var(--color-ink)] tabular-nums">{accuracy}%</p>
+          <p className="mt-3! flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-base font-bold tabular-nums">
+            <span className="inline-flex items-center gap-1 text-[var(--color-ink)]"><XpIcon size={20} className="quiz-result-icon" /><span>획득 XP</span><span>+{Math.max(0, xp - xpAtStart.current)}</span></span>
+          </p>
+          <p className="mt-1! text-xs text-[var(--color-ink-3)]">최고 {maxCombo}연속</p>
+        </section>
+        <button
+          type="button"
+          className="press-fade min-h-11 px-3 text-sm font-semibold text-[var(--color-ink-2)] anim-fade-up"
           style={{ '--i': 3 } as React.CSSProperties}
-        />
-        <Card pad="md" className="w-full anim-fade-up" style={{ '--i': 4 } as React.CSSProperties}>
-          <p className="text-xs font-bold text-[var(--color-info)] mb-1.5!">이번에 확인한 내용</p>
-          <p className="text-sm font-semibold text-[var(--color-ink)] leading-relaxed break-keep">처음 푼 {baseQueue.length}문제 중 {firstCorrect}개에 정답을 골랐어요. 나중에 다시 보며 기억을 확인해요.</p>
-        </Card>
-        <Card tone="surface" pad="md" className="w-full flex flex-col gap-3 anim-fade-up" style={{ '--i': 5 } as React.CSSProperties}>
-          <div className="flex items-start gap-3">
-            <Share2 {...resultIconProps} className="quiz-result-icon mt-0.5" />
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold text-[var(--color-ink)]">오늘의 성과 공유하기</p>
-              <p className="mt-1! text-xs text-[var(--color-ink-3)] leading-relaxed break-keep">
-                정답률과 오늘 확인한 용어가 담긴 토스 링크를 보낼 수 있어요.
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={() => {
-              logClick('quiz_result_share', { mode: navState?.mode ?? 'quiz', total: baseQueue.length, accuracy, max_combo: maxCombo });
-              void shareTossLink('intoss://moneytermi/course', quizShareMessage(sessionLabel, baseQueue.length, accuracy, maxCombo, baseQueue));
-            }}
-            className="action-secondary w-full min-h-[46px] rounded-button text-sm font-bold active:opacity-90"
-          >
-            친구에게 공유
-          </button>
-        </Card>
+          onClick={() => {
+            logClick('quiz_result_share', { mode: navState?.mode ?? 'quiz', total: baseQueue.length, accuracy, max_combo: maxCombo });
+            void shareTossLink('intoss://moneytermi/course', quizShareMessage(sessionLabel, baseQueue.length, accuracy, maxCombo, baseQueue));
+          }}
+        >
+          친구에게 공유
+        </button>
       </LearningCompletionScreen>
     );
   }
@@ -250,8 +197,6 @@ const QuizScreen = () => {
     answerLock.current = true;
     setAnswerPending(true);
     setSubmissionMessage(null);
-    setLastEarned(0);
-    setCapped(false);
     try {
       const attempt = attemptRef.current ?? {
         requestId: createQuizRequestId(), wordId: currentWord.id, answer: option.answer, receipt: null,
@@ -279,10 +224,6 @@ const QuizScreen = () => {
       if (firstAttempt && res.correct) setFirstCorrect(value => value + 1);
       setCombo(res.combo);
       setMaxCombo(value => Math.max(value, res.combo));
-      setTotalEarned(value => value + res.earned);
-      setLastEarned(res.earned);
-      setCapped(res.capped);
-      if (res.earned > 0) setShowPointPop(true);
       const conflict = res.correct !== option.isCorrect;
       setGradingConflict(conflict);
       if (conflict) setSubmissionMessage('문제 정보와 서버 채점이 달라 정답 표시를 생략했어요. 최신 학습 내용으로 다시 확인해 주세요.');
@@ -313,17 +254,17 @@ const QuizScreen = () => {
     setSelected(null);
     setStatus('idle');
     setSubmissionMessage(null);
-    setShowPointPop(false);
   };
   const confirmAnswer = () => {
     const option = quizItem?.options.find(candidate => candidate.answer === selected);
     if (option) void handleSelect(option);
   };
-  const streakMessage = combo >= 5 ? `${combo}연속! x2 보너스` : combo >= 3 ? `${combo}연속! 조개 5개 보너스` : null;
+  const streakMessage = combo >= 3 ? `${combo}연속!` : null;
   const answeredCorrectly = status === 'correct';
   const correctOption = quizItem?.options.find(option => option.isCorrect);
   const answerLabel = gradingConflict ? '' : quizItem?.type === 'word_to_meaning' ? currentWord.meaning : correctOption?.label ?? currentWord.word;
   const showGrading = status !== 'idle' && !gradingConflict;
+  const otterPose = !showGrading ? 'explain' : answeredCorrectly ? 'cheer' : 'defeat';
 
   return (
     <div className="quiz-screen app-soft-screen flex flex-col h-full">
@@ -332,30 +273,21 @@ const QuizScreen = () => {
         progress={progressPercent}
         streakText={streakMessage}
         durationClass="duration-500"
-        right={(
-          <div className="relative ml-auto h-5 w-12">
-            {showPointPop && (
-              <span
-                key={totalEarned}
-                className="anim-reward-rise absolute -top-1 right-0 text-xs font-bold text-brand-500 whitespace-nowrap"
-              >
-                +{lastEarned}개
-              </span>
-            )}
-          </div>
-        )}
       />
 
       {/* 콘텐츠 — 뜻 보기 4개가 길면 작은 화면에서 넘치므로 이 영역만 스크롤 */}
-      <div ref={questionContentRef} className="quiz-question-content flex-1 min-h-0 overflow-y-auto flex flex-col px-5 pt-3 pb-5 gap-4 [&::-webkit-scrollbar]:hidden">
-        {/* 문제 카드 */}
-        <div key={currentQuizIndex} className={`quiz-question-card anim-slide-in rounded-card bg-[var(--color-card)] px-5 py-5 flex flex-col items-start text-left gap-3
+      <div ref={questionContentRef} className="quiz-question-content flex-1 min-h-0 overflow-y-auto flex flex-col px-5 pt-3 pb-5 gap-8 [&::-webkit-scrollbar]:hidden">
+        {/* 문제는 카드 밖 왼쪽 아래 수달이 말하는 말풍선 */}
+        <div className="flex items-start gap-2">
+        {/* 수달 표정은 채점 결과를 따라간다: 문제 설명 → 정답이면 응원, 오답이면 시무룩 */}
+        <img src={`/otter/v5/otter-${otterPose}.svg`} alt="" aria-hidden="true" height={112} className="quiz-question-otter h-[112px] w-auto shrink-0 self-end" data-otter={otterPose} />
+        <div key={currentQuizIndex} className={`quiz-question-card quiz-bubble anim-slide-in min-w-0 flex-1 rounded-card bg-[var(--color-card)] p-5 flex flex-col items-start text-left gap-2
           ${status === 'correct' ? 'anim-answer-wash' : ''}
           ${shake ? 'anim-soft-nudge' : ''}
         `}>
-          <span className="text-xs font-bold text-brand-600">{quizItem?.promptLabel}</span>
+          <span className="text-xs text-[var(--color-brand-text)]">{quizItem?.promptLabel}</span>
 
-          <h2 ref={questionHeadingRef} tabIndex={-1} className="quiz-prompt-main w-full text-[22px] font-bold text-[var(--color-ink)] leading-[1.5] break-keep">
+          <h2 ref={questionHeadingRef} tabIndex={-1} className="quiz-prompt-main w-full text-xl font-semibold text-[var(--color-ink)] leading-normal break-keep">
             {keepShortUnitsTogether(quizItem?.promptMain ?? '')}
           </h2>
 
@@ -364,31 +296,32 @@ const QuizScreen = () => {
               <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep">{keepShortUnitsTogether(quizItem.promptSub)}</p>
             </div>
           )}
-
+        </div>
         </div>
 
-        <p className="quiz-selection-guide">{status === 'idle' ? answerPending ? '답안 저장을 확인하고 있어요.' : submissionMessage ? '선택한 답안 그대로 다시 저장할 수 있어요.' : '답을 고른 뒤 정답 확인을 눌러주세요.' : gradingConflict ? '서버 채점 결과로 기록했어요. 문제 정보를 다시 확인해 주세요.' : '내 답과 정답을 비교해 보세요.'}</p>
+        <p className="quiz-selection-guide">{status === 'idle' ? answerPending ? '답안 저장을 확인하고 있어요.' : submissionMessage ? '선택한 답안 그대로 다시 저장할 수 있어요.' : '' : gradingConflict ? '서버 채점 결과로 기록했어요. 문제 정보를 다시 확인해 주세요.' : ''}</p>
         {/* 객관식 선택지는 채점 뒤에도 숨기지 않는다. */}
-        <div className="grid grid-cols-1 gap-2.5">
+        <div className="grid grid-cols-1 gap-3">
           {(quizItem?.options ?? []).map((opt, i) => {
             const isSelected = selected === opt.answer;
             const isCorrectOption = opt.isCorrect;
-            // 색은 배경·테두리·아이콘에만. 보기 글자는 어떤 상태에서도 진하게 둔다
-            let optionStyle = 'bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink)] active:border-brand-300 active:bg-[var(--color-brand-soft)]';
-            if (!showGrading && isSelected) optionStyle = 'bg-[var(--color-surface)] border-[var(--color-ink-3)] text-[var(--color-ink)]';
+            // 안 고른 보기는 테두리 없는 연한 회베이지 면, 고른 보기는 흰 바탕에 주버튼과 같은 진한 갈색 테두리
+            let optionStyle = 'bg-[var(--color-surface)] border-transparent text-[var(--color-brand-text)] active:opacity-80';
+            if (!showGrading && isSelected) optionStyle = 'bg-[var(--color-card)] border-[var(--color-brand-action)] text-[var(--color-brand-text)]';
             if (showGrading) {
-              optionStyle = isCorrectOption ? 'bg-[var(--color-success-soft)] border-success-500/55 text-[var(--color-ink)]'
-                : isSelected ? 'bg-[var(--color-card)] border-danger-300/50 text-[var(--color-ink)]'
-                : 'bg-[var(--color-card)] border-[var(--color-line)] text-[var(--color-ink-3)]';
+              // 채점 뒤: 정답은 연한 초록, 내가 고른 오답은 연한 빨강(이해 확인 피드백과 같은 색)
+              optionStyle = isCorrectOption ? 'bg-[var(--accent-green-soft)] border-[var(--accent-green-ink)] text-[var(--accent-green-ink)]'
+                : isSelected ? 'bg-[var(--color-danger-soft)] border-[var(--color-danger-line)] text-[var(--color-danger-foreground)]'
+                : 'bg-[var(--color-surface)] border-transparent text-[var(--color-brand-text)]';
             }
-            const tag = !showGrading ? (isSelected ? (status === 'idle' ? '선택' : '내 답') : null) : isCorrectOption ? '정답' : isSelected ? '내 답' : null;
+            const tag = !showGrading ? (isSelected && status !== 'idle' ? '내 답' : null) : isCorrectOption ? '정답' : isSelected ? '내 답' : null;
             const feedbackMotion = showGrading && (isCorrectOption || isSelected) ? 'anim-choice-lock' : '';
             const markerClass = !showGrading
-              ? isSelected ? 'bg-[var(--color-ink-2)] text-[var(--color-card)]' : 'border border-[var(--color-line-strong)] bg-[var(--color-card)] text-[var(--color-ink-3)]'
+              ? isSelected ? 'bg-[var(--color-brand-action)] text-[var(--color-on-brand)]' : 'border border-[var(--color-line-strong)] bg-[var(--color-card)] text-[var(--color-ink-3)]'
               : isCorrectOption
-                ? 'bg-[var(--color-success-foreground)] text-[var(--color-card)]'
+                ? 'text-[var(--accent-green-ink)]'
                 : isSelected
-                  ? 'border border-danger-300/70 bg-[var(--color-danger-soft)] text-danger-500'
+                  ? 'text-[var(--color-danger-foreground)]'
                   : 'border border-[var(--color-line)] bg-[var(--color-surface)] text-[var(--color-ink-4)]';
 
             return (
@@ -397,15 +330,18 @@ const QuizScreen = () => {
                 onClick={() => { if (status === 'idle' && !answerPending && !submissionMessage) setSelected(opt.answer); }}
                 aria-pressed={isSelected}
                 disabled={status !== 'idle' || answerPending || submissionMessage !== null}
-                className={`quiz-option anim-fade-up ${feedbackMotion} flex items-center gap-3 min-h-[64px] py-4 px-4 border text-base font-semibold leading-relaxed text-left break-keep transition-colors duration-150 ${optionStyle}`}
+                className={`quiz-option anim-fade-up ${feedbackMotion} flex items-center gap-3 min-h-[64px] py-4 px-4 border-2 text-base font-semibold leading-relaxed text-left break-keep transition-colors duration-150 ${optionStyle}`}
                 style={{ '--i': i + 1, borderRadius: 'var(--shape-button)' } as React.CSSProperties}
               >
-                <span className={`w-7 h-7 shrink-0 flex items-center justify-center text-xs font-semibold ${markerClass}`} style={{ borderRadius: 9999 }}>
-                  {showGrading && isCorrectOption ? <Check size={14} strokeWidth={3} /> : showGrading && isSelected ? <X size={14} strokeWidth={3} /> : i + 1}
-                </span>
+                {/* 번호는 흰 원 번호 그림(고르면 진한 갈색 채움). 채점 뒤 정답·내 오답만 체크·엑스 */}
+                {(!showGrading || (!isCorrectOption && !isSelected)) && i < 4
+                  ? <img src={`/icons/num/num-${i + 1}${isSelected ? '-selected' : ''}.svg`} alt="" aria-hidden="true" width={28} height={28} className="shrink-0" data-num-icon />
+                  : <span className={`w-7 h-7 shrink-0 flex items-center justify-center text-xs font-semibold ${markerClass}`} style={{ borderRadius: 9999 }}>
+                    {showGrading && isCorrectOption ? <Check size={16} strokeWidth={3} /> : showGrading && isSelected ? <X size={16} strokeWidth={3} /> : i + 1}
+                  </span>}
                 <span className="min-w-0 flex-1">{keepShortUnitsTogether(opt.label)}</span>
                 {tag && (
-                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-2xs font-black ${showGrading && isCorrectOption ? 'bg-[var(--color-card)] text-[var(--color-success-foreground)]' : 'bg-[var(--color-surface)] text-[var(--color-ink-4)]'}`}>
+                  <span className={`shrink-0 text-xs font-bold ${showGrading && isCorrectOption ? 'text-[var(--accent-green-ink)]' : showGrading && isSelected ? 'text-[var(--color-danger-foreground)]' : 'text-[var(--color-brand-text)]'}`}>
                     {tag}
                   </span>
                 )}
@@ -427,7 +363,7 @@ const QuizScreen = () => {
           answerLabel={answerLabel} word={currentWord.word} meaning={gradingConflict ? '' : currentWord.meaning}
           explanation={gradingConflict ? undefined : quizItem?.explanation} example={gradingConflict ? undefined : currentWord.learningExample}
           pending={answerPending} submissionMessage={submissionMessage}
-          earned={lastEarned} capped={capped} combo={combo}
+          combo={combo}
           nextLabel={currentQuizIndex === quizQueue.length - 1 ? '결과 보기' : '다음 문제'} onNext={goNextQuestion}
         />
       )}

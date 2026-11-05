@@ -13,6 +13,9 @@ export const weekStart = (now: Date = new Date()): number => {
 export const msUntilReset = (now: Date = new Date()): number =>
   weekStart(now) + 7 * 24 * 60 * 60 * 1000 - now.getTime();
 
-// 남은 일수. 오늘이 마지막 날이면 1일로 표시한다(0일이라고 하면 이미 끝난 것처럼 보인다).
-export const daysUntilReset = (now: Date = new Date()): number =>
-  Math.max(1, Math.ceil(msUntilReset(now) / (24 * 60 * 60 * 1000)));
+// 리그 남은 기간. 하루 이상이면 'D-n'(남은 일수 내림), 하루 안이면 'n시간 남음'(올림, 최소 1시간)
+export const timeLeftLabel = (now: Date = new Date()): string => {
+  const ms = msUntilReset(now);
+  const HOUR = 60 * 60 * 1000;
+  return ms >= 24 * HOUR ? `D-${Math.floor(ms / (24 * HOUR))}` : `${Math.max(1, Math.ceil(ms / HOUR))}시간 남음`;
+};

@@ -146,6 +146,8 @@ async function mount() {
   document.body.appendChild(container);
   root = createRoot(container);
   await act(async () => { root!.render(<AppProvider><Probe /></AppProvider>); });
+  // 콘텐츠 JSON은 동적 import라 한 번 더 기다린다
+  await act(async () => { await vi.dynamicImportSettled(); });
   expect(current.contentStatus).toBe('ready');
   expect(current.hydrated).toBe(true);
 }
@@ -631,7 +633,7 @@ describe('AppProvider 미션 보상 수령 결과 계약', () => {
     expect([...current.claimingMissionIds]).toEqual([]);
     expect(current.claimingMissionIds).not.toBe(pendingIds);
     expect([...pendingIds]).toEqual(['m3']);
-    expect(current.missionRewards).toEqual([{ points: 30, xp: 17, source: 'mission' }]);
+    expect(current.missionRewards).toEqual([{ xp: 17 }]);
     expect(mocks.feedback).toHaveBeenCalledTimes(1);
     expect(mocks.analytics.mock.calls.filter(([name]) => name === 'mission_reward_claim')).toHaveLength(1);
     await act(async () => { expect(await current.claimReward('m3')).toBeNull(); });

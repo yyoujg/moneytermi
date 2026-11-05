@@ -18,7 +18,7 @@ const mount = (visuals: Parameters<typeof WordVisuals>[0]['visuals'], terms?: Te
 };
 
 describe('WordVisuals tables and charts', () => {
-  it('gives long first-column labels more room in three-column tables', () => {
+  it('shows comparisons of three columns or fewer as a per-row list on mobile', () => {
     const container = mount([{
       type: 'table',
       title: '단리와 복리 비교',
@@ -29,7 +29,12 @@ describe('WordVisuals tables and charts', () => {
       ],
     }]);
 
-    expect([...container.querySelectorAll('col')].map(col => (col as HTMLTableColElement).style.width)).toEqual(['34%', '30%', '36%']);
+    // 3열 이하 비교는 표 대신 행별 목록: 항목명 아래에 '열 이름 값'이 줄마다 온다.
+    expect(container.querySelector('table')).toBeNull();
+    const items = container.querySelectorAll('.word-visual-rows > div');
+    expect(items).toHaveLength(2);
+    expect(items[0].querySelector('dt')).toHaveTextContent('이자가 붙는 곳');
+    expect([...items[0].querySelectorAll('dd')].map(dd => dd.textContent)).toEqual(['단리원금에만', '복리원금 + 쌓인 이자']);
   });
 
   it('keeps wide tables horizontally scrollable instead of squeezing every column', () => {

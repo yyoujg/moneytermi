@@ -111,3 +111,20 @@ describe('selectDueReviewWords', () => {
     ], '2026-10-09')).toBe('2026-10-10');
   });
 });
+
+describe('selectRecallWords 오답 단어', () => {
+  it('복습에서 틀려 unknown이 된 단어(last_grade 0)는 새로고침 뒤에도 우선 고른다', () => {
+    const picked = selectRecallWords({
+      candidates: [1, 2].map(word),
+      knownIds: new Set([1]),
+      courses: [course('단원', [1, 2])],
+      count: 2,
+      today: '2026-10-09',
+      progressRows: [
+        { word_id: 1, status: 'known', due_date: '2026-10-20', reps: 2 },
+        { word_id: 2, status: 'unknown', due_date: '2026-10-09', reps: 0, last_grade: 0 },
+      ],
+    });
+    expect(picked.map(w => w.id)).toEqual([2, 1]);
+  });
+});

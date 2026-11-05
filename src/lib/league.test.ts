@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { weekStart, msUntilReset, daysUntilReset } from './league';
+import { weekStart, msUntilReset, timeLeftLabel } from './league';
 
 const kst = (s: string) => new Date(`${s}+09:00`);
 const DAY = 24 * 60 * 60 * 1000;
@@ -39,20 +39,21 @@ describe('msUntilReset', () => {
   });
 });
 
-describe('daysUntilReset', () => {
-  it('월요일 시작이면 7일', () => {
-    expect(daysUntilReset(kst('2026-09-21T00:00:00'))).toBe(7);
+describe('timeLeftLabel', () => {
+  it('월요일 시작이면 D-7', () => {
+    expect(timeLeftLabel(kst('2026-09-21T00:00:00'))).toBe('D-7');
   });
 
-  it('마지막 날에도 0이 아니라 1', () => {
-    expect(daysUntilReset(kst('2026-09-27T23:00:00'))).toBe(1);
+  it('하루 이상 남으면 D-n, 일수는 내림', () => {
+    expect(timeLeftLabel(kst('2026-09-26T12:00:00'))).toBe('D-1');
   });
 
-  it('1~7 범위를 벗어나지 않는다', () => {
-    for (let h = 0; h < 24 * 7; h += 3) {
-      const d = daysUntilReset(new Date(kst('2026-09-21T00:00:00').getTime() + h * 3600000));
-      expect(d).toBeGreaterThanOrEqual(1);
-      expect(d).toBeLessThanOrEqual(7);
-    }
+  it('하루 안이면 시간 단위로 올림', () => {
+    expect(timeLeftLabel(kst('2026-09-27T00:30:00'))).toBe('24시간 남음');
+    expect(timeLeftLabel(kst('2026-09-27T21:30:00'))).toBe('3시간 남음');
+  });
+
+  it('마지막 몇 분에도 0이 아니라 1시간', () => {
+    expect(timeLeftLabel(kst('2026-09-27T23:59:00'))).toBe('1시간 남음');
   });
 });

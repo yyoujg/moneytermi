@@ -78,7 +78,9 @@ export const selectRecallWords = ({
     .filter(word => {
       if (seen.has(word.id)) return false;
       seen.add(word.id);
-      return knownIds.has(word.id) && !excluded.has(word.id);
+      // 복습에서 틀려(last_grade 0) 'unknown'이 된 단어도 배운 단어다. 빼면 새로고침 뒤 오답 우선순위가 사라진다.
+      // 카드에서 모른다고 한 'unknown'(채점 기록 없음)은 아직 안 배운 단어라 뺀다
+      return (knownIds.has(word.id) || progressById.get(word.id)?.last_grade === 0) && !excluded.has(word.id);
     })
     .sort((a, b) => {
       const ar = progressById.get(a.id);

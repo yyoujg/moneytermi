@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef, useId } from 'react';
-import { X } from 'lucide-react';
+import { X } from '../ui/OtterIcons';
 import { BottomSheet } from '@toss/tds-mobile';
 import { ActionButton } from '../ui/ActionButton';
-import { UserRound } from '../ui/OtterIcons';
 
 export const NicknameSheet = ({
   open,
@@ -63,7 +62,7 @@ export const NicknameSheet = ({
       open={open}
       className="original-modal"
       onDimmerClick={required ? () => {} : onClose}
-      header={<div className="nickname-sheet-heading"><UserRound size={30} /><span>{required ? '닉네임을 정해주세요' : '닉네임 변경'}</span></div>}
+      header={<span className="sheet-title">{required ? '닉네임을 정해주세요' : '닉네임 변경'}</span>}
       hasTextField
     >
       <div className="nickname-sheet-body">
@@ -94,7 +93,7 @@ export const NicknameSheet = ({
             <span id={hintId} className="sr-only">최대 10자, 현재 {value.length}자 입력</span>
             {value.length > 0 && (
               <button type="button" onClick={() => { setValue(''); setError(null); inputRef.current?.focus(); }} aria-label="지우기" className="nickname-clear">
-                <span><X size={14} strokeWidth={2.25} absoluteStrokeWidth aria-hidden="true" focusable="false" /></span>
+                <span><X size={16} strokeWidth={2.25} absoluteStrokeWidth aria-hidden="true" focusable="false" /></span>
               </button>
             )}
           </div>

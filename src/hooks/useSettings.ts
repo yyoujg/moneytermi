@@ -5,7 +5,8 @@ import { bgmPrefs, hapticPrefs, setBgmEnabled, soundPrefs } from '../lib/feedbac
 // 효과음/배경음악/진동 설정 (Storage 키 setting_sound / setting_bgm / setting_vibration, 'on'|'off')
 export const useSettings = () => {
   const [soundOn, setSoundOn] = useState(true);
-  const [bgmOn, setBgmOn] = useState(true);
+  // 배경음악은 토스 안에서 이질적이라 기본으로 끈다. 사용자가 켠 경우에만 재생
+  const [bgmOn, setBgmOn] = useState(false);
   const [vibrationOn, setVibrationOn] = useState(true);
 
   useEffect(() => {

@@ -8,17 +8,21 @@ export const isDefaultNickname = (n?: string | null) => {
   return !v || v === DEFAULT_NICKNAME || LEGACY_DEFAULT_NICKNAMES.includes(v);
 };
 
+// 코스 난이도: 데이터 값(기초·중급·고급·심화)은 그대로 두고 화면에 보이는 이름만 바꾼다
+export const LEVEL_LABELS: Record<string, string> = { 기초: '입문', 중급: '기본', 고급: '응용', 심화: '전문' };
+export const levelLabel = (level: string) => LEVEL_LABELS[level] ?? level;
+
 export type GrowthStage = {
   id: number;
   name: string;
   emoji: string;
-  minPoints: number;
-  nextMinPoints: number | null; // null = 최고 단계
 };
 
-// 리그 티어. 누적 XP로 결정된다.
-// 기준선은 포인트 시절의 1/5 — XP는 포인트보다 훨씬 천천히 쌓인다(퀴즈 1정답 = 객관식 10~20P·주관식 5~28P vs 2XP. 보상은 하루 150정답까지).
-// 4000XP는 퀴즈 2000문제라 사실상 도달 불가였다.
+// 리그 티어. 서버가 매주 지난주 주간 순위로 정한다(profiles.league_stage, supabase/content/league-weekly-promotion).
+// 상위 3명 승급, 참여자 7명 이상인 주의 하위 3명 강등.
+export const LEAGUE_PROMOTE_TOP = 3;
+export const LEAGUE_DEMOTE_BOTTOM = 3;
+export const LEAGUE_DEMOTE_MIN_PLAYERS = 7;
 // 포인트 경제 (migration_points_economy.sql). 레슨 시작 비용 / XP 마일스톤 보너스.
 export const LESSON_COST = 10;
 export const XP_BONUS_STEP = 50;
@@ -33,23 +37,24 @@ export const ENERGY_REFILL_COST = 600;
 // 미션 보상 수령 시 서버가 함께 주는 XP (migration_xp.sql STEP 7 claim_mission_reward → add_xp 5)
 export const MISSION_XP = 5;
 
-// 표시 이름만 수달의 학습 성장 단계로 바꾼다. 단계 ID·누적 XP 기준·기존 저장값은 유지한다.
-export const GROWTH_STAGES: Omit<GrowthStage, 'nextMinPoints'>[] = [
-  { id: 1, name: '아기수달', emoji: '🌱', minPoints: 0 },
-  { id: 2, name: '꼬마수달', emoji: '🚀', minPoints: 20 },
-  { id: 3, name: '탐험수달', emoji: '🎯', minPoints: 100 },
-  { id: 4, name: '척척수달', emoji: '🌟', minPoints: 300 },
-  { id: 5, name: '박사수달', emoji: '🏆', minPoints: 800 },
+// 10단계. 그림은 public/league/v3(StageGlyph), 서버 league_stage 1~10과 같은 순서
+export const GROWTH_STAGES: GrowthStage[] = [
+  { id: 1, name: '텅장러', emoji: '👛' },
+  { id: 2, name: '꼼꼼이', emoji: '📒' },
+  { id: 3, name: '짠돌이', emoji: '🪙' },
+  { id: 4, name: '꿀꿀이', emoji: '🐷' },
+  { id: 5, name: '갓생러', emoji: '✨' },
+  { id: 6, name: '뉴스광', emoji: '📰' },
+  { id: 7, name: '개미', emoji: '📈' },
+  { id: 8, name: '존버장인', emoji: '🧘' },
+  { id: 9, name: '건물주', emoji: '🔑' },
+  { id: 10, name: '회장님', emoji: '💰' },
 ];
 
-export const getGrowthStage = (points: number): GrowthStage => {
-  const current = [...GROWTH_STAGES].reverse().find(s => points >= s.minPoints) ?? GROWTH_STAGES[0];
-  const next = GROWTH_STAGES.find(s => s.id === current.id + 1) ?? null;
-  return { ...current, nextMinPoints: next?.minPoints ?? null };
-};
+export const getGrowthStage = (stageId: number): GrowthStage => GROWTH_STAGES.find(s => s.id === stageId) ?? GROWTH_STAGES[0];
 
 // 하루 복습 큐 상한 (홈 "오늘 복습할 단어 N개")
 export const DAILY_REVIEW_CAP = 10;
 
-// 프로필 아바타 값(서버 저장값). 고르기 시트에 이 순서로 나온다. 그림 매핑은 ProfileAvatar.
+// 프로필 아바타 값(서버 저장값). 현재 화면에서는 쓰지 않는다.
 export const AVATAR_OPTIONS = ['🍊','🐼','🥰','🦉'];

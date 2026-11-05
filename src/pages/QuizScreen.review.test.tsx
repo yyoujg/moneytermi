@@ -156,7 +156,7 @@ describe('QuizScreen review SRS', () => {
     expect(state.recordReview).toHaveBeenNthCalledWith(2, 2, true, false);
   });
 
-  it('조개와 공통 입체 그림을 항목명 왼쪽에 두고 수치·복귀는 유지한다', async () => {
+  it('XP 그림을 항목명 왼쪽에 두고 코인 없이 수치·복귀는 유지한다', async () => {
     const { container, click } = await mount();
     await click('용어1');
     await click('다음 문제');
@@ -165,24 +165,19 @@ describe('QuizScreen review SRS', () => {
     const summary = container.querySelector('[aria-label="퀴즈 결과 요약"]');
     expect(summary).not.toBeNull();
     const icons = [...summary!.querySelectorAll('.quiz-result-icon')];
-    expect(icons).toHaveLength(4);
-    for (const [index, label] of ['모은 조개', '획득 XP', '첫 시도 정답률', '최고 연속 정답'].entries()) {
-      const icon = icons[index];
-      expect(icon).toHaveAttribute('width', '18');
-      expect(icon).toHaveAttribute('height', '18');
-      if (index === 0) {
-        expect(icon).toHaveAttribute('src', '/otter/v3/items/shell.png');
-      } else {
-        expect(icon).toHaveAttribute('src', ['/otter/v3/icons/trophy.png', '/otter/v3/icons/target.png', '/otter/v3/icons/flame.png'][index - 1]);
-        expect(icon).not.toHaveAttribute('stroke-width');
-        expect(icon).not.toHaveAttribute('fill');
-      }
-      expect(icon).toHaveAttribute('aria-hidden', 'true');
-      expect(icon.parentElement).toHaveTextContent(label);
-      expect(icon.parentElement?.nextElementSibling).toHaveTextContent(['+0개', '+0', '100%', '1연속'][index]);
-    }
-    expect(container.querySelectorAll('.quiz-result-icon')).toHaveLength(5);
-    expect([...container.querySelectorAll('.quiz-result-icon')].at(-1)?.closest('.rounded-full')).toBeNull();
+    expect(icons).toHaveLength(1);
+    const icon = icons[0];
+    expect(icon).toHaveAttribute('width', '20');
+    expect(icon).toHaveAttribute('height', '20');
+    expect(icon).toHaveAttribute('data-icon', 'Xp');
+    expect(icon).toHaveAttribute('aria-hidden', 'true');
+    expect(icon.parentElement).toHaveTextContent('획득 XP');
+    expect(icon.parentElement).toHaveTextContent('+0');
+    expect(summary).not.toHaveTextContent('코인');
+    expect(container).toHaveTextContent('100%');
+    expect(container).toHaveTextContent('1연속');
+    // 등급은 주간 순위로 오르므로 퀴즈 결과에 누적 XP 승급 막대를 두지 않는다
+    expect(summary!.querySelector('[role="progressbar"]')).toBeNull();
     await click('주제로 돌아가기');
     expect(container.textContent).toContain('코스 화면');
   });
@@ -205,48 +200,43 @@ describe('QuizScreen review SRS', () => {
 });
 
 
-describe('조개 표시와 보상 값 유지', () => {
-  it.each([3, 4])('%i연속의 고정 보너스는 조개 5개이고 서버 보상 값은 그대로 표시한다', async combo => {
+describe('코인 없이 XP와 연속 정답만 표시', () => {
+  it.each([3, 4, 5])('%i연속은 코인 보너스 없이 연속 수만 알리고 서버 보상 값은 표시하지 않는다', async combo => {
     state.submitQuizAnswer.mockResolvedValue(quizResult({ combo, earned: 15 }));
     const { container, click } = await mount();
     await click('용어1');
-    expect(container.textContent).toContain(combo + '연속! 조개 5개 보너스');
-    expect(container.querySelector('.anim-reward-rise')).toHaveTextContent('+15개');
-    expect(container.querySelector('.quiz-feedback-sheet')).toHaveTextContent('+15개');
+    expect(container.textContent).toContain(combo + '연속!');
+    expect(container.textContent).not.toMatch(/코인|x2 보너스|\+15개/);
+    expect(container.querySelector('.anim-reward-rise')).toBeNull();
     expect(state.submitQuizAnswer).toHaveBeenCalledWith(1, '용어1', 'mc', false, true, expect.any(String));
     await click('다음 문제');
     await click('용어2');
     await click('결과 보기');
-    expect(container.querySelector('[aria-label="퀴즈 결과 요약"]')).toHaveTextContent('+30개');
+    expect(container.querySelector('[aria-label="퀴즈 결과 요약"]')).not.toHaveTextContent('+30개');
   });
 
-  it('5연속 배수 보너스와 보상 한도 조건을 유지한다', async () => {
+  it('보상 한도 문구를 보여주지 않는다', async () => {
     state.submitQuizAnswer.mockResolvedValue(quizResult({ combo: 5, capped: true }));
     const { container, click } = await mount();
     await click('용어1');
-    expect(container.textContent).toContain('5연속! x2 보너스');
-    expect(container.textContent).toContain('한도 도달');
-    expect(container.querySelector('.anim-reward-rise')).toBeNull();
-    expect(container.textContent).not.toContain('조개 5개 보너스');
+    expect(container.textContent).not.toContain('한도 도달');
   });
 
-  it('홈 미션 보상은 조개 개수로 표시하고 XP와 지급 인수는 유지한다', async () => {
+  it('홈 미션 보상은 XP만 표시하고 지급 인수는 유지한다', async () => {
     const { container, click } = await mount({}, <HomeScreen />);
-    expect(container.textContent).toContain('+37개');
+    expect(container.textContent).not.toContain('+37개');
     expect(container.textContent).toContain('+' + MISSION_XP + ' XP');
-    expect(container.textContent).not.toContain('+37P');
     await click('받기');
     expect(state.claimReward).toHaveBeenCalledWith('m1');
-    expect(container.querySelector('[role="dialog"]')).toHaveTextContent('+37개');
+    expect(container.querySelector('[role="dialog"]')).toHaveTextContent('XP');
+    expect(container.querySelector('[role="dialog"]')).not.toHaveTextContent('코인');
   });
 
-  it('리그 안내는 레슨 조개 차감 대신 에너지와 부스트 선택 사용을 설명한다', async () => {
+  it('리그 안내는 코인·부스트 없이 XP 규칙만 설명하고 에너지는 다루지 않는다', async () => {
     const { container } = await mount({}, <LeagueRules />);
-    expect(container.textContent).toContain('에너지 모두 충전(600개)');
-    expect(container.textContent).toContain('XP 2배 부스트(300개 · 30분)에 선택해서 써요');
-    expect(container.textContent).toContain('레슨 시작에는 조개가 필요 없어요');
-    expect(container.textContent).toContain('XP 50마다 조개 50개');
-    expect(container.textContent).toContain('학습·퀴즈를 새로 시작할 때 1씩 써요');
+    expect(container.textContent).not.toMatch(/코인|부스트|600개/);
+    expect(container.textContent).toContain('퀴즈 정답 2');
+    expect(container.textContent).not.toContain('에너지');
     expect(container.textContent).not.toMatch(/포인트|10P|50P|300P/);
   });
 });
@@ -392,14 +382,13 @@ describe('서버 채점과 저장 확정 회귀', () => {
     await click('오답');
     expect(state.recordReview).toHaveBeenNthCalledWith(1, 1, true, false);
     expect(container.querySelector('.quiz-answer-feedback')).toHaveAttribute('data-correct', 'true');
-    expect(container.querySelector('.quiz-answer-reward')).toHaveTextContent('+17개');
+    expect(container.querySelector('.quiz-answer-reward')).toBeNull();
     expect(shouldScheduleRetry).not.toHaveBeenCalled();
     expect(logClick).toHaveBeenCalledWith('quiz_answer', expect.objectContaining({ word_id: 1, correct: true, first_attempt: true }));
     await click('다음 문제');
     await click('용어2');
     await click('결과 보기');
     expect(container.querySelector('[aria-label="퀴즈 결과 요약"]')).toHaveTextContent('100%');
-    expect(container.querySelector('[aria-label="퀴즈 결과 요약"]')).toHaveTextContent('+17개');
     expect(state.submitQuizAnswer).toHaveBeenCalledTimes(2);
     expect(logClick).toHaveBeenCalledWith('quiz_complete', expect.objectContaining({ total: 2, correct: 2, attempts: 2 }));
   });
