@@ -305,19 +305,19 @@ const QuizScreen = () => {
           {(quizItem?.options ?? []).map((opt, i) => {
             const isSelected = selected === opt.answer;
             const isCorrectOption = opt.isCorrect;
-            // 보기는 테두리 없는 연한 갈색 면에 진한 갈색 굵은 글자. 고른 보기만 주버튼과 같은 진한 갈색 테두리로 표시한다
-            let optionStyle = 'bg-[var(--color-choice)] border-transparent text-[var(--color-brand-text)] active:opacity-80';
-            if (!showGrading && isSelected) optionStyle = 'bg-[var(--color-accent-soft)] border-[var(--color-brand-action)] text-[var(--color-brand-text)]';
+            // 안 고른 보기는 말풍선처럼 흰 바탕에 베이지 테두리, 고른 보기는 테두리 없는 연한 갈색 면
+            let optionStyle = 'bg-[var(--color-card)] border-[var(--color-bubble-line)] text-[var(--color-brand-text)] active:opacity-80';
+            if (!showGrading && isSelected) optionStyle = 'bg-[var(--color-choice)] border-transparent text-[var(--color-brand-text)]';
             if (showGrading) {
               // 채점 뒤: 정답은 연한 초록, 내가 고른 오답은 연한 빨강(이해 확인 피드백과 같은 색)
               optionStyle = isCorrectOption ? 'bg-[var(--accent-green-soft)] border-[var(--accent-green-ink)] text-[var(--accent-green-ink)]'
                 : isSelected ? 'bg-[var(--color-danger-soft)] border-[var(--color-danger-line)] text-[var(--color-danger-foreground)]'
-                : 'bg-[var(--color-choice)] border-transparent text-[var(--color-brand-text)]';
+                : 'bg-[var(--color-card)] border-[var(--color-bubble-line)] text-[var(--color-brand-text)]';
             }
             const tag = !showGrading ? (isSelected ? (status === 'idle' ? '선택' : '내 답') : null) : isCorrectOption ? '정답' : isSelected ? '내 답' : null;
             const feedbackMotion = showGrading && (isCorrectOption || isSelected) ? 'anim-choice-lock' : '';
             const markerClass = !showGrading
-              ? isSelected ? 'bg-[var(--color-brand-action)] text-[var(--color-on-brand)]' : 'border border-[var(--color-line-strong)] bg-[var(--color-card)] text-[var(--color-ink-3)]'
+              ? isSelected ? 'bg-[var(--color-bubble-line)] text-[var(--color-brand-text)]' : 'border border-[var(--color-line-strong)] bg-[var(--color-card)] text-[var(--color-ink-3)]'
               : isCorrectOption
                 ? 'text-[var(--accent-green-ink)]'
                 : isSelected
@@ -330,12 +330,12 @@ const QuizScreen = () => {
                 onClick={() => { if (status === 'idle' && !answerPending && !submissionMessage) setSelected(opt.answer); }}
                 aria-pressed={isSelected}
                 disabled={status !== 'idle' || answerPending || submissionMessage !== null}
-                className={`quiz-option anim-fade-up ${feedbackMotion} flex items-center gap-3 min-h-[64px] py-4 px-4 border text-base font-semibold leading-relaxed text-left break-keep transition-colors duration-150 ${optionStyle}`}
+                className={`quiz-option anim-fade-up ${feedbackMotion} flex items-center gap-3 min-h-[64px] py-4 px-4 border-2 text-base font-semibold leading-relaxed text-left break-keep transition-colors duration-150 ${optionStyle}`}
                 style={{ '--i': i + 1, borderRadius: 'var(--shape-button)' } as React.CSSProperties}
               >
-                {/* 번호는 수달 3색 번호 그림(고르면 갈색 채움). 채점 뒤 정답·내 오답만 체크·엑스 */}
+                {/* 번호는 베이지 원 번호 그림. 채점 뒤 정답·내 오답만 체크·엑스 */}
                 {(!showGrading || (!isCorrectOption && !isSelected)) && i < 4
-                  ? <img src={`/icons/num/num-${i + 1}${isSelected ? '-selected' : ''}.svg`} alt="" aria-hidden="true" width={28} height={28} className="shrink-0" data-num-icon />
+                  ? <img src={`/icons/num/num-${i + 1}.svg`} alt="" aria-hidden="true" width={28} height={28} className="shrink-0" data-num-icon />
                   : <span className={`w-7 h-7 shrink-0 flex items-center justify-center text-xs font-semibold ${markerClass}`} style={{ borderRadius: 9999 }}>
                     {showGrading && isCorrectOption ? <Check size={16} strokeWidth={3} /> : showGrading && isSelected ? <X size={16} strokeWidth={3} /> : i + 1}
                   </span>}
