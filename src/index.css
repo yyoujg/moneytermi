@@ -376,6 +376,12 @@ svg:is(.text-brand-300, .text-brand-400, .text-brand-500, .text-brand-600, .text
 /* 에너지 칩은 카드와 따로 화면 위 바탕색 줄에 고정한다. 코스 머리는 스크롤 중 그 줄 바로 아래에 고정된다 */
 .course-energy-bar { position: sticky; top: 0; z-index: 20; display: flex; justify-content: flex-end; padding: var(--space-2) var(--space-5); background: var(--color-canvas); }
 .course-energy-bar button.course-energy-entry.is-compact { position: static; background: var(--color-card); }
+.course-topic-screen .course-energy-bar { justify-content: space-between; align-items: center; gap: var(--space-2); }
+.course-home-stats { display: flex; min-width: 0; align-items: center; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+.course-home-stats li { display: flex; align-items: baseline; gap: var(--space-1); white-space: nowrap; }
+.course-home-stats img { align-self: center; }
+.course-home-stats strong { color: var(--color-ink); font-size: var(--font-size-body); font-weight: var(--font-weight-semibold); font-variant-numeric: tabular-nums; }
+.course-home-stats span { color: var(--color-ink-3); font-size: var(--font-size-caption); }
 .course-topic-screen .course-topic-summary.sticky { top: calc(var(--size-touch-min) + var(--space-2) * 2); }
 /* 코스 카드 오른쪽 주제 목록 버튼: 44px 터치 영역, 아이콘은 갈색 */
 .course-topic-list-button { display: inline-flex; width: var(--size-touch-min); height: var(--size-touch-min); flex-shrink: 0; align-items: center; justify-content: center; margin: calc(var(--space-3) * -1) calc(var(--space-2) * -1) calc(var(--space-3) * -1) 0; color: var(--color-brand-text); }

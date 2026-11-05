@@ -9,6 +9,7 @@ import { useAuth } from '../hooks/useAuth';
 import { logClick } from '../lib/analytics';
 import { ENERGY_ACTION_COST, levelLabel } from '../constants';
 import { feedbackNodeTap } from '../lib/feedback';
+import { calcStreak } from '../lib/streak';
 import { loadDoneNodes } from '../lib/pathProgress';
 import { Storage } from '../lib/storage';
 import { COURSE_REVIEW_COUNT, LESSON_WARMUP_COUNT, firstUnknownWordIndex, learnedOrFallbackWords, selectCourseQuizWords } from '../lib/coursePractice';
@@ -94,7 +95,7 @@ const CourseScreen = () => {
   const navigate = useNavigate();
   const isCatalog = useLocation().pathname === '/course/topics';
   const [searchParams, setSearchParams] = useSearchParams();
-  const { hydrated, contentStatus, retryContent, viewedIds: knownIds, courses, energy, energyMax, spendEnergy, pickRecallWords, openShop } = useAppContext();
+  const { hydrated, contentStatus, retryContent, viewedIds: knownIds, courses, energy, energyMax, spendEnergy, pickRecallWords, openShop, xp, attendanceDates } = useAppContext();
   // 이 기기에서 끝낸 퀴즈·복습 노드. 화면에 돌아올 때마다 다시 읽는다(퀴즈 끝내고 돌아온 직후 반영).
   const [doneNodes, setDoneNodes] = useState<Set<string>>(new Set());
   const [doneNodesLoaded, setDoneNodesLoaded] = useState(false);
@@ -359,6 +360,19 @@ const CourseScreen = () => {
     <div className={`course-screen ${isCatalog ? 'bg-[var(--color-card)]' : activeTopic ? 'course-topic-screen' : 'app-soft-screen'} flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden`}>
       {/* 에너지 칩은 주제 카드와 따로 화면 위에 고정한다 */}
       {activeTopic && <div className="course-energy-bar">
+        {/* 마이의 학습 기록 중 리그를 뺀 세 가지를 홈 위에 한 줄로(마이와 같은 그림·단위) */}
+        <ul className="course-home-stats" aria-label="학습 기록">
+          {[
+            { icon: 'terms', label: '살펴본 용어', value: knownIds.size, unit: '개' },
+            { icon: 'streak', label: '연속 학습', value: calcStreak(attendanceDates), unit: '일' },
+            { icon: 'xp', label: '경험치', value: xp, unit: 'XP' },
+          ].map(stat => (
+            <li key={stat.icon} aria-label={`${stat.label} ${stat.value.toLocaleString()}${stat.unit}`}>
+              <img src={`/icons/stat/icon-${stat.icon}.svg`} alt="" aria-hidden="true" width={20} height={20} data-stat-icon={stat.icon} />
+              <strong aria-hidden="true">{stat.value.toLocaleString()}</strong><span aria-hidden="true">{stat.unit}</span>
+            </li>
+          ))}
+        </ul>
         <button type="button" className="course-energy-entry is-compact" aria-label={`학습 에너지 ${energy}/${energyMax}, 충전 방법 보기`} onClick={() => openShop('energy')}>
           <span><img src="/icons/stat/icon-energy.svg" alt="" aria-hidden="true" width={20} height={20} data-stat-icon="energy" /><span><span className="course-energy-label">에너지 </span><strong>{energy}/{energyMax}</strong></span></span>
           <span className="course-energy-action">충전 방법<ChevronRight size={16} aria-hidden="true" /></span>
