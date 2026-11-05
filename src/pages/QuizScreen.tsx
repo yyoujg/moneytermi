@@ -314,7 +314,7 @@ const QuizScreen = () => {
                 : isSelected ? 'bg-[var(--color-danger-soft)] border-[var(--color-danger-line)] text-[var(--color-danger-foreground)]'
                 : 'bg-[var(--color-surface)] border-transparent text-[var(--color-brand-text)]';
             }
-            const tag = !showGrading ? (isSelected ? (status === 'idle' ? '선택' : '내 답') : null) : isCorrectOption ? '정답' : isSelected ? '내 답' : null;
+            const tag = !showGrading ? (isSelected && status !== 'idle' ? '내 답' : null) : isCorrectOption ? '정답' : isSelected ? '내 답' : null;
             const feedbackMotion = showGrading && (isCorrectOption || isSelected) ? 'anim-choice-lock' : '';
             const markerClass = !showGrading
               ? isSelected ? 'bg-[var(--color-brand-action)] text-[var(--color-on-brand)]' : 'border border-[var(--color-line-strong)] bg-[var(--color-card)] text-[var(--color-ink-3)]'

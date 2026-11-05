@@ -1056,7 +1056,7 @@ button.word-meaning-detail:focus-visible { outline: 2px solid var(--color-ink-3)
 .quiz-selection-guide { margin-top: calc(var(--space-1) * -1); color: var(--color-ink-3); font-size: var(--font-size-label); line-height: var(--line-height-relaxed); word-break: keep-all; }
 .quiz-prompt-main:focus { outline: none; }
 button.quiz-option:disabled { opacity: 1; cursor: default; }
-.quiz-confirm-footer { flex-shrink: 0; padding: var(--space-3) var(--space-5) max(var(--space-6), env(safe-area-inset-bottom)); border-top: 1px solid var(--color-accent-soft); background: var(--color-card); }
+.quiz-confirm-footer { flex-shrink: 0; padding: var(--space-3) var(--space-5) max(var(--space-6), env(safe-area-inset-bottom)); border-top: 1px solid var(--color-line); background: var(--color-card); }
 .quiz-answer-feedback { display: flex; flex-shrink: 0; flex-direction: column; gap: var(--space-3); padding: var(--space-5) var(--space-5) max(var(--space-5), env(safe-area-inset-bottom)); border-radius: var(--shape-card) var(--shape-card) 0 0; background: var(--color-card); box-shadow: 0 -4px 16px rgba(31, 26, 23, 0.06); }
 .quiz-answer-heading { display: flex; align-items: center; gap: var(--space-2); }
 .quiz-answer-heading > h2 { flex: 1; min-width: 0; color: var(--color-ink); font-size: var(--font-size-title-3); font-weight: var(--font-weight-bold); line-height: var(--line-height-body); word-break: keep-all; }
@@ -1122,7 +1122,7 @@ button.my-profile-name-button { display: flex; align-items: center; gap: var(--s
 .league-screen > div:first-child { padding-bottom: var(--space-2); background: transparent; }
 .quiz-answer-feedback[data-correct='true'] .quiz-answer-heading > h2 { color: var(--accent-green-ink); }
 /* 말풍선이 수달 옆이라 폭이 좁아, 문제는 한 단계 작게(줄 수 줄이기) */
-.quiz-question-card .quiz-prompt-main { font-size: var(--font-size-headline); line-height: var(--line-height-relaxed); }
+.quiz-question-card .quiz-prompt-main { font-size: var(--font-size-title-3); line-height: var(--line-height-title); }
 button.course-home-topic[data-current='true'] { border-color: var(--color-accent-line-strong); }
 .course-home-topic-icon { position: absolute; left: -88px; top: calc(50% - 30px); display: flex; align-items: center; justify-content: center; width: 60px; height: 60px; border-radius: 50%; background: transparent; color: var(--color-ink-2); }
 .course-home-topic-icon:has([data-icon='BookOpenText']) { background: var(--color-card); }

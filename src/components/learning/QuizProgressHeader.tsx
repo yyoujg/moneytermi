@@ -30,7 +30,7 @@ export const QuizProgressHeader = ({
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={Math.max(0, Math.min(100, Math.round(progress)))}
-      className="h-2 rounded-full bg-[var(--color-accent-soft)] overflow-hidden"
+      className="h-2 rounded-full bg-[var(--color-surface)] overflow-hidden"
     >
       <div className={`h-full rounded-full bg-[var(--color-progress)] transition-all ${durationClass}`} style={{ width: `${progress}%` }} />
     </div>
