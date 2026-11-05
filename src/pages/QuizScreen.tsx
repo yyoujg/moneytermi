@@ -158,24 +158,21 @@ const QuizScreen = () => {
     return (
       <LearningCompletionScreen
         title={completionTitle}
-        subtitle={<>{`${baseQueue.length}문제 완료${retryQueue.length > 0 ? ` · 다시 푼 문제 ${retryQueue.length}개` : ''}`}<br />{praiseForQuiz({ accuracy, maxCombo, total: baseQueue.length })}</>}
+        subtitle={<>{`${baseQueue.length}문제 완료${retryQueue.length > 0 ? ` · 틀린 문제 다시 풀기 ${retryQueue.length}번` : ''}`}<br />{praiseForQuiz({ accuracy, maxCombo, total: baseQueue.length })}</>}
         actionLabel={navState?.nextRoute?.label ?? (backPath.startsWith('/course') ? '주제로 돌아가기' : '퀘스트로')}
         onAction={() => navState?.nextRoute
           ? navigate(navState.nextRoute.pathname, { replace: true, state: navState.nextRoute.state })
           : navigate(backPath, { replace: true, state: { openFocus: true } })}
       >
-        {/* 끝 화면은 핵심 숫자 하나와 보상 한 줄만 크게 보여준다(피크엔드) */}
-        <section className="quiz-result-stats w-full flex flex-col items-center gap-1 text-center anim-fade-up" role="group" aria-label="퀴즈 결과 요약" style={{ '--i': 2 } as React.CSSProperties}>
-          <p className="text-xs text-[var(--color-ink-3)]">첫 시도 정답률</p>
-          <p className="text-4xl font-bold text-[var(--color-ink)] tabular-nums">{accuracy}%</p>
-          <p className="mt-3! flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-base font-bold tabular-nums">
-            <span className="inline-flex items-center gap-1 text-[var(--color-ink)]"><XpIcon size={20} className="quiz-result-icon" /><span>획득 XP</span><span>+{Math.max(0, xp - xpAtStart.current)}</span></span>
-          </p>
-          <p className="mt-1! text-xs text-[var(--color-ink-3)]">최고 {maxCombo}연속</p>
+        {/* 끝 화면 숫자 세 개를 한 줄에 같은 크기로(마이 학습 기록과 같은 모양, 상자 없이) */}
+        <section className="quiz-result-stats anim-fade-up" role="group" aria-label="퀴즈 결과 요약" style={{ '--i': 2 } as React.CSSProperties}>
+          <div className="quiz-result-stat"><strong>{accuracy}%</strong><span>첫 시도 정답률</span></div>
+          <div className="quiz-result-stat"><XpIcon size={20} className="quiz-result-icon" /><strong>+{Math.max(0, xp - xpAtStart.current)}</strong><span>획득 XP</span></div>
+          <div className="quiz-result-stat"><strong>{maxCombo}연속</strong><span>최고 기록</span></div>
         </section>
-        <button
-          type="button"
-          className="press-fade min-h-11 px-3 text-sm font-semibold text-[var(--color-ink-2)] anim-fade-up"
+        <ActionButton
+          tone="soft"
+          className="quiz-result-share anim-fade-up"
           style={{ '--i': 3 } as React.CSSProperties}
           onClick={() => {
             logClick('quiz_result_share', { mode: navState?.mode ?? 'quiz', total: baseQueue.length, accuracy, max_combo: maxCombo });
@@ -183,7 +180,7 @@ const QuizScreen = () => {
           }}
         >
           친구에게 공유
-        </button>
+        </ActionButton>
       </LearningCompletionScreen>
     );
   }

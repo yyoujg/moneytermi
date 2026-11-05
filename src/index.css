@@ -201,8 +201,9 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
 }
 /* 문제 말풍선: 왼쪽 아래 수달 쪽으로 꼬리. 수달 그림 양옆 여백만큼 당겨 붙인다 */
 .quiz-question-otter { margin-inline: -18px -15px; }
+/* 말풍선 꼬리: 큰 말풍선은 아래에서 72px(수달 머리 높이), 한 줄짜리 짧은 말풍선은 가운데로 내려 40px 둥근 모서리에 걸리지 않게 */
 .quiz-bubble { position: relative; overflow: visible; }
-.quiz-bubble::before { content: ''; position: absolute; bottom: 72px; left: -8px; width: 14px; height: 14px; border-left: 2px solid var(--color-bubble-line); border-bottom: 2px solid var(--color-bubble-line); background: var(--color-card); transform: rotate(45deg); }
+.quiz-bubble::before { content: ''; position: absolute; bottom: min(72px, calc(50% - 7px)); left: -8px; width: 14px; height: 14px; border-left: 2px solid var(--color-bubble-line); border-bottom: 2px solid var(--color-bubble-line); background: var(--color-card); transform: rotate(45deg); }
 .quiz-question-card { border: 0; background: var(--color-card); text-align: left; align-items: stretch; padding: var(--space-5); }
 .quiz-option {
   position: relative;
@@ -1369,3 +1370,9 @@ div[open][tabindex='0'] { border-radius: var(--shape-card) !important; }
 /* 마이 메뉴 행(직접 그린 버튼): 글자는 왼쪽, 화살표는 오른쪽 끝. 높이는 TDS 목록 행과 같은 47px */
 button.my-page-menu-row { display: flex; width: 100%; min-height: 47px; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) 0; border: 0; border-radius: 0; background: transparent; color: var(--color-ink); text-align: left; }
 button.my-page-menu-row:active { opacity: 0.7; }
+/* 퀴즈 결과 숫자 세 칸: 큰 숫자(24/700) 아래 작은 이름. XP 칸은 그림을 숫자 왼쪽에 */
+.quiz-result-stats { display: grid; width: 100%; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); text-align: center; }
+.quiz-result-stat { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--space-1); }
+.quiz-result-stat > strong { color: var(--color-ink); font-size: var(--font-size-title-2); font-weight: var(--font-weight-bold); line-height: var(--line-height-title); font-variant-numeric: tabular-nums; }
+.quiz-result-stat > span { flex-basis: 100%; color: var(--color-ink-3); font-size: var(--font-size-label); line-height: var(--line-height-body); }
+button.action-button.quiz-result-share { min-height: var(--size-touch-min); padding-inline: var(--box-pad-x); font-size: var(--font-size-body) !important; }
