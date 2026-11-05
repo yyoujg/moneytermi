@@ -6,7 +6,7 @@ import {
   SpeakerHigh as SpeakerSvg, MusicNotes as MusicSvg, Vibrate as VibrateSvg, Lightbulb as BulbSvg,
   Target as TargetSvg, Flame as FlameSvg, Television as TvSvg, SpeakerX as MuteSvg,
   PencilSimple as PencilSvg, Lock as LockSvg, ArrowRight as ArrowRightSvg, ArrowDown as ArrowDownSvg,
-  CaretRight as CaretRightSvg, CaretLeft as CaretLeftSvg, CaretDown as CaretDownSvg,
+  CaretRight as CaretRightSvg, CaretLeft as CaretLeftSvg, CaretDown as CaretDownSvg, List as ListSvg,
   CaretDoubleUp as CaretDoubleUpSvg, ArrowCounterClockwise as RotateSvg, ArrowSquareOut as ExternalSvg,
   LinkSimple as LinkSvg, ShareNetwork as ShareSvg, Check as CheckSvg, X as CrossSvg, TrendUp as TrendSvg,
   Sparkle as SparkleSvg, SealCheck as SealCheckSvg, Info as InfoSvg, WarningCircle as AlertSvg,
@@ -62,6 +62,7 @@ export const ArrowDown = createControl(ArrowDownSvg, 'ArrowDown');
 export const ChevronRight = createControl(CaretRightSvg, 'ChevronRight');
 export const ChevronLeft = createControl(CaretLeftSvg, 'ChevronLeft');
 export const ChevronDown = createControl(CaretDownSvg, 'ChevronDown');
+export const ListIcon = createControl(ListSvg, 'ListIcon');
 export const ChevronsUp = createControl(CaretDoubleUpSvg, 'ChevronsUp');
 export const RotateCcw = createControl(RotateSvg, 'RotateCcw');
 export const ExternalLink = createControl(ExternalSvg, 'ExternalLink');

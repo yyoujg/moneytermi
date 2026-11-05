@@ -19,7 +19,7 @@ describe('버튼 글자색을 따르는 작은 조작 표시', () => {
   it('방향·재시도·부스트 표시는 현재 글자색을 따르는 선형이다', () => {
     const container = mount(<>{Object.entries(Controls).map(([name, Icon]) => <Icon key={name} />)}</>);
     expect(container.querySelector('img')).toBeNull();
-    expect(container.querySelectorAll('svg')).toHaveLength(6);
+    expect(container.querySelectorAll('svg')).toHaveLength(7);
     for (const icon of container.querySelectorAll('svg')) {
       expect(icon).toHaveAttribute('fill', 'currentColor');
       expect(icon).toHaveAttribute('width', '20');

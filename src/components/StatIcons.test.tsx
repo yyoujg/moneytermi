@@ -32,7 +32,7 @@ describe('재화와 학습 그림 아이콘', () => {
 describe('공용 아이콘 export 호환', () => {
   it('기존 이름과 재화 아이콘이 모두 채움 없는 선형 svg로 그려진다', () => {
     const names = Object.keys(OtterIcons) as (keyof typeof OtterIcons)[];
-    expect(names).toHaveLength(45);
+    expect(names).toHaveLength(46);
     const el = mount(<>{names.map(name => { const Icon = OtterIcons[name] as React.ComponentType; return <Icon key={name} />; })}</>);
     expect(el.querySelector('img')).toBeNull();
     const icons = [...el.querySelectorAll('svg')];

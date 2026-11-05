@@ -372,22 +372,14 @@ svg:is(.text-brand-300, .text-brand-400, .text-brand-500, .text-brand-600, .text
 .app-soft-screen { background: var(--color-card); }
 /* 주제 화면(징검다리 노드)은 연회색 바탕 */
 .course-topic-screen { background: var(--color-canvas); }
-/* 회색 바탕 위에 주제 머리와 코스 머리를 각각 흰 카드로 묶는다(경계는 배경색 하나만) */
-.course-topic-screen .course-topic-header { margin: 0 var(--space-5); padding: var(--space-3) var(--space-4); border-radius: var(--shape-card); background: var(--color-card); }
 .course-topic-screen .course-topic-summary { padding-inline: var(--space-4) !important; border-bottom: 0; border-radius: var(--shape-card); background: var(--color-card) !important; }
 /* 에너지 칩은 카드와 따로 화면 위 바탕색 줄에 고정한다. 코스 머리는 스크롤 중 그 줄 바로 아래에 고정된다 */
 .course-energy-bar { position: sticky; top: 0; z-index: 20; display: flex; justify-content: flex-end; padding: var(--space-2) var(--space-5); background: var(--color-canvas); }
 .course-energy-bar button.course-energy-entry.is-compact { position: static; background: var(--color-card); }
-.course-topic-screen .course-topic-header { position: sticky; top: calc(var(--size-touch-min) + var(--space-2) * 2); z-index: 9; }
-.course-topic-screen .course-topic-summary.sticky { top: calc(var(--size-touch-min) + var(--space-2) * 2 + var(--topic-header-h) - var(--shape-card)); }
-/* 주제 머리와 첫 코스 머리는 한 카드로 잇는다. 주제 머리 흰 면을 코스 머리 둥근 윗모서리 뒤까지 늘려 평소엔 이음매가 안 보이고,
-   스크롤로 코스 머리만 위에 고정되면 둥근 카드로 보인다 */
-.course-topic-screen .course-topic-header { padding-bottom: var(--shape-card); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
-/* 주제와 코스는 구분선 없이 한 덩어리로 읽히게 붙인다 */
-.course-topic-screen .course-topic-header > div, .course-topic-screen .course-topic-switch { width: 100%; }
-.course-topic-screen .course-topic-switch { padding-bottom: 0; }
-.course-topic-screen .course-topic-switch h1 { font-size: var(--font-size-headline); }
-.course-topic-screen section:first-of-type > .course-topic-summary { margin-top: calc(-1 * var(--shape-card)) !important; padding-top: var(--space-2) !important; }
+.course-topic-screen .course-topic-summary.sticky { top: calc(var(--size-touch-min) + var(--space-2) * 2); }
+/* 코스 카드 오른쪽 주제 목록 버튼: 44px 터치 영역, 아이콘은 갈색 */
+.course-topic-list-button { display: inline-flex; width: var(--size-touch-min); height: var(--size-touch-min); flex-shrink: 0; align-items: center; justify-content: center; margin: calc(var(--space-3) * -1) calc(var(--space-2) * -1) calc(var(--space-3) * -1) 0; color: var(--color-brand-text); }
+.course-topic-list-button:active { opacity: 0.7; }
 .learning-completion-card { border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); }
 .learning-completion-mark { display: flex; width: 56px; height: 56px; border-radius: 50%; align-items: center; justify-content: center; background: var(--color-progress); color: var(--color-on-progress); }
 .app-soft-header {

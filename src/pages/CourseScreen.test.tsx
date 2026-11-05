@@ -173,25 +173,22 @@ describe('주제 화면은 코스를 한 페이지에 모두', () => {
   it('같은 주제의 코스를 차례로 모두 보여준다', async () => {
     baseContext({ courses: [course({ id: 'c1', category: '경제' }), course({ id: 'c2', category: '경제', startId: 5 })] });
     const { container } = await mount('/course?topic=0');
-    expect(container.textContent).toContain('코스 1/2');
-    expect(container.textContent).toContain('코스 2/2');
     expect(container.querySelectorAll('[data-course-section]')).toHaveLength(2);
+    // 코스 카드는 이름과 주제 목록 버튼만(코스 번호·진행 막대 없음)
+    expect(container.textContent).not.toContain('코스 1/2');
+    expect(container.querySelector('.course-topic-summary [role="progressbar"]')).toBeNull();
   });
 });
 
-describe('주제 화면 머리에서 다른 주제로 이동', () => {
-  it('머리를 누르면 난이도별 코스 카드 시트를 열고, 카드를 누르면 그 코스로 간다', async () => {
+describe('코스 카드의 주제 목록 버튼', () => {
+  it('오른쪽 목록 버튼을 누르면 주제 고르기 화면으로 간다', async () => {
     baseContext({ courses: [course({ id: 'c1', category: '경제' }), course({ id: 'c2', category: '가계', startId: 5 })] });
-    state.doneNodes = new Set();
     const { container } = await mount('/course?topic=0');
-    await act(async () => container.querySelector<HTMLButtonElement>('.course-topic-switch')!.click());
-    const cards = [...document.querySelectorAll<HTMLButtonElement>('.course-picker .course-home-rail-card')];
-    expect(cards).toHaveLength(2);
-    expect(cards[0]).toHaveAttribute('data-current', 'true');
-    expect(cards[1]).toHaveAttribute('data-locked', 'true');
-    await act(async () => cards[1].click());
-    expect(container.querySelector('[data-course-section="c2"]')).toBeInTheDocument();
-    expect(container.querySelector('[data-course-section="c1"]')).toBeNull();
+    const button = container.querySelector<HTMLButtonElement>('.course-topic-list-button')!;
+    expect(button).toHaveAttribute('aria-label', '주제 고르기');
+    await act(async () => button.click());
+    expect(container.textContent).toContain('주제 고르기');
+    expect(container.querySelector('[data-course-section]')).toBeNull();
   });
 });
 
@@ -410,7 +407,6 @@ describe('CourseScreen energy gates', () => {
   it('포인트가 없어도 지금 순서인 첫 레슨을 에너지로 시작한다', async () => {
     baseContext({ points: 0, courses: [course({ category: '경제' }), course({ id: 'c2', category: '금융', startId: 5 })] });
     const { container, clickButtonContaining } = await mount('/course?topic=0');
-    expect(container.textContent).toContain('코스 1/1');
     await clickButtonContaining('용어1');
     await passLessonIntro();
     expect(container.textContent).toContain('단어 카드');

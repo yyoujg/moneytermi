@@ -1,9 +1,8 @@
 import React, { useMemo, useRef, useLayoutEffect, useEffect, useState } from 'react';
 import { LockKeyhole } from '../components/ui/OtterIcons';
-import { BottomSheet, List, ListRow } from '@toss/tds-mobile';
-import { TopicThumb } from '../components/TopicThumb';
+import { List, ListRow } from '@toss/tds-mobile';
 import { COURSE_NAMES } from '../lib/topicImages';
-import { ChevronDown, ChevronRight } from '../components/ui/ControlIcons';
+import { ChevronRight, ListIcon } from '../components/ui/ControlIcons';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { useAuth } from '../hooks/useAuth';
@@ -175,16 +174,8 @@ const CourseScreen = () => {
   // 길에는 돌(체크·번호·복습)만 두고, 돌을 누르면 그 단계(역할·제목·열기)를 옆 말풍선으로 띄운다.
   // 한 번에 하나, 바깥을 누르면 닫힘. 처음엔 지금 할 단계(focus) 말풍선을 열어 둔다(undefined = 기본값)
   const [bubbleId, setBubbleId] = useState<string | null>(null);
-  // 주제 머리도 스크롤 중 고정한다. 코스 머리는 그 높이만큼 아래에 붙는다(CSS --topic-header-h)
-  const topicHeaderRef = useRef<HTMLDivElement>(null);
-  const [topicHeaderH, setTopicHeaderH] = useState(0);
-  // 내용이 로딩 화면일 땐 머리가 없어 0이 되므로 로딩 상태도 다시 잰다
-  useLayoutEffect(() => { setTopicHeaderH(topicHeaderRef.current?.offsetHeight ?? 0); }, [activeTopic?.category, contentStatus]);
   // 학습 결과에서 '코스에서 이어 하기'로 오면 다음 할 단계 말풍선을 바로 열어 둔다
   const openFocusOnReturn = useRef((useLocation().state as { openFocus?: boolean } | null)?.openFocus === true);
-  const homeRailRef = useRef<HTMLDivElement>(null);
-  // 주제 화면 머리를 누르면 같은 난이도의 다른 주제로 옮기는 시트
-  const [topicPicker, setTopicPicker] = useState(false);
   const [stampCheckReady, setStampCheckReady] = useState(false);
   const stampedRef = useRef(false);
   useEffect(() => {
@@ -234,12 +225,6 @@ const CourseScreen = () => {
     openFocusOnReturn.current = false;
     if (focusId) setBubbleId(focusId);
   }, [focusId, hydrated, doneNodesLoaded]);
-  // 홈 코스 줄: 지금 학습 중인 코스 카드가 왼쪽에 오게 가로 위치를 맞춘다
-  useEffect(() => {
-    const rail = homeRailRef.current;
-    const current = rail?.querySelector<HTMLElement>('[data-current]');
-    if (rail && current) rail.scrollLeft = current.offsetLeft - rail.offsetLeft - 20;
-  }, [focus?.courseId, topicPicker]);
   // 홈 화면은 따로 없다: /course(첫 화면 ?resume=1 포함)는 지금 할 단계가 있는 주제·코스 화면으로 바꾼다. 다 끝냈으면 첫 주제
   const isHome = !activeTopic && !isCatalog;
   useEffect(() => {
@@ -371,7 +356,7 @@ const CourseScreen = () => {
   );
 
   return (
-    <div className={`course-screen ${isCatalog ? 'bg-[var(--color-card)]' : activeTopic ? 'course-topic-screen' : 'app-soft-screen'} flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden`} style={{ '--topic-header-h': `${topicHeaderH}px` } as React.CSSProperties}>
+    <div className={`course-screen ${isCatalog ? 'bg-[var(--color-card)]' : activeTopic ? 'course-topic-screen' : 'app-soft-screen'} flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden`}>
       {/* 에너지 칩은 주제 카드와 따로 화면 위에 고정한다 */}
       {activeTopic && <div className="course-energy-bar">
         <button type="button" className="course-energy-entry is-compact" aria-label={`학습 에너지 ${energy}/${energyMax}, 충전 방법 보기`} onClick={() => openShop('energy')}>
@@ -379,26 +364,19 @@ const CourseScreen = () => {
           <span className="course-energy-action">충전 방법<ChevronRight size={16} aria-hidden="true" /></span>
         </button>
       </div>}
-      <div ref={activeTopic ? topicHeaderRef : undefined} className={activeTopic ? 'course-topic-header' : 'course-home-header'}>
-        {activeTopic ? (
-          <div className="flex items-center gap-3">
-            {/* 뒤로가기는 토스 내비게이션 바가 맡는다(자체 뒤로가기 중복은 검수 반려 사유) */}
-            <button type="button" className="course-topic-switch min-w-0 text-left" aria-haspopup="dialog" aria-label={`${activeTopic.category}, 다른 주제로 이동`} onClick={() => setTopicPicker(true)}>
-              {/* 난이도는 제목 위 작은 글자(코스 머리의 '코스 n/N'과 같은 자리). 코스 수·진행은 코스 머리와 겹쳐 두지 않는다 */}
-              <p className="course-topic-level">{levelLabel(activeTopic.level)}</p>
-              <h1 className="type-page-title flex items-center gap-1"><span className="truncate">{activeTopic.category}</span><ChevronDown size={16} aria-hidden="true" className="shrink-0 text-[var(--color-ink-3)]" /></h1>
-            </button>
-          </div>
-        ) : isCatalog ? (
+      {/* 주제 화면은 따로 머리를 두지 않고 코스 카드(이름 + 주제 목록 버튼)만 둔다. 주제 이름은 스크린리더용 제목으로만 */}
+      {activeTopic && <h1 className="sr-only">{activeTopic.category}</h1>}
+      {!activeTopic && <div className="course-home-header">
+        {isCatalog ? (
           <div className="flex items-center gap-2">
             {/* 뒤로가기는 토스 내비게이션 바가 맡는다(자체 뒤로가기 중복은 검수 반려 사유) */}
-            <h1 id="course-catalog-title" tabIndex={-1} className="type-page-title">주제 둘러보기</h1>
+            <h1 id="course-catalog-title" tabIndex={-1} className="type-page-title">주제 고르기</h1>
           </div>
         ) : (
           // 앱 이름은 토스 내비게이션 바가 보여준다. 화면에는 제목을 숨기고 스크린리더용으로만 남긴다
           <h1 className="sr-only">홈</h1>
         )}
-      </div>
+      </div>}
       {isCatalog && <>
         <div className="px-5">
           <div role="tablist" aria-label="학습 난이도" className="course-home-filters">
@@ -426,7 +404,7 @@ const CourseScreen = () => {
         </div>
         <section id="course-level-panel" role="tabpanel" aria-labelledby={`course-level-${LEVEL_TABS.indexOf(selectedLevel)}`} tabIndex={0} className="course-home-catalog">
           <div className="course-home-catalog-heading">
-            <h2>주제 둘러보기</h2><span>{visibleTopics.length}개 주제</span>
+            <h2>주제 고르기</h2><span>{visibleTopics.length}개 주제</span>
           </div>
 
           <List className="course-home-topic-list">
@@ -459,25 +437,15 @@ const CourseScreen = () => {
       </>}
       {/* 주제의 코스를 한 페이지에 모두 차례로 보여준다 */}
       {activeTopic && activeTopic.parts.map(({ section: sec, si }, partIndex) => {
-        const steps = sec.nodes.filter(isStep);
-        const stepsDone = steps.filter(isDone).length;
-        const pct = steps.length ? Math.round((stepsDone / steps.length) * 100) : 0;
         return (
         <section key={sec.course.id} data-section-index={si} data-course-section={sec.course.id} className="scroll-mt-4">
           <div className={`course-topic-summary sticky top-0 z-10 mx-5 mt-3 mb-4 overflow-hidden py-3 ${sec.course.id === focus?.courseId ? 'anim-fade' : ''}`}>
-            {/* 코스 이름(COURSE_NAMES)이 주제명과 같으면 반복하지 않고 진행 정도만 보여준다 */}
-            {courseName(sec.course) !== activeTopic.category && <div className="relative mb-3 flex items-start gap-3">
-              <div className="flex min-w-0 items-baseline gap-2">
-                <p className="course-topic-course-meta shrink-0">코스 {partIndex + 1}/{activeTopic.parts.length}</p>
-                <h3 className="flex items-center gap-1 text-[length:var(--font-size-body)] font-semibold text-[var(--color-ink)] break-keep leading-snug">{courseName(sec.course)}</h3>
-              </div>
-            </div>}
-            {/* 진행은 막대 + 오른쪽 단계 수 한 줄(같은 값을 %로 한 번 더 쓰지 않는다) */}
-            <div className="relative flex items-center gap-3">
-              <div role="progressbar" aria-label={`${courseName(sec.course)} 진행률`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--color-button-secondary)]">
-                <div className={`h-full rounded-full bg-[var(--color-progress)] ${sec.course.id === focus?.courseId ? 'course-progress-reveal' : ''}`} style={{ width: `${pct}%` }} />
-              </div>
-              <p className="course-topic-steps"><strong>{stepsDone}</strong>/{steps.length}단계</p>
+            {/* 코스 카드는 이름 한 줄과 오른쪽 주제 목록 버튼만. 진행은 아래 단계 노드로 보인다 */}
+            <div className="flex items-center gap-3">
+              <h3 className="min-w-0 flex-1 text-[length:var(--font-size-headline)] font-bold text-[var(--color-ink)] break-keep leading-snug">{courseName(sec.course)}</h3>
+              <button type="button" className="course-topic-list-button" aria-label="주제 고르기" onClick={() => navigate('/course/topics')}>
+                <ListIcon size={24} aria-hidden="true" />
+              </button>
             </div>
           </div>
 
@@ -528,39 +496,6 @@ const CourseScreen = () => {
         </section>
         );
       })}
-      {activeTopic && <BottomSheet open={topicPicker} onDimmerClick={() => setTopicPicker(false)} header={<span className="sheet-title">코스 고르기</span>}>
-        <div className="course-picker pb-6">
-          {[...new Set(topics.map(topic => topic.level))].map(level => (
-            <section key={level} aria-label={`${levelLabel(level)} 코스`}>
-              <div className="course-home-section-heading">
-                <h2 className="course-topic-level">{levelLabel(level)}</h2>
-              </div>
-              <div ref={level === (focusTopic?.level ?? topics[0]?.level) ? homeRailRef : undefined} className="course-home-rail" role="list" aria-label={`${levelLabel(level)} 코스`}>
-                {topics.filter(topic => topic.level === level).flatMap(topic => topic.parts.map(({ section }, pi) => {
-                  const steps = section.nodes.filter(isStep);
-                  const done = steps.filter(isDone).length;
-                  // 잠김 = 남은 필수 단계가 있는데 지금 할 수 있는 단계가 없음(예전에 일부 푼 코스도 앞 코스를 끝내기 전엔 잠김)
-                  const locked = done < steps.length && !steps.some(node => !isDone(node) && node.state !== 'locked');
-                  const name = COURSE_NAMES[section.course.id] ?? (topic.parts.length > 1 ? `${topic.category} ${pi + 1}` : topic.category);
-                  return (
-                    <button key={section.course.id} type="button" role="listitem" className="course-home-rail-card" data-locked={locked}
-                      data-current={section.course.id === focus?.courseId || undefined}
-                      onClick={() => { setTopicPicker(false); navigate(`/course?topic=${topic.index}&course=${section.course.id}`); }} aria-label={`${topic.category} ${name} 코스 열기, ${locked ? '잠김' : `${done}/${steps.length}단계 완료`}`}>
-                      <span className="course-home-rail-thumb">
-                        <TopicThumb category={topic.category} courseId={section.course.id} size={160} height={120} />
-                        {locked && <span className="course-home-rail-lock"><LockKeyhole size={20} aria-hidden="true" /></span>}
-                      </span>
-                      <span className="course-home-rail-text">
-                        <span className="course-home-rail-title">{name}</span>
-                      </span>
-                    </button>
-                  );
-                }))}
-              </div>
-            </section>
-          ))}
-        </div>
-      </BottomSheet>}
     </div>
   );
 };
