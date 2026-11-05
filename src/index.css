@@ -390,7 +390,8 @@ button.course-home-stat-button:active { opacity: 0.7; }
 /* 코스 카드 전체가 주제 고르기 버튼(높이 44px 이상). 오른쪽 '다른 주제 ›'는 보조 글자 */
 button.course-topic-list-button { display: flex; width: 100%; min-height: var(--size-touch-min); align-items: center; gap: var(--space-3); text-align: left; }
 button.course-topic-list-button:active { opacity: 0.7; }
-.course-topic-list-hint { display: inline-flex; flex-shrink: 0; align-items: center; gap: 2px; color: var(--color-ink-3); font-size: var(--font-size-label); font-weight: var(--font-weight-semibold); }
+/* 코스 카드의 "다른 주제" 표시: 회베이지 알약 칩(진한 갈색 굵은 글자). 누르는 영역은 카드 전체 */
+.course-topic-list-hint { display: inline-flex; flex-shrink: 0; align-items: center; gap: 2px; padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3); border-radius: var(--shape-chip); background: var(--color-surface); color: var(--color-brand-text); font-size: var(--font-size-label); font-weight: var(--font-weight-bold); line-height: 1; }
 .learning-completion-card { border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); }
 .learning-completion-mark { display: flex; width: 56px; height: 56px; border-radius: 50%; align-items: center; justify-content: center; background: var(--color-progress); color: var(--color-on-progress); }
 .app-soft-header {
