@@ -385,7 +385,7 @@ button.course-home-stat-button { display: flex; min-height: var(--size-touch-min
 button.course-home-stat-button:active { opacity: 0.7; }
 .course-home-stat-button strong { color: var(--color-ink); font-size: var(--font-size-body); font-weight: var(--font-weight-semibold); font-variant-numeric: tabular-nums; }
 .course-home-stats strong { color: var(--color-ink); font-size: var(--font-size-body); font-weight: var(--font-weight-semibold); font-variant-numeric: tabular-nums; }
-.course-home-stats span { color: var(--color-ink-3); font-size: var(--font-size-body); font-weight: var(--font-weight-semibold); }
+.course-home-stats span { margin-left: calc(var(--space-1) * -1 + 1px); color: var(--color-ink-3); font-size: var(--font-size-body); font-weight: var(--font-weight-semibold); }
 .course-topic-screen .course-topic-summary.sticky { top: calc(var(--size-touch-min) + var(--space-2) * 2); }
 /* 코스 카드 오른쪽 주제 목록 버튼: 44px 터치 영역, 아이콘은 갈색 */
 .course-topic-list-button { display: inline-flex; width: var(--size-touch-min); height: var(--size-touch-min); flex-shrink: 0; align-items: center; justify-content: center; margin: calc(var(--space-3) * -1) calc(var(--space-2) * -1) calc(var(--space-3) * -1) 0; color: var(--color-brand-text); }
