@@ -378,11 +378,11 @@ svg:is(.text-brand-300, .text-brand-400, .text-brand-500, .text-brand-600, .text
 /* 주제 머리와 첫 코스 머리는 한 카드로 잇는다. 주제 머리 흰 면을 코스 머리 둥근 윗모서리 뒤까지 늘려 평소엔 이음매가 안 보이고,
    스크롤로 코스 머리만 위에 고정되면 둥근 카드로 보인다 */
 .course-topic-screen .course-topic-header { padding-bottom: var(--shape-card); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
-/* 한 카드 안에서 주제와 코스는 구분선 한 줄로 나눈다 */
+/* 주제와 코스는 구분선 없이 한 덩어리로 읽히게 붙인다 */
 .course-topic-screen .course-topic-header > div, .course-topic-screen .course-topic-switch { width: 100%; }
-.course-topic-screen .course-topic-switch { padding-bottom: var(--space-3); border-bottom: 1px solid var(--color-line); }
+.course-topic-screen .course-topic-switch { padding-bottom: 0; }
 .course-topic-screen .course-topic-switch h1 { font-size: var(--font-size-headline); }
-.course-topic-screen section:first-of-type > .course-topic-summary { margin-top: calc(-1 * var(--shape-card)) !important; padding-top: var(--space-3) !important; }
+.course-topic-screen section:first-of-type > .course-topic-summary { margin-top: calc(-1 * var(--shape-card)) !important; padding-top: var(--space-2) !important; }
 .lesson-intro-check { display: flex; width: 24px; height: 24px; flex-shrink: 0; border-radius: 50%; align-items: center; justify-content: center; background: var(--color-accent-soft); color: var(--color-accent-foreground); }
 .lesson-intro-step { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4); border-radius: var(--shape-inset); background: var(--color-card); box-shadow: var(--shadow-choice); }
 .lesson-intro-step-number { display: flex; width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%; align-items: center; justify-content: center; background: var(--color-progress); color: var(--color-on-progress); font-size: var(--font-size-label); font-weight: var(--font-weight-bold); }

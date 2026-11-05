@@ -445,8 +445,8 @@ const CourseScreen = () => {
           <div className={`course-topic-summary sticky top-0 z-10 mx-5 mt-3 mb-4 overflow-hidden py-3 ${sec.course.id === focus?.courseId ? 'anim-fade' : ''}`}>
             {/* 코스 이름(COURSE_NAMES)이 주제명과 같으면 반복하지 않고 진행 정도만 보여준다 */}
             {courseName(sec.course) !== activeTopic.category && <div className="relative mb-3 flex items-start gap-3">
-              <div className="min-w-0">
-                <p className="course-topic-course-meta">코스 {partIndex + 1}/{activeTopic.parts.length}</p>
+              <div className="flex min-w-0 items-baseline gap-2">
+                <p className="course-topic-course-meta shrink-0">코스 {partIndex + 1}/{activeTopic.parts.length}</p>
                 <h3 className="flex items-center gap-1 text-[length:var(--font-size-body)] font-semibold text-[var(--color-ink)] break-keep leading-snug">{courseName(sec.course)}</h3>
               </div>
             </div>}
