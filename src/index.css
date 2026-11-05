@@ -582,9 +582,10 @@ button.course-home-primary {
 .course-home-catalog-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
 .course-home-catalog-heading h2 { color: var(--color-ink); font-size: var(--font-size-section-title); font-weight: var(--font-weight-bold); line-height: var(--line-height-body); }
 .course-home-catalog-heading > span { flex-shrink: 0; color: var(--color-ink-3); font-size: var(--font-size-label); }
-.course-home-filters { display: flex; width: 100%; border-bottom: 1px solid var(--color-line); }
-button.course-home-filter { flex: 1 1 0; min-width: 0; min-height: var(--size-touch-min); padding: var(--space-3) 0; border: 0; border-bottom: 3px solid transparent; border-radius: 0 !important; background: transparent; color: var(--color-ink-3); font-size: var(--font-size-body) !important; font-weight: var(--font-weight-semibold) !important; white-space: nowrap; }
-button.course-home-filter[aria-selected='true'] { border-bottom-color: var(--color-accent-foreground); color: var(--color-ink); }
+/* 난이도 탭: 밑줄·구분선 없이 글자만. 고른 탭은 진하게, 나머지는 연한 회색(20px 굵게라 큰 글자 대비 3:1 기준) */
+.course-home-filters { display: flex; width: 100%; gap: var(--space-4); }
+button.course-home-filter { flex: none; min-width: 0; min-height: var(--size-touch-min); padding: 0; border: 0; border-radius: 0 !important; background: transparent; color: var(--color-tab-inactive); font-size: var(--font-size-title-3) !important; font-weight: var(--font-weight-bold) !important; white-space: nowrap; }
+button.course-home-filter[aria-selected='true'] { color: var(--color-ink); }
 .course-home-topic-list { display: grid; gap: var(--space-7); padding: var(--space-6) 0; }
 button.course-home-topic { position: relative; display: flex; flex-direction: column; justify-content: center; min-height: 124px; margin-left: 88px; width: calc(100% - 88px); padding: var(--space-5); border: 2px solid transparent; border-radius: var(--shape-card) !important; background: var(--color-card); color: var(--color-ink); text-align: left; -webkit-tap-highlight-color: transparent; }
 /* 주제 목록은 카드 대신 구분선으로 나눈다. 강조는 위 추천 학습 카드가 맡는다 */
