@@ -2,15 +2,17 @@
 -- 매주(월요일 0시 기준) 지난주 주간 XP 순위(전체 한 판, 개발 계정 제외)로
 --   상위 3명: 한 단계 승급(최고 10단계)
 --   참여자가 7명 이상인 주의 하위 3명: 한 단계 강등(최저 1단계)
--- 모든 사용자는 1단계(돈알못)부터 시작한다.
+-- 모든 사용자는 1단계(텅장러)부터 시작한다. 이 파일은 운영 DB에 이미 적용돼 있다(2026-11-05 settle_league 응답 확인).
 -- 정산은 앱이 settle_league()를 부를 때 지난주가 아직 정산 전이면 한 번만 한다(league_settlements로 중복 방지).
 BEGIN;
 
+-- settle_league가 쓰는 개발 계정 제외 컬럼(league-exclude-dev). 순서가 바뀌어도 돌도록 같이 만든다
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS exclude_from_league boolean NOT NULL DEFAULT false;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS league_stage smallint NOT NULL DEFAULT 1;
 -- 10단계(텅장러~회장님). 5단계로 먼저 적용했어도 다시 실행하면 범위를 10으로 맞춘다
 ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_league_stage_check;
 ALTER TABLE public.profiles ADD CONSTRAINT profiles_league_stage_check CHECK (league_stage BETWEEN 1 AND 10);
-UPDATE public.profiles SET league_stage = 1;
+-- 처음 적용 땐 새 컬럼 기본값 1로 모두 1단계에서 시작한다. 예전엔 여기서 전원을 1로 되돌려, 이미 적용된 DB에 다시 돌리면 등급이 초기화됐다(2026-11-05 삭제)
 GRANT SELECT (league_stage) ON public.profiles TO anon, authenticated;
 
 CREATE TABLE IF NOT EXISTS public.league_settlements (

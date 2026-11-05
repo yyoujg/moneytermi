@@ -119,6 +119,18 @@ export type Database = {
         };
         Relationships: [];
       };
+      period_mission_rewards: {
+        Row: {
+          user_id: string;
+          mission_id: string;
+          period_start: string;
+          xp: number;
+          claimed_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
       mission_defs: {
         Row: {
           mission_id: string;
@@ -442,6 +454,10 @@ export type Database = {
           points: number;
           credited: number;
         };
+      };
+      claim_period_mission: {
+        Args: { p_mission_id: string };
+        Returns: { xp: number; reward: number; period_start: string };
       };
       settle_league: {
         Args: Record<PropertyKey, never>;

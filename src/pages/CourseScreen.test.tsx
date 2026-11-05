@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Course, Word } from '../types';
 import CourseScreen from './CourseScreen';
+import { weekStart } from '../lib/periodMissions';
 import HomeScreen from './HomeScreen';
 import LessonIntroScreen from './LessonIntroScreen';
 import { MISSION_XP } from '../constants';
@@ -44,7 +45,9 @@ vi.mock('../lib/feedback', () => ({ feedbackNodeTap: vi.fn(), feedbackClaim: vi.
 vi.mock('../lib/analytics', () => ({ logClick: vi.fn() }));
 vi.mock('../components/AlertModal', () => ({ showModal: vi.fn() }));
 vi.mock('../hooks/useAuth', () => ({ useAuth: () => ({ user: { nickname: '테스트' }, guestToken: state.guestToken }) }));
-vi.mock('../lib/supabase', () => ({ supabase: { rpc: (...args: unknown[]) => state.rpc(...args) }, getGuestClient: (token: string) => state.guestClient(token) }));
+// 주간·월간 보상 테이블은 기본으로 '아직 없음'(오류)으로 둬서 진행도만 보이는 기존 동작을 검사한다
+function missingTable() { return { select: () => ({ gte: () => Promise.resolve({ data: null, error: { message: 'relation does not exist' } }) }) }; }
+vi.mock('../lib/supabase', () => ({ supabase: { rpc: (...args: unknown[]) => state.rpc(...args), from: missingTable }, getGuestClient: (token: string) => state.guestClient(token) }));
 vi.mock('../components/PointCelebration', () => ({ PointCelebration: () => <div>미션 보상 축하</div> }));
 
 Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { value: true, configurable: true });
@@ -159,7 +162,7 @@ beforeEach(() => {
   baseContext();
   state.guestToken = null;
   state.rpc.mockReset().mockResolvedValue({ data: { rank: 3, total: 13, points: 120 }, error: null });
-  state.guestClient.mockReset().mockReturnValue({ rpc: state.rpc });
+  state.guestClient.mockReset().mockReturnValue({ rpc: state.rpc, from: missingTable });
   vi.mocked(logClick).mockClear();
 });
 
@@ -537,6 +540,28 @@ describe('퀘스트의 미션 동작', () => {
     cleanup = () => { act(() => root.unmount()); container.remove(); };
     return container;
   };
+
+  it('주간 미션을 다 채우면 받기 버튼으로 서버 보상을 받고 완료로 바뀐다', async () => {
+    const { supabase } = await import('../lib/supabase');
+    const db = supabase as unknown as { from: unknown };
+    const original = db.from;
+    db.from = () => ({ select: () => ({ gte: () => Promise.resolve({ data: [], error: null }) }) });
+    const refreshWallet = vi.fn(async () => {});
+    state.guestToken = null;
+    state.rpc.mockImplementation(async (name: string) => name === 'my_league_rank'
+      ? { data: { rank: 3, total: 10, points: 150 }, error: null }
+      : { data: { xp: 120, reward: 20, period_start: weekStart() }, error: null });
+    baseContext({ xp: 100, knownWords: [word(1)], unknownWords: [], attendanceDates: [], myEmoji: '🦦', claimReward: vi.fn(), refreshWallet, missions: { m: { id: 'm', title: '학습하기', current: 0, target: 1, reward: 5, isRewarded: false, sortOrder: 1 } } });
+    const container = await mountHome();
+    const row = [...container.querySelectorAll('[data-period="week"] .home-mission-row')].find(el => el.textContent?.includes('100 XP 모으기'))!;
+    expect(row).toHaveTextContent('+20 XP');
+    const button = [...row.querySelectorAll('button')].find(el => el.textContent === '받기')!;
+    await act(async () => { button.click(); });
+    expect(state.rpc).toHaveBeenCalledWith('claim_period_mission', { p_mission_id: 'w-xp' });
+    expect(row).toHaveTextContent('완료');
+    expect(refreshWallet).toHaveBeenCalled();
+    db.from = original;
+  });
 
   it('오늘의 미션만 모두 표시하고 보상과 진행 숫자를 유지한다', async () => {
     const claimReward = vi.fn(async () => ({ xpGained: MISSION_XP }));
