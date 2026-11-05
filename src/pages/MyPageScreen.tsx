@@ -103,9 +103,8 @@ const MyPageScreen = () => {
             {[...badges.filter(b => b.earned).reverse(), ...badges.filter(b => !b.earned).sort((a, b) => b.progress - a.progress)].slice(0, 5).map(b => (
               <li key={b.id} className="flex min-w-0 flex-col items-center gap-1">
                 <BadgeGlyph id={b.id} size={44} earned={b.earned} />
-                <span className={`text-2xs text-center leading-snug break-keep ${b.earned ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-3)]'}`}>
-                  {b.title}
-                </span>
+                {/* 이름은 그림으로 알 수 있어 화면에서 숨기고 스크린리더용으로만 둔다 */}
+                <span className="sr-only">{b.title}</span>
               </li>
             ))}
           </ul>
