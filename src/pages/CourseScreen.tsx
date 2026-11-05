@@ -163,6 +163,17 @@ const CourseScreen = () => {
     : undefined;
   const backPath = activeTopic ? `/course?topic=${topicIndex}${shownPart ? `&course=${shownPart.section.course.id}` : ''}` : '/course';
   const focusRef = useRef<HTMLButtonElement>(null);
+  // 코스 카드는 화면 위에 하나만 고정하고, 카드 바로 아래까지 올라온 코스로 내용만 바꾼다
+  const topicCardRef = useRef<HTMLDivElement>(null);
+  const [cardPart, setCardPart] = useState(0);
+  useEffect(() => setCardPart(0), [requestedTopic]);
+  const syncTopicCard = (event: React.UIEvent<HTMLDivElement>) => {
+    const line = topicCardRef.current?.getBoundingClientRect().bottom;
+    if (line === undefined) return;
+    let index = 0;
+    event.currentTarget.querySelectorAll('[data-course-section]').forEach((section, i) => { if (section.getBoundingClientRect().top <= line) index = i; });
+    setCardPart(index);
+  };
 
   const isDone = (node: PathNode) => node.state === 'done' || (doneNodes.has(node.id) && node.state === 'available');
   const isStep = (node: PathNode) => node.type !== 'review';
@@ -357,7 +368,7 @@ const CourseScreen = () => {
   );
 
   return (
-    <div className={`course-screen ${isCatalog ? 'bg-[var(--color-card)]' : activeTopic ? 'course-topic-screen' : 'app-soft-screen'} flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden`}>
+    <div onScroll={activeTopic ? syncTopicCard : undefined} className={`course-screen ${isCatalog ? 'bg-[var(--color-card)]' : activeTopic ? 'course-topic-screen' : 'app-soft-screen'} flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden`}>
       {/* 에너지 칩은 주제 카드와 따로 화면 위에 고정한다 */}
       {activeTopic && <div className="course-energy-bar">
         {/* 마이의 학습 기록 중 리그를 뺀 세 가지와 에너지를 같은 모양으로 한 줄에 고르게 둔다. 에너지만 눌러서 충전 방법을 연다 */}
@@ -451,20 +462,27 @@ const CourseScreen = () => {
           </List>
         </section>
       </>}
-      {/* 주제의 코스를 한 페이지에 모두 차례로 보여준다 */}
-      {activeTopic && activeTopic.parts.map(({ section: sec, si }, partIndex) => {
+      {/* 코스 카드는 하나만 위에 고정한다. 스크롤해서 다음 코스가 카드 아래까지 오면 그 코스 이름으로 바뀐다 */}
+      {activeTopic && (() => {
+        const card = activeTopic.parts[Math.min(cardPart, activeTopic.parts.length - 1)].section.course;
         return (
-        <section key={sec.course.id} data-section-index={si} data-course-section={sec.course.id} className="scroll-mt-4">
-          <div className={`course-topic-summary sticky top-0 z-10 mx-5 mt-3 mb-4 overflow-hidden py-5 ${sec.course.id === focus?.courseId ? 'anim-fade' : ''}`}>
+          <div ref={topicCardRef} className="course-topic-summary sticky top-0 z-10 mx-5 mt-3 mb-4 shrink-0 overflow-hidden py-5">
             {/* 코스 카드 전체가 주제 고르기 버튼. 아이콘만 두면 앱 메뉴로 읽혀 '다른 주제'를 글자로 적는다. 진행은 아래 단계 노드로 보인다 */}
-            <button type="button" className="course-topic-list-button" aria-label={`${courseName(sec.course)}, 다른 주제 고르기`} onClick={() => navigate('/course/topics')}>
+            <button key={card.id} type="button" className="course-topic-list-button anim-fade" aria-label={`${courseName(card)}, 다른 주제 고르기`} onClick={() => navigate('/course/topics')}>
               <span className="min-w-0 flex-1">
                 <span className="course-topic-card-eyebrow">{activeTopic.category}</span>
-                <h3 className="course-topic-card-title">{courseName(sec.course)}</h3>
+                <span className="course-topic-card-title block">{courseName(card)}</span>
               </span>
               <span className="course-topic-list-hint" aria-hidden="true">다른 주제<ChevronRight size={16} /></span>
             </button>
           </div>
+        );
+      })()}
+      {/* 주제의 코스를 한 페이지에 모두 차례로 보여준다 */}
+      {activeTopic && activeTopic.parts.map(({ section: sec, si }, partIndex) => {
+        return (
+        <section key={sec.course.id} data-section-index={si} data-course-section={sec.course.id} className={`scroll-mt-4 ${partIndex > 0 ? 'pt-8' : ''}`}>
+          <h3 className="sr-only">{courseName(sec.course)}</h3>
 
           <div className="course-steps">
           {sec.nodes.map((node, k) => {
