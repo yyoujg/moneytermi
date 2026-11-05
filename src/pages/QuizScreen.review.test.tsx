@@ -199,9 +199,9 @@ describe('QuizScreen review SRS', () => {
 
     expect(state.shareTossLink).toHaveBeenCalledWith(
       'intoss://moneytermi/course',
-      expect.stringContaining('머니터미에서 퀴즈 2문제 100% 달성!'),
+      expect.stringContaining('머니터미에서 퀴즈 2문제 100% 찍었어!'),
     );
-    expect(state.shareTossLink.mock.calls[0][1]).toContain('오늘 확인한 용어: 용어1 · 용어2.');
+    expect(state.shareTossLink.mock.calls[0][1]).toContain('오늘 본 용어: 용어1 · 용어2.');
   });
 });
 

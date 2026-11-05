@@ -434,7 +434,7 @@ describe('CourseScreen energy gates', () => {
     expect(state.spendEnergy).toHaveBeenCalledTimes(1);
     expect(state.pickRecallWords).toHaveBeenCalledWith({ excludeIds: [1, 2, 3, 4], count: 3 });
     // 처음 여는 레슨은 수달 로딩을 잠깐 보여준 뒤 인출 퀴즈로 보낸다
-    expect(container.textContent).toContain('새 용어 4개를 준비하고 있어요');
+    expect(container.textContent).toContain('새 용어 4개 준비 중');
     await passLessonIntro();
     expect(container.textContent).toContain('퀴즈 화면');
     expect(container.textContent).not.toContain('단어 카드');

@@ -24,9 +24,9 @@ import { createQuizRequestId, type QuizAnswerResult } from '../lib/quizSubmissio
 
 const quizShareMessage = (modeLabel: string, total: number, accuracy: number, maxCombo: number, words: Word[]) => {
   const learned = words.slice(0, 3).map(word => word.word).join(' · ');
-  const comboText = maxCombo >= 3 ? ` 최고 ${maxCombo}연속 정답.` : '';
-  const learnedText = learned ? ` 오늘 확인한 용어: ${learned}.` : '';
-  return `머니터미에서 ${modeLabel} ${total}문제 ${accuracy}% 달성!${comboText}${learnedText} 경제 공부, 쉬운 상황부터 같이 시작해요`;
+  const comboText = maxCombo >= 3 ? ` ${maxCombo}연속 정답까지!` : '';
+  const learnedText = learned ? ` 오늘 본 용어: ${learned}.` : '';
+  return `머니터미에서 ${modeLabel} ${total}문제 ${accuracy}% 찍었어!${comboText}${learnedText} 경제 뉴스 이제 좀 알아듣자. 같이 하자`;
 };
 
 const QuizScreen = () => {
@@ -354,7 +354,7 @@ const QuizScreen = () => {
         </footer>
       ) : (
         <QuizAnswerFeedback key={currentQuizIndex}
-          correct={answeredCorrectly} title={gradingConflict ? '서버 채점 결과를 반영했어요' : answeredCorrectly ? praiseForAnswer(combo) : '정답을 확인해요'}
+          correct={answeredCorrectly} title={gradingConflict ? '서버 채점 결과를 반영했어요' : answeredCorrectly ? praiseForAnswer(combo) : '아깝다! 정답 확인하고 가자'}
           answerLabel={answerLabel} word={currentWord.word} meaning={gradingConflict ? '' : currentWord.meaning}
           explanation={gradingConflict ? undefined : quizItem?.explanation} example={gradingConflict ? undefined : currentWord.learningExample}
           pending={answerPending} submissionMessage={submissionMessage}

@@ -41,7 +41,7 @@ describe('레슨 시작 로딩', () => {
     vi.useFakeTimers();
     const container = mount({ courseTitle: '경제 기초 개념 1', words: [word(1), word(2)], warmupCount: 3, courseId: 'c1', nodeId: 'c1-l0', next: { pathname: '/quiz', state: { mode: 'lesson_warmup' } } });
     expect(container.querySelector('.loading-screen')).not.toBeNull();
-    expect(container).toHaveTextContent('새 용어 2개를 준비하고 있어요');
+    expect(container).toHaveTextContent('새 용어 2개 준비 중');
     expect(container.querySelector('button')).toBeNull();
     expect(container.querySelector('[data-location]')).toBeNull();
     act(() => { vi.advanceTimersByTime(LESSON_INTRO_MS); });

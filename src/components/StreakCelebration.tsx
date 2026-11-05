@@ -92,7 +92,7 @@ export const StreakCelebration = () => {
 
       <div className="flex items-center gap-3 anim-fade-up" style={{ '--i': 8 } as React.CSSProperties}>
         <p className="max-w-[240px] text-center text-sm font-normal break-keep leading-relaxed text-[var(--color-ink-2)]">
-          {streak === 1 ? '오늘 출석이 기록됐어요.' : streakMessage(streak)}
+          {streak === 1 ? '오늘 출석 완료!' : streakMessage(streak)}
         </p>
       </div>
 
