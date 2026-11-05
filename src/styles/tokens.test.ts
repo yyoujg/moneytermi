@@ -394,10 +394,11 @@ describe('컬러와 타이포그래피 역할 계층', () => {
     expect(parseFloat(resolve('--font-size-content-title', light))).toBeGreaterThan(sizes[0]);
     expect(indexCss).toContain('font-family: var(--font-family-sans) !important');
   });
-  it('네 탭 제목은 같은 글자 역할을 사용한다', () => {
-    for (const page of ['CourseScreen', 'HomeScreen', 'LeagueScreen', 'MyPageScreen']) {
-      const source = readFileSync(resolvePath(cwd(), `src/pages/${page}.tsx`), 'utf8');
-      expect(source, page).toContain('type-page-title');
+  it('보이는 페이지 제목은 같은 글자 역할, 탭 화면 제목은 하단 탭과 겹쳐 스크린리더용으로만 둔다', () => {
+    const read = (page: string) => readFileSync(resolvePath(cwd(), `src/pages/${page}.tsx`), 'utf8');
+    expect(read('CourseScreen')).toContain('type-page-title');
+    for (const [page, title] of [['HomeScreen', '퀘스트'], ['LeagueScreen', '리그'], ['MyPageScreen', '마이페이지']]) {
+      expect(read(page), page).toContain(`<h2 className="sr-only">${title}</h2>`);
     }
   });
 });
