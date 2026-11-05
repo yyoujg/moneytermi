@@ -247,11 +247,11 @@
   --color-league-second: var(--color-surface);
   --color-league-third: var(--color-surface);
 
-  /* PickleUp 참고: 카드 16, 버튼·안쪽 상자·칩 12 */
-  --shape-card: 16px;
-  --shape-button: 12px;
-  --shape-chip: 12px;
-  --shape-inset: 12px;
+  /* 하단 내비(완전 둥근 알약)에 맞춰 둥글게 통일: 카드·버튼·선택지 24, 안쪽 상자 16, 칩은 알약 */
+  --shape-card: 24px;
+  --shape-button: 24px;
+  --shape-chip: var(--shape-full);
+  --shape-inset: 16px;
 
   /* 카드·선택지는 그림자 대신 검정 테두리(--card-border)로 나눈다. */
   --shadow-card: none;

@@ -102,7 +102,7 @@ const Table = ({ columns, rows }: { columns: string[]; rows: string[][] }) => {
         <thead>
           <tr>
             {columns.map((c, i) => (
-              <th key={i} className={`py-2 px-2 text-left font-bold break-keep ${i === 0 ? 'text-[var(--color-ink-3)]' : 'text-[var(--color-ink-2)]'} bg-[var(--color-surface)] first:rounded-l-[var(--shape-sm)] last:rounded-r-[var(--shape-sm)]`}>{c}</th>
+              <th key={i} className={`py-2 px-2 text-left font-bold break-keep ${i === 0 ? 'text-[var(--color-ink-3)]' : 'text-[var(--color-ink-2)]'} bg-[var(--color-surface)] first:rounded-l-[var(--shape-inset)] last:rounded-r-[var(--shape-inset)]`}>{c}</th>
             ))}
           </tr>
         </thead>
