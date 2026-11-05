@@ -1298,7 +1298,7 @@ button.review-aux-button:disabled { color: var(--color-ink-3); }
 /* 주제 둘러보기는 흰 바탕 + TDS ListRow. 예전 경로형 카드 배치를 끈다 */
 .course-home-topic-list { display: block; padding: var(--space-2) 0; }
 .course-home-topic-list .course-home-topic { display: block; width: 100%; margin-left: 0; min-height: 0; padding: 0; border: 0; background: transparent; }
-.course-home-topic-list .course-home-topic > div { padding-left: 0; padding-right: 0; }
+.course-home-topic-list .course-home-topic > div { padding-left: var(--space-3); padding-right: var(--space-3); }
 /* 전체 탭 난이도 구분: 굵은 띠 + 섹션 제목 크기. 첫 난이도는 띠 없이 */
 .course-home-level-heading { display: flex; align-items: baseline; justify-content: space-between; margin: var(--space-4) calc(var(--space-5) * -1) 0; padding: var(--space-5) var(--space-5) var(--space-2); border-top: 8px solid var(--color-neutral-soft); color: var(--color-ink); font-size: var(--font-size-section-title); font-weight: var(--font-weight-bold); }
 .course-home-level-heading > span { color: var(--color-ink-3); font-size: var(--font-size-caption); font-weight: var(--font-weight-regular); }
