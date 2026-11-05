@@ -47,7 +47,7 @@ const LeagueScreen = () => {
   return (
     <div className="league-screen flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
       <div className="pt-4 px-5 pb-4">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-6">
           <h2 className="type-page-title">리그</h2>
           {/* 44px 버튼이 제목 줄을 키워 제목이 다른 탭보다 내려가지 않게, 버튼 칸 높이를 제목 줄(34px)에 맞춘다 */}
           <div className="flex h-[34px] items-center gap-1">

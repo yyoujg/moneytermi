@@ -49,7 +49,7 @@ const HomeScreen = () => {
   return (
     <div className="quest-screen flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
 
-      <div className="pt-4 px-5 pb-2">
+      <div className="pt-4 px-5 pb-4">
         <h2 className="type-page-title">퀘스트</h2>
       </div>
 

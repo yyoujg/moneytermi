@@ -544,7 +544,7 @@ button.word-meaning-detail:not(:disabled):active { opacity: 0.6; }
 /* 학습 홈: 한 개의 주요 학습과 간결한 도구, 넓은 주제 목록으로 정리한다. */
 /* 바텀시트 제목: 모든 시트가 같은 크기·여백을 쓴다. */
 .sheet-title { display: block; padding-inline: var(--space-5); color: var(--color-ink); font-size: var(--font-size-headline); font-weight: var(--font-weight-bold); line-height: var(--line-height-title); }
-.course-home-header { padding: var(--space-4) var(--space-5) var(--space-3); }
+.course-home-header { padding: var(--space-4) var(--space-5) var(--space-5); }
 /* 주제 상세: 홈과 달리 제목 옆 에너지 칩 + 단계 타임라인으로 구성한다. */
 .course-topic-header { position: relative; padding: var(--space-5) var(--space-5) var(--space-2); }
 .course-steps { position: relative; margin: 0 var(--space-5) var(--space-4); }
