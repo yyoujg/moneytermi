@@ -1251,7 +1251,7 @@ button.home-review-entry { margin-bottom: 0; padding: var(--space-4) 0; border-r
 button.course-home-rail-card { width: 112px; padding: 0; border-radius: 0; background: transparent; box-shadow: none; }
 button.course-home-rail-card:active { background: transparent; opacity: 0.7; }
 .league-tier-road { padding-inline: 0; border-radius: 0; background: transparent; box-shadow: none; }
-#home-mission-list { gap: 0; margin-top: var(--space-2); }
+#home-mission-list { gap: 0; margin-top: var(--space-4); }
 /* 미션 행: 구분선 없이 여백으로만 나눈다 */
 .home-mission-row { padding: var(--space-4) 0; border-radius: 0; background: transparent; box-shadow: none; }
 .home-mission-row[data-rewarded] { background: transparent; }
@@ -1351,8 +1351,8 @@ button.course-home-rail-card { width: 160px; flex-direction: column; align-items
 .course-topic-card-eyebrow { display: block; color: var(--color-ink-3); font-size: var(--font-size-caption); line-height: var(--line-height-body); word-break: keep-all; }
 .course-topic-card-title { margin-top: var(--space-2); color: var(--color-ink); font-size: var(--font-size-title-3); font-weight: var(--font-weight-bold); line-height: var(--line-height-title); word-break: keep-all; }
 .course-home-level-heading { font-size: var(--font-size-title-3); }
-/* 퀘스트 섹션 제목 아래 첫 미션까지 24px(행 위 여백 16 + 8). 주간·월간 목록도 지금 미션(#home-mission-list)과 같게 */
-.home-missions[data-period] > .home-mission-heading + div { margin-top: var(--space-2); }
+/* 퀘스트 섹션 제목 아래 첫 미션까지 32px(행 위 여백 16 + 16). 주간·월간 목록도 지금 미션(#home-mission-list)과 같게 */
+.home-missions[data-period] > .home-mission-heading + div { margin-top: var(--space-4); }
 /* 주제 고르기: 지금 배우는 주제 한 줄만 회베이지 둥근 면 + 진행 막대로 강조(화면 좌우 여백 20px 안쪽) */
 .course-home-topic-list .course-home-topic[data-current] { margin: var(--space-2) 0; border-radius: var(--shape-card) !important; background: var(--color-surface); }
 .course-home-topic-list .course-home-topic[data-current] > div { padding: var(--box-pad-y) var(--box-pad-x); }
