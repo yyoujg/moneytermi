@@ -276,7 +276,7 @@ const QuizScreen = () => {
       />
 
       {/* 콘텐츠 — 뜻 보기 4개가 길면 작은 화면에서 넘치므로 이 영역만 스크롤 */}
-      <div ref={questionContentRef} className="quiz-question-content flex-1 min-h-0 overflow-y-auto flex flex-col px-5 pt-3 pb-5 gap-6 [&::-webkit-scrollbar]:hidden">
+      <div ref={questionContentRef} className="quiz-question-content flex-1 min-h-0 overflow-y-auto flex flex-col px-5 pt-3 pb-5 gap-8 [&::-webkit-scrollbar]:hidden">
         {/* 문제는 카드 밖 왼쪽 아래 수달이 말하는 말풍선 */}
         <div className="flex items-start gap-2">
         {/* 수달 표정은 채점 결과를 따라간다: 문제 설명 → 정답이면 응원, 오답이면 시무룩 */}
