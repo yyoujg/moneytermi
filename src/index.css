@@ -917,7 +917,7 @@ button.nickname-clear { display: inline-flex; flex: 0 0 44px; width: 44px; heigh
 .quest-hero-count > strong { color: var(--color-neutral-strong); font-size: var(--font-size-title-2); font-weight: var(--font-weight-bold); }
 .home-mission-top { display: grid; grid-template-columns: 28px minmax(0, 1fr) 64px; align-items: center; gap: var(--space-3); }
 .home-mission-check { display: flex; width: 28px; height: 28px; align-items: center; justify-content: center; border: 2px solid var(--color-line-strong); border-radius: 50%; color: var(--color-card); }
-.home-mission-row[data-done] .home-mission-check { border-color: var(--color-neutral-strong); background: var(--color-neutral-strong); }
+.home-mission-row[data-done] .home-mission-check { border-color: var(--color-progress); background: var(--color-progress); }
 .home-mission-info { min-width: 0; }
 .home-mission-title { font-weight: var(--font-weight-semibold); line-height: var(--line-height-title); word-break: keep-all; overflow-wrap: anywhere; }
 .home-mission-info > p + p { margin-top: var(--space-1); }
@@ -1131,7 +1131,7 @@ button.course-home-topic:not(:last-child)::after { content: ''; position: absolu
 .my-streak .week-strip { padding: 0; border: 0; }
 .my-streak .week-strip-heading { display: none; }
 .my-streak .week-strip-circle { max-width: 44px; background: var(--color-neutral-soft); color: var(--color-ink-3); }
-.my-streak .week-strip-day[data-state='done'] .week-strip-circle { background: var(--color-neutral-strong); color: var(--color-card); }
+.my-streak .week-strip-day[data-state='done'] .week-strip-circle { background: var(--color-progress); color: var(--color-card); }
 .my-streak .week-strip-day[data-state='today'] .week-strip-circle { border-color: var(--color-progress); background: var(--color-card); color: var(--color-progress); }
 .my-streak .week-strip-day[data-state='future'] .week-strip-circle { border-color: transparent; background: var(--color-neutral-soft); }
 
@@ -1253,6 +1253,8 @@ button.quiz-option.border-transparent { border-color: var(--color-line-strong) !
 /* 획득 배지 = 세이지 틴트 원 + 진한 중립 채움 아이콘, 미획득 = 회색 원 + 흐린 선 아이콘 */
 .badge-glyph { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; border: 0; background: var(--color-badge-earned-soft); color: var(--color-badge-earned); }
 .badge-glyph.is-locked { border: 0; background: var(--color-surface); color: var(--color-ink-3); opacity: 0.6; }
+/* 3일 연속 불꽃 그림만 다른 배지보다 작게 그려져 있어 크기를 맞춘다 */
+.badge-glyph[data-badge-id='s3'] img { transform: scale(1.3); }
 
 /* 국내 앱 레이아웃: 회색 바탕 + 흰 섹션 블록(모서리 없음, 12px 간격). 카드 수를 늘리지 않고 영역만 나눈다. */
 .course-home-hero { margin: 0 0 var(--section-gap) !important; border-radius: 0 !important; background: var(--color-card) !important; }
@@ -1260,6 +1262,7 @@ button.quiz-option.border-transparent { border-color: var(--color-line-strong) !
 .course-home-section-heading { margin: 0 !important; padding: var(--space-5) var(--space-5) 0; background: var(--color-card); }
 /* 홈 난이도 제목(입문·기본 …)은 코스 이름(15px)보다 확실히 크게 */
 .course-home-section-heading h2 { font-size: var(--font-size-title-3); font-weight: var(--font-weight-bold); }
+.course-home-section-heading h2.course-topic-level { font-size: var(--font-size-label); font-weight: var(--font-weight-semibold); }
 .course-home-rail { margin: 0 0 var(--section-gap); padding-top: var(--space-3); padding-bottom: var(--space-5); background: var(--color-card); }
 .course-home-overview { margin: 0 0 var(--section-gap) !important; padding: 0 var(--space-5); background: var(--color-card); }
 button.home-review-entry { border-bottom: 0; }

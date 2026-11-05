@@ -33,7 +33,7 @@ describe('미션 보상 버튼과 완료 상태의 동일한 크기', () => {
     const { container, onClaim } = mount(true);
     const complete = container.querySelector('[data-state="claimed"]')!;
     expect(complete).toHaveClass('mission-reward-status');
-    expect(complete).toHaveTextContent('받음');
+    expect(complete).toHaveTextContent('완료');
     expect(container.querySelector('button')).toBeNull();
     expect(complete).not.toHaveAttribute('tabindex');
     act(() => (complete as HTMLElement).click());

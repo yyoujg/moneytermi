@@ -561,7 +561,7 @@ describe('퀘스트의 미션 동작', () => {
     const rows = [...container.querySelectorAll('#home-mission-list .home-mission-row')];
     // 받을 수 있는 미션 → 진행 중 → 완료 순서(직렬 위치 효과)
     expect(rows.map(row => row.querySelector('.home-mission-title')?.textContent?.trim())).toEqual(['퀴즈 풀기', '용어 학습하기', '오늘 출석하기']);
-    // 미션 카드에는 보상 XP 선형 아이콘 하나만 둔다(받은 미션은 '받음' 앞 체크가 하나 더 붙는다)
+    // 미션 카드에는 보상 XP 선형 아이콘 하나만 둔다(받은 미션은 '완료' 앞 체크가 하나 더 붙는다)
     expect(rows.every(row => row.querySelector('.home-mission-top img') === null && row.querySelectorAll('.home-mission-reward svg').length === 1)).toBe(true);
     expect(rows[0].querySelector('.home-mission-reward svg')).toHaveAttribute('data-icon', 'Xp');
     expect(rows[1].querySelector('.home-mission-count')).toHaveTextContent('1/3');
@@ -572,7 +572,7 @@ describe('퀘스트의 미션 동작', () => {
     expect(rows[0]).toHaveAttribute('data-done', 'true');
     expect(rows[1]).not.toHaveAttribute('data-done');
     expect(rows[2].querySelector('button')).toBeNull();
-    expect(rows[2].querySelector('[data-state=claimed]')).toHaveTextContent('받음');
+    expect(rows[2].querySelector('[data-state=claimed]')).toHaveTextContent('완료');
     // '오늘의 미션' 제목은 목록 위 한 곳에만
     expect([...container.querySelectorAll('h2, p')].filter(el => el.textContent?.trim() === '오늘의 미션')).toHaveLength(1);
     await act(async () => rows[0].querySelector<HTMLButtonElement>('button')!.click());

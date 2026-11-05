@@ -28,7 +28,8 @@ export const BadgeCelebration = () => {
       const seen = new Set<string>(raw ? JSON.parse(raw) : []);
       const earned = badges.filter(b => b.earned);
       const news = earned.filter(b => !seen.has(b.id));
-      Storage.setItem(KEY, JSON.stringify(earned.map(b => b.id))).catch(() => {});
+      // 덮어쓰면 단어 목록이 늦게 채워질 때 단어 배지가 기록에서 빠져 앱을 열 때마다 다시 뜬다
+      Storage.setItem(KEY, JSON.stringify([...new Set([...seen, ...earned.map(b => b.id)])])).catch(() => {});
       if (news.length === 0) return;
       setFresh(news);
       feedbackBadge();

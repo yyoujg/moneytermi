@@ -492,7 +492,7 @@ const CourseScreen = () => {
                         <span data-learning-kind={node.type}>{copy.kind}</span>
                       )}
                       {/* 완료는 왼쪽 체크로 보이므로 글자는 화면 읽기용으로만 둔다 */}
-                      <span data-learning-status className={done ? 'sr-only' : `font-normal ${locked ? 'text-[var(--color-ink-4)]' : isFocus ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-3)]'}`}>{nodeStatus}</span>
+                      <span data-learning-status className={done || nodeStatus === '시작 가능' ? 'sr-only' : `font-normal ${locked ? 'text-[var(--color-ink-4)]' : isFocus ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-3)]'}`}>{nodeStatus}</span>
                     </span>
                     <span className={`mt-1 block text-sm break-keep ${locked ? 'font-semibold text-[var(--color-ink-3)]' : done ? 'font-semibold text-[var(--color-ink-2)]' : 'font-bold text-[var(--color-ink)]'}`}>{copy.title}</span>
                   </span>
@@ -510,7 +510,7 @@ const CourseScreen = () => {
           {[...new Set(topics.map(topic => topic.level))].map(level => (
             <section key={level} aria-label={`${levelLabel(level)} 코스`}>
               <div className="course-home-section-heading">
-                <h2 className="type-section-title">{levelLabel(level)}</h2>
+                <h2 className="course-topic-level">{levelLabel(level)}</h2>
               </div>
               <div ref={level === (focusTopic?.level ?? topics[0]?.level) ? homeRailRef : undefined} className="course-home-rail" role="list" aria-label={`${levelLabel(level)} 코스`}>
                 {topics.filter(topic => topic.level === level).flatMap(topic => topic.parts.map(({ section }, pi) => {

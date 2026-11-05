@@ -129,6 +129,9 @@ const LeagueScreen = () => {
             )}
           </Card>
         )}
+        {!failed && rows && rows.length > 0 && mine && mine.rank == null && !rows.some(r => r.is_me) && (
+          <p className="py-4 text-sm text-[var(--color-ink-3)] text-center">아직 이번 주 순위에 없어요</p>
+        )}
 
         <Spacing size={8} />
       </div>

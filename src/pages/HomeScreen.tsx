@@ -57,7 +57,7 @@ const HomeScreen = () => {
           <div className="min-w-0 flex-1">
             {/* '오늘의 미션' 제목은 아래 목록에만 둔다 */}
             {allMissionsDone && <p className="type-supporting">오늘 미션을 모두 마쳤어요</p>}
-            <p className="quest-hero-count"><strong>{doneMissions}</strong> / {missionList.length} 완료</p>
+            <p className="quest-hero-count">오늘 <strong>{doneMissions}</strong> / {missionList.length} 완료</p>
             <div role="progressbar" aria-label="오늘의 미션 전체 진행률" aria-valuemin={0} aria-valuemax={missionList.length} aria-valuenow={doneMissions} className="course-home-progress-track mt-2">
               <span style={{ width: `${Math.round(doneMissions / missionList.length * 100)}%` }} />
             </div>
@@ -121,14 +121,14 @@ const PeriodMissionList = ({ id, title, resetLabel, missions }: { id: string; ti
       {missions.map(mission => {
         const done = mission.current >= mission.target;
         return (
-          <div key={mission.id} className="home-mission-row" data-done={done || undefined}>
+          <div key={mission.id} className="home-mission-row" data-done={done || undefined} data-rewarded={done || undefined}>
             <div className="home-mission-top">
               <span className="home-mission-check" aria-hidden="true">{done && <Check size={16} />}</span>
               <div className="home-mission-info">
                 <p className={`home-mission-title text-sm ${done ? 'text-[var(--color-ink-3)]' : 'text-[var(--color-ink)]'}`}>{mission.title}</p>
               </div>
               {done
-                ? <span className="home-mission-count text-sm font-semibold text-[var(--color-ink-3)]">달성</span>
+                ? <span className="mission-reward-status" data-state="claimed"><Check size={16} aria-hidden="true" />완료</span>
                 : <span className="home-mission-count text-sm font-semibold text-[var(--color-ink)]">{mission.current}<span className="text-xs text-[var(--color-ink-4)]">/{mission.target}</span></span>}
             </div>
           </div>
