@@ -51,6 +51,11 @@ vi.mock('../context/AppContext', () => ({
 // 숫자 애니메이션은 제외하고 화면에 전달된 서버 보상 합계를 검증한다.
 vi.mock('../hooks/useCountUp', () => ({ useCountUp: (value: number) => value }));
 vi.mock('../hooks/useAuth', () => ({ useAuth: () => ({ user: null }) }));
+// HomeScreen이 이번 주 XP(my_league_rank)를 불러온다. CI에는 Supabase 환경변수가 없어 실제 클라이언트를 만들면 바로 실패한다
+vi.mock('../lib/supabase', () => {
+  const rpc = () => Promise.resolve({ data: null });
+  return { supabase: { rpc }, getGuestClient: () => ({ rpc }) };
+});
 vi.mock('../lib/pathProgress', () => ({ markNodeDone: vi.fn() }));
 vi.mock('../lib/feedback', () => ({
   feedbackClaim: vi.fn(),
