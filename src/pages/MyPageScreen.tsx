@@ -53,7 +53,7 @@ const MyPageScreen = () => {
 
       {/* 프로필 헤더 */}
       <div className="my-page-hero shrink-0 pt-4 px-5 pb-5">
-        <h2 className="type-page-title mb-4!">마이페이지</h2>
+        <h2 className="type-page-title mb-6!">마이페이지</h2>
         <ProfileHeader
           nickname={user?.nickname ?? DEFAULT_NICKNAME}
           avatar={myEmoji}

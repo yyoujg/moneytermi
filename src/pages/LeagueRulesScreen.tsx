@@ -8,7 +8,6 @@ const LeagueRulesScreen = () => (
       <h2 className="type-page-title">리그 안내</h2>
     </div>
     <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden">
-      <Spacing size={20} />
       <div className="px-5">
         <LeagueRules />
       </div>
