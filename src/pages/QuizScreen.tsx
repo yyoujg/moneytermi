@@ -164,22 +164,23 @@ const QuizScreen = () => {
         onAction={() => navState?.nextRoute
           ? navigate(navState.nextRoute.pathname, { replace: true, state: navState.nextRoute.state })
           : navigate(backPath, { replace: true, state: { openFocus: true } })}
+        secondaryAction={
+          <ActionButton
+            tone="soft"
+            className="flex-1"
+            onClick={() => {
+              logClick('quiz_result_share', { mode: navState?.mode ?? 'quiz', total: baseQueue.length, accuracy, max_combo: maxCombo });
+              void shareTossLink('intoss://moneytermi/course', quizShareMessage(sessionLabel, baseQueue.length, accuracy, maxCombo, baseQueue));
+            }}
+          >
+            친구에게 공유
+          </ActionButton>
+        }
       >
         {/* 끝 화면은 한 문장(위)과 보상 한 줄만. 정답률·연속 기록은 문장과 겹쳐 뺐다 */}
         <section className="quiz-result-stats anim-fade-up" role="group" aria-label="퀴즈 결과 요약" style={{ '--i': 2 } as React.CSSProperties}>
           <p className="quiz-result-xp"><XpIcon size={20} className="quiz-result-icon" /><span>획득 XP</span><m.strong initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 12, delay: 0.2 }}>+{Math.max(0, xp - xpAtStart.current)}</m.strong></p>
         </section>
-        <ActionButton
-          tone="soft"
-          className="quiz-result-share anim-fade-up"
-          style={{ '--i': 3 } as React.CSSProperties}
-          onClick={() => {
-            logClick('quiz_result_share', { mode: navState?.mode ?? 'quiz', total: baseQueue.length, accuracy, max_combo: maxCombo });
-            void shareTossLink('intoss://moneytermi/course', quizShareMessage(sessionLabel, baseQueue.length, accuracy, maxCombo, baseQueue));
-          }}
-        >
-          친구에게 공유
-        </ActionButton>
       </LearningCompletionScreen>
     );
   }

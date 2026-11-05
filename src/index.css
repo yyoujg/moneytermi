@@ -1369,4 +1369,3 @@ button.my-page-menu-row:active { opacity: 0.7; }
 /* 퀴즈 결과: 보상 한 줄(그림 + 이름 + 숫자) */
 .quiz-result-stats { display: flex; width: 100%; justify-content: center; }
 .quiz-result-xp { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--color-ink); font-size: var(--font-size-headline); font-weight: var(--font-weight-bold); font-variant-numeric: tabular-nums; }
-button.action-button.quiz-result-share { min-height: var(--size-touch-min); padding-inline: var(--box-pad-x); font-size: var(--font-size-body) !important; }

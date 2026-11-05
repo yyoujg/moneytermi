@@ -10,6 +10,7 @@ export const LearningCompletionScreen = ({
   actionLabel,
   onAction,
   actionPlacement = 'bottom',
+  secondaryAction,
 }: {
   title: string;
   subtitle: ReactNode;
@@ -17,9 +18,11 @@ export const LearningCompletionScreen = ({
   actionLabel: string;
   onAction: () => void;
   actionPlacement?: 'bottom' | 'inline';
+  // 주 버튼 왼쪽에 같은 높이로 나란히 두는 보조 버튼(예: 공유)
+  secondaryAction?: ReactNode;
 }) => {
   const button = (
-    <ActionButton fullWidth onClick={onAction} className="learning-completion-action max-w-sm">{actionLabel}</ActionButton>
+    <ActionButton fullWidth onClick={onAction} className={`learning-completion-action max-w-sm${secondaryAction ? ' flex-[1.6]' : ''}`}>{actionLabel}</ActionButton>
   );
 
   return (
@@ -40,7 +43,8 @@ export const LearningCompletionScreen = ({
         {actionPlacement === 'inline' && button}
       </div>
       {actionPlacement === 'bottom' && (
-        <div className="px-5 pb-12 flex flex-col gap-3">
+        <div className={`px-5 pb-12 flex gap-3 ${secondaryAction ? 'flex-row' : 'flex-col'}`}>
+          {secondaryAction}
           {button}
         </div>
       )}
