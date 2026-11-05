@@ -592,7 +592,7 @@ describe('퀘스트의 미션 동작', () => {
     expect(rows[2].querySelector('button')).toBeNull();
     expect(rows[2].querySelector('[data-state=claimed]')).toHaveTextContent('완료');
     // '지금 미션' 제목은 목록 위 한 곳에만
-    expect([...container.querySelectorAll('h2, p')].filter(el => el.textContent?.trim() === '지금 미션')).toHaveLength(1);
+    expect([...container.querySelectorAll('h2, p')].filter(el => el.textContent?.trim().startsWith('지금 미션'))).toHaveLength(1);
     await act(async () => rows[0].querySelector<HTMLButtonElement>('button')!.click());
     expect(claimReward).toHaveBeenCalledExactlyOnceWith('quiz');
     expect(container).toHaveTextContent('미션 보상 축하');

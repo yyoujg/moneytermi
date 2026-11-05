@@ -910,13 +910,11 @@ button.nickname-clear { display: inline-flex; flex: 0 0 44px; width: 44px; heigh
 #home-mission-list { gap: var(--space-3); margin-top: var(--space-4); }
 .home-mission-row { padding: var(--space-4); border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); }
 .home-mission-row[data-rewarded] { box-shadow: none; background: var(--color-surface); }
-.quest-hero { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-4) var(--space-5); border-radius: var(--shape-card); background: var(--color-card); box-shadow: var(--shadow-card); }
-.quest-hero-character { width: 72px; height: auto; flex-shrink: 0; }
-.quest-hero-count { margin-top: var(--space-1); color: var(--color-ink-3); font-size: var(--font-size-body); font-variant-numeric: tabular-nums; }
-.quest-hero-count > strong { color: var(--color-neutral-strong); font-size: var(--font-size-title-2); font-weight: var(--font-weight-bold); }
 .home-mission-top { display: grid; grid-template-columns: 28px minmax(0, 1fr) 64px; align-items: center; gap: var(--space-3); }
 .home-mission-check { display: flex; width: 28px; height: 28px; align-items: center; justify-content: center; border: 2px solid var(--color-line-strong); border-radius: 50%; color: var(--color-card); }
 .home-mission-row[data-done] .home-mission-check { border-color: var(--color-progress); background: var(--color-progress); }
+.home-mission-ring { flex-shrink: 0; }
+.home-mission-total { margin-left: var(--space-1); color: var(--color-brand-text); font-variant-numeric: tabular-nums; }
 .home-mission-info { min-width: 0; }
 .home-mission-title { font-weight: var(--font-weight-semibold); line-height: var(--line-height-title); word-break: keep-all; overflow-wrap: anywhere; }
 .home-mission-info > p + p { margin-top: var(--space-1); }
@@ -1238,7 +1236,6 @@ button.home-review-entry { margin-bottom: 0; padding: var(--space-4) 0; border-r
 button.course-home-rail-card { width: 112px; padding: 0; border-radius: 0; background: transparent; box-shadow: none; }
 button.course-home-rail-card:active { background: transparent; opacity: 0.7; }
 .league-tier-road { padding-inline: 0; border-radius: 0; background: transparent; box-shadow: none; }
-.quest-hero { padding: 0 0 var(--space-5); border-radius: 0; background: transparent; box-shadow: none; }
 #home-mission-list { gap: 0; margin-top: var(--space-2); }
 /* 미션 행: 구분선 없이 여백으로만 나눈다 */
 .home-mission-row { padding: var(--space-3) 0; border-radius: 0; background: transparent; box-shadow: none; }
@@ -1269,7 +1266,6 @@ button.home-review-entry { border-bottom: 0; }
 .league-screen > div:first-child { padding-bottom: 0; }
 .league-tier-road { margin: 0 calc(var(--space-5) * -1); padding: var(--space-2) var(--space-5); background: var(--color-card); border-bottom: 0; }
 .league-ranking-section { padding-bottom: var(--space-5); background: var(--color-card); }
-.quest-hero { margin: 0 calc(var(--space-5) * -1); padding: var(--space-5); background: var(--color-card); border-bottom: 0; }
 .quest-missions-section { padding-bottom: var(--space-3); background: var(--color-card); }
 /* 마이: 흰 바탕에서 여백만으로는 섹션이 안 나뉘어, 프로필·통계와 같은 1px 구분선으로 통일한다 */
 .my-page-hero { margin-bottom: 0; padding-bottom: 0; background: var(--color-card); }

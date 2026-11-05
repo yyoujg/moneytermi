@@ -50,19 +50,8 @@ const HomeScreen = () => {
   return (
     <div className="quest-screen flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
 
-      <div className="pt-4 px-5 pb-4">
-        <h2 className="type-page-title mb-4!">퀘스트</h2>
-        {missionList.length > 0 && <section className="quest-hero" aria-label="지금 미션 요약">
-          {allMissionsDone && <img className="quest-hero-character" src="/otter/v5/otter-cheer.svg" data-otter="cheer" alt="" aria-hidden="true" width={72} height={72} />}
-          <div className="min-w-0 flex-1">
-            {/* '지금 미션' 제목은 아래 목록에만 둔다 */}
-            {allMissionsDone && <p className="type-supporting">지금 미션을 모두 마쳤어요</p>}
-            <p className="quest-hero-count">지금 <strong>{doneMissions}</strong> / {missionList.length} 완료</p>
-            <div role="progressbar" aria-label="지금 미션 전체 진행률" aria-valuemin={0} aria-valuemax={missionList.length} aria-valuenow={doneMissions} className="course-home-progress-track mt-2">
-              <span style={{ width: `${Math.round(doneMissions / missionList.length * 100)}%` }} />
-            </div>
-          </div>
-        </section>}
+      <div className="pt-4 px-5 pb-2">
+        <h2 className="type-page-title">퀘스트</h2>
       </div>
 
       {/* 지금 미션(0·8·16시에 바뀐다) */}
@@ -70,8 +59,9 @@ const HomeScreen = () => {
         <Card pad="none" className="home-missions mb-4 anim-fade-up" aria-labelledby="home-missions-heading">
         <div className="home-mission-heading anim-fade-up">
           <div>
-            <h2 id="home-missions-heading">지금 미션</h2>
-            {/* 완료 수는 위 요약에 있으므로 받을 보상이 있을 때만 알려준다 */}
+            {/* 완료 수는 제목 옆 한 곳에만(따로 요약 칸을 두지 않는다) */}
+            <h2 id="home-missions-heading">지금 미션 <span className="home-mission-total" aria-label={`${missionList.length}개 중 ${doneMissions}개 완료`}>{doneMissions}/{missionList.length}</span></h2>
+            {allMissionsDone && <p className="mt-1! text-xs text-[var(--color-ink-3)] break-keep">지금 미션을 모두 마쳤어요</p>}
             {readyMissions > 0 && <p className="mt-1! text-xs text-[var(--color-ink-3)] break-keep">받을 수 있는 보상 {readyMissions}개</p>}
           </div>
           <span className="shrink-0 text-xs font-normal text-[var(--color-ink-3)]">{resetLabel}</span>
@@ -83,7 +73,7 @@ const HomeScreen = () => {
                 // 미션마다 게이지를 두면 한눈에 안 들어와, 왼쪽 원(끝내면 체크)과 오른쪽 숫자로만 보여준다. 게이지는 위 전체 진행 하나
                 <div key={mission.id} className="home-mission-row" data-rewarded={mission.isRewarded || undefined} data-done={done || undefined}>
                   <div className="home-mission-top">
-                    <span className="home-mission-check" aria-hidden="true">{done && <Check size={16} />}</span>
+                    <MissionRing current={mission.current} target={mission.target} />
                     <div className="home-mission-info">
                       <p className={`home-mission-title text-sm ${mission.isRewarded ? 'text-[var(--color-ink-3)]' : 'text-[var(--color-ink)]'}`}>
                         {mission.title}
@@ -127,7 +117,7 @@ const PeriodMissionList = ({ id, title, resetLabel, missions, claimed }: {
         return (
           <div key={mission.id} className="home-mission-row" data-done={done || undefined} data-rewarded={rewarded || undefined}>
             <div className="home-mission-top">
-              <span className="home-mission-check" aria-hidden="true">{done && <Check size={16} />}</span>
+              <MissionRing current={mission.current} target={mission.target} />
               <div className="home-mission-info">
                 <p className={`home-mission-title text-sm ${rewarded ? 'text-[var(--color-ink-3)]' : 'text-[var(--color-ink)]'}`}>{mission.title}</p>
                 {claimed && <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
@@ -144,5 +134,17 @@ const PeriodMissionList = ({ id, title, resetLabel, missions, claimed }: {
     </div>
   </Card>
 );
+
+// 미션 왼쪽 원: 진행만큼 갈색 고리가 차고, 다 채우면 갈색 원 + 체크
+const MissionRing = ({ current, target }: { current: number; target: number }) => {
+  if (current >= target) return <span className="home-mission-check" aria-hidden="true"><Check size={16} /></span>;
+  const pct = target > 0 ? Math.round(current / target * 100) : 0;
+  return (
+    <svg className="home-mission-ring" width={28} height={28} viewBox="0 0 28 28" aria-hidden="true">
+      <circle cx={14} cy={14} r={12} fill="none" stroke="var(--color-line)" strokeWidth={3} />
+      {pct > 0 && <circle cx={14} cy={14} r={12} fill="none" stroke="var(--color-progress)" strokeWidth={3} strokeLinecap="round" pathLength={100} strokeDasharray={`${pct} 100`} transform="rotate(-90 14 14)" />}
+    </svg>
+  );
+};
 
 export default HomeScreen;
