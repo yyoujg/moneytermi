@@ -278,7 +278,7 @@ const QuizScreen = () => {
       <div ref={questionContentRef} className="quiz-question-content flex-1 min-h-0 overflow-y-auto flex flex-col px-5 pt-3 pb-5 gap-4 [&::-webkit-scrollbar]:hidden">
         {/* 문제는 카드 밖 왼쪽 아래 수달이 말하는 말풍선 */}
         <div className="flex items-start gap-2">
-        <img src="/otter/v5/otter-explain.svg" alt="" aria-hidden="true" height={88} className="quiz-question-otter h-[88px] w-auto shrink-0 self-end" data-otter="explain" />
+        <img src="/otter/v5/otter-explain.svg" alt="" aria-hidden="true" height={112} className="quiz-question-otter h-[112px] w-auto shrink-0 self-end" data-otter="explain" />
         <div key={currentQuizIndex} className={`quiz-question-card quiz-bubble anim-slide-in min-w-0 flex-1 rounded-card bg-[var(--color-card)] px-5 py-5 flex flex-col items-start text-left gap-3
           ${status === 'correct' ? 'anim-answer-wash' : ''}
           ${shake ? 'anim-soft-nudge' : ''}

@@ -200,9 +200,9 @@ button.text-xl, input.text-xl, select.text-xl, textarea.text-xl { font-size: var
   overflow-wrap: normal;
 }
 /* 문제 말풍선: 왼쪽 아래 수달 쪽으로 꼬리. 수달 그림 양옆 여백만큼 당겨 붙인다 */
-.quiz-question-otter { margin-inline: -14px -12px; }
+.quiz-question-otter { margin-inline: -18px -15px; }
 .quiz-bubble { position: relative; overflow: visible; }
-.quiz-bubble::before { content: ''; position: absolute; bottom: 56px; left: -7px; width: 12px; height: 12px; border-left: 1px solid var(--color-line); border-bottom: 1px solid var(--color-line); background: var(--color-card); transform: rotate(45deg); }
+.quiz-bubble::before { content: ''; position: absolute; bottom: 72px; left: -7px; width: 12px; height: 12px; border-left: 1px solid var(--color-line); border-bottom: 1px solid var(--color-line); background: var(--color-card); transform: rotate(45deg); }
 .quiz-question-card { border: 0; background: var(--color-card); text-align: left; align-items: stretch; padding-block: var(--space-8); }
 .quiz-option {
   position: relative;
