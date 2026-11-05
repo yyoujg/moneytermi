@@ -19,8 +19,8 @@
   --brown-900: #5e5248;
   /* 징검다리 노드 그림(public/path)의 갈색 */
   --otter-brown: #8c7c6d;
-  --neutral-100: #f2f4f6;
-  --neutral-900: #191f28;
+  --neutral-100: #f4f1ec;
+  --neutral-900: #1f1a17;
   --amber-50: #fff1e6;
   --amber-100: #ffd9bd;
   --amber-200: #f5d6ae;
@@ -28,26 +28,26 @@
   --amber-500: #d96100;
   --amber-900: #352b23;
 
-  /* 중성 회색은 TDS grey 스케일 값(보라 기운 없는 회색) */
+  /* 중성 회색은 수달 캐릭터에 맞춘 따뜻한 회갈색(2026-11-05, 예전 TDS 청회색과 같은 밝기 단계) */
   --gray-0: #ffffff;
-  --gray-50: #f9fafb;
-  --gray-75: #f2f4f6;
-  --gray-100: #e5e8eb;
-  --gray-150: #e5e8eb;
-  --gray-200: #d1d6db;
-  --gray-300: #b0b8c1;
-  --gray-400: #8b95a1;
-  --gray-450: #6b7684;
-  --gray-500: #6b7684;
-  --gray-600: #4e5968;
-  --gray-650: #4e5968;
-  --gray-700: #4e5968;
-  --gray-720: #333d4b;
-  --gray-750: #333d4b;
-  --gray-800: #333d4b;
-  --gray-830: #191f28;
-  --gray-850: #191f28;
-  --gray-900: #191f28;
+  --gray-50: #faf8f5;
+  --gray-75: #f4f1ec;
+  --gray-100: #e9e3da;
+  --gray-150: #e9e3da;
+  --gray-200: #d8d0c5;
+  --gray-300: #bcb2a6;
+  --gray-400: #988c80;
+  --gray-450: #7a6e63;
+  --gray-500: #7a6e63;
+  --gray-600: #5a5048;
+  --gray-650: #5a5048;
+  --gray-700: #5a5048;
+  --gray-720: #3d3530;
+  --gray-750: #3d3530;
+  --gray-800: #3d3530;
+  --gray-830: #1f1a17;
+  --gray-850: #1f1a17;
+  --gray-900: #1f1a17;
 
   /* 메인 보라와 글자용 진한 보라를 구분한다. */
   --accent-brand: var(--brown-500);
