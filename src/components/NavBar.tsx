@@ -78,7 +78,7 @@ const NavBar = () => {
       className="absolute bottom-0 w-full flex justify-center z-50 pointer-events-none"
       style={{ paddingBottom: 24 + insets.bottom }}
     >
-      <div className="app-nav-tray flex w-[90%] max-w-[400px] items-stretch rounded-full px-4 py-2 border border-[var(--color-line)] pointer-events-auto">
+      <div className="app-nav-tray flex w-[90%] max-w-[400px] items-stretch rounded-card px-4 py-2 border border-[var(--color-line)] pointer-events-auto">
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.path || pathname.startsWith(`${item.path}/`);
           const hasNew = newByPath[item.path] ?? false;

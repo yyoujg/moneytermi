@@ -248,11 +248,11 @@
   --color-league-second: var(--color-surface);
   --color-league-third: var(--color-surface);
 
-  /* 하단 내비(완전 둥근 알약)에 맞춰 둥글게 통일: 카드·버튼·선택지 32(낮은 칸은 알약처럼), 안쪽 상자 16, 칩은 알약 */
+  /* 모서리는 한 값으로 통일(하단 내비 포함): 카드·버튼·선택지·안쪽 상자·칩 모두 32px. 낮은 칸은 알약처럼 보인다. 원은 50%·--shape-full */
   --shape-card: 32px;
-  --shape-button: 32px;
-  --shape-chip: var(--shape-full);
-  --shape-inset: 16px;
+  --shape-button: var(--shape-card);
+  --shape-chip: var(--shape-card);
+  --shape-inset: var(--shape-card);
 
   /* 카드·선택지는 그림자 대신 검정 테두리(--card-border)로 나눈다. */
   --shadow-card: none;

@@ -126,8 +126,8 @@ const WordCard = ({
         [1, 2, 3].map(i => (
           <div key={i} className="flex gap-3 py-3">
             <div className="flex-1 flex flex-col gap-1">
-              <div className="h-3.5 bg-[var(--color-surface)] rounded animate-pulse" style={{ width: '90%' }} />
-              <div className="h-3.5 bg-[var(--color-surface)] rounded animate-pulse" style={{ width: '60%' }} />
+              <div className="h-3.5 bg-[var(--color-surface)] rounded-chip animate-pulse" style={{ width: '90%' }} />
+              <div className="h-3.5 bg-[var(--color-surface)] rounded-chip animate-pulse" style={{ width: '60%' }} />
             </div>
           </div>
         ))

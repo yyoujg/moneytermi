@@ -87,7 +87,7 @@ const LeagueScreen = () => {
         {!failed && rows === null && (
           <Card pad="lg">
             <div className="flex flex-col gap-3">
-              {[1, 2, 3].map(i => <div key={i} className="h-5 bg-[var(--color-surface)] rounded animate-pulse" />)}
+              {[1, 2, 3].map(i => <div key={i} className="h-5 bg-[var(--color-surface)] rounded-chip animate-pulse" />)}
             </div>
           </Card>
         )}

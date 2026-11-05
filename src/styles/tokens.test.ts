@@ -240,9 +240,9 @@ describe('그림자 없는 테두리 카드와 평면 버튼 표면', () => {
   it('모든 테마와 화면이 같은 둥근 모서리 원본을 사용한다', () => {
     for (const values of [light]) {
       expect(values['--shape-card']).toBe('32px');
-      expect(values['--shape-button']).toBe('32px');
-      expect(values['--shape-chip']).toBe('var(--shape-full)');
-      expect(values['--shape-inset']).toBe('16px');
+      expect(values['--shape-button']).toBe('var(--shape-card)');
+      expect(values['--shape-chip']).toBe('var(--shape-card)');
+      expect(values['--shape-inset']).toBe('var(--shape-card)');
       expect([values['--shape-sm'], values['--shape-md'], values['--shape-lg'], values['--shape-xl']]).toEqual(['4px', '6px', '8px', '12px']);
       const shadows = Object.keys(values).filter(key => key.startsWith('--shadow-'));
       expect(shadows).toEqual(expect.arrayContaining(['--shadow-card', '--shadow-card-pressed', '--shadow-choice', '--shadow-action', '--shadow-action-secondary', '--shadow-action-soft', '--shadow-action-pressed']));
