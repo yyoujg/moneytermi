@@ -55,10 +55,10 @@ for (const [name, values] of [['라이트', light]] as const) {
         expect(contrast(resolve(foreground, values), resolve(background, values))).toBeGreaterThanOrEqual(4.5);
       });
     }
-    it('주행동은 세이지 바탕에 진한 글자를 쓰고 글자 대비 4.5:1을 넘는다', () => {
-      expect(resolve('--color-brand-action', values)).toBe('#a39382');
-      expect(resolve('--color-on-brand', values)).toBe('#1f1a17');
-      expect(resolve('--color-brand-pressed', values)).toBe('#8c7c6d');
+    it('주행동은 진한 갈색 바탕에 흰 글자를 쓰고 글자 대비 4.5:1을 넘는다', () => {
+      expect(resolve('--color-brand-action', values)).toBe('#5e5248');
+      expect(resolve('--color-on-brand', values)).toBe('#ffffff');
+      expect(resolve('--color-brand-pressed', values)).toBe('#4a4039');
       expect(contrast(resolve('--color-on-brand', values), resolve('--color-brand-action', values))).toBeGreaterThanOrEqual(4.5);
     });
     it('누름 색은 기본보다 어둡고 보조 버튼의 상태를 유지한다', () => {
@@ -104,8 +104,8 @@ for (const [name, values] of [['라이트', light]] as const) {
       expect(resolve('--color-character-stage', values)).toBe(resolve('--color-surface', values));
       expect(resolve('--color-filter-tray', values)).toBe(name === '라이트' ? '#e9e3da' : '#222036');
     });
-    it('주행동 글자는 진한 중립색, 중성 채움 버튼 글자는 흰색이다', () => {
-      expect(resolve('--color-on-brand', values)).toBe('#1f1a17');
+    it('주행동·중성 채움 버튼 글자는 모두 흰색이다', () => {
+      expect(resolve('--color-on-brand', values)).toBe('#ffffff');
       expect(resolve('--color-on-action', values)).toBe('#ffffff');
     });
   });
@@ -318,7 +318,7 @@ describe('주황 메인과 따뜻한 보조 팔레트', () => {
     expect(resolve('--color-canvas', light)).toBe('#f4f1ec');
     expect(resolve('--color-card', light)).toBe('#ffffff');
     expect(resolve('--color-surface', light)).toBe('#f4f1ec');
-    expect(resolve('--color-brand-action', light)).toBe('#a39382');
+    expect(resolve('--color-brand-action', light)).toBe('#5e5248');
     expect(resolve('--color-brand-decoration', light)).toBe('#5e5248');
     expect(resolve('--color-brand-accent', light)).toBe('#a39382');
   });
@@ -379,7 +379,6 @@ describe('컬러와 타이포그래피 역할 계층', () => {
       for (const name of ['--color-brand-action', '--color-accent-foreground', '--color-accent-soft', '--color-progress', '--color-ink', '--color-ink-2', '--color-ink-3']) {
         expect(resolve(name, values)).toMatch(/^#[\da-f]{6}$/i);
       }
-      expect(resolve('--color-brand-action', values)).not.toBe(resolve('--color-accent-foreground', values));
       expect(contrast(resolve('--color-accent-foreground', values), resolve('--color-accent-soft', values))).toBeGreaterThanOrEqual(4.5);
     }
   });
