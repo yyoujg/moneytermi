@@ -47,15 +47,8 @@ const LeagueScreen = () => {
   return (
     <div className="league-screen flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
       <div className="pt-4 px-5 pb-4">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="type-page-title">리그</h2>
-          {/* 44px 버튼이 제목 줄을 키워 제목이 다른 탭보다 내려가지 않게, 버튼 칸 높이를 제목 줄(34px)에 맞춘다 */}
-          <div className="flex h-[34px] items-center gap-1">
-            <TextButton size="small" className="league-header-action" aria-label="리그 안내" onClick={() => setSheet('rules')}>
-              안내
-            </TextButton>
-          </div>
-        </div>
+        {/* 화면 제목은 하단 탭 이름과 겹쳐 스크린리더용으로만 둔다. 안내 버튼은 TOP 10 줄 오른쪽 */}
+        <h2 className="sr-only">리그</h2>
 
         {/* 티어 로드맵: 테두리·선 없이 등급 아이콘(84px 원 안 44px)과 이름을 가로로 넘기고 처음에 현재 등급을 가운데로 둔다. 규칙 설명은 안내 시트(LeagueRules)에만 둔다 */}
         <ol ref={roadRef} className="league-tier-road anim-fade-up" aria-label="등급 단계" style={{ '--i': 1 } as React.CSSProperties}>
@@ -77,6 +70,11 @@ const LeagueScreen = () => {
         <div className="flex items-center gap-2 mb-4">
           <h3 className="type-section-title">이번 주 TOP 10</h3>
           <span className="league-time-left" aria-label={`리그 종료까지 ${timeLeftLabel()}`}>{timeLeftLabel()}</span>
+          <span className="ml-auto -my-3 flex">
+            <TextButton size="small" className="league-header-action" aria-label="리그 안내" onClick={() => setSheet('rules')}>
+              안내
+            </TextButton>
+          </span>
         </div>
 
         {failed && (

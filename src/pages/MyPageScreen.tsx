@@ -52,8 +52,9 @@ const MyPageScreen = () => {
       />
 
       {/* 프로필 헤더 */}
-      <div className="my-page-hero shrink-0 pt-4 px-5 pb-5">
-        <h2 className="type-page-title mb-8!">마이페이지</h2>
+      <div className="my-page-hero shrink-0 pt-6 px-5 pb-5">
+        {/* 화면 제목은 하단 탭 이름과 겹쳐 스크린리더용으로만 둔다 */}
+        <h2 className="sr-only">마이페이지</h2>
         <ProfileHeader
           nickname={user?.nickname ?? DEFAULT_NICKNAME}
           avatar={myEmoji}

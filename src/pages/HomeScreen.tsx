@@ -49,12 +49,11 @@ const HomeScreen = () => {
   return (
     <div className="quest-screen flex flex-col h-full pb-nav overflow-y-auto [&::-webkit-scrollbar]:hidden">
 
-      <div className="pt-4 px-5 pb-4">
-        <h2 className="type-page-title">퀘스트</h2>
-      </div>
+      {/* 화면 제목은 하단 탭 이름과 겹쳐 스크린리더용으로만 둔다 */}
+      <h2 className="sr-only">퀘스트</h2>
 
       {/* 지금 미션(0·8·16시에 바뀐다) */}
-      {missionList.length > 0 && <div className="quest-missions-section px-5 pt-4 flex flex-col gap-4">
+      {missionList.length > 0 && <div className="quest-missions-section px-5 pt-6 flex flex-col gap-4">
         <Card pad="none" className="home-missions mb-4 anim-fade-up" aria-labelledby="home-missions-heading">
         <div className="home-mission-heading anim-fade-up">
           <div>
