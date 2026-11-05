@@ -27,7 +27,7 @@ export const PointCelebration = ({ reward, onClose }: { reward: PointReward; onC
       <div role="dialog" aria-label="미션 완료" onClick={e => e.stopPropagation()}
         className="app-card flex w-full max-w-xs flex-col items-center rounded-card bg-[var(--color-card)] px-6 pb-6 pt-8 text-center anim-pop-in">
         <h2 className="text-xl font-bold text-[var(--color-ink)]">
-          오늘의 미션 완료!
+          미션 완료!
         </h2>
         <p className="mt-2! text-sm text-[var(--color-ink-3)] break-keep">
           미션을 마치고 경험치를 모았어요.

@@ -1,5 +1,5 @@
 import { ActionButton } from '../ui/ActionButton';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { useAuth } from '../../hooks/useAuth';
 import { feedbackCelebrate } from '../../lib/feedback';
@@ -29,10 +29,11 @@ export const LeagueRankCelebration = () => {
   const { hydrated, xp } = useAppContext();
   const { user, guestToken } = useAuth();
   const [rankUp, setRankUp] = useState<RankUp | null>(null);
-  const storageKey = useMemo(() => user ? leagueRankSeenKey(user.id, weekStart()) : null, [user]);
 
   useEffect(() => {
-    if (!hydrated || !user || !storageKey) return;
+    if (!hydrated || !user) return;
+    // 주가 바뀐 뒤에도 앱을 켜 둔 채면 지난주 키와 비교하지 않게 매번 이번 주 키를 계산한다
+    const storageKey = leagueRankSeenKey(user.id, weekStart());
     let cancelled = false;
     const db = guestToken ? getGuestClient(guestToken) : supabase;
 
@@ -65,7 +66,7 @@ export const LeagueRankCelebration = () => {
       .catch(() => {});
 
     return () => { cancelled = true; };
-  }, [guestToken, hydrated, storageKey, user, xp]);
+  }, [guestToken, hydrated, user, xp]);
 
   const myTurn = useModalTurn(!!rankUp);
   if (!rankUp || !myTurn) return null;

@@ -139,7 +139,7 @@ const QuizScreen = () => {
         title="아직 풀 문제가 없어요"
         description="자주 마주치는 용어를 먼저 보면 퀴즈를 풀 수 있어요."
         actionLabel="시작하러 가기"
-        onAction={() => navigate('/course')}
+        onAction={() => navigate('/course', { replace: true })}
       />
     );
   }
@@ -159,8 +159,8 @@ const QuizScreen = () => {
         subtitle={<>{`${baseQueue.length}문제 완료${retryQueue.length > 0 ? ` · 다시 푼 문제 ${retryQueue.length}개` : ''}`}<br />{praiseForQuiz({ accuracy, maxCombo, total: baseQueue.length })}</>}
         actionLabel={navState?.nextRoute?.label ?? (backPath.startsWith('/course') ? '주제로 돌아가기' : '퀘스트로')}
         onAction={() => navState?.nextRoute
-          ? navigate(navState.nextRoute.pathname, navState.nextRoute.state === undefined ? undefined : { state: navState.nextRoute.state })
-          : navigate(backPath)}
+          ? navigate(navState.nextRoute.pathname, { replace: true, state: navState.nextRoute.state })
+          : navigate(backPath, { replace: true, state: { openFocus: true } })}
       >
         {/* 끝 화면은 핵심 숫자 하나와 보상 한 줄만 크게 보여준다(피크엔드) */}
         <section className="quiz-result-stats w-full flex flex-col items-center gap-1 text-center anim-fade-up" role="group" aria-label="퀴즈 결과 요약" style={{ '--i': 2 } as React.CSSProperties}>

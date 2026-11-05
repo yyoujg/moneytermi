@@ -50,7 +50,7 @@ const LessonCheckScreen = () => {
         results={roundResults}
         reviewCount={mistakes.length}
         onRetry={() => { setQuestions(mistakes.map(item => ({ ...item, options: shuffle(item.options) }))); setMistakes([]); setIndex(0); setSelected(null); setAttempt(value => value + 1); }}
-        onBack={() => navigate(backPath, { state: { openFocus: true } })}
+        onBack={() => navigate(backPath, { replace: true, state: { openFocus: true } })}
       />
     );
   }

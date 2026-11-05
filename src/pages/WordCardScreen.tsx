@@ -406,7 +406,7 @@ const WordCardScreen = () => {
                   onClick={() => {
                     logClick('continue_after_first');
                     const idx = state!.continueWords!.findIndex(w => !knownIds.has(w.id));
-                    navigate('/word-card', { state: { words: state!.continueWords, index: idx, backPath, autoAdvance: true } });
+                    navigate('/word-card', { replace: true, state: { words: state!.continueWords, index: idx, backPath, autoAdvance: true } });
                   }}
                 >
                   다음 용어 계속 보기 <ChevronRight size={20} />
@@ -417,14 +417,14 @@ const WordCardScreen = () => {
               <ActionButton
                 fullWidth
                 onClick={() => lessonChecks(words).length > 0
-                  ? navigate('/lesson-check', { state: { words, backPath, courseId: state?.courseId, nodeId: state?.nodeId } })
-                  : navigate('/quiz', { state: { quizQueue: lessonQuizWords, backPath, reviewMode: true, mode: 'lesson_recall', courseId: state?.courseId, lessonId: state?.nodeId } })}
+                  ? navigate('/lesson-check', { replace: true, state: { words, backPath, courseId: state?.courseId, nodeId: state?.nodeId } })
+                  : navigate('/quiz', { replace: true, state: { quizQueue: lessonQuizWords, backPath, reviewMode: true, mode: 'lesson_recall', courseId: state?.courseId, lessonId: state?.nodeId } })}
               >
                 {lessonChecks(words).length > 0 ? '상황 문제로 이해 확인하기' : '용어 퀴즈로 확인하기'}
               </ActionButton>
             );
           })()}
-          <ActionButton tone="soft" fullWidth onClick={() => navigate(backPath, backState ? { state: backState } : undefined)}>
+          <ActionButton tone="soft" fullWidth onClick={() => navigate(backPath, { replace: true, state: { ...(backState as object | undefined), openFocus: true } })}>
             코스로 돌아가기
           </ActionButton>
         </div>

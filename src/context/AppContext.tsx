@@ -493,7 +493,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     const scheduleReset = () => {
       timer = setTimeout(() => {
         if (stopped) return;
-        lastMissionDate.current = `${toDateStr(new Date())}#${missionSlot()}`;
+        lastMissionDate.current = slotKey = `${toDateStr(new Date())}#${missionSlot()}`;
         setMissions(missionBaseRef.current);
         void checkInRef.current();
         scheduleReset();
@@ -501,7 +501,21 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     scheduleReset();
-    return () => { stopped = true; if (timer !== undefined) clearTimeout(timer); };
+    // 기기가 잠들면 타이머가 멈춘다. 다시 보일 때 슬롯이 바뀌었으면 타이머와 같은 초기화를 바로 하고 다시 예약한다
+    let slotKey = `${toDateStr(new Date())}#${missionSlot()}`;
+    const onVisible = () => {
+      if (stopped || document.visibilityState !== 'visible') return;
+      const key = `${toDateStr(new Date())}#${missionSlot()}`;
+      if (key === slotKey) return;
+      slotKey = key;
+      lastMissionDate.current = key;
+      setMissions(missionBaseRef.current);
+      void checkInRef.current();
+      if (timer !== undefined) clearTimeout(timer);
+      scheduleReset();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => { stopped = true; if (timer !== undefined) clearTimeout(timer); document.removeEventListener('visibilitychange', onVisible); };
   }, [ready]);
 
   // ── toggleKnown ───────────────────────────────────────────────
@@ -537,6 +551,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   // ── claimReward — 서버가 자격 검증 후 적립 ─────────────────────
   // 성공 여부를 돌려줘 화면이 토스트/햅틱을 결정한다
+  // 같은 틱에 여러 미션을 받으면 렌더 시점 xp가 옛 값이라 지급량이 겹쳐 보인다. 최신 잔고는 ref로 따로 들고 간다
+  const latestXpRef = useRef(xp);
+  useEffect(() => { latestXpRef.current = xp; }, [xp]);
   const claimReward = async (missionId: keyof Missions): Promise<{ xpGained: number } | 'pending' | null> => {
     if (claimingRef.current.has(missionId)) return 'pending';
     const mission = missions[missionId];
@@ -548,7 +565,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       const { data, error } = await dbRef.current.rpc('claim_mission_reward', { p_mission_id: missionId, p_date: today });
       if (error || !data) { console.error('[claimReward] 실패:', error); return null; }
       // 기존 서버 최종 잔고와 지급 규칙을 그대로 사용한다.
-      const xpGained = typeof data.xp === 'number' ? Math.max(data.xp - xp, 0) : MISSION_XP;
+      const xpGained = typeof data.xp === 'number' ? Math.max(data.xp - latestXpRef.current, 0) : MISSION_XP;
+      if (typeof data.xp === 'number') latestXpRef.current = data.xp; else latestXpRef.current += MISSION_XP;
       setPoints(data.points);
       if (typeof data.xp === 'number') setXp(data.xp); else setXp(x => x + MISSION_XP);
       setMissions(prev => ({ ...prev, [missionId]: { ...prev[missionId], isRewarded: true } }));
@@ -757,6 +775,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     const profileId = profileIdRef.current;
     if (!profileId) return false;
     const existing = wpRows.find(r => r.word_id === wordId);
+    // 아직 복습할 때가 안 된 단어를 맞히면 일정을 당겨 늘리지 않는다(10일 뒤 단어를 오늘 맞혀 25일로 뛰는 것 방지). 틀리면 그대로 리셋
+    if (correct && existing && existing.status === 'known' && existing.last_grade !== 0 && existing.due_date > toDateStr(new Date())) return true;
     const base = existing ?? { ease: 2.5, interval_d: 0, reps: 0 };
     const grade = gradeFromResult(correct, usedHint);
     const ns = nextSrs(base, grade);

@@ -551,8 +551,8 @@ describe('퀘스트의 미션 동작', () => {
     const container = await mountHome();
     const card = container.querySelector('.home-missions');
     expect(card).toHaveAttribute('aria-labelledby', 'home-missions-heading');
-    expect(card?.querySelector('h2')).toHaveTextContent('오늘의 미션');
-    expect(container.querySelector('.home-mission-heading')).toHaveTextContent('오늘의 미션');
+    expect(card?.querySelector('h2')).toHaveTextContent('지금 미션');
+    expect(container.querySelector('.home-mission-heading')).toHaveTextContent('지금 미션');
     expect(container.querySelectorAll('#home-mission-list .home-mission-row')).toHaveLength(3);
     // 주간·월간 미션은 진행도만(보상 버튼 없음)
     expect([...container.querySelectorAll('[data-period] h2')].map(h => h.textContent)).toEqual(['이번 주 미션', '이번 달 미션']);
@@ -573,8 +573,8 @@ describe('퀘스트의 미션 동작', () => {
     expect(rows[1]).not.toHaveAttribute('data-done');
     expect(rows[2].querySelector('button')).toBeNull();
     expect(rows[2].querySelector('[data-state=claimed]')).toHaveTextContent('완료');
-    // '오늘의 미션' 제목은 목록 위 한 곳에만
-    expect([...container.querySelectorAll('h2, p')].filter(el => el.textContent?.trim() === '오늘의 미션')).toHaveLength(1);
+    // '지금 미션' 제목은 목록 위 한 곳에만
+    expect([...container.querySelectorAll('h2, p')].filter(el => el.textContent?.trim() === '지금 미션')).toHaveLength(1);
     await act(async () => rows[0].querySelector<HTMLButtonElement>('button')!.click());
     expect(claimReward).toHaveBeenCalledExactlyOnceWith('quiz');
     expect(container).toHaveTextContent('미션 보상 축하');

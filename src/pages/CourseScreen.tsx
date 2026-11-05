@@ -111,9 +111,17 @@ const CourseScreen = () => {
   // 안 끝낸 첫 단계 하나만 열고 그 뒤의 미완료 단계는 다른 주제·다음 난이도까지 모두 잠근다. 복습은 선택이라 잠그지 않는다
   const sections = useMemo(() => {
     let opened = false;
-    return buildPath(courses, knownIds).map(sec => {
+    const path = buildPath(courses, knownIds);
+    // 퀴즈 완료는 기기에만 남아 재설치·기기 변경 때 사라진다. 같은 코스에서 그 뒤 학습을 서버 기록으로 이미 끝냈다면 앞 퀴즈도 끝낸 것으로 본다
+    // (다른 코스까지 보면 다른 주제에서 익힌 단어 때문에 아직 안 푼 퀴즈가 건너뛰어진다)
+    const passedIds = new Set(path.flatMap(sec => {
+      const lastServerDone = sec.nodes.reduce((at, node, i) => node.type === 'lesson' && node.state === 'done' ? i : at, -1);
+      return sec.nodes.slice(0, Math.max(0, lastServerDone)).map(node => node.id);
+    }));
+    return path.map(sec => {
       return { ...sec, nodes: sec.nodes.map(node => {
         if (node.type === 'review') return node;
+        if (node.state === 'available' && !doneNodes.has(node.id) && passedIds.has(node.id)) return { ...node, state: 'done' as const };
         const done = node.state === 'done' || (doneNodes.has(node.id) && node.state === 'available');
         if (done) return node;
         if (!opened) { opened = true; return node; }
@@ -218,9 +226,10 @@ const CourseScreen = () => {
   const focusId = focus?.id ?? null;
   useEffect(() => {
     // 완료 기록이 다 오기 전엔 focus가 이미 끝낸 단계를 가리킬 수 있다
-    if (!openFocusOnReturn.current || !focusId || !hydrated || !doneNodesLoaded) return;
+    if (!openFocusOnReturn.current || !hydrated || !doneNodesLoaded) return;
+    // 열 단계가 없어도 한 번 판단하면 끈다(다음 주제 전환 때 엉뚱하게 열리지 않게)
     openFocusOnReturn.current = false;
-    setBubbleId(focusId);
+    if (focusId) setBubbleId(focusId);
   }, [focusId, hydrated, doneNodesLoaded]);
   // 홈 코스 줄: 지금 학습 중인 코스 카드가 왼쪽에 오게 가로 위치를 맞춘다
   useEffect(() => {

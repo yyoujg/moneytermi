@@ -26,14 +26,13 @@ const LABELS = ['월', '화', '수', '목', '금', '토', '일'];
 // 이번 주(월~일) 7칸. WeeklyBarChart와 같은 월요일 기준.
 export const weekDays = (attendanceDates: string[], today: Date = new Date()): WeekDay[] => {
   const s = new Set(attendanceDates);
-  const dow = today.getDay();
+  // 요일은 기기 시간대가 아니라 KST로 센다(출석 날짜 문자열이 KST라서)
+  const dow = new Date(today.getTime() + 9 * 60 * 60 * 1000).getUTCDay();
   const mondayOffset = dow === 0 ? -6 : 1 - dow;
   const todayIdx = dow === 0 ? 6 : dow - 1;
 
   return LABELS.map((label, i) => {
-    const d = new Date(today);
-    d.setDate(today.getDate() + mondayOffset + i);
-    const dateStr = toDateStr(d);
+    const dateStr = toDateStr(new Date(today.getTime() + (mondayOffset + i) * 24 * 60 * 60 * 1000));
     return { label, dateStr, attended: s.has(dateStr), isToday: i === todayIdx, isFuture: i > todayIdx };
   });
 };

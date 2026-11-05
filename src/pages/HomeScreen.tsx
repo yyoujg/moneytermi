@@ -52,25 +52,25 @@ const HomeScreen = () => {
 
       <div className="pt-4 px-5 pb-4">
         <h2 className="type-page-title mb-4!">퀘스트</h2>
-        {missionList.length > 0 && <section className="quest-hero" aria-label="오늘의 미션 요약">
+        {missionList.length > 0 && <section className="quest-hero" aria-label="지금 미션 요약">
           {allMissionsDone && <img className="quest-hero-character" src="/otter/v5/otter-cheer.svg" data-otter="cheer" alt="" aria-hidden="true" width={72} height={72} />}
           <div className="min-w-0 flex-1">
-            {/* '오늘의 미션' 제목은 아래 목록에만 둔다 */}
-            {allMissionsDone && <p className="type-supporting">오늘 미션을 모두 마쳤어요</p>}
-            <p className="quest-hero-count">오늘 <strong>{doneMissions}</strong> / {missionList.length} 완료</p>
-            <div role="progressbar" aria-label="오늘의 미션 전체 진행률" aria-valuemin={0} aria-valuemax={missionList.length} aria-valuenow={doneMissions} className="course-home-progress-track mt-2">
+            {/* '지금 미션' 제목은 아래 목록에만 둔다 */}
+            {allMissionsDone && <p className="type-supporting">지금 미션을 모두 마쳤어요</p>}
+            <p className="quest-hero-count">지금 <strong>{doneMissions}</strong> / {missionList.length} 완료</p>
+            <div role="progressbar" aria-label="지금 미션 전체 진행률" aria-valuemin={0} aria-valuemax={missionList.length} aria-valuenow={doneMissions} className="course-home-progress-track mt-2">
               <span style={{ width: `${Math.round(doneMissions / missionList.length * 100)}%` }} />
             </div>
           </div>
         </section>}
       </div>
 
-      {/* 오늘의 미션 */}
+      {/* 지금 미션(0·8·16시에 바뀐다) */}
       {missionList.length > 0 && <div className="quest-missions-section px-5 pt-4 flex flex-col gap-4">
         <Card pad="none" className="home-missions mb-4 anim-fade-up" aria-labelledby="home-missions-heading">
         <div className="home-mission-heading anim-fade-up">
           <div>
-            <h2 id="home-missions-heading">오늘의 미션</h2>
+            <h2 id="home-missions-heading">지금 미션</h2>
             {/* 완료 수는 위 요약에 있으므로 받을 보상이 있을 때만 알려준다 */}
             {readyMissions > 0 && <p className="mt-1! text-xs text-[var(--color-ink-3)] break-keep">받을 수 있는 보상 {readyMissions}개</p>}
           </div>

@@ -22,7 +22,7 @@ const mount = (reward: PointReward) => {
 describe('수달과 미션 보상 안내', () => {
   it('미션으로 받은 실제 경험치만 보여준다', () => {
     const { container, onClose } = mount({ xp: 10 });
-    expect(container).toHaveTextContent('오늘의 미션 완료!');
+    expect(container).toHaveTextContent('미션 완료!');
     expect(container).toHaveTextContent('미션을 마치고 경험치를 모았어요.');
     expect(container).toHaveTextContent('+10 XP');
     expect(container.querySelector('[role="dialog"]')).toHaveAttribute('aria-label', '미션 완료');

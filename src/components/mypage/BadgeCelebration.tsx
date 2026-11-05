@@ -25,7 +25,9 @@ export const BadgeCelebration = () => {
     // 로딩 중 일부 통계만 채워진 상태로 판정하면 나머지 배지가 새로 딴 것처럼 뜬다
     if (!hydrated || !earnedIds) return;
     Storage.getItem(KEY).catch(() => null).then(raw => {
-      const seen = new Set<string>(raw ? JSON.parse(raw) : []);
+      // 저장값이 깨져 있으면 빈 기록으로 보고 덮어쓴다(안 그러면 이 기기에선 축하가 영영 안 뜬다)
+      let seen = new Set<string>();
+      try { seen = new Set<string>(raw ? JSON.parse(raw) : []); } catch { /* 깨진 값 */ }
       const earned = badges.filter(b => b.earned);
       const news = earned.filter(b => !seen.has(b.id));
       // 덮어쓰면 단어 목록이 늦게 채워질 때 단어 배지가 기록에서 빠져 앱을 열 때마다 다시 뜬다
