@@ -83,7 +83,7 @@ describe('레슨 이해 확인', () => {
     const { container, click } = mount({ pathname: '/lesson-check', state: { words: [word(entry.wordId, [quiz])] } });
     expect(container.textContent?.replace(/\u00a0/g, ' ')).toContain(quiz.q);
     click(quiz.options[quiz.answer]);
-    expect(container.textContent).toContain('맞았어요');
+    expect(container.textContent).toContain('정답! 감 잡았네');
     expect(container.textContent?.replace(/\u00a0/g, ' ')).toContain(quiz.explanation);
     click('결과 보기');
     expect(container.textContent).toContain('1/ 1');
@@ -95,7 +95,7 @@ describe('레슨 이해 확인', () => {
     const correct = container.querySelector('[data-lesson-check-result="correct"]');
     expect(correct).toHaveClass('lesson-feedback-answer');
     expect(container.querySelector('.lesson-feedback-intro img')).toBeNull();
-    expect(container.querySelector('.lesson-feedback-intro h1')).toHaveTextContent('맞았어요!');
+    expect(container.querySelector('.lesson-feedback-intro h1')).toHaveTextContent('정답! 감 잡았네');
     expect(container.querySelector('.lesson-feedback-status-icon')).toBeNull();
     expect(container.querySelector('.lesson-feedback-answer :is(svg, img[data-icon])')).toBeNull();
     expect(container.querySelector('[class*="answer-soft"]')).toBeNull();
@@ -115,7 +115,7 @@ describe('레슨 이해 확인', () => {
     const { container, click } = mount({ pathname: '/lesson-check', state: { words: [word(1, [check])] } });
     click('내린다');
     expect(container.querySelector('.lesson-feedback-intro img')).toBeNull();
-    expect(container.querySelector('.lesson-feedback-intro h1')).toHaveTextContent('아쉬워요, 오답이에요');
+    expect(container.querySelector('.lesson-feedback-intro h1')).toHaveTextContent('아깝다! 정답을 같이 보자');
     expect(container.querySelector('[data-lesson-check-result="wrong"]')).toHaveClass('lesson-feedback-my-answer');
     expect(container.querySelector('[class*="danger-"], [class*="answer-soft"], [class*="success-"]')).toBeNull();
     expect(container.querySelector('.lesson-feedback-my-answer :is(svg, img[data-icon])')).toBeNull();
@@ -123,33 +123,18 @@ describe('레슨 이해 확인', () => {
     expect(container.querySelector('[data-lesson-check-result="correct"]')).toHaveTextContent('정답');
     expect(container.querySelector('[data-lesson-check-feedback="wrong"]')).toHaveClass('lesson-feedback-card');
     expect(container.querySelectorAll('button[data-own-sfx]')).toHaveLength(0);
-    click('다른 보기 확인하기');
-    expect(container.querySelectorAll('.lesson-feedback-options li')).toHaveLength(4);
-    expect(container.querySelector('.lesson-feedback-options [data-lesson-option-state="wrong"]')).toHaveTextContent('내린다');
-    expect(container.querySelectorAll('.lesson-feedback-options button')).toHaveLength(0);
-    expect(container.querySelectorAll('.lesson-feedback-options :is(svg, img[data-icon])')).toHaveLength(0);
-    expect([...container.querySelectorAll('.lesson-feedback-option-marker')].map(marker => marker.textContent)).toEqual(['1', '2', '3', '4']);
-    expect(container.querySelector('.lesson-feedback-options [data-lesson-option-state="correct"]')).toHaveTextContent('정답');
-    expect(container.querySelector('.lesson-feedback-options [data-lesson-option-state="wrong"]')).toHaveTextContent('내 선택');
+    expect(container.querySelector('.lesson-feedback-reason')).toHaveTextContent(check.explanation);
+    expect([...container.querySelectorAll('button')].map(button => button.textContent)).toEqual(['결과 보기']);
   });
 
-  it('정답 뒤에는 해설을 먼저 보여주고 다른 보기는 펼쳐서 확인한다', () => {
+  it('정답 뒤에는 상황과 해설을 보여주고 바로 결과로 이동한다', () => {
     const { container, click } = mount({ pathname: '/lesson-check', state: { words: [word(1, [check])] } });
     click('오른다');
-    expect(container.querySelector('.lesson-feedback-intro h1')).toHaveTextContent('맞았어요!');
+    expect(container.querySelector('.lesson-feedback-intro h1')).toHaveTextContent('정답! 감 잡았네');
     expect(document.activeElement).toBe(container.querySelector('.lesson-feedback-intro h1'));
     expect(container.querySelector('.lesson-feedback-question')).toHaveTextContent(check.q);
-    expect(container.querySelector('.lesson-feedback-reason')).toHaveTextContent('이렇게 이해해요');
-    expect(container.querySelector('.lesson-feedback-options')).toBeNull();
-    expect(container.querySelector('.lesson-feedback-disclosure')).toHaveAttribute('aria-expanded', 'false');
-    expect(container.querySelector('.lesson-feedback-disclosure')).not.toHaveAttribute('aria-controls');
-    click('다른 보기 확인하기');
-    expect(container.querySelector('.lesson-feedback-disclosure')).toHaveAttribute('aria-expanded', 'true');
-    const controlledId = container.querySelector('.lesson-feedback-disclosure')!.getAttribute('aria-controls')!;
-    expect(document.getElementById(controlledId)).toBe(container.querySelector('.lesson-feedback-options'));
-    expect(container.querySelectorAll('.lesson-feedback-options li')).toHaveLength(4);
-    click('다른 보기 접기');
-    expect(container.querySelector('.lesson-feedback-options')).toBeNull();
+    expect(container.querySelector('.lesson-feedback-reason')).toHaveTextContent('핵심은 이거야');
+    expect([...container.querySelectorAll('button')].map(button => button.textContent)).toEqual(['결과 보기']);
     click('결과 보기');
     expect(container.querySelector('.lesson-complete-score')).toHaveTextContent('1/ 1');
     expect(document.activeElement).toBe(container.querySelector('.lesson-complete-hero h1'));
@@ -168,20 +153,18 @@ describe('레슨 이해 확인', () => {
     expect(container.textContent).not.toContain('포인트');
   });
 
-  it('여러 문제에서도 다음 문제·보기 접힘·실제 점수를 유지한다', () => {
+  it('여러 문제에서도 다음 문제 이동과 실제 점수를 유지한다', () => {
     const second = { ...check, q: '두 번째 상황은?', options: ['확대', '축소'], explanation: '조건에 따라 규모가 확대돼요.' };
     const { container, click } = mount({ pathname: '/lesson-check', state: { words: [word(1, [check]), word(2, [second])] } });
     click('오른다');
-    click('다른 보기 확인하기');
     click('다음 문제');
     expect(container.textContent).toContain('두 번째 상황은?');
     expect(container.querySelector('[role="progressbar"]')).toHaveAttribute('aria-valuenow', '1');
     click('축소');
-    expect(container.querySelector('.lesson-feedback-options')).toBeNull();
     click('결과 보기');
     expect(container.querySelector('.lesson-complete-score')).toHaveTextContent('1/ 2');
     expect(container.querySelector('[data-lesson-check-summary]')).toHaveAttribute('aria-label', '첫 풀이 결과');
-    expect(container.querySelector('.lesson-complete-hero h1')).toHaveTextContent('틀린 문제를 다시 풀어볼까요?');
+    expect(container.querySelector('.lesson-complete-hero h1')).toHaveTextContent('헷갈린 문제, 한 번 더?');
     click('틀린 문제 다시 풀기');
     expect(container.querySelector('h1')).toHaveTextContent('틀린 문제 다시 풀기');
     expect(container.textContent).toContain('두 번째 상황은?');
@@ -191,7 +174,7 @@ describe('레슨 이해 확인', () => {
     expect(container.querySelector('.lesson-complete-score')).toHaveTextContent('1/ 1');
     expect(container.querySelector('[data-lesson-check-summary]')).toHaveAttribute('aria-label', '다시 풀기 결과');
     expect(container.querySelector('[data-lesson-check-first-result]')).toHaveTextContent('첫 풀이 1/2');
-    expect(container.querySelector('.lesson-complete-hero h1')).toHaveTextContent('틀린 문제를 모두 맞혔어요!');
+    expect(container.querySelector('.lesson-complete-hero h1')).toHaveTextContent('헷갈린 문제까지 올클!');
   });
 
 
@@ -246,7 +229,7 @@ describe('레슨 이해 확인', () => {
   it('첫 풀이에서 모두 맞히면 재도전 결과 없이 다음 학습 선택으로 복귀한다', () => {
     const { container, click } = mount({ pathname: '/lesson-check', state: { words: [word(1, [check])], backPath: '/course?topic=3' } });
     click('오른다'); click('결과 보기');
-    expect(container.querySelector('.lesson-complete-hero h1')).toHaveTextContent('모두 맞혔어요!');
+    expect(container.querySelector('.lesson-complete-hero h1')).toHaveTextContent('전부 정답! 깔끔했다');
     expect(container.querySelector('[data-lesson-check-first-result]')).toBeNull();
     expect(container.querySelector('[aria-label="이전 재도전 결과"]')).toBeNull();
     click('코스에서 이어 하기');
@@ -286,7 +269,7 @@ describe('레슨 이해 확인', () => {
 
     click('틀린 문제 다시 풀기');
     click('오른다');
-    expect(container.textContent).toContain('맞았어요');
+    expect(container.textContent).toContain('정답! 감 잡았네');
     click('결과 보기');
     expect(container.textContent).toContain('1/ 1');
     click('코스에서 이어 하기');
@@ -295,14 +278,14 @@ describe('레슨 이해 확인', () => {
 
   it('직접 진입해 문제가 없으면 코스로 돌아간다', () => {
     const { container, click } = mount('/lesson-check');
-    expect(container.textContent).toContain('자주 마주치는 용어부터 시작해요');
+    expect(container.textContent).toContain('용어부터 가볍게 시작하자');
     click('학습 시작하기');
     expect(container.textContent).toContain('코스 화면');
   });
 
   it('레슨에 이해 확인 문제가 없으면 다음 학습을 안내한다', () => {
     const { container, click } = mount({ pathname: '/lesson-check', state: { words: [word(1)] } });
-    expect(container.textContent).toContain('이번 레슨에는 이해 확인 문제가 없어요');
+    expect(container.textContent).toContain('이번 레슨은 용어까지만!');
     click('다음 학습 선택하기');
     expect(container.textContent).toContain('코스 화면');
   });
@@ -312,7 +295,7 @@ it('결과 보기를 연속 눌러도 첫 풀이를 가짜 재도전으로 중�
  const {container,click}=mount({pathname:'/lesson-check',state:{words:[word(1,[check])]}});click('오른다');
  const button=[...container.querySelectorAll('button')].find(el=>el.textContent?.includes('결과 보기'))!;
  act(()=>{button.click();button.click();});
- expect(container.querySelector('h1')).toHaveTextContent(/맞혔어요|다시 풀어볼까요/);
+ expect(container.querySelector('h1')).toHaveTextContent(/전부 정답! 깔끔했다|헷갈린 문제, 한 번 더\?/);
  expect(container.querySelector('[data-lesson-check-first-result]')).toBeNull();
  expect(vi.mocked(logClick).mock.calls.filter(([name])=>name==='lesson_check_complete')).toHaveLength(1);
 });

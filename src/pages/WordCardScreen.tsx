@@ -1,8 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ExternalLink } from '../components/ui/OtterIcons';
+import { Check, ExternalLink } from '../components/ui/OtterIcons';
 import { ChevronLeft, ChevronRight } from '../components/ui/ControlIcons';
-import { BottomSheet } from '@toss/tds-mobile';
 import { showModal } from '../components/AlertModal';
 import type { Word } from '../types';
 import { useAppContext } from '../context/AppContext';
@@ -18,11 +17,16 @@ import { StreakCelebration } from '../components/StreakCelebration';
 import { Card } from '../components/ui/Card';
 import { ActionButton } from '../components/ui/ActionButton';
 import { WordMeaningCard } from '../components/learning/WordMeaningCard';
+import { StudyText } from '../components/learning/StudyText';
+import { WordQuickCheck } from '../components/learning/WordQuickCheck';
+import { WordResourcesDialog, type WordResource } from '../components/learning/WordResourcesDialog';
 import { additionalMeaning } from '../lib/learningText';
+import { buildWordLessonCheck, wordLessonVisuals } from '../lib/wordLesson';
 import { WordVisuals, type Terms } from '../components/WordVisuals';
 import { lessonChecks, termPattern } from '../lib/quiz';
 import { selectLessonQuizWords } from '../lib/lessonQuiz';
 import { buildWordLookup, relatedWordNames, type WordLookup } from '../lib/wordLookup';
+import './WordCardScreen.css';
 
 
 const SOURCE_NAMES: Record<string, string> = { bok800: '한국은행 경제금융용어 800선', tesat: 'TESAT', sgsg: '한경 생글생글 경제 퀴즈' };
@@ -43,7 +47,7 @@ const Highlight = ({ text, keyword, pattern }: { text: string; keyword: string; 
     <>
       {parts.map((part, i) =>
         i % 2 === 1
-          ? <mark key={i} style={{ background: 'var(--color-brand-cream)', color: 'var(--color-ink-2)', fontWeight: 700, borderRadius: 3, padding: '0 2px' }}>{part}</mark>
+          ? <mark key={i} className="study-keyword type-emphasis">{part}</mark>
           : <span key={i}>{part}</span>
       )}
     </>
@@ -89,30 +93,27 @@ const WordCard = ({
   keyword: string;
   visualTerms: Terms;
   detailContent?: React.ReactNode;
-  // 'meaning'은 레슨 1페이지(정의+예시), 'extras'는 자세히 보기 시트(그래프·뉴스·관련 용어)
-  section?: 'meaning' | 'extras';
+  section?: 'definition' | 'example' | 'references';
 }) => {
   // 기사 원문 사진은 언론사 저작물이라 쓰지 않고, 용어가 속한 주제의 Unsplash 사진을 둔다
   const { courses } = useAppContext();
   const newsTopic = topicOfWord(word.id, courses);
-  if (section === 'meaning') return (
-    <div className="flex flex-col gap-3 px-5 pb-6">
-      {/* 출처는 자세히 보기 시트 맨 아래에만 둔다 */}
-      <WordMeaningCard word={word} onDetail={onDetail} />
+  const visuals = section === 'references' ? [] : (word.visuals ?? []).filter(visual => visual.type !== 'text');
+  if (section === 'definition' || section === 'example') return (
+    <div className="word-study-dialogue px-5">
+      <img src="/otter/v5/otter-explain.svg" alt="" aria-hidden="true" width={144} height={144} className="quiz-question-otter w-auto shrink-0 self-end" data-otter="explain" />
+      <WordMeaningCard word={word} section={section} onDetail={onDetail} className="quiz-bubble min-w-0 flex-1" />
     </div>
   );
   return (
-  <div className={`flex flex-col gap-3${section === 'extras' ? '' : ' px-5 pb-6'}`}>
+  <div className={`flex flex-col gap-3${section === 'references' ? '' : ' px-5 pb-6'}`}>
 
-    {section !== 'extras' && <WordMeaningCard word={word} sources={(word.sources ?? []).map(source => SOURCE_NAMES[source] ?? source)} onDetail={onDetail} />}
+    {!section && <WordMeaningCard word={word} sources={(word.sources ?? []).map(source => SOURCE_NAMES[source] ?? source)} onDetail={onDetail} />}
 
     {detailContent}
 
-    {/* 순서: 단어+뜻 → 그래프·표 → 뉴스 → 관련 용어. 자세히 알아보기는 단어 카드의 버튼으로 여는 시트 */}
-    {/* 그래프·표 — 뜻 바로 아래에서 그림으로 이해시킨다 */}
-    {/* 글로 된 '쉽게 설명'은 핵심 뜻과 겹쳐서 자세히 보기 시트로 옮기고, 본문에는 그래프·표만 둔다 */}
-    {/* 비교 표: 시트·카드 제목이 이미 용어라 'OO와 비슷한 개념'은 '비슷한 개념'으로, 카드 뜻과 겹치는 자기 자신 행은 뺀다 */}
-    {word.visuals && word.visuals.some(v => v.type !== 'text') && <WordVisuals visuals={word.visuals.filter(v => v.type !== 'text').map(v => v.type !== 'table' ? v : {
+    {/* 비슷한 개념 목록에서만 현재 단어를 빼고, 두 개념을 비교하는 표는 제목과 내용을 유지한다. */}
+    {visuals.length > 0 && <WordVisuals visuals={visuals.map(v => v.type !== 'table' || !v.title.endsWith('비슷한 개념') ? v : {
       ...v,
       title: [`${word.word}와 `, `${word.word}과 `].reduce((t, p) => t.startsWith(p) ? t.slice(p.length) : t, v.title),
       rows: v.rows.filter(row => row[0] !== word.word),
@@ -121,7 +122,7 @@ const WordCard = ({
     {/* 뉴스 — '이 용어가 기사에서 어떻게 쓰였는지'가 보이게 제목·요약 목록. 불러온 뒤 기사가 없으면 섹션째 숨긴다 */}
     {(newsLoading || newsItems.length > 0) && (
     <Card pad="md" className="flex flex-col">
-      <h3 className="pb-1 text-base font-bold text-[var(--color-ink)] break-keep">실제 뉴스에서는 이렇게 나와요</h3>
+      {section !== 'references' && <h3 className="type-section-title pb-1 break-keep">뉴스에선 이렇게 쓰여</h3>}
       {newsLoading ? (
         [1, 2, 3].map(i => (
           <div key={i} className="flex gap-3 py-3">
@@ -140,11 +141,11 @@ const WordCard = ({
         >
           {newsTopic && <TopicThumb category={newsTopic} />}
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-[var(--color-ink)] break-keep leading-normal line-clamp-2">
+            <p className="type-item-title break-keep line-clamp-2">
               <Highlight text={stripHtml(item.title)} keyword={keyword} />
             </p>
             {/* 기사 본문 발췌는 원문 그대로라 싣지 않고 헤드라인과 링크만 둔다 */}
-            <p className="text-xs text-[var(--color-ink-3)] mt-1!">
+            <p className="type-supporting mt-1!">
               {new Date(item.pubDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })} · 네이버 뉴스
             </p>
           </div>
@@ -156,8 +157,8 @@ const WordCard = ({
 
     {/* 관련 용어 */}
     {validRelated.length > 0 && (
-      <Card pad="md" className="flex flex-col gap-2">
-        <h3 className="text-base font-bold text-[var(--color-ink)]">관련 용어</h3>
+      <Card pad="md" className="word-related-terms flex flex-col gap-2">
+        {section !== 'references' && <h3 className="type-section-title">관련 용어</h3>}
         <div className="flex flex-col">
           {validRelated.map(tag => (
             <button
@@ -165,7 +166,7 @@ const WordCard = ({
               onClick={() => onRelatedClick(tag)}
               className="flex items-center gap-3 py-3 border-b border-[var(--color-surface)] last:border-0 active:opacity-60 text-left"
             >
-              <p className="text-sm font-semibold text-[var(--color-ink)] break-keep flex-1">{tag}</p>
+              <p className="type-item-title break-keep flex-1">{tag}</p>
               <ChevronRight size={16} className="text-[var(--color-ink-4)] shrink-0" />
             </button>
           ))}
@@ -200,9 +201,9 @@ const RelatedWordPreviewContent = ({ word, lookup, onRelatedClick }: {
     keyword={word.word}
     visualTerms={visualTerms}
     detailContent={detail ? <details className="rounded-card bg-[var(--color-card)] p-5">
-      <summary className="cursor-pointer font-semibold text-[var(--color-ink)]">자세히 보기</summary>
+      <summary className="type-item-title cursor-pointer">자세히 보기</summary>
       <div className="mt-3 flex flex-col gap-4">
-        {toParagraphs(detail).map((para, i) => <p key={i} className="text-base leading-relaxed break-keep text-[var(--color-ink-2)]">
+        {toParagraphs(detail).map((para, i) => <p key={i} className="type-body break-keep">
           <Highlight text={para} keyword={word.word} pattern={termPattern(word.word) ?? undefined} />
         </p>)}
       </div>
@@ -268,10 +269,10 @@ const RelatedWordPreview = ({ initialWord, lookup, onClose }: {
     <div>
       <header className="sticky top-0 z-10 flex flex-col gap-2 bg-[var(--color-card)] px-5 py-4">
         <div className="flex items-center justify-between gap-3">
-          <h2 id={titleId} ref={titleRef} tabIndex={-1} className="text-base font-bold">{word.word} 미리보기</h2>
+          <h2 id={titleId} ref={titleRef} tabIndex={-1} className="type-section-title">{word.word} 미리보기</h2>
           <button type="button" onClick={onClose} className="action-secondary rounded-button px-4 py-3 text-sm font-semibold">미리보기 닫기</button>
         </div>
-        <p id={descriptionId} className="text-xs text-[var(--color-ink-3)]">읽기 전용이에요. 닫으면 학습하던 위치로 돌아가요.</p>
+        <p id={descriptionId} className="type-supporting">잠깐 구경하는 용어야. 닫으면 보던 곳으로 돌아가!</p>
         {stack.length > 1 && <button type="button" onClick={() => setStack(previous => previous.slice(0, -1))} className="self-start py-2 text-sm font-semibold">이전 미리보기</button>}
       </header>
       <div key={stack.length + ':' + word.id} className="pt-4">
@@ -317,22 +318,22 @@ const WordCardScreen = () => {
   const autoAdvance = state?.autoAdvance ?? false;
 
   const [wordIndex, setWordIndex] = React.useState(state?.index ?? 0);
+  const [pageIndex, setPageIndex] = React.useState(0);
+  const [completedWord, setCompletedWord] = React.useState<Word | null>(null);
   const [previewWord, setPreviewWord] = React.useState<Word | null>(null);
-
-  // 자세히 알아보기 시트. 단어가 바뀌면 닫는다.
-  const [detailOpen, setDetailOpen] = React.useState(false);
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { setDetailOpen(false); }, [wordIndex]);
+  const [selectedAnswer, setSelectedAnswer] = React.useState<number | null>(null);
+  const [answerRevealed, setAnswerRevealed] = React.useState(false);
+  const [resourcesOpen, setResourcesOpen] = React.useState(false);
 
 
   // 로딩이 끝났는데도 보여줄 단어가 없으면 돌아간다. 렌더 중 navigate는 안 된다.
   const noWords = words.length === 0 && !(isDeepLink && (courses.length === 0 || !hydrated));
   useEffect(() => { if (noWords) navigate(backPath, { replace: true }); }, [backPath, navigate, noWords]);
 
-  // 단어 변경 시 스크롤 맨 위로
+  // 단어나 페이지가 바뀌면 새 내용의 처음부터 읽는다.
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [wordIndex]);
+  }, [wordIndex, pageIndex]);
 
   // 뉴스 (현재 단어 로드 + 다음 단어 prefetch)
   const { newsItems, newsStatus } = useNews(words, wordIndex);
@@ -373,6 +374,10 @@ const WordCardScreen = () => {
     () => ({ names: termNames, meaningOf, exampleOf, onClick: handleRelatedWordClick }),
     [handleRelatedWordClick, meaningOf, exampleOf, termNames],
   );
+  const currentWord = words[wordIndex];
+  const question = React.useMemo(() => currentWord
+    ? buildWordLessonCheck(currentWord, knownWords, [...words, ...allWords])
+    : null, [currentWord, knownWords, words, allWords]);
 
   // autoAdvance 완료 화면
   if (autoAdvance && words.length > 0 && wordIndex >= words.length) {
@@ -381,12 +386,11 @@ const WordCardScreen = () => {
         {/* 카드 + 알림 카드 + 축하가 작은 화면에서 넘칠 수 있어 이 영역만 스크롤 */}
         <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden flex flex-col items-center justify-center-safe gap-5 p-8">
           <div className="text-center anim-fade-up" style={{ '--i': 1 } as React.CSSProperties}>
-            <h2 className="text-xl font-bold text-[var(--color-ink)] mb-1!">용어를 살펴봤어요</h2>
+            <h2 className="text-xl font-bold text-[var(--color-ink)] mb-1!">오늘 용어, 한 바퀴 끝!</h2>
             {/* 끝 화면의 핵심 숫자 하나를 크게(피크엔드) */}
             <p className="mt-3! text-4xl font-bold text-[var(--color-ink)] tabular-nums">{words.length}<span className="ml-1 text-base font-semibold text-[var(--color-ink-3)]">개 용어</span></p>
           </div>
           <div className="w-full text-center anim-fade-up" style={{ '--i': 2 } as React.CSSProperties}>
-            {lessonChecks(words).length === 0 && <p className="text-sm text-[var(--color-ink-2)] leading-relaxed break-keep mb-3!">상황 적용 문제는 아직 준비 중이에요.</p>}
             <div className="flex flex-wrap justify-center gap-1">
               {words.slice(0, 5).map(w => (
                 <span key={w.id} className="text-xs px-2 py-1 rounded-chip border border-[var(--color-line)] text-[var(--color-ink-2)]">{w.word}</span>
@@ -406,6 +410,10 @@ const WordCardScreen = () => {
                   onClick={() => {
                     logClick('continue_after_first');
                     const idx = state!.continueWords!.findIndex(w => !knownIds.has(w.id));
+                    setWordIndex(idx);
+                    setPageIndex(0);
+                    setSelectedAnswer(null);
+                    setAnswerRevealed(false);
                     navigate('/word-card', { replace: true, state: { words: state!.continueWords, index: idx, backPath, autoAdvance: true } });
                   }}
                 >
@@ -416,16 +424,16 @@ const WordCardScreen = () => {
             return (
               <ActionButton
                 fullWidth
-                onClick={() => lessonChecks(words).length > 0
-                  ? navigate('/lesson-check', { replace: true, state: { words, backPath, courseId: state?.courseId, nodeId: state?.nodeId } })
-                  : navigate('/quiz', { replace: true, state: { quizQueue: lessonQuizWords, backPath, reviewMode: true, mode: 'lesson_recall', courseId: state?.courseId, lessonId: state?.nodeId } })}
+                onClick={() => navigate(backPath, { replace: true, state: { ...(backState as object | undefined), openFocus: true } })}
               >
-                {lessonChecks(words).length > 0 ? '상황 문제로 이해 확인하기' : '용어 퀴즈로 확인하기'}
+                코스로 돌아가기
               </ActionButton>
             );
           })()}
-          <ActionButton tone="soft" fullWidth onClick={() => navigate(backPath, { replace: true, state: { ...(backState as object | undefined), openFocus: true } })}>
-            코스로 돌아가기
+          <ActionButton tone="soft" fullWidth onClick={() => lessonChecks(words).length > 0
+            ? navigate('/lesson-check', { replace: true, state: { words, backPath, courseId: state?.courseId, nodeId: state?.nodeId } })
+            : navigate('/quiz', { replace: true, state: { quizQueue: lessonQuizWords, backPath, reviewMode: true, mode: 'lesson_recall', courseId: state?.courseId, lessonId: state?.nodeId } })}>
+            더 연습하기
           </ActionButton>
         </div>
       </div>
@@ -437,9 +445,36 @@ const WordCardScreen = () => {
   const word = words[wordIndex];
   const { detail, related } = wordExtras(word, wordLookup);
   const textVisuals = word.visuals?.filter(v => v.type === 'text') ?? [];
+  const { primary, more } = wordLessonVisuals(word);
+  const hasCheck = question !== null && question.options.length > 1;
   const lastWord = wordIndex === words.length - 1;
+  const example = word.learningExample?.replace(/^\s*학습용 가정\s*:\s*/, '').trim();
+  const pages = [
+    { id: 'meaning', label: '뜻', shortLabel: '뜻' },
+    ...(example ? [{ id: 'example', label: '생활 속 예시', shortLabel: '예시' }] : []),
+    ...(primary ? [{ id: 'concept', label: '한눈에 이해', shortLabel: '핵심' }] : []),
+    ...(hasCheck ? [{ id: 'check', label: '확인 문제', shortLabel: '문제' }, { id: 'feedback', label: '해설', shortLabel: '해설' }] : []),
+  ];
+  const resources: WordResource[] = [
+    ...textVisuals.map((visual, index) => ({ id: `text-${index}`, label: visual.title, content: <WordVisuals visuals={[visual]} terms={visualTerms} emphasisWord={word.word} showTitle={false} /> })),
+    ...(!textVisuals.length && detail.trim() ? [{
+      id: 'detail', label: '자세히 보기', content: <div className="word-resource-explanation">{toParagraphs(detail).filter(Boolean).map((paragraph, index) => <p key={index} className="type-reading"><StudyText text={paragraph} word={word.word} /></p>)}</div>,
+    }] : []),
+    ...more.map((visual, index) => ({ id: `visual-${index}`, label: visual.title, content: <WordVisuals visuals={[visual]} terms={visualTerms} emphasisWord={word.word} showTitle={false} /> })),
+    ...(related.length ? [{ id: 'related', label: '관련 용어', content: <WordCard word={word} section="references" validRelated={related} onRelatedClick={handleRelatedWordClick} newsItems={[]} newsLoading={false} keyword={word.word} visualTerms={visualTerms} /> }] : []),
+    ...(newsItems.length ? [{ id: 'news', label: '뉴스', content: <WordCard word={word} section="references" validRelated={[]} onRelatedClick={handleRelatedWordClick} newsItems={newsItems} newsLoading={false} keyword={word.word} visualTerms={visualTerms} /> }] : []),
+    ...(word.sources?.length ? [{ id: 'sources', label: '출처', content: <p className="word-resource-sources">{[...new Set(word.sources)].map(source => SOURCE_NAMES[source] ?? source).join(' · ')}</p> }] : []),
+  ];
+  const page = pages[pageIndex];
+  const lastPage = pageIndex === pages.length - 1;
 
   const goNext = () => {
+    if (page.id === 'check') {
+      if (selectedAnswer === null) return;
+      setAnswerRevealed(true);
+    }
+    if (!lastPage) { setPageIndex(i => i + 1); return; }
+    if (hasCheck && !answerRevealed) return;
     if (autoAdvance) {
       if (knownWords.length === 0) {
         logClick('activation_first_card');
@@ -447,20 +482,17 @@ const WordCardScreen = () => {
       }
       setKnownWords(prev => prev.some(w => w.id === word.id) ? prev : [...prev, word]);
       feedbackLearned();
-      setWordIndex(i => i + 1);
-    } else if (wordIndex < words.length - 1) {
-      setWordIndex(i => i + 1);
     }
+    setCompletedWord(word);
   };
 
   const goPrev = () => {
-    if (wordIndex > 0) setWordIndex(i => i - 1);
+    if (pageIndex > 0) setPageIndex(i => i - 1);
   };
 
   // 넘길 수 없는 쪽이면 제자리.
   const SLIDE_MS = 220;
-  const canNext = autoAdvance || !lastWord;
-  const canPrev = wordIndex > 0;
+  const canPrev = pageIndex > 0;
   const width = () => scrollRef.current?.offsetWidth ?? 375;
   const settle = (x: number, then?: () => void) => {
     setSliding(true);
@@ -469,7 +501,7 @@ const WordCardScreen = () => {
   };
   const slide = (dir: 1 | -1) => {
     if (sliding) return;
-    if (dir === 1 ? !canNext : !canPrev) { settle(0); return; }
+    if (dir === -1 && !canPrev) { settle(0); return; }
     const w = width();
     settle(-dir * w, () => {
       setDragX(dir * w);   // 새 단어는 반대편에서 들어온다
@@ -478,94 +510,115 @@ const WordCardScreen = () => {
     });
   };
 
+  if (completedWord) return (
+    <>
+    <div className="word-complete-screen app-soft-screen flex h-full flex-col">
+      <div className="word-complete-progress">
+        <div className="type-supporting"><span>{autoAdvance ? '단어 학습' : '단어 살펴보기'}</span><span>{wordIndex + 1} / {words.length}</span></div>
+        <div className="word-complete-progress-track" role="progressbar" aria-label="단어 학습 진행" aria-valuemin={0} aria-valuemax={words.length} aria-valuenow={wordIndex + 1}>
+          <span style={{ width: `${(wordIndex + 1) / words.length * 100}%` }} />
+        </div>
+      </div>
+      <div className="word-complete-content">
+        <header className="word-complete-summary">
+          <div className="word-complete-artwork">
+            <img src="/otter/v5/otter-cheer.svg" alt="" aria-hidden="true" width={144} height={144} />
+          </div>
+          <div className="word-complete-copy">
+            <p className="type-supporting type-emphasis">{autoAdvance ? '단어 하나 클리어!' : '한 번 더 보니까 더 익숙하지?'}</p>
+            <h1 className="type-page-title">{completedWord.word}</h1>
+          </div>
+        </header>
+      </div>
+      <div className="study-action-footer word-complete-footer">
+        {!lastWord && <p className="type-supporting word-complete-next-label">다음 단어 · {words[wordIndex + 1].word}</p>}
+        {(!lastWord || autoAdvance) && <ActionButton className="word-complete-next" onClick={() => { setCompletedWord(null); setPageIndex(0); setSelectedAnswer(null); setAnswerRevealed(false); setWordIndex(i => i + 1); }}>
+          {lastWord ? '학습 마무리' : '다음 단어'}<ChevronRight size={20} />
+        </ActionButton>}
+        <button type="button" className="word-complete-back" onClick={() => navigate(backPath, { replace: true, state: { ...(backState as object | undefined), openFocus: true } })}>코스로 돌아가기</button>
+      </div>
+    </div>
+    {previewWord && <RelatedWordPreview initialWord={previewWord} lookup={wordLookup} onClose={() => setPreviewWord(null)} />}
+    </>
+  );
+
   return (
     <>
     <div className="word-study-screen app-soft-screen flex flex-col h-full overflow-hidden">
 
-      {/* 상단: 레슨 안의 단어 위치 */}
-      <div className="px-5 pt-4 flex items-center justify-between gap-3">
-        <div role="progressbar" aria-label="레슨 용어 진행률" aria-valuemin={0} aria-valuemax={words.length} aria-valuenow={wordIndex + 1} className="flex flex-1 items-center gap-1 overflow-hidden">
-          {words.map((w, i) => (
-            <span
-              key={w.id}
-              style={{ borderRadius: 9999 }}
-              className={`shrink-0 h-2 transition-all ${i === wordIndex ? 'w-5 bg-[var(--color-ink)]' : 'w-2 bg-[var(--color-line)]'}`}
-            />
-          ))}
+      <div className="word-study-header px-5 pt-4">
+        <div role="progressbar" aria-label={`${word.word} 페이지 진행률`} aria-valuemin={0} aria-valuemax={pages.length} aria-valuenow={pageIndex + 1} aria-valuetext={`${pageIndex + 1}/${pages.length} ${page.label}`}>
+            <span className="sr-only" aria-hidden="true" data-study-page-count>{pageIndex + 1}/{pages.length}</span>
+            <ol className="word-study-stepper" aria-hidden="true">
+              {pages.map((step, i) => <li key={step.id} data-state={i < pageIndex ? 'done' : i === pageIndex ? 'current' : 'upcoming'}>
+                <span className="word-study-step-dot">{i < pageIndex ? <Check size={16} /> : i + 1}</span>
+                <span className="word-study-step-name">{step.shortLabel}</span>
+              </li>)}
+            </ol>
         </div>
-        <span className="shrink-0 text-xs tabular-nums text-[var(--color-ink-3)]">{wordIndex + 1}/{words.length}</span>
       </div>
 
-      {/* 스크롤 영역 */}
+      <div className="word-study-layout">
+      {/* 진행바 아래에서 시작하고, 긴 내용만 스크롤한다. */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden pt-4"
+        className="word-study-content [&::-webkit-scrollbar]:hidden"
         style={{
           transform: `translateX(${dragX}px)`,
           transition: sliding ? `transform ${SLIDE_MS}ms cubic-bezier(0.25, 0.8, 0.25, 1)` : 'none',
         }}
       >
-        <div key={word.id}>
-          <WordCard
-            word={word}
-            section="meaning"
-            onDetail={() => setDetailOpen(true)}
-            validRelated={related}
-            onRelatedClick={handleRelatedWordClick}
-            newsItems={newsItems}
-            newsLoading={newsLoading}
-            keyword={word.word}
-            visualTerms={visualTerms}
-          />
+        <div key={`${word.id}:${page.id}`} data-study-unit={page.id}>
+            {(page.id === 'meaning' || page.id === 'example') && <WordCard
+              word={word}
+              section={page.id === 'meaning' ? 'definition' : 'example'}
+              onDetail={resources.length ? () => setResourcesOpen(true) : undefined}
+              validRelated={related}
+              onRelatedClick={handleRelatedWordClick}
+              newsItems={newsItems}
+              newsLoading={newsLoading}
+              keyword={word.word}
+              visualTerms={visualTerms}
+            />}
+            {page.id === 'concept' && primary && <div className="word-concept-content px-5">
+              <h1 className="sr-only">{word.word}, 한눈에 이해하기</h1>
+              <WordVisuals visuals={[primary]} terms={visualTerms} emphasisWord={word.word} />
+              {resources.length > 0 && <button type="button" className="word-resource-entry" aria-label="더 알아보기" aria-haspopup="dialog" onClick={() => setResourcesOpen(true)}>더 알아보기<ChevronRight size={16} aria-hidden="true" /></button>}
+            </div>}
+            {(page.id === 'check' || page.id === 'feedback') && question && <WordQuickCheck
+              question={question}
+              meaning={word.meaning}
+              selected={selectedAnswer}
+              revealed={answerRevealed}
+              feedbackOnly={page.id === 'feedback'}
+              onSelect={setSelectedAnswer}
+            />}
+
         </div>
       </div>
 
       {/* 하단: 이전 · 다음 */}
-      <div className="study-action-footer px-5 pt-3">
+      <div className="word-study-controls">
         <div className="flex gap-3">
-          {/* 첫 장에서는 이전 버튼을 숨긴다(비활성 회색 버튼이 눌릴 것처럼 보여서). 자리는 남겨 다음 버튼 폭을 유지 */}
-          <ActionButton tone="soft" onClick={() => slide(-1)} disabled={!canPrev} aria-hidden={!canPrev || undefined} className={`flex-1${canPrev ? '' : ' invisible'}`}>
+          {canPrev && <ActionButton tone="soft" onClick={() => slide(-1)} disabled={sliding} className="flex-1">
             <ChevronLeft size={20} />이전
-          </ActionButton>
-          <ActionButton onClick={() => slide(1)} disabled={lastWord && !autoAdvance} className="flex-[2]">
-            {lastWord && autoAdvance ? '살펴보기 완료' : <>다음 <ChevronRight size={20} /></>}
+          </ActionButton>}
+          <ActionButton
+            data-word-next
+            onClick={() => slide(1)}
+            disabled={sliding || (page.id === 'check' && selectedAnswer === null)}
+            className="flex-[2]"
+          >
+            다음
           </ActionButton>
         </div>
       </div>
+      </div>
     </div>
 
+    {resourcesOpen && <WordResourcesDialog resources={resources} onClose={() => setResourcesOpen(false)} />}
     {previewWord && <RelatedWordPreview initialWord={previewWord} lookup={wordLookup} onClose={() => setPreviewWord(null)} />}
 
-    {/* 자세히 알아보기 바텀시트 */}
-    <BottomSheet
-      open={detailOpen}
-      onDimmerClick={() => setDetailOpen(false)}
-      header={<span className="sheet-title">{word.word} 자세히 알아보기</span>}
-    >
-      <div className="px-5 pb-8 flex flex-col gap-4 max-h-[60vh] overflow-y-auto">
-        {/* 시트 제목이 이미 '용어 자세히 알아보기'라 '… 쉽게 설명' 소제목은 뺀다.
-            설명 자료가 있으면 상세 뜻은 카드의 핵심 뜻·쉬운 설명과 겹쳐 싣지 않고, 없을 때만 본문으로 보여준다 */}
-        {textVisuals.length > 0 && <WordVisuals visuals={textVisuals.map(v => v.type === 'text' && v.title.endsWith('쉽게 설명') ? { ...v, title: '' } : v)} terms={visualTerms} />}
-        {textVisuals.length === 0 && toParagraphs(detail).map((para, i) => (
-          <p key={i} className="text-sm leading-relaxed break-keep text-[var(--color-ink-2)]">
-            <Highlight text={para} keyword={word.word} pattern={termPattern(word.word) ?? undefined} />
-          </p>
-        ))}
-        <WordCard
-          word={word}
-          section="extras"
-          validRelated={related}
-          onRelatedClick={handleRelatedWordClick}
-          newsItems={newsItems}
-          newsLoading={newsLoading}
-          keyword={word.word}
-          visualTerms={visualTerms}
-        />
-        {word.sources && word.sources.length > 0 && (
-          <p className="mt-2 border-t border-[var(--color-line)] pt-3 text-xs text-[var(--color-ink-3)]">출처: {word.sources.map(s => SOURCE_NAMES[s] ?? s).join(' · ')}</p>
-        )}
-      </div>
-    </BottomSheet>
     </>
   );
 };

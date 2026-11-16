@@ -179,6 +179,7 @@ describe('서버·검증 실패는 성공으로 처리하지 않음', () => {
     ['', '닉네임을 입력해주세요'], ['   ', '닉네임을 입력해주세요'],
     ['가나다라마바사아자차카', '닉네임은 10자 이내로 입력해주세요'],
     ['새친구', '현재 닉네임과 동일해요'], [' 예비슈퍼개미 ', '다른 닉네임을 정해주세요'],
+    ['따뜻한올빼미959', '다른 닉네임을 정해주세요'], ['침착한비버699', '다른 닉네임을 정해주세요'],
   ])('%j 입력을 기존 규칙대로 거절한다', async (nickname, error) => {
     await mount();
     expect(await change(nickname)).toEqual({ error });
@@ -260,6 +261,26 @@ describe('서버·검증 실패는 성공으로 처리하지 않음', () => {
 });
 
 describe('닉네임 Sheet 회귀', () => {
+  it.each(['따뜻한올빼미959', '침착한비버699'])('자동 생성형 이름 %s도 변경 안내를 띄우고 저장하면 닫는다', async nickname => {
+    mocks.getItem.mockResolvedValue(JSON.stringify({ ...stored, nickname }));
+    mocks.single.mockResolvedValue({ data: { nickname }, error: null });
+    await mount('required');
+    expect(container.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(container.querySelector('input')).toHaveValue('');
+    await saveInSheet('아리123');
+    expect(mocks.update).toHaveBeenCalledWith({ nickname: '아리123' });
+    expect(current.user?.nickname).toBe('아리123');
+    expect(container.querySelector('[role="dialog"]')).toBeNull();
+  });
+
+  it('직접 정한 닉네임에는 변경 안내를 띄우지 않는다', async () => {
+    mocks.getItem.mockResolvedValue(JSON.stringify({ ...stored, nickname: '아리' }));
+    mocks.single.mockResolvedValue({ data: { nickname: '아리' }, error: null });
+    await mount('required');
+    expect(container.querySelector('[role="dialog"]')).toBeNull();
+    expect(mocks.update).not.toHaveBeenCalled();
+  });
+
   it('캐시 저장 거절에도 필수 초기 닉네임 게이트를 해제한다', async () => {
     await mount('required');
     expect(container.querySelector('[role="dialog"]')).not.toBeNull();

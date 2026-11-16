@@ -81,14 +81,14 @@ describe('내 정보의 정확한 숫자 표시', () => {
     expect([...container.querySelectorAll('[data-stat-number]')].map(item => item.textContent)).toEqual(['2', '0', '120']);
     expect(container.querySelector('.my-profile-subtitle')).toHaveTextContent('텅장러 리그');
   });
-  it('실제 복습 위치를 안내하고 규칙 수치는 담당 화면으로 넘긴다', () => {
+  it('학습·복습 흐름을 안내하고 규칙 수치는 담당 화면으로 넘긴다', () => {
     const container = mount();
     const guide = [...container.querySelectorAll('button')].find(button => button.textContent?.includes('앱 사용법'))!;
     act(() => guide.click());
-    // 복습은 홈의 주 버튼, 에너지는 주제 화면 오른쪽 위에서 연다
-    expect(container).toHaveTextContent("홈의 '오늘 다시 볼 용어' 버튼");
+    // 학습·퀴즈·복습 순서와 에너지를 확인할 위치를 안내한다
+    expect(container).toHaveTextContent('배운 건 퀴즈로 체크하고, 헷갈린 건 복습으로 한 번 더!');
     expect(container).not.toHaveTextContent("퀘스트의 '오늘 다시 볼 용어'");
-    expect(container).toHaveTextContent('주제 화면 오른쪽 위 에너지');
+    expect(container).toHaveTextContent('주제 화면 위쪽 에너지를 눌러봐');
     // XP·에너지 수치는 리그 안내·에너지 시트에만 둔다
     expect(container).not.toHaveTextContent('1시간마다');
     expect(container).not.toHaveTextContent('퀴즈 정답 2');

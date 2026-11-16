@@ -164,9 +164,9 @@ const QuizPage = () => {
     const nothingLearned = knownWords.length === 0;
     return (
       <LearningEmptyState
-        title={nothingLearned ? '다시 볼 용어가 아직 없어요' : '오늘 다시 보기 완료'}
-        description={nothingLearned ? '자주 마주치는 용어를 배우면 다음 날부터 다시 보기가 열려요' : '지금 다시 볼 용어가 없어요'}
-        actionLabel={nothingLearned ? '시작하러 가기' : '퀘스트로'}
+        title={nothingLearned ? '복습할 용어, 아직은 없어' : '오늘 복습도 클리어!'}
+        description={nothingLearned ? '용어를 배우면 다음 날부터 복습이 열려. 하나 만나러 갈까?' : '지금 복습할 건 다 챙겼어.'}
+        actionLabel={nothingLearned ? '용어 배우러 가기' : '퀘스트로'}
         onAction={() => navigate(nothingLearned ? '/course' : '/home')}
         actionPlacement="inline"
       />
@@ -200,7 +200,7 @@ const QuizPage = () => {
       <div className="flex-1 flex flex-col px-5 py-4">
         {/* 문제 카드 */}
         <Card key={word.id} tone="card" pad="lg" className="mb-4 anim-slide-in">
-          <p id="review-prompt-guide" className="text-xs text-[var(--color-ink-3)] mb-3!">뜻을 보고 어떤 용어인지 맞혀보세요</p>
+          <p id="review-prompt-guide" className="text-xs text-[var(--color-ink-3)] mb-3!">이 뜻, 어떤 용어였더라?</p>
 
           <p className="quiz-prompt-main text-lg font-bold text-[var(--color-ink)] leading-relaxed">{keepShortUnitsTogether(maskTerm(word.meaning, word.word))}</p>
 
@@ -222,7 +222,7 @@ const QuizPage = () => {
               value={input}
               onChange={(e) => { if (!attemptRef.current && !submittingRef.current) setInput(e.target.value); }}
               aria-labelledby="review-prompt-guide"
-              placeholder="용어를 입력하세요"
+              placeholder="떠오른 용어를 적어 봐"
               disabled={status !== 'idle'}
               autoComplete="off"
               className={`w-full px-4 py-4 rounded-button text-sm font-normal outline-none border transition-colors
@@ -233,10 +233,10 @@ const QuizPage = () => {
               style={{ caretColor: 'var(--color-ink)' }}
             />
             {status === 'correct' && (
-              <p className="text-xs font-bold text-[var(--color-success-foreground)] mt-1! px-1">✓ 정답! 바로 맞혔어요</p>
+              <p className="text-xs font-bold text-[var(--color-success-foreground)] mt-1! px-1">✓ 정답! 기억하고 있었네</p>
             )}
             {status === 'wrong' && (
-              <p className="text-xs font-bold text-[var(--color-ink-2)] mt-1! px-1">✕ 틀렸어요. 정답: {word.word}</p>
+              <p className="text-xs font-bold text-[var(--color-ink-2)] mt-1! px-1">✕ 아깝다! 정답: {word.word}</p>
             )}
           </div>
 

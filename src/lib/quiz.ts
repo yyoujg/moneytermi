@@ -127,7 +127,7 @@ export const buildCustomQuizItem = (quiz: CustomQuiz): QuizItem => {
   const options = quiz.options.map((label, i) => ({ label, answer: label, isCorrect: i === quiz.answer }));
   return {
     type: 'custom',
-    promptLabel: '알맞은 것을 고르세요',
+    promptLabel: '어떤 답이 맞을까?',
     promptMain: quiz.q,
     explanation: quiz.explanation,
     options: shuffle(options),

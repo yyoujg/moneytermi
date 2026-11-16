@@ -10,7 +10,7 @@ import { isDefaultNickname } from './constants';
 import { NicknameSheet } from './components/mypage/NicknameSheet';
 import { parseLandingPath, parseReferrer } from './lib/landing';
 import { logScreen, logClick } from './lib/analytics';
-import { dismissRelatedWordPreview, resolveBackEventAction } from './lib/backEvent';
+import { dismissRelatedWordPreview, dismissWordResources, resolveBackEventAction } from './lib/backEvent';
 import NavBar from './components/NavBar';
 import { TopBar } from './components/TopBar';
 import { BadgeCelebration } from './components/mypage/BadgeCelebration';
@@ -117,7 +117,7 @@ const WelcomeScreen = () => {
 
         {picked && (
           <p role="status" className="mt-5 text-sm leading-relaxed text-[var(--color-ink-2)] break-keep">
-            <strong className="text-[var(--color-ink)]">{correct ? '맞아요! ' : '아쉬워요. '}</strong>{WELCOME_QUIZ.explain}
+            <strong className="text-[var(--color-ink)]">{correct ? '정답! 감 잡았네. ' : '아깝다! 같이 짚어보자. '}</strong>{WELCOME_QUIZ.explain}
           </p>
         )}
       </div>
@@ -127,14 +127,14 @@ const WelcomeScreen = () => {
         {picked ? (
           <button type="button" onClick={start}
             className="flex w-full items-center justify-center gap-2 rounded-button bg-brand-500 py-4 text-base font-bold active:opacity-90">
-            이런 용어부터 배워 볼게요<ArrowRight size={20} />
+            첫 용어 만나러 가기<ArrowRight size={20} />
           </button>
         ) : (
           <button type="button" onClick={start} className="min-h-[44px] w-full text-sm font-semibold text-[var(--color-ink-3)] active:opacity-60">
             건너뛰고 시작하기
           </button>
         )}
-        <p className="mt-3! text-xs text-[var(--color-ink-4)]">별도 가입 없이 시작할 수 있어요</p>
+        <p className="mt-3! text-xs text-[var(--color-ink-4)]">따로 가입 없이 바로 시작!</p>
       </div>
     </div>
   );
@@ -189,7 +189,7 @@ const BackEventHandler = () => {
     try {
       unsubscription = graniteEvent.addEventListener('backEvent', {
         onEvent: () => {
-          if (dismissRelatedWordPreview()) return;
+          if (dismissRelatedWordPreview() || dismissWordResources()) return;
           const action = resolveBackEventAction(typeof window !== 'undefined' ? window.history.state?.idx : 0);
           if (action === 'back') {
             navigate(-1);

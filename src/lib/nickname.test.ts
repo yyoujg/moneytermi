@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { randomNickname } from './nickname';
+import { isGeneratedNickname, randomNickname } from './nickname';
 
 describe('randomNickname', () => {
   it('형용사+명사+세자리 숫자', () => {
@@ -21,6 +21,10 @@ describe('randomNickname', () => {
 
   it('10자 이하 (닉네임 입력 상한과 같음)', () => {
     for (let i = 0; i < 200; i++) expect(randomNickname().length).toBeLessThanOrEqual(10);
+  });
+
+  it('생성한 닉네임은 변경 안내용 자동 이름 검사에서도 인식한다', () => {
+    for (let i = 0; i < 200; i++) expect(isGeneratedNickname(randomNickname())).toBe(true);
   });
 
   it('충분히 다양하다', () => {

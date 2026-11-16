@@ -20,13 +20,13 @@ describe('수달 컨셉 공통 카드', () => {
     const card = mount();
     expect(card).toHaveClass('app-card', 'py-4');
     expect(card).toHaveAttribute('data-card-tone', 'plain');
-    expect(card).not.toHaveClass('border', 'rounded-card', 'bg-[var(--color-card)]');
+    expect(card).not.toHaveClass('card-surface', 'card-padding');
     expect(card).toHaveTextContent('경제 기초');
   });
   it('누르는 카드는 card 톤으로 표면을 유지한다', () => {
     const card = mount({ tone: 'card', pad: 'lg' });
     expect(card).toHaveAttribute('data-card-tone', 'card');
-    expect(card).toHaveClass('bg-[var(--color-card)]', 'border', 'rounded-card', 'p-5');
+    expect(card).toHaveClass('card-surface', 'card-padding');
   });
   it('크기·접근성·직접 스타일을 보존한다', () => {
     const card = mount({ pad: 'none', className: 'custom', role: 'group', 'aria-label': '결과 요약', style: { border: 0 } });

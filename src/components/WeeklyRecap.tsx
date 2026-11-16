@@ -8,8 +8,8 @@ const STEP_MS = 3200;
 
 export const WeeklyRecap = ({ snap, onClose }: { snap: WeekSnapshot; onClose: () => void }) => {
   const slides = [
-    { key: 'xp', label: '지난주 모은 XP', value: snap.points, unit: 'XP', note: snap.points >= 500 ? '꾸준함이 쌓였어요' : '작은 걸음도 쌓여요' },
-    ...(snap.rank ? [{ key: 'rank', label: `${snap.total.toLocaleString()}명 중`, value: snap.rank, unit: '위', note: snap.rank <= 3 ? '시상대에 올랐어요' : snap.rank <= 10 ? 'TOP 10이에요' : '이번 주엔 한 계단 더' }] : []),
+    { key: 'xp', label: '지난주 모은 XP', value: snap.points, unit: 'XP', note: snap.points >= 500 ? '차곡차곡 모은 XP, 뿌듯하지?' : '한 번씩 쌓은 기록이 여기 있어' },
+    ...(snap.rank ? [{ key: 'rank', label: `${snap.total.toLocaleString()}명 중`, value: snap.rank, unit: '위', note: snap.rank <= 3 ? '시상대 입성! 멋진 한 주였어' : snap.rank <= 10 ? 'TOP 10 진입! 흐름 좋다' : '이번 주엔 한 계단 더' }] : []),
   ];
   const [i, setI] = useState(0);
   const last = i === slides.length;   // 마지막 장: 이번 주 시작
@@ -53,8 +53,8 @@ export const WeeklyRecap = ({ snap, onClose }: { snap: WeekSnapshot; onClose: ()
           </>
         ) : (
           <>
-            <p className="text-2xl font-bold anim-pop-in">새로운 한 주가 시작됐어요</p>
-            <p className="mt-3! text-sm anim-fade-up" style={{ '--i': 3 } as React.CSSProperties}>리그가 초기화됐어요. 이번 주도 함께 올라가 봐요.</p>
+            <p className="text-2xl font-bold anim-pop-in">새로운 한 주, 새 판 시작!</p>
+            <p className="mt-3! text-sm anim-fade-up" style={{ '--i': 3 } as React.CSSProperties}>주간 순위가 새로 시작됐어. 이번 주도 같이 가보자!</p>
             <button type="button" onClick={e => { e.stopPropagation(); onClose(); }}
               className="action-secondary mt-8! w-full py-4 rounded-button text-sm font-bold active:opacity-90 anim-fade-up" style={{ '--i': 6 } as React.CSSProperties}>
               이번 주 시작하기

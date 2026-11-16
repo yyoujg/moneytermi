@@ -18,7 +18,7 @@ export const ReviewCompletionScreen = ({ initialTotal, firstCorrect, note, onAct
       <main className="review-complete-content">
         <header className="review-complete-hero">
           <p className="review-complete-overline">오늘의 복습</p>
-          <h1 ref={headingRef} tabIndex={-1}>오늘 복습을 마쳤어요</h1>
+          <h1 ref={headingRef} tabIndex={-1}>오늘 복습, 한 바퀴 끝!</h1>
         </header>
 
         <section className="review-complete-summary" aria-label={`첫 시도 ${initialTotal}문제 중 ${firstCorrect}개 정답`}>

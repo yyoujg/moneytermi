@@ -1,0 +1,18 @@
+.point-celebration { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; overflow-y: auto; padding: var(--space-8) var(--space-6); background: color-mix(in srgb, var(--gray-900) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--gray-0); }
+.point-celebration-content { display: flex; width: 100%; max-width: 360px; flex-shrink: 0; flex-direction: column; align-items: center; padding-block: var(--space-6); text-align: center; }
+.point-celebration-content h2 { color: var(--gray-0); font-size: var(--font-size-display); font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); }
+.point-celebration-subtitle { margin-top: var(--space-4); color: var(--gray-0); font-size: var(--font-size-headline); font-weight: var(--font-weight-semibold); }
+.point-celebration-art { position: relative; display: grid; place-items: center; width: 240px; height: 240px; margin-top: var(--space-5); }
+.point-celebration-art::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--brown-500) 28%, transparent), transparent 68%); }
+.point-celebration-art img { position: relative; object-fit: contain; }
+.point-celebration-reward { display: flex; align-items: center; gap: var(--space-2); color: var(--brown-50); font-size: var(--font-size-title-2); font-weight: var(--font-weight-bold); font-variant-numeric: tabular-nums; }
+.point-celebration-description { margin-top: var(--space-3); color: var(--gray-200); font-size: var(--font-size-label); line-height: var(--line-height-body); word-break: keep-all; }
+button.point-celebration-confirm { min-width: 76px; min-height: var(--size-action); margin-top: var(--space-10); padding: 0 var(--space-6); border-radius: var(--shape-xl); background: var(--gray-0); color: var(--gray-900); font-size: var(--font-size-body) !important; font-weight: var(--font-weight-bold) !important; }
+button.point-celebration-confirm:focus-visible { outline-color: var(--brown-50) !important; }
+@media (max-height: 620px) {
+  .point-celebration { align-items: flex-start; padding-block: var(--space-4); }
+  .point-celebration-content { padding-block: var(--space-3); }
+  .point-celebration-art { height: 180px; margin-top: var(--space-3); }
+  .point-celebration-art img { height: 160px; }
+  button.point-celebration-confirm { margin-top: var(--space-6); }
+}

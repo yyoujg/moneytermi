@@ -54,7 +54,7 @@ export const BadgeCelebration = () => {
         />
       ))}
 
-      <h2 className="text-xl font-bold text-[var(--color-ink)] anim-pop-in">새 배지 획득!</h2>
+      <h2 className="text-xl font-bold text-[var(--color-ink)] anim-pop-in">새 배지, 컬렉션에 추가!</h2>
 
       <div className={`flex flex-wrap justify-center gap-5 ${fresh.length === 1 ? '' : 'max-w-xs'}`}>
         {fresh.map((b, i) => (
@@ -66,7 +66,7 @@ export const BadgeCelebration = () => {
       </div>
 
       <p className="text-sm text-[var(--color-ink-3)] text-center break-keep anim-fade-up" style={{ '--i': 4 } as React.CSSProperties}>
-        {fresh.length === 1 ? '꾸준함이 만든 배지예요. 마이페이지에서 언제든 볼 수 있어요.' : `${fresh.length}개를 한 번에! 마이페이지에서 언제든 볼 수 있어요.`}
+        {fresh.length === 1 ? '꾸준히 쌓은 기록이 배지가 됐어. 마이페이지에서 꺼내 봐!' : `${fresh.length}개를 한 번에 챙겼네! 마이페이지에서 꺼내 봐.`}
       </p>
 
       <button

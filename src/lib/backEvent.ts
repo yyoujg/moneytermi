@@ -9,3 +9,10 @@ export const dismissRelatedWordPreview = (root: Document = document): boolean =>
   dialog.dispatchEvent(new Event('cancel', { cancelable: true }));
   return true;
 };
+
+export const dismissWordResources = (root: Document = document): boolean => {
+  const dialog = root.querySelector<HTMLDialogElement>('dialog[data-word-resources-modal][open]');
+  if (!dialog) return false;
+  dialog.dispatchEvent(new Event('cancel', { cancelable: true }));
+  return true;
+};

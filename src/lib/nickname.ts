@@ -10,6 +10,9 @@ const NOUN = [
   '두더지', '햄스터', '알파카', '코알라', '비버', '오리', '고래',
 ];
 
+const GENERATED_NICKNAME_PATTERN = new RegExp(`^(?:${ADJ.join('|')})(?:${NOUN.join('|')})[1-9]\\d{2}$`);
+export const isGeneratedNickname = (nickname: string): boolean => GENERATED_NICKNAME_PATTERN.test(nickname);
+
 // rand는 [0,1) 난수. 테스트에서 주입한다.
 export const randomNickname = (rand: () => number = Math.random): string => {
   const a = ADJ[Math.floor(rand() * ADJ.length)];

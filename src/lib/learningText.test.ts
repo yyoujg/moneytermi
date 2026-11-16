@@ -1,5 +1,24 @@
 import { describe, expect, it } from 'vitest';
-import { additionalMeaning } from './learningText';
+import { additionalMeaning, spokenDefinition } from './learningText';
+
+describe('말풍선의 용어 뜻', () => {
+  it('명사형 뜻을 받침에 맞게 자연스러운 말투로 끝맺는다', () => {
+    expect(spokenDefinition('원금에만 이자가 붙는 이자 계산 방식')).toBe('원금에만 이자가 붙는 이자 계산 방식이에요.');
+    expect(spokenDefinition('포기한 대안 중 가장 큰 가치')).toBe('포기한 대안 중 가장 큰 가치예요.');
+    expect(spokenDefinition('실제로 살 돈과 의사가 있는 수요')).toBe('실제로 살 돈과 의사가 있는 수요예요.');
+  });
+  it('이미 말하는 문장은 유지하고 명사형 문장만 바꾼다', () => {
+    expect(spokenDefinition('매매가격 대비 보증금의 비율. 높을수록 보증금이 집값에 가까워져요')).toBe('매매가격 대비 보증금의 비율이에요. 높을수록 보증금이 집값에 가까워져요.');
+    expect(spokenDefinition('이자를 다시 계산해요.')).toBe('이자를 다시 계산해요.');
+    expect(spokenDefinition('어떻게 계산할까요?')).toBe('어떻게 계산할까요?');
+  });
+  it('괄호 설명과 숫자·소수점이 있는 수식을 보존한다', () => {
+    expect(spokenDefinition('여러 번 쓸 수 있는 전지(배터리)')).toBe('여러 번 쓸 수 있는 전지예요. (배터리)');
+    expect(spokenDefinition('단순 계산은 대출금 ÷ 예금 × 100')).toBe('단순 계산은 대출금 ÷ 예금 × 100이에요.');
+    expect(spokenDefinition('비율 2.5')).toBe('비율 2.5예요.');
+    expect(spokenDefinition('')).toBe('');
+  });
+});
 
 describe('상세 뜻의 중복 문장', () => {
   it('중복 정의에 붙은 이에요까지 걷어내 자연스러운 추가 설명을 남긴다', () => {

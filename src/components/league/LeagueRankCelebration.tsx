@@ -92,7 +92,7 @@ export const LeagueRankCelebration = () => {
         <div className="relative flex flex-col items-center px-5 pb-5 pt-6 text-center">
           <p className="text-xs text-[var(--color-ink-3)]">주간 순위 상승</p>
           <h2 id="league-rank-up-title" className="mt-1! text-xl font-bold text-[var(--color-ink)]">
-            순위가 올랐어요
+            순위가 쑥 올라갔어!
           </h2>
           <div className="mt-4 flex items-center justify-center gap-3">
             <span className="text-lg font-semibold text-[var(--color-ink-3)] tabular-nums">

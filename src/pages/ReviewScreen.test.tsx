@@ -141,7 +141,7 @@ describe('ReviewScreen retry spacing', () => {
     await submit('틀림');
     await act(async () => { vi.advanceTimersByTime(1000); });
 
-    expect(container.textContent).toContain('오늘 복습을 마쳤어요');
+    expect(container.textContent).toContain('오늘 복습, 한 바퀴 끝!');
     expect(container.querySelector('[data-review-total]')).toHaveTextContent('1문제');
     expect(container.querySelector('[data-review-correct]')).toHaveTextContent('0개');
     expect(container.querySelector('section')).toHaveAttribute('aria-label', '첫 시도 1문제 중 0개 정답');
@@ -164,7 +164,7 @@ describe('복습 코인 미표시', () => {
     state.submitQuizAnswer.mockResolvedValue(receipt(true, { combo: 3, earned: 28 }));
     const { container, submit } = await mount([word(1)]);
     await submit('용어1');
-    expect(container.textContent).toContain('정답! 바로 맞혔어요');
+    expect(container.textContent).toContain('정답! 기억하고 있었네');
     expect(container.textContent).not.toContain('+28개');
     expect(state.submitQuizAnswer).toHaveBeenCalledWith(1, '용어1', 'typed', false, true, expect.any(String));
   });
@@ -298,7 +298,7 @@ describe('복습 답안의 확정 저장', () => {
     expect(state.recordReview).toHaveBeenCalledWith(1, correct, false);
     expect(feedbackCorrect).toHaveBeenCalledTimes(correct ? 1 : 0);
     expect(feedbackWrong).toHaveBeenCalledTimes(correct ? 0 : 1);
-    expect(container).toHaveTextContent(correct ? '정답! 바로 맞혔어요' : '틀렸어요. 정답:');
+    expect(container).toHaveTextContent(correct ? '정답! 기억하고 있었네' : '아깝다! 정답:');
     expect(container).toHaveTextContent(correct ? '복습 1 / 2' : '복습 1 / 3');
     await act(async () => { vi.advanceTimersByTime(correct ? 900 : 1000); });
     state.submitQuizAnswer.mockResolvedValue(receipt(true));

@@ -139,9 +139,9 @@ const QuizScreen = () => {
   if (quizQueue.length === 0) {
     return (
       <LearningEmptyState
-        title="아직 풀 문제가 없어요"
-        description="자주 마주치는 용어를 먼저 보면 퀴즈를 풀 수 있어요."
-        actionLabel="시작하러 가기"
+        title="퀴즈 전에 용어부터 만나자"
+        description="용어를 하나 배우면 퀴즈도 열려. 가볍게 시작해 볼까?"
+        actionLabel="용어 배우러 가기"
         onAction={() => navigate('/course', { replace: true })}
       />
     );
@@ -151,15 +151,15 @@ const QuizScreen = () => {
   if (currentQuizIndex >= quizQueue.length) {
     const accuracy = baseQueue.length > 0 ? Math.round((firstCorrect / baseQueue.length) * 100) : 0;
     const completionTitle = navState?.mode === 'lesson_warmup'
-      ? '준비 완료!'
+      ? '워밍업 끝!'
       : navState?.mode === 'course_review'
-        ? '다시 보기 완료!'
-        : '확인 완료!';
+        ? '복습 한 바퀴 끝!'
+        : '퀴즈 한 판 끝!';
 
     return (
       <LearningCompletionScreen
         title={completionTitle}
-        subtitle={`${baseQueue.length}문제 중 ${firstCorrect}문제를 한 번에 맞혔어요`}
+        subtitle={`${baseQueue.length}문제 중 ${firstCorrect}문제를 한 번에 맞혔어!`}
         actionLabel={navState?.nextRoute?.label ?? (backPath.startsWith('/course') ? '주제로 돌아가기' : '퀘스트로')}
         onAction={() => navState?.nextRoute
           ? navigate(navState.nextRoute.pathname, { replace: true, state: navState.nextRoute.state })
@@ -173,7 +173,7 @@ const QuizScreen = () => {
               void shareTossLink('intoss://moneytermi/course', quizShareMessage(sessionLabel, baseQueue.length, accuracy, maxCombo, baseQueue));
             }}
           >
-            친구에게 공유
+            친구에게 기록 공유
           </ActionButton>
         }
       >
@@ -361,7 +361,7 @@ const QuizScreen = () => {
         </footer>
       ) : (
         <QuizAnswerFeedback key={currentQuizIndex}
-          correct={answeredCorrectly} title={gradingConflict ? '서버 채점 결과를 반영했어요' : answeredCorrectly ? praiseForAnswer(combo) : '아깝다! 정답 확인하고 가자'}
+          correct={answeredCorrectly} title={gradingConflict ? '서버 채점 결과를 반영했어요' : answeredCorrectly ? praiseForAnswer(combo) : '괜찮아, 같이 알아보자!'}
           answerLabel={answerLabel} word={currentWord.word} meaning={gradingConflict ? '' : currentWord.meaning}
           explanation={gradingConflict ? undefined : quizItem?.explanation} example={gradingConflict ? undefined : currentWord.learningExample}
           pending={answerPending} submissionMessage={submissionMessage}

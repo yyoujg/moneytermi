@@ -63,10 +63,10 @@ export const LeaguePromotionCelebration = () => {
 
           <p className="mt-4! text-xs text-[var(--color-ink-3)]">리그 승급</p>
           <h2 id="league-promotion-title" className="mt-1! text-xl font-bold text-[var(--color-ink)]">
-            {promotion.to.name} 리그에 올라갔어요
+            {promotion.to.name} 리그 입성!
           </h2>
           <p className="mt-2! text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">
-            지난주 순위 3위 안에 들었어요. 이번 주에도 순위를 지켜 봐요.
+            지난주 TOP 3 달성! 이번 주도 같이 달려보자.
           </p>
 
           <p className="mt-4! text-xs text-[var(--color-ink-3)]">현재 누적 <span className="font-semibold text-[var(--color-ink)] tabular-nums">{xp.toLocaleString()}XP</span></p>

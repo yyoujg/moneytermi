@@ -93,7 +93,7 @@ const LeagueScreen = () => {
         )}
 
         {!failed && rows?.length === 0 && (
-          <p className="py-6 text-sm text-[var(--color-ink-3)] text-center">이번 주엔 아직 아무도 없어요.<br />먼저 학습해서 1위를 차지해보세요!</p>
+          <p className="py-6 text-sm text-[var(--color-ink-3)] text-center">이번 주 리그, 첫 주인공은 누구?<br />XP 쌓고 첫 순위에 이름 올려봐!</p>
         )}
 
 
@@ -129,7 +129,7 @@ const LeagueScreen = () => {
           </Card>
         )}
         {!failed && rows && rows.length > 0 && mine && mine.rank == null && !rows.some(r => r.is_me) && (
-          <p className="py-4 text-sm text-[var(--color-ink-3)] text-center">아직 이번 주 순위에 없어요</p>
+          <p className="py-4 text-sm text-[var(--color-ink-3)] text-center">이번 주 XP를 모으면 내 순위도 생겨!</p>
         )}
 
         <Spacing size={8} />

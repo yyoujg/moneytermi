@@ -21,9 +21,9 @@ describe('달리 로딩 화면', () => {
     const container = mount(<LoadingScreen />);
     expect(container.querySelector('[role="status"]')).toBeNull();
     act(() => { vi.advanceTimersByTime(300); });
-    expect(container.querySelector('[role="status"]')).toHaveTextContent('오늘의 단어 준비 중');
+    expect(container.querySelector('[role="status"]')).toHaveTextContent('오늘의 돈 공부, 준비 중');
     act(() => { vi.advanceTimersByTime(2400); });
-    expect(container.querySelector('[role="status"]')).toHaveTextContent('달리가 단어장 넘기는 중');
+    expect(container.querySelector('[role="status"]')).toHaveTextContent('달리가 단어 고르는 중');
   });
 
   it('문구를 주면 바꾸지 않고, 지연 0이면 바로 보인다', () => {

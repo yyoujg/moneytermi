@@ -1,0 +1,109 @@
+.word-demand-explorer {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.word-demand-price {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border-radius: var(--space-3);
+  background: var(--color-surface);
+}
+
+.word-demand-price button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--size-touch-min);
+  padding: var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--space-2);
+  color: var(--color-ink-3);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-body);
+  cursor: pointer;
+}
+
+.word-demand-price button[aria-pressed="true"] {
+  border-color: var(--color-line);
+  background: var(--color-card);
+  color: var(--color-ink);
+}
+
+.word-demand-legend { display: flex; justify-content: center; gap: var(--space-4); }
+.word-demand-legend span { display: inline-flex; align-items: center; gap: var(--space-2); }
+.word-demand-legend i { width: 20px; border-top: 2px solid var(--color-accent-foreground); }
+.word-demand-legend .word-demand-key-before { border-top-color: var(--color-ink-3); border-top-style: dashed; }
+
+.word-demand-results { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+.word-demand-results[hidden] { display: none; }
+
+.word-demand-result {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  min-width: 0;
+}
+
+.word-demand-result h4 { display: grid; gap: var(--space-1); margin: 0; text-align: center; }
+.word-demand-result dl { display: grid; gap: var(--space-1); margin: 0; text-align: center; }
+.word-demand-result dl > div { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 0 var(--space-2); }
+.word-demand-result dd { margin: 0; }
+.word-demand-result dl > div:first-child dd { line-height: var(--line-height-reading); }
+.word-demand-result dl > div:last-child dd { font-size: var(--font-size-label); line-height: var(--line-height-body); color: var(--color-ink-3); }
+
+.word-demand-chart { display: block; width: 100%; max-width: 240px; height: auto; justify-self: center; overflow: visible; }
+.word-demand-axis { fill: none; stroke: var(--color-line-strong); stroke-width: 1.5; }
+.word-demand-axis-label { fill: var(--color-ink-3); font-size: var(--font-size-label); }
+.word-demand-curve-before { stroke: var(--color-ink-3); stroke-width: 2; stroke-dasharray: 4 4; }
+.word-demand-curve-after { stroke: var(--color-accent-foreground); stroke-width: 3; }
+.word-demand-shift { fill: none; stroke: var(--color-accent-foreground); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+@media (max-width: 359px) {
+  .word-demand-results { grid-template-columns: minmax(0, 1fr); }
+  .word-demand-result + .word-demand-result { border-top: var(--card-border); }
+}
+
+.word-demand-note {
+  padding: var(--space-4);
+  border-radius: var(--space-3);
+  background: var(--color-surface);
+}
+
+.word-visual-paragraphs { display: grid; gap: var(--space-4); word-break: keep-all; overflow-wrap: anywhere; }
+.word-visual-note { padding: var(--space-4); border-radius: var(--space-3); background: var(--color-surface); white-space: pre-line; word-break: keep-all; overflow-wrap: anywhere; }
+.word-table-region { display: grid; gap: var(--space-2); min-width: 0; }
+.word-table-scroll { overflow-x: auto; scrollbar-width: thin; }
+.word-table-scroll:focus-visible { outline: 2px solid var(--color-ink-3); outline-offset: 3px; }
+.word-data-table { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 0; border-top: var(--card-border); border-left: var(--card-border); }
+.word-table-label-column { width: 80px; }
+.word-table-scroll :is(th, td) { padding: var(--space-4) var(--space-3); border-right: var(--card-border); border-bottom: var(--card-border); text-align: left; vertical-align: top; word-break: keep-all; overflow-wrap: anywhere; }
+.word-table-scroll thead th { background: var(--color-surface); }
+.word-table-scroll thead th:first-child { position: sticky; left: 0; z-index: 1; }
+.word-table-scroll tbody th { position: sticky; left: 0; background: var(--color-surface); }
+
+.word-flow { display: grid; gap: var(--space-4); }
+.word-flow-steps { display: grid; gap: var(--space-2); list-style: none; margin: 0; padding: 0; }
+.word-flow-steps > li { display: grid; gap: var(--space-2); }
+.word-flow-connector { margin-left: var(--space-5); color: var(--color-ink-3); }
+.word-flow-step { display: flex; align-items: baseline; gap: var(--space-3); padding: var(--space-4); border: var(--card-border); border-radius: var(--space-3); }
+.word-flow-number { flex-shrink: 0; width: 24px; font-weight: var(--font-weight-semibold); }
+.word-flow-step p { min-width: 0; word-break: keep-all; overflow-wrap: anywhere; }
+.word-flow-steps > li:last-child .word-flow-step { background: var(--color-surface); border-color: var(--color-line-strong); }
+
+.word-line-chart { display: grid; gap: var(--space-3); }
+.word-chart-control { display: grid; gap: var(--space-1); }
+.word-chart-control input { width: 100%; min-width: 0; height: var(--size-touch-min); accent-color: var(--color-accent-foreground); cursor: pointer; }
+.word-chart-values { display: grid; gap: var(--space-2); padding: var(--space-4); border-radius: var(--space-3); background: var(--color-surface); }
+.word-chart-values > p { padding-bottom: var(--space-2); border-bottom: var(--card-border); }
+.word-chart-value { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); }
+.word-chart-value > span { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; word-break: keep-all; overflow-wrap: anywhere; }
+.word-chart-value i { display: inline-block; width: 16px; flex-shrink: 0; border-top-width: 2px; transform: translateY(-4px); }
+.word-chart-value strong { flex-shrink: 0; font-variant-numeric: tabular-nums; }

@@ -51,11 +51,11 @@ export const EnergyShopContent = ({
         <button type="button" onClick={onEnergyAd} disabled={full || adDisabled} className="energy-shop-option" data-energy-option="ad">
           <img src="/icons/stat/icon-energy-ad.svg" alt="" width={24} height={24} data-stat-icon="energy-ad" />
           <span className="energy-shop-option-body"><strong>광고 보고 +{ENERGY_AD_REWARD}</strong></span>
-          <span className="energy-shop-option-state">{full ? '가득 찼어요' : adHint}{!(full || adDisabled) && <ChevronRight size={16} />}</span>
+          <span className="energy-shop-option-state">{full ? '충전 완료!' : adHint}{!(full || adDisabled) && <ChevronRight size={16} />}</span>
         </button>
       </section>
 
-      <p className="energy-shop-info">새 학습·퀴즈를 시작할 때 1씩 써요. 이어하기와 복습은 무료, {ENERGY_REGEN_MS / (60 * 60 * 1000)}시간마다 1씩 차요.</p>
+      <p className="energy-shop-info">새 학습·퀴즈를 시작할 때 1씩 써. 이어하기와 복습은 무료고, {ENERGY_REGEN_MS / (60 * 60 * 1000)}시간마다 1씩 충전돼.</p>
     </div>
   );
 };

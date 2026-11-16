@@ -23,12 +23,12 @@ const mount = (element: ReactNode) => {
 describe('학습 시작 전과 완료 후 안내', () => {
   it('빈 화면은 캐릭터 없이 실제 안내와 버튼 동작을 유지한다', () => {
     const onAction = vi.fn();
-    const container = mount(<LearningEmptyState title="아직 풀 문제가 없어요" description="용어를 먼저 확인해요." actionLabel="시작하러 가기" onAction={onAction} />);
+    const container = mount(<LearningEmptyState title="퀴즈 전에 용어부터 만나자" description="용어를 먼저 확인해요." actionLabel="용어 배우러 가기" onAction={onAction} />);
     expect(container.querySelector('img')).toBeNull();
-    expect(container).toHaveTextContent('아직 풀 문제가 없어요');
+    expect(container).toHaveTextContent('퀴즈 전에 용어부터 만나자');
     expect(container).toHaveTextContent('용어를 먼저 확인해요.');
     const button = container.querySelector('button')!;
-    expect(button).toHaveTextContent('시작하러 가기');
+    expect(button).toHaveTextContent('용어 배우러 가기');
     act(() => button.click());
     expect(onAction).toHaveBeenCalledOnce();
   });
@@ -40,8 +40,8 @@ describe('학습 시작 전과 완료 후 안내', () => {
 
   it.each(['bottom', 'inline'] as const)('완료 화면 %s 배치에서도 결과와 동작은 유지하고 보상을 약속하지 않는다', actionPlacement => {
     const onAction = vi.fn();
-    const container = mount(<LearningCompletionScreen title="확인 완료!" subtitle="3문제 완료" actionLabel="주제로 돌아가기" onAction={onAction} actionPlacement={actionPlacement}><div>획득 포인트 +0P · 첫 시도 정답률 67%</div></LearningCompletionScreen>);
-    expect(container).toHaveTextContent('확인 완료!');
+    const container = mount(<LearningCompletionScreen title="퀴즈 한 판 끝!" subtitle="3문제 완료" actionLabel="주제로 돌아가기" onAction={onAction} actionPlacement={actionPlacement}><div>획득 포인트 +0P · 첫 시도 정답률 67%</div></LearningCompletionScreen>);
+    expect(container).toHaveTextContent('퀴즈 한 판 끝!');
     expect(container).toHaveTextContent('3문제 완료');
     expect(container).toHaveTextContent('획득 포인트 +0P · 첫 시도 정답률 67%');
     expect(container).not.toHaveTextContent('수달');

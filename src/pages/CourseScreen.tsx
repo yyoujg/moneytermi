@@ -81,13 +81,13 @@ const nodeCopy = (node: PathNode) => {
   if (node.type === 'quiz') {
     return {
       kind: '용어 퀴즈',
-      title: '살펴본 용어 확인하기',
+      title: '배운 용어, 퀴즈로 체크',
     };
   }
   const finalReview = node.id.endsWith('-r');
   return {
     kind: finalReview ? '누적 복습' : '중간 복습',
-    title: finalReview ? '배운 용어 다시 연결하기' : '오늘 익힌 용어 다시 보기',
+    title: finalReview ? '배운 용어 한 번에 복습' : '배운 용어 한 번 더',
   };
 };
 
@@ -436,7 +436,7 @@ const CourseScreen = () => {
 
           {/* 주제 행은 TDS ListRow 대신 직접 그린 버튼(TDS 버튼의 가운데 정렬이 iOS 웹뷰에서 내용을 가운데로 몰았다) */}
           <div className="course-home-topic-list">
-            {visibleTopics.length === 0 && <p className="type-supporting py-5 text-center">이 난이도의 학습을 준비하고 있어요.</p>}
+            {visibleTopics.length === 0 && <p className="type-supporting py-5 text-center">이 난이도는 준비 중이야. 다른 주제부터 만나자!</p>}
             {visibleTopics.map((topic, i) => {
               const locked = topic.locked;
               const steps = topicSteps(topic);
@@ -469,7 +469,7 @@ const CourseScreen = () => {
       {activeTopic && (() => {
         const card = activeTopic.parts[Math.min(cardPart, activeTopic.parts.length - 1)].section.course;
         return (
-          <div ref={topicCardRef} className="course-topic-summary sticky top-0 z-10 mx-5 mt-3 mb-4 shrink-0 overflow-hidden py-5">
+          <div ref={topicCardRef} className="course-topic-summary sticky top-0 z-10 mx-5 mt-3 mb-4 shrink-0 overflow-hidden">
             {/* 코스 카드 전체가 주제 고르기 버튼. 아이콘만 두면 앱 메뉴로 읽혀 '다른 주제'를 글자로 적는다. 진행은 아래 단계 노드로 보인다 */}
             <button key={card.id} type="button" className="course-topic-list-button anim-fade" aria-label={`${courseName(card)}, 다른 주제 고르기`} onClick={() => navigate('/course/topics')}>
               <span className="min-w-0 flex-1">
@@ -493,6 +493,7 @@ const CourseScreen = () => {
             const done = isDone(node);
             const locked = node.state === 'locked';
             const copy = nodeCopy(node);
+            const completedWords = node.words.filter(word => knownIds.has(word.id)).length;
             const inProgress = node.type === 'lesson' && !done && node.words.some(word => knownIds.has(word.id));
             // 다음에 할 단계만 카드로 띄우고, 끝났거나 잠긴 단계는 평평한 행으로 둔다
             const nodeCardClass = isFocus && !locked ? 'course-node-current border-[var(--color-line)] bg-[var(--color-card)] px-4' : 'border-transparent bg-transparent px-0';
@@ -500,12 +501,24 @@ const CourseScreen = () => {
             const nodeStatus = done ? '완료' : locked ? '잠김' : inProgress ? '진행 중' : '시작 가능';
             const isReview = node.type === 'review';
             return (
-              <div key={node.id} className="course-step" data-step-state={done ? 'done' : locked ? 'locked' : isFocus ? 'current' : 'open'}>
+              <div key={node.id} className="course-step" data-step-kind={node.type} data-step-state={done ? 'done' : locked ? 'locked' : isFocus ? 'current' : 'open'}>
                 {/* 곡선이 가장 멀리 휜 돌(8개 중 3·7번째) 반대편 빈자리에 장식 수달을 둔다 */}
                 {k % 4 === 2 && <img className="course-step-buddy" src={STEP_BUDDIES[(partIndex * 3 + Math.floor(k / 4)) % STEP_BUDDIES.length]} alt="" aria-hidden="true" data-step-buddy />}
                 {/* 잠긴 단계는 눌러도 말풍선을 열지 않는다(자물쇠 돌만으로 잠김을 알 수 있다) */}
                 <m.button whileTap={{ scale: 0.9, transition: { type: 'spring', stiffness: 600, damping: 15 } }} ref={isFocus ? focusRef : undefined} type="button" className="course-step-marker" data-step-kind={isReview ? 'review' : 'step'} aria-expanded={locked ? undefined : bubbleId === node.id} aria-disabled={locked || undefined}
+                  data-word-count={node.type === 'lesson' ? node.words.length : undefined} aria-describedby={node.type === 'lesson' ? `${node.id}-word-progress` : undefined}
                   aria-label={locked ? `${copy.kind} ${copy.title} 잠김` : `${copy.kind} ${copy.title} ${nodeStatus}, ${bubbleId === node.id ? '닫기' : '보기'}`} onClick={() => { if (!locked) setBubbleId(bubbleId === node.id ? null : node.id); }}>
+                  {node.type === 'lesson' && <>
+                    <svg className="course-word-ring" viewBox="0 0 100 100" aria-hidden="true">
+                      {node.words.map((word, i) => {
+                        const slot = 360 / node.words.length;
+                        const gap = Math.min(20, slot / 3);
+                        const dash = slot - gap;
+                        return <circle key={word.id} data-word-id={word.id} data-done={knownIds.has(word.id)} cx="50" cy="50" r="44" fill="none" strokeWidth="5" strokeLinecap="round" pathLength="360" strokeDasharray={`${dash} ${360 - dash}`} transform={`rotate(${-90 + slot * i + gap / 2} 50 50)`} />;
+                      })}
+                    </svg>
+                    <span id={`${node.id}-word-progress`} className="course-word-count">{completedWords}/{node.words.length}<span className="sr-only">단어 완료</span></span>
+                  </>}
                   {/* 징검다리 돌은 상태별 노드 그림(public/path): 잠김 > 복습 > 완료 > 지금 할 학습 */}
                   <img src={`/path/node-${locked ? 'locked' : isReview ? 'review' : done ? 'done' : 'current'}.svg`} alt="" aria-hidden="true" width={72} height={72} data-node-icon />
                 </m.button>
@@ -521,7 +534,8 @@ const CourseScreen = () => {
                       <span data-learning-status className={done || nodeStatus === '시작 가능' ? 'sr-only' : `font-normal ${locked ? 'text-[var(--color-ink-4)]' : isFocus ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-3)]'}`}>{nodeStatus}</span>
                     </span>
                     <span className={`mt-1 block text-sm break-keep ${locked ? 'font-semibold text-[var(--color-ink-3)]' : done ? 'font-semibold text-[var(--color-ink-2)]' : 'font-bold text-[var(--color-ink)]'}`}>{copy.title}</span>
-                    {locked && <span className="mt-1 block text-xs text-[var(--color-ink-3)]">앞 단계를 끝내면 열려요</span>}
+                    {node.type === 'lesson' && <span className="mt-2 block text-xs text-[var(--color-ink-3)]">{completedWords}/{node.words.length}단어 완료 · 한 단어씩 배우기</span>}
+                    {locked && <span className="mt-1 block text-xs text-[var(--color-ink-3)]">앞 단계 클리어하면 열려!</span>}
                   </span>
                   {!locked && <ChevronRight size={20} strokeWidth={1.75} aria-hidden="true" data-learning-action className="shrink-0 text-[var(--color-ink-3)]" />}
                 </button></span>

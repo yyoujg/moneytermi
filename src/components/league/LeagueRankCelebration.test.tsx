@@ -91,7 +91,7 @@ describe('LeagueRankCelebration', () => {
     state.rpc.mockResolvedValue({ data: { rank: 3, total: 10, points: 70 }, error: null });
     const { container } = await mount();
 
-    expect(container.querySelector('[role="dialog"]')?.textContent).toContain('순위가 올랐어요');
+    expect(container.querySelector('[role="dialog"]')?.textContent).toContain('순위가 쑥 올라갔어!');
     expect(container.querySelector('[role="dialog"]')?.textContent).toContain('5위');
     expect(container.querySelector('[role="dialog"]')?.textContent).toContain('3위');
     expect(container.querySelector('[role="dialog"]')?.textContent).toContain('70XP');

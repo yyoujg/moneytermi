@@ -62,13 +62,13 @@ export const NicknameSheet = ({
       open={open}
       className="original-modal"
       onDimmerClick={required ? () => {} : onClose}
-      header={<span className="sheet-title">{required ? '닉네임을 정해주세요' : '닉네임 변경'}</span>}
+      header={<span className="sheet-title">{required ? '뭐라고 불러줄까?' : '닉네임 변경'}</span>}
       hasTextField
     >
       <div className="nickname-sheet-body">
         <p id={introId} className="nickname-sheet-intro">{required
-          ? '학습 기록과 랭킹에 쓰일 이름이에요. 나중에 마이페이지에서 바꿀 수 있어요.'
-          : '학습 기록과 리그에 표시할 이름이에요.'}</p>
+          ? '학습 기록과 리그에 쓸 이름이야. 나중에 마이페이지에서 바꿔도 돼.'
+          : '학습 기록과 리그에 이 이름으로 등장할 거야.'}</p>
         <div className="nickname-editor">
           <div className="nickname-label-row">
             <label htmlFor={fieldId}>닉네임</label>

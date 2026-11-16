@@ -23,7 +23,7 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
             </span>
             <div>
               <p className="text-sm font-semibold text-[var(--color-ink)]">효과음</p>
-              <p className="text-xs text-[var(--color-ink-3)]">퀴즈 정답/오답 효과음</p>
+              <p className="text-xs text-[var(--color-ink-3)]">정답·오답을 소리로 알려줘</p>
             </div>
           </div>
           <Switch checked={soundOn} onChange={toggleSound} aria-label="효과음" />
@@ -37,7 +37,7 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
             </span>
             <div>
               <p className="text-sm font-semibold text-[var(--color-ink)]">배경음악</p>
-              <p className="text-xs text-[var(--color-ink-3)]">조용한 학습 루프</p>
+              <p className="text-xs text-[var(--color-ink-3)]">돈 공부할 때 깔아두는 BGM</p>
             </div>
           </div>
           <Switch checked={bgmOn} onChange={toggleBgm} aria-label="배경음악" />
@@ -51,7 +51,7 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
             </span>
             <div>
               <p className="text-sm font-semibold text-[var(--color-ink)]">진동</p>
-              <p className="text-xs text-[var(--color-ink-3)]">햅틱 피드백</p>
+              <p className="text-xs text-[var(--color-ink-3)]">버튼을 누르면 짧게 톡</p>
             </div>
           </div>
           <Switch checked={vibrationOn} onChange={toggleVibration} aria-label="진동" />
@@ -63,7 +63,7 @@ export const SettingsSheet = ({ open, onClose }: { open: boolean; onClose: () =>
             <span className="flex w-6 shrink-0 justify-center"><Bell size={20} className={agreed ? 'text-[var(--color-ink-2)]' : 'text-[var(--color-ink-4)]'} /></span>
             <div>
               <p className="text-sm font-semibold text-[var(--color-ink)]">학습 알림</p>
-              <p className="text-xs text-[var(--color-ink-3)]">복습/학습 리마인더 받기</p>
+              <p className="text-xs text-[var(--color-ink-3)]">학습·복습할 때 알림으로 챙겨줘</p>
             </div>
           </div>
           <Switch checked={agreed} disabled={agreed} onChange={() => { if (!agreed) requestAgreement('settings'); }} aria-label="학습 알림" />

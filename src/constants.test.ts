@@ -1,5 +1,15 @@
 import { describe, it, expect } from 'vitest';
-import { GROWTH_STAGES, getGrowthStage, LEAGUE_DEMOTE_BOTTOM, LEAGUE_DEMOTE_MIN_PLAYERS, LEAGUE_PROMOTE_TOP } from './constants';
+import { GROWTH_STAGES, getGrowthStage, isDefaultNickname, LEAGUE_DEMOTE_BOTTOM, LEAGUE_DEMOTE_MIN_PLAYERS, LEAGUE_PROMOTE_TOP } from './constants';
+
+describe('isDefaultNickname', () => {
+  it.each([undefined, null, '', '  ', '새친구', '예비슈퍼개미', '따뜻한올빼미959', '침착한비버699', ' 성실한너구리100 ', '단단한고래999'])('%j는 닉네임 변경 안내 대상이다', nickname => {
+    expect(isDefaultNickname(nickname)).toBe(true);
+  });
+
+  it.each(['아리', '아리123', '따뜻한수달', '따뜻한수달99', '따뜻한수달099', '따뜻한수달1000', '귀여운수달123', '따뜻한아리123', '내따뜻한수달123', '따뜻한수달123님'])('%j는 자동 생성형 이름으로 판단하지 않는다', nickname => {
+    expect(isDefaultNickname(nickname)).toBe(false);
+  });
+});
 
 describe('getGrowthStage', () => {
   it('열 단계의 식별자와 이름을 유지한다', () => {

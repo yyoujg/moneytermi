@@ -4,7 +4,6 @@ import type { Word } from '../types';
 import { buildCustomQuizItem, lessonChecks } from '../lib/quiz';
 import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
 import { logClick } from '../lib/analytics';
-import { Card } from '../components/ui/Card';
 import { ActionButton } from '../components/ui/ActionButton';
 import { LessonCheckFeedback } from '../components/learning/LessonCheckFeedback';
 import { LessonCheckSummary, type LessonCheckRoundResult } from '../components/learning/LessonCheckSummary';
@@ -35,8 +34,8 @@ const LessonCheckScreen = () => {
     const hasLesson = Boolean(state?.words?.length);
     return (
       <div className="lesson-check-screen app-soft-screen flex h-full flex-col items-center justify-center gap-4 px-5 text-center">
-        <h1 className="mt-1 text-xl font-bold text-[var(--color-ink)]">{hasLesson ? '이번 레슨에는 이해 확인 문제가 없어요' : '자주 마주치는 용어부터 시작해요'}</h1>
-        <p className="text-sm text-[var(--color-ink-2)] break-keep">{hasLesson ? '다음 학습을 선택할 수 있어요.' : '용어를 하나 익히면 이해 확인 문제를 풀 수 있어요.'}</p>
+        <h1 className="mt-1 text-xl font-bold text-[var(--color-ink)]">{hasLesson ? '이번 레슨은 용어까지만!' : '용어부터 가볍게 시작하자'}</h1>
+        <p className="text-sm text-[var(--color-ink-2)] break-keep">{hasLesson ? '다음 학습도 만나볼까?' : '용어 하나 배우면 상황 문제도 풀 수 있어.'}</p>
         <ActionButton fullWidth onClick={() => navigate(backPath, { replace: true })} className="mt-3">
           {hasLesson ? '다음 학습 선택하기' : '학습 시작하기'}
         </ActionButton>
@@ -72,27 +71,23 @@ const LessonCheckScreen = () => {
   }
 
   return (
-    <div className="lesson-check-screen app-soft-screen flex h-full flex-col">
-      <div className="app-soft-header px-5 pb-4 pt-4">
-        <div className="flex items-center gap-3">
-          <div role="progressbar" aria-label="이해 확인 진행률" aria-valuemin={0} aria-valuemax={questions.length} aria-valuenow={index} className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--color-button-secondary)]">
-            <div className="h-full rounded-full bg-[var(--color-progress)]" style={{ width: (index / questions.length * 100) + '%' }} />
-          </div>
-          <p className="text-xs tabular-nums text-[var(--color-ink-3)]">{index + 1}/{questions.length}</p>
+    <div className="lesson-check-screen lesson-question-screen app-soft-screen">
+      <header className="lesson-feedback-header">
+        <div className="lesson-feedback-header-row"><span>이해 확인</span><span>{index + 1}/{questions.length}</span></div>
+        <div role="progressbar" aria-label="이해 확인 진행률" aria-valuemin={0} aria-valuemax={questions.length} aria-valuenow={index} className="lesson-feedback-progress">
+          <span style={{ width: `${index / questions.length * 100}%` }} />
         </div>
-      </div>
-      <div className="flex-1 min-h-0 overflow-y-auto px-5 py-5 [&::-webkit-scrollbar]:hidden">
-        <h1 className="mb-4! text-xs text-[var(--color-ink-3)]">{attempt === 1 ? '상황을 읽고 골라보세요' : '틀린 문제 다시 풀기'}</h1>
-        {/* 문제는 카드 밖 왼쪽 아래 수달이 말하는 말풍선 */}
-        <div className="mb-8 flex items-start gap-2">
-          <img src="/otter/v5/otter-explain.svg" alt="" aria-hidden="true" height={112} className="quiz-question-otter h-[112px] w-auto shrink-0 self-end" data-otter="explain" />
-          <Card pad="sm" className="quiz-bubble min-w-0 flex-1">
-            <h2 className="quiz-prompt-main text-lg font-bold text-[var(--color-ink)] leading-relaxed break-keep">
-              {keepShortUnitsTogether(question.promptMain)}
-            </h2>
-          </Card>
+      </header>
+      <main className="lesson-question-content">
+        <div className="lesson-question-intro">
+          <h1>{attempt === 1 ? '이 상황엔 어떤 답이 딱일까?' : '틀린 문제 다시 풀기'}</h1>
+          <img src="/otter/v5/otter-explain.svg" alt="" aria-hidden="true" height={64} data-otter="explain" />
         </div>
-        <div className="flex flex-col gap-3">
+        <section className="lesson-feedback-situation" aria-labelledby="lesson-question-prompt">
+          <p className="lesson-feedback-label">이번 상황</p>
+          <h2 id="lesson-question-prompt" className="lesson-feedback-question">{keepShortUnitsTogether(question.promptMain)}</h2>
+        </section>
+        <div className="lesson-question-options" role="group" aria-label="답 고르기">
           {question.options.map((option, optionIndex) => (
             <button
               key={optionIndex}
@@ -105,17 +100,14 @@ const LessonCheckScreen = () => {
                 if (option.isCorrect) feedbackCorrect();
                 else { feedbackWrong(); setMistakes(prev => [...prev, question]); }
               }}
-              className="quiz-option w-full flex items-center gap-3 min-h-[64px] border border-transparent bg-[var(--color-surface)] active:opacity-80 px-4 py-4 text-left text-base font-semibold leading-relaxed text-[var(--color-brand-text)] break-keep"
-              style={{ borderRadius: 'var(--shape-button)' }}
+              className="lesson-question-option"
             >
-              {optionIndex < 4
-                ? <img src={`/icons/num/num-${optionIndex + 1}.svg`} alt="" aria-hidden="true" width={28} height={28} className="shrink-0" data-num-icon />
-                : <span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[var(--color-line-strong)] bg-[var(--color-card)] text-xs font-semibold text-[var(--color-ink-3)]">{optionIndex + 1}</span>}
+              <span aria-hidden="true" className="lesson-question-option-number">{optionIndex + 1}</span>
               <span data-lesson-check-label className="min-w-0 flex-1">{keepShortUnitsTogether(option.label)}</span>
             </button>
           ))}
         </div>
-      </div>
+      </main>
     </div>
   );
 };
