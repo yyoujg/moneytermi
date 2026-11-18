@@ -88,7 +88,7 @@ describe('LeaguePromotionCelebration', () => {
     const { container } = await mount();
 
     expect(container.querySelector('[role="dialog"]')?.textContent).toContain('꼼꼼이 리그 입성!');
-    expect(container.querySelector('[role="dialog"]')?.textContent).toContain('TOP 3 달성');
+    expect(container.querySelector('[role="dialog"]')?.textContent).toContain('승급했네.');
     expect(state.feedbackTierUp).toHaveBeenCalledTimes(1);
     expect(state.logClick).toHaveBeenCalledWith('league_promotion_modal_view', { from: 1, to: 2, xp: 340 });
   });

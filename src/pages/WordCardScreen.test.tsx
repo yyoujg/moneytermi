@@ -74,9 +74,9 @@ const mount = (visuals: Word['visuals']) => {
 
 describe('레슨 완료 후 다음 행동', () => {
   it('추가 문제를 강제하지 않고 코스로 돌아간다', () => {
-    const { container, click } = mount([{ type: 'quiz', lessonCheck: true, q: '어떤 변화가 생길까요?', options: ['증가', '감소'], answer: 0, explanation: '조건이 같을 때 증가해요.' }]);
-    expect(container.textContent).toContain('오늘 용어, 한 바퀴 끝!');
-    expect(container.textContent).not.toContain('이제 할 수 있어요');
+    const { container, click } = mount([{ type: 'quiz', lessonCheck: true, q: '어떤 변화가 생길까?', options: ['증가', '감소'], answer: 0, explanation: '조건이 같을 때 증가해.' }]);
+    expect(container.textContent).toContain('오늘 용어 접수. 뉴스에서 만나면 아는 척해.');
+    expect(container.textContent).not.toContain('이제 할 수 있어');
     expect(logClick).toHaveBeenCalledWith('lesson_view_complete', { course_id: 'c1', node_id: 'c1-l0', total: 1 });
     expect(container.querySelector('[data-tone="primary"]')).toHaveTextContent('코스로 돌아가기');
     click('코스로 돌아가기');
@@ -93,7 +93,7 @@ describe('레슨 완료 후 다음 행동', () => {
   });
 
   it('상황 문제가 있는 레슨은 선택형 추가 연습에서 코스 정보를 유지한다', () => {
-    const { container, click } = mount([{ type: 'quiz', lessonCheck: true, q: '어떤 변화가 생길까요?', options: ['증가', '감소'], answer: 0, explanation: '조건이 같을 때 증가해요.' }]);
+    const { container, click } = mount([{ type: 'quiz', lessonCheck: true, q: '어떤 변화가 생길까?', options: ['증가', '감소'], answer: 0, explanation: '조건이 같을 때 증가해.' }]);
     click('더 연습하기');
     expect(container.textContent).toContain('/lesson-check');
     expect(container.textContent).toContain('c1-l0');
@@ -102,7 +102,7 @@ describe('레슨 완료 후 다음 행동', () => {
 });
 
 const makeWord = (id: number, name: string, relatedWords: string[] = []): Word => ({
-  id, word: name, meaning: `${name}의 뜻 (${id})`, detailedMeaning: `${name}의 상세 설명이에요.`,
+  id, word: name, meaning: `${name}의 뜻 (${id})`, detailedMeaning: `${name}의 상세 설명이야.`,
   newsExample: '', hint: '', difficulty: 1, relatedWords,
 });
 
@@ -172,7 +172,7 @@ const mountLesson = (autoAdvance = true, example = '', studyWord = makeWord(2, '
 describe('단어별 페이지 학습', () => {
   it('뜻·예시·문제·해설을 각각 한 화면에서 보고 완료할 때만 기록한다', () => {
     vi.useFakeTimers();
-    const view = mountLesson(true, '학습용 가정: 물건을 비교하는 예시예요.');
+    const view = mountLesson(true, '학습용 가정: 물건을 비교하는 예시야.');
     const screen = () => view.container.querySelector('.word-study-screen')!;
     const counter = () => view.container.querySelector('[data-study-page-count]');
     expect(counter()).toHaveTextContent('1/4');
@@ -185,7 +185,7 @@ describe('단어별 페이지 학습', () => {
     expect(counter()).toHaveTextContent('2/4');
     expect(screen().querySelector('.word-study-stepper [data-state="current"]')).toHaveTextContent('예시');
     expect(screen().querySelectorAll('.word-study-stepper [data-state="done"]')).toHaveLength(1);
-    expect(screen()).toHaveTextContent('물건을 비교하는 예시예요.');
+    expect(screen()).toHaveTextContent('물건을 비교하는 예시야.');
     expect(screen().querySelector('.word-meaning-definition')).toBeNull();
     expect(screen().querySelectorAll('[data-study-unit]')).toHaveLength(1);
     view.advancePage();
@@ -204,20 +204,20 @@ describe('단어별 페이지 학습', () => {
     expect(counter()).toHaveTextContent('4/4');
     expect(screen().querySelector('.word-study-stepper [data-state="current"]')).toHaveTextContent('해설');
     expect(screen().querySelectorAll('.word-study-stepper [data-state="done"]')).toHaveLength(3);
-    expect(screen().querySelector('.word-check-feedback')).toHaveTextContent('맞았어요!');
+    expect(screen().querySelector('.word-check-feedback')).toHaveTextContent('정답. 제법인데?');
     expect(screen().querySelector('.word-check-options')).toBeNull();
     expect(mocks.setKnownWords).not.toHaveBeenCalled();
     view.click('이전');
     act(() => vi.advanceTimersByTime(700));
     expect(screen().querySelector('.word-check-options button')).toBeDisabled();
     view.advancePage();
-    expect(screen().querySelector('.word-check-feedback')).toHaveTextContent('맞았어요!');
+    expect(screen().querySelector('.word-check-feedback')).toHaveTextContent('정답. 제법인데?');
     view.completeWord();
     expect(mocks.setKnownWords).toHaveBeenCalledTimes(1);
     const update = mocks.setKnownWords.mock.calls[0][0] as (previous: Word[]) => Word[];
     expect(update([])).toEqual([view.words[0]]);
     expect(update([view.words[0]])).toEqual([view.words[0]]);
-    expect(view.container.querySelector('.word-complete-screen')).toHaveTextContent('단어 하나 클리어!');
+    expect(view.container.querySelector('.word-complete-screen')).toHaveTextContent('한 단어 접수. 아는 척 적립.');
     expect(view.container.querySelector('.word-complete-screen')).not.toHaveTextContent('첫 용어의 뜻');
     view.click('다음 단어');
     expect(counter()).toHaveTextContent('1/4');
@@ -232,7 +232,7 @@ describe('단어별 페이지 학습', () => {
   it('오답에도 정답과 해설을 보여준 뒤 완료할 수 있다', () => {
     vi.useFakeTimers();
     const word = makeWord(2, '학습 용어');
-    word.visuals = [{ type: 'quiz', lessonCheck: true, q: '어떤 변화가 생길까요?', options: ['증가', '감소'], answer: 0, explanation: '조건이 같을 때 증가해요.' }];
+    word.visuals = [{ type: 'quiz', lessonCheck: true, q: '어떤 변화가 생길까?', options: ['증가', '감소'], answer: 0, explanation: '조건이 같을 때 증가해.' }];
     const view = mountLesson(true, '', word);
     view.next();
     vi.clearAllMocks();
@@ -241,7 +241,7 @@ describe('단어별 페이지 학습', () => {
     view.advancePage();
     const feedback = view.container.querySelector('.word-check-feedback');
     expect(feedback).toHaveTextContent('정답 · 증가');
-    expect(feedback).toHaveTextContent('조건이 같을 때 증가해요.');
+    expect(feedback).toHaveTextContent('조건이 같을 때 증가해.');
     expect(mocks.setKnownWords).not.toHaveBeenCalled();
     view.completeWord();
     expect(mocks.setKnownWords).toHaveBeenCalledTimes(1);
@@ -256,7 +256,7 @@ describe('단어별 페이지 학습', () => {
     view.completeWord();
     expect(mocks.setKnownWords).toHaveBeenCalledTimes(4);
     view.click('학습 마무리');
-    expect(view.container).toHaveTextContent('오늘 용어, 한 바퀴 끝!');
+    expect(view.container).toHaveTextContent('오늘 용어 접수. 뉴스에서 만나면 아는 척해.');
     expect(logClick).toHaveBeenCalledWith('lesson_view_complete', { course_id: 'c1', node_id: 'c1-l0', total: 4 });
     view.click('코스로 돌아가기');
     expect(view.location()).toContain('/course');
@@ -412,7 +412,7 @@ describe('관련 용어 읽기 전용 미리보기', () => {
     const detail = view.dialog().querySelector('details')!;
     act(() => detail.querySelector('summary')!.click());
     expect(detail.open).toBe(true);
-    expect(detail.textContent).toContain('다른 코스의 상세 설명이에요.');
+    expect(detail.textContent).toContain('다른 코스의 상세 설명이야.');
     expect(mocks.useNews).toHaveBeenCalledWith([view.otherWord], 0);
     const newsButton = [...view.dialog().querySelectorAll('button')].find(button => button.textContent?.includes('다른 코스 뉴스'))!;
     act(() => newsButton.click());

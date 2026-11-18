@@ -29,8 +29,8 @@ export const LessonCheckFeedback = ({ question, selected, number, total, onNext 
       <main className="lesson-feedback-content">
         <div className="lesson-feedback-intro">
           <div>
-            <h1 ref={headingRef} tabIndex={-1}>{correct ? '정답! 감 잡았네' : '아깝다! 정답을 같이 보자'}</h1>
-            <p>{correct ? '왜 맞는지도 알면 더 확실해져.' : '내 답이랑 어디가 다른지 짚어보자.'}</p>
+            <h1 ref={headingRef} tabIndex={-1}>{correct ? '정답. 내가 좀 가르치네.' : '오답. 정답은 여기 있었네.'}</h1>
+            <p>{correct ? '왜 맞았는지도 알면 진짜 아는 척 가능.' : '보기한테 잠깐 속았네. 어디서 낚였는지 보자.'}</p>
           </div>
         </div>
 

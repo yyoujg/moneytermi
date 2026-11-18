@@ -1,0 +1,4 @@
+apply-*.sql
+rollback-*.sql
+words-after.json
+__pycache__/

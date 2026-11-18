@@ -28,7 +28,7 @@ const LessonIntroScreen = () => {
   }, [navigate, next, state?.courseId, state?.nodeId, total]);
 
   if (!next) return null;
-  return <LoadingScreen delayMs={0} message={total > 0 ? `새 용어 ${total}개, 같이 알아보자` : undefined} />;
+  return <LoadingScreen delayMs={0} message={total > 0 ? `새 용어 ${total}개. 아는 척할 거리 들어간다.` : undefined} />;
 };
 
 export default LessonIntroScreen;

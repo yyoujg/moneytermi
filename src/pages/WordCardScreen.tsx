@@ -365,7 +365,7 @@ const WordCardScreen = () => {
     const wordName = rawName.replace(/["""'']/g, '').trim();
     const targetWord = words.find(word => word.word === wordName) ?? wordLookup.byName.get(wordName);
     if (!targetWord) {
-      showModal('아직 등록되지 않은 용어예요', 'error');
+      showModal('아직 등록되지 않은 용어야', 'error');
       return;
     }
     setPreviewWord(targetWord);
@@ -386,7 +386,7 @@ const WordCardScreen = () => {
         {/* 카드 + 알림 카드 + 축하가 작은 화면에서 넘칠 수 있어 이 영역만 스크롤 */}
         <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden flex flex-col items-center justify-center-safe gap-5 p-8">
           <div className="text-center anim-fade-up" style={{ '--i': 1 } as React.CSSProperties}>
-            <h2 className="text-xl font-bold text-[var(--color-ink)] mb-1!">오늘 용어, 한 바퀴 끝!</h2>
+            <h2 className="text-xl font-bold text-[var(--color-ink)] mb-1!">오늘 용어 접수. 뉴스에서 만나면 아는 척해.</h2>
             {/* 끝 화면의 핵심 숫자 하나를 크게(피크엔드) */}
             <p className="mt-3! text-4xl font-bold text-[var(--color-ink)] tabular-nums">{words.length}<span className="ml-1 text-base font-semibold text-[var(--color-ink-3)]">개 용어</span></p>
           </div>
@@ -525,7 +525,7 @@ const WordCardScreen = () => {
             <img src="/otter/v5/otter-cheer.svg" alt="" aria-hidden="true" width={144} height={144} />
           </div>
           <div className="word-complete-copy">
-            <p className="type-supporting type-emphasis">{autoAdvance ? '단어 하나 클리어!' : '한 번 더 보니까 더 익숙하지?'}</p>
+            <p className="type-supporting type-emphasis">{autoAdvance ? '한 단어 접수. 아는 척 적립.' : '또 봤네. 이제 모르는 척은 어렵겠는데?'}</p>
             <h1 className="type-page-title">{completedWord.word}</h1>
           </div>
         </header>

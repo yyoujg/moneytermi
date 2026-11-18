@@ -141,7 +141,7 @@ describe('ReviewScreen retry spacing', () => {
     await submit('틀림');
     await act(async () => { vi.advanceTimersByTime(1000); });
 
-    expect(container.textContent).toContain('오늘 복습, 한 바퀴 끝!');
+    expect(container.textContent).toContain('복습 끝. 까먹을 틈을 안 주네.');
     expect(container.querySelector('[data-review-total]')).toHaveTextContent('1문제');
     expect(container.querySelector('[data-review-correct]')).toHaveTextContent('0개');
     expect(container.querySelector('section')).toHaveAttribute('aria-label', '첫 시도 1문제 중 0개 정답');
@@ -164,7 +164,7 @@ describe('복습 코인 미표시', () => {
     state.submitQuizAnswer.mockResolvedValue(receipt(true, { combo: 3, earned: 28 }));
     const { container, submit } = await mount([word(1)]);
     await submit('용어1');
-    expect(container.textContent).toContain('정답! 기억하고 있었네');
+    expect(container.textContent).toContain('정답. 모르는 척한 거였네?');
     expect(container.textContent).not.toContain('+28개');
     expect(state.submitQuizAnswer).toHaveBeenCalledWith(1, '용어1', 'typed', false, true, expect.any(String));
   });
@@ -173,7 +173,7 @@ describe('복습 코인 미표시', () => {
     state.submitQuizAnswer.mockResolvedValue(receipt(true, { capped: true }));
     const { container, submit } = await mount([word(1)]);
     await submit('용어1');
-    expect(container.textContent).not.toContain('오늘 보상 한도에 도달했어요');
+    expect(container.textContent).not.toContain('오늘 보상 한도에 도달했어');
   });
 });
 
@@ -226,7 +226,7 @@ describe('복습 답안의 확정 저장', () => {
     const payload = [...state.submitQuizAnswer.mock.calls[0]];
     expect(payload).toEqual([1, '용어1', 'typed', true, true, expect.any(String)]);
     expect(payload[5]).not.toBe('');
-    expect(container.querySelector('[aria-live="polite"]')).toHaveTextContent('답안 저장을 확인하지 못했어요');
+    expect(container.querySelector('[aria-live="polite"]')).toHaveTextContent('답안 저장을 확인하지 못했어');
     expect(document.activeElement).toHaveTextContent('다시 저장하기');
     expect(input()).toBeDisabled();
     await click('건너뛰기');
@@ -298,7 +298,7 @@ describe('복습 답안의 확정 저장', () => {
     expect(state.recordReview).toHaveBeenCalledWith(1, correct, false);
     expect(feedbackCorrect).toHaveBeenCalledTimes(correct ? 1 : 0);
     expect(feedbackWrong).toHaveBeenCalledTimes(correct ? 0 : 1);
-    expect(container).toHaveTextContent(correct ? '정답! 기억하고 있었네' : '아깝다! 정답:');
+    expect(container).toHaveTextContent(correct ? '정답. 모르는 척한 거였네?' : '잠깐 낚였네. 정답:');
     expect(container).toHaveTextContent(correct ? '복습 1 / 2' : '복습 1 / 3');
     await act(async () => { vi.advanceTimersByTime(correct ? 900 : 1000); });
     state.submitQuizAnswer.mockResolvedValue(receipt(true));

@@ -91,11 +91,11 @@ describe('퀘스트 미션과 큰 보상', () => {
     mocks.ctx.missions = {};
     mocks.ctx.periodClaimed = null;
     const container = await mount();
-    expect(container).toHaveTextContent('새 미션 준비 중! 먼저 공부해 볼까?');
+    expect(container).toHaveTextContent('미션 준비 중. 그동안 단어 하나쯤은 거뜬하지?');
     act(() => container.querySelector<HTMLButtonElement>('#quest-tab-rewards')!.click());
     expect(container.querySelectorAll('.quest-reward-card')).toHaveLength(3);
     expect(container.querySelector('.quest-reward-amount')).toHaveAttribute('aria-label', '보상 기준 20 XP');
-    expect(container.querySelector('.quest-reward-unavailable')).toHaveTextContent('현재 지급 상태는 확인할 수 없어요');
+    expect(container.querySelector('.quest-reward-unavailable')).toHaveTextContent('현재 지급 상태는 확인할 수 없어');
     expect(container).not.toHaveTextContent('달성하면 자동 적립');
   });
 });

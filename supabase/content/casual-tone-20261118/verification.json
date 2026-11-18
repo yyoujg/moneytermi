@@ -1,0 +1,9 @@
+{
+  "projectId": "idrdlfoouhnksielnqca",
+  "table": "words",
+  "expectedRows": 1233,
+  "matchingRows": 1233,
+  "actualRows": 1233,
+  "mismatchedIds": [],
+  "comparison": "All columns compared as jsonb with the generated after snapshot after all 13 batches were applied."
+}

@@ -2,7 +2,7 @@
 // 300ms 안에 끝나는 로딩은 보여주지 않는다(깜빡임 방지). 문구는 2.4초마다 바뀐다. 앱 첫 진입은 스플래시(SplashScreen)
 import { useEffect, useState } from 'react';
 
-const MESSAGES = ['오늘의 돈 공부, 준비 중', '달리가 단어 고르는 중', '거의 다 됐어!'];
+const MESSAGES = ['아는 척할 거리 준비 중', '수달도 공부하는데, 질 수 없지?', '거의 다 됐어. 도망갈 틈은 없겠네.'];
 
 export const LoadingScreen = ({ message, delayMs = 300 }: { message?: string; delayMs?: number }) => {
   const [visible, setVisible] = useState(delayMs === 0);

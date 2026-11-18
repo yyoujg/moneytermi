@@ -91,7 +91,7 @@ describe('LeagueRankCelebration', () => {
     state.rpc.mockResolvedValue({ data: { rank: 3, total: 10, points: 70 }, error: null });
     const { container } = await mount();
 
-    expect(container.querySelector('[role="dialog"]')?.textContent).toContain('순위가 쑥 올라갔어!');
+    expect(container.querySelector('[role="dialog"]')?.textContent).toContain('또 올라왔네. 자리 좀 비켜봐.');
     expect(container.querySelector('[role="dialog"]')?.textContent).toContain('5위');
     expect(container.querySelector('[role="dialog"]')?.textContent).toContain('3위');
     expect(container.querySelector('[role="dialog"]')?.textContent).toContain('70XP');
@@ -100,7 +100,7 @@ describe('LeagueRankCelebration', () => {
     expect(container.querySelector('[data-icon="TrendingUp"]')).not.toBeInTheDocument();
     // 별도 X 버튼 없이 '좋아요'와 바깥 영역으로 닫는다.
     expect(container.querySelector('button[aria-label="닫기"]')).toBeNull();
-    expect([...container.querySelectorAll('button')].some(button => button.textContent === '좋아요')).toBe(true);
+    expect([...container.querySelectorAll('button')].some(button => button.textContent === '좋아')).toBe(true);
     expect(state.feedbackCelebrate).toHaveBeenCalledTimes(1);
     expect(state.logClick).toHaveBeenCalledWith('league_rank_up_modal_view', { from: 5, to: 3, total: 10, weekly_xp: 70 });
   });

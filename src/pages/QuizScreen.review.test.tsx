@@ -22,7 +22,7 @@ const state = vi.hoisted(() => ({
 vi.mock('../lib/quiz', () => ({
   pickQuizType: vi.fn(() => 'meaning-to-term'),
   buildQuizItem: vi.fn((_type: string, currentWord: Word) => ({
-    promptLabel: '뜻을 보고 용어를 고르세요',
+    promptLabel: '뜻을 보고 용어를 고르세',
     promptMain: currentWord.meaning,
     options: [
       { label: currentWord.word, answer: currentWord.word, isCorrect: true },
@@ -199,7 +199,8 @@ describe('QuizScreen review SRS', () => {
 
     expect(state.shareTossLink).toHaveBeenCalledWith(
       'intoss://moneytermi/course',
-      expect.stringContaining('머니터미에서 퀴즈 2문제 100% 찍었어!'),
+      expect.stringContaining('머니터미 2문제 중 2개 정답.'),
+      'quiz',
     );
     expect(state.shareTossLink.mock.calls[0][1]).toContain('오늘 본 용어: 용어1 · 용어2.');
   });
@@ -293,7 +294,7 @@ describe('선택 후 정답 확인과 답안 전송 순서', () => {
     state.submitQuizAnswer.mockRejectedValueOnce(new Error('연결 끊김'));
     const { container, click } = await mount();
     await click('용어1');
-    expect(container.querySelector('[role="alert"]')).toHaveTextContent('답안 전송을 확인하지 못했어요.');
+    expect(container.querySelector('[role="alert"]')).toHaveTextContent('답안 전송을 확인하지 못했어.');
     expect(container).not.toHaveTextContent('+10개');
     expect(container).toHaveTextContent('뜻1');
     expect(state.recordReview).not.toHaveBeenCalled();
@@ -336,7 +337,7 @@ describe('선택 정보와 문제 전환', () => {
     state.submitQuizAnswer.mockResolvedValueOnce(null);
     const { container, click } = await mount();
     await click('용어1');
-    expect(container.querySelector('[role="alert"]')).toHaveTextContent('답안 전송을 확인하지 못했어요.');
+    expect(container.querySelector('[role="alert"]')).toHaveTextContent('답안 전송을 확인하지 못했어.');
     expect(container.querySelector('.quiz-answer-reward')).toBeNull();
     expect(state.recordReview).not.toHaveBeenCalled();
     expect(container.querySelector('.quiz-confirm-footer button')).toHaveTextContent('다시 저장하기');
@@ -362,7 +363,7 @@ describe('서버 채점과 저장 확정 회귀', () => {
     const { container, click } = await mount();
     await click('용어1');
     expect(state.recordReview).toHaveBeenNthCalledWith(1, 1, false, false);
-    expect(container.querySelector('[role="alert"]')).toHaveTextContent('문제 정보와 서버 채점이 달라 정답 표시를 생략했어요.');
+    expect(container.querySelector('[role="alert"]')).toHaveTextContent('문제 정보와 서버 채점이 달라 정답 표시를 생략했어.');
     expect(container.querySelector('.quiz-answer-feedback')).toHaveAttribute('data-correct', 'false');
     expect(container.querySelector('.quiz-answer-result')).toBeNull();
     expect(container.querySelector('.quiz-answer-explanation')).toBeNull();
@@ -501,7 +502,7 @@ describe('작은 화면 저장 실패 안내', () => {
     selected.scrollIntoView = scrollIntoView;
     await click('정답 확인');
     expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest' });
-    expect(container.querySelector('.quiz-selection-guide')).toHaveTextContent('선택한 답안 그대로 다시 저장할 수 있어요.');
+    expect(container.querySelector('.quiz-selection-guide')).toHaveTextContent('선택한 답안 그대로 다시 저장할 수 있어.');
     expect(container.querySelector('.quiz-confirm-footer button')).toHaveTextContent('다시 저장하기');
   });
 });

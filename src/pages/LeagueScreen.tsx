@@ -79,7 +79,7 @@ const LeagueScreen = () => {
 
         {failed && (
           <div className="flex flex-col items-center gap-3 py-6">
-            <p className="text-sm text-[var(--color-ink-3)] text-center">순위를 불러오지 못했어요</p>
+            <p className="text-sm text-[var(--color-ink-3)] text-center">순위를 불러오지 못했어</p>
             <ActionButton tone="soft" onClick={() => { setFailed(false); setRows(null); setReloadKey(key => key + 1); }}>다시 시도</ActionButton>
           </div>
         )}

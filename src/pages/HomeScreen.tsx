@@ -48,10 +48,10 @@ const HomeScreen = () => {
     if (res === 'pending') return;
     if (res) {
       feedbackClaim();
-      setCelebration({ xp: res.xpGained });
+      setCelebration({ xp: res.xpGained, missionTitle: missions[missionId]?.title });
     } else {
       feedbackError();
-      showModal('보상을 받지 못했어요. 잠시 후 다시 받아 주세요.', 'error');
+      showModal('보상을 받지 못했어. 잠시 후 다시 받아 줘.', 'error');
     }
   };
   const resetLabel = `${Math.ceil(msUntilNextSlot() / 3600000)}시간 뒤 새 미션`;
@@ -80,9 +80,9 @@ const HomeScreen = () => {
       <div id="quest-panel-now" role="tabpanel" aria-labelledby="quest-tab-now" hidden={tab !== 'now'} className="quest-panel">
         <section className="quest-intro" aria-labelledby="quest-intro-title">
           <div>
-            <p className="quest-eyebrow">돈 공부, 오늘도 한 판</p>
-            <h2 id="quest-intro-title">미션은 가볍게<br />보상은 차곡차곡</h2>
-            <p className="quest-intro-caption">하나씩 클리어하고 XP 챙겨 가!</p>
+            <p className="quest-eyebrow">경제 뉴스에 아는 척할 준비</p>
+            <h2 id="quest-intro-title">고민은 짧게<br />XP는 야무지게</h2>
+            <p className="quest-intro-caption">구경에는 XP 안 줘. 하나 깨고 와.</p>
           </div>
           <img src="/otter/v5/otter-explain.svg" alt="" width={116} height={136} />
         </section>
@@ -96,7 +96,7 @@ const HomeScreen = () => {
             <ProgressBar label="지금 미션 완료" current={doneMissions} target={missionList.length} />
             <span><strong>{doneMissions}</strong> / {missionList.length}</span>
           </div>
-          <p className="quest-daily-caption" aria-live="polite">{allMissionsDone ? '지금 미션 올클!' : readyMissions > 0 ? `받을 수 있는 보상 ${readyMissions}개` : '미션 하나 깨고, 보상도 챙기자'}</p>
+          <p className="quest-daily-caption" aria-live="polite">{allMissionsDone ? '미션 올클. 오늘도 할 일을 없애버렸네.' : readyMissions > 0 ? `받을 수 있는 보상 ${readyMissions}개` : '할까 말까 하는 사이에 하나는 깨겠네.'}</p>
           <div className="quest-mission-list">
             {missionList.map(mission => {
               const done = mission.current >= mission.target;
@@ -116,22 +116,22 @@ const HomeScreen = () => {
               );
             })}
           </div>
-        </section> : <div className="quest-empty"><p>새 미션 준비 중! 먼저 공부해 볼까?</p><button type="button" className="quest-go" onClick={() => navigate('/course')}>학습하기</button></div>}
+        </section> : <div className="quest-empty"><p>미션 준비 중. 그동안 단어 하나쯤은 거뜬하지?</p><button type="button" className="quest-go" onClick={() => navigate('/course')}>학습하기</button></div>}
 
         <button type="button" className="quest-rewards-link" onClick={() => setTab('rewards')}>
           <span className="quest-link-icon"><Gift size={20} weight="regular" aria-hidden="true" /></span>
-          <span><strong>꾸준히 하면 보상도 레벨업</strong><span>미션당 최대 {maxPeriodXp} XP · 지금 미션의 {maxPeriodXp / MISSION_XP}배</span></span>
+          <span><strong>이 정도 보상으론 성에 안 차지?</strong><span>미션당 최대 {maxPeriodXp} XP · 지금 미션의 {maxPeriodXp / MISSION_XP}배</span></span>
           <ChevronRight size={18} />
         </button>
-        <p className="quest-footnote">지금 미션은 매일 0시·8시·16시에 바뀌어요</p>
+        <p className="quest-footnote">지금 미션은 매일 0시·8시·16시에 바뀌어</p>
       </div>
 
       <div id="quest-panel-rewards" role="tabpanel" aria-labelledby="quest-tab-rewards" hidden={tab !== 'rewards'} className="quest-panel">
         <div className="quest-rewards-heading">
           <p className="quest-eyebrow">지금 미션은 하나당 {MISSION_XP} XP</p>
-          <h2>차곡차곡 쌓으면<br />최대 {maxPeriodXp / MISSION_XP}배의 보상</h2>
-          <p>주간·월간 미션 하나를 달성했을 때의 보상이에요.</p>
-          {!periodClaimed && <p className="quest-reward-unavailable" role="status">아래는 보상 기준이에요. 현재 지급 상태는 확인할 수 없어요.</p>}
+          <h2>꾸준함 좀 뽐내면<br />최대 {maxPeriodXp / MISSION_XP}배의 보상</h2>
+          <p>주간·월간 미션 하나를 달성했을 때의 보상이야.</p>
+          {!periodClaimed && <p className="quest-reward-unavailable" role="status">아래는 보상 기준이야. 현재 지급 상태는 확인할 수 없어.</p>}
         </div>
         <div className="quest-reward-cards">
           {period.weekly.map(mission => <PeriodMissionCard key={mission.id} mission={mission} claimed={periodClaimed} period="week" resetLabel={`${daysLeftInWeek()}일 남음`} onGo={() => navigate('/course')} />)}

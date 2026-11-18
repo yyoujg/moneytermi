@@ -81,13 +81,13 @@ const nodeCopy = (node: PathNode) => {
   if (node.type === 'quiz') {
     return {
       kind: '용어 퀴즈',
-      title: '배운 용어, 퀴즈로 체크',
+      title: '배웠다며? 퀴즈로 확인하자.',
     };
   }
   const finalReview = node.id.endsWith('-r');
   return {
     kind: finalReview ? '누적 복습' : '중간 복습',
-    title: finalReview ? '배운 용어 한 번에 복습' : '배운 용어 한 번 더',
+    title: finalReview ? '아직 기억하지? 한 번에 확인.' : '잊기 전에 한 번 더. 내가 다 봐.',
   };
 };
 
@@ -339,8 +339,8 @@ const CourseScreen = () => {
 
   if (contentStatus === 'error' || (contentStatus === 'ready' && courses.length === 0)) return (
     <div className="app-soft-screen flex h-full flex-col items-center justify-center gap-3 px-5 text-center">
-      <h1 className="text-lg font-bold text-[var(--color-ink)]">학습 내용을 불러오지 못했어요</h1>
-      <p className="text-sm text-[var(--color-ink-2)]">연결을 확인하고 다시 시도해 주세요.</p>
+      <h1 className="text-lg font-bold text-[var(--color-ink)]">학습 내용을 불러오지 못했어</h1>
+      <p className="text-sm text-[var(--color-ink-2)]">연결을 확인하고 다시 시도해 줘.</p>
       <ActionButton fullWidth onClick={retryContent} className="mt-3">다시 시도</ActionButton>
     </div>
   );
@@ -349,7 +349,7 @@ const CourseScreen = () => {
   if (contentStatus === 'loading') return (
     // 뼈대는 지금 주제 화면 모양(에너지 칩, 주제·코스 카드, 지그재그 노드)을 그대로 따른다
     <div className="course-screen course-topic-screen flex h-full flex-col overflow-hidden" role="status" aria-live="polite">
-      <span className="sr-only">학습 내용을 불러오는 중이에요</span>
+      <span className="sr-only">학습 내용을 불러오는 중이야</span>
       <div aria-hidden="true" className="flex justify-end px-5 py-2">
         <div className="h-11 w-24 rounded-full bg-[var(--color-card)] animate-pulse" />
       </div>

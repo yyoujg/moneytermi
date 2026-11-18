@@ -9,6 +9,7 @@ import { markNodeDone } from '../lib/pathProgress';
 import { feedbackCorrect, feedbackWrong, feedbackQuizComplete } from '../lib/feedback';
 import { logClick } from '../lib/analytics';
 import { shareTossLink } from '../lib/share';
+import { shareMessage } from '../lib/shareCopy';
 import { ActionButton } from '../components/ui/ActionButton';
 import { XpIcon } from '../components/StatIcons';
 import { buildQuizItem, pickQuizType, type QuizOption } from '../lib/quiz';
@@ -22,13 +23,6 @@ import { keepShortUnitsTogether } from '../lib/formatText';
 import { QuizAnswerFeedback } from '../components/learning/QuizAnswerFeedback';
 import { createQuizRequestId, type QuizAnswerResult } from '../lib/quizSubmission';
 import { m } from 'motion/react';
-
-const quizShareMessage = (modeLabel: string, total: number, accuracy: number, maxCombo: number, words: Word[]) => {
-  const learned = words.slice(0, 3).map(word => word.word).join(' · ');
-  const comboText = maxCombo >= 3 ? ` ${maxCombo}연속 정답까지!` : '';
-  const learnedText = learned ? ` 오늘 본 용어: ${learned}.` : '';
-  return `머니터미에서 ${modeLabel} ${total}문제 ${accuracy}% 찍었어!${comboText}${learnedText} 경제 뉴스 이제 좀 알아듣자. 같이 하자`;
-};
 
 const QuizScreen = () => {
   const navigate = useNavigate();
@@ -139,8 +133,8 @@ const QuizScreen = () => {
   if (quizQueue.length === 0) {
     return (
       <LearningEmptyState
-        title="퀴즈 전에 용어부터 만나자"
-        description="용어를 하나 배우면 퀴즈도 열려. 가볍게 시작해 볼까?"
+        title="아는 척도 재료가 있어야 하지."
+        description="용어 하나 배우면 퀴즈도 열려. 한 단어쯤은 거뜬하지?"
         actionLabel="용어 배우러 가기"
         onAction={() => navigate('/course', { replace: true })}
       />
@@ -151,10 +145,10 @@ const QuizScreen = () => {
   if (currentQuizIndex >= quizQueue.length) {
     const accuracy = baseQueue.length > 0 ? Math.round((firstCorrect / baseQueue.length) * 100) : 0;
     const completionTitle = navState?.mode === 'lesson_warmup'
-      ? '워밍업 끝!'
+      ? '워밍업 끝. 이제 몸 풀렸지?'
       : navState?.mode === 'course_review'
-        ? '복습 한 바퀴 끝!'
-        : '퀴즈 한 판 끝!';
+        ? '복습 끝. 기억력 좀 살아났네.'
+        : '퀴즈 끝. 점수는 거짓말 안 하지.';
 
     return (
       <LearningCompletionScreen
@@ -170,7 +164,7 @@ const QuizScreen = () => {
             className="flex-1"
             onClick={() => {
               logClick('quiz_result_share', { mode: navState?.mode ?? 'quiz', total: baseQueue.length, accuracy, max_combo: maxCombo });
-              void shareTossLink('intoss://moneytermi/course', quizShareMessage(sessionLabel, baseQueue.length, accuracy, maxCombo, baseQueue));
+              void shareTossLink('intoss://moneytermi/course', shareMessage({ kind: 'quiz', total: baseQueue.length, correct: firstCorrect, words: baseQueue.map(word => word.word) }), 'quiz');
             }}
           >
             친구에게 기록 공유
@@ -203,7 +197,7 @@ const QuizScreen = () => {
       const res = attempt.receipt ?? await submitQuizAnswer(attempt.wordId, attempt.answer, 'mc', false, currentQuizIndex === 0, attempt.requestId);
       if (!mountedRef.current) return;
       if (!res) {
-        setSubmissionMessage('답안 전송을 확인하지 못했어요. 같은 답안으로 다시 저장해 주세요.');
+        setSubmissionMessage('답안 전송을 확인하지 못했어. 같은 답안으로 다시 저장해 줘.');
         return;
       }
       attempt.receipt = res;
@@ -211,7 +205,7 @@ const QuizScreen = () => {
         const saved = await recordReview(attempt.wordId, res.correct, false);
         if (!mountedRef.current) return;
         if (!saved) {
-          setSubmissionMessage('복습 일정 저장을 확인하지 못했어요. 같은 답안으로 다시 저장해 주세요.');
+          setSubmissionMessage('복습 일정 저장을 확인하지 못했어. 같은 답안으로 다시 저장해 줘.');
           return;
         }
         reviewRecordedIds.current.add(attempt.wordId);
@@ -223,7 +217,7 @@ const QuizScreen = () => {
       setMaxCombo(value => Math.max(value, res.combo));
       const conflict = res.correct !== option.isCorrect;
       setGradingConflict(conflict);
-      if (conflict) setSubmissionMessage('문제 정보와 서버 채점이 달라 정답 표시를 생략했어요. 최신 학습 내용으로 다시 확인해 주세요.');
+      if (conflict) setSubmissionMessage('문제 정보와 서버 채점이 달라 정답 표시를 생략했어. 최신 학습 내용으로 다시 확인해 줘.');
       setStatus(res.correct ? 'correct' : 'wrong');
       if (res.correct) {
         feedbackCorrect(soundOn, vibrationOn, res.combo);
@@ -235,7 +229,7 @@ const QuizScreen = () => {
         if (shouldScheduleRetry(quizQueue, currentQuizIndex, attempt.wordId)) setRetryQueue(queue => [...queue, currentWord]);
       }
     } catch {
-      if (mountedRef.current) setSubmissionMessage('답안 전송을 확인하지 못했어요. 같은 답안으로 다시 저장해 주세요.');
+      if (mountedRef.current) setSubmissionMessage('답안 전송을 확인하지 못했어. 같은 답안으로 다시 저장해 줘.');
     } finally {
       answerLock.current = false;
       if (mountedRef.current) setAnswerPending(false);
@@ -296,7 +290,7 @@ const QuizScreen = () => {
         </div>
         </div>
 
-        <p className="quiz-selection-guide">{status === 'idle' ? answerPending ? '답안 저장을 확인하고 있어요.' : submissionMessage ? '선택한 답안 그대로 다시 저장할 수 있어요.' : '' : gradingConflict ? '서버 채점 결과로 기록했어요. 문제 정보를 다시 확인해 주세요.' : ''}</p>
+        <p className="quiz-selection-guide">{status === 'idle' ? answerPending ? '답안 저장을 확인하고 있어.' : submissionMessage ? '선택한 답안 그대로 다시 저장할 수 있어.' : '' : gradingConflict ? '서버 채점 결과로 기록했어. 문제 정보를 다시 확인해 줘.' : ''}</p>
         {/* 객관식 선택지는 채점 뒤에도 숨기지 않는다. */}
         <div className="grid grid-cols-1 gap-3">
           {(quizItem?.options ?? []).map((opt, i) => {
@@ -361,7 +355,7 @@ const QuizScreen = () => {
         </footer>
       ) : (
         <QuizAnswerFeedback key={currentQuizIndex}
-          correct={answeredCorrectly} title={gradingConflict ? '서버 채점 결과를 반영했어요' : answeredCorrectly ? praiseForAnswer(combo) : '괜찮아, 같이 알아보자!'}
+          correct={answeredCorrectly} title={gradingConflict ? '서버 채점 결과를 반영했어' : answeredCorrectly ? praiseForAnswer(combo) : '오답. 자신감은 정답이었는데.'}
           answerLabel={answerLabel} word={currentWord.word} meaning={gradingConflict ? '' : currentWord.meaning}
           explanation={gradingConflict ? undefined : quizItem?.explanation} example={gradingConflict ? undefined : currentWord.learningExample}
           pending={answerPending} submissionMessage={submissionMessage}

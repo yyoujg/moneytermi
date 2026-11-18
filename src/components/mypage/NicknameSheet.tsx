@@ -28,10 +28,10 @@ export const NicknameSheet = ({
   const introId = useId();
   const saveDisabled = loading || value.trim().length === 0 || (!required && value.trim() === currentNickname);
   const help = value.trim().length === 0
-    ? '닉네임을 입력해주세요.'
+    ? '닉네임을 입력해줘.'
     : !required && value.trim() === currentNickname
-      ? '새 닉네임을 입력하면 저장할 수 있어요.'
-      : '최대 10자까지 입력할 수 있어요.';
+      ? '새 닉네임을 입력하면 저장할 수 있어.'
+      : '최대 10자까지 입력할 수 있어.';
 
   // 시트는 항상 마운트돼 있고 open만 바뀐다. 열릴 때마다 값을 현재 닉네임으로 되돌리고 포커스를 준다.
   useEffect(() => {
@@ -51,7 +51,7 @@ export const NicknameSheet = ({
       if (result.error) setError(result.error);
       else onClose();
     } catch {
-      setError('닉네임 변경에 실패했어요');
+      setError('닉네임 변경에 실패했어');
     } finally {
       setLoading(false);
     }
@@ -68,7 +68,7 @@ export const NicknameSheet = ({
       <div className="nickname-sheet-body">
         <p id={introId} className="nickname-sheet-intro">{required
           ? '학습 기록과 리그에 쓸 이름이야. 나중에 마이페이지에서 바꿔도 돼.'
-          : '학습 기록과 리그에 이 이름으로 등장할 거야.'}</p>
+          : '리그에서 눈에 띌 이름이야. 실력은 따로 보여주고.'}</p>
         <div className="nickname-editor">
           <div className="nickname-label-row">
             <label htmlFor={fieldId}>닉네임</label>

@@ -7,20 +7,23 @@ export const additionalMeaning = (meaning: string, detailedMeaning: string): str
   const rest = detail.slice(brief.length);
   if (!rest.trim()) return '';
   if (/[.!?。]$/.test(brief) || /^\s*\n/.test(rest)) return rest.trim();
-  const boundary = /^(?:(?:이에요|예요|입니다|이다|에요)[.!?]\s*|[.!?](?:\s+|$))/;
+  const boundary = /^(?:(?:이야|야|이에요|예요|입니다|이다|에요)[.!?]\s*|[.!?](?:\s+|$))/;
   return boundary.test(rest) ? rest.replace(boundary, '').trim() : detail;
 };
 
 export const spokenDefinition = (meaning: string): string => meaning.trim().split(/(?<=[.!?])\s+/).map(sentence => {
   if (!sentence) return '';
   const text = sentence.replace(/[.!?]$/, '');
-  if (/(?:이에요|예요|해요|돼요|아요|어요|려요|져요|워요|나요|까요|세요|죠)$/.test(text)) return `${text}${sentence.match(/[.!?]$/)?.[0] ?? '.'}`;
+  const casual = text.replace(/아니에요$/, '아니야').replace(/이에요$/, '이야').replace(/예요$/, '야')
+    .replace(/보세요$/, '봐').replace(/하세요$/, '해').replace(/주세요$/, '줘')
+    .replace(/(해|돼|아|어|려|져|워|나|까)요$/, '$1');
+  if (casual !== text || /(?:이야|거야|해|돼|있어|없어|워|져|볼까|할까)$/.test(text)) return `${casual}${sentence.match(/[.!?]$/)?.[0] ?? '.'}`;
   const note = text.match(/\s*(\([^()]*\))$/);
   const noun = note ? text.slice(0, note.index).trimEnd() : text;
-  if (/(?:는지|인지)$/.test(noun)) return `${text}를 말해요.`;
+  if (/(?:는지|인지)$/.test(noun)) return `${text}를 말해.`;
   const last = noun.charCodeAt(noun.length - 1);
   const hasFinalConsonant = last >= 0xac00 && last <= 0xd7a3
     ? (last - 0xac00) % 28 !== 0
     : /[013678]$/.test(noun);
-  return `${noun}${hasFinalConsonant ? '이에요' : '예요'}.${note ? ` ${note[1]}` : ''}`;
+  return `${noun}${hasFinalConsonant ? '이야' : '야'}.${note ? ` ${note[1]}` : ''}`;
 }).join(' ');

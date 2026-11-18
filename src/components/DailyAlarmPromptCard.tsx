@@ -32,7 +32,7 @@ export const DailyAlarmPromptCard = () => {
     <Card pad="lg" className="w-full flex flex-col gap-3 anim-fade-up">
       <div className="flex items-center gap-3">
         <div>
-          <p className="text-sm font-semibold text-[var(--color-ink)]">돈 공부 한 입, 매일 챙길까?</p>
+          <p className="text-sm font-semibold text-[var(--color-ink)]">내일의 너도 까먹을 것 같아서.</p>
           <p className="text-xs text-[var(--color-ink-3)]">매일 오전 9시, 자주 쓰는 경제 용어를 쉽게 보내줄게.</p>
         </div>
       </div>

@@ -595,7 +595,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       claimReward(m.id).then(res => {
         if (!res || res === 'pending') return;
         feedbackClaim();
-        setMissionRewards(q => [...q, { xp: res.xpGained }]);
+        setMissionRewards(q => [...q, { xp: res.xpGained, missionTitle: m.title }]);
       });
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -631,7 +631,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         setPeriodClaimed(prev => new Set(prev).add(`${mission.id}:${data.period_start}`));
         setXp(data.xp);
         feedbackClaim();
-        setMissionRewards(q => [...q, { xp: data.reward }]);
+        setMissionRewards(q => [...q, { xp: data.reward, missionTitle: mission.title }]);
       }
     }, 1500);
     return () => clearTimeout(timer);

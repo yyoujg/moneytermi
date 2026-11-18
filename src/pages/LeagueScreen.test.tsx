@@ -45,7 +45,7 @@ describe('리그 화면 순위', () => {
     const container = await mount();
     expect(container.querySelector('.league-time-left')).toHaveTextContent(/^(D-\d+|\d+시간 남음)$/);
     expect(container.querySelector('[aria-labelledby="league-my-rank"]')).toBeNull();
-    expect(container).not.toHaveTextContent('리그로 올라가요');
+    expect(container).not.toHaveTextContent('리그로 올라가');
   });
 
   it('10위 밖이면 내 순위를 목록 맨 아래에 붙인다', async () => {
@@ -62,9 +62,9 @@ describe('리그 화면 순위', () => {
     state.mine.mockResolvedValueOnce({ data: null, error: { message: 'offline' } });
     const container = await mount();
     expect(state.guestClient).toHaveBeenCalledWith('test-guest');
-    expect(container).toHaveTextContent('순위를 불러오지 못했어요');
+    expect(container).toHaveTextContent('순위를 불러오지 못했어');
     const retry = [...container.querySelectorAll('button')].find(button => button.textContent === '다시 시도')!;
     await act(async () => { retry.click(); });
-    expect(container).not.toHaveTextContent('순위를 불러오지 못했어요');
+    expect(container).not.toHaveTextContent('순위를 불러오지 못했어');
   });
 });
