@@ -175,6 +175,6 @@ describe('TopBar energy shop', () => {
     await act(async () => { adButton.click(); });
 
     expect(state.closeShop).not.toHaveBeenCalled();
-    expect(state.showModal).toHaveBeenCalledWith('광고를 열지 못했어요. 잠시 후 다시 시도해 주세요', 'error');
+    expect(state.showModal).toHaveBeenCalledWith('광고를 열지 못했어. 잠시 후 다시 시도해 줘', 'error');
   });
 });

@@ -44,10 +44,10 @@ const MILESTONES: Record<number, string> = {
 export const streakMilestone = (streak: number): string | null => MILESTONES[streak] ?? null;
 
 export const streakMessage = (streak: number): string => {
-  if (streak >= 30) return '한 달 연속! 돈 공부가 루틴이 됐네';
-  if (streak >= 14) return '2주 연속! 이 정도면 루틴 맛집';
-  if (streak >= 7) return '일주일 꽉 채웠다! 꾸준함 인정';
-  if (streak >= 3) return '하루하루 쌓이는 중. 페이스 좋다';
-  if (streak >= 2) return '이틀 연속! 내일도 한 칸 채워볼까?';
-  return '오늘도 체크인! 한 단어부터 가보자';
+  if (streak >= 30) return '한 달째 또 너야. 이제 단골 할인이라도 해줘야 하나.';
+  if (streak >= 14) return '2주째 출석. 수달보다 여기 자주 오는 중.';
+  if (streak >= 7) return '일주일 꽉 채웠네. 작심삼일이 두 번 지나갔는데?';
+  if (streak >= 3) return '또 왔네. 이제 꾸준한 사람인 거 받아들여.';
+  if (streak >= 2) return '이틀째네. 첫날은 우연인 줄 알았지.';
+  return '출석 접수. 일단 얼굴은 기억해 둘게.';
 };

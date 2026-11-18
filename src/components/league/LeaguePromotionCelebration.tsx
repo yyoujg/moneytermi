@@ -7,6 +7,8 @@ import { logClick } from '../../lib/analytics';
 import { Storage } from '../../lib/storage';
 import { StageGlyph } from '../StageGlyph';
 import { useModalTurn } from '../../lib/modalTurn';
+import { shareTossLink } from '../../lib/share';
+import { shareMessage } from '../../lib/shareCopy';
 
 const KEY = 'league_promotion_seen_stage_v1';
 
@@ -66,12 +68,16 @@ export const LeaguePromotionCelebration = () => {
             {promotion.to.name} 리그 입성!
           </h2>
           <p className="mt-2! text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">
-            지난주 TOP 3 달성! 이번 주도 같이 달려보자.
+            승급했네. 이제 위에서 아는 척할 차례.
           </p>
 
           <p className="mt-4! text-xs text-[var(--color-ink-3)]">현재 누적 <span className="font-semibold text-[var(--color-ink)] tabular-nums">{xp.toLocaleString()}XP</span></p>
 
-          <ActionButton fullWidth onClick={close} className="mt-5">좋아요</ActionButton>
+          <ActionButton fullWidth onClick={close} className="mt-5">좋아</ActionButton>
+          <ActionButton fullWidth tone="soft" className="mt-2" onClick={() => {
+            logClick('league_promotion_share', { to: promotion.to.id });
+            void shareTossLink('intoss://moneytermi/league', shareMessage({ kind: 'league', league: promotion.to.name }), 'league');
+          }}>승급 기록 공유</ActionButton>
         </div>
       </div>
     </div>

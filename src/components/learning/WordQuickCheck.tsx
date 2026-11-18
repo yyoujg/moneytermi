@@ -48,7 +48,7 @@ export const WordQuickCheck = ({ question, meaning, selected, revealed, feedback
   }, [feedbackOnly, question, meaning, correct]);
   if (feedbackOnly) return <section className="word-feedback-scene" aria-label="정답과 해설">
       <div ref={feedbackCardRef} className="word-check-feedback word-check-feedback-page">
-        <h1 ref={feedbackRef} tabIndex={-1} className="type-page-title">{correct ? '맞았어요!' : '괜찮아, 핵심을 다시 보자'}</h1>
+        <h1 ref={feedbackRef} tabIndex={-1} className="type-page-title">{correct ? '정답. 제법인데?' : '오답. 자신감은 정답이었는데.'}</h1>
         {!correct && <p className="type-reading"><strong className="type-emphasis">정답</strong> · {answer.label}</p>}
         <p className="type-reading">{keepShortUnitsTogether(question.explanation ?? meaning)}</p>
       </div>
@@ -57,7 +57,7 @@ export const WordQuickCheck = ({ question, meaning, selected, revealed, feedback
   return <section className="word-quick-check" aria-label="단어 확인 문제">
     <header>
       <h1 className="type-section-title">{question.type === 'word_to_meaning' ? `${question.promptMain}의 뜻은?` : keepShortUnitsTogether(question.promptMain)}</h1>
-      <p className="type-supporting">{revealed ? '다음에서 해설을 확인해보세요.' : '알맞은 답을 하나 골라주세요.'}</p>
+      <p className="type-supporting">{revealed ? '다음에서 해설을 확인해봐.' : '알맞은 답을 하나 골라줘.'}</p>
     </header>
     <div className="word-check-options" role="group" aria-label="답 고르기">
       {question.options.map((option, index) => <button

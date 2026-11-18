@@ -56,12 +56,12 @@ describe('둥근 영역에 초점을 표시하는 닉네임 입력', () => {
   });
   it('저장 오류는 입력과 연결하고 편집을 시작하면 초기화한다', async () => {
     const { container, input, change, save, onSave, onClose } = mount();
-    onSave.mockResolvedValueOnce({ error: '이미 사용 중인 닉네임이에요' });
+    onSave.mockResolvedValueOnce({ error: '이미 사용 중인 닉네임이야' });
     change('다른 닉네임');
     await act(async () => save().click());
     expect(input).toHaveAttribute('aria-invalid', 'true');
     expect(container.querySelector('.nickname-field')).toHaveClass('has-error');
-    const error = [...container.querySelectorAll('p')].find(e => e.textContent === '이미 사용 중인 닉네임이에요')!;
+    const error = [...container.querySelectorAll('p')].find(e => e.textContent === '이미 사용 중인 닉네임이야')!;
     expect(input.getAttribute('aria-describedby')).toContain(error.id);
     expect(error).toHaveAttribute('role', 'alert');
     expect(onClose).not.toHaveBeenCalled();
@@ -86,12 +86,12 @@ describe('둥근 영역에 초점을 표시하는 닉네임 입력', () => {
   });
   it('변경 전·수정 중·빈 값 안내를 구분하고 최대 길이를 표시한다', () => {
     const { container, change } = mount();
-    expect(container.querySelector('.nickname-help')).toHaveTextContent('새 닉네임을 입력하면 저장할 수 있어요.');
+    expect(container.querySelector('.nickname-help')).toHaveTextContent('새 닉네임을 입력하면 저장할 수 있어.');
     change('가나다라마바사아자차');
     expect(container.querySelector('.nickname-counter')).toHaveClass('is-full');
-    expect(container.querySelector('.nickname-help')).toHaveTextContent('최대 10자까지 입력할 수 있어요.');
+    expect(container.querySelector('.nickname-help')).toHaveTextContent('최대 10자까지 입력할 수 있어.');
     change('');
-    expect(container.querySelector('.nickname-help')).toHaveTextContent('닉네임을 입력해주세요.');
+    expect(container.querySelector('.nickname-help')).toHaveTextContent('닉네임을 입력해줘.');
     expect(container.querySelector('.nickname-counter')).not.toHaveClass('is-full');
   });
   it('유효한 닉네임의 엔터 저장도 유지한다', async () => {

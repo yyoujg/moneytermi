@@ -176,10 +176,10 @@ describe('서버 확정과 기기 캐시 분리', () => {
 
 describe('서버·검증 실패는 성공으로 처리하지 않음', () => {
   it.each([
-    ['', '닉네임을 입력해주세요'], ['   ', '닉네임을 입력해주세요'],
-    ['가나다라마바사아자차카', '닉네임은 10자 이내로 입력해주세요'],
-    ['새친구', '현재 닉네임과 동일해요'], [' 예비슈퍼개미 ', '다른 닉네임을 정해주세요'],
-    ['따뜻한올빼미959', '다른 닉네임을 정해주세요'], ['침착한비버699', '다른 닉네임을 정해주세요'],
+    ['', '닉네임을 입력해줘'], ['   ', '닉네임을 입력해줘'],
+    ['가나다라마바사아자차카', '닉네임은 10자 이내로 입력해줘'],
+    ['새친구', '현재 닉네임과 동일해'], [' 예비슈퍼개미 ', '다른 닉네임을 정해줘'],
+    ['따뜻한올빼미959', '다른 닉네임을 정해줘'], ['침착한비버699', '다른 닉네임을 정해줘'],
   ])('%j 입력을 기존 규칙대로 거절한다', async (nickname, error) => {
     await mount();
     expect(await change(nickname)).toEqual({ error });
@@ -191,7 +191,7 @@ describe('서버·검증 실패는 성공으로 처리하지 않음', () => {
 
   it.each(['회장님', '개미'])('등급 이름과 같은 닉네임(%s)은 서버 확인 없이 거절한다', async (name) => {
     await mount();
-    expect(await change(name)).toEqual({ error: '등급 이름은 닉네임에 쓸 수 없어요' });
+    expect(await change(name)).toEqual({ error: '등급 이름은 닉네임에 쓸 수 없어' });
     expect(mocks.rpc).not.toHaveBeenCalledWith('is_nickname_taken', expect.anything());
     expect(mocks.update).not.toHaveBeenCalled();
   });
@@ -199,7 +199,7 @@ describe('서버·검증 실패는 성공으로 처리하지 않음', () => {
   it('중복 닉네임은 서버 쓰기 없이 거절한다', async () => {
     await mount();
     mocks.rpc.mockResolvedValueOnce({ data: true, error: null });
-    expect(await change('중복이름')).toEqual({ error: '이미 사용 중인 닉네임이에요' });
+    expect(await change('중복이름')).toEqual({ error: '이미 사용 중인 닉네임이야' });
     expect(mocks.update).not.toHaveBeenCalled();
     expect(mocks.setItem).not.toHaveBeenCalled();
   });
@@ -211,7 +211,7 @@ describe('서버·검증 실패는 성공으로 처리하지 않음', () => {
   ])('%s이면 인증 상태와 캐시를 변경하지 않는다', async (_label, response) => {
     await mount();
     mocks.select.mockResolvedValueOnce(response);
-    expect(await change('새이름')).toEqual({ error: '닉네임 변경에 실패했어요' });
+    expect(await change('새이름')).toEqual({ error: '닉네임 변경에 실패했어' });
     expect(current.user?.nickname).toBe('새친구');
     expect(mocks.setItem).not.toHaveBeenCalled();
   });
@@ -220,7 +220,7 @@ describe('서버·검증 실패는 성공으로 처리하지 않음', () => {
     mocks.getItem.mockResolvedValue(JSON.stringify({ ...stored, profileId: null }));
     await mount();
     expect(current.profileId).toBeNull();
-    expect(await change('새이름')).toEqual({ error: '닉네임 변경에 실패했어요' });
+    expect(await change('새이름')).toEqual({ error: '닉네임 변경에 실패했어' });
     expect(current.user?.nickname).toBe('새친구');
     expect(mocks.rpc).not.toHaveBeenCalled();
     expect(mocks.update).not.toHaveBeenCalled();
@@ -232,7 +232,7 @@ describe('서버·검증 실패는 성공으로 처리하지 않음', () => {
     mocks.getItem.mockReturnValueOnce(cache.promise);
     await mount();
     expect(current.user).toBeNull();
-    expect(await change('새이름')).toEqual({ error: '닉네임 변경에 실패했어요' });
+    expect(await change('새이름')).toEqual({ error: '닉네임 변경에 실패했어' });
     expect(mocks.update).not.toHaveBeenCalled();
     await act(async () => { cache.resolve(JSON.stringify(stored)); });
   });
@@ -244,7 +244,7 @@ describe('서버·검증 실패는 성공으로 처리하지 않음', () => {
     expect(current.profileId).toBeTruthy();
     mocks.setItem.mockClear();
     mocks.select.mockResolvedValueOnce({ data: [], error: null });
-    expect(await change('새이름')).toEqual({ error: '닉네임 변경에 실패했어요' });
+    expect(await change('새이름')).toEqual({ error: '닉네임 변경에 실패했어' });
     expect(current.user).toEqual(before);
     expect(mocks.setItem).not.toHaveBeenCalled();
   });
@@ -253,7 +253,7 @@ describe('서버·검증 실패는 성공으로 처리하지 않음', () => {
     mocks.getItem.mockResolvedValue(JSON.stringify({ ...stored, guestToken: null }));
     await mount();
     mocks.select.mockResolvedValueOnce({ data: [], error: null });
-    expect(await change('새이름')).toEqual({ error: '닉네임 변경에 실패했어요' });
+    expect(await change('새이름')).toEqual({ error: '닉네임 변경에 실패했어' });
     expect(mocks.defaultFrom).toHaveBeenCalledWith('profiles');
     expect(mocks.getGuestClient).not.toHaveBeenCalled();
     expect(mocks.setItem).not.toHaveBeenCalled();
@@ -288,7 +288,7 @@ describe('닉네임 Sheet 회귀', () => {
     await saveInSheet();
     expect(current.user?.nickname).toBe('새이름');
     expect(container.querySelector('[role="dialog"]')).toBeNull();
-    expect(container.textContent).not.toContain('닉네임 변경에 실패했어요');
+    expect(container.textContent).not.toContain('닉네임 변경에 실패했어');
   });
 
   it('일반 변경도 캐시 실패를 변경 실패로 표시하지 않고 닫는다', async () => {
@@ -308,7 +308,7 @@ describe('닉네임 Sheet 회귀', () => {
     expect(current.user?.nickname).toBe('새친구');
     expect(container.querySelector('[role="dialog"]')).not.toBeNull();
     expect(container.querySelector('[role="alert"]')?.textContent).toBe(mode === '중복'
-      ? '이미 사용 중인 닉네임이에요' : '닉네임 변경에 실패했어요');
+      ? '이미 사용 중인 닉네임이야' : '닉네임 변경에 실패했어');
     expect(closed).not.toHaveBeenCalled();
     expect(mocks.setItem).not.toHaveBeenCalled();
   });
@@ -395,7 +395,7 @@ describe('저장 프로필의 닉네임 배경 복구', () => {
     mocks.single.mockReturnValueOnce(response.promise);
     await mount();
     mocks.select.mockResolvedValueOnce({ data: [], error: null });
-    expect(await change('실패이름')).toEqual({ error: '닉네임 변경에 실패했어요' });
+    expect(await change('실패이름')).toEqual({ error: '닉네임 변경에 실패했어' });
     await act(async () => { response.resolve({ data: { nickname: '기존서버이름' }, error: null }); });
     expect(current.user?.nickname).toBe('기존서버이름');
     expect(mocks.setItem).not.toHaveBeenCalled();

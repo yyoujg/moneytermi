@@ -9,6 +9,8 @@ import { calcStreak, streakMessage, streakMilestone, weekDays } from '../lib/str
 import { feedbackCelebrate, feedbackStreak } from '../lib/feedback';
 import { Storage } from '../lib/storage';
 import { useModalTurn } from '../lib/modalTurn';
+import { shareTossLink } from '../lib/share';
+import { shareMessage } from '../lib/shareCopy';
 
 // 학습을 끝낸 뒤 하루 1회 뜨는 연속 출석 축하 모달.
 // DailyAlarmPromptCard와 같은 자기완결 패턴 — 완료 화면에 그냥 놓으면 알아서 판단한다.
@@ -92,7 +94,7 @@ export const StreakCelebration = () => {
 
       <div className="flex items-center gap-3 anim-fade-up" style={{ '--i': 8 } as React.CSSProperties}>
         <p className="max-w-[240px] text-center text-sm font-normal break-keep leading-relaxed text-[var(--color-ink-2)]">
-          {streak === 1 ? '오늘도 출석 체크!' : streakMessage(streak)}
+          {streak === 1 ? '첫 출석 접수. 시작은 했네?' : streakMessage(streak)}
         </p>
       </div>
 
@@ -103,6 +105,10 @@ export const StreakCelebration = () => {
       >
         확인
       </button>
+      <button type="button" className="action-secondary w-full max-w-xs min-h-11" onClick={() => {
+        logClick('streak_share', { streak });
+        void shareTossLink('intoss://moneytermi/course', shareMessage({ kind: 'streak', days: streak }), 'streak');
+      }}>출석 기록 공유</button>
     </div>
   );
 };

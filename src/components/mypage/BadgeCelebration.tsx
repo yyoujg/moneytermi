@@ -8,6 +8,8 @@ import { logClick } from '../../lib/analytics';
 import { feedbackBadge } from '../../lib/feedback';
 import { BadgeGlyph } from './BadgeGlyph';
 import { useModalTurn } from '../../lib/modalTurn';
+import { shareTossLink } from '../../lib/share';
+import { shareMessage } from '../../lib/shareCopy';
 
 // 새로 획득한 배지 축하. 배지는 서버 기록 없이 통계에서 파생되므로, "이미 보여준 배지" 목록을 기기에 남겨 차이만 축하한다.
 // 여러 개를 한 번에 얻었으면 한 화면에 같이 보여준다. 유실돼도 축하가 한 번 더 뜰 뿐이다.
@@ -54,7 +56,7 @@ export const BadgeCelebration = () => {
         />
       ))}
 
-      <h2 className="text-xl font-bold text-[var(--color-ink)] anim-pop-in">새 배지, 컬렉션에 추가!</h2>
+      <h2 className="text-xl font-bold text-[var(--color-ink)] anim-pop-in">이 배지 없었지? 이젠 있네.</h2>
 
       <div className={`flex flex-wrap justify-center gap-5 ${fresh.length === 1 ? '' : 'max-w-xs'}`}>
         {fresh.map((b, i) => (
@@ -66,7 +68,7 @@ export const BadgeCelebration = () => {
       </div>
 
       <p className="text-sm text-[var(--color-ink-3)] text-center break-keep anim-fade-up" style={{ '--i': 4 } as React.CSSProperties}>
-        {fresh.length === 1 ? '꾸준히 쌓은 기록이 배지가 됐어. 마이페이지에서 꺼내 봐!' : `${fresh.length}개를 한 번에 챙겼네! 마이페이지에서 꺼내 봐.`}
+        {fresh.length === 1 ? '자랑할 거리 추가. 마이페이지에서 꺼내 봐.' : `${fresh.length}개를 한 번에? 자랑도 나눠서 해.`}
       </p>
 
       <button
@@ -76,6 +78,10 @@ export const BadgeCelebration = () => {
       >
         확인
       </button>
+      <button type="button" className="action-secondary w-full max-w-xs min-h-11" onClick={() => {
+        logClick('badge_earned_share', { count: fresh.length });
+        void shareTossLink('intoss://moneytermi/course', shareMessage({ kind: 'badge', badges: fresh.map(badge => badge.title) }), 'badge');
+      }}>새 배지 공유</button>
     </div>
   );
 };

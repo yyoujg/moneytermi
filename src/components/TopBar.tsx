@@ -86,9 +86,9 @@ export const TopBar = () => {
 
   const startRewardedAd = (onReward: (amount: number, unit: string) => void) => {
     if (rewardedAdLockRef.current || rewardedAdPending) return false;
-    if (!isRewardedAdEnabled()) { showModal('지금은 광고를 볼 수 없어요', 'error'); return false; }
+    if (!isRewardedAdEnabled()) { showModal('지금은 광고를 볼 수 없어', 'error'); return false; }
     if (!rewardedAdReady) {
-      showModal('광고를 준비 중이에요. 잠시 후 다시 시도해 주세요', 'error');
+      showModal('광고를 준비 중이야. 잠시 후 다시 시도해 줘', 'error');
       prepareRewardedAd();
       return false;
     }
@@ -107,7 +107,7 @@ export const TopBar = () => {
         if (result === 'dismissed') closeShop();
         rewardedAdLockRef.current = false;
         setRewardedAdPending(false);
-        if (result !== 'dismissed') showModal('광고를 열지 못했어요. 잠시 후 다시 시도해 주세요', 'error');
+        if (result !== 'dismissed') showModal('광고를 열지 못했어. 잠시 후 다시 시도해 줘', 'error');
         prepareRewardedAd();
       },
     });
@@ -115,7 +115,7 @@ export const TopBar = () => {
       rewardedAdLockRef.current = false;
       setRewardedAdPending(false);
       setRewardedAdReady(false);
-      showModal('광고를 준비 중이에요. 잠시 후 다시 시도해 주세요', 'error');
+      showModal('광고를 준비 중이야. 잠시 후 다시 시도해 줘', 'error');
       prepareRewardedAd();
       return false;
     }
@@ -123,7 +123,7 @@ export const TopBar = () => {
   };
 
   const handleEnergyAd = () => {
-    if (energy >= energyMax) { showModal('에너지가 이미 가득 찼어요'); return; }
+    if (energy >= energyMax) { showModal('에너지가 이미 가득 찼어'); return; }
     if (!startRewardedAd(() => {
       claimEnergyAd().then(credited => {
         if (credited) { feedbackClaim(); showModal(`에너지 +${credited}`); }
@@ -159,9 +159,9 @@ export const TopBar = () => {
               {tip === 'streak' ? `연속 학습 ${streak}일` : tip === 'xp' ? `경험치(XP) ${xp.toLocaleString()}` : `익힌 용어 ${knownWords.length}개`}
             </p>
             <p className="relative mt-1 text-2xs text-[var(--color-tooltip-ink)] leading-relaxed break-keep">
-              {tip === 'streak' ? '오늘까지 하루도 빠지지 않고 학습한 날 수예요. 하루라도 쉬면 처음부터 다시 세요.'
-                : tip === 'xp' ? '학습과 퀴즈로 쌓여요. 리그 순위와 성장 단계는 XP로 정해져요.'
-                : '학습을 마친 용어 수예요. 같은 용어를 다시 배워도 늘지 않아요.'}
+              {tip === 'streak' ? '오늘까지 하루도 빠지지 않고 학습한 날 수야. 하루라도 쉬면 처음부터 다시 세.'
+                : tip === 'xp' ? '학습과 퀴즈로 쌓여. 리그 순위와 성장 단계는 XP로 정해져.'
+                : '학습을 마친 용어 수야. 같은 용어를 다시 배워도 늘지 않아.'}
             </p>
           </div>
         )}

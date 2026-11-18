@@ -233,15 +233,15 @@ const QuizPage = () => {
               style={{ caretColor: 'var(--color-ink)' }}
             />
             {status === 'correct' && (
-              <p className="text-xs font-bold text-[var(--color-success-foreground)] mt-1! px-1">✓ 정답! 기억하고 있었네</p>
+              <p className="text-xs font-bold text-[var(--color-success-foreground)] mt-1! px-1">✓ 정답. 모르는 척한 거였네?</p>
             )}
             {status === 'wrong' && (
-              <p className="text-xs font-bold text-[var(--color-ink-2)] mt-1! px-1">✕ 아깝다! 정답: {word.word}</p>
+              <p className="text-xs font-bold text-[var(--color-ink-2)] mt-1! px-1">✕ 잠깐 낚였네. 정답: {word.word}</p>
             )}
           </div>
 
           <p role="status" aria-live="polite" aria-atomic="true" className={status === 'save-error' || status === 'saving' ? 'text-xs text-[var(--color-ink-2)]' : 'sr-only'}>
-            {status === 'save-error' ? '답안 저장을 확인하지 못했어요. 같은 답안으로 다시 저장해 주세요.' : status === 'saving' ? '답안을 저장하고 있어요.' : ''}
+            {status === 'save-error' ? '답안 저장을 확인하지 못했어. 같은 답안으로 다시 저장해 줘.' : status === 'saving' ? '답안을 저장하고 있어.' : ''}
           </p>
           <ActionButton
             ref={retryRef}

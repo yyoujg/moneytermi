@@ -92,7 +92,7 @@ export const LeagueRankCelebration = () => {
         <div className="relative flex flex-col items-center px-5 pb-5 pt-6 text-center">
           <p className="text-xs text-[var(--color-ink-3)]">주간 순위 상승</p>
           <h2 id="league-rank-up-title" className="mt-1! text-xl font-bold text-[var(--color-ink)]">
-            순위가 쑥 올라갔어!
+            또 올라왔네. 자리 좀 비켜봐.
           </h2>
           <div className="mt-4 flex items-center justify-center gap-3">
             <span className="text-lg font-semibold text-[var(--color-ink-3)] tabular-nums">
@@ -104,10 +104,10 @@ export const LeagueRankCelebration = () => {
             </span>
           </div>
           <p className="mt-4! text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">
-            이번 주 {rankUp.points.toLocaleString()}XP로 {rankUp.total.toLocaleString()}명 중 {rankUp.toRank}위예요.
+            이번 주 {rankUp.points.toLocaleString()}XP로 {rankUp.total.toLocaleString()}명 중 {rankUp.toRank}위야.
           </p>
 
-          <ActionButton fullWidth onClick={close} className="mt-5">좋아요</ActionButton>
+          <ActionButton fullWidth onClick={close} className="mt-5">좋아</ActionButton>
         </div>
       </div>
     </div>

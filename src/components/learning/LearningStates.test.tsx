@@ -23,10 +23,10 @@ const mount = (element: ReactNode) => {
 describe('학습 시작 전과 완료 후 안내', () => {
   it('빈 화면은 캐릭터 없이 실제 안내와 버튼 동작을 유지한다', () => {
     const onAction = vi.fn();
-    const container = mount(<LearningEmptyState title="퀴즈 전에 용어부터 만나자" description="용어를 먼저 확인해요." actionLabel="용어 배우러 가기" onAction={onAction} />);
+    const container = mount(<LearningEmptyState title="아는 척도 재료가 있어야 하지." description="용어를 먼저 확인해." actionLabel="용어 배우러 가기" onAction={onAction} />);
     expect(container.querySelector('img')).toBeNull();
-    expect(container).toHaveTextContent('퀴즈 전에 용어부터 만나자');
-    expect(container).toHaveTextContent('용어를 먼저 확인해요.');
+    expect(container).toHaveTextContent('아는 척도 재료가 있어야 하지.');
+    expect(container).toHaveTextContent('용어를 먼저 확인해.');
     const button = container.querySelector('button')!;
     expect(button).toHaveTextContent('용어 배우러 가기');
     act(() => button.click());
@@ -34,14 +34,14 @@ describe('학습 시작 전과 완료 후 안내', () => {
   });
 
   it('화면 안 버튼 배치를 유지한다', () => {
-    const container = mount(<LearningEmptyState title="확인해 주세요" description="잠시 후 다시 시도해요." actionLabel="다시 시도" onAction={() => {}} actionPlacement="inline" />);
+    const container = mount(<LearningEmptyState title="확인해 줘" description="잠시 후 다시 시도해." actionLabel="다시 시도" onAction={() => {}} actionPlacement="inline" />);
     expect(container.querySelector('button')?.parentElement).toContainElement(container.querySelector('h2'));
   });
 
   it.each(['bottom', 'inline'] as const)('완료 화면 %s 배치에서도 결과와 동작은 유지하고 보상을 약속하지 않는다', actionPlacement => {
     const onAction = vi.fn();
-    const container = mount(<LearningCompletionScreen title="퀴즈 한 판 끝!" subtitle="3문제 완료" actionLabel="주제로 돌아가기" onAction={onAction} actionPlacement={actionPlacement}><div>획득 포인트 +0P · 첫 시도 정답률 67%</div></LearningCompletionScreen>);
-    expect(container).toHaveTextContent('퀴즈 한 판 끝!');
+    const container = mount(<LearningCompletionScreen title="퀴즈 끝. 점수는 거짓말 안 하지." subtitle="3문제 완료" actionLabel="주제로 돌아가기" onAction={onAction} actionPlacement={actionPlacement}><div>획득 포인트 +0P · 첫 시도 정답률 67%</div></LearningCompletionScreen>);
+    expect(container).toHaveTextContent('퀴즈 끝. 점수는 거짓말 안 하지.');
     expect(container).toHaveTextContent('3문제 완료');
     expect(container).toHaveTextContent('획득 포인트 +0P · 첫 시도 정답률 67%');
     expect(container).not.toHaveTextContent('수달');
@@ -49,7 +49,7 @@ describe('학습 시작 전과 완료 후 안내', () => {
     expect(container.querySelectorAll('img')).toHaveLength(1);
     expect(container.querySelector('img')).toHaveAttribute('src', '/otter/v5/otter-cheer.svg');
     expect(container.querySelector('img')).toHaveAttribute('aria-hidden', 'true');
-    expect(container).not.toHaveTextContent('포인트를 받았어요');
+    expect(container).not.toHaveTextContent('포인트를 받았어');
     expect(container).toHaveTextContent('알림 안내');
     expect(container).toHaveTextContent('출석 안내');
     const button = container.querySelector('button')!;

@@ -179,7 +179,7 @@ const Table = ({ title, columns, rows }: { title: string; columns: string[]; row
         </tbody>
       </table>
       </div>
-      {minWidth && <p className="type-supporting">좌우로 밀어서 비교해 보세요.</p>}
+      {minWidth && <p className="type-supporting">좌우로 밀어서 비교해 봐.</p>}
     </div>
   );
 };

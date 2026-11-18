@@ -52,8 +52,8 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
     if (this.state.error) {
       return (
         <div className="flex flex-col items-center justify-center h-full gap-4 px-6 text-center">
-          <p className="text-lg font-bold text-[var(--color-ink)]">앗, 문제가 생겼어요</p>
-          <p className="text-sm text-[var(--color-ink-3)]">앱을 다시 시작해 주세요.</p>
+          <p className="text-lg font-bold text-[var(--color-ink)]">앗, 문제가 생겼어</p>
+          <p className="text-sm text-[var(--color-ink-3)]">앱을 다시 시작해 줘.</p>
           <button
             onClick={() => closeView()}
             className="mt-2 px-5 py-2 rounded-button bg-brand-500 text-sm font-bold text-white active:opacity-80"
@@ -73,10 +73,10 @@ const LoadingScreen = SplashScreen;
 const WELCOME_KEY = 'welcome_seen_v1';
 // 소개 문구 대신 첫 화면에서 바로 한 문제를 풀어 본다. 기록·XP와 무관한 체험용 문제다
 const WELCOME_QUIZ = {
-  question: '월급명세서에서 세금과 4대 보험료를 빼고 실제로 통장에 들어오는 돈을 뭐라고 할까요?',
+  question: '월급명세서에서 세금과 4대 보험료를 빼고 실제로 통장에 들어오는 돈을 뭐라고 할까?',
   options: ['연봉', '실수령액', '통상임금'],
   answer: '실수령액',
-  explain: '연봉은 세금을 빼기 전 1년 치 금액이에요. 실제로 받는 돈은 실수령액이라고 해요.',
+  explain: '연봉은 세금을 빼기 전 1년 치 금액이야. 실제로 받는 돈은 실수령액이라고 해.',
 };
 
 const WelcomeScreen = () => {
@@ -93,7 +93,7 @@ const WelcomeScreen = () => {
     <div className="app-soft-screen flex h-full flex-col">
       <div className="flex flex-1 flex-col overflow-y-auto px-5 pt-8 pb-4 [&::-webkit-scrollbar]:hidden">
         <img src="/otter/v5/otter-idle.svg" data-otter="idle" alt="" aria-hidden="true" width={96} height={96} className="shrink-0" />
-        <p className="mt-4 text-sm text-[var(--color-ink-3)]">달리랑 한 문제만 풀어 볼래?</p>
+        <p className="mt-4 text-sm text-[var(--color-ink-3)]">경제 좀 안다고? 한 문제만 보자.</p>
         <h1 className="mt-2 text-xl font-bold leading-snug text-[var(--color-ink)] break-keep">{WELCOME_QUIZ.question}</h1>
 
         <div className="mt-6 flex flex-col gap-3">
@@ -117,7 +117,7 @@ const WelcomeScreen = () => {
 
         {picked && (
           <p role="status" className="mt-5 text-sm leading-relaxed text-[var(--color-ink-2)] break-keep">
-            <strong className="text-[var(--color-ink)]">{correct ? '정답! 감 잡았네. ' : '아깝다! 같이 짚어보자. '}</strong>{WELCOME_QUIZ.explain}
+            <strong className="text-[var(--color-ink)]">{correct ? '정답. 첫인상은 합격이네. ' : '오답. 자신감은 잘 봤어. 해설도 보자. '}</strong>{WELCOME_QUIZ.explain}
           </p>
         )}
       </div>

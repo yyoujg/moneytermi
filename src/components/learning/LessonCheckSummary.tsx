@@ -21,7 +21,7 @@ export const LessonCheckSummary = ({ results, reviewCount, onRetry, onBack }: {
   const { correct, total } = currentResult;
   const accuracy = accuracyFor(currentResult);
   const currentLabel = retryRound > 0 ? '다시 풀기' : '첫 풀이';
-  const title = reviewCount > 0 ? '헷갈린 문제, 한 번 더?' : accuracy === 100 ? (retryRound > 0 ? '헷갈린 문제까지 올클!' : '전부 정답! 깔끔했다') : '상황 문제 한 판 끝!';
+  const title = reviewCount > 0 ? '헷갈린 문제, 한 번 더?' : accuracy === 100 ? (retryRound > 0 ? '헷갈린 문제까지 접수. 이제 핑계 없음.' : '전부 정답. 틀린 문제는 내가 못 찾겠네.') : '상황 문제 끝. 이제 현실에서도 써먹자.';
   return (
     <div data-lesson-check-complete className="lesson-check-screen lesson-complete-screen app-soft-screen">
       <main className="lesson-complete-content">

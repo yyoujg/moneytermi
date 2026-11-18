@@ -3,9 +3,9 @@ import { praiseForAnswer, praiseForMission, praiseForQuiz, praiseForReview } fro
 
 describe('praise copy', () => {
   it('connects claimable mission rewards to XP without promising extra rewards', () => {
-    expect(praiseForMission({ ready: 2, completed: 3 })).toBe('보상 2개 받을 수 있어! 얼른 챙기자');
-    expect(praiseForMission({ ready: 0, completed: 3 })).toBe('미션 3개 클리어. 꾸준함 미쳤다');
-    expect(praiseForMission({ ready: 0, completed: 0 })).toBe('하나씩 깨면 오늘 성과가 바로 보여');
+    expect(praiseForMission({ ready: 2, completed: 3 })).toBe('보상 2개 대기 중. 받는 것까지 내가 해줄까?');
+    expect(praiseForMission({ ready: 0, completed: 3 })).toBe('미션 3개 클리어. 입만 산 줄 알았는데 제법이네.');
+    expect(praiseForMission({ ready: 0, completed: 0 })).toBe('계획 잘 들었어. 이제 하나 깨볼까?');
   });
 
   it('praises perfect quiz results', () => {
@@ -13,11 +13,11 @@ describe('praise copy', () => {
   });
 
   it('uses a light retry message for missed quiz results', () => {
-    expect(praiseForQuiz({ accuracy: 40, maxCombo: 1, total: 5 })).toBe('해설 보고 틀린 거 한 번만 더 풀어 보자');
+    expect(praiseForQuiz({ accuracy: 40, maxCombo: 1, total: 5 })).toBe('정답은 도망 안 가. 해설 보고 다시 잡자.');
   });
 
   it('uses a clear correct-answer message', () => {
-    expect(praiseForAnswer(1)).toBe('정답!');
+    expect(praiseForAnswer(1)).toBe('정답. 제법인데?');
   });
 
   it('praises review recall separately from new quizzes', () => {

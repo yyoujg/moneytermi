@@ -1,13 +1,15 @@
 import { share, getTossShareLink } from '@apps-in-toss/web-framework';
+import type { ShareKind } from './shareCopy';
 
 // 공유 미리보기용 OG 이미지(절대 HTTPS) - 가로형 1200x630(docs/assets/og/og-image.png). main에 있어야 보인다.
 // main의 최신 이미지를 본다. 저장소가 비공개가 되면 깨진다.
 const OG_IMAGE = 'https://raw.githubusercontent.com/yyoujg/moneytermi/main/docs/assets/og/og-image.png';
 
 // 토스 공유 링크를 만들어 네이티브 공유 시트를 띄운다. 미지원/취소/실패 시 무시.
-export const shareTossLink = async (path: string, message: string): Promise<void> => {
+export const shareTossLink = async (path: string, message: string, kind?: ShareKind): Promise<void> => {
   try {
-    const link = await getTossShareLink(path, OG_IMAGE);
+    const image = kind ? `https://raw.githubusercontent.com/yyoujg/moneytermi/main/docs/assets/og/cheeky-v1/og-${kind}.png` : OG_IMAGE;
+    const link = await getTossShareLink(path, image);
     await share({ message: `${message}\n${link}` });
   } catch { /* 미지원/취소/실패 무시 */ }
 };

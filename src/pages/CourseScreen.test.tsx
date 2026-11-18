@@ -354,7 +354,7 @@ describe('CourseScreen energy gates', () => {
     baseContext({ contentStatus: 'error', courses: [] });
     const { container, clickButtonContaining } = await mount('/course');
 
-    expect(container.textContent).toContain('학습 내용을 불러오지 못했어요');
+    expect(container.textContent).toContain('학습 내용을 불러오지 못했어');
     await clickButtonContaining('다시 시도');
 
     expect(state.retryContent).toHaveBeenCalledTimes(1);
@@ -434,7 +434,7 @@ describe('CourseScreen energy gates', () => {
     expect(state.spendEnergy).toHaveBeenCalledTimes(1);
     expect(state.pickRecallWords).toHaveBeenCalledWith({ excludeIds: [1, 2, 3, 4], count: 3 });
     // 처음 여는 레슨은 수달 로딩을 잠깐 보여준 뒤 인출 퀴즈로 보낸다
-    expect(container.textContent).toContain('새 용어 4개, 같이 알아보자');
+    expect(container.textContent).toContain('새 용어 4개. 아는 척할 거리 들어간다.');
     await passLessonIntro();
     expect(container.textContent).toContain('퀴즈 화면');
     expect(container.textContent).not.toContain('단어 카드');
@@ -444,7 +444,7 @@ describe('CourseScreen energy gates', () => {
     baseContext({ knownIds: new Set([1, 2, 3, 4]) });
     const { container, clickButtonContaining } = await mount();
 
-    await clickButtonContaining('배운 용어 한 번에 복습');
+    await clickButtonContaining('아직 기억하지? 한 번에 확인.');
 
     expect(state.spendEnergy).not.toHaveBeenCalled();
     expect(state.pickRecallWords).toHaveBeenCalledWith({ candidates: [1, 2, 3, 4].map(word), count: 10 });

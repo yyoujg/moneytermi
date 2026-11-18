@@ -50,7 +50,7 @@ export const withStudyRequestTimeout = async <T>(
       new Promise<never>((_, reject) => {
         timer = setTimeout(() => {
           controller.abort();
-          reject(new Error('학습 기록 저장 응답 시간이 초과됐어요.'));
+          reject(new Error('학습 기록 저장 응답 시간이 초과됐어.'));
         }, timeoutMs);
       }),
     ]);

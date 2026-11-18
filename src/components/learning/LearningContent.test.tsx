@@ -16,28 +16,28 @@ const mount = async (element: React.ReactNode) => {
   cleanup = () => { act(() => root.unmount()); container.remove(); };
   return container;
 };
-const word: Word = { id: 1, word: '기회비용', meaning: '선택하면서 포기한 것 중 가장 큰 가치', detailedMeaning: '자세한 설명', learningExample: '학습용 가정: 영화 대신 일하면 10,000 원을 벌 수 있어요.', newsExample: '', hint: '', difficulty: 1 };
+const word: Word = { id: 1, word: '기회비용', meaning: '선택하면서 포기한 것 중 가장 큰 가치', detailedMeaning: '자세한 설명', learningExample: '학습용 가정: 영화 대신 일하면 10,000 원을 벌 수 있어.', newsExample: '', hint: '', difficulty: 1 };
 
 describe('뜻과 생활 예시', () => {
   it('학습 말풍선은 뜻을 말투로 보여주고 중복 제목은 제거한다', async () => {
     const original = JSON.stringify(word);
     const container = await mount(<WordMeaningCard word={word} section="meaning" className="quiz-bubble" />);
     expect(container.querySelector('h1')).toHaveTextContent('기회비용');
-    expect(container.querySelector('.word-meaning-definition > p')).toHaveTextContent('선택하면서 포기한 것 중 가장 큰 가치예요.');
-    expect(container.querySelector('.word-meaning-definition strong')).toHaveTextContent('선택하면서 포기한 것 중 가장 큰 가치예요.');
+    expect(container.querySelector('.word-meaning-definition > p')).toHaveTextContent('선택하면서 포기한 것 중 가장 큰 가치야.');
+    expect(container.querySelector('.word-meaning-definition strong')).toHaveTextContent('선택하면서 포기한 것 중 가장 큰 가치야.');
     expect(container.querySelector('.word-meaning-heading')).toBeNull();
     expect(container.querySelector('h2')).toBeNull();
-    expect(container.querySelector('.word-meaning-example')).toHaveTextContent('영화 대신 일하면 10,000 원을 벌 수 있어요.');
+    expect(container.querySelector('.word-meaning-example')).toHaveTextContent('영화 대신 일하면 10,000 원을 벌 수 있어.');
     expect(JSON.stringify(word)).toBe(original);
   });
   it('뜻에 이어 가정 예시를 대화로 소개하고 숫자와 원래 조건은 유지한다', async () => {
     const container = await mount(<WordMeaningCard word={word} section="meaning" className="quiz-bubble" />);
     expect(container).toHaveTextContent('이런 상황이라고 해보자.');
-    expect(container).toHaveTextContent('영화 대신 일하면 10,000 원을 벌 수 있어요.');
+    expect(container).toHaveTextContent('영화 대신 일하면 10,000 원을 벌 수 있어.');
     expect(container.querySelector('.word-meaning-example .study-figure')).toHaveTextContent('10,000 원');
     expect(container.querySelector('.word-meaning-heading')).toBeNull();
     expect(container.querySelector('h2')).toBeNull();
-    expect(container.querySelector('.word-meaning-definition')).toHaveTextContent('선택하면서 포기한 것 중 가장 큰 가치예요.');
+    expect(container.querySelector('.word-meaning-definition')).toHaveTextContent('선택하면서 포기한 것 중 가장 큰 가치야.');
   });
   it('핵심 뜻과 가상 예시를 구분하고 출처와 상세 보기 기능을 보존한다', async () => {
     const onDetail = vi.fn();
@@ -62,7 +62,7 @@ describe('뜻과 생활 예시', () => {
 });
 
 describe('정답과 풀이', () => {
-  const props = { correct: false, title: '정답을 확인해요', answerLabel: '포기한 것 중 가장 큰 가치', word: '기회비용', meaning: word.meaning, explanation: '선택 때문에 포기한 가치 중 가장 큰 것을 비교해요.', example: word.learningExample, pending: false, submissionMessage: null, combo: 0, nextLabel: '다음 문제', onNext: vi.fn() };
+  const props = { correct: false, title: '정답을 확인해', answerLabel: '포기한 것 중 가장 큰 가치', word: '기회비용', meaning: word.meaning, explanation: '선택 때문에 포기한 가치 중 가장 큰 것을 비교해.', example: word.learningExample, pending: false, submissionMessage: null, combo: 0, nextLabel: '다음 문제', onNext: vi.fn() };
   it('직접 작성 문제의 정답 보기와 기존 풀이를 보여준다', async () => {
     const container = await mount(<QuizAnswerFeedback {...props} />);
     expect(container.querySelector('.quiz-answer-result')).toBeNull();

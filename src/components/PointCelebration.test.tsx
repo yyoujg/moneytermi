@@ -22,8 +22,8 @@ const mount = (reward: PointReward) => {
 describe('수달과 미션 보상 안내', () => {
   it('미션으로 받은 실제 경험치만 보여준다', () => {
     const { container, onClose } = mount({ xp: 10 });
-    expect(container).toHaveTextContent('미션 클리어!');
-    expect(container).toHaveTextContent('오늘의 돈 공부, XP로 차곡차곡.');
+    expect(container).toHaveTextContent('미션 끝. 제법 빠른데?');
+    expect(container).toHaveTextContent('계획만 있는 줄 알았더니 결과까지 있네.');
     expect(container).toHaveTextContent('+10 XP');
     expect(container.querySelector('[role="dialog"]')).toHaveAttribute('aria-label', '미션 완료');
     expect(container.querySelector('[role="dialog"]')).toHaveAttribute('aria-modal', 'true');
@@ -41,6 +41,8 @@ describe('수달과 미션 보상 안내', () => {
     const tab = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
     act(() => button.dispatchEvent(tab));
     expect(tab.defaultPrevented).toBe(true);
+    expect(container.querySelector('.point-celebration-share')).toHaveFocus();
+    act(() => container.querySelector('.point-celebration-share')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true })));
     expect(button).toHaveFocus();
     act(() => button.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
     expect(onClose).toHaveBeenCalledOnce();

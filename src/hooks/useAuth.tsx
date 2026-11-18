@@ -238,21 +238,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const updateNickname = async (newNickname: string): Promise<{ error: string | null }> => {
     const trimmed = newNickname.trim();
-    if (!trimmed) return { error: '닉네임을 입력해주세요' };
-    if (trimmed.length > 10) return { error: '닉네임은 10자 이내로 입력해주세요' };
-    if (trimmed === authState.user?.nickname) return { error: '현재 닉네임과 동일해요' };
-    if (isDefaultNickname(trimmed)) return { error: '다른 닉네임을 정해주세요' };
+    if (!trimmed) return { error: '닉네임을 입력해줘' };
+    if (trimmed.length > 10) return { error: '닉네임은 10자 이내로 입력해줘' };
+    if (trimmed === authState.user?.nickname) return { error: '현재 닉네임과 동일해' };
+    if (isDefaultNickname(trimmed)) return { error: '다른 닉네임을 정해줘' };
     // 티어 이름과 같으면 '회장님 · 개미'처럼 닉네임과 등급이 뒤섞여 읽힌다. '개미'·'짠돌이'처럼 일상어가 많아 포함이 아니라 같을 때만 막는다
-    if (GROWTH_STAGES.some(stage => trimmed === stage.name)) return { error: '등급 이름은 닉네임에 쓸 수 없어요' };
+    if (GROWTH_STAGES.some(stage => trimmed === stage.name)) return { error: '등급 이름은 닉네임에 쓸 수 없어' };
 
     // 서버 프로필이 없으면 로컬 상태만 바꿔 성공으로 처리하지 않는다.
-    if (!profileId || !authState.user) return { error: '닉네임 변경에 실패했어요' };
+    if (!profileId || !authState.user) return { error: '닉네임 변경에 실패했어' };
 
     const { data: taken } = await supabase.rpc('is_nickname_taken', {
       p_nickname: trimmed, p_exclude_id: profileId,
     });
 
-    if (taken) return { error: '이미 사용 중인 닉네임이에요' };
+    if (taken) return { error: '이미 사용 중인 닉네임이야' };
 
     // profiles_update 정책은 x-guest-token 헤더로 본인 행을 찾는다. 기본 클라이언트면 0행 갱신인데
     // PostgREST는 이를 에러로 주지 않아 서버는 그대로고 내 기기만 바뀐다(다른 사람 리그에 옛 닉네임).
@@ -263,8 +263,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       .eq('id', profileId)
       .select('id');
 
-    if (updateError || !updated?.length) return { error: '닉네임 변경에 실패했어요' };
-    if (activeProfileIdRef.current !== profileId) return { error: '프로필이 바뀌었어요. 현재 프로필에서 다시 시도해 주세요' };
+    if (updateError || !updated?.length) return { error: '닉네임 변경에 실패했어' };
+    if (activeProfileIdRef.current !== profileId) return { error: '프로필이 바뀌었어. 현재 프로필에서 다시 시도해 줘' };
 
     // 서버에서 실제 행 갱신이 확인됐으므로 필수 닉네임 게이트도 즉시 해제한다.
     // 기기 캐시는 보조 저장소다. 캐시 오류를 서버 변경 실패로 반환하거나 서버 쓰기를 재시도하지 않는다.
