@@ -1,3 +1,24 @@
+## 2026-11-19 PR #70 · 검토 필요 - 등급별 리그·공유 카드 새 디자인
+
+상태: PR #70(`feat/league-stage-share-cards`) 머지 전. 전체 76개 파일·2,082개 테스트(Supabase 환경변수 없이), 타입 검사 통과, 코드 규칙 오류 0·기존 경고 1. deploymentId는 머지 후 기입. 리그 SQL(`supabase/content/league-per-stage/apply.sql`)은 2026-11-18 운영 DB에 적용하고 verify 3줄 모두 true 확인.
+
+| 항목 | 내용 | 파일 |
+|------|------|------|
+| 리그 | 같은 등급끼리 순위·참여자 수를 세고, 주간 정산도 등급마다 상위 3명 승급·7명 이상이면 하위 3명 강등 | `supabase/content/league-per-stage/`, `src/components/LeagueRules.tsx` |
+| 이미지로 공유 | 새 세로 템플릿 5종(1080x1920) 위에 실제 기록(정답 수, 연속 일수, 미션, 리그, 배지)을 쓴다 | `src/lib/achievementImage.ts`, `public/share/` |
+| 친구에게 공유 | 퀴즈·연속 학습·퀘스트·리그 승급·배지 화면에 이미지 공유와 나란히. 종류별 OG 이미지·메시지·착지 화면 | `src/components/AchievementShareButton.tsx`, `src/lib/share.ts`, `docs/assets/og/` |
+| 문구 | 기본 OG 새 디자인, 겹치던 칭찬 문구 정리 | `docs/assets/og/og-image.png`, `src/lib/praise.ts`, `src/App.tsx` |
+
+미해결: 토스 앱 실기기에서 이미지 저장·공유 시트, 링크 미리보기(OG) 확인 필요.
+
+### 토스 콘솔 출시노트 (사용자 노출용)
+
+```
+- 리그가 같은 등급끼리 겨루는 방식으로 바뀌었어요. 내 리그에서 3위 안에 들면 다음 주에 승급해요.
+- 퀴즈 결과, 연속 학습, 퀘스트, 리그 승급, 배지 기록을 새 디자인 이미지로 공유할 수 있어요.
+- 친구에게 링크로도 기록을 공유할 수 있어요.
+```
+
 ## 2026-11-16 배포 완료 · 출시 진행 중 (`af4a5c2`) - 단어 학습·자료 모달·비교표·문제 화면 정리
 
 상태: main `af4a5c21e7944f71b15cd6f3ab9da2ae5e803c4b` 푸시 및 [자동 배포 43846685673](https://github.com/yyoujg/moneytermi/actions/runs/43846685673) 성공. 서버 동시성·멱등성 검사, 전체 74개 파일·2,070개 테스트(Supabase 환경변수 없이), 타입·코드 규칙 검사 및 빌드 통과. 코드 규칙 검사는 오류 0·기존 경고 1. 콘텐츠 1,233개·코스 연결 1,233개·코스 78개 동기화 확인. deploymentId `01a1e3da-50af-71c0-aa41-143842ec192b`. 검토 요청 및 실제 출시는 토스 콘솔 확인 후 기입한다.
