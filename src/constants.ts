@@ -20,7 +20,7 @@ export type GrowthStage = {
   emoji: string;
 };
 
-// 리그 티어. 서버가 매주 지난주 주간 순위로 정한다(profiles.league_stage, supabase/content/league-weekly-promotion).
+// 리그 티어. 서버가 매주 지난주 등급별 주간 순위로 정한다(profiles.league_stage, supabase/content/league-per-stage).
 // 상위 3명 승급, 참여자 7명 이상인 주의 하위 3명 강등.
 export const LEAGUE_PROMOTE_TOP = 3;
 export const LEAGUE_DEMOTE_BOTTOM = 3;
