@@ -7,6 +7,7 @@ import { logClick } from '../../lib/analytics';
 import { Storage } from '../../lib/storage';
 import { StageGlyph } from '../StageGlyph';
 import { useModalTurn } from '../../lib/modalTurn';
+import { AchievementShareButton } from '../AchievementShareButton';
 
 const KEY = 'league_promotion_seen_stage_v1';
 
@@ -72,6 +73,7 @@ export const LeaguePromotionCelebration = () => {
           <p className="mt-4! text-xs text-[var(--color-ink-3)]">현재 누적 <span className="font-semibold text-[var(--color-ink)] tabular-nums">{xp.toLocaleString()}XP</span></p>
 
           <ActionButton fullWidth onClick={close} className="mt-5">좋아요</ActionButton>
+          <AchievementShareButton card={{ kind: 'league', title: '새로운 리그 입성!', value: promotion.to.name, unit: '리그 승급', description: '지난주 내 리그 TOP 3 달성!', stats: [{ label: '누적 경험치', value: `${xp.toLocaleString()} XP` }] }} />
         </div>
       </div>
     </div>

@@ -9,6 +9,8 @@ import { calcStreak, streakMessage, streakMilestone, weekDays } from '../lib/str
 import { feedbackCelebrate, feedbackStreak } from '../lib/feedback';
 import { Storage } from '../lib/storage';
 import { useModalTurn } from '../lib/modalTurn';
+import { AchievementShareButton } from './AchievementShareButton';
+import { streakShareCard } from '../lib/achievementImage';
 
 // 학습을 끝낸 뒤 하루 1회 뜨는 연속 출석 축하 모달.
 // DailyAlarmPromptCard와 같은 자기완결 패턴 — 완료 화면에 그냥 놓으면 알아서 판단한다.
@@ -103,6 +105,7 @@ export const StreakCelebration = () => {
       >
         확인
       </button>
+      <AchievementShareButton card={streakShareCard(streak, attendanceDates)} />
     </div>
   );
 };

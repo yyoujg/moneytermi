@@ -13,8 +13,8 @@ export const praiseForQuiz = ({ accuracy, maxCombo, total }: { accuracy: number;
 };
 
 export const praiseForAnswer = (combo: number) => {
-  if (combo >= 5) return `${combo}연속 정답! 폼 미쳤다`;
-  if (combo >= 3) return '연속 정답! 감 잡았다';
+  if (combo >= 5) return `${combo}연속 정답! 폼 올라왔다`;
+  if (combo >= 3) return '연속 정답! 이 기세 그대로';
   return '정답!';
 };
 

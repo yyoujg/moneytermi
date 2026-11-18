@@ -41,6 +41,9 @@ describe('수달과 미션 보상 안내', () => {
     const tab = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
     act(() => button.dispatchEvent(tab));
     expect(tab.defaultPrevented).toBe(true);
+    expect(container.querySelector('.achievement-share-trigger')).toHaveFocus();
+    // 이미지 공유 -> 친구에게 공유 -> 다시 확인으로 돈다
+    for (let i = 0; i < 2; i++) act(() => (document.activeElement as HTMLElement).dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true })));
     expect(button).toHaveFocus();
     act(() => button.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
     expect(onClose).toHaveBeenCalledOnce();

@@ -10,13 +10,14 @@ import { MISSION_XP } from '../constants';
 import { logClick } from '../lib/analytics';
 import { shouldScheduleRetry } from '../lib/review';
 import type { QuizAnswerResult } from '../lib/quizSubmission';
+import type { AchievementCard } from '../lib/achievementImage';
 
 const state = vi.hoisted(() => ({
   claimReward: vi.fn(),
   recordReview: vi.fn(),
   submitQuizAnswer: vi.fn(),
   refreshWallet: vi.fn(),
-  shareTossLink: vi.fn(),
+  shareImage: vi.fn(),
 }));
 
 vi.mock('../lib/quiz', () => ({
@@ -70,7 +71,7 @@ vi.mock('../lib/review', async importOriginal => {
   return { ...actual, shouldScheduleRetry: vi.fn(actual.shouldScheduleRetry) };
 });
 vi.mock('../lib/analytics', () => ({ logClick: vi.fn() }));
-vi.mock('../lib/share', () => ({ shareTossLink: (...args: unknown[]) => state.shareTossLink(...args) }));
+vi.mock('../components/AchievementShareButton', () => ({ AchievementShareButton: ({ card }: { card: AchievementCard }) => <button onClick={() => state.shareImage(card)}>이미지로 공유</button> }));
 
 Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { value: true, configurable: true });
 
@@ -132,7 +133,7 @@ beforeEach(() => {
   state.recordReview = vi.fn(() => Promise.resolve(true));
   state.submitQuizAnswer = vi.fn((id: number, answer: string) => Promise.resolve(quizResult({ correct: answer === `용어${id}`, combo: answer === `용어${id}` ? 1 : 0 })));
   state.refreshWallet = vi.fn(() => Promise.resolve());
-  state.shareTossLink = vi.fn(() => Promise.resolve());
+  state.shareImage = vi.fn();
 });
 
 describe('QuizScreen review SRS', () => {
@@ -195,13 +196,9 @@ describe('QuizScreen review SRS', () => {
     await click('다음 문제');
     await click('용어2');
     await click('결과 보기');
-    await click('친구에게 기록 공유');
+    await click('이미지로 공유');
 
-    expect(state.shareTossLink).toHaveBeenCalledWith(
-      'intoss://moneytermi/course',
-      expect.stringContaining('머니터미에서 퀴즈 2문제 100% 찍었어!'),
-    );
-    expect(state.shareTossLink.mock.calls[0][1]).toContain('오늘 본 용어: 용어1 · 용어2.');
+    expect(state.shareImage).toHaveBeenCalledWith(expect.objectContaining({ kind: 'quiz', value: '100%', unit: '첫 도전 정답률', description: '퀴즈 2문제 중 2문제 정답' }));
   });
 });
 
