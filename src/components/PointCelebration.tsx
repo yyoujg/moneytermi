@@ -3,9 +3,11 @@ import { XpIcon } from './StatIcons';
 import { logClick } from '../lib/analytics';
 import { useModalTurn } from '../lib/modalTurn';
 import { m, useReducedMotion } from 'motion/react';
+import { AchievementShareButton } from './AchievementShareButton';
+import { questShareCard } from '../lib/achievementImage';
 import './PointCelebration.css';
 
-export type PointReward = { xp: number };
+export type PointReward = { xp: number; title?: string };
 
 export const PointCelebration = ({ reward, onClose }: { reward: PointReward; onClose: () => void }) => {
   const close = () => { logClick('point_celebration_close', { xp: reward.xp }); onClose(); };
@@ -22,7 +24,12 @@ export const PointCelebration = ({ reward, onClose }: { reward: PointReward; onC
   return (
     <div className="original-modal point-celebration" onClick={close} onKeyDown={event => {
       if (event.key === 'Escape') { event.stopPropagation(); close(); }
-      if (event.key === 'Tab') { event.preventDefault(); confirmRef.current?.focus(); }
+      if (event.key === 'Tab') {
+        const buttons = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('button:not(:disabled)'));
+        const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
+        event.preventDefault();
+        buttons[(index + (event.shiftKey ? -1 : 1) + buttons.length) % buttons.length]?.focus();
+      }
     }}>
       <div role="dialog" aria-modal="true" aria-label="미션 완료" aria-describedby="point-celebration-description" onClick={e => e.stopPropagation()} className="point-celebration-content anim-pop-in">
         <h2>미션 클리어!</h2>
@@ -35,6 +42,7 @@ export const PointCelebration = ({ reward, onClose }: { reward: PointReward; onC
         </m.div>
         <p id="point-celebration-description" className="point-celebration-description">오늘의 돈 공부, XP로 차곡차곡.</p>
         <button ref={confirmRef} type="button" onClick={close} className="point-celebration-confirm">확인</button>
+        <AchievementShareButton card={questShareCard(reward.title ?? '오늘의 돈 공부, 하나 더 완료!', reward.xp)} />
       </div>
     </div>
   );

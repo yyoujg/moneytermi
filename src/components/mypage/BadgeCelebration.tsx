@@ -8,6 +8,7 @@ import { logClick } from '../../lib/analytics';
 import { feedbackBadge } from '../../lib/feedback';
 import { BadgeGlyph } from './BadgeGlyph';
 import { useModalTurn } from '../../lib/modalTurn';
+import { AchievementShareButton } from '../AchievementShareButton';
 
 // 새로 획득한 배지 축하. 배지는 서버 기록 없이 통계에서 파생되므로, "이미 보여준 배지" 목록을 기기에 남겨 차이만 축하한다.
 // 여러 개를 한 번에 얻었으면 한 화면에 같이 보여준다. 유실돼도 축하가 한 번 더 뜰 뿐이다.
@@ -76,6 +77,7 @@ export const BadgeCelebration = () => {
       >
         확인
       </button>
+      <AchievementShareButton card={{ kind: 'badge', title: '새 배지 획득!', value: String(fresh.length), unit: '개의 새로운 배지', description: fresh.map(badge => badge.title).join(' · ') }} />
     </div>
   );
 };

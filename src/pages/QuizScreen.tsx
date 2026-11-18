@@ -8,7 +8,7 @@ import { useSettings } from '../hooks/useSettings';
 import { markNodeDone } from '../lib/pathProgress';
 import { feedbackCorrect, feedbackWrong, feedbackQuizComplete } from '../lib/feedback';
 import { logClick } from '../lib/analytics';
-import { shareTossLink } from '../lib/share';
+import { AchievementShareButton } from '../components/AchievementShareButton';
 import { ActionButton } from '../components/ui/ActionButton';
 import { XpIcon } from '../components/StatIcons';
 import { buildQuizItem, pickQuizType, type QuizOption } from '../lib/quiz';
@@ -23,11 +23,14 @@ import { QuizAnswerFeedback } from '../components/learning/QuizAnswerFeedback';
 import { createQuizRequestId, type QuizAnswerResult } from '../lib/quizSubmission';
 import { m } from 'motion/react';
 
+// 토스 공유 시트로 보내는 텍스트. 줄마다 끊어 읽히게 한다
 const quizShareMessage = (modeLabel: string, total: number, accuracy: number, maxCombo: number, words: Word[]) => {
   const learned = words.slice(0, 3).map(word => word.word).join(' · ');
-  const comboText = maxCombo >= 3 ? ` ${maxCombo}연속 정답까지!` : '';
-  const learnedText = learned ? ` 오늘 본 용어: ${learned}.` : '';
-  return `머니터미에서 ${modeLabel} ${total}문제 ${accuracy}% 찍었어!${comboText}${learnedText} 경제 뉴스 이제 좀 알아듣자. 같이 하자`;
+  return [
+    `머니터미 ${modeLabel} ${total}문제 ${accuracy}% 실화?${maxCombo >= 3 ? ` ${maxCombo}연속 정답까지` : ''}`,
+    learned && `오늘 본 용어: ${learned}`,
+    '경제 뉴스 알아듣는 사람 됨. 너도 ㄱ?',
+  ].filter(Boolean).join('\n');
 };
 
 const QuizScreen = () => {
@@ -164,23 +167,16 @@ const QuizScreen = () => {
         onAction={() => navState?.nextRoute
           ? navigate(navState.nextRoute.pathname, { replace: true, state: navState.nextRoute.state })
           : navigate(backPath, { replace: true, state: { openFocus: true } })}
-        secondaryAction={
-          <ActionButton
-            tone="soft"
-            className="flex-1"
-            onClick={() => {
-              logClick('quiz_result_share', { mode: navState?.mode ?? 'quiz', total: baseQueue.length, accuracy, max_combo: maxCombo });
-              void shareTossLink('intoss://moneytermi/course', quizShareMessage(sessionLabel, baseQueue.length, accuracy, maxCombo, baseQueue));
-            }}
-          >
-            친구에게 기록 공유
-          </ActionButton>
-        }
       >
         {/* 끝 화면은 한 문장(위)과 보상 한 줄만. 정답률·연속 기록은 문장과 겹쳐 뺐다 */}
         <section className="quiz-result-stats anim-fade-up" role="group" aria-label="퀴즈 결과 요약" style={{ '--i': 2 } as React.CSSProperties}>
           <p className="quiz-result-xp"><XpIcon size={20} className="quiz-result-icon" /><span>획득 XP</span><m.strong initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 12, delay: 0.2 }}>+{Math.max(0, xp - xpAtStart.current)}</m.strong></p>
         </section>
+        <AchievementShareButton className="w-full anim-fade-up" card={{
+          kind: 'quiz', title: completionTitle, value: `${accuracy}%`, unit: '첫 도전 정답률',
+          description: `${sessionLabel} ${baseQueue.length}문제 중 ${firstCorrect}문제 정답`,
+          stats: [{ label: '획득 XP', value: `+${Math.max(0, xp - xpAtStart.current)}` }, { label: '최대 연속 정답', value: `${maxCombo}회` }],
+        }} linkMessage={quizShareMessage(sessionLabel, baseQueue.length, accuracy, maxCombo, baseQueue)} />
       </LearningCompletionScreen>
     );
   }

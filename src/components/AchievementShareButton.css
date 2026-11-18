@@ -1,0 +1,20 @@
+.achievement-share-row { display: flex; justify-content: center; gap: var(--space-2); }
+.achievement-share-trigger { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 44px; padding: var(--space-2) var(--space-3); border-radius: var(--shape-lg); color: var(--color-ink-2); font-size: var(--font-size-label); font-weight: var(--font-weight-semibold); cursor: pointer; }
+.achievement-share-trigger:hover { background: var(--color-surface); }
+.achievement-share-trigger:active { opacity: .7; }
+.achievement-share-dialog { position: fixed; inset: 0; width: calc(100% - 32px); max-width: 420px; max-height: calc(100dvh - 32px); margin: auto; padding: 0; overflow: hidden; border: 0; border-radius: 24px; color: var(--color-ink); background: var(--color-card); }
+.achievement-share-dialog::backdrop { background: rgb(31 26 23 / 55%); }
+.achievement-share-shell { display: flex; flex-direction: column; max-height: calc(100dvh - 32px); }
+.achievement-share-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 24px 20px 16px; }
+.achievement-share-header h2 { font-size: var(--font-size-title-3); font-weight: var(--font-weight-bold); line-height: var(--line-height-title); }
+.achievement-share-header p { margin-top: 8px; font-size: var(--font-size-label); color: var(--color-ink-3); }
+.achievement-share-close { display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px; margin: -8px -8px 0 0; }
+.achievement-share-preview { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 20px; }
+.achievement-share-preview > img { display: block; width: auto; max-width: 100%; height: auto; max-height: 56dvh; margin: 0 auto; border-radius: 16px; }
+.achievement-share-preview > p { display: grid; place-items: center; min-height: 280px; border-radius: 16px; background: var(--color-surface); color: var(--color-ink-3); }
+.achievement-share-footer { display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; padding: 16px 20px max(20px, env(safe-area-inset-bottom)); }
+.achievement-share-footer > p { font-size: var(--font-size-label); line-height: var(--line-height-body); text-align: center; color: var(--color-ink-3); }
+.achievement-share-footer > .achievement-share-error { color: var(--color-danger-foreground); }
+.achievement-share-footer .action-button { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.point-celebration .achievement-share-trigger { margin-top: 12px; color: var(--gray-0); }
+.point-celebration .achievement-share-trigger:hover { background: rgb(255 255 255 / 10%); }

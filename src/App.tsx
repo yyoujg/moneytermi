@@ -10,7 +10,7 @@ import { isDefaultNickname } from './constants';
 import { NicknameSheet } from './components/mypage/NicknameSheet';
 import { parseLandingPath, parseReferrer } from './lib/landing';
 import { logScreen, logClick } from './lib/analytics';
-import { dismissRelatedWordPreview, dismissWordResources, resolveBackEventAction } from './lib/backEvent';
+import { dismissAchievementShare, dismissRelatedWordPreview, dismissWordResources, resolveBackEventAction } from './lib/backEvent';
 import NavBar from './components/NavBar';
 import { TopBar } from './components/TopBar';
 import { BadgeCelebration } from './components/mypage/BadgeCelebration';
@@ -117,7 +117,7 @@ const WelcomeScreen = () => {
 
         {picked && (
           <p role="status" className="mt-5 text-sm leading-relaxed text-[var(--color-ink-2)] break-keep">
-            <strong className="text-[var(--color-ink)]">{correct ? '정답! 감 잡았네. ' : '아깝다! 같이 짚어보자. '}</strong>{WELCOME_QUIZ.explain}
+            <strong className="text-[var(--color-ink)]">{correct ? '정답! 시작이 좋은데. ' : '아깝다! 같이 짚어보자. '}</strong>{WELCOME_QUIZ.explain}
           </p>
         )}
       </div>
@@ -189,7 +189,7 @@ const BackEventHandler = () => {
     try {
       unsubscription = graniteEvent.addEventListener('backEvent', {
         onEvent: () => {
-          if (dismissRelatedWordPreview() || dismissWordResources()) return;
+          if (dismissAchievementShare() || dismissRelatedWordPreview() || dismissWordResources()) return;
           const action = resolveBackEventAction(typeof window !== 'undefined' ? window.history.state?.idx : 0);
           if (action === 'back') {
             navigate(-1);
