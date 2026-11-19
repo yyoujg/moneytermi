@@ -1,6 +1,8 @@
-## 2026-11-19 PR #71 · 검토 필요 - 기록 공유하기 저장·공유 버튼 분리
+## 2026-11-19 PR #71 머지 · 검토 필요 (`8df8740`) - 기록 공유하기 저장·공유 버튼 분리
 
-상태: PR #71(`fix/share-modal-save-share`) 머지 전. 전체 76개 파일·2,082개 테스트(Supabase 환경변수 없이), 타입 검사, 바꾼 파일 코드 규칙 검사 통과. deploymentId는 머지 후 기입.
+상태: PR #71 머지(main `8df8740d795f7e7308e08391fa37d0562c595e52`) 후 [자동 배포 44434503295](https://github.com/yyoujg/moneytermi/actions/runs/44434503295) 성공(2026-11-19 10:07 KST 시작 · 10:12 완료). 전체 76개 파일·2,082개 테스트(Supabase 환경변수 없이), 타입 검사, 바꾼 파일 코드 규칙 검사 통과. deploymentId `01a1f15b-c69a-76a4-9c20-424383469a94`. PR #70(`01a1ef4e`) 내용을 모두 포함한다. 콘솔 번들 번호·검토 요청은 콘솔 확인 후 기입.
+
+실기기: `intoss-private://moneytermi?_deploymentId=01a1f15b-c69a-76a4-9c20-424383469a94&host=appsInTossHost`
 
 | 항목 | 내용 | 파일 |
 |------|------|------|
