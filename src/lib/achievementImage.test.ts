@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { achievementImageLines, canShareAchievementImage, createAchievementImage, shareAchievementImage, streakShareCard } from './achievementImage';
+import { achievementImageLines, createAchievementImage, saveAchievementImage, shareAchievementImage, streakShareCard } from './achievementImage';
 
 const bridge = vi.hoisted(() => ({ supported: vi.fn(() => false), save: vi.fn() }));
 vi.mock('@apps-in-toss/web-framework', () => ({ File: { saveBase64: Object.assign(bridge.save, { isSupported: bridge.supported }) } }));
@@ -7,50 +7,43 @@ const image = { dataUrl: 'data:image/png;base64,aGVsbG8=', file: new File(['hell
 beforeEach(() => { vi.clearAllMocks(); bridge.supported.mockReturnValue(false); bridge.save.mockResolvedValue(undefined); });
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
-describe('달성 이미지 전달', () => {
-  it('토스에서는 실제 PNG의 Base64와 파일 이름을 네이티브로 전달한다', async () => {
+describe('달성 이미지 저장과 공유', () => {
+  it('토스에서는 실제 PNG의 Base64와 파일 이름으로 기기에 저장한다', async () => {
     bridge.supported.mockReturnValue(true);
-    expect(canShareAchievementImage(image)).toBe(true);
-    expect(await shareAchievementImage(image)).toBe('shared');
+    expect(await saveAchievementImage(image)).toBe('saved');
     expect(bridge.save).toHaveBeenCalledWith({ data: 'aGVsbG8=', fileName: 'record.png', mimeType: 'image/png' });
   });
-  it('파일 공유 지원 브라우저는 PNG 파일 자체를 클릭 직후 전달한다', async () => {
-    const share = vi.fn().mockResolvedValue(undefined);
-    vi.stubGlobal('navigator', { share, canShare: vi.fn(() => true) });
-    const pending = shareAchievementImage(image);
-    expect(share).toHaveBeenCalledWith({ files: [image.file] });
-    expect(await pending).toBe('shared');
-    expect(bridge.save).not.toHaveBeenCalled();
-  });
-  it('공유 취소는 다운로드나 다른 공유 창을 자동으로 열지 않는다', async () => {
+  it('토스 밖(환경 상수가 없어 예외가 나도)에서는 PNG를 내려받는다', async () => {
+    bridge.supported.mockImplementation(() => { throw new TypeError('operationalEnvironment'); });
     const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
-    vi.stubGlobal('navigator', { share: vi.fn().mockRejectedValue(new DOMException('cancelled', 'AbortError')), canShare: () => true });
-    expect(await shareAchievementImage(image)).toBe('cancelled');
-    expect(click).not.toHaveBeenCalled();
-    expect(bridge.save).not.toHaveBeenCalled();
-  });
-  it('공유 미지원 환경은 PNG 다운로드로 제공한다', async () => {
-    vi.stubGlobal('navigator', { share: undefined });
-    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
-    expect(canShareAchievementImage(image)).toBe(false);
-    expect(await shareAchievementImage(image)).toBe('downloaded');
+    expect(await saveAchievementImage(image)).toBe('downloaded');
     const downloaded = click.mock.instances[0] as HTMLAnchorElement;
     expect(downloaded.download).toBe('record.png');
     expect(downloaded.href).toBe(image.dataUrl);
     expect(downloaded.isConnected).toBe(false);
   });
-  it('토스 환경 상수가 없는 일반 브라우저에서도 이미지 저장이 열린다', async () => {
-    bridge.supported.mockImplementationOnce(() => { throw new TypeError('operationalEnvironment'); }).mockImplementationOnce(() => { throw new TypeError('operationalEnvironment'); });
-    vi.stubGlobal('navigator', { share: undefined });
-    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
-    expect(canShareAchievementImage(image)).toBe(false);
-    expect(await shareAchievementImage(image)).toBe('downloaded');
-    expect(click).toHaveBeenCalledOnce();
-  });
-  it('실패를 성공으로 처리하지 않고 재시도할 수 있게 전달한다', async () => {
+  it('저장 실패를 성공으로 처리하지 않는다', async () => {
     bridge.supported.mockReturnValue(true);
     bridge.save.mockRejectedValue(new Error('device unavailable'));
-    await expect(shareAchievementImage(image)).rejects.toThrow('device unavailable');
+    await expect(saveAchievementImage(image)).rejects.toThrow('device unavailable');
+  });
+  it('파일 공유 지원 환경은 PNG와 메시지를 클릭 직후 함께 보낸다', async () => {
+    const share = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('navigator', { share, canShare: vi.fn(() => true) });
+    const pending = shareAchievementImage(image, '같이 하자');
+    expect(share).toHaveBeenCalledWith({ files: [image.file], text: '같이 하자' });
+    expect(await pending).toBe('shared');
+  });
+  it('공유 취소는 취소로 돌려주고 다른 동작을 하지 않는다', async () => {
+    vi.stubGlobal('navigator', { share: vi.fn().mockRejectedValue(new DOMException('cancelled', 'AbortError')), canShare: () => true });
+    expect(await shareAchievementImage(image, 'm')).toBe('cancelled');
+    expect(bridge.save).not.toHaveBeenCalled();
+  });
+  it('파일 공유가 안 되면 unsupported로 알려 링크 공유로 넘기게 한다', async () => {
+    vi.stubGlobal('navigator', { share: vi.fn(), canShare: () => false });
+    expect(await shareAchievementImage(image, 'm')).toBe('unsupported');
+    vi.stubGlobal('navigator', { share: undefined });
+    expect(await shareAchievementImage(image, 'm')).toBe('unsupported');
   });
 });
 

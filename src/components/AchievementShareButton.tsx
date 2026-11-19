@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ShareNetwork, DownloadSimple, LinkSimple } from '@phosphor-icons/react';
 import { X } from './ui/OtterIcons';
-import { createAchievementImage, canShareAchievementImage, shareAchievementImage, downloadAchievementImage, supportsTossImageShare, type AchievementCard, type AchievementImage } from '../lib/achievementImage';
+import { createAchievementImage, saveAchievementImage, shareAchievementImage, type AchievementCard, type AchievementImage } from '../lib/achievementImage';
 import { logClick } from '../lib/analytics';
 import { achievementShareMessage, shareTossLink } from '../lib/share';
 import './AchievementShareButton.css';
@@ -21,11 +21,11 @@ export const AchievementShareButton = ({ card, label = '이미지로 공유', cl
       logClick('achievement_link_share', { kind: card.kind });
       void shareTossLink(card.kind, linkMessage ?? achievementShareMessage(card));
     }}><LinkSimple size={18} aria-hidden="true" />친구에게 공유</button>
-    {preview && createPortal(<AchievementShareDialog card={preview} onClose={() => setPreview(null)} />, document.body)}
+    {preview && createPortal(<AchievementShareDialog card={preview} message={linkMessage ?? achievementShareMessage(card)} onClose={() => setPreview(null)} />, document.body)}
   </span>;
 };
 
-const AchievementShareDialog = ({ card, onClose }: { card: AchievementCard; onClose: () => void }) => {
+const AchievementShareDialog = ({ card, message, onClose }: { card: AchievementCard; message: string; onClose: () => void }) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   const [image, setImage] = useState<AchievementImage | null>(null);
@@ -38,6 +38,8 @@ const AchievementShareDialog = ({ card, onClose }: { card: AchievementCard; onCl
     const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const dialog = dialogRef.current;
     dialog?.showModal();
+    // showModal은 첫 버튼(X)에 초점을 줘 초점 링이 테두리처럼 보인다. 열 때는 모달 자체에 초점을 둔다
+    dialog?.focus();
     return () => { dialog?.close(); if (trigger?.isConnected) trigger.focus({ preventScroll: true }); };
   }, []);
   useEffect(() => {
@@ -47,19 +49,25 @@ const AchievementShareDialog = ({ card, onClose }: { card: AchievementCard; onCl
     }).catch(() => { if (!cancelled) setError('이미지를 만들지 못했어요. 다시 시도해 주세요.'); });
     return () => { cancelled = true; };
   }, [card, attempt]);
-  const share = async () => {
+  // 저장·공유 중 하나만 돌게 막는다
+  const run = async (task: () => Promise<void>) => {
     if (!image || sharing.current) return;
     sharing.current = true;
     setBusy(true); setError(''); setStatus('');
-    try {
-      const result = await shareAchievementImage(image);
-      if (result === 'downloaded') setStatus('이미지를 다운로드했어요. 저장한 파일을 공유해 주세요.');
-      if (result !== 'cancelled') logClick('achievement_image_share', { kind: card.kind, method: result });
-    } catch { setError('공유하지 못했어요. 다시 시도해 주세요.'); }
+    try { await task(); } catch { setError('처리하지 못했어요. 다시 시도해 주세요.'); }
     finally { sharing.current = false; setBusy(false); }
   };
-  const nativeShare = image ? canShareAchievementImage(image) : true;
-  return <dialog ref={dialogRef} className="achievement-share-dialog" aria-labelledby={titleId} data-achievement-share-modal
+  const save = () => run(async () => {
+    const result = await saveAchievementImage(image!);
+    setStatus(result === 'saved' ? '이미지를 저장했어요.' : '이미지를 다운로드했어요.');
+    logClick('achievement_image_save', { kind: card.kind, method: result });
+  });
+  const share = () => run(async () => {
+    const result = await shareAchievementImage(image!, message);
+    if (result === 'unsupported') await shareTossLink(card.kind, message);
+    if (result !== 'cancelled') logClick('achievement_image_share', { kind: card.kind, method: result === 'unsupported' ? 'link' : 'image' });
+  });
+  return <dialog ref={dialogRef} tabIndex={-1} className="achievement-share-dialog" aria-labelledby={titleId} data-achievement-share-modal
     onCancel={event => { event.preventDefault(); onClose(); }}
     onKeyDown={event => event.stopPropagation()}
     onClick={event => { event.stopPropagation(); if (event.target === event.currentTarget) onClose(); }}>
@@ -76,14 +84,14 @@ const AchievementShareDialog = ({ card, onClose }: { card: AchievementCard; onCl
         {error && <p className="achievement-share-error" role="alert">{error}</p>}
         {status && <p role="status">{status}</p>}
         {!image && error ? <button type="button" className="action-button w-full" onClick={() => { setError(''); setAttempt(value => value + 1); }}>다시 만들기</button>
-          : <button type="button" className="action-button w-full" disabled={!image || busy} onClick={() => void share()}>
-            {nativeShare ? <ShareNetwork size={20} aria-hidden="true" /> : <DownloadSimple size={20} aria-hidden="true" />}
-            {busy ? '공유하는 중…' : nativeShare ? '이미지 공유하기' : '이미지 저장하기'}
-          </button>}
-        {image && nativeShare && !supportsTossImageShare() && <button type="button" className="achievement-share-trigger" disabled={busy} onClick={() => {
-          downloadAchievementImage(image);
-          setStatus('이미지를 다운로드했어요. 저장한 파일을 공유해 주세요.');
-        }}><DownloadSimple size={18} aria-hidden="true" />이미지 저장하기</button>}
+          : <div className="achievement-share-actions">
+            <button type="button" className="action-button" data-tone="soft" disabled={!image || busy} onClick={() => void save()}>
+              <DownloadSimple size={20} aria-hidden="true" />이미지 저장
+            </button>
+            <button type="button" className="action-button" disabled={!image || busy} onClick={() => void share()}>
+              <ShareNetwork size={20} aria-hidden="true" />{busy ? '처리 중…' : '공유하기'}
+            </button>
+          </div>}
       </footer>
     </div>
   </dialog>;
