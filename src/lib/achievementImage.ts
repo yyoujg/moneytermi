@@ -79,9 +79,10 @@ export const createAchievementImage = async (card: AchievementCard): Promise<Ach
   };
 };
 
-const supportsTossSave = (): boolean => {
-  // 일반 브라우저에는 토스 환경 상수가 없어 SDK의 지원 여부 조회도 예외가 난다.
-  try { return TossFile.saveBase64.isSupported(); } catch { return false; }
+// 'toss': 토스 기기 저장 가능, 'old-toss': 토스 앱이지만 버전이 낮아 저장 불가, 'browser': 토스 밖.
+// 일반 브라우저에는 토스 환경 상수가 없어 SDK의 지원 여부 조회가 예외를 낸다(그래서 예외 = 토스 밖).
+const tossSaveSupport = (): 'toss' | 'old-toss' | 'browser' => {
+  try { return TossFile.saveBase64.isSupported() ? 'toss' : 'old-toss'; } catch { return 'browser'; }
 };
 
 const downloadAchievementImage = (image: AchievementImage): void => {
@@ -93,9 +94,12 @@ const downloadAchievementImage = (image: AchievementImage): void => {
   link.remove();
 };
 
-// 토스에서는 기기에 저장하고, 그 밖에서는 PNG를 내려받는다.
-export const saveAchievementImage = async (image: AchievementImage): Promise<'saved' | 'downloaded'> => {
-  if (supportsTossSave()) {
+// 토스에서는 기기에 저장하고, 토스 밖에서는 PNG를 내려받는다.
+// 낮은 버전 토스 앱은 다운로드 링크가 iOS 웹뷰에서 조용히 무시돼 성공처럼 보이므로, 내려받기 대신 미지원을 돌려준다.
+export const saveAchievementImage = async (image: AchievementImage): Promise<'saved' | 'downloaded' | 'unsupported'> => {
+  const support = tossSaveSupport();
+  if (support === 'old-toss') return 'unsupported';
+  if (support === 'toss') {
     await TossFile.saveBase64({ data: image.dataUrl.split(',')[1], fileName: image.file.name, mimeType: 'image/png' });
     return 'saved';
   }

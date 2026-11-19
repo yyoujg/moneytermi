@@ -1,6 +1,6 @@
 ## 2026-11-19 PR #72 · 검토 필요 - 축하 화면 통일
 
-상태: PR #72(`feat/celebration-screens`) 머지 전. 전체 76개 파일·2,082개 테스트(Supabase 환경변수 없이), 타입 검사, 바꾼 파일 코드 규칙 검사 통과. deploymentId는 머지 후 기입.
+상태: PR #72(`feat/celebration-screens`) 머지 전. 전체 76개 파일·2,085개 테스트(Supabase 환경변수 없이), 타입 검사, 바꾼 파일 코드 규칙 검사 통과. deploymentId는 머지 후 기입.
 
 | 항목 | 내용 | 파일 |
 |------|------|------|
@@ -8,6 +8,7 @@
 | 리그 승급 | 전체 화면, 새 등급 캐릭터만, 확인 버튼, "지난주 내 리그 TOP 3" | `src/components/league/LeaguePromotionCelebration.tsx` |
 | 배지 획득 | 여러 개면 한 화면에 하나씩 순서대로 | `src/components/mypage/BadgeCelebration.tsx` |
 | 연속 출석 | 마일스톤 날 글자가 안 보이던 문제, 불꽃 대신 수달 | `src/components/StreakCelebration.tsx` |
+| 공유 | "친구에게 공유" 연속 탭 시 공유 시트 중복, 낮은 버전 토스 앱에서 이미지 저장이 안 되는데 성공으로 안내되던 문제(업데이트 안내로) | `src/components/AchievementShareButton.tsx`, `src/lib/achievementImage.ts` |
 
 미해결: 토스 앱 실기기에서 네 축하 화면 확인 필요.
 

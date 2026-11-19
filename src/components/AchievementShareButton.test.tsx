@@ -59,6 +59,27 @@ describe('이미지 공유 미리보기', () => {
     expect(document.querySelector('dialog')).toBeNull();
     expect(button).toHaveFocus();
   });
+  it('친구에게 공유는 공유 시트가 뜨는 동안 다시 눌러도 한 번만 연다', async () => {
+    let done!: () => void;
+    vi.mocked(shareTossLink).mockReturnValueOnce(new Promise<void>(resolve => { done = resolve; }));
+    mount();
+    const link = [...document.querySelectorAll<HTMLButtonElement>('.achievement-share-trigger')].find(b => b.textContent === '친구에게 공유')!;
+    act(() => { link.click(); link.click(); });
+    expect(shareTossLink).toHaveBeenCalledTimes(1);
+    await act(async () => done());
+    act(() => link.click());
+    expect(shareTossLink).toHaveBeenCalledTimes(2);
+  });
+  it('낮은 버전 토스 앱에서 저장하면 업데이트 안내를 보여준다', async () => {
+    vi.mocked(createAchievementImage).mockResolvedValue(prepared);
+    vi.mocked(saveAchievementImage).mockResolvedValue('unsupported');
+    const { button } = mount();
+    await act(async () => button.click());
+    const save = document.querySelector<HTMLButtonElement>('dialog .achievement-share-actions .action-button')!;
+    await act(async () => save.click());
+    expect(document.querySelector('[role="alert"]')).toHaveTextContent('토스 앱을 업데이트해 주세요');
+    expect(document.querySelector('dialog')).not.toHaveTextContent('저장했어요');
+  });
   it('생성 오류를 안내하고 다시 만들 수 있다', async () => {
     vi.mocked(createAchievementImage).mockRejectedValueOnce(new Error('image failed')).mockResolvedValueOnce(prepared);
     const { button } = mount();
