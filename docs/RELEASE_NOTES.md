@@ -1,6 +1,8 @@
-## 2026-11-19 PR #70 · 검토 필요 - 등급별 리그·공유 카드 새 디자인
+## 2026-11-19 PR #70 머지 · 검토 필요 (`f16b1ea`) - 등급별 리그·공유 카드 새 디자인
 
-상태: PR #70(`feat/league-stage-share-cards`) 머지 전. 전체 76개 파일·2,082개 테스트(Supabase 환경변수 없이), 타입 검사 통과, 코드 규칙 오류 0·기존 경고 1. deploymentId는 머지 후 기입. 리그 SQL(`supabase/content/league-per-stage/apply.sql`)은 2026-11-18 운영 DB에 적용하고 verify 3줄 모두 true 확인.
+상태: PR #70 머지(main `f16b1ea218639e15716189e1bc89ea2808e7b842`) 후 [자동 배포 44337140063](https://github.com/yyoujg/moneytermi/actions/runs/44337140063) 성공(2026-11-19 00:34 KST 시작 · 00:38 완료). 전체 76개 파일·2,082개 테스트(Supabase 환경변수 없이), 타입 검사 통과, 코드 규칙 오류 0·기존 경고 1. deploymentId `01a1ef4e-7bde-7fa9-ac29-e1886c4c8b74`. 콘솔 번들 번호·검토 요청은 콘솔 확인 후 기입.
+
+실기기: `intoss-private://moneytermi?_deploymentId=01a1ef4e-7bde-7fa9-ac29-e1886c4c8b74&host=appsInTossHost` 리그 SQL(`supabase/content/league-per-stage/apply.sql`)은 2026-11-18 운영 DB에 적용하고 verify 3줄 모두 true 확인.
 
 | 항목 | 내용 | 파일 |
 |------|------|------|
