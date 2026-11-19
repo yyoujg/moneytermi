@@ -1,6 +1,6 @@
-## 2026-11-19 PR #71 머지 · 검토 필요 (`8df8740`) - 기록 공유하기 저장·공유 버튼 분리
+## 2026-11-19 PR #71 머지 · 검토 중 (`8df8740`) - 기록 공유하기 저장·공유 버튼 분리
 
-상태: PR #71 머지(main `8df8740d795f7e7308e08391fa37d0562c595e52`) 후 [자동 배포 44434503295](https://github.com/yyoujg/moneytermi/actions/runs/44434503295) 성공(2026-11-19 10:07 KST 시작 · 10:12 완료). 전체 76개 파일·2,082개 테스트(Supabase 환경변수 없이), 타입 검사, 바꾼 파일 코드 규칙 검사 통과. deploymentId `01a1f15b-c69a-76a4-9c20-424383469a94`. PR #70(`01a1ef4e`) 내용을 모두 포함한다. 콘솔 번들 번호·검토 요청은 콘솔 확인 후 기입.
+상태: PR #71 머지(main `8df8740d795f7e7308e08391fa37d0562c595e52`) 후 [자동 배포 44434503295](https://github.com/yyoujg/moneytermi/actions/runs/44434503295) 성공(2026-11-19 10:07 KST 시작 · 10:12 완료). 전체 76개 파일·2,082개 테스트(Supabase 환경변수 없이), 타입 검사, 바꾼 파일 코드 규칙 검사 통과. deploymentId `01a1f15b-c69a-76a4-9c20-424383469a94`. PR #70(`01a1ef4e`) 내용을 모두 포함한다. 콘솔 번들 20261119-182, 11-19 검토 요청(검토 중).
 
 실기기: `intoss-private://moneytermi?_deploymentId=01a1f15b-c69a-76a4-9c20-424383469a94&host=appsInTossHost`
 
@@ -17,9 +17,9 @@
 - 기록 이미지를 저장하거나 친구에게 바로 공유할 수 있어요.
 ```
 
-## 2026-11-19 PR #70 머지 · 검토 필요 (`f16b1ea`) - 등급별 리그·공유 카드 새 디자인
+## 2026-11-19 PR #70 머지 · 출시 준비됨 (`f16b1ea`) - 등급별 리그·공유 카드 새 디자인
 
-상태: PR #70 머지(main `f16b1ea218639e15716189e1bc89ea2808e7b842`) 후 [자동 배포 44337140063](https://github.com/yyoujg/moneytermi/actions/runs/44337140063) 성공(2026-11-19 00:34 KST 시작 · 00:38 완료). 전체 76개 파일·2,082개 테스트(Supabase 환경변수 없이), 타입 검사 통과, 코드 규칙 오류 0·기존 경고 1. deploymentId `01a1ef4e-7bde-7fa9-ac29-e1886c4c8b74`. 콘솔 번들 번호·검토 요청은 콘솔 확인 후 기입.
+상태: PR #70 머지(main `f16b1ea218639e15716189e1bc89ea2808e7b842`) 후 [자동 배포 44337140063](https://github.com/yyoujg/moneytermi/actions/runs/44337140063) 성공(2026-11-19 00:34 KST 시작 · 00:38 완료). 전체 76개 파일·2,082개 테스트(Supabase 환경변수 없이), 타입 검사 통과, 코드 규칙 오류 0·기존 경고 1. deploymentId `01a1ef4e-7bde-7fa9-ac29-e1886c4c8b74`. 콘솔 번들 20261119-181(11-19 기준 출시 준비됨). 내용은 PR #71 번들 20261119-182에 모두 포함되어 검토·출시는 182로 한다.
 
 실기기: `intoss-private://moneytermi?_deploymentId=01a1ef4e-7bde-7fa9-ac29-e1886c4c8b74&host=appsInTossHost` 리그 SQL(`supabase/content/league-per-stage/apply.sql`)은 2026-11-18 운영 DB에 적용하고 verify 3줄 모두 true 확인.
 
