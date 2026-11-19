@@ -72,7 +72,7 @@ describe('퀘스트 미션과 큰 보상', () => {
     await act(async () => container.querySelector<HTMLButtonElement>('[data-state="ready"]')!.click());
     expect(mocks.claim).toHaveBeenCalledWith('ready');
     expect(container.querySelector('[role="dialog"]')).toHaveTextContent('+7 XP');
-    act(() => container.querySelector<HTMLButtonElement>('.point-celebration-confirm')!.click());
+    act(() => container.querySelector<HTMLButtonElement>('.celebration-confirm')!.click());
     expect(container.querySelector('[role="dialog"]')).toBeNull();
   });
 

@@ -19,5 +19,4 @@
 .achievement-share-actions { display: flex; gap: 8px; }
 .achievement-share-actions > .action-button { flex: 1; width: auto; }
 .achievement-share-footer .action-button { display: flex; align-items: center; justify-content: center; gap: 8px; }
-.point-celebration .achievement-share-trigger { margin-top: 12px; color: var(--gray-0); }
-.point-celebration .achievement-share-trigger:hover { background: rgb(255 255 255 / 10%); }
+.celebration-screen .achievement-share-row { margin-top: 24px; }
