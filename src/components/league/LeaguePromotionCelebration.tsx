@@ -1,4 +1,3 @@
-import { ActionButton } from '../ui/ActionButton';
 import { useEffect, useMemo, useState } from 'react';
 import { getGrowthStage, GROWTH_STAGES, type GrowthStage } from '../../constants';
 import { useAppContext } from '../../context/AppContext';
@@ -7,7 +6,7 @@ import { logClick } from '../../lib/analytics';
 import { Storage } from '../../lib/storage';
 import { StageGlyph } from '../StageGlyph';
 import { useModalTurn } from '../../lib/modalTurn';
-import { AchievementShareButton } from '../AchievementShareButton';
+import { CelebrationScreen } from '../CelebrationScreen';
 
 const KEY = 'league_promotion_seen_stage_v1';
 
@@ -43,39 +42,15 @@ export const LeaguePromotionCelebration = () => {
   };
 
   return (
-    <div
-      className="fixed inset-0 z-[70] flex items-center justify-center bg-[var(--color-overlay)] px-6"
-      role="presentation"
-      onClick={close}
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="league-promotion-title"
-        onClick={e => e.stopPropagation()}
-        className="app-card w-full max-w-xs overflow-hidden rounded-card bg-[var(--color-card)] anim-pop-in"
-      >
-        <div className="relative flex flex-col items-center px-5 pb-5 pt-6 text-center">
-          <div className="flex items-center justify-center gap-3">
-            {promotion.from && <StageGlyph id={promotion.from.id} size={52} className="opacity-45 grayscale" />}
-            <span className="text-lg text-[var(--color-ink-3)]" aria-hidden="true">→</span>
-            <StageGlyph id={promotion.to.id} size={76} className="anim-pop-in" />
-          </div>
-
-          <p className="mt-4! text-xs text-[var(--color-ink-3)]">리그 승급</p>
-          <h2 id="league-promotion-title" className="mt-1! text-xl font-bold text-[var(--color-ink)]">
-            {promotion.to.name} 리그 입성!
-          </h2>
-          <p className="mt-2! text-sm leading-relaxed text-[var(--color-ink-3)] break-keep">
-            지난주 TOP 3 달성! 이번 주도 같이 달려보자.
-          </p>
-
-          <p className="mt-4! text-xs text-[var(--color-ink-3)]">현재 누적 <span className="font-semibold text-[var(--color-ink)] tabular-nums">{xp.toLocaleString()}XP</span></p>
-
-          <ActionButton fullWidth onClick={close} className="mt-5">좋아요</ActionButton>
-          <AchievementShareButton card={{ kind: 'league', title: '새로운 리그 입성!', value: promotion.to.name, unit: '리그 승급', description: '지난주 내 리그 TOP 3 달성!', stats: [{ label: '누적 경험치', value: `${xp.toLocaleString()} XP` }] }} />
-        </div>
-      </div>
-    </div>
+    <CelebrationScreen
+      label="리그 승급"
+      title={`${promotion.to.name} 리그 입성!`}
+      subtitle="리그 승급"
+      art={<StageGlyph id={promotion.to.id} size={172} />}
+      record={<p className="celebration-record">누적 {xp.toLocaleString()} XP</p>}
+      description="지난주 내 리그 TOP 3 달성! 이번 주도 같이 달려보자."
+      shareCard={{ kind: 'league', title: '새로운 리그 입성!', value: promotion.to.name, unit: '리그 승급', description: '지난주 내 리그 TOP 3 달성!', stats: [{ label: '누적 경험치', value: `${xp.toLocaleString()} XP` }] }}
+      onClose={close}
+    />
   );
 };

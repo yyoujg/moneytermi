@@ -1,0 +1,18 @@
+.celebration-screen { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; overflow-x: hidden; overflow-y: auto; padding: var(--space-8) var(--space-6); background: var(--color-canvas); color: var(--color-ink); }
+.celebration-content { display: flex; width: 100%; max-width: 360px; flex-shrink: 0; flex-direction: column; align-items: center; padding-block: var(--space-6); text-align: center; }
+.celebration-content h2 { color: var(--color-ink); font-size: var(--font-size-display); font-weight: var(--font-weight-bold); line-height: var(--line-height-tight); }
+.celebration-subtitle { margin-top: var(--space-4); color: var(--color-ink-2); font-size: var(--font-size-headline); font-weight: var(--font-weight-semibold); }
+.celebration-art { position: relative; display: grid; place-items: center; width: 240px; height: 240px; margin-top: var(--space-5); }
+.celebration-art::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--brown-500) 28%, transparent), transparent 68%); }
+.celebration-art img { position: relative; object-fit: contain; }
+.celebration-record { display: flex; align-items: center; gap: var(--space-2); color: var(--color-ink); font-size: var(--font-size-title-2); font-weight: var(--font-weight-bold); font-variant-numeric: tabular-nums; }
+.celebration-description { margin-top: var(--space-3); color: var(--color-ink-3); font-size: var(--font-size-label); line-height: var(--line-height-body); word-break: keep-all; }
+button.celebration-confirm { max-width: 320px; margin-top: var(--space-8); }
+@media (max-height: 620px) {
+  .celebration-screen { align-items: flex-start; padding-block: var(--space-4); }
+  .celebration-content { padding-block: var(--space-3); }
+  .celebration-art { height: 180px; margin-top: var(--space-3); }
+  .celebration-art img { height: 160px; }
+  button.celebration-confirm { margin-top: var(--space-6); }
+}
+.celebration-art > * { position: relative; }

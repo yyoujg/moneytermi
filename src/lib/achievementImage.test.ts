@@ -22,6 +22,13 @@ describe('달성 이미지 저장과 공유', () => {
     expect(downloaded.href).toBe(image.dataUrl);
     expect(downloaded.isConnected).toBe(false);
   });
+  it('낮은 버전 토스 앱은 다운로드로 넘기지 않고 미지원을 알린다', async () => {
+    bridge.supported.mockReturnValue(false);
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    expect(await saveAchievementImage(image)).toBe('unsupported');
+    expect(click).not.toHaveBeenCalled();
+    expect(bridge.save).not.toHaveBeenCalled();
+  });
   it('저장 실패를 성공으로 처리하지 않는다', async () => {
     bridge.supported.mockReturnValue(true);
     bridge.save.mockRejectedValue(new Error('device unavailable'));

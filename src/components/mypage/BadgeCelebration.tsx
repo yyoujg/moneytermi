@@ -1,4 +1,3 @@
-import { CELEBRATION_COLORS } from '../../lib/visualPalette';
 import { useEffect, useState } from 'react';
 import { buildBadges, type Badge } from '../../lib/badges';
 import { useAppContext } from '../../context/AppContext';
@@ -8,18 +7,19 @@ import { logClick } from '../../lib/analytics';
 import { feedbackBadge } from '../../lib/feedback';
 import { BadgeGlyph } from './BadgeGlyph';
 import { useModalTurn } from '../../lib/modalTurn';
-import { AchievementShareButton } from '../AchievementShareButton';
+import { CelebrationScreen } from '../CelebrationScreen';
 
 // 새로 획득한 배지 축하. 배지는 서버 기록 없이 통계에서 파생되므로, "이미 보여준 배지" 목록을 기기에 남겨 차이만 축하한다.
 // 여러 개를 한 번에 얻었으면 한 화면에 같이 보여준다. 유실돼도 축하가 한 번 더 뜰 뿐이다.
 const KEY = 'badges_seen';
-const CONFETTI = Array.from({ length: 5 }, (_, i) => CELEBRATION_COLORS[i % CELEBRATION_COLORS.length]);
 
 // 앱 전역(Layout)에 붙어 있어 어느 화면에서든 달성 즉시 뜬다.
 export const BadgeCelebration = () => {
   const { hydrated, knownWords, attendanceDates, xp } = useAppContext();
   const badges = buildBadges({ words: knownWords.length, streak: calcStreak(attendanceDates), xp });
   const [fresh, setFresh] = useState<Badge[] | null>(null);
+  // 여러 개를 한 번에 얻어도 한 화면에 배지 하나씩, 확인을 누를 때마다 다음 배지로 넘긴다
+  const [index, setIndex] = useState(0);
   const earnedIds = badges.filter(b => b.earned).map(b => b.id).join(',');
 
   useEffect(() => {
@@ -35,6 +35,7 @@ export const BadgeCelebration = () => {
       Storage.setItem(KEY, JSON.stringify([...new Set([...seen, ...earned.map(b => b.id)])])).catch(() => {});
       if (news.length === 0) return;
       setFresh(news);
+      setIndex(0);
       feedbackBadge();
       logClick('badge_earned_view', { ids: news.map(b => b.id).join(','), count: news.length });
     });
@@ -44,40 +45,24 @@ export const BadgeCelebration = () => {
   const myTurn = useModalTurn(!!fresh);
   if (!fresh || !myTurn) return null;
 
+  const badge = fresh[index];
+  const next = () => {
+    if (index + 1 < fresh.length) { setIndex(index + 1); return; }
+    logClick('badge_earned_close', { count: fresh.length });
+    setFresh(null);
+  };
   return (
-    <div className="original-modal bg-[var(--color-canvas)] fixed inset-0 z-[60] flex flex-col items-center justify-center gap-6 px-6 overflow-hidden">
-      {CONFETTI.map((c, i) => (
-        <span
-          key={i}
-          aria-hidden
-          className="anim-confetti"
-          style={{ '--x': `${(i * 8 + 4) % 100}%`, '--d': `${(i % 6) * 0.4}s`, '--r': i % 2 ? 1 : -1, background: c } as React.CSSProperties}
-        />
-      ))}
-
-      <h2 className="text-xl font-bold text-[var(--color-ink)] anim-pop-in">새 배지, 컬렉션에 추가!</h2>
-
-      <div className={`flex flex-wrap justify-center gap-5 ${fresh.length === 1 ? '' : 'max-w-xs'}`}>
-        {fresh.map((b, i) => (
-          <div key={b.id} className="flex flex-col items-center gap-2 anim-pop-in" style={{ '--i': i + 2 } as React.CSSProperties}>
-            <BadgeGlyph id={b.id} size={fresh.length === 1 ? 140 : 96} />
-            <p className="text-sm font-bold text-[var(--color-ink)]">{b.title}</p>
-          </div>
-        ))}
-      </div>
-
-      <p className="text-sm text-[var(--color-ink-3)] text-center break-keep anim-fade-up" style={{ '--i': 4 } as React.CSSProperties}>
-        {fresh.length === 1 ? '꾸준히 쌓은 기록이 배지가 됐어. 마이페이지에서 꺼내 봐!' : `${fresh.length}개를 한 번에 챙겼네! 마이페이지에서 꺼내 봐.`}
-      </p>
-
-      <button
-        onClick={() => { logClick('badge_earned_close', { count: fresh.length }); setFresh(null); }}
-        className="action-button w-full max-w-xs anim-fade-up"
-        style={{ '--i': 5 } as React.CSSProperties}
-      >
-        확인
-      </button>
-      <AchievementShareButton card={{ kind: 'badge', title: '새 배지 획득!', value: String(fresh.length), unit: '개의 새로운 배지', description: fresh.map(badge => badge.title).join(' · ') }} />
-    </div>
+    <CelebrationScreen
+      key={badge.id}
+      label="배지 획득"
+      title="새 배지 획득!"
+      subtitle={fresh.length > 1 ? `컬렉션에 추가! ${index + 1}/${fresh.length}` : '컬렉션에 추가!'}
+      confetti
+      art={<BadgeGlyph id={badge.id} size={160} />}
+      record={<p className="celebration-record">{badge.title}</p>}
+      description="꾸준히 쌓은 기록이 배지가 됐어. 마이페이지에서 꺼내 봐!"
+      shareCard={{ kind: 'badge', title: '새 배지 획득!', value: '1', unit: '개의 새로운 배지', description: badge.title }}
+      onClose={next}
+    />
   );
 };

@@ -12,14 +12,18 @@ export const AchievementShareButton = ({ card, label = '이미지로 공유', cl
   card: AchievementCard; label?: string; className?: string; linkMessage?: string;
 }) => {
   const [preview, setPreview] = useState<AchievementCard | null>(null);
+  // 링크 공유 시트가 뜨는 동안 다시 눌러 시트가 연달아 뜨지 않게 한다
+  const linkSharing = useRef(false);
   return <span className={`achievement-share-row ${className}`}>
     <button type="button" className="achievement-share-trigger" onClick={() => {
       setPreview(card);
       logClick('achievement_image_preview', { kind: card.kind });
     }}><ShareNetwork size={18} aria-hidden="true" />{label}</button>
     <button type="button" className="achievement-share-trigger" onClick={() => {
+      if (linkSharing.current) return;
+      linkSharing.current = true;
       logClick('achievement_link_share', { kind: card.kind });
-      void shareTossLink(card.kind, linkMessage ?? achievementShareMessage(card));
+      void shareTossLink(card.kind, linkMessage ?? achievementShareMessage(card)).finally(() => { linkSharing.current = false; });
     }}><LinkSimple size={18} aria-hidden="true" />친구에게 공유</button>
     {preview && createPortal(<AchievementShareDialog card={preview} message={linkMessage ?? achievementShareMessage(card)} onClose={() => setPreview(null)} />, document.body)}
   </span>;
@@ -59,6 +63,7 @@ const AchievementShareDialog = ({ card, message, onClose }: { card: AchievementC
   };
   const save = () => run(async () => {
     const result = await saveAchievementImage(image!);
+    if (result === 'unsupported') { setError('이 토스 앱 버전에서는 이미지를 저장할 수 없어요. 토스 앱을 업데이트해 주세요.'); return; }
     setStatus(result === 'saved' ? '이미지를 저장했어요.' : '이미지를 다운로드했어요.');
     logClick('achievement_image_save', { kind: card.kind, method: result });
   });
