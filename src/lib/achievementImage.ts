@@ -79,16 +79,12 @@ export const createAchievementImage = async (card: AchievementCard): Promise<Ach
   };
 };
 
-export const supportsTossImageShare = (): boolean => {
+const supportsTossSave = (): boolean => {
   // 일반 브라우저에는 토스 환경 상수가 없어 SDK의 지원 여부 조회도 예외가 난다.
   try { return TossFile.saveBase64.isSupported(); } catch { return false; }
 };
 
-export const canShareAchievementImage = (image: AchievementImage): boolean => (
-  supportsTossImageShare() || (typeof navigator.share === 'function' && typeof navigator.canShare === 'function' && navigator.canShare({ files: [image.file] }))
-);
-
-export const downloadAchievementImage = (image: AchievementImage): void => {
+const downloadAchievementImage = (image: AchievementImage): void => {
   const link = document.createElement('a');
   link.href = image.dataUrl;
   link.download = image.file.name;
@@ -97,19 +93,23 @@ export const downloadAchievementImage = (image: AchievementImage): void => {
   link.remove();
 };
 
+// 토스에서는 기기에 저장하고, 그 밖에서는 PNG를 내려받는다.
+export const saveAchievementImage = async (image: AchievementImage): Promise<'saved' | 'downloaded'> => {
+  if (supportsTossSave()) {
+    await TossFile.saveBase64({ data: image.dataUrl.split(',')[1], fileName: image.file.name, mimeType: 'image/png' });
+    return 'saved';
+  }
+  downloadAchievementImage(image);
+  return 'downloaded';
+};
+
+// 이미지 파일 공유(Web Share)가 되면 이미지와 메시지를 함께 보낸다. 안 되면 'unsupported'(호출 쪽이 링크 공유로 대신한다).
 // 이미지를 미리 만들어 둔 뒤 클릭 안에서 호출해 Web Share의 사용자 활성화를 유지한다.
-export const shareAchievementImage = async (image: AchievementImage): Promise<'shared' | 'downloaded' | 'cancelled'> => {
+export const shareAchievementImage = async (image: AchievementImage, text: string): Promise<'shared' | 'cancelled' | 'unsupported'> => {
+  if (typeof navigator.share !== 'function' || typeof navigator.canShare !== 'function' || !navigator.canShare({ files: [image.file] })) return 'unsupported';
   try {
-    if (supportsTossImageShare()) {
-      await TossFile.saveBase64({ data: image.dataUrl.split(',')[1], fileName: image.file.name, mimeType: 'image/png' });
-      return 'shared';
-    }
-    if (typeof navigator.share === 'function' && typeof navigator.canShare === 'function' && navigator.canShare({ files: [image.file] })) {
-      await navigator.share({ files: [image.file] });
-      return 'shared';
-    }
-    downloadAchievementImage(image);
-    return 'downloaded';
+    await navigator.share({ files: [image.file], text });
+    return 'shared';
   } catch (error) {
     if (typeof error === 'object' && error !== null && 'name' in error && error.name === 'AbortError') return 'cancelled';
     throw error;

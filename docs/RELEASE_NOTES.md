@@ -1,6 +1,25 @@
-## 2026-11-19 PR #70 · 검토 필요 - 등급별 리그·공유 카드 새 디자인
+## 2026-11-19 PR #71 · 검토 필요 - 기록 공유하기 저장·공유 버튼 분리
 
-상태: PR #70(`feat/league-stage-share-cards`) 머지 전. 전체 76개 파일·2,082개 테스트(Supabase 환경변수 없이), 타입 검사 통과, 코드 규칙 오류 0·기존 경고 1. deploymentId는 머지 후 기입. 리그 SQL(`supabase/content/league-per-stage/apply.sql`)은 2026-11-18 운영 DB에 적용하고 verify 3줄 모두 true 확인.
+상태: PR #71(`fix/share-modal-save-share`) 머지 전. 전체 76개 파일·2,082개 테스트(Supabase 환경변수 없이), 타입 검사, 바꾼 파일 코드 규칙 검사 통과. deploymentId는 머지 후 기입.
+
+| 항목 | 내용 | 파일 |
+|------|------|------|
+| 기록 공유하기 | 하단을 이미지 저장·공유하기 두 버튼으로. 토스 앱은 기기 저장과 링크 공유(종류별 OG·메시지), 이미지 파일 공유가 되는 환경은 이미지와 메시지를 함께 | `src/components/AchievementShareButton.tsx`, `src/lib/achievementImage.ts` |
+| 기록 공유하기 | 모달을 열 때 X 버튼에 초점 테두리가 생기던 문제 | `src/components/AchievementShareButton.tsx`, `.css` |
+
+미해결: 토스 앱 실기기에서 이미지 저장과 링크 공유 확인 필요.
+
+### 토스 콘솔 출시노트 (사용자 노출용)
+
+```
+- 기록 이미지를 저장하거나 친구에게 바로 공유할 수 있어요.
+```
+
+## 2026-11-19 PR #70 머지 · 검토 필요 (`f16b1ea`) - 등급별 리그·공유 카드 새 디자인
+
+상태: PR #70 머지(main `f16b1ea218639e15716189e1bc89ea2808e7b842`) 후 [자동 배포 44337140063](https://github.com/yyoujg/moneytermi/actions/runs/44337140063) 성공(2026-11-19 00:34 KST 시작 · 00:38 완료). 전체 76개 파일·2,082개 테스트(Supabase 환경변수 없이), 타입 검사 통과, 코드 규칙 오류 0·기존 경고 1. deploymentId `01a1ef4e-7bde-7fa9-ac29-e1886c4c8b74`. 콘솔 번들 번호·검토 요청은 콘솔 확인 후 기입.
+
+실기기: `intoss-private://moneytermi?_deploymentId=01a1ef4e-7bde-7fa9-ac29-e1886c4c8b74&host=appsInTossHost` 리그 SQL(`supabase/content/league-per-stage/apply.sql`)은 2026-11-18 운영 DB에 적용하고 verify 3줄 모두 true 확인.
 
 | 항목 | 내용 | 파일 |
 |------|------|------|

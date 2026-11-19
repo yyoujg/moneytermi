@@ -3,6 +3,7 @@
 .achievement-share-trigger:hover { background: var(--color-surface); }
 .achievement-share-trigger:active { opacity: .7; }
 .achievement-share-dialog { position: fixed; inset: 0; width: calc(100% - 32px); max-width: 420px; max-height: calc(100dvh - 32px); margin: auto; padding: 0; overflow: hidden; border: 0; border-radius: 24px; color: var(--color-ink); background: var(--color-card); }
+.achievement-share-dialog:focus-visible { outline: none !important; }
 .achievement-share-dialog::backdrop { background: rgb(31 26 23 / 55%); }
 .achievement-share-shell { display: flex; flex-direction: column; max-height: calc(100dvh - 32px); }
 .achievement-share-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 24px 20px 16px; }
@@ -15,6 +16,8 @@
 .achievement-share-footer { display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; padding: 16px 20px max(20px, env(safe-area-inset-bottom)); }
 .achievement-share-footer > p { font-size: var(--font-size-label); line-height: var(--line-height-body); text-align: center; color: var(--color-ink-3); }
 .achievement-share-footer > .achievement-share-error { color: var(--color-danger-foreground); }
+.achievement-share-actions { display: flex; gap: 8px; }
+.achievement-share-actions > .action-button { flex: 1; width: auto; }
 .achievement-share-footer .action-button { display: flex; align-items: center; justify-content: center; gap: 8px; }
 .point-celebration .achievement-share-trigger { margin-top: 12px; color: var(--gray-0); }
 .point-celebration .achievement-share-trigger:hover { background: rgb(255 255 255 / 10%); }
