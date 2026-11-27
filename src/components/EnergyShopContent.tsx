@@ -1,5 +1,5 @@
 import { ChevronRight } from './ui/ControlIcons';
-import { ENERGY_AD_REWARD } from '../constants';
+import { ENERGY_ACTION_COST, ENERGY_AD_REWARD } from '../constants';
 
 type Props = {
   energy: number;
@@ -55,7 +55,7 @@ export const EnergyShopContent = ({
         </button>
       </section>
 
-      <p className="energy-shop-info">새 학습·퀴즈를 시작할 때 1씩 써. 이어하기와 복습은 무료고, 매일 자정에 가득 충전돼.</p>
+      <p className="energy-shop-info">새 학습·퀴즈를 시작할 때 {ENERGY_ACTION_COST}씩 써. 이어하기와 복습은 무료고, 매일 자정에 가득 충전돼.</p>
     </div>
   );
 };

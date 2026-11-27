@@ -7,7 +7,7 @@ import CourseScreen from './CourseScreen';
 import { weekStart } from '../lib/periodMissions';
 import HomeScreen from './HomeScreen';
 import LessonIntroScreen, { LESSON_INTRO_MS } from './LessonIntroScreen';
-import { MISSION_XP } from '../constants';
+import { ENERGY_ACTION_COST, MISSION_XP } from '../constants';
 import { showModal } from '../components/AlertModal';
 import { logClick } from '../lib/analytics';
 
@@ -367,7 +367,7 @@ describe('CourseScreen energy gates', () => {
 
     await clickButtonContaining('용어1');
 
-    expect(spendEnergy).toHaveBeenCalledWith(1, 'lesson', 'c1-l0:1,2,3,4');
+    expect(spendEnergy).toHaveBeenCalledWith(ENERGY_ACTION_COST, 'lesson', 'c1-l0:1,2,3,4');
     expect(state.openShop).toHaveBeenCalledWith('energy');
     expect(container.textContent).not.toContain('단어 카드');
   });
@@ -412,7 +412,7 @@ describe('CourseScreen energy gates', () => {
     await passLessonIntro();
     expect(container.textContent).toContain('단어 카드');
     expect(state.spendPoints).not.toHaveBeenCalled();
-    expect(state.spendEnergy).toHaveBeenCalledWith(1, 'lesson', 'c1-l0:1,2,3,4');
+    expect(state.spendEnergy).toHaveBeenCalledWith(ENERGY_ACTION_COST, 'lesson', 'c1-l0:1,2,3,4');
   });
 
   it('복습에서 틀렸어도 열람 진도가 있으면 다음 레슨은 잠기지 않는다', async () => {
@@ -487,7 +487,7 @@ describe('학습 주제의 역할 아이콘', () => {
     await clickButtonContaining('용어1');
     await passLessonIntro();
     expect(container.textContent).toContain('단어 카드');
-    expect(state.spendEnergy).toHaveBeenCalledWith(1, 'lesson', 'c1-l0:1,2,3,4');
+    expect(state.spendEnergy).toHaveBeenCalledWith(ENERGY_ACTION_COST, 'lesson', 'c1-l0:1,2,3,4');
   });
 
   it('학습·퀴즈·복습은 역할 글자(아이콘·배지 없이)로 구분하고 돌은 상태별 노드 그림', async () => {
