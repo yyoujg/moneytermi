@@ -16,6 +16,7 @@ import { shouldScheduleRetry } from '../lib/review';
 import { takeShuffled } from '../lib/random';
 import { LearningCompletionScreen } from '../components/learning/LearningCompletionScreen';
 import { EnergyAdPrompt } from '../components/learning/EnergyAdPrompt';
+import { ENERGY_ACTION_COST } from '../constants';
 import { LearningEmptyState } from '../components/learning/LearningEmptyState';
 import { QuizProgressHeader } from '../components/learning/QuizProgressHeader';
 import { praiseForAnswer } from '../lib/praise';
@@ -37,7 +38,7 @@ const quizShareMessage = (modeLabel: string, total: number, accuracy: number, ma
 const QuizScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { xp, allWords, knownWords, courses, submitQuizAnswer, recordReview, refreshWallet } = useAppContext();
+  const { xp, allWords, knownWords, courses, submitQuizAnswer, recordReview, refreshWallet, energy, spendEnergy, openShop } = useAppContext();
   const { user } = useAuth();
 
   // 단어 id → 코스 카테고리 (오답 보기를 같은 주제로 뽑기 위함)
@@ -165,9 +166,12 @@ const QuizScreen = () => {
         title={completionTitle}
         subtitle={`${baseQueue.length}문제 중 ${firstCorrect}문제를 한 번에 맞혔어!`}
         actionLabel={navState?.nextRoute?.label ?? (backPath.startsWith('/course') ? '주제로 돌아가기' : '퀘스트로')}
-        onAction={() => navState?.nextRoute
-          ? navigate(navState.nextRoute.pathname, { replace: true, state: navState.nextRoute.state })
-          : navigate(backPath, { replace: true, state: { openFocus: true } })}
+        onAction={() => {
+          // 결과 화면을 넘어갈 때 1을 쓴다. 모자라도 넘어가는 건 막지 않는다
+          void spendEnergy(ENERGY_ACTION_COST, 'quiz_complete');
+          if (navState?.nextRoute) navigate(navState.nextRoute.pathname, { replace: true, state: navState.nextRoute.state });
+          else navigate(backPath, { replace: true, state: { openFocus: true } });
+        }}
       >
         {/* 끝 화면은 한 문장(위)과 보상 한 줄만. 정답률·연속 기록은 문장과 겹쳐 뺐다 */}
         <section className="quiz-result-stats anim-fade-up" role="group" aria-label="퀴즈 결과 요약" style={{ '--i': 2 } as React.CSSProperties}>
@@ -228,6 +232,7 @@ const QuizScreen = () => {
         setCorrectCount(value => value + 1);
       } else {
         feedbackWrong();
+        void spendEnergy(ENERGY_ACTION_COST, 'quiz_wrong');
         setShake(true);
         setTimeout(() => { if (mountedRef.current) setShake(false); }, 500);
         if (shouldScheduleRetry(quizQueue, currentQuizIndex, attempt.wordId)) setRetryQueue(queue => [...queue, currentWord]);
@@ -242,6 +247,12 @@ const QuizScreen = () => {
 
   const goNextQuestion = () => {
     if (answerLock.current || answerPending || status === 'idle') return;
+    // 오답으로 에너지가 바닥나면 충전하기 전까지 다음 문제로 가지 않는다
+    if (energy <= 0) {
+      logClick('energy_blocked', { type: 'quiz_next', energy, node_id: navState?.nodeId, course_id: navState?.courseId });
+      openShop('energy');
+      return;
+    }
     answerLock.current = true;
     attemptRef.current = null;
     setGradingConflict(false);

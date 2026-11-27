@@ -55,7 +55,7 @@ export const EnergyShopContent = ({
         </button>
       </section>
 
-      <p className="energy-shop-info">새 학습·퀴즈를 시작할 때 1씩 써. 이어하기와 복습은 무료고, 매일 자정에 가득 충전돼.</p>
+      <p className="energy-shop-info">문제를 틀리거나 학습 결과를 넘길 때 1씩 써. 매일 자정에 가득 충전돼.</p>
     </div>
   );
 };

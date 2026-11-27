@@ -1,6 +1,6 @@
-## 2026-11-27 PR 준비 - 학습 완료 화면 광고 충전 버튼, 에너지 하루 한 번 풀충전
+## 2026-11-27 PR #74 준비 - 학습 완료 화면 광고 충전 버튼, 에너지 소모 시점 변경·하루 한 번 풀충전
 
-상태: 머지 전. 전체 77개 파일·2,087개 테스트(Supabase 환경변수 없이), 타입 검사, 바꾼 파일 코드 규칙 검사 통과. DB 변경 없음. deploymentId는 머지 후 기입.
+상태: 머지 전. 전체 77개 파일·2,089개 테스트(Supabase 환경변수 없이), 타입 검사, 바꾼 파일 코드 규칙 검사 통과. DB 변경 없음. deploymentId는 머지 후 기입.
 
 배경: 최근 14일 인앱 광고 요청 2건·노출 0건. 광고는 에너지 시트를 열 때만 불러오는데, 1시간에 1칸 회복이라 에너지가 바닥나는 사용자가 없었다(콘솔 `energy_blocked` 0건, `energy_spend` 34건).
 
@@ -8,7 +8,8 @@
 |------|------|------|
 | 광고 충전 버튼 | 퀴즈 완료·레슨 확인 완료 화면에 "광고 보고 에너지 +5". 에너지가 덜 찼고 광고가 켜져 있을 때만 보이고, 누르면 기존 에너지 시트를 연다(`energy_ad_prompt_click`) | `src/components/learning/EnergyAdPrompt.tsx`, `src/pages/QuizScreen.tsx`, `src/components/learning/LessonCheckSummary.tsx` |
 | 에너지 회복 | 1시간에 1칸 → 매일 한국 시간 자정에 25칸 풀충전. `ENERGY_REGEN_MS` 삭제 | `src/lib/energy.ts`, `src/constants.ts` |
-| 에너지 시트 문구 | "N시간 N분 후 가득", "매일 자정에 가득 충전돼" | `src/components/EnergyShopContent.tsx` |
+| 에너지 소모 시점 | 노드 시작 때 1 → 퀴즈·레슨 확인 오답마다 1, 결과 화면을 넘길 때 1. 노드 시작은 무료이고 에너지 0이면 열지 않는다. 문제 중 0이 되면 충전하기 전까지 다음 문제로 못 가고 에너지 시트가 열린다(`energy_blocked` type `quiz_next`·`lesson_check_next`) | `src/pages/CourseScreen.tsx`, `src/pages/QuizScreen.tsx`, `src/pages/LessonCheckScreen.tsx` |
+| 에너지 시트 문구 | "N시간 N분 후 가득", "문제를 틀리거나 학습 결과를 넘길 때 1씩 써. 매일 자정에 가득 충전돼." | `src/components/EnergyShopContent.tsx` |
 
 미해결: 토스 앱 실기기에서 완료 화면 버튼·광고 표시 확인 필요. 배포 후 콘솔 인앱 광고 요청 수와 `energy_ad_prompt_click`, `energy_blocked` 추이 확인.
 
@@ -16,6 +17,7 @@
 
 ```
 - 학습을 마치면 광고를 보고 에너지를 바로 충전할 수 있어요.
+- 에너지는 문제를 틀리거나 학습을 마칠 때 써요.
 - 에너지가 매일 자정에 가득 채워져요.
 ```
 

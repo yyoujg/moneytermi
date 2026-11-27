@@ -18,6 +18,8 @@ const state = vi.hoisted(() => ({
   submitQuizAnswer: vi.fn(),
   refreshWallet: vi.fn(),
   shareImage: vi.fn(),
+  spendEnergy: vi.fn(async () => true),
+  openShop: vi.fn(),
 }));
 
 vi.mock('../lib/quiz', () => ({
@@ -47,6 +49,9 @@ vi.mock('../context/AppContext', () => ({
     submitQuizAnswer: state.submitQuizAnswer,
     recordReview: state.recordReview,
     refreshWallet: state.refreshWallet,
+    energy: 25,
+    spendEnergy: state.spendEnergy,
+    openShop: state.openShop,
   }),
 }));
 // 숫자 애니메이션은 제외하고 화면에 전달된 서버 보상 합계를 검증한다.

@@ -12,7 +12,8 @@ import type { CustomQuiz } from '../lib/quiz';
 
 vi.mock('../lib/feedback', () => ({ feedbackCorrect: vi.fn(), feedbackWrong: vi.fn() }));
 vi.mock('../lib/analytics', () => ({ logClick: vi.fn() }));
-vi.mock('../context/AppContext', () => ({ useAppContext: () => ({ energy: 10, energyMax: 10, openShop: vi.fn() }) }));
+const energyCtx = vi.hoisted(() => ({ energy: 10, energyMax: 10, openShop: vi.fn(), spendEnergy: vi.fn(async () => true) }));
+vi.mock('../context/AppContext', () => ({ useAppContext: () => energyCtx }));
 Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { value: true, configurable: true });
 
 const word = (id: number, visuals?: Word['visuals']): Word => ({
@@ -22,7 +23,7 @@ const word = (id: number, visuals?: Word['visuals']): Word => ({
 const check = { type: 'quiz' as const, lessonCheck: true as const, q: '이 상황에서 어떤 변화가 생길까요?', options: ['오른다', '내린다', '같다', '모른다'], answer: 0, explanation: '수요가 늘었으므로 가격이 올라요.' };
 
 let cleanup = () => {};
-afterEach(() => { cleanup(); vi.clearAllMocks(); });
+afterEach(() => { cleanup(); vi.clearAllMocks(); energyCtx.energy = 10; });
 
 const CourseDestination = () => {
   const location = useLocation();
@@ -76,6 +77,25 @@ describe('레슨 이해 확인', () => {
     expect(logClick).toHaveBeenCalledWith('lesson_check_complete', { course_id: 'example-course', node_id: 'example-node', total: 1, correct: 1, attempt: 2 });
     click('코스에서 이어 하기');
     expect(container.textContent).toContain('코스 화면');
+  });
+
+  it('오답마다 에너지를 쓰고, 결과를 넘길 때 에너지를 쓴다', () => {
+    const { container, click } = mount({ pathname: '/lesson-check', state: { words: [word(1, [check])] } });
+    click('내린다');
+    expect(energyCtx.spendEnergy).toHaveBeenCalledWith(1, 'lesson_check_wrong');
+    click('결과 보기');
+    click('코스로 돌아가기');
+    expect(energyCtx.spendEnergy).toHaveBeenCalledWith(1, 'lesson_check_complete');
+    expect(container.textContent).toContain('코스 화면');
+  });
+
+  it('에너지가 0이면 충전 전까지 다음으로 넘어가지 않고 에너지 시트를 연다', () => {
+    const { container, click } = mount({ pathname: '/lesson-check', state: { words: [word(1, [check])] } });
+    energyCtx.energy = 0;
+    click('내린다');
+    click('결과 보기');
+    expect(energyCtx.openShop).toHaveBeenCalledWith('energy');
+    expect(container.querySelector('[data-lesson-check-complete]')).toBeNull();
   });
 
   it.each([0, 1, 2, 173, 220])('신규 문항 %i의 정답과 해설을 표시하고 완료한다', index => {

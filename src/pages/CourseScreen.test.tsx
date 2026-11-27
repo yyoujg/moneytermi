@@ -360,38 +360,33 @@ describe('CourseScreen energy gates', () => {
     expect(state.retryContent).toHaveBeenCalledTimes(1);
   });
 
-  it('새 레슨 시작 시 에너지가 부족하면 이동하지 않고 에너지 상점을 연다', async () => {
+  it('에너지가 0이면 레슨을 열지 않고 에너지 상점을 연다', async () => {
     const spendEnergy = vi.fn(() => Promise.resolve(false));
     baseContext({ energy: 0, spendEnergy });
     const { container, clickButtonContaining } = await mount();
 
     await clickButtonContaining('용어1');
 
-    expect(spendEnergy).toHaveBeenCalledWith(1, 'lesson', 'c1-l0:1,2,3,4');
+    expect(spendEnergy).not.toHaveBeenCalled();
     expect(state.openShop).toHaveBeenCalledWith('energy');
     expect(container.textContent).not.toContain('단어 카드');
   });
 
-  it('연속 탭은 에너지 차감과 이동을 한 번만 실행한다', async () => {
-    let resolveSpend!: (value: boolean) => void;
-    state.spendEnergy = vi.fn(() => new Promise<boolean>(resolve => { resolveSpend = resolve; }));
-    state.ctx = { ...state.ctx, spendEnergy: state.spendEnergy };
+  it('연속 탭은 이동을 한 번만 실행하고 시작할 때 에너지를 쓰지 않는다', async () => {
     const { container } = await mount();
     const button = [...container.querySelectorAll('button')].find(el => el.textContent?.includes('용어1'))!;
 
-    act(() => {
+    await act(async () => {
       button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
-    expect(state.spendEnergy).toHaveBeenCalledTimes(1);
-
-    await act(async () => { resolveSpend(true); });
+    expect(state.spendEnergy).not.toHaveBeenCalled();
     expect(container.querySelector('[data-location]')).toHaveTextContent('/lesson-intro');
     await passLessonIntro();
     expect(container.textContent).toContain('단어 카드');
   });
 
-  it('완료 레슨 재진입은 에너지를 다시 쓰지 않는다', async () => {
+  it('완료 레슨을 다시 열 때 에너지를 쓰지 않는다', async () => {
     baseContext({ knownIds: new Set([1, 2, 3, 4]) });
     const { container, clickButtonContaining } = await mount();
 
@@ -412,7 +407,7 @@ describe('CourseScreen energy gates', () => {
     await passLessonIntro();
     expect(container.textContent).toContain('단어 카드');
     expect(state.spendPoints).not.toHaveBeenCalled();
-    expect(state.spendEnergy).toHaveBeenCalledWith(1, 'lesson', 'c1-l0:1,2,3,4');
+    expect(state.spendEnergy).not.toHaveBeenCalled();
   });
 
   it('복습에서 틀렸어도 열람 진도가 있으면 다음 레슨은 잠기지 않는다', async () => {
@@ -431,7 +426,7 @@ describe('CourseScreen energy gates', () => {
 
     await clickButtonContaining('용어1');
 
-    expect(state.spendEnergy).toHaveBeenCalledTimes(1);
+    expect(state.spendEnergy).not.toHaveBeenCalled();
     expect(state.pickRecallWords).toHaveBeenCalledWith({ excludeIds: [1, 2, 3, 4], count: 3 });
     // 처음 여는 레슨은 수달 로딩을 잠깐 보여준 뒤 인출 퀴즈로 보낸다
     expect(container.textContent).toContain('새 용어 4개, 같이 알아보자');
@@ -440,7 +435,7 @@ describe('CourseScreen energy gates', () => {
     expect(container.textContent).not.toContain('단어 카드');
   });
 
-  it('코스 복습은 에너지를 쓰지 않고 복습 퀴즈로 간다', async () => {
+  it('코스 복습은 시작할 때 에너지를 쓰지 않고 복습 퀴즈로 간다', async () => {
     baseContext({ knownIds: new Set([1, 2, 3, 4]) });
     const { container, clickButtonContaining } = await mount();
 
@@ -487,7 +482,7 @@ describe('학습 주제의 역할 아이콘', () => {
     await clickButtonContaining('용어1');
     await passLessonIntro();
     expect(container.textContent).toContain('단어 카드');
-    expect(state.spendEnergy).toHaveBeenCalledWith(1, 'lesson', 'c1-l0:1,2,3,4');
+    expect(state.spendEnergy).not.toHaveBeenCalled();
   });
 
   it('학습·퀴즈·복습은 역할 글자(아이콘·배지 없이)로 구분하고 돌은 상태별 노드 그림', async () => {

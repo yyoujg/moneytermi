@@ -4,6 +4,8 @@ import type { Word } from '../types';
 import { buildCustomQuizItem, lessonChecks } from '../lib/quiz';
 import { feedbackCorrect, feedbackWrong } from '../lib/feedback';
 import { logClick } from '../lib/analytics';
+import { useAppContext } from '../context/AppContext';
+import { ENERGY_ACTION_COST } from '../constants';
 import { ActionButton } from '../components/ui/ActionButton';
 import { LessonCheckFeedback } from '../components/learning/LessonCheckFeedback';
 import { LessonCheckSummary, type LessonCheckRoundResult } from '../components/learning/LessonCheckSummary';
@@ -13,6 +15,7 @@ import { shuffle } from '../lib/random';
 const LessonCheckScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { energy, spendEnergy, openShop } = useAppContext();
   const state = location.state as { words?: Word[]; backPath?: string; courseId?: string; nodeId?: string } | null;
   const backPath = state?.backPath ?? '/course';
   const [questions, setQuestions] = useState(() => lessonChecks(state?.words ?? []).map(({ word, quiz }) => ({ ...buildCustomQuizItem(quiz), wordId: word.id })));
@@ -49,12 +52,18 @@ const LessonCheckScreen = () => {
         results={roundResults}
         reviewCount={mistakes.length}
         onRetry={() => { setQuestions(mistakes.map(item => ({ ...item, options: shuffle(item.options) }))); setMistakes([]); setIndex(0); setSelected(null); setAttempt(value => value + 1); }}
-        onBack={() => navigate(backPath, { replace: true, state: { openFocus: true } })}
+        onBack={() => { void spendEnergy(ENERGY_ACTION_COST, 'lesson_check_complete'); navigate(backPath, { replace: true, state: { openFocus: true } }); }}
       />
     );
   }
 
   const goNext = () => {
+    // 오답으로 에너지가 바닥나면 충전하기 전까지 다음 문제로 가지 않는다
+    if (energy <= 0) {
+      logClick('energy_blocked', { type: 'lesson_check_next', energy, node_id: state?.nodeId, course_id: state?.courseId });
+      openShop('energy');
+      return;
+    }
     const questionKey = `${attempt}:${index}`;
     if (advancedQuestionRef.current === questionKey) return;
     advancedQuestionRef.current = questionKey;
@@ -98,7 +107,7 @@ const LessonCheckScreen = () => {
                 setSelected(optionIndex);
                 logClick('lesson_check_answer', { course_id: state?.courseId, node_id: state?.nodeId, word_id: question.wordId, correct: option.isCorrect, attempt });
                 if (option.isCorrect) feedbackCorrect();
-                else { feedbackWrong(); setMistakes(prev => [...prev, question]); }
+                else { feedbackWrong(); void spendEnergy(ENERGY_ACTION_COST, 'lesson_check_wrong'); setMistakes(prev => [...prev, question]); }
               }}
               className="lesson-question-option"
             >

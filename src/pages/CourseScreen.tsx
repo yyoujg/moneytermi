@@ -6,7 +6,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { useAuth } from '../hooks/useAuth';
 import { logClick } from '../lib/analytics';
-import { ENERGY_ACTION_COST, levelLabel } from '../constants';
+import { levelLabel } from '../constants';
 import { feedbackNodeTap } from '../lib/feedback';
 import { calcStreak } from '../lib/streak';
 import { loadDoneNodes } from '../lib/pathProgress';
@@ -95,7 +95,7 @@ const CourseScreen = () => {
   const navigate = useNavigate();
   const isCatalog = useLocation().pathname === '/course/topics';
   const [searchParams, setSearchParams] = useSearchParams();
-  const { hydrated, contentStatus, retryContent, viewedIds: knownIds, courses, energy, energyMax, spendEnergy, pickRecallWords, openShop, xp, attendanceDates } = useAppContext();
+  const { hydrated, contentStatus, retryContent, viewedIds: knownIds, courses, energy, energyMax, pickRecallWords, openShop, xp, attendanceDates } = useAppContext();
   // 이 기기에서 끝낸 퀴즈·복습 노드. 화면에 돌아올 때마다 다시 읽는다(퀴즈 끝내고 돌아온 직후 반영).
   const [doneNodes, setDoneNodes] = useState<Set<string>>(new Set());
   const [doneNodesLoaded, setDoneNodesLoaded] = useState(false);
@@ -282,14 +282,13 @@ const CourseScreen = () => {
     logClick('path_node_click', { course_id: node.courseId, type: node.type, index, state: node.state });
 
     try {
-      const needsEnergy = !isDone(node) && node.type !== 'review';
-      const accessKey = `${node.id}:${node.words.map(word => word.id).join(',')}`;
+      // 에너지는 시작할 때가 아니라 오답·결과 화면에서 쓴다. 바닥났으면 충전 시트부터 연다.
+      if (energy <= 0) {
+        logClick('energy_blocked', { type: node.type, energy, node_id: node.id, course_id: node.courseId });
+        openShop('energy');
+        return;
+      }
       if (node.type === 'quiz' || node.type === 'review') {
-        if (needsEnergy && !(await spendEnergy(ENERGY_ACTION_COST, node.type, accessKey))) {
-          logClick('energy_blocked', { type: node.type, energy, node_id: node.id, course_id: node.courseId });
-          openShop('energy');
-          return;
-        }
         const pool = learnedOrFallbackWords(node.words, knownIds);
         const queue = node.type === 'review'
           ? pickRecallWords({ candidates: pool, count: COURSE_REVIEW_COUNT })
@@ -300,11 +299,6 @@ const CourseScreen = () => {
         return;
       }
 
-      if (needsEnergy && !(await spendEnergy(ENERGY_ACTION_COST, node.type, accessKey))) {
-        logClick('energy_blocked', { type: node.type, energy, node_id: node.id, course_id: node.courseId });
-        openShop('energy');
-        return;
-      }
       if (node.state !== 'done' && courseKnown === 0) {
         logClick('course_start', { course_id: node.courseId, title: courseTitle });
       }
@@ -314,7 +308,7 @@ const CourseScreen = () => {
       feedbackNodeTap();
       await expandFromNode(node.id, courseTitle);
       const lessonState = { words: node.words, index: firstUnknownWordIndex(node.words, knownIds), backPath, autoAdvance: true, courseTitle, courseId: node.courseId, nodeId: node.id };
-      const recallWords = needsEnergy ? pickRecallWords({ excludeIds: node.words.map(word => word.id), count: LESSON_WARMUP_COUNT }) : [];
+      const recallWords = !isDone(node) ? pickRecallWords({ excludeIds: node.words.map(word => word.id), count: LESSON_WARMUP_COUNT }) : [];
       const destination = recallWords.length > 0
         ? {
           pathname: '/quiz',

@@ -52,8 +52,8 @@ describe('에너지 시트의 실제 조건과 동작', () => {
     const { container } = mount({ energyLeft: 3599000 });
     expect(container).toHaveTextContent('1시간 0분 후 가득');
   });
-  it('이용 안내와 복습 무료 조건을 유지한다', () => {
+  it('에너지를 쓰는 때를 안내한다', () => {
     const { container } = mount();
-    expect(container).toHaveTextContent('이어하기와 복습은 무료');
+    expect(container).toHaveTextContent('문제를 틀리거나 학습 결과를 넘길 때 1씩 써');
   });
 });
