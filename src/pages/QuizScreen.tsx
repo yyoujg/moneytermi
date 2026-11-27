@@ -16,7 +16,7 @@ import { shouldScheduleRetry } from '../lib/review';
 import { takeShuffled } from '../lib/random';
 import { LearningCompletionScreen } from '../components/learning/LearningCompletionScreen';
 import { EnergyAdPrompt } from '../components/learning/EnergyAdPrompt';
-import { ENERGY_ACTION_COST } from '../constants';
+import { ENERGY_ACTION_COST, ENERGY_STREAK_TARGET } from '../constants';
 import { LearningEmptyState } from '../components/learning/LearningEmptyState';
 import { QuizProgressHeader } from '../components/learning/QuizProgressHeader';
 import { praiseForAnswer } from '../lib/praise';
@@ -38,7 +38,7 @@ const quizShareMessage = (modeLabel: string, total: number, accuracy: number, ma
 const QuizScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { xp, allWords, knownWords, courses, submitQuizAnswer, recordReview, refreshWallet, energy, spendEnergy, openShop } = useAppContext();
+  const { xp, allWords, knownWords, courses, submitQuizAnswer, recordReview, refreshWallet, spendEnergy, earnEnergy } = useAppContext();
   const { user } = useAuth();
 
   // 단어 id → 코스 카테고리 (오답 보기를 같은 주제로 뽑기 위함)
@@ -99,6 +99,7 @@ const QuizScreen = () => {
   const [correctCount, setCorrectCount] = useState(0);
   const [firstCorrect, setFirstCorrect] = useState(0);
   const [shake, setShake] = useState(false);
+  const streakRef = useRef(0);   // 이 세션의 연속 정답 수. ENERGY_STREAK_TARGET마다 에너지 +1
   const { soundOn, vibrationOn } = useSettings();
   const reviewRecordedIds = useRef<Set<number>>(new Set());
   const completedRef = useRef(false);
@@ -167,8 +168,8 @@ const QuizScreen = () => {
         subtitle={`${baseQueue.length}문제 중 ${firstCorrect}문제를 한 번에 맞혔어!`}
         actionLabel={navState?.nextRoute?.label ?? (backPath.startsWith('/course') ? '주제로 돌아가기' : '퀘스트로')}
         onAction={() => {
-          // 결과 화면을 넘어갈 때 1을 쓴다. 모자라도 넘어가는 건 막지 않는다
-          void spendEnergy(ENERGY_ACTION_COST, 'quiz_complete');
+          // 결과 화면을 넘어갈 때 1을 쓴다. 레슨 앞 워밍업은 레슨의 일부라 레슨 끝에서 한 번만 쓴다
+          if (mode !== 'lesson_warmup') void spendEnergy(ENERGY_ACTION_COST, 'quiz_complete');
           if (navState?.nextRoute) navigate(navState.nextRoute.pathname, { replace: true, state: navState.nextRoute.state });
           else navigate(backPath, { replace: true, state: { openFocus: true } });
         }}
@@ -230,9 +231,11 @@ const QuizScreen = () => {
       if (res.correct) {
         feedbackCorrect(soundOn, vibrationOn, res.combo);
         setCorrectCount(value => value + 1);
+        streakRef.current += 1;
+        if (streakRef.current % ENERGY_STREAK_TARGET === 0) earnEnergy(1, 'quiz_streak');
       } else {
         feedbackWrong();
-        void spendEnergy(ENERGY_ACTION_COST, 'quiz_wrong');
+        streakRef.current = 0;
         setShake(true);
         setTimeout(() => { if (mountedRef.current) setShake(false); }, 500);
         if (shouldScheduleRetry(quizQueue, currentQuizIndex, attempt.wordId)) setRetryQueue(queue => [...queue, currentWord]);
@@ -247,12 +250,6 @@ const QuizScreen = () => {
 
   const goNextQuestion = () => {
     if (answerLock.current || answerPending || status === 'idle') return;
-    // 오답으로 에너지가 바닥나면 충전하기 전까지 다음 문제로 가지 않는다
-    if (energy <= 0) {
-      logClick('energy_blocked', { type: 'quiz_next', energy, node_id: navState?.nodeId, course_id: navState?.courseId });
-      openShop('energy');
-      return;
-    }
     answerLock.current = true;
     attemptRef.current = null;
     setGradingConflict(false);

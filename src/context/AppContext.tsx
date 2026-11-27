@@ -37,6 +37,7 @@ type AppContextValue = {
   nextEnergyAt: number | null;
   spendEnergy: (amount: number, reason: string, accessKey?: string) => Promise<boolean>;
   claimEnergyAd: (amount?: number) => Promise<number | null>;
+  earnEnergy: (amount: number, reason: string) => void;
   buyEnergyRefill: () => Promise<EnergyRefillResult | 'full'>;
   spendPoints: (amount: number, reason: string) => Promise<boolean>;
   claimFirstLesson: (courseId: string) => Promise<'free' | 'ineligible' | 'error'>;
@@ -659,6 +660,17 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     return data.credited as number;
   };
 
+  // ── earnEnergy — 연속 정답 같은 학습 보상으로 이 기기 에너지를 채운다(최대치까지) ──
+  const earnEnergy = (amount: number, reason: string) => {
+    const normalized = normalizeEnergy(energyStateRef.current);
+    const next = addEnergyState(normalized, amount);
+    if (next.current <= normalized.current) return;
+    energyStateRef.current = next;
+    setEnergyState(next);
+    void persistEnergy(next);
+    logClick('energy_earn', { reason, amount: next.current - normalized.current, energy: next.current });
+  };
+
   // ── claimEnergyAd — 광고 보상으로 이 기기 에너지를 충전한다 ──
   const claimEnergyAd = async (amount = ENERGY_AD_REWARD) => {
     const normalized = normalizeEnergy(energyStateRef.current);
@@ -848,7 +860,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       knownWords, knownIds, viewedIds, setKnownWords,
       unknownWords, setUnknownWords,
       xp, leagueStage, boostUntil, buyBoost,
-      energy, energyMax: ENERGY_MAX, nextEnergyAt, spendEnergy, claimEnergyAd, buyEnergyRefill,
+      energy, energyMax: ENERGY_MAX, nextEnergyAt, spendEnergy, claimEnergyAd, earnEnergy, buyEnergyRefill,
       spendPoints, claimFirstLesson, refreshWallet, shopReason, shopOpen, openShop, closeShop,
       missions, setMissions,
       claimReward, claimingMissionIds,

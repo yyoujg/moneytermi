@@ -1,5 +1,5 @@
 import { ChevronRight } from './ui/ControlIcons';
-import { ENERGY_AD_REWARD } from '../constants';
+import { ENERGY_AD_REWARD, ENERGY_STREAK_TARGET } from '../constants';
 
 type Props = {
   energy: number;
@@ -55,7 +55,7 @@ export const EnergyShopContent = ({
         </button>
       </section>
 
-      <p className="energy-shop-info">문제를 틀리거나 학습 결과를 넘길 때 1씩 써. 매일 자정에 가득 충전돼.</p>
+      <p className="energy-shop-info">학습을 마칠 때 1씩 써. 문제를 {ENERGY_STREAK_TARGET}개 연속으로 맞히면 1 채워지고, 틀린 문제 다시 풀기는 무료야. 매일 자정에 가득 충전돼.</p>
     </div>
   );
 };

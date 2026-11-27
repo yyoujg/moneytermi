@@ -54,6 +54,6 @@ describe('에너지 시트의 실제 조건과 동작', () => {
   });
   it('에너지를 쓰는 때를 안내한다', () => {
     const { container } = mount();
-    expect(container).toHaveTextContent('문제를 틀리거나 학습 결과를 넘길 때 1씩 써');
+    expect(container).toHaveTextContent('학습을 마칠 때 1씩 써. 문제를 3개 연속으로 맞히면 1 채워지고');
   });
 });

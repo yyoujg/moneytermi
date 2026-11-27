@@ -12,7 +12,7 @@ import type { CustomQuiz } from '../lib/quiz';
 
 vi.mock('../lib/feedback', () => ({ feedbackCorrect: vi.fn(), feedbackWrong: vi.fn() }));
 vi.mock('../lib/analytics', () => ({ logClick: vi.fn() }));
-const energyCtx = vi.hoisted(() => ({ energy: 10, energyMax: 10, openShop: vi.fn(), spendEnergy: vi.fn(async () => true) }));
+const energyCtx = vi.hoisted(() => ({ energy: 10, energyMax: 10, openShop: vi.fn(), spendEnergy: vi.fn(async () => true), earnEnergy: vi.fn() }));
 vi.mock('../context/AppContext', () => ({ useAppContext: () => energyCtx }));
 Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { value: true, configurable: true });
 
@@ -23,7 +23,7 @@ const word = (id: number, visuals?: Word['visuals']): Word => ({
 const check = { type: 'quiz' as const, lessonCheck: true as const, q: '이 상황에서 어떤 변화가 생길까요?', options: ['오른다', '내린다', '같다', '모른다'], answer: 0, explanation: '수요가 늘었으므로 가격이 올라요.' };
 
 let cleanup = () => {};
-afterEach(() => { cleanup(); vi.clearAllMocks(); energyCtx.energy = 10; });
+afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
 const CourseDestination = () => {
   const location = useLocation();
@@ -79,23 +79,33 @@ describe('레슨 이해 확인', () => {
     expect(container.textContent).toContain('코스 화면');
   });
 
-  it('오답마다 에너지를 쓰고, 결과를 넘길 때 에너지를 쓴다', () => {
+  it('오답에는 에너지를 쓰지 않고, 결과를 넘길 때 1을 쓴다', () => {
     const { container, click } = mount({ pathname: '/lesson-check', state: { words: [word(1, [check])] } });
     click('내린다');
-    expect(energyCtx.spendEnergy).toHaveBeenCalledWith(1, 'lesson_check_wrong');
+    expect(energyCtx.spendEnergy).not.toHaveBeenCalled();
+    click('결과 보기');
+    click('틀린 문제 다시 풀기');
+    click('내린다');
+    expect(energyCtx.spendEnergy).not.toHaveBeenCalled();
     click('결과 보기');
     click('코스로 돌아가기');
+    expect(energyCtx.spendEnergy).toHaveBeenCalledTimes(1);
     expect(energyCtx.spendEnergy).toHaveBeenCalledWith(1, 'lesson_check_complete');
     expect(container.textContent).toContain('코스 화면');
   });
 
-  it('에너지가 0이면 충전 전까지 다음으로 넘어가지 않고 에너지 시트를 연다', () => {
-    const { container, click } = mount({ pathname: '/lesson-check', state: { words: [word(1, [check])] } });
-    energyCtx.energy = 0;
-    click('내린다');
-    click('결과 보기');
-    expect(energyCtx.openShop).toHaveBeenCalledWith('energy');
-    expect(container.querySelector('[data-lesson-check-complete]')).toBeNull();
+  it('3문제를 연속으로 맞히면 에너지를 1 채우고, 틀리면 연속 기록이 끊긴다', () => {
+    const { click } = mount({ pathname: '/lesson-check', state: { words: [1, 2, 3, 4].map(id => word(id, [check])) } });
+    const answer = (label: string, last = false) => { click(label); click(last ? '결과 보기' : '다음 문제'); };
+    answer('오른다');
+    answer('내린다');
+    answer('오른다');
+    answer('오른다', true);
+    expect(energyCtx.earnEnergy).not.toHaveBeenCalled();
+    click('틀린 문제 다시 풀기');
+    click('오른다');
+    expect(energyCtx.earnEnergy).toHaveBeenCalledTimes(1);
+    expect(energyCtx.earnEnergy).toHaveBeenCalledWith(1, 'lesson_check_streak');
   });
 
   it.each([0, 1, 2, 173, 220])('신규 문항 %i의 정답과 해설을 표시하고 완료한다', index => {
