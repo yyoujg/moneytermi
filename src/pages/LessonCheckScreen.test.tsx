@@ -12,6 +12,7 @@ import type { CustomQuiz } from '../lib/quiz';
 
 vi.mock('../lib/feedback', () => ({ feedbackCorrect: vi.fn(), feedbackWrong: vi.fn() }));
 vi.mock('../lib/analytics', () => ({ logClick: vi.fn() }));
+vi.mock('../context/AppContext', () => ({ useAppContext: () => ({ energy: 10, energyMax: 10, openShop: vi.fn() }) }));
 Object.defineProperty(globalThis, 'IS_REACT_ACT_ENVIRONMENT', { value: true, configurable: true });
 
 const word = (id: number, visuals?: Word['visuals']): Word => ({

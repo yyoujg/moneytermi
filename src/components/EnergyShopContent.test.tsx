@@ -50,7 +50,7 @@ describe('에너지 시트의 실제 조건과 동작', () => {
   });
   it('자동 충전 남은 시간을 기존 방식으로 표시한다', () => {
     const { container } = mount({ energyLeft: 3599000 });
-    expect(container).toHaveTextContent('1시간 0분 후 +1');
+    expect(container).toHaveTextContent('1시간 0분 후 가득');
   });
   it('이용 안내와 복습 무료 조건을 유지한다', () => {
     const { container } = mount();

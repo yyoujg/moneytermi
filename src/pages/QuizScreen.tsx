@@ -15,6 +15,7 @@ import { buildQuizItem, pickQuizType, type QuizOption } from '../lib/quiz';
 import { shouldScheduleRetry } from '../lib/review';
 import { takeShuffled } from '../lib/random';
 import { LearningCompletionScreen } from '../components/learning/LearningCompletionScreen';
+import { EnergyAdPrompt } from '../components/learning/EnergyAdPrompt';
 import { LearningEmptyState } from '../components/learning/LearningEmptyState';
 import { QuizProgressHeader } from '../components/learning/QuizProgressHeader';
 import { praiseForAnswer } from '../lib/praise';
@@ -177,6 +178,7 @@ const QuizScreen = () => {
           description: `${sessionLabel} ${baseQueue.length}문제 중 ${firstCorrect}문제 정답`,
           stats: [{ label: '획득 XP', value: `+${Math.max(0, xp - xpAtStart.current)}` }, { label: '최대 연속 정답', value: `${maxCombo}회` }],
         }} linkMessage={quizShareMessage(sessionLabel, baseQueue.length, accuracy, maxCombo, baseQueue)} />
+        <EnergyAdPrompt from="quiz_complete" />
       </LearningCompletionScreen>
     );
   }
