@@ -1,5 +1,5 @@
 import { ChevronRight } from './ui/ControlIcons';
-import { ENERGY_AD_REWARD, ENERGY_REGEN_MS } from '../constants';
+import { ENERGY_AD_REWARD } from '../constants';
 
 type Props = {
   energy: number;
@@ -40,7 +40,7 @@ export const EnergyShopContent = ({
         <div className="energy-shop-summary-heading">
           <img src="/icons/stat/icon-energy.svg" alt="" width={24} height={24} data-stat-icon="energy" />
           <div className="energy-shop-balance"><p><strong>{energy}</strong><span>/ {energyMax}</span></p></div>
-          {!full && <span className="energy-shop-state">{formatEnergyLeft(energyLeft)} 후 +1</span>}
+          {!full && <span className="energy-shop-state">{formatEnergyLeft(energyLeft)} 후 가득</span>}
         </div>
         <div role="progressbar" aria-label="에너지 충전 진행률" aria-valuemin={0} aria-valuemax={energyMax} aria-valuenow={energy} className="energy-shop-progress" data-full={full}>
           <span style={{ width: `${energyPercent}%` }} />
@@ -55,7 +55,7 @@ export const EnergyShopContent = ({
         </button>
       </section>
 
-      <p className="energy-shop-info">새 학습·퀴즈를 시작할 때 1씩 써. 이어하기와 복습은 무료고, {ENERGY_REGEN_MS / (60 * 60 * 1000)}시간마다 1씩 충전돼.</p>
+      <p className="energy-shop-info">새 학습·퀴즈를 시작할 때 1씩 써. 이어하기와 복습은 무료고, 매일 자정에 가득 충전돼.</p>
     </div>
   );
 };

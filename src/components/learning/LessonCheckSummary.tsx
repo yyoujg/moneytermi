@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { ArrowRight, RotateCcw } from '../ui/ControlIcons';
 import { praiseForQuiz } from '../../lib/praise';
 import { ActionButton } from '../ui/ActionButton';
+import { EnergyAdPrompt } from './EnergyAdPrompt';
 
 export type LessonCheckRoundResult = { correct: number; total: number };
 const accuracyFor = ({ correct, total }: LessonCheckRoundResult) => total > 0 ? Math.round(correct / total * 100) : 0;
@@ -48,7 +49,10 @@ export const LessonCheckSummary = ({ results, reviewCount, onRetry, onBack }: {
         {reviewCount > 0 ? <>
           <ActionButton fullWidth onClick={onRetry}><RotateCcw size={20} aria-hidden="true" />틀린 문제 다시 풀기</ActionButton>
           <ActionButton tone="soft" fullWidth onClick={onBack}>코스로 돌아가기<ArrowRight size={20} aria-hidden="true" /></ActionButton>
-        </> : <ActionButton fullWidth onClick={onBack}>코스에서 이어 하기<ArrowRight size={20} aria-hidden="true" /></ActionButton>}
+        </> : <>
+          <ActionButton fullWidth onClick={onBack}>코스에서 이어 하기<ArrowRight size={20} aria-hidden="true" /></ActionButton>
+          <EnergyAdPrompt from="lesson_check" />
+        </>}
       </footer>
     </div>
   );

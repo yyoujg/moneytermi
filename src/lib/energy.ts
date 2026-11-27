@@ -1,4 +1,4 @@
-import { ENERGY_MAX, ENERGY_REGEN_MS } from '../constants';
+import { ENERGY_MAX } from '../constants';
 
 export type EnergyState = {
   current: number;
@@ -8,33 +8,30 @@ export type EnergyState = {
 
 const clamp = (value: number, max = ENERGY_MAX) => Math.min(max, Math.max(0, Math.floor(value)));
 
+// 하루에 한 번, 한국 시간 자정이 지나면 가득 채운다.
+const DAY_MS = 24 * 60 * 60 * 1000;
+const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
+const kstDay = (ms: number) => Math.floor((ms + KST_OFFSET_MS) / DAY_MS);
+
 export const normalizeEnergy = (
   state: EnergyState,
   now = Date.now(),
   max = ENERGY_MAX,
-  regenMs = ENERGY_REGEN_MS,
 ): EnergyState => {
   const current = clamp(state.current, max);
   if (current >= max) return { ...state, current: max, updatedAt: now };
   const updatedAt = Number.isFinite(state.updatedAt) ? state.updatedAt : now;
-  const recovered = Math.floor(Math.max(0, now - updatedAt) / regenMs);
-  if (recovered <= 0) return { ...state, current, updatedAt };
-  const nextCurrent = clamp(current + recovered, max);
-  return {
-    ...state,
-    current: nextCurrent,
-    updatedAt: nextCurrent >= max ? now : updatedAt + recovered * regenMs,
-  };
+  if (kstDay(now) > kstDay(updatedAt)) return { ...state, current: max, updatedAt: now };
+  return { ...state, current, updatedAt };
 };
 
 export const nextEnergyAt = (
   state: EnergyState,
   now = Date.now(),
   max = ENERGY_MAX,
-  regenMs = ENERGY_REGEN_MS,
 ): number | null => {
-  const normalized = normalizeEnergy(state, now, max, regenMs);
-  return normalized.current >= max ? null : normalized.updatedAt + regenMs;
+  const normalized = normalizeEnergy(state, now, max);
+  return normalized.current >= max ? null : (kstDay(now) + 1) * DAY_MS - KST_OFFSET_MS;
 };
 
 export const spendEnergyState = (
@@ -42,9 +39,8 @@ export const spendEnergyState = (
   amount: number,
   now = Date.now(),
   max = ENERGY_MAX,
-  regenMs = ENERGY_REGEN_MS,
 ): EnergyState | null => {
-  const normalized = normalizeEnergy(state, now, max, regenMs);
+  const normalized = normalizeEnergy(state, now, max);
   const cost = clamp(amount, max);
   if (cost <= 0) return normalized;
   if (normalized.current < cost) return null;
@@ -60,9 +56,8 @@ export const addEnergyState = (
   amount: number,
   now = Date.now(),
   max = ENERGY_MAX,
-  regenMs = ENERGY_REGEN_MS,
 ): EnergyState => {
-  const normalized = normalizeEnergy(state, now, max, regenMs);
+  const normalized = normalizeEnergy(state, now, max);
   const current = clamp(normalized.current + Math.max(0, Math.floor(amount)), max);
   return {
     ...normalized,
@@ -75,8 +70,7 @@ export const fillEnergyState = (
   state: EnergyState,
   now = Date.now(),
   max = ENERGY_MAX,
-  regenMs = ENERGY_REGEN_MS,
-): EnergyState => addEnergyState(state, max, now, max, regenMs);
+): EnergyState => addEnergyState(state, max, now, max);
 
 export const spendEnergyOnce = (state: EnergyState, amount: number, accessKey: string, now = Date.now()): EnergyState | null => {
   if (state.startedNodeKeys?.includes(accessKey)) return normalizeEnergy(state, now);
