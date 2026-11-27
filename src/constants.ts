@@ -31,7 +31,7 @@ export const XP_BONUS_STEP = 50;
 export const XP_BONUS_POINTS = 50;
 export const ENERGY_MAX = 25;
 // 1시간에 1칸 회복이면 아무도 바닥나지 않아 충전 시트·광고가 열리지 않았다(2026-11 콘솔 energy_blocked 0건). 회복은 하루 한 번 풀충전(src/lib/energy.ts).
-export const ENERGY_ACTION_COST = 3;
+export const ENERGY_ACTION_COST = 1;
 export const ENERGY_AD_REWARD = 5;
 export const ENERGY_REFILL_COST = 600;
 
